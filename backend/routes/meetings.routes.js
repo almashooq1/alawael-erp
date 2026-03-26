@@ -4,24 +4,40 @@
  */
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Meeting = require('../models/Meeting');
 
+/** Max page size to prevent memory exhaustion */
+const MAX_PAGE_LIMIT = 100;
+const clampLimit = (v) => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
+
+/** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
+const validObjectId = (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return false;
+  }
+  return true;
+};
+
 router.use(authenticate);
 
 // ─── List meetings ───────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 20 } = req.query;
+    const { status, type, page = 1, limit: rawLimit = 20 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (status) filter.status = status;
     if (type) filter.type = type;
-    const skip = (Math.max(1, +page) - 1) * +limit;
+    const skip = (Math.max(1, +page) - 1) * limit;
     const [data, total] = await Promise.all([
-      Meeting.find(filter).sort({ date: -1 }).skip(skip).limit(+limit).lean(),
+      Meeting.find(filter).sort({ date: -1 }).skip(skip).limit(limit).lean(),
       Meeting.countDocuments(filter),
     ]);
     res.json({
@@ -38,6 +54,7 @@ router.get('/', async (req, res) => {
 
 // ─── Get single meeting ──────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const meeting = await Meeting.findById(req.params.id).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
@@ -85,8 +102,12 @@ router.post(
       if (!title || !date) {
         return res.status(400).json({ success: false, message: 'العنوان والتاريخ مطلوبان' });
       }
-      const count = await Meeting.countDocuments();
-      const meetingId = `MTG-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
+      // Atomic ID — avoids race condition where two concurrent requests
+      // both read the same countDocuments() value and produce duplicate IDs.
+      const year = new Date().getFullYear();
+      const seq = crypto.randomInt(1000, 9999);
+      const ts = Date.now().toString(36).slice(-4).toUpperCase();
+      const meetingId = `MTG-${year}-${ts}${seq}`;
       const meeting = await Meeting.create({
         meetingId,
         title,
@@ -115,6 +136,7 @@ router.post(
 
 // ─── Update meeting ──────────────────────────────────────────────────────────
 router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const {
       title,
@@ -165,6 +187,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
 
 // ─── Delete meeting ──────────────────────────────────────────────────────────
 router.delete('/:id', authorize(['admin', 'manager']), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const meeting = await Meeting.findByIdAndDelete(req.params.id);
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });

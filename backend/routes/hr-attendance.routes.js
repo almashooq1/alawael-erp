@@ -19,6 +19,16 @@ const router = express.Router();
 const AttendanceEngine = require('../services/hr/attendanceEngine');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
+// Maximum records per page — prevents DoS via unbounded queries
+const MAX_PAGE_LIMIT = 100;
+const clampLimit = (raw, fallback) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);
+
+// Safe error message — never leak internal error details in production
+const safeErrorMessage = (error) => {
+  if (process.env.NODE_ENV === 'production') return 'حدث خطأ في العملية';
+  return error.message || 'حدث خطأ في العملية';
+};
+
 // جميع المسارات تتطلب تسجيل الدخول
 router.use(authenticateToken);
 
@@ -42,7 +52,7 @@ router.post('/check-in', async (req, res) => {
 
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -62,7 +72,7 @@ router.post('/check-out', async (req, res) => {
 
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -75,7 +85,7 @@ router.get('/today', async (req, res) => {
     const result = await AttendanceEngine.getTodayStatus(req.user.employeeId || req.user.id);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -90,14 +100,14 @@ router.get('/my-records', async (req, res) => {
       endDate: req.query.endDate,
       month: req.query.month ? parseInt(req.query.month) : undefined,
       year: req.query.year ? parseInt(req.query.year) : undefined,
-      limit: parseInt(req.query.limit) || 31,
+      limit: clampLimit(req.query.limit, 31),
       page: parseInt(req.query.page) || 1,
       status: req.query.status,
     });
 
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -118,7 +128,7 @@ router.get('/my-monthly-report', async (req, res) => {
 
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -140,12 +150,12 @@ router.get(
         status: req.query.status,
         search: req.query.search,
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 50,
+        limit: clampLimit(req.query.limit, 50),
       });
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -162,7 +172,7 @@ router.get(
       const result = await AttendanceEngine.getQuickStats();
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -185,14 +195,14 @@ router.get(
         endDate: req.query.endDate,
         month: req.query.month ? parseInt(req.query.month) : undefined,
         year: req.query.year ? parseInt(req.query.year) : undefined,
-        limit: parseInt(req.query.limit) || 31,
+        limit: clampLimit(req.query.limit, 31),
         page: parseInt(req.query.page) || 1,
         status: req.query.status,
       });
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -213,7 +223,7 @@ router.get(
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -230,7 +240,7 @@ router.get(
       const shift = await AttendanceEngine.getEmployeeShift(req.params.employeeId);
       res.json({ success: true, data: shift });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -251,7 +261,7 @@ router.post(
 
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -278,7 +288,7 @@ router.get(
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -304,7 +314,7 @@ router.put(
 
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -326,7 +336,7 @@ router.post(
 
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -348,7 +358,7 @@ router.post(
 
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -365,12 +375,12 @@ router.get(
       const result = await AttendanceEngine.getPendingApprovals({
         department: req.query.department,
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 50,
+        limit: clampLimit(req.query.limit, 50),
       });
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
+      res.status(500).json({ success: false, message: safeErrorMessage(error) });
     }
   }
 );
@@ -388,7 +398,7 @@ router.get('/shifts', async (req, res) => {
     const shifts = await AttendanceEngine.getShifts();
     res.json({ success: true, data: shifts, count: shifts.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -405,7 +415,7 @@ router.post('/shifts', authorizeRole(['admin', 'hr_manager']), async (req, res) 
       data: shift,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -422,7 +432,7 @@ router.put('/shifts/:shiftId', authorizeRole(['admin', 'hr_manager']), async (re
       data: shift,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -454,7 +464,7 @@ router.post('/shifts/:shiftId/assign', authorizeRole(['admin', 'hr_manager']), a
       data: shift,
     });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 
@@ -467,7 +477,7 @@ router.get('/my-shift', async (req, res) => {
     const shift = await AttendanceEngine.getEmployeeShift(req.user.employeeId || req.user.id);
     res.json({ success: true, data: shift });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: safeErrorMessage(error) });
   }
 });
 

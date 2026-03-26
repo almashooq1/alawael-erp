@@ -15,6 +15,7 @@ const BeneficiaryProgress = require('../models/BeneficiaryProgress');
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
+const validateObjectId = require('../middleware/validateObjectId');
 
 // All beneficiary routes require authentication
 router.use(authenticate);
@@ -384,7 +385,7 @@ router.get('/export', async (req, res) => {
  * GET /api/beneficiaries/:id
  * Get single beneficiary detail
  */
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId('id'), async (req, res) => {
   try {
     const beneficiary = await Beneficiary.findById(req.params.id)
       .select('-password -twoFactorSecret -accountVerificationCode')
@@ -531,7 +532,7 @@ router.post('/', async (req, res) => {
  * PUT /api/beneficiaries/:id
  * Update beneficiary
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateObjectId('id'), async (req, res) => {
   try {
     const updateData = { ...req.body };
 
@@ -585,7 +586,7 @@ router.put('/:id', async (req, res) => {
  * DELETE /api/beneficiaries/:id
  * Soft-delete (archive) beneficiary
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateObjectId('id'), async (req, res) => {
   try {
     const { reason } = req.body;
 
@@ -612,7 +613,7 @@ router.delete('/:id', async (req, res) => {
  * PATCH /api/beneficiaries/:id/restore
  * Restore archived beneficiary
  */
-router.patch('/:id/restore', async (req, res) => {
+router.patch('/:id/restore', validateObjectId('id'), async (req, res) => {
   try {
     const beneficiary = await Beneficiary.findById(req.params.id);
     if (!beneficiary) {
@@ -636,7 +637,7 @@ router.patch('/:id/restore', async (req, res) => {
  * PATCH /api/beneficiaries/:id/status
  * Update beneficiary status
  */
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', validateObjectId('id'), async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) {
@@ -720,7 +721,7 @@ router.post('/bulk-action', async (req, res) => {
  * POST /api/beneficiaries/:id/progress
  * Add progress record for beneficiary
  */
-router.post('/:id/progress', async (req, res) => {
+router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
   try {
     const beneficiaryId = req.params.id;
     const {
@@ -818,7 +819,7 @@ router.post('/:id/progress', async (req, res) => {
  * GET /api/beneficiaries/:id/progress
  * Get progress history for beneficiary
  */
-router.get('/:id/progress', async (req, res) => {
+router.get('/:id/progress', validateObjectId('id'), async (req, res) => {
   try {
     const { limit = 12 } = req.query;
     const data = await BeneficiaryProgress.find({ beneficiaryId: req.params.id })

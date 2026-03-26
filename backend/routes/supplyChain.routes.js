@@ -9,6 +9,10 @@ const supplyChainService = require('../services/supplyChain.service');
 const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 
+// Maximum records per page — prevents DoS via unbounded queries
+const MAX_PAGE_LIMIT = 200;
+const clampLimit = (raw, fallback = 100) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);
+
 // Helper function for error handling
 const handleError = (error, res, defaultStatus = 500) => {
   const status = error.statusCode || defaultStatus;
@@ -89,7 +93,7 @@ router.get('/suppliers', async (req, res) => {
       category: req.query.category,
       status: req.query.status || 'active',
       minRating: parseFloat(req.query.minRating) || 0,
-      limit: parseInt(req.query.limit) || 100,
+      limit: clampLimit(req.query.limit, 100),
       offset: parseInt(req.query.offset) || 0,
     };
 
@@ -285,7 +289,7 @@ router.get('/inventory', async (req, res) => {
     }
 
     const items = await supplyChainService.listInventory({
-      limit: parseInt(req.query.limit) || 100,
+      limit: clampLimit(req.query.limit, 100),
       offset: parseInt(req.query.offset) || 0,
     });
     res.json({
@@ -413,7 +417,7 @@ router.get('/orders', async (req, res) => {
       status: req.query.status,
       supplierId: req.query.supplierId,
       priority: req.query.priority,
-      limit: parseInt(req.query.limit) || 100,
+      limit: clampLimit(req.query.limit, 100),
       offset: parseInt(req.query.offset) || 0,
     };
 
@@ -556,7 +560,7 @@ router.get('/shipments', async (req, res) => {
 
     const shipments = await supplyChainService.listShipments({
       status: req.query.status,
-      limit: parseInt(req.query.limit) || 100,
+      limit: clampLimit(req.query.limit, 100),
       offset: parseInt(req.query.offset) || 0,
     });
     res.json({

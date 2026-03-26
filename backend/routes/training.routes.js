@@ -6,6 +6,19 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
+/** Max page size to prevent memory exhaustion */
+const MAX_PAGE_LIMIT = 100;
+const clampLimit = (v) => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
+
+/** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
+const validObjectId = (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return false;
+  }
+  return true;
+};
+
 const safeModel = n => (mongoose.models[n] ? mongoose.model(n) : require(`../models/Training`)[n]);
 
 // ── Dashboard ────────────────────────────────────────────────
@@ -49,13 +62,14 @@ router.get('/dashboard', authenticate, async (_req, res) => {
 router.get('/courses', authenticate, async (req, res) => {
   try {
     const Course = safeModel('TrainingCourse');
-    const { status, category, page = 1, limit = 20 } = req.query;
+    const { status, category, page = 1, limit: rawLimit = 20 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (status) filter.status = status;
     if (category) filter.category = category;
     const skip = (page - 1) * limit;
     const [docs, total] = await Promise.all([
-      Course.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
+      Course.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Course.countDocuments(filter),
     ]);
     res.json({
@@ -79,9 +93,9 @@ router.post('/courses', authenticate, async (req, res) => {
 });
 
 router.put('/courses/:id', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const Course = safeModel('TrainingCourse');
-    const doc = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -90,9 +104,9 @@ router.put('/courses/:id', authenticate, async (req, res) => {
 });
 
 router.delete('/courses/:id', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const Course = safeModel('TrainingCourse');
-    await Course.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -103,7 +117,8 @@ router.delete('/courses/:id', authenticate, async (req, res) => {
 router.get('/sessions', authenticate, async (req, res) => {
   try {
     const Session = safeModel('TrainingSession');
-    const { status, page = 1, limit = 20 } = req.query;
+    const { status, page = 1, limit: rawLimit = 20 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (status) filter.status = status;
     const skip = (page - 1) * limit;
@@ -111,7 +126,7 @@ router.get('/sessions', authenticate, async (req, res) => {
       Session.find(filter)
         .sort({ startDate: -1 })
         .skip(skip)
-        .limit(Number(limit))
+        .limit(limit)
         .populate('course', 'titleAr courseCode category')
         .lean(),
       Session.countDocuments(filter),
@@ -137,9 +152,9 @@ router.post('/sessions', authenticate, async (req, res) => {
 });
 
 router.put('/sessions/:id', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const Session = safeModel('TrainingSession');
-    const doc = await Session.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -169,9 +184,9 @@ router.post('/plans', authenticate, async (req, res) => {
 });
 
 router.put('/plans/:id', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const Plan = safeModel('TrainingPlan');
-    const doc = await Plan.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {

@@ -21,6 +21,9 @@ const ALLOWED_ROLES = [
 router.use(authenticate);
 router.use(authorize(['admin', 'super_admin']));
 
+// Maximum records per page — prevents DoS via unbounded queries
+const MAX_PAGE_LIMIT = 100;
+
 // GET /overview
 router.get('/overview', async (req, res) => {
   try {
@@ -43,15 +46,16 @@ router.get('/overview', async (req, res) => {
 router.get('/users', async (req, res) => {
   try {
     const { page = 1, limit = 20, role, status } = req.query;
+    const safeLimit = Math.min(+limit || 20, MAX_PAGE_LIMIT);
     const filter = {};
     if (role) filter.role = role;
     if (status) filter.status = status;
-    const skip = (Math.max(1, +page) - 1) * +limit;
+    const skip = (Math.max(1, +page) - 1) * safeLimit;
     const [data, total] = await Promise.all([
-      User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
+      User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
       User.countDocuments(filter),
     ]);
-    res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
+    res.json({ success: true, data, pagination: { page: +page, limit: safeLimit, total } });
   } catch (err) {
     logger.error('Admin users error:', err);
     res.status(500).json({ success: false, message: 'خطأ في جلب المستخدمين' });

@@ -15,6 +15,7 @@ const {
 const { authenticate, authorize } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
 const { paginate } = require('../utils/paginate');
+const validateObjectId = require('../middleware/validateObjectId');
 
 /**
  * Get all equipment with filters
@@ -55,7 +56,7 @@ router.get('/', authenticate, async (req, res) => {
  * Get equipment by ID with full details
  * GET /api/equipment/:id
  */
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, validateObjectId('id'), async (req, res) => {
   try {
     const equipment = await Equipment.findById(req.params.id)
       .populate('createdBy', 'name email')
@@ -160,7 +161,7 @@ router.post('/', authenticate, authorize('admin', 'manager'), async (req, res) =
  * Update equipment
  * PUT /api/equipment/:id
  */
-router.put('/:id', authenticate, authorize('admin', 'manager'), async (req, res) => {
+router.put('/:id', authenticate, authorize('admin', 'manager'), validateObjectId('id'), async (req, res) => {
   try {
     const equipment = await Equipment.findByIdAndUpdate(
       req.params.id,
@@ -182,7 +183,7 @@ router.put('/:id', authenticate, authorize('admin', 'manager'), async (req, res)
  * Update equipment status
  * PATCH /api/equipment/:id/status
  */
-router.patch('/:id/status', authenticate, authorize('admin', 'manager'), async (req, res) => {
+router.patch('/:id/status', authenticate, authorize('admin', 'manager'), validateObjectId('id'), async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -210,7 +211,7 @@ router.patch('/:id/status', authenticate, authorize('admin', 'manager'), async (
  * Delete (retire) equipment
  * DELETE /api/equipment/:id
  */
-router.delete('/:id', authenticate, authorize('admin'), async (req, res) => {
+router.delete('/:id', authenticate, authorize('admin'), validateObjectId('id'), async (req, res) => {
   try {
     const equipment = await Equipment.findById(req.params.id);
 

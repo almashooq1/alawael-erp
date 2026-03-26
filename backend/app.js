@@ -234,6 +234,22 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(sanitizeInput);
 app.use(requestValidationSanitize);
 
+// ─── HTTP Parameter Pollution (HPP) Protection ───────────────────────────────
+// When a query param appears multiple times (?sort=name&sort=DROP), Express parses
+// it as an array, which can confuse downstream code. This middleware keeps only the
+// last value for every query parameter, neutralising HPP attacks.
+const hppProtection = (req, _res, next) => {
+  if (req.query) {
+    for (const key of Object.keys(req.query)) {
+      if (Array.isArray(req.query[key])) {
+        req.query[key] = req.query[key][req.query[key].length - 1];
+      }
+    }
+  }
+  next();
+};
+app.use(hppProtection);
+
 // ─── CSRF Protection ────────────────────────────────────────────────────────
 app.use(csrfProtection);
 
@@ -269,7 +285,21 @@ app.use(auditMiddleware());
 
 // ─── Response Helper & Logging ───────────────────────────────────────────────
 app.use(responseHandler);
-app.use(morgan('dev'));
+
+// Custom morgan token that strips sensitive query params (tokens, passwords, keys)
+// to prevent credential leakage in access logs
+const SENSITIVE_QS_KEYS = /(?:^|&)(token|password|secret|key|authorization|api_key|apikey|access_token|refresh_token)=[^&]*/gi;
+morgan.token('safe-url', (req) => {
+  const url = req.originalUrl || req.url || '';
+  const qIdx = url.indexOf('?');
+  if (qIdx === -1) return url;
+  const pathPart = url.substring(0, qIdx);
+  const qs = url.substring(qIdx + 1).replace(SENSITIVE_QS_KEYS, (m, k) =>
+    (m.startsWith('&') ? '&' : '') + `${k}=[REDACTED]`
+  );
+  return `${pathPart}?${qs}`;
+});
+app.use(morgan(':method :safe-url :status :response-time ms'));
 app.use(requestLogger);
 
 // ─── Test Mode: Mock User ────────────────────────────────────────────────────

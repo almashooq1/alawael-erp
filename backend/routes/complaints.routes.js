@@ -9,6 +9,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Complaint = require('../models/Complaint');
+const validateObjectId = require('../middleware/validateObjectId');
 
 router.use(authenticate);
 
@@ -112,7 +113,7 @@ router.get('/stats', async (req, res) => {
 });
 
 // GET /:id — Get complaint details
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId('id'), async (req, res) => {
   try {
     const doc = await Complaint.findById(req.params.id)
       .populate('submittedBy', 'name email')
@@ -294,7 +295,7 @@ router.post(
 );
 
 // DELETE /:id
-router.delete('/:id', authorize(['admin', 'super_admin']), async (req, res) => {
+router.delete('/:id', authorize(['admin', 'super_admin']), validateObjectId('id'), async (req, res) => {
   try {
     const doc = await Complaint.findByIdAndDelete(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });

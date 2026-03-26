@@ -550,7 +550,8 @@ router.get(
   authenticate,
   authorize(['admin', 'ceo']),
   wrap((req, res) => {
-    const limit = req.query.limit ? parseInt(req.query.limit, 10) : undefined;
+    const MAX_AUDIT_LIMIT = 100;
+    const limit = req.query.limit ? Math.min(parseInt(req.query.limit, 10), MAX_AUDIT_LIMIT) : undefined;
     const data = svc.getAuditLog(limit);
     res.json({ success: true, data });
   })

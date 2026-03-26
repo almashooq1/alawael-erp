@@ -12,7 +12,7 @@ router.post(
   '/login',
   wrapAsync(async (req, res) => {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username }).select('-twoFactorSecret');
     if (!user) return res.status(401).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });
     const valid = await user.comparePassword(password);
     if (!valid) return res.status(401).json({ message: 'اسم المستخدم أو كلمة المرور غير صحيحة' });

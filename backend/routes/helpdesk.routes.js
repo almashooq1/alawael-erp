@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
 const { HelpDeskTicket, HelpDeskArticle } = require('../models/HelpDesk');
+
+/** Max page size to prevent memory exhaustion */
+const MAX_PAGE_LIMIT = 100;
+const clampLimit = (v) => Math.max(1, Math.min(parseInt(v, 10) || 10, MAX_PAGE_LIMIT));
+
+/** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
+const validObjectId = (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return false;
+  }
+  return true;
+};
 
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, async (req, res) => {
@@ -59,7 +73,8 @@ router.get('/dashboard', authenticate, async (req, res) => {
 // ── Tickets CRUD ─────────────────────────────────────────────────────
 router.get('/tickets', authenticate, async (req, res) => {
   try {
-    const { status, priority, category, page = 1, limit = 10 } = req.query;
+    const { status, priority, category, page = 1, limit: rawLimit = 10 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
@@ -93,6 +108,7 @@ router.post('/tickets', authenticate, async (req, res) => {
 });
 
 router.put('/tickets/:id', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -106,6 +122,7 @@ router.put('/tickets/:id', authenticate, async (req, res) => {
 });
 
 router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findByIdAndDelete(req.params.id);
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
@@ -117,6 +134,7 @@ router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res)
 
 // ── Ticket comments ──────────────────────────────────────────────────
 router.post('/tickets/:id/comments', authenticate, async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
@@ -135,7 +153,8 @@ router.post('/tickets/:id/comments', authenticate, async (req, res) => {
 // ── Knowledge Articles ───────────────────────────────────────────────
 router.get('/articles', authenticate, async (req, res) => {
   try {
-    const { category, status = 'published', page = 1, limit = 10 } = req.query;
+    const { category, status = 'published', page = 1, limit: rawLimit = 10 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (category) filter.category = category;
     if (status) filter.status = status;

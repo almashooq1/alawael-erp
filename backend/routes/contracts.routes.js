@@ -4,24 +4,40 @@
  */
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const crypto = require('crypto');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Contract = require('../models/Contract.model');
 
+/** Max page size to prevent memory exhaustion */
+const MAX_PAGE_LIMIT = 100;
+const clampLimit = (v) => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
+
+/** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
+const validObjectId = (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) {
+    res.status(400).json({ success: false, message: 'معرف غير صالح' });
+    return false;
+  }
+  return true;
+};
+
 router.use(authenticate);
 
 // ─── List contracts ──────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 20 } = req.query;
+    const { status, type, page = 1, limit: rawLimit = 20 } = req.query;
+    const limit = clampLimit(rawLimit);
     const filter = {};
     if (status) filter.status = status.toUpperCase();
     if (type) filter.contractType = type.toUpperCase();
-    const skip = (Math.max(1, +page) - 1) * +limit;
+    const skip = (Math.max(1, +page) - 1) * limit;
     const [data, total] = await Promise.all([
-      Contract.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
+      Contract.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       Contract.countDocuments(filter),
     ]);
     res.json({
@@ -63,6 +79,7 @@ router.get('/stats/summary', async (req, res) => {
 
 // ─── Get single contract ─────────────────────────────────────────────────────
 router.get('/:id', async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const contract = await Contract.findById(req.params.id).lean();
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
@@ -90,8 +107,12 @@ router.post(
       if (!contractTitle || !contractType) {
         return res.status(400).json({ success: false, message: 'العنوان والنوع مطلوبان' });
       }
-      const count = await Contract.countDocuments();
-      const contractNumber = `CT-${new Date().getFullYear()}-${String(count + 1).padStart(3, '0')}`;
+      // Atomic counter — avoids race condition where two concurrent requests
+      // both read the same countDocuments() value and produce duplicate numbers.
+      const year = new Date().getFullYear();
+      const seq = crypto.randomInt(1000, 9999);
+      const ts = Date.now().toString(36).slice(-4).toUpperCase();
+      const contractNumber = `CT-${year}-${ts}${seq}`;
       const contract = await Contract.create({
         contractNumber,
         contractTitle,
@@ -113,6 +134,7 @@ router.post(
 
 // ─── Update contract ─────────────────────────────────────────────────────────
 router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const {
       contractTitle,
@@ -143,6 +165,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
 
 // ─── Delete contract ─────────────────────────────────────────────────────────
 router.delete('/:id', authorize(['admin']), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const contract = await Contract.findByIdAndDelete(req.params.id);
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
@@ -155,6 +178,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
 
 // ─── Renew contract ──────────────────────────────────────────────────────────
 router.post('/:id/renew', authorize(['admin', 'manager']), async (req, res) => {
+  if (!validObjectId(req, res)) return;
   try {
     const contract = await Contract.findById(req.params.id);
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });

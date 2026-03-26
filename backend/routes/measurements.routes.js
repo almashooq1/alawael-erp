@@ -4,6 +4,8 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { paginate } = require('../utils/paginate');
 
+const MAX_PAGE_LIMIT = 100;
+
 // Health check
 router.get('/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Measurements module active' });
@@ -598,7 +600,7 @@ router.get('/dashboard', async (req, res) => {
  */
 router.get('/trend/:beneficiaryId/:typeId', async (req, res) => {
   try {
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = Math.min(parseInt(req.query.limit) || 10, MAX_PAGE_LIMIT);
     const trend = await MeasurementResult.getTrend(
       req.params.beneficiaryId,
       req.params.typeId,

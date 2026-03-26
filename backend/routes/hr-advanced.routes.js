@@ -17,6 +17,8 @@ const HRExportService = require('../services/hr/exportService');
 const HRBatchService = require('../services/hr/batchService');
 const HRAnalyticsAIService = require('../services/hr/analyticsAIService');
 
+const MAX_PAGE_LIMIT = 100;
+
 // ============= إدارة الموظفين =============
 
 /**
@@ -340,8 +342,8 @@ router.get(
   async (req, res) => {
     try {
       const trail = await HRAuditService.getEmployeeAuditTrail(req.params.employeeId, {
-        limit: req.query.limit || 50,
-        page: req.query.page || 1,
+        limit: Math.min(parseInt(req.query.limit) || 50, MAX_PAGE_LIMIT),
+        page: Math.max(1, parseInt(req.query.page) || 1),
       });
       res.json({ success: true, data: trail });
     } catch (error) {
@@ -375,7 +377,7 @@ router.get('/audit/report', authenticateToken, authorizeRole(['Admin']), async (
 router.get('/notifications', authenticateToken, async (req, res) => {
   try {
     const notifications = await HRNotificationService.getEmployeeNotifications(req.user.id, {
-      limit: req.query.limit || 20,
+      limit: Math.min(parseInt(req.query.limit) || 20, MAX_PAGE_LIMIT),
       unreadOnly: req.query.unreadOnly === 'true',
     });
     res.json({ success: true, data: notifications });
@@ -589,15 +591,16 @@ router.get('/leaves', authenticateToken, async (req, res) => {
   try {
     const Leave = require('../models/HR/Leave');
     const { status, employeeId, page = 1, limit = 50 } = req.query;
+    const safeLimit = Math.min(Math.max(1, +limit), MAX_PAGE_LIMIT);
     const filter = {};
     if (status) filter.status = status;
     if (employeeId) filter.employeeId = employeeId;
-    const skip = (Math.max(1, +page) - 1) * +limit;
+    const skip = (Math.max(1, +page) - 1) * safeLimit;
     const [data, total] = await Promise.all([
-      Leave.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
+      Leave.find(filter).sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
       Leave.countDocuments(filter),
     ]);
-    res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
+    res.json({ success: true, data, pagination: { page: +page, limit: safeLimit, total } });
   } catch (error) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الإجازات' });
   }

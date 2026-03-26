@@ -22,6 +22,8 @@ const { body, param, query, validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/authMiddleware');
 const _logger = require('../utils/logger');
 
+const MAX_PAGE_LIMIT = 100;
+
 // ── Service ──
 const busTracking = require('../services/busTracking.service');
 
@@ -448,7 +450,7 @@ router.get('/notifications', authenticate, [query('phone').notEmpty()], async (r
   if (handleValidation(req, res)) return;
   try {
     const notifs = busTracking.getParentNotifications(req.query.phone, {
-      limit: parseInt(req.query.limit) || 50,
+      limit: Math.min(parseInt(req.query.limit) || 50, MAX_PAGE_LIMIT),
       unreadOnly: req.query.unreadOnly === 'true',
     });
     res.json({ success: true, data: notifs, total: notifs.length });

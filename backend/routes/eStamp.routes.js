@@ -31,6 +31,9 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
 const { escapeRegex } = require('../utils/sanitize');
+const validateObjectId = require('../middleware/validateObjectId');
+
+const MAX_PAGE_LIMIT = 100;
 
 /* ─── Multer config for stamp image uploads (memory storage → base64) ───── */
 const stampImageUpload = multer({
@@ -46,6 +49,15 @@ const stampImageUpload = multer({
 });
 
 router.use(authenticate);
+
+/* ─── Validate :id param as ObjectId on all sub-routes ────────────────────── */
+router.param('id', (req, res, next, val) => {
+  const mongoose = require('mongoose');
+  if (!mongoose.Types.ObjectId.isValid(val)) {
+    return res.status(400).json({ success: false, message: 'معرّف id غير صالح' });
+  }
+  next();
+});
 
 /* ═══════════════════════════════════════════════════════════════════════════
    Verify Stamp Application — MUST be before /:id to avoid route conflict
@@ -231,7 +243,9 @@ router.get('/', async (req, res) => {
       ];
     }
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const safePage = Math.max(1, parseInt(page) || 1);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
+    const skip = (safePage - 1) * safeLimit;
     const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
 
     const [stamps, totalCount] = await Promise.all([
@@ -239,7 +253,7 @@ router.get('/', async (req, res) => {
         .select('-usageHistory -auditTrail -stampSVG')
         .sort(sort)
         .skip(skip)
-        .limit(parseInt(limit))
+        .limit(safeLimit)
         .lean(),
       EStamp.countDocuments(filter),
     ]);
@@ -249,9 +263,9 @@ router.get('/', async (req, res) => {
       data: stamps,
       pagination: {
         total: totalCount,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(totalCount / parseInt(limit)),
+        page: safePage,
+        limit: safeLimit,
+        pages: Math.ceil(totalCount / safeLimit),
       },
     });
   } catch (err) {
@@ -298,7 +312,7 @@ router.post('/', async (req, res) => {
     });
   } catch (err) {
     logger.error('E-Stamp create error: %s', err.message);
-    res.status(500).json({ success: false, message: err.message || 'خطأ في إنشاء الختم' });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء الختم' });
   }
 });
 
@@ -330,7 +344,7 @@ router.post('/:id/upload-image', stampImageUpload.single('stampImage'), async (r
     });
   } catch (err) {
     logger.error('Stamp image upload error: %s', err.message);
-    res.status(500).json({ success: false, message: err.message || 'خطأ في رفع الصورة' });
+    res.status(500).json({ success: false, message: 'خطأ في رفع الصورة' });
   }
 });
 
@@ -597,7 +611,7 @@ router.post('/:id/apply', async (req, res) => {
     );
     await stamp.save();
 
-    logger.info('E-Stamp applied: %s on document %s', stamp.stampId, req.body.documentId);
+    logger.info('E-Stamp applied: %s on document %s', stamp.stampId, String(req.body.documentId).replace(/[\r\n]/g, ''));
 
     res.json({
       success: true,

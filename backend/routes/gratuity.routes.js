@@ -13,6 +13,17 @@ const Gratuity = require('../models/gratuity.model');
 const GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
+const MAX_PAGE_LIMIT = 100;
+
+/* ─── Validate :gratuityId param as ObjectId ──────────────────────────────── */
+router.param('gratuityId', (req, res, next, val) => {
+  const mongoose = require('mongoose');
+  if (!mongoose.Types.ObjectId.isValid(val)) {
+    return res.status(400).json({ success: false, message: 'معرّف gratuityId غير صالح' });
+  }
+  next();
+});
+
 // ============================================================
 // 1. حسابات مكافأة نهاية الخدمة
 // ============================================================
@@ -241,6 +252,8 @@ router.get('/employee/:employeeId', authenticateToken, async (req, res) => {
 router.get('/', authenticateToken, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
   try {
     const { status, scenario, department, fromDate, toDate, page = 1, limit = 20 } = req.query;
+    const safePage = Math.max(1, parseInt(page) || 1);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
 
     const filter = {};
 
@@ -254,13 +267,13 @@ router.get('/', authenticateToken, authorizeRole(['hr', 'finance', 'admin']), as
       if (toDate) filter.terminationDate.$lte = new Date(toDate);
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (safePage - 1) * safeLimit;
 
     const [data, total] = await Promise.all([
       Gratuity.find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(parseInt(limit))
+        .limit(safeLimit)
         .populate('employeeId', 'name position'),
       Gratuity.countDocuments(filter),
     ]);
@@ -270,9 +283,9 @@ router.get('/', authenticateToken, authorizeRole(['hr', 'finance', 'admin']), as
       data,
       pagination: {
         total,
-        page: parseInt(page),
-        limit: parseInt(limit),
-        pages: Math.ceil(total / limit),
+        page: safePage,
+        limit: safeLimit,
+        pages: Math.ceil(total / safeLimit),
       },
     });
   } catch (error) {

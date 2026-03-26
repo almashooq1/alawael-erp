@@ -12,6 +12,8 @@ const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { authenticate } = require('../middleware/auth');
 
+const MAX_PAGE_LIMIT = 100;
+
 /* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 router.use(authenticate);
 
@@ -209,21 +211,23 @@ router.get(
         { decisionNumber: { $regex: escapeRegex(search), $options: 'i' } },
       ];
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const safePage = Math.max(1, parseInt(page) || 1);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
+    const skip = (safePage - 1) * safeLimit;
     const [items, total] = await Promise.all([
       AdminDecision.find(filter)
         .select('-body -auditTrail -comments')
         .sort(sort)
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(safeLimit),
       AdminDecision.countDocuments(filter),
     ]);
     res.json({
       success: true,
       data: items,
       total,
-      page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
+      page: safePage,
+      pages: Math.ceil(total / safeLimit),
     });
   })
 );
@@ -489,21 +493,23 @@ router.get(
         { receiverName: { $regex: escapeRegex(search), $options: 'i' } },
       ];
 
-    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const safePage = Math.max(1, parseInt(page) || 1);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
+    const skip = (safePage - 1) * safeLimit;
     const [items, total] = await Promise.all([
       Correspondence.find(filter)
         .select('-auditTrail -routingHistory')
         .sort(sort)
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(safeLimit),
       Correspondence.countDocuments(filter),
     ]);
     res.json({
       success: true,
       data: items,
       total,
-      page: parseInt(page),
-      pages: Math.ceil(total / parseInt(limit)),
+      page: safePage,
+      pages: Math.ceil(total / safeLimit),
     });
   })
 );

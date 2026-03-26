@@ -11,8 +11,8 @@ const REQUIRED = [
   {
     key: 'REACT_APP_API_URL',
     label: 'Backend API URL',
-    validate: v => /^https?:\/\/.+/i.test(v),
-    hint: 'Must be a valid HTTP(S) URL, e.g. http://localhost:3001/api',
+    validate: v => /^(https?:\/\/.+|\/\w+)/i.test(v),
+    hint: 'Must be a valid HTTP(S) URL or a relative path, e.g. http://localhost:3001/api or /api',
   },
 ];
 

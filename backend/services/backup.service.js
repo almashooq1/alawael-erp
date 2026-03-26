@@ -44,10 +44,14 @@ class BackupService {
       // Assumes process.env.MONGODB_URI format: mongodb://host:port/dbname
       // For production with Auth, this needs better parsing
       const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_db';
+      // Mask credentials for any log output
+      const maskedUri = uri.replace(/\/\/([^:]+):([^@]+)@/, '//<user>:<hidden>@');
 
       // Construct mongodump command
       // Note: mongodump must be installed on the host system
       const args = [`--uri=${uri}`, `--archive=${filePath}`, '--gzip'];
+      // Log with masked URI only
+      logger.info(`Starting backup with mongodump (${maskedUri})`);
 
       const mongodump = spawn('mongodump', args);
 

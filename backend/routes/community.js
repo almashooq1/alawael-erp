@@ -33,9 +33,39 @@ const VALID_CATEGORIES = [
 
 // ================== EDUCATIONAL CONTENT ==================
 
+// ─── Input length limits (prevent storage DoS) ──────────────────────────────
+const COMMUNITY_FIELD_LIMITS = {
+  title: 300,
+  description: 5000,
+  contentUrl: 2048,
+  comment: 2000,
+  name: 300,
+  level: 100,
+  contentType: 100,
+};
+
+/**
+ * Validate that string fields in req.body do not exceed safe length limits.
+ * Returns an error string if any field is too long, or null if OK.
+ */
+function validateFieldLengths(body, limits = COMMUNITY_FIELD_LIMITS) {
+  if (!body || typeof body !== 'object') return null;
+  for (const [field, max] of Object.entries(limits)) {
+    if (body[field] && typeof body[field] === 'string' && body[field].length > max) {
+      return `${field} exceeds maximum length of ${max} characters`;
+    }
+  }
+  return null;
+}
+
 // POST /api/community/content - Create educational content
 router.post('/content', authenticate, (req, res) => {
   try {
+    const lengthErr = validateFieldLengths(req.body);
+    if (lengthErr) {
+      return res.status(400).json({ success: false, message: lengthErr });
+    }
+
     const {
       title,
       description,
@@ -449,6 +479,11 @@ router.delete('/library/:id', authenticate, (req, res) => {
 // POST /api/community/sessions - Create virtual session
 router.post('/sessions', authenticate, (req, res) => {
   try {
+    const lengthErr = validateFieldLengths(req.body);
+    if (lengthErr) {
+      return res.status(400).json({ success: false, message: lengthErr });
+    }
+
     const { title, description, sessionType, targetDisabilityCategory, scheduledDate, duration } =
       req.body;
 

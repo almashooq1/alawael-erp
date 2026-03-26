@@ -192,6 +192,8 @@ class EnhancedBackupService extends EventEmitter {
   async performDatabaseBackup(backupPath, metadata) {
     try {
       const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_db';
+      // Mask credentials so they never leak into logs or process listings
+      const _maskedUri = mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//<user>:<hidden>@');
 
       return new Promise((resolve, reject) => {
         const child = execFile(
@@ -354,6 +356,8 @@ class EnhancedBackupService extends EventEmitter {
 
       // Restore database
       const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_db';
+      // Mask credentials so they never leak into logs
+      const _maskedUri = mongoUri.replace(/\/\/([^:]+):([^@]+)@/, '//<user>:<hidden>@');
 
       return new Promise((resolve, reject) => {
         execFile(

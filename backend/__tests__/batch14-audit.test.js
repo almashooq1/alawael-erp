@@ -97,7 +97,7 @@ describe('Item 132 — server.js unhandledRejection / uncaughtException handlers
   });
 
   test('unhandledRejection handler logs via logger', () => {
-    // Extract the block after 'unhandledRejection' 
+    // Extract the block after 'unhandledRejection'
     const idx = src.indexOf("'unhandledRejection'");
     const block = src.substring(idx, idx + 300);
     expect(block).toMatch(/logger\.error/);
@@ -267,7 +267,9 @@ describe('Item 138 — fixedAssets.controller.js prototype pollution prevention'
   });
 
   test('imports stripDangerousKeys from sanitize', () => {
-    expect(src).toMatch(/stripDangerousKeys.*require.*sanitize|require.*sanitize.*stripDangerousKeys/s);
+    expect(src).toMatch(
+      /stripDangerousKeys.*require.*sanitize|require.*sanitize.*stripDangerousKeys/s
+    );
   });
 
   test('createAsset uses stripDangerousKeys on req.body', () => {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * AL-AWAEL ERP — AUTOMATED BACKUP ROUTES
  * Phase 23 — نظام النسخ الاحتياطي التلقائي
  *
@@ -9,6 +9,21 @@
 const express = require('express');
 const router = express.Router();
 const AutomatedBackupService = require('../services/automated-backup.service');
+
+/**
+ * Return a safe error message for client responses.
+ * In production, internal/infrastructure errors are replaced with a generic message
+ * to prevent information leakage (stack traces, file paths, connection strings).
+ */
+const safeErrorMsg = err => {
+  const msg = err && err.message ? err.message : 'حدث خطأ داخلي';
+  const isProd = process.env.NODE_ENV === 'production';
+  // Allow short, known operational messages through; mask everything else in prod
+  if (isProd && msg.length > 200) return 'حدث خطأ داخلي';
+  // Strip anything that looks like a file path or stack trace
+  if (isProd && /[/\\]|at\s+\w|node_modules|Error:/.test(msg)) return 'حدث خطأ داخلي';
+  return msg;
+};
 
 const backupService = new AutomatedBackupService({
   s3Bucket: process.env.AWS_S3_BUCKET || '',
@@ -37,7 +52,7 @@ router.post('/', guard, (req, res) => {
     const backup = backupService.createBackup(req.body);
     res.status(201).json({ success: true, data: backup });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -47,7 +62,7 @@ router.get('/', guard, (req, res) => {
     const result = backupService.listBackups(req.query);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -59,7 +74,7 @@ router.get('/health', guard, (_req, res) => {
     const health = backupService.getHealthStatus();
     res.json({ success: true, data: health });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -69,7 +84,7 @@ router.get('/analytics', guard, (req, res) => {
     const analytics = backupService.getAnalytics(req.query);
     res.json({ success: true, data: analytics });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -79,7 +94,7 @@ router.get('/config', guard, (_req, res) => {
     const config = backupService.getConfig();
     res.json({ success: true, data: config });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -89,7 +104,7 @@ router.put('/config', guard, (req, res) => {
     const config = backupService.updateConfig(req.body);
     res.json({ success: true, data: config });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -99,7 +114,7 @@ router.post('/cleanup', guard, (_req, res) => {
     const result = backupService.runRetentionCleanup();
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -109,7 +124,7 @@ router.get('/:id', guard, (req, res) => {
     const backup = backupService.getBackup(req.params.id);
     res.json({ success: true, data: backup });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -119,7 +134,7 @@ router.delete('/:id', guard, (req, res) => {
     const result = backupService.deleteBackup(req.params.id);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -129,7 +144,7 @@ router.post('/:id/verify', guard, (req, res) => {
     const result = backupService.verifyBackup(req.params.id);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -143,7 +158,7 @@ router.get('/schedules/list', guard, (_req, res) => {
     const result = backupService.listSchedules();
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -153,7 +168,7 @@ router.post('/schedules', guard, (req, res) => {
     const schedule = backupService.upsertSchedule(req.body);
     res.status(201).json({ success: true, data: schedule });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -163,7 +178,7 @@ router.put('/schedules/:id/toggle', guard, (req, res) => {
     const schedule = backupService.toggleSchedule(req.params.id, req.body.enabled);
     res.json({ success: true, data: schedule });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -173,7 +188,7 @@ router.delete('/schedules/:id', guard, (req, res) => {
     const result = backupService.deleteSchedule(req.params.id);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -187,7 +202,7 @@ router.get('/storage/targets', guard, (_req, res) => {
     const result = backupService.listStorageTargets();
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -197,7 +212,7 @@ router.post('/storage/targets', guard, (req, res) => {
     const target = backupService.upsertStorageTarget(req.body);
     res.status(201).json({ success: true, data: target });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -207,7 +222,7 @@ router.post('/storage/targets/:id/test', guard, (req, res) => {
     const result = backupService.testStorageTarget(req.params.id);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -217,7 +232,7 @@ router.delete('/storage/targets/:id', guard, (req, res) => {
     const result = backupService.removeStorageTarget(req.params.id);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -231,7 +246,7 @@ router.post('/restore/:id', guard, (req, res) => {
     const result = backupService.restoreBackup(req.params.id, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 
@@ -241,7 +256,7 @@ router.get('/restore/history', guard, (req, res) => {
     const result = backupService.listRestoreHistory(req.query);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeErrorMsg(error) });
   }
 });
 

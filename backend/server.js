@@ -193,15 +193,18 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
 });
 
 // --- Unhandled Rejection / Uncaught Exception Safety Net ---
-process.on('unhandledRejection', (reason) => {
-  logger.error('[Process] Unhandled promise rejection:', reason instanceof Error ? reason.message : reason);
+process.on('unhandledRejection', reason => {
+  logger.error(
+    '[Process] Unhandled promise rejection:',
+    reason instanceof Error ? reason.message : reason
+  );
   // In production, exit so PM2/container restarts cleanly
   if (process.env.NODE_ENV === 'production') {
     process.exit(1);
   }
 });
 
-process.on('uncaughtException', (err) => {
+process.on('uncaughtException', err => {
   logger.error('[Process] Uncaught exception:', err.message);
   // Always exit — process is in undefined state
   process.exit(1);

@@ -352,8 +352,12 @@ router.get('/verify/number/:certNumber', async (req, res) => {
       return res.status(404).json({ success: false, verified: false, result: 'not_found' });
     }
 
-    // Redirect to hash-based verification
-    res.redirect(`/api/blockchain/verify/${cert.hash}`);
+    // Redirect to hash-based verification — validate hash is safe hex to prevent open redirect
+    const safeHash = /^[a-fA-F0-9]{1,128}$/.test(cert.hash) ? cert.hash : '';
+    if (!safeHash) {
+      return res.status(400).json({ success: false, message: 'Invalid certificate hash' });
+    }
+    res.redirect(`/api/blockchain/verify/${safeHash}`);
   } catch (error) {
     res.status(500).json({ success: false });
   }

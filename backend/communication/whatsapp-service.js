@@ -865,7 +865,10 @@ class WhatsAppService {
     let tokensMatch = false;
     if (mode === 'subscribe' && token && verifyToken && token.length === verifyToken.length) {
       try {
-        tokensMatch = crypto.timingSafeEqual(Buffer.from(token, 'utf8'), Buffer.from(verifyToken, 'utf8'));
+        tokensMatch = crypto.timingSafeEqual(
+          Buffer.from(token, 'utf8'),
+          Buffer.from(verifyToken, 'utf8')
+        );
       } catch {
         tokensMatch = false;
       }

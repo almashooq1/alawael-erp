@@ -400,8 +400,19 @@ app.get('/api/info', (req, res) => {
   });
 });
 
-// Serve static files
-app.use(express.static('public'));
+// Serve static files — with security headers and immutable cache for hashed assets
+app.use(
+  express.static('public', {
+    maxAge: '1d',
+    setHeaders: (res, filePath) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      // Immutable cache for fingerprinted/hashed assets
+      if (/\.[a-f0-9]{8,}\./i.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      }
+    },
+  })
+);
 
 // ─── Integration Context Middleware (distributed tracing) ────────────────────
 app.use(createIntegrationContextMiddleware({ integrationBus, serviceName: 'alawael-erp' }));

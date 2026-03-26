@@ -233,9 +233,14 @@ const connectDB = async () => {
 // ==================== EVENT LISTENERS SETUP ====================
 const setupEventListeners = () => {
   mongoose.connection.on('error', err => {
-    logger.error('❌ MongoDB Connection Error:', err.message);
+    // Mask any connection-string credentials that might appear in the error
+    const safeMsg = (err.message || '').replace(
+      /mongodb(\+srv)?:\/\/[^@]+@/gi,
+      'mongodb://<credentials-hidden>@'
+    );
+    logger.error('❌ MongoDB Connection Error:', safeMsg);
     connectionHealth.isConnected = false;
-    connectionHealth.lastErrorMessage = err.message;
+    connectionHealth.lastErrorMessage = safeMsg;
     connectionHealth.lastErrorTime = new Date();
   });
 

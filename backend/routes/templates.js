@@ -1,4 +1,4 @@
-// إرسال رسالة WhatsApp عبر Twilio (مبسط)
+﻿// إرسال رسالة WhatsApp عبر Twilio (مبسط)
 async function sendWhatsApp(to, message) {
   try {
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -29,7 +29,10 @@ const storage = multer.diskStorage({
     cb(null, unique + '-' + file.originalname.replace(/\s+/g, '_'));
   },
 });
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max upload
+});
 
 // رفع ملف مرفق (جميع الأنواع)
 router.post('/upload', auth, upload.single('file'), (req, res) => {
@@ -44,8 +47,18 @@ router.post('/upload', auth, upload.single('file'), (req, res) => {
     uploadedAt: new Date(),
   });
 });
-// تقديم الملفات المرفقة مباشرة
-router.use('/attachments', express.static(uploadDir));
+// تقديم الملفات المرفقة مباشرة — with security headers & cache control
+router.use(
+  '/attachments',
+  (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader('Cache-Control', 'private, max-age=86400');
+    res.setHeader('Content-Security-Policy', "default-src 'none'");
+    next();
+  },
+  express.static(uploadDir)
+);
 // مسارات إدارة القوالب الذكية
 const express = require('express');
 const router = express.Router();
@@ -138,7 +151,7 @@ router.post('/:id/approve', auth, requireAdmin, async (req, res) => {
     }
     res.json(tpl);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -228,7 +241,7 @@ router.post('/:id/reject', auth, requireAdmin, async (req, res) => {
     }
     res.json(tpl);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -263,7 +276,7 @@ router.post('/', auth, async (req, res) => {
     });
     res.status(201).json(tpl);
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
 
@@ -279,7 +292,7 @@ router.get('/', auth, async (req, res) => {
     const tpls = await Template.find(query);
     res.json(tpls);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: 'حدث خطأ داخلي' });
   }
 });
 
@@ -318,7 +331,7 @@ router.put('/:id', auth, async (req, res) => {
     if (!tpl) return res.status(404).json({ error: 'Template not found or not allowed' });
     res.json(tpl);
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
 
@@ -329,7 +342,7 @@ router.delete('/:id', auth, async (req, res) => {
     if (!tpl) return res.status(404).json({ error: 'Template not found or not allowed' });
     res.json({ success: true });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
 
@@ -339,7 +352,7 @@ router.post('/:id/use', auth, async (req, res) => {
     await Template.findByIdAndUpdate(req.params.id, { $inc: { usageCount: 1 } });
     res.json({ success: true });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
 

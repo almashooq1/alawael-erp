@@ -4,6 +4,7 @@ const Employee = require('../models/Employee');
 const Invoice = require('../models/Invoice');
 // const Document = require('../models/Document'); // Enable when ready
 const TherapySession = require('../models/TherapySession');
+const { escapeRegex } = require('../utils/sanitize');
 
 class GlobalSearchService {
   /**
@@ -34,7 +35,7 @@ class GlobalSearchService {
       totalHits: 0,
     };
 
-    const regex = new RegExp(term, 'i'); // Case insensitive
+    const regex = new RegExp(escapeRegex(term), 'i'); // Case insensitive — escaped to prevent ReDoS
 
     // 1. Specialized Search (Fast Track)
     if (type === 'INVOICE_ID') {

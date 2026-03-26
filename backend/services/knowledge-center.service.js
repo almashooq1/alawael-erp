@@ -83,8 +83,8 @@ class KnowledgeCenterService {
         { title: { $regex: escapeRegex(s), $options: 'i' } },
         { description: { $regex: escapeRegex(s), $options: 'i' } },
         { content: { $regex: escapeRegex(s), $options: 'i' } },
-        { tags: { $in: [new RegExp(s, 'i')] } },
-        { keywords: { $in: [new RegExp(s, 'i')] } },
+        { tags: { $in: [new RegExp(escapeRegex(s), 'i')] } },
+        { keywords: { $in: [new RegExp(escapeRegex(s), 'i')] } },
       ];
     }
 
@@ -450,7 +450,7 @@ class KnowledgeCenterService {
       { title: { $regex: escapeRegex(searchTerm), $options: 'i' } },
       { description: { $regex: escapeRegex(searchTerm), $options: 'i' } },
       { content: { $regex: escapeRegex(searchTerm), $options: 'i' } },
-      { tags: { $in: [new RegExp(searchTerm, 'i')] } },
+      { tags: { $in: [new RegExp(escapeRegex(searchTerm), 'i')] } },
     ];
 
     if (category && category !== 'all') filter.category = category;

@@ -212,7 +212,7 @@ describe('CashFlowDashboard', () => {
             fireEvent.click(excelButton);
           }
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -229,7 +229,7 @@ describe('CashFlowDashboard', () => {
             fireEvent.click(pdfButton);
           }
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
 
@@ -247,7 +247,7 @@ describe('CashFlowDashboard', () => {
             fireEvent.click(excelButton);
           }
         },
-        { timeout: 3000 }
+        { timeout: 3000 },
       );
     });
   });
@@ -261,9 +261,7 @@ describe('CashFlowDashboard', () => {
 
       await waitFor(() => {
         // التحقق من وجود رسم بياني
-        expect(container.querySelectorAll('.recharts-responsive-container').length).toBeGreaterThan(
-          0
-        );
+        expect(container.querySelectorAll('.recharts-responsive-container').length).toBeGreaterThan(0);
       });
     });
 
@@ -289,9 +287,7 @@ describe('CashFlowDashboard', () => {
 
       await waitFor(() => {
         // يجب أن يكون هناك تبويب للرسوم البيانية
-        expect(
-          screen.getByText(/📈 الرسوم البيانية/i) || screen.getByText(/الرسوم البيانية/i)
-        ).toBeTruthy();
+        expect(screen.getByText(/📈 الرسوم البيانية/i) || screen.getByText(/الرسوم البيانية/i)).toBeTruthy();
       });
     });
 

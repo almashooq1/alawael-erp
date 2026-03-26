@@ -99,7 +99,13 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const refreshToken = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        type: 'refresh',
+        jti: crypto.randomUUID(),
+      },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
@@ -147,7 +153,10 @@ router.post('/login', authLimiter, async (req, res) => {
     // Find user — must select password explicitly (field has select: false)
     const user = await User.findOne({ email }).select('+password +failedLoginAttempts +lockUntil');
     if (!user) {
-      logger.error('❌ Login failed: User not found for email:', email.replace(/(.{2}).*(@.*)/, '$1***$2'));
+      logger.error(
+        '❌ Login failed: User not found for email:',
+        email.replace(/(.{2}).*(@.*)/, '$1***$2')
+      );
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password',
@@ -174,7 +183,10 @@ router.post('/login', authLimiter, async (req, res) => {
     if (!isPasswordValid) {
       // Increment failed attempts (may trigger lock)
       await user.incLoginAttempts();
-      logger.error('❌ Login failed: Invalid password for email:', email.replace(/(.{2}).*(@.*)/, '$1***$2'));
+      logger.error(
+        '❌ Login failed: Invalid password for email:',
+        email.replace(/(.{2}).*(@.*)/, '$1***$2')
+      );
       logSecurityEvent('FAILED_LOGIN', {
         email,
         ip: getClientIP(req),
@@ -216,7 +228,9 @@ router.post('/login', authLimiter, async (req, res) => {
         const activeSessions = await Session.countDocuments({ userId: user._id, isActive: true });
         if (activeSessions >= MAX_CONCURRENT_SESSIONS) {
           // Deactivate oldest session
-          const oldest = await Session.findOne({ userId: user._id, isActive: true }).sort({ createdAt: 1 });
+          const oldest = await Session.findOne({ userId: user._id, isActive: true }).sort({
+            createdAt: 1,
+          });
           if (oldest) await oldest.terminate();
         }
         await Session.create({
@@ -314,7 +328,13 @@ router.post('/refresh', async (req, res) => {
       { expiresIn: ACCESS_TOKEN_EXPIRY }
     );
     const newRefreshToken = jwt.sign(
-      { userId: user._id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
+      {
+        userId: user._id,
+        email: user.email,
+        role: user.role,
+        type: 'refresh',
+        jti: crypto.randomUUID(),
+      },
       JWT_REFRESH_SECRET,
       { expiresIn: REFRESH_TOKEN_EXPIRY }
     );
@@ -526,7 +546,13 @@ router.post(
         { expiresIn: ACCESS_TOKEN_EXPIRY }
       );
       const newRefreshToken = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role, type: 'refresh', jti: crypto.randomUUID() },
+        {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          type: 'refresh',
+          jti: crypto.randomUUID(),
+        },
         JWT_REFRESH_SECRET,
         { expiresIn: REFRESH_TOKEN_EXPIRY }
       );
@@ -583,9 +609,11 @@ router.post('/forgot-password', passwordLimiter, async (req, res) => {
     // Send reset email (non-blocking — failure does NOT expose existence)
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
     if (emailService && emailService.sendEmail) {
-      emailService.sendEmail(user.email, 'passwordReset', { resetUrl, fullName: user.fullName }).catch(err => {
-        logger.error('Failed to send reset email:', err.message);
-      });
+      emailService
+        .sendEmail(user.email, 'passwordReset', { resetUrl, fullName: user.fullName })
+        .catch(err => {
+          logger.error('Failed to send reset email:', err.message);
+        });
     }
 
     logSecurityEvent('FORGOT_PASSWORD_REQUESTED', {
@@ -609,15 +637,24 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
   try {
     const { token, newPassword } = req.body;
     if (!token || !newPassword) {
-      return res.status(400).json({ success: false, message: 'Token and new password are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Token and new password are required' });
     }
 
     // Enforce password complexity (same rules as registration)
     if (newPassword.length < 8) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Password must be at least 8 characters' });
     }
     if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      return res.status(400).json({ success: false, message: 'Password must contain uppercase, lowercase, and a number' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: 'Password must contain uppercase, lowercase, and a number',
+        });
     }
 
     // Hash the token and find user

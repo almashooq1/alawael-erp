@@ -53,7 +53,7 @@ function scanBuffer(buffer) {
       socket.write(end);
     });
 
-    socket.on('data', (data) => {
+    socket.on('data', data => {
       response += data.toString();
     });
 
@@ -67,7 +67,7 @@ function scanBuffer(buffer) {
       reject(new Error('ClamAV scan timeout'));
     });
 
-    socket.on('error', (err) => {
+    socket.on('error', err => {
       reject(err);
     });
   });

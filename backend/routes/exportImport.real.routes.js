@@ -20,10 +20,18 @@ router.get('/export/excel', async (req, res) => {
     }
 
     const userId = req.user?.userId || req.user?._id || req.user?.id;
+    let parsedFilters = {};
+    if (filters) {
+      try {
+        parsedFilters = JSON.parse(filters);
+      } catch {
+        return res.status(400).json({ success: false, message: 'Invalid filters JSON' });
+      }
+    }
     const result = await importExportService.createExport({
       module: model,
       format: 'xlsx',
-      query: filters ? JSON.parse(filters) : {},
+      query: parsedFilters,
       userId,
     });
 

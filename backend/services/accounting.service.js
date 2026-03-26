@@ -24,6 +24,7 @@ const ExcelGenerator = require('../utils/excel-generator');
 const { sendEmail } = require('../utils/emailService');
 const { calculateVAT, calculateFinancialRatios } = require('../utils/financial-calculations');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class AccountingService {
   // ===================================================================
@@ -41,9 +42,9 @@ class AccountingService {
     if (filters.isActive !== undefined) query.isActive = filters.isActive;
     if (filters.searchTerm) {
       query.$or = [
-        { code: new RegExp(filters.searchTerm, 'i') },
-        { name: new RegExp(filters.searchTerm, 'i') },
-        { nameEn: new RegExp(filters.searchTerm, 'i') },
+        { code: new RegExp(escapeRegex(filters.searchTerm), 'i') },
+        { name: new RegExp(escapeRegex(filters.searchTerm), 'i') },
+        { nameEn: new RegExp(escapeRegex(filters.searchTerm), 'i') },
       ];
     }
 

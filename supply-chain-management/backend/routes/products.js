@@ -11,11 +11,30 @@ const storage = multer.diskStorage({
     cb(null, path.join(process.cwd(), 'backend', 'uploads', 'products'));
   },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1e9) + ext);
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, Date.now() + '-' + Math.random().toString(36).slice(2, 10) + ext);
   },
 });
-const upload = multer({ storage });
+
+// Product images only
+const PRODUCT_ALLOWED_MIMES = new Set(['image/png', 'image/jpeg', 'image/jpg', 'image/webp']);
+const PRODUCT_ALLOWED_EXTS = new Set(['.png', '.jpg', '.jpeg', '.webp']);
+
+const productFileFilter = (_req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (PRODUCT_ALLOWED_MIMES.has(file.mimetype) && PRODUCT_ALLOWED_EXTS.has(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('نوع الملف غير مدعوم. المسموح: PNG, JPG, JPEG, WEBP'));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter: productFileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB per product image
+});
 
 const router = express.Router();
 

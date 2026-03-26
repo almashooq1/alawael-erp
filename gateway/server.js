@@ -67,8 +67,8 @@ app.use(
 );
 app.use(compression()); // Compress responses
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Distributed tracing
 app.use(tracingMiddleware);
@@ -236,6 +236,11 @@ const server = app.listen(config.port, () => {
       .join(''),
   );
 });
+
+// --- Server Timeouts (prevent hung connections) ---
+server.timeout = 30_000;          // 30 s — max time a request can take
+server.keepAliveTimeout = 65_000;  // 65 s — must be > ALB/Nginx idle (usually 60 s)
+server.headersTimeout = 66_000;    // slightly higher than keepAliveTimeout
 
 // Graceful shutdown
 const gracefulShutdown = () => {

@@ -1,4 +1,5 @@
 const express = require('express');
+require('express-async-errors'); // Global async error catching — no silent promise rejections
 const cors = require('cors');
 const helmet = require('helmet');
 const dotenv = require('dotenv');
@@ -810,6 +811,44 @@ app.get('*', (req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-app.listen(PORT, () => {
-  // Server started
+// ─── Global Error Handler (MUST be after all routes) ─────────────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, _req, res, _next) => {
+  console.error('[ERROR]', err.message);
+  const statusCode = err.status || err.statusCode || 500;
+  res.status(statusCode).json({
+    success: false,
+    message: process.env.NODE_ENV === 'production' ? 'حدث خطأ في الخادم' : err.message,
+  });
+});
+
+const http = require('http');
+const httpServer = http.createServer(app);
+
+// ─── Request Timeouts (prevent hung connections) ─────────────────────────────
+httpServer.timeout = 30000;           // 30s max request duration
+httpServer.keepAliveTimeout = 65000;  // 65s (must exceed reverse proxy idle, usually 60s)
+httpServer.headersTimeout = 66000;    // slightly > keepAliveTimeout
+
+// ─── Graceful Shutdown ───────────────────────────────────────────────────────
+let isShuttingDown = false;
+const gracefulShutdown = (signal) => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+  console.log(`\n[Shutdown] ${signal} received — draining connections...`);
+  httpServer.close(() => {
+    console.log('[Shutdown] All connections drained. Exiting.');
+    process.exit(0);
+  });
+  // Force exit after 30s if connections don't drain
+  setTimeout(() => {
+    console.error('[Shutdown] Forced exit after 30s timeout');
+    process.exit(1);
+  }, 30000).unref();
+};
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+httpServer.listen(PORT, () => {
+  // Server started with timeouts and graceful shutdown
 });

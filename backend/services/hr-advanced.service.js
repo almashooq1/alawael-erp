@@ -8,6 +8,7 @@ const Employee = require('../models/employee.model');
 const Payroll = require('../models/payroll.model');
 const Training = require('../models/training.model');
 const Performance = require('../models/performance.model');
+const { escapeRegex } = require('../utils/sanitize');
 
 class HRService {
   /**
@@ -356,9 +357,9 @@ class HRService {
       if (searchTerm) {
         query = {
           $or: [
-            { firstName: new RegExp(searchTerm, 'i') },
-            { lastName: new RegExp(searchTerm, 'i') },
-            { email: new RegExp(searchTerm, 'i') },
+            { firstName: new RegExp(escapeRegex(searchTerm), 'i') },
+            { lastName: new RegExp(escapeRegex(searchTerm), 'i') },
+            { email: new RegExp(escapeRegex(searchTerm), 'i') },
             { employeeId: searchTerm },
           ],
         };

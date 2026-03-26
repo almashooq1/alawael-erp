@@ -67,11 +67,7 @@ function App() {
 
   return (
     <div style={{ padding: 24 }}>
-      <Notification
-        message={notif.message}
-        type={notif.type}
-        onClose={() => setNotif({ message: '', type: 'info' })}
-      />
+      <Notification message={notif.message} type={notif.type} onClose={() => setNotif({ message: '', type: 'info' })} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Supply Chain Management</h1>
         <div>

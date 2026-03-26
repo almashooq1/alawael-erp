@@ -9,6 +9,12 @@ const logger = require('../utils/logger');
 
 const { validateUploadedFile } = require('../utils/uploadValidator');
 
+/** Safely parse JSON — returns fallback on invalid input */
+const safeJsonParse = (str, fallback = []) => {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
+};
+
 // إعداد مجلدات التخزين
 const UPLOAD_DIRS = {
   أشعة: 'radiology',
@@ -158,7 +164,7 @@ router.post(
         uploadDate: new Date(),
         uploadedBy: req.user.id,
         description: req.body.description || '',
-        tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+        tags: safeJsonParse(req.body.tags, []),
       };
 
       res.json({
@@ -201,18 +207,22 @@ router.post(
         });
       }
 
+      const parsedFileTypes = safeJsonParse(req.body.fileTypes, []);
+      const parsedDescriptions = safeJsonParse(req.body.descriptions, []);
+      const parsedTags = safeJsonParse(req.body.tags, []);
+
       const filesInfo = req.files.map((file, index) => ({
         originalName: file.originalname,
         fileName: file.filename,
-        fileType: req.body.fileTypes ? JSON.parse(req.body.fileTypes)[index] : 'أخرى',
+        fileType: parsedFileTypes[index] || 'أخرى',
         mimeType: file.mimetype,
         size: file.size,
         path: file.path,
         url: `/uploads/medical-files/${file.path.split('medical-files')[1].replace(/\\/g, '/')}`,
         uploadDate: new Date(),
         uploadedBy: req.user.id,
-        description: req.body.descriptions ? JSON.parse(req.body.descriptions)[index] : '',
-        tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+        description: parsedDescriptions[index] || '',
+        tags: parsedTags,
       }));
 
       res.json({

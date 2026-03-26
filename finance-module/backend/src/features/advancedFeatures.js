@@ -2,7 +2,7 @@
 /**
  * Advanced Finance Module Features
  * ML-Based Forecasting, WebSocket Real-Time Updates, Notifications
- * 
+ *
  * Features:
  * - Machine Learning forecasting with trend analysis
  * - Real-time WebSocket updates for all dashboards
@@ -46,20 +46,20 @@ class MLCashFlowForecaster {
         conservative: [],
         confidence: {
           lower: [],
-          upper: []
+          upper: [],
         },
         trend: trend,
         seasonality: this._detectSeasonality(netFlow),
-        predictions: []
+        predictions: [],
       };
 
       for (let i = 0; i < periods; i++) {
-        const baseValue = flowMean + (trend * (i + 1));
+        const baseValue = flowMean + trend * (i + 1);
         const confidence = Math.abs(flowStdDev * 1.96); // 95% CI
 
         forecast.baseline.push(baseValue);
-        forecast.optimistic.push(baseValue + (baseValue * 0.20)); // +20%
-        forecast.pessimistic.push(baseValue - (baseValue * 0.20)); // -20%
+        forecast.optimistic.push(baseValue + baseValue * 0.2); // +20%
+        forecast.pessimistic.push(baseValue - baseValue * 0.2); // -20%
         forecast.conservative.push(baseValue); // No variance
 
         forecast.confidence.lower.push(baseValue - confidence);
@@ -71,10 +71,10 @@ class MLCashFlowForecaster {
           lower95: baseValue - confidence,
           upper95: baseValue + confidence,
           scenarios: {
-            optimistic: baseValue + (baseValue * 0.20),
-            pessimistic: baseValue - (baseValue * 0.20),
-            conservative: baseValue
-          }
+            optimistic: baseValue + baseValue * 0.2,
+            pessimistic: baseValue - baseValue * 0.2,
+            conservative: baseValue,
+          },
         });
       }
 
@@ -82,14 +82,14 @@ class MLCashFlowForecaster {
         success: true,
         data: forecast,
         accuracy: this._estimateAccuracy(historicalData),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       console.error('[ML Forecaster] Error:', error);
       return {
         success: false,
         error: 'حدث خطأ داخلي',
-        fallbackForecast: this._generateBasicForecast(historicalData, periods)
+        fallbackForecast: this._generateBasicForecast(historicalData, periods),
       };
     }
   }
@@ -99,7 +99,7 @@ class MLCashFlowForecaster {
    */
   static _calculateTrend(data) {
     if (data.length < 2) return 0;
-    const x = Array.from({length: data.length}, (_, i) => i);
+    const x = Array.from({ length: data.length }, (_, i) => i);
     const result = simple.linearRegression(x.map((xi, i) => [xi, data[i]]));
     return result.m; // Slope
   }
@@ -115,8 +115,8 @@ class MLCashFlowForecaster {
     }
     return {
       detected: Math.max(...seasonalVariance) > simple.variance(data) * 0.5,
-      pattern: 'monthly',  // Can be improved with FFT
-      strength: Math.max(...seasonalVariance) / simple.variance(data)
+      pattern: 'monthly', // Can be improved with FFT
+      strength: Math.max(...seasonalVariance) / simple.variance(data),
     };
   }
 
@@ -125,7 +125,7 @@ class MLCashFlowForecaster {
    */
   static _estimateAccuracy(data) {
     const volatility = simple.standardDeviation(data.map(d => d.netFlow || 0));
-    return Math.max(0.6, 1 - (volatility / 100)); // 60-100% accuracy range
+    return Math.max(0.6, 1 - volatility / 100); // 60-100% accuracy range
   }
 
   /**
@@ -136,10 +136,10 @@ class MLCashFlowForecaster {
     const forecast = Array(periods).fill(avg);
     return {
       baseline: forecast,
-      optimistic: forecast.map(f => f * 1.20),
-      pessimistic: forecast.map(f => f * 0.80),
+      optimistic: forecast.map(f => f * 1.2),
+      pessimistic: forecast.map(f => f * 0.8),
       conservative: forecast,
-      confidence: { lower: forecast, upper: forecast }
+      confidence: { lower: forecast, upper: forecast },
     };
   }
 }
@@ -167,14 +167,14 @@ class AnomalyDetector {
         transaction: t,
         severity: this._calculateSeverity(t.amount, mean, stdDev),
         recommendation: this._generateRecommendation(t, mean),
-        timestamp: new Date()
+        timestamp: new Date(),
       }));
 
     return {
       count: anomalies.length,
       anomalies: anomalies,
       summary: this._generateSummary(anomalies),
-      riskLevel: this._assessRiskLevel(anomalies)
+      riskLevel: this._assessRiskLevel(anomalies),
     };
   }
 
@@ -205,7 +205,7 @@ class AnomalyDetector {
     return {
       high: anomalies.filter(a => a.severity >= 7).length,
       medium: anomalies.filter(a => a.severity >= 4 && a.severity < 7).length,
-      low: anomalies.filter(a => a.severity < 4).length
+      low: anomalies.filter(a => a.severity < 4).length,
     };
   }
 
@@ -240,9 +240,7 @@ class FinanceRealtimeManager {
     // Authentication middleware — verify JWT before allowing finance namespace connections
     this.financeNS.use((socket, next) => {
       try {
-        const token =
-          socket.handshake.auth?.token ||
-          socket.handshake.headers?.authorization?.replace('Bearer ', '');
+        const token = socket.handshake.auth?.token || socket.handshake.headers?.authorization?.replace('Bearer ', '');
         if (!token) {
           return next(new Error('Authentication required'));
         }
@@ -255,38 +253,38 @@ class FinanceRealtimeManager {
       }
     });
 
-    this.financeNS.on('connection', (socket) => {
+    this.financeNS.on('connection', socket => {
       console.log(`[Finance Realtime] User ${socket.id} connected`);
 
       // Subscribe to violations in real-time
-      socket.on('watch:violations', (params) => {
+      socket.on('watch:violations', params => {
         socket.join(`violations:${params.userId || 'all'}`);
-        socket.emit('subscribed', { 
+        socket.emit('subscribed', {
           channel: 'violations',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       });
 
       // Subscribe to cash flow updates
-      socket.on('watch:cashflow', (params) => {
+      socket.on('watch:cashflow', params => {
         socket.join(`cashflow:${params.userId || 'all'}`);
-        socket.emit('subscribed', { 
+        socket.emit('subscribed', {
           channel: 'cashflow',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       });
 
       // Subscribe to risk matrix changes
-      socket.on('watch:risks', (params) => {
+      socket.on('watch:risks', params => {
         socket.join(`risks:${params.userId || 'all'}`);
-        socket.emit('subscribed', { 
+        socket.emit('subscribed', {
           channel: 'risks',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
       });
 
       // Unsubscribe handlers
-      socket.on('unwatch:violations', (params) => {
+      socket.on('unwatch:violations', params => {
         socket.leave(`violations:${params.userId || 'all'}`);
       });
 
@@ -303,7 +301,7 @@ class FinanceRealtimeManager {
     this.financeNS.to(`violations:${userId}`).emit('violation:created', {
       violation,
       timestamp: new Date(),
-      action: 'created'
+      action: 'created',
     });
   }
 
@@ -314,7 +312,7 @@ class FinanceRealtimeManager {
     this.financeNS.to(`violations:${userId}`).emit('violation:resolved', {
       violationId,
       timestamp: new Date(),
-      action: 'resolved'
+      action: 'resolved',
     });
   }
 
@@ -325,7 +323,7 @@ class FinanceRealtimeManager {
     this.financeNS.to(`cashflow:${userId}`).emit('forecast:generated', {
       forecast,
       timestamp: new Date(),
-      action: 'forecast_ready'
+      action: 'forecast_ready',
     });
   }
 
@@ -337,7 +335,7 @@ class FinanceRealtimeManager {
       anomaly,
       timestamp: new Date(),
       severity: anomaly.severity,
-      action: 'anomaly_alert'
+      action: 'anomaly_alert',
     });
   }
 
@@ -348,7 +346,7 @@ class FinanceRealtimeManager {
     this.financeNS.to(`risks:${userId}`).emit('risk:matrix_updated', {
       riskData,
       timestamp: new Date(),
-      action: 'matrix_refresh'
+      action: 'matrix_refresh',
     });
   }
 }
@@ -371,7 +369,7 @@ class FinanceAlertEngine {
         severity: 'high',
         message: 'Liquidity below 80% target',
         recommendation: 'Increase reserves immediately',
-        action: 'reserve_adjustment'
+        action: 'reserve_adjustment',
       });
     }
 
@@ -382,7 +380,7 @@ class FinanceAlertEngine {
         severity: 'medium',
         message: `${financialData.violationCount} outstanding violations`,
         recommendation: 'Schedule compliance review',
-        action: 'compliance_review'
+        action: 'compliance_review',
       });
     }
 
@@ -393,7 +391,7 @@ class FinanceAlertEngine {
         severity: 'critical',
         message: `${financialData.criticalRisks} critical risks identified`,
         recommendation: 'Activate risk mitigation plan',
-        action: 'risk_mitigation'
+        action: 'risk_mitigation',
       });
     }
 
@@ -404,7 +402,7 @@ class FinanceAlertEngine {
         severity: 'low',
         message: 'Forecast confidence below 70%',
         recommendation: 'Use forecasts with caution',
-        action: 'manual_review'
+        action: 'manual_review',
       });
     }
 
@@ -419,5 +417,5 @@ module.exports = {
   MLCashFlowForecaster,
   AnomalyDetector,
   FinanceRealtimeManager,
-  FinanceAlertEngine
+  FinanceAlertEngine,
 };

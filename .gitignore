@@ -36,6 +36,8 @@ out/
 .next/
 coverage/
 .nyc_output/
+.jest-cache/
+**/.jest-cache/
 *.js.map
 *.ts.map
 *.css.map

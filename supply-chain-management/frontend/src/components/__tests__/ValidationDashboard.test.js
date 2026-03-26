@@ -70,9 +70,7 @@ describe('ValidationDashboard', () => {
     });
 
     test('يجب أن يعرض رسالة تحميل في البداية', async () => {
-      API.getViolations.mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100))
-      );
+      API.getViolations.mockImplementation(() => new Promise(resolve => setTimeout(() => resolve({ data: [] }), 100)));
 
       render(<ValidationDashboard />);
 

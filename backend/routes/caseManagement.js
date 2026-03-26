@@ -9,6 +9,12 @@ const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 
+/** Safely parse JSON — returns fallback on invalid input */
+const safeJsonParse = (str, fallback = []) => {
+  if (!str) return fallback;
+  try { return JSON.parse(str); } catch { return fallback; }
+};
+
 /* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const CASE_FIELDS = [
   'patientName',
@@ -453,7 +459,7 @@ router.post('/:id/files', authenticate, upload.single('file'), async (req, res) 
       fileSize: req.file.size,
       uploadedBy: req.user._id,
       description: req.body.description,
-      tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+      tags: safeJsonParse(req.body.tags, []),
     };
 
     caseDoc.medicalFiles.push(medicalFile);

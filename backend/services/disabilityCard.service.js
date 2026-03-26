@@ -14,6 +14,12 @@
 
 const logger = require('../utils/logger');
 
+// ── PII Masking Helper ─────────────────────────────────────────────────────────
+const maskNID = (nid) => {
+  if (!nid || typeof nid !== 'string') return '***';
+  return nid.length > 4 ? '***' + nid.slice(-4) : '***';
+};
+
 // ── Lazy Model Loaders (avoid circular deps) ─────────────────────────────────
 let DisabilityCard;
 const getDisabilityCard = () => {
@@ -62,7 +68,7 @@ class DisabilityCardService {
     });
 
     await card.save();
-    logger.info(`[DisabilityCard] Card created: ${card.card_number} for NID: ${data.national_id}`);
+    logger.info(`[DisabilityCard] Card created: ${card.card_number} for NID: ${maskNID(data.national_id)}`);
     return card;
   }
 
@@ -885,7 +891,7 @@ class DisabilityCardService {
    * MOHR API simulation (وزارة الموارد البشرية)
    */
   async _callMOHRApi(action, data) {
-    logger.info(`[MOHR API] ${action} called with NID: ${data.national_id}`);
+    logger.info(`[MOHR API] ${action} called with NID: ${maskNID(data.national_id)}`);
 
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -930,7 +936,7 @@ class DisabilityCardService {
    * Absher API simulation (أبشر)
    */
   async _callAbsherApi(action, data) {
-    logger.info(`[Absher API] ${action} called with NID: ${data.national_id}`);
+    logger.info(`[Absher API] ${action} called with NID: ${maskNID(data.national_id)}`);
     await new Promise(resolve => setTimeout(resolve, 100));
 
     switch (action) {
@@ -1013,7 +1019,7 @@ class DisabilityCardService {
    * Social Security API simulation (الضمان الاجتماعي)
    */
   async _callSocialSecurityApi(action, data) {
-    logger.info(`[Social Security API] ${action} called for NID: ${data.national_id}`);
+    logger.info(`[Social Security API] ${action} called for NID: ${maskNID(data.national_id)}`);
     await new Promise(resolve => setTimeout(resolve, 100));
 
     switch (action) {

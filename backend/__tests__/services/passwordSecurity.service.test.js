@@ -61,13 +61,17 @@ describe('PasswordSecurityService', () => {
 
     it('should penalise repeated characters', () => {
       const result = PasswordSecurityService.checkPasswordStrength('AAAbbbb1!');
-      expect(result.feedback).toEqual(expect.arrayContaining([expect.stringContaining('repeated')]));
+      expect(result.feedback).toEqual(
+        expect.arrayContaining([expect.stringContaining('repeated')])
+      );
     });
 
     it('should give feedback for missing uppercase', () => {
       const result = PasswordSecurityService.checkPasswordStrength('alllower1!xy');
       // no uppercase → feedback should mention it
-      expect(result.feedback).toEqual(expect.arrayContaining([expect.stringContaining('uppercase')]));
+      expect(result.feedback).toEqual(
+        expect.arrayContaining([expect.stringContaining('uppercase')])
+      );
     });
 
     it('should give feedback for missing numbers', () => {
@@ -102,7 +106,9 @@ describe('PasswordSecurityService', () => {
         data: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1:1\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB2:2',
       });
 
-      const result = await PasswordSecurityService.isPasswordCompromised('super-unique-pass-xyz-42!');
+      const result = await PasswordSecurityService.isPasswordCompromised(
+        'super-unique-pass-xyz-42!'
+      );
       expect(result.compromised).toBe(false);
     });
 

@@ -271,7 +271,7 @@ if (false && process.env.NODE_ENV !== 'test') {
 
       logger.info('✅ In-memory database initialized with admin user');
       logger.info('📧 Email: admin@alawael.com');
-      logger.info('🔑 Password: Admin@123456');
+      logger.info('🔑 Password: (set via ADMIN_INITIAL_PASS env var)');
     }
   })();
 }

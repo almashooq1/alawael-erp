@@ -473,7 +473,19 @@ describe('Password Security (SecurityService policy validation)', () => {
           // Return a fake model constructor with static methods
           const M = function () {};
           M.modelName = name;
-          M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) });
+          M.find = jest
+            .fn()
+            .mockReturnValue({
+              sort: jest
+                .fn()
+                .mockReturnValue({
+                  skip: jest
+                    .fn()
+                    .mockReturnValue({
+                      limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+                    }),
+                }),
+            });
           M.findById = jest.fn().mockResolvedValue(null);
           M.findOne = jest.fn().mockResolvedValue(null);
           M.findOneAndUpdate = jest.fn().mockResolvedValue({});
@@ -487,7 +499,7 @@ describe('Password Security (SecurityService policy validation)', () => {
         return {
           ...actualMongoose,
           models: {},
-          model: jest.fn((name) => stubModel(name)),
+          model: jest.fn(name => stubModel(name)),
         };
       });
 
@@ -500,7 +512,19 @@ describe('Password Security (SecurityService policy validation)', () => {
       });
       jest.doMock('../models/Session', () => {
         const M = function () {};
-        M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) });
+        M.find = jest
+          .fn()
+          .mockReturnValue({
+            sort: jest
+              .fn()
+              .mockReturnValue({
+                skip: jest
+                  .fn()
+                  .mockReturnValue({
+                    limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+                  }),
+              }),
+          });
         M.findOne = jest.fn().mockResolvedValue(null);
         M.countDocuments = jest.fn().mockResolvedValue(0);
         M.updateMany = jest.fn().mockResolvedValue({ modifiedCount: 0 });
@@ -508,7 +532,25 @@ describe('Password Security (SecurityService policy validation)', () => {
       });
       jest.doMock('../models/securityLog.model', () => {
         const M = function () {};
-        M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ populate: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) }) });
+        M.find = jest
+          .fn()
+          .mockReturnValue({
+            sort: jest
+              .fn()
+              .mockReturnValue({
+                skip: jest
+                  .fn()
+                  .mockReturnValue({
+                    limit: jest
+                      .fn()
+                      .mockReturnValue({
+                        populate: jest
+                          .fn()
+                          .mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+                      }),
+                  }),
+              }),
+          });
         M.findOne = jest.fn().mockResolvedValue(null);
         M.countDocuments = jest.fn().mockResolvedValue(0);
         M.create = jest.fn().mockResolvedValue({});

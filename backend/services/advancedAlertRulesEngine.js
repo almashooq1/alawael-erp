@@ -448,7 +448,11 @@ class AdvancedAlertRulesEngine extends EventEmitter {
       case 'lte':
         return fieldValue <= filter.value;
       case 'regex':
-        return new RegExp(filter.value).test(String(fieldValue));
+        try {
+          return new RegExp(String(filter.value).slice(0, 200)).test(String(fieldValue));
+        } catch {
+          return false; // invalid regex pattern — treat as non-match
+        }
       case 'in':
         return filter.value.includes(fieldValue);
       case 'notIn':

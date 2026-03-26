@@ -16,6 +16,7 @@
  */
 
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // Lazy model loaders (safe for test environments)
 let Employee, LeaveRequest;
@@ -93,7 +94,7 @@ class EmployeeAffairsService {
     if (department) query.department = department;
     if (status) query.status = status;
     if (search) {
-      const regex = new RegExp(search, 'i');
+      const regex = new RegExp(escapeRegex(search), 'i');
       query.$or = [
         { firstName: regex },
         { lastName: regex },

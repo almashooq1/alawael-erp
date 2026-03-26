@@ -25,7 +25,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  error => Promise.reject(error)
+  error => Promise.reject(error),
 );
 
 // Add response interceptor for error handling
@@ -37,15 +37,13 @@ apiClient.interceptors.response.use(
       window.location.href = '/login';
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // AUTH APIs
-export const loginUser = (email, password) =>
-  apiClient.post('/api/auth/login', { email, password });
+export const loginUser = (email, password) => apiClient.post('/api/auth/login', { email, password });
 
-export const registerUser = (email, password, name) =>
-  apiClient.post('/api/auth/register', { email, password, name });
+export const registerUser = (email, password, name) => apiClient.post('/api/auth/register', { email, password, name });
 
 export const logoutUser = () => apiClient.post('/api/auth/logout');
 
@@ -64,19 +62,16 @@ export const updateProduct = (id, data) => apiClient.put(`/api/products/${id}`, 
 export const deleteProduct = id => apiClient.delete(`/api/products/${id}`);
 
 // INVENTORY APIs
-export const getInventory = (page = 1, limit = 10) =>
-  apiClient.get(`/api/inventory?page=${page}&limit=${limit}`);
+export const getInventory = (page = 1, limit = 10) => apiClient.get(`/api/inventory?page=${page}&limit=${limit}`);
 
 export const getInventoryItem = id => apiClient.get(`/api/inventory/${id}`);
 
 export const updateInventory = (id, data) => apiClient.put(`/api/inventory/${id}`, data);
 
-export const adjustInventory = (id, quantity, reason) =>
-  apiClient.post(`/api/inventory/${id}/adjust`, { quantity, reason });
+export const adjustInventory = (id, quantity, reason) => apiClient.post(`/api/inventory/${id}/adjust`, { quantity, reason });
 
 // ORDER APIs
-export const getOrders = (page = 1, limit = 10, status = '') =>
-  apiClient.get(`/api/orders?page=${page}&limit=${limit}&status=${status}`);
+export const getOrders = (page = 1, limit = 10, status = '') => apiClient.get(`/api/orders?page=${page}&limit=${limit}&status=${status}`);
 
 export const getOrder = id => apiClient.get(`/api/orders/${id}`);
 
@@ -84,12 +79,10 @@ export const createOrder = data => apiClient.post('/api/orders', data);
 
 export const updateOrder = (id, data) => apiClient.put(`/api/orders/${id}`, data);
 
-export const updateOrderStatus = (id, status) =>
-  apiClient.patch(`/api/orders/${id}/status`, { status });
+export const updateOrderStatus = (id, status) => apiClient.patch(`/api/orders/${id}/status`, { status });
 
 // SHIPMENT APIs
-export const getShipments = (page = 1, limit = 10) =>
-  apiClient.get(`/api/shipments?page=${page}&limit=${limit}`);
+export const getShipments = (page = 1, limit = 10) => apiClient.get(`/api/shipments?page=${page}&limit=${limit}`);
 
 export const getShipment = id => apiClient.get(`/api/shipments/${id}`);
 
@@ -97,12 +90,10 @@ export const createShipment = data => apiClient.post('/api/shipments', data);
 
 export const updateShipment = (id, data) => apiClient.put(`/api/shipments/${id}`, data);
 
-export const trackShipment = trackingNumber =>
-  apiClient.get(`/api/shipments/track/${trackingNumber}`);
+export const trackShipment = trackingNumber => apiClient.get(`/api/shipments/track/${trackingNumber}`);
 
 // SUPPLIER APIs
-export const getSuppliers = (page = 1, limit = 10) =>
-  apiClient.get(`/api/suppliers?page=${page}&limit=${limit}`);
+export const getSuppliers = (page = 1, limit = 10) => apiClient.get(`/api/suppliers?page=${page}&limit=${limit}`);
 
 export const getSupplier = id => apiClient.get(`/api/suppliers/${id}`);
 
@@ -120,14 +111,11 @@ export const getBarcode = id => apiClient.get(`/api/barcodes/${id}`);
 // ANALYTICS APIs
 export const getDashboardStats = () => apiClient.get('/api/analytics/dashboard');
 
-export const getInventoryAnalytics = (period = '30d') =>
-  apiClient.get(`/api/analytics/inventory?period=${period}`);
+export const getInventoryAnalytics = (period = '30d') => apiClient.get(`/api/analytics/inventory?period=${period}`);
 
-export const getOrderAnalytics = (period = '30d') =>
-  apiClient.get(`/api/analytics/orders?period=${period}`);
+export const getOrderAnalytics = (period = '30d') => apiClient.get(`/api/analytics/orders?period=${period}`);
 
-export const getSalesAnalytics = (period = '30d') =>
-  apiClient.get(`/api/analytics/sales?period=${period}`);
+export const getSalesAnalytics = (period = '30d') => apiClient.get(`/api/analytics/sales?period=${period}`);
 
 // FILE UPLOAD APIs
 export const uploadFile = (file, fileType = 'general') => {
@@ -140,8 +128,7 @@ export const uploadFile = (file, fileType = 'general') => {
   });
 };
 
-export const downloadFile = fileId =>
-  apiClient.get(`/api/files/${fileId}/download`, { responseType: 'blob' });
+export const downloadFile = fileId => apiClient.get(`/api/files/${fileId}/download`, { responseType: 'blob' });
 
 // DASHBOARD APIs
 export const getValidationDashboard = () => apiClient.get('/api/dashboards/validation');
@@ -154,14 +141,12 @@ export const getComplianceDashboard = () => apiClient.get('/api/dashboards/compl
 
 export const getReportingDashboard = () => apiClient.get('/api/dashboards/reporting');
 
-export const getAdvancedAnalyticsDashboard = () =>
-  apiClient.get('/api/dashboards/advanced-analytics');
+export const getAdvancedAnalyticsDashboard = () => apiClient.get('/api/dashboards/advanced-analytics');
 
 // CASH FLOW SPECIFIC APIs
 export const getCashFlowData = () => apiClient.get('/api/dashboards/cashflow/data');
 
-export const getForecasts = (period = '3m') =>
-  apiClient.get(`/api/dashboards/cashflow/forecasts?period=${period}`);
+export const getForecasts = (period = '3m') => apiClient.get(`/api/dashboards/cashflow/forecasts?period=${period}`);
 
 export const getReserves = () => apiClient.get('/api/dashboards/cashflow/reserves');
 
@@ -173,8 +158,7 @@ export const getComplianceMetrics = () => apiClient.get('/api/dashboards/validat
 // RISK SPECIFIC APIs
 export const getRiskItems = () => apiClient.get('/api/dashboards/risk/items');
 
-export const getRiskTrends = (period = '90d') =>
-  apiClient.get(`/api/dashboards/risk/trends?period=${period}`);
+export const getRiskTrends = (period = '90d') => apiClient.get(`/api/dashboards/risk/trends?period=${period}`);
 
 export const getMitigationStrategies = () => apiClient.get('/api/dashboards/risk/mitigations');
 
@@ -184,8 +168,7 @@ export const getComplianceViolations = () => apiClient.get('/api/dashboards/comp
 export const getComplianceReports = () => apiClient.get('/api/dashboards/compliance/reports');
 
 // REPORTING SPECIFIC APIs
-export const getFinancialReports = (type = 'all') =>
-  apiClient.get(`/api/dashboards/reporting/reports?type=${type}`);
+export const getFinancialReports = (type = 'all') => apiClient.get(`/api/dashboards/reporting/reports?type=${type}`);
 
 export const getFinancialRatios = () => apiClient.get('/api/dashboards/reporting/ratios');
 
@@ -202,8 +185,7 @@ export const getAuditLogs = (page = 1, limit = 10, filters = {}) =>
 export const getAuditLog = id => apiClient.get(`/api/audit-logs/${id}`);
 
 // CHANGELOG APIs
-export const getChangeLogs = (entityType, entityId) =>
-  apiClient.get(`/api/changelogs/${entityType}/${entityId}`);
+export const getChangeLogs = (entityType, entityId) => apiClient.get(`/api/changelogs/${entityType}/${entityId}`);
 
 // HEALTH CHECK
 export const healthCheck = () => apiClient.get('/health');

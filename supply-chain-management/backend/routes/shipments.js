@@ -12,11 +12,37 @@ const storage = multer.diskStorage({
     cb(null, path.join(process.cwd(), 'backend', 'uploads', 'shipments'));
   },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1e9) + ext);
+    // Use crypto-safe random instead of Math.random
+    const crypto = await import('crypto').catch(() => ({ randomBytes: () => Buffer.from(String(Date.now())) }));
+    const safeName = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, Date.now() + '-' + Math.random().toString(36).slice(2, 10) + ext);
   },
 });
-const upload = multer({ storage });
+
+// Shipment attachments: PDFs, images, and common documents only
+const ALLOWED_MIMES = new Set([
+  'application/pdf',
+  'image/png', 'image/jpeg', 'image/jpg',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // docx
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',       // xlsx
+]);
+const ALLOWED_EXTS = new Set(['.pdf', '.png', '.jpg', '.jpeg', '.docx', '.xlsx']);
+
+const shipmentFileFilter = (_req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (ALLOWED_MIMES.has(file.mimetype) && ALLOWED_EXTS.has(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error('نوع الملف غير مدعوم. المسموح: PDF, PNG, JPG, DOCX, XLSX'));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter: shipmentFileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB per file
+});
 
 const router = express.Router();
 

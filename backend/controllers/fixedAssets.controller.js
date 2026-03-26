@@ -7,7 +7,7 @@
 
 const FixedAsset = require('../models/FixedAsset');
 const asyncHandler = require('express-async-handler');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripDangerousKeys } = require('../utils/sanitize');
 
 // الحصول على جميع الأصول
 exports.getAllAssets = asyncHandler(async (req, res) => {
@@ -46,7 +46,7 @@ exports.getAllAssets = asyncHandler(async (req, res) => {
 // إنشاء أصل جديد
 exports.createAsset = asyncHandler(async (req, res) => {
   const assetData = {
-    ...req.body,
+    ...stripDangerousKeys(req.body),
     createdBy: req.user._id,
   };
 
@@ -70,7 +70,7 @@ exports.updateAsset = asyncHandler(async (req, res) => {
     });
   }
 
-  Object.assign(asset, req.body);
+  Object.assign(asset, stripDangerousKeys(req.body));
   asset.updatedBy = req.user._id;
   await asset.save();
 

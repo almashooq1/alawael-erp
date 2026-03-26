@@ -13,10 +13,14 @@ const {
 
 // ============ GET ENDPOINTS ============
 
+// Allowed sort fields to prevent field enumeration / injection
+const ALLOWED_SORT_FIELDS = ['createdAt', 'updatedAt', 'title', 'views', 'status', 'category'];
+
 // Get all articles (with filtering)
 router.get('/articles', async (req, res) => {
   try {
     const { category, status, page = 1, limit = 10, sortBy = 'createdAt' } = req.query;
+    const safeSortBy = ALLOWED_SORT_FIELDS.includes(sortBy) ? sortBy : 'createdAt';
     const query = {};
 
     if (category) query.category = category;
@@ -26,7 +30,7 @@ router.get('/articles', async (req, res) => {
     const skip = (page - 1) * limit;
     const articles = await KnowledgeArticle.find(query)
       .populate('author', 'name email')
-      .sort({ [sortBy]: -1 })
+      .sort({ [safeSortBy]: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 

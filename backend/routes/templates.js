@@ -235,9 +235,29 @@ router.post('/:id/reject', auth, requireAdmin, async (req, res) => {
 // إنشاء قالب جديد
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, category, language, keywords, body: tplBody, shared, description, tags, variables, content } = req.body;
+    const {
+      title,
+      category,
+      language,
+      keywords,
+      body: tplBody,
+      shared,
+      description,
+      tags,
+      variables,
+      content,
+    } = req.body;
     const tpl = await Template.create({
-      title, category, language, keywords, body: tplBody, shared, description, tags, variables, content,
+      title,
+      category,
+      language,
+      keywords,
+      body: tplBody,
+      shared,
+      description,
+      tags,
+      variables,
+      content,
       createdBy: req.user.id,
       orgId: req.user.organizationId,
     });
@@ -266,7 +286,18 @@ router.get('/', auth, async (req, res) => {
 // تحديث قالب
 router.put('/:id', auth, async (req, res) => {
   try {
-    const { title, category, language, keywords, body: tplBody, shared, description, tags, variables, content } = req.body;
+    const {
+      title,
+      category,
+      language,
+      keywords,
+      body: tplBody,
+      shared,
+      description,
+      tags,
+      variables,
+      content,
+    } = req.body;
     const updateFields = {};
     if (title !== undefined) updateFields.title = title;
     if (category !== undefined) updateFields.category = category;

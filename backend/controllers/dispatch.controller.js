@@ -4,17 +4,23 @@
 
 const DispatchService = require('../services/dispatchService');
 const logger = require('../utils/logger');
+const { stripDangerousKeys } = require('../utils/sanitize');
+
+/** Redact internal error details — log real error, send generic message to client */
+const safeErrorMessage = (res, statusCode, genericMsg, error) => {
+  logger.error(genericMsg, error.message || error);
+  res.status(statusCode).json({ success: false, message: genericMsg });
+};
 
 class DispatchController {
   /** إنشاء أمر توزيع */
   static async createOrder(req, res) {
     try {
-      const data = { ...req.body, createdBy: req.user?._id };
+      const data = { ...stripDangerousKeys(req.body), createdBy: req.user?._id };
       const order = await DispatchService.createOrder(data);
       res.status(201).json({ success: true, message: 'تم إنشاء أمر التوزيع', data: order });
     } catch (error) {
-      logger.error('Dispatch create error:', error.message);
-      res.status(400).json({ success: false, message: 'فشل إنشاء الأمر', error: error.message });
+      safeErrorMessage(res, 400, 'فشل إنشاء الأمر', error);
     }
   }
 
@@ -39,7 +45,7 @@ class DispatchController {
       );
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الأوامر', error: error.message });
+      safeErrorMessage(res, 500, 'فشل جلب الأوامر', error);
     }
   }
 
@@ -50,7 +56,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, data: order });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      safeErrorMessage(res, 500, 'خطأ', error);
     }
   }
 
@@ -61,7 +67,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'تم التحديث', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      safeErrorMessage(res, 400, 'فشل التحديث', error);
     }
   }
 
@@ -78,7 +84,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'تم التعيين', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التعيين', error: error.message });
+      safeErrorMessage(res, 400, 'فشل التعيين', error);
     }
   }
 
@@ -89,7 +95,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'بدأت الرحلة', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      safeErrorMessage(res, 400, 'فشل بدء التوزيع', error);
     }
   }
 
@@ -108,7 +114,7 @@ class DispatchController {
         return res.status(404).json({ success: false, message: 'الأمر أو النقطة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث النقطة', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      safeErrorMessage(res, 400, 'فشل التحديث', error);
     }
   }
 
@@ -120,7 +126,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'تم إلغاء الأمر', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإلغاء', error: error.message });
+      safeErrorMessage(res, 400, 'فشل الإلغاء', error);
     }
   }
 
@@ -137,7 +143,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'تم التقييم', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التقييم', error: error.message });
+      safeErrorMessage(res, 400, 'فشل التقييم', error);
     }
   }
 
@@ -147,7 +153,7 @@ class DispatchController {
       const orders = await DispatchService.getActiveOrders(req.query.organization);
       res.json({ success: true, data: orders });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      safeErrorMessage(res, 500, 'خطأ', error);
     }
   }
 
@@ -157,7 +163,7 @@ class DispatchController {
       const orders = await DispatchService.getDriverOrders(req.params.driverId, req.query.status);
       res.json({ success: true, data: orders });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      safeErrorMessage(res, 500, 'خطأ', error);
     }
   }
 
@@ -168,7 +174,7 @@ class DispatchController {
       if (!order) return res.status(404).json({ success: false, message: 'الأمر غير موجود' });
       res.json({ success: true, message: 'تم تحسين المسار', data: order });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحسين', error: error.message });
+      safeErrorMessage(res, 400, 'فشل التحسين', error);
     }
   }
 
@@ -178,7 +184,7 @@ class DispatchController {
       const stats = await DispatchService.getStatistics(req.query);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      safeErrorMessage(res, 500, 'خطأ في الإحصائيات', error);
     }
   }
 }

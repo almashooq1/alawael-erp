@@ -858,9 +858,20 @@ class WhatsAppService {
    * Verify webhook
    */
   verifyWebhook(mode, token, challenge) {
+    const crypto = require('crypto');
     const verifyToken = whatsappConfig.cloudApi.webhookVerifyToken;
 
-    if (mode === 'subscribe' && token === verifyToken) {
+    // Timing-safe comparison to prevent timing attacks on webhook verification token
+    let tokensMatch = false;
+    if (mode === 'subscribe' && token && verifyToken && token.length === verifyToken.length) {
+      try {
+        tokensMatch = crypto.timingSafeEqual(Buffer.from(token, 'utf8'), Buffer.from(verifyToken, 'utf8'));
+      } catch {
+        tokensMatch = false;
+      }
+    }
+
+    if (mode === 'subscribe' && tokensMatch) {
       return { success: true, challenge };
     }
 

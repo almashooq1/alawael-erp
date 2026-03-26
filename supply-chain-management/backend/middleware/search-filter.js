@@ -15,10 +15,13 @@ class SearchFilter {
 
     if (!searchTerm) return null;
 
+    // Escape special regex characters to prevent ReDoS
+    const escapedTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
     // Build OR query for multiple fields
     return {
       $or: searchFields.map(field => ({
-        [field]: { $regex: searchTerm, $options: 'i' },
+        [field]: { $regex: escapedTerm, $options: 'i' },
       })),
     };
   }
@@ -59,9 +62,14 @@ class SearchFilter {
     };
   }
 
+  // Default allowed sort fields — prevents arbitrary field name injection
+  static ALLOWED_SORT_FIELDS = ['createdAt', 'updatedAt', 'name', 'price', 'quantity', 'status', 'rating', 'sku', 'date'];
+
   // Parse sorting
-  parseSorting(query) {
-    const sortField = query.sort || 'createdAt';
+  parseSorting(query, allowedSortFields) {
+    const allowed = allowedSortFields || SearchFilter.ALLOWED_SORT_FIELDS;
+    const rawField = query.sort || 'createdAt';
+    const sortField = allowed.includes(rawField) ? rawField : 'createdAt';
     const sortOrder = (query.order || 'desc').toLowerCase() === 'asc' ? 1 : -1;
 
     return { [sortField]: sortOrder };

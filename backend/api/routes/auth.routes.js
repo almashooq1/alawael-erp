@@ -649,12 +649,10 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
         .json({ success: false, message: 'Password must be at least 8 characters' });
     }
     if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Password must contain uppercase, lowercase, and a number',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Password must contain uppercase, lowercase, and a number',
+      });
     }
 
     // Hash the token and find user

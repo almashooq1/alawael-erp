@@ -853,7 +853,10 @@ router.get('/:id/download', authenticate, async (req, res) => {
       },
     });
 
-    const safeOriginalName = (media.originalName || media.fileName || 'download').replace(/[\r\n"]/g, '_');
+    const safeOriginalName = (media.originalName || media.fileName || 'download').replace(
+      /[\r\n"]/g,
+      '_'
+    );
     res.download(filePath, safeOriginalName);
   } catch (error) {
     logger.error('GET /media/:id/download error:', error);

@@ -39,6 +39,7 @@ app.use(
   cors({
     origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
     credentials: true,
+    maxAge: 86400, // Cache preflight responses for 24 hours to reduce OPTIONS requests
   }),
 );
 app.use(express.json());
@@ -202,7 +203,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials',
-        message: 'User not found',
+        message: 'Invalid username or password',
       });
     }
 
@@ -213,7 +214,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials',
-        message: 'Wrong password',
+        message: 'Invalid username or password',
       });
     }
 

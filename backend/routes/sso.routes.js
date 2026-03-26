@@ -18,10 +18,8 @@ const logger = require('../utils/logger');
 const User = require('../models/User');
 const { loginLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
 
-
 const ssoService = new SSOService();
 const oAuthService = new OAuthService();
-
 
 // ============================================
 // SSO Health & Status Endpoint
@@ -70,7 +68,6 @@ router.get('/status', async (_req, res) => {
  * تسجيل دخول المستخدم وإنشاء جلسة SSO
  */
 router.post('/login', loginLimiter, async (req, res) => {
-
   try {
     const { email, password, deviceId, userAgent } = req.body;
 
@@ -390,20 +387,36 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
     }
 
     // Open-redirect prevention: validate redirect_uri against allowed origins
-    const allowedRedirectHosts = (process.env.OAUTH_ALLOWED_REDIRECT_HOSTS || process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'localhost')
+    const allowedRedirectHosts = (
+      process.env.OAUTH_ALLOWED_REDIRECT_HOSTS ||
+      process.env.CORS_ORIGINS ||
+      process.env.FRONTEND_URL ||
+      'localhost'
+    )
       .split(',')
-      .map(s => { try { return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`).hostname; } catch { return s.trim(); } })
+      .map(s => {
+        try {
+          return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`).hostname;
+        } catch {
+          return s.trim();
+        }
+      })
       .filter(Boolean);
     try {
       const parsedRedirect = new URL(redirect_uri);
-      if (!allowedRedirectHosts.includes(parsedRedirect.hostname) && parsedRedirect.hostname !== 'localhost') {
+      if (
+        !allowedRedirectHosts.includes(parsedRedirect.hostname) &&
+        parsedRedirect.hostname !== 'localhost'
+      ) {
         return res.status(400).json({
           success: false,
           error: 'invalid_request',
           message: 'redirect_uri hostname is not in the allowed list',
         });
       }
-    } catch { /* already validated above */ }
+    } catch {
+      /* already validated above */
+    }
 
     // For demonstration, redirect to login with oauth params
     const result = await oAuthService.initiateAuthorizationCodeFlow(

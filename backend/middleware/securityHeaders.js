@@ -90,7 +90,7 @@ const helmetMiddleware = helmet({
 });
 
 // Sensitive paths that should never be cached
-const SENSITIVE_PATHS = ['/api/auth', '/api/v1/auth', '/api/users/me', '/api/admin'];
+const SENSITIVE_PATHS = ['/api/auth', '/api/v1/auth', '/api/users/me', '/api/admin', '/api/sso'];
 
 // Compose Helmet with additional security headers
 const securityHeaders = (req, res, next) => {
@@ -109,6 +109,7 @@ const securityHeaders = (req, res, next) => {
       'autoplay=(self)',
       'fullscreen=(self)',
       'picture-in-picture=(self)',
+      'browsing-topics=()',
     ].join(', ')
   );
 

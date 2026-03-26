@@ -191,7 +191,8 @@ router.get(
       }
 
       res.setHeader('Content-Type', file.mimeType);
-      res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
+      const safeName = (file.filename || 'report').replace(/[\r\n"]/g, '_');
+      res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
       res.send(file.data);
     } catch (error) {
       logger.error('Error downloading report:', error);

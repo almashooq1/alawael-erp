@@ -19,12 +19,13 @@ async function sendWhatsApp(to, message) {
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const unique = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
     cb(null, unique + '-' + file.originalname.replace(/\s+/g, '_'));
   },
 });
@@ -234,8 +235,9 @@ router.post('/:id/reject', auth, requireAdmin, async (req, res) => {
 // إنشاء قالب جديد
 router.post('/', auth, async (req, res) => {
   try {
+    const { title, category, language, keywords, body: tplBody, shared, description, tags, variables, content } = req.body;
     const tpl = await Template.create({
-      ...req.body,
+      title, category, language, keywords, body: tplBody, shared, description, tags, variables, content,
       createdBy: req.user.id,
       orgId: req.user.organizationId,
     });
@@ -264,9 +266,22 @@ router.get('/', auth, async (req, res) => {
 // تحديث قالب
 router.put('/:id', auth, async (req, res) => {
   try {
+    const { title, category, language, keywords, body: tplBody, shared, description, tags, variables, content } = req.body;
+    const updateFields = {};
+    if (title !== undefined) updateFields.title = title;
+    if (category !== undefined) updateFields.category = category;
+    if (language !== undefined) updateFields.language = language;
+    if (keywords !== undefined) updateFields.keywords = keywords;
+    if (tplBody !== undefined) updateFields.body = tplBody;
+    if (shared !== undefined) updateFields.shared = shared;
+    if (description !== undefined) updateFields.description = description;
+    if (tags !== undefined) updateFields.tags = tags;
+    if (variables !== undefined) updateFields.variables = variables;
+    if (content !== undefined) updateFields.content = content;
+    updateFields.updatedAt = Date.now();
     const tpl = await Template.findOneAndUpdate(
       { _id: req.params.id, createdBy: req.user.id },
-      { ...req.body, updatedAt: Date.now() },
+      updateFields,
       { new: true }
     );
     if (!tpl) return res.status(404).json({ error: 'Template not found or not allowed' });

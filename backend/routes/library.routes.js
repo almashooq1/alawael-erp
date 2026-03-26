@@ -260,7 +260,7 @@ router.post(
   '/resources/bulk-import',
   authenticate,
   authorize(['admin', 'manager']),
-  [body('items').isArray({ min: 1 }).withMessage('يجب تقديم قائمة موارد')],
+  [body('items').isArray({ min: 1, max: 200 }).withMessage('يجب تقديم قائمة موارد (بحد أقصى 200)')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
     try {

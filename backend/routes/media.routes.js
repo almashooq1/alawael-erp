@@ -853,7 +853,8 @@ router.get('/:id/download', authenticate, async (req, res) => {
       },
     });
 
-    res.download(filePath, media.originalName);
+    const safeOriginalName = (media.originalName || media.fileName || 'download').replace(/[\r\n"]/g, '_');
+    res.download(filePath, safeOriginalName);
   } catch (error) {
     logger.error('GET /media/:id/download error:', error);
     res.status(500).json({ success: false, message: 'خطأ في تحميل الملف' });

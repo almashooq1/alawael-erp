@@ -21,9 +21,8 @@ class Logger {
   log(level, message, data = {}) {
     const timestamp = new Date().toISOString();
     // Sanitize message to prevent log injection (newlines, control chars)
-    const safeMessage = typeof message === 'string'
-      ? message.replace(/[\r\n]/g, ' ').replace(/[^\x20-\x7E\u0600-\u06FF ]/g, '')
-      : String(message);
+    const safeMessage =
+      typeof message === 'string' ? message.replace(/[\r\n]/g, ' ').replace(/[^\x20-\x7E\u0600-\u06FF ]/g, '') : String(message);
     const logEntry = {
       timestamp,
       level,
@@ -153,7 +152,7 @@ const requestLoggingMiddleware = (req, res, next) => {
 const SENSITIVE_KEYS = ['password', 'token', 'secret', 'authorization', 'cookie', 'creditCard', 'ssn', 'apiKey'];
 
 /** Redact sensitive fields from an object (shallow clone) */
-const redactSensitive = (obj) => {
+const redactSensitive = obj => {
   if (!obj || typeof obj !== 'object') return obj;
   const redacted = {};
   for (const [key, value] of Object.entries(obj)) {
@@ -167,7 +166,7 @@ const redactSensitive = (obj) => {
 };
 
 /** Sanitize a string for safe log output (prevent log injection) */
-const sanitizeLogString = (str) => {
+const sanitizeLogString = str => {
   if (typeof str !== 'string') return str;
   return str.replace(/[\r\n]/g, ' ').replace(/[^\x20-\x7E\u0600-\u06FF ]/g, '');
 };

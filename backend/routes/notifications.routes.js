@@ -443,6 +443,11 @@ router.post(
       throw new AppError('At least one notification is required', 400);
     }
 
+    const MAX_BULK_NOTIFICATIONS = 100;
+    if (notificationsArray.length > MAX_BULK_NOTIFICATIONS) {
+      throw new AppError(`Bulk create limited to ${MAX_BULK_NOTIFICATIONS} notifications`, 400);
+    }
+
     const created = [];
     for (const notif of notificationsArray) {
       try {

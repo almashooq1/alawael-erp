@@ -73,6 +73,14 @@ router.post(
         });
       }
 
+      const MAX_WEBHOOK_EVENTS = 20;
+      if (events.length > MAX_WEBHOOK_EVENTS) {
+        return res.status(400).json({
+          success: false,
+          error: `Maximum ${MAX_WEBHOOK_EVENTS} events allowed per webhook`,
+        });
+      }
+
       const webhook = await webhookService.registerWebhook({
         url,
         events,

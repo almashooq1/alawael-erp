@@ -11,46 +11,46 @@ const BASE = '/api/employee-affairs-phase2';
 // ═══════════════════════════════════════════════════════════════════════════
 // Dashboard
 // ═══════════════════════════════════════════════════════════════════════════
-export const getPhase2Dashboard = () => safeFetch(`${BASE}/phase2-dashboard`, {}, DEMO_DASHBOARD);
+export const getPhase2Dashboard = () => safeFetch(`${BASE}/phase2-dashboard`, DEMO_DASHBOARD);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Tasks — المهام
 // ═══════════════════════════════════════════════════════════════════════════
 export const getTasks = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(`${BASE}/tasks?${qs}`, {}, { tasks: DEMO_TASKS, total: DEMO_TASKS.length });
+  return safeFetch(`${BASE}/tasks?${qs}`, { tasks: DEMO_TASKS, total: DEMO_TASKS.length });
 };
 export const getTaskStats = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(`${BASE}/tasks/stats?${qs}`, {}, DEMO_TASK_STATS);
+  return safeFetch(`${BASE}/tasks/stats?${qs}`, DEMO_TASK_STATS);
 };
 export const createTask = data =>
-  safeFetch(`${BASE}/tasks`, {
+  safeFetch(`${BASE}/tasks`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const getTaskById = id => safeFetch(`${BASE}/tasks/${id}`);
 export const updateTaskStatus = (id, data) =>
-  safeFetch(`${BASE}/tasks/${id}/status`, {
+  safeFetch(`${BASE}/tasks/${id}/status`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const addTaskComment = (id, data) =>
-  safeFetch(`${BASE}/tasks/${id}/comments`, {
+  safeFetch(`${BASE}/tasks/${id}/comments`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const delegateTask = (id, data) =>
-  safeFetch(`${BASE}/tasks/${id}/delegate`, {
+  safeFetch(`${BASE}/tasks/${id}/delegate`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const rateTask = (id, data) =>
-  safeFetch(`${BASE}/tasks/${id}/rate`, {
+  safeFetch(`${BASE}/tasks/${id}/rate`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -63,12 +63,11 @@ export const getHousingUnits = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return safeFetch(
     `${BASE}/housing/units?${qs}`,
-    {},
     { units: DEMO_HOUSING_UNITS, total: DEMO_HOUSING_UNITS.length }
   );
 };
 export const createHousingUnit = data =>
-  safeFetch(`${BASE}/housing/units`, {
+  safeFetch(`${BASE}/housing/units`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -78,28 +77,28 @@ export const getHousingAssignments = (params = {}) => {
   return safeFetch(`${BASE}/housing/assignments?${qs}`);
 };
 export const assignHousing = data =>
-  safeFetch(`${BASE}/housing/assignments`, {
+  safeFetch(`${BASE}/housing/assignments`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-export const getHousingStats = () => safeFetch(`${BASE}/housing/stats`, {}, DEMO_HOUSING_STATS);
+export const getHousingStats = () => safeFetch(`${BASE}/housing/stats`, DEMO_HOUSING_STATS);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Transportation — المواصلات
 // ═══════════════════════════════════════════════════════════════════════════
 export const getTransportationRoutes = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(`${BASE}/transportation/routes?${qs}`, {}, DEMO_TRANSPORT_ROUTES);
+  return safeFetch(`${BASE}/transportation/routes?${qs}`, DEMO_TRANSPORT_ROUTES);
 };
 export const createTransportationRoute = data =>
-  safeFetch(`${BASE}/transportation/routes`, {
+  safeFetch(`${BASE}/transportation/routes`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const assignEmployeeToRoute = (routeId, employeeId) =>
-  safeFetch(`${BASE}/transportation/routes/${routeId}/assign/${employeeId}`, { method: 'PATCH' });
+  safeFetch(`${BASE}/transportation/routes/${routeId}/assign/${employeeId}`, null, { method: 'PATCH' });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Custody — العهد
@@ -108,26 +107,25 @@ export const getCustodies = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return safeFetch(
     `${BASE}/custody?${qs}`,
-    {},
     { custodies: DEMO_CUSTODIES, total: DEMO_CUSTODIES.length }
   );
 };
-export const getCustodyStats = () => safeFetch(`${BASE}/custody/stats`, {}, DEMO_CUSTODY_STATS);
+export const getCustodyStats = () => safeFetch(`${BASE}/custody/stats`, DEMO_CUSTODY_STATS);
 export const createCustody = data =>
-  safeFetch(`${BASE}/custody`, {
+  safeFetch(`${BASE}/custody`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const getCustodyById = id => safeFetch(`${BASE}/custody/${id}`);
 export const returnCustody = (id, data) =>
-  safeFetch(`${BASE}/custody/${id}/return`, {
+  safeFetch(`${BASE}/custody/${id}/return`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const reportCustodyIssue = (id, data) =>
-  safeFetch(`${BASE}/custody/${id}/issue`, {
+  safeFetch(`${BASE}/custody/${id}/issue`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -142,21 +140,20 @@ export const getWorkPermits = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return safeFetch(
     `${BASE}/permits?${qs}`,
-    {},
     { permits: DEMO_PERMITS, total: DEMO_PERMITS.length }
   );
 };
-export const getWorkPermitStats = () => safeFetch(`${BASE}/permits/stats`, {}, DEMO_PERMIT_STATS);
+export const getWorkPermitStats = () => safeFetch(`${BASE}/permits/stats`, DEMO_PERMIT_STATS);
 export const getExpiringPermits = (days = 30) => safeFetch(`${BASE}/permits/expiring?days=${days}`);
 export const createWorkPermit = data =>
-  safeFetch(`${BASE}/permits`, {
+  safeFetch(`${BASE}/permits`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const getWorkPermitById = id => safeFetch(`${BASE}/permits/${id}`);
 export const renewWorkPermit = (id, data) =>
-  safeFetch(`${BASE}/permits/${id}/renew`, {
+  safeFetch(`${BASE}/permits/${id}/renew`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -169,26 +166,25 @@ export const getRewards = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
   return safeFetch(
     `${BASE}/rewards?${qs}`,
-    {},
     { rewards: DEMO_REWARDS, total: DEMO_REWARDS.length }
   );
 };
-export const getRewardStats = () => safeFetch(`${BASE}/rewards/stats`, {}, DEMO_REWARD_STATS);
+export const getRewardStats = () => safeFetch(`${BASE}/rewards/stats`, DEMO_REWARD_STATS);
 export const createReward = data =>
-  safeFetch(`${BASE}/rewards`, {
+  safeFetch(`${BASE}/rewards`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const getRewardById = id => safeFetch(`${BASE}/rewards/${id}`);
 export const approveReward = (id, data) =>
-  safeFetch(`${BASE}/rewards/${id}/approve`, {
+  safeFetch(`${BASE}/rewards/${id}/approve`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const disburseReward = (id, data) =>
-  safeFetch(`${BASE}/rewards/${id}/disburse`, {
+  safeFetch(`${BASE}/rewards/${id}/disburse`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -200,21 +196,21 @@ export const getEmployeeRewardPoints = employeeId =>
 // Shifts — الورديات
 // ═══════════════════════════════════════════════════════════════════════════
 export const getShiftDefinitions = () =>
-  safeFetch(`${BASE}/shifts/definitions`, {}, DEMO_SHIFT_DEFS);
+  safeFetch(`${BASE}/shifts/definitions`, DEMO_SHIFT_DEFS);
 export const createShiftDefinition = data =>
-  safeFetch(`${BASE}/shifts/definitions`, {
+  safeFetch(`${BASE}/shifts/definitions`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const createShiftAssignment = data =>
-  safeFetch(`${BASE}/shifts/assignments`, {
+  safeFetch(`${BASE}/shifts/assignments`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const bulkCreateShiftAssignments = assignments =>
-  safeFetch(`${BASE}/shifts/assignments/bulk`, {
+  safeFetch(`${BASE}/shifts/assignments/bulk`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ assignments }),
@@ -226,7 +222,7 @@ export const getEmployeeSchedule = (employeeId, startDate, endDate) =>
 export const getDepartmentSchedule = (department, date) =>
   safeFetch(`${BASE}/shifts/schedule/department/${department}?date=${date}`);
 export const recordShiftAttendance = (id, data) =>
-  safeFetch(`${BASE}/shifts/assignments/${id}/attendance`, {
+  safeFetch(`${BASE}/shifts/assignments/${id}/attendance`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -234,17 +230,16 @@ export const recordShiftAttendance = (id, data) =>
 export const getShiftStats = department =>
   safeFetch(
     `${BASE}/shifts/stats${department ? `?department=${department}` : ''}`,
-    {},
     DEMO_SHIFT_STATS
   );
 export const createShiftSwapRequest = data =>
-  safeFetch(`${BASE}/shifts/swap`, {
+  safeFetch(`${BASE}/shifts/swap`, null, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
 export const approveShiftSwap = (id, data) =>
-  safeFetch(`${BASE}/shifts/swap/${id}/approve`, {
+  safeFetch(`${BASE}/shifts/swap/${id}/approve`, null, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),

@@ -136,7 +136,7 @@ const EmployeeManagement = () => {
         <DialogContent>
           <Alert severity="warning" sx={{ borderRadius: 2 }}>
             هل أنت متأكد من حذف الموظف <strong>{h.deleteTarget?.firstName} {h.deleteTarget?.lastName}</strong>
-            ({h.deleteTarget?.employeeNumber})؟
+            ({h.deleteTarget?.employeeId})؟
             <br />لا يمكن التراجع عن هذا الإجراء.
           </Alert>
         </DialogContent>

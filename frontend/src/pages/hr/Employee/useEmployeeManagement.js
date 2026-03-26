@@ -4,7 +4,7 @@
  * Wired to /api/hr-advanced/employees — falls back to demo data when API unavailable.
  */
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { DEPARTMENTS, STATUS_MAP } from './employeeManagement.constants';
+import { DEPARTMENTS, STATUS_MAP, normalizeStatus } from './employeeManagement.constants';
 import {
   getEmployees,
   createEmployee,
@@ -34,8 +34,12 @@ const POSITIONS_BY_DEPT = {
   العمليات: ['مدير عمليات', 'منسق عمليات', 'مشرف عمليات'],
   التعليم: ['معلم', 'معلمة رياضيات', 'معلمة علوم', 'مشرف تعليمي'],
   'العلاج الطبيعي': ['أخصائي علاج طبيعي', 'أخصائية علاج طبيعي', 'معالج وظيفي'],
+  'العلاج الوظيفي': ['أخصائي علاج وظيفي', 'أخصائية علاج وظيفي'],
+  'علاج النطق': ['أخصائي نطق', 'أخصائية نطق'],
+  التمريض: ['ممرض', 'ممرضة', 'مشرف تمريض'],
   الإدارة: ['مدير إداري', 'سكرتير', 'مساعد إداري'],
   الخدمات: ['منسق خدمات', 'فني صيانة', 'حارس أمن'],
+  'الخدمات المساندة': ['مشرف صيانة', 'فني تكييف', 'عامل نظافة'],
 };
 
 /* ────────────────────────────────── */
@@ -68,7 +72,9 @@ export default function useEmployeeManagement() {
     setLoading(true);
     try {
       const { data, isDemo: demo } = await getEmployees();
-      setEmployees(Array.isArray(data) ? data : []);
+      const raw = Array.isArray(data) ? data : [];
+      // Normalize status field from backend/demo to STATUS_MAP keys
+      setEmployees(raw.map(e => ({ ...e, status: normalizeStatus(e.status) })));
       setIsDemo(demo);
     } catch {
       setEmployees([]);
@@ -93,7 +99,7 @@ export default function useEmployeeManagement() {
       list = list.filter(
         e =>
           `${e.firstName} ${e.lastName}`.toLowerCase().includes(q) ||
-          e.empNumber.includes(q) ||
+          (e.employeeId || '').toLowerCase().includes(q) ||
           (e.email && e.email.toLowerCase().includes(q))
       );
     }
@@ -160,12 +166,34 @@ export default function useEmployeeManagement() {
       if (step === 0) {
         if (!form.firstName) errs.firstName = 'مطلوب';
         if (!form.lastName) errs.lastName = 'مطلوب';
-        if (!form.nationalId) errs.nationalId = 'مطلوب';
-        if (!form.phone) errs.phone = 'مطلوب';
+
+        // National ID: 10 digits, starts with 1 or 2
+        if (!form.nationalId) {
+          errs.nationalId = 'مطلوب';
+        } else if (!/^[12]\d{9}$/.test(form.nationalId)) {
+          errs.nationalId = 'رقم الهوية يجب أن يكون 10 أرقام ويبدأ بـ 1 أو 2';
+        }
+
+        // Phone: Saudi format 05xxxxxxxx
+        if (!form.phone) {
+          errs.phone = 'مطلوب';
+        } else if (!/^05\d{8}$/.test(form.phone)) {
+          errs.phone = 'رقم الجوال يجب أن يبدأ بـ 05 ويتكون من 10 أرقام';
+        }
+
+        // Email (optional but must be valid if provided)
+        if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+          errs.email = 'صيغة البريد الإلكتروني غير صحيحة';
+        }
       } else if (step === 1) {
         if (!form.department) errs.department = 'مطلوب';
         if (!form.position) errs.position = 'مطلوب';
         if (!form.joinDate) errs.joinDate = 'مطلوب';
+
+        // Salary: positive number
+        if (form.salary && (isNaN(form.salary) || Number(form.salary) < 0)) {
+          errs.salary = 'الراتب يجب أن يكون رقم موجب';
+        }
       }
       return errs;
     },
@@ -202,7 +230,7 @@ export default function useEmployeeManagement() {
           const newEmp = {
             ...form,
             _id: `EMP-${String(employees.length + 1).padStart(3, '0')}`,
-            empNumber: String(1000 + employees.length + 1),
+            employeeId: `EMP-${String(1000 + employees.length + 1)}`,
           };
           setEmployees(prev => [...prev, newEmp]);
         } else {
@@ -248,7 +276,7 @@ export default function useEmployeeManagement() {
   const handleExport = useCallback(() => {
     const header = ['الرقم الوظيفي', 'الاسم', 'القسم', 'المسمى', 'الحالة'];
     const rows = filtered.map(e => [
-      e.empNumber,
+      e.employeeId,
       `${e.firstName} ${e.lastName}`,
       e.department,
       e.position,
@@ -267,8 +295,9 @@ export default function useEmployeeManagement() {
 
   /* ── copy ID ── */
   const handleCopyId = useCallback(emp => {
-    navigator.clipboard.writeText(emp.empNumber).then(() => {
-      setSnack({ open: true, message: `تم نسخ الرقم ${emp.empNumber}`, severity: 'info' });
+    const id = emp.employeeId || '';
+    navigator.clipboard.writeText(id).then(() => {
+      setSnack({ open: true, message: `تم نسخ الرقم ${id}`, severity: 'info' });
     });
   }, []);
 

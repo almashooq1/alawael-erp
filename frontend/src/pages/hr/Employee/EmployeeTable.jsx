@@ -103,7 +103,7 @@ export default function EmployeeTable({
 
                     {/* Emp number */}
                     <TableCell>
-                      <Typography variant="body2" dir="ltr">{emp.empNumber}</Typography>
+                      <Typography variant="body2" dir="ltr">{emp.employeeId}</Typography>
                     </TableCell>
 
                     {/* Department */}

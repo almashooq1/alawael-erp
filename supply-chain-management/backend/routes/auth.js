@@ -32,8 +32,7 @@ router.post('/register', authLimiter, async (req, res) => {
     const { username, password, role } = req.body;
     if (!isStrongPassword(password)) {
       return res.status(400).json({
-        error:
-          'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
+        error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
       });
     }
     const hashed = await bcrypt.hash(password, 12);

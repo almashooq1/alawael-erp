@@ -12,7 +12,11 @@ const { escapeRegex } = require('../utils/sanitize');
 /** Safely parse JSON — returns fallback on invalid input */
 const safeJsonParse = (str, fallback = []) => {
   if (!str) return fallback;
-  try { return JSON.parse(str); } catch { return fallback; }
+  try {
+    return JSON.parse(str);
+  } catch {
+    return fallback;
+  }
 };
 
 /* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

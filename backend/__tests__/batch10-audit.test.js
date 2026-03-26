@@ -23,7 +23,7 @@ const ROOT = path.resolve(__dirname, '..');
 const SCM_ROOT = path.resolve(ROOT, '..', 'supply-chain-management', 'backend');
 
 // ─── Helper: read file safely ────────────────────────────────────────────────
-const readSafe = (filePath) => {
+const readSafe = filePath => {
   try {
     return fs.readFileSync(filePath, 'utf8');
   } catch {
@@ -106,7 +106,9 @@ describe('Item 94 — PII masking in notification & email services', () => {
 
   test('notificationSystem masks phone number (last 4 digits only)', () => {
     expect(notifSrc).toMatch(/slice\(-4\)/);
-    expect(notifSrc).not.toMatch(/logger\.info\(`📱 Sending SMS to \$\{notification\.phoneNumber\}`/);
+    expect(notifSrc).not.toMatch(
+      /logger\.info\(`📱 Sending SMS to \$\{notification\.phoneNumber\}`/
+    );
   });
 
   test('notificationSystem masks email recipient', () => {
@@ -187,7 +189,7 @@ describe('Item 97 — SCM server async error safety net', () => {
 describe('Item 98 — SCM Auth /me uses authMiddleware', () => {
   const src = readSafe(path.join(SCM_ROOT, 'routes', 'auth.js'));
 
-  test("GET /me includes authMiddleware", () => {
+  test('GET /me includes authMiddleware', () => {
     expect(src).toMatch(/router\.get\('\/me',\s*authMiddleware/);
   });
 

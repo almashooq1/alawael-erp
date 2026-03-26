@@ -192,7 +192,10 @@ const sendEmail = async (to, templateName, data) => {
     logger.info(`✅ Email sent to ${maskedTo}: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    logger.error(`❌ Error sending email to ${to ? to.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`, error.message);
+    logger.error(
+      `❌ Error sending email to ${to ? to.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`,
+      error.message
+    );
     return { success: false, error: 'حدث خطأ داخلي' };
   }
 };
@@ -239,7 +242,10 @@ const send2FAEnabledEmail = async (email, username) => {
     const { emailIntegration } = require('./email-integration.service');
     return await emailIntegration.send2FAEnabledEmail(email, username);
   } catch (error) {
-    logger.error(`Error sending 2FA enabled email to ${email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`, error.message);
+    logger.error(
+      `Error sending 2FA enabled email to ${email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`,
+      error.message
+    );
     return { success: false, error: error.message };
   }
 };
@@ -255,7 +261,10 @@ const send2FADisabledEmail = async (email, username) => {
     const { emailIntegration } = require('./email-integration.service');
     return await emailIntegration.send2FADisabledEmail(email, username);
   } catch (error) {
-    logger.error(`Error sending 2FA disabled email to ${email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`, error.message);
+    logger.error(
+      `Error sending 2FA disabled email to ${email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`,
+      error.message
+    );
     return { success: false, error: error.message };
   }
 };

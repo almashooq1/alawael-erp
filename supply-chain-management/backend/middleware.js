@@ -6,6 +6,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 /**
  * Async Handler Wrapper
@@ -180,7 +181,7 @@ const rateLimit = (windowMs = 60000, maxRequests = 100) => {
  * Adds unique ID to each request for tracking
  */
 const requestIdMiddleware = (req, res, next) => {
-  req.id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  req.id = crypto.randomUUID();
   res.setHeader('X-Request-Id', req.id);
   next();
 };

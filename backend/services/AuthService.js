@@ -102,7 +102,7 @@ class AuthService {
    */
   static async hashPassword(password) {
     try {
-      const saltRounds = 10;
+      const saltRounds = 12;
       const hash = await bcrypt.hash(password, saltRounds);
       return { success: true, hash };
     } catch (error) {

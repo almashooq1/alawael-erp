@@ -826,13 +826,13 @@ const http = require('http');
 const httpServer = http.createServer(app);
 
 // ─── Request Timeouts (prevent hung connections) ─────────────────────────────
-httpServer.timeout = 30000;           // 30s max request duration
-httpServer.keepAliveTimeout = 65000;  // 65s (must exceed reverse proxy idle, usually 60s)
-httpServer.headersTimeout = 66000;    // slightly > keepAliveTimeout
+httpServer.timeout = 30000; // 30s max request duration
+httpServer.keepAliveTimeout = 65000; // 65s (must exceed reverse proxy idle, usually 60s)
+httpServer.headersTimeout = 66000; // slightly > keepAliveTimeout
 
 // ─── Graceful Shutdown ───────────────────────────────────────────────────────
 let isShuttingDown = false;
-const gracefulShutdown = (signal) => {
+const gracefulShutdown = signal => {
   if (isShuttingDown) return;
   isShuttingDown = true;
   console.log(`\n[Shutdown] ${signal} received — draining connections...`);

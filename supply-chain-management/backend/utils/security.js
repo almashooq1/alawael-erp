@@ -70,7 +70,7 @@ export const passwordUtils = {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
     let password = '';
     for (let i = 0; i < length; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
+      password += chars.charAt(crypto.randomInt(chars.length));
     }
     return password;
   },
@@ -205,7 +205,7 @@ export const encryptionUtils = {
   generateOTP(length = 6) {
     let otp = '';
     for (let i = 0; i < length; i++) {
-      otp += Math.floor(Math.random() * 10);
+      otp += crypto.randomInt(10);
     }
     return otp;
   },

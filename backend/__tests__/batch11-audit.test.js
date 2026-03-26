@@ -23,7 +23,7 @@ const ROOT = path.resolve(__dirname, '..');
 const GATEWAY_ROOT = path.resolve(ROOT, '..', 'gateway');
 
 // ─── Helper: read file safely ────────────────────────────────────────────────
-const readSafe = (filePath) => {
+const readSafe = filePath => {
   try {
     return fs.readFileSync(filePath, 'utf8');
   } catch {

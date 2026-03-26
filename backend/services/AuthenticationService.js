@@ -35,7 +35,7 @@ const { jwtSecret } = require('../config/secrets');
 
 const JWT_SECRET = jwtSecret;
 const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
-const BCRYPT_ROUNDS = 10;
+const BCRYPT_ROUNDS = 12;
 
 // Demo credentials - ONLY available in non-production environments
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -218,8 +218,7 @@ class AuthenticationService {
         id: user.id,
         username: user.username,
         email: user.email,
-        phone: user.phone,
-        idNumber: user.idNumber,
+        // PII fields (phone, idNumber) excluded from JWT to minimise token exposure
         roles: user.roles || ['user'],
         loginMethod: user.loginMethod, // طريقة الدخول المستخدمة
         createdAt: new Date().toISOString(),

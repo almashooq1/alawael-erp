@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 // Ensure logs directory exists
 const logsDir = path.join(__dirname, '../logs');
@@ -19,16 +20,20 @@ class Logger {
 
   log(level, message, data = {}) {
     const timestamp = new Date().toISOString();
+    // Sanitize message to prevent log injection (newlines, control chars)
+    const safeMessage = typeof message === 'string'
+      ? message.replace(/[\r\n]/g, ' ').replace(/[^\x20-\x7E\u0600-\u06FF ]/g, '')
+      : String(message);
     const logEntry = {
       timestamp,
       level,
-      message,
+      message: safeMessage,
       data,
       pid: process.pid,
     };
 
-    // Write to file
-    const logString = `[${timestamp}] [${level}] ${message} ${JSON.stringify(data)}\n`;
+    // Write to file (use safeMessage to avoid log injection)
+    const logString = `[${timestamp}] [${level}] ${safeMessage} ${JSON.stringify(data)}\n`;
     fs.appendFileSync(this.logFile, logString);
 
     // Console output
@@ -110,7 +115,7 @@ const logger = new Logger();
 // Request logging middleware
 const requestLoggingMiddleware = (req, res, next) => {
   const startTime = Date.now();
-  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const requestId = crypto.randomUUID();
 
   // Store original send
   const originalSend = res.send;
@@ -144,21 +149,44 @@ const requestLoggingMiddleware = (req, res, next) => {
   next();
 };
 
+// Sensitive keys that must never appear in logs
+const SENSITIVE_KEYS = ['password', 'token', 'secret', 'authorization', 'cookie', 'creditCard', 'ssn', 'apiKey'];
+
+/** Redact sensitive fields from an object (shallow clone) */
+const redactSensitive = (obj) => {
+  if (!obj || typeof obj !== 'object') return obj;
+  const redacted = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (SENSITIVE_KEYS.some(sk => key.toLowerCase().includes(sk))) {
+      redacted[key] = '[REDACTED]';
+    } else {
+      redacted[key] = value;
+    }
+  }
+  return redacted;
+};
+
+/** Sanitize a string for safe log output (prevent log injection) */
+const sanitizeLogString = (str) => {
+  if (typeof str !== 'string') return str;
+  return str.replace(/[\r\n]/g, ' ').replace(/[^\x20-\x7E\u0600-\u06FF ]/g, '');
+};
+
 // Error logging middleware
 const errorLoggingMiddleware = (err, req, res, next) => {
+  const isProd = process.env.NODE_ENV === 'production';
   const errorData = {
-    message: err.message,
-    stack: err.stack,
+    message: sanitizeLogString(err.message),
+    ...(isProd ? {} : { stack: err.stack }),
     method: req.method,
-    url: req.originalUrl,
-    body: req.body,
+    url: sanitizeLogString(req.originalUrl),
+    body: redactSensitive(req.body),
   };
 
-  logger.error(`Error: ${err.message}`, errorData);
+  logger.error(`Error: ${sanitizeLogString(err.message)}`, errorData);
 
   // Don't lose the error
   next(err);
-};
 };
 
 module.exports = {

@@ -157,7 +157,10 @@ class EmailChannel {
   async send(notification) {
     // Implement actual email sending (nodemailer, SendGrid, etc.)
     return new Promise((resolve, reject) => {
-      logger.info(`📧 Sending email to ${notification.recipient ? notification.recipient.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`, notification.subject);
+      logger.info(
+        `📧 Sending email to ${notification.recipient ? notification.recipient.replace(/(.{2}).*(@.*)/, '$1***$2') : '<unknown>'}:`,
+        notification.subject
+      );
 
       // Simulate sending
       setTimeout(() => {
@@ -182,7 +185,10 @@ class SMSChannel {
   async send(notification) {
     // Implement actual SMS sending (Twilio, AWS SNS, etc.)
     return new Promise(resolve => {
-      logger.info(`📱 Sending SMS to ${notification.phoneNumber ? '***' + notification.phoneNumber.slice(-4) : '<unknown>'}:`, notification.body);
+      logger.info(
+        `📱 Sending SMS to ${notification.phoneNumber ? '***' + notification.phoneNumber.slice(-4) : '<unknown>'}:`,
+        notification.body
+      );
 
       // Simulate sending
       setTimeout(() => {

@@ -15,7 +15,7 @@
 const logger = require('../utils/logger');
 
 // ── PII Masking Helper ─────────────────────────────────────────────────────────
-const maskNID = (nid) => {
+const maskNID = nid => {
   if (!nid || typeof nid !== 'string') return '***';
   return nid.length > 4 ? '***' + nid.slice(-4) : '***';
 };
@@ -30,7 +30,7 @@ const getDisabilityCard = () => {
 let User;
 const _getUser = () => {
   if (!User) User = require('../models/User');
-const { escapeRegex } = require('../utils/sanitize');
+  const { escapeRegex } = require('../utils/sanitize');
   return User;
 };
 
@@ -68,7 +68,9 @@ class DisabilityCardService {
     });
 
     await card.save();
-    logger.info(`[DisabilityCard] Card created: ${card.card_number} for NID: ${maskNID(data.national_id)}`);
+    logger.info(
+      `[DisabilityCard] Card created: ${card.card_number} for NID: ${maskNID(data.national_id)}`
+    );
     return card;
   }
 

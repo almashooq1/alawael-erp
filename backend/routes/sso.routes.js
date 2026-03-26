@@ -389,6 +389,22 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
       });
     }
 
+    // Open-redirect prevention: validate redirect_uri against allowed origins
+    const allowedRedirectHosts = (process.env.OAUTH_ALLOWED_REDIRECT_HOSTS || process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'localhost')
+      .split(',')
+      .map(s => { try { return new URL(s.trim().startsWith('http') ? s.trim() : `https://${s.trim()}`).hostname; } catch { return s.trim(); } })
+      .filter(Boolean);
+    try {
+      const parsedRedirect = new URL(redirect_uri);
+      if (!allowedRedirectHosts.includes(parsedRedirect.hostname) && parsedRedirect.hostname !== 'localhost') {
+        return res.status(400).json({
+          success: false,
+          error: 'invalid_request',
+          message: 'redirect_uri hostname is not in the allowed list',
+        });
+      }
+    } catch { /* already validated above */ }
+
     // For demonstration, redirect to login with oauth params
     const result = await oAuthService.initiateAuthorizationCodeFlow(
       client_id,

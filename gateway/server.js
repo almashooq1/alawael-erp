@@ -238,9 +238,9 @@ const server = app.listen(config.port, () => {
 });
 
 // --- Server Timeouts (prevent hung connections) ---
-server.timeout = 30_000;          // 30 s — max time a request can take
-server.keepAliveTimeout = 65_000;  // 65 s — must be > ALB/Nginx idle (usually 60 s)
-server.headersTimeout = 66_000;    // slightly higher than keepAliveTimeout
+server.timeout = 30_000; // 30 s — max time a request can take
+server.keepAliveTimeout = 65_000; // 65 s — must be > ALB/Nginx idle (usually 60 s)
+server.headersTimeout = 66_000; // slightly higher than keepAliveTimeout
 
 // Graceful shutdown
 const gracefulShutdown = () => {

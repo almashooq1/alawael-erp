@@ -4,9 +4,11 @@
  */
 
 export const errorHandler = (err, req, res, _next) => {
+  const isProd = process.env.NODE_ENV === 'production';
+  // Log safely: omit stack in production to prevent accidental exposure in log sinks
   console.error('Error:', {
     message: err.message,
-    stack: err.stack,
+    ...(isProd ? {} : { stack: err.stack }),
     path: req.path,
     method: req.method,
     timestamp: new Date().toISOString(),

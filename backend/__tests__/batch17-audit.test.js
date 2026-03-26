@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const read = (rel) => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
+const read = rel => fs.readFileSync(path.join(__dirname, '..', rel), 'utf8');
 
 // ── 161 ── eStamp.routes.js pagination cap ──────────────────────────────────
 describe('Item 161 — eStamp.routes.js pagination limit cap', () => {

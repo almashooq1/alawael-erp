@@ -14,7 +14,7 @@ const Meeting = require('../models/Meeting');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
-const clampLimit = (v) => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
+const clampLimit = v => Math.max(1, Math.min(parseInt(v, 10) || 20, MAX_PAGE_LIMIT));
 
 /** Guard: reject invalid ObjectIds early (400 instead of CastError 500) */
 const validObjectId = (req, res) => {

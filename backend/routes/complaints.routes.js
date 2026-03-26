@@ -295,15 +295,20 @@ router.post(
 );
 
 // DELETE /:id
-router.delete('/:id', authorize(['admin', 'super_admin']), validateObjectId('id'), async (req, res) => {
-  try {
-    const doc = await Complaint.findByIdAndDelete(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
-    res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
-  } catch (err) {
-    logger.error('Complaint delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الشكوى' });
+router.delete(
+  '/:id',
+  authorize(['admin', 'super_admin']),
+  validateObjectId('id'),
+  async (req, res) => {
+    try {
+      const doc = await Complaint.findByIdAndDelete(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
+      res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
+    } catch (err) {
+      logger.error('Complaint delete error:', err);
+      res.status(500).json({ success: false, message: 'خطأ في حذف الشكوى' });
+    }
   }
-});
+);
 
 module.exports = router;

@@ -2,12 +2,12 @@
 const SmartQualityService = require('../services/smartQuality.service');
 const SmartNotificationService = require('../services/smartNotificationService');
 const Employee = require('../models/Employee');
-const Vehicle = require('../models/Vehicle_SaudiCompliant');
+const Vehicle = require('../models/Vehicle');
 const ComplianceLog = require('../models/ComplianceLog');
 
 jest.mock('../services/smartNotificationService');
 jest.mock('../models/Employee');
-jest.mock('../models/Vehicle_SaudiCompliant');
+jest.mock('../models/Vehicle');
 jest.mock('../models/ComplianceLog');
 
 describe('Phase 12: QA & Smart Compliance Scanning', () => {

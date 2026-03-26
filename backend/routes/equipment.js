@@ -161,84 +161,102 @@ router.post('/', authenticate, authorize('admin', 'manager'), async (req, res) =
  * Update equipment
  * PUT /api/equipment/:id
  */
-router.put('/:id', authenticate, authorize('admin', 'manager'), validateObjectId('id'), async (req, res) => {
-  try {
-    const equipment = await Equipment.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, updatedBy: req.user._id },
-      { new: true, runValidators: true }
-    );
+router.put(
+  '/:id',
+  authenticate,
+  authorize('admin', 'manager'),
+  validateObjectId('id'),
+  async (req, res) => {
+    try {
+      const equipment = await Equipment.findByIdAndUpdate(
+        req.params.id,
+        { ...req.body, updatedBy: req.user._id },
+        { new: true, runValidators: true }
+      );
 
-    if (!equipment) {
-      return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      if (!equipment) {
+        return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      }
+
+      res.json({ success: true, data: equipment });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    res.json({ success: true, data: equipment });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
-});
+);
 
 /**
  * Update equipment status
  * PATCH /api/equipment/:id/status
  */
-router.patch('/:id/status', authenticate, authorize('admin', 'manager'), validateObjectId('id'), async (req, res) => {
-  try {
-    const { status } = req.body;
+router.patch(
+  '/:id/status',
+  authenticate,
+  authorize('admin', 'manager'),
+  validateObjectId('id'),
+  async (req, res) => {
+    try {
+      const { status } = req.body;
 
-    const equipment = await Equipment.findByIdAndUpdate(
-      req.params.id,
-      { status, updatedBy: req.user._id },
-      { new: true }
-    );
+      const equipment = await Equipment.findByIdAndUpdate(
+        req.params.id,
+        { status, updatedBy: req.user._id },
+        { new: true }
+      );
 
-    if (!equipment) {
-      return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      if (!equipment) {
+        return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      }
+
+      res.json({
+        success: true,
+        data: equipment,
+        message: `تم تحديث حالة المعدة إلى: ${status}`,
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
-
-    res.json({
-      success: true,
-      data: equipment,
-      message: `تم تحديث حالة المعدة إلى: ${status}`,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
-});
+);
 
 /**
  * Delete (retire) equipment
  * DELETE /api/equipment/:id
  */
-router.delete('/:id', authenticate, authorize('admin'), validateObjectId('id'), async (req, res) => {
-  try {
-    const equipment = await Equipment.findById(req.params.id);
+router.delete(
+  '/:id',
+  authenticate,
+  authorize('admin'),
+  validateObjectId('id'),
+  async (req, res) => {
+    try {
+      const equipment = await Equipment.findById(req.params.id);
 
-    if (!equipment) {
-      return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      if (!equipment) {
+        return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
+      }
+
+      // Soft delete: mark as retired
+      equipment.status = 'retired';
+      equipment.updatedBy = req.user._id;
+      await equipment.save();
+
+      // Also cancel any pending maintenance schedules
+      await MaintenanceSchedule.updateMany(
+        { equipment: req.params.id, status: { $in: ['scheduled', 'pending'] } },
+        { status: 'cancelled' }
+      );
+
+      res.json({
+        success: true,
+        message: 'تم إيقاف المعدة بنجاح (تقاعد)',
+        data: equipment,
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
     }
-
-    // Soft delete: mark as retired
-    equipment.status = 'retired';
-    equipment.updatedBy = req.user._id;
-    await equipment.save();
-
-    // Also cancel any pending maintenance schedules
-    await MaintenanceSchedule.updateMany(
-      { equipment: req.params.id, status: { $in: ['scheduled', 'pending'] } },
-      { status: 'cancelled' }
-    );
-
-    res.json({
-      success: true,
-      message: 'تم إيقاف المعدة بنجاح (تقاعد)',
-      data: equipment,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }
-});
+);
 
 // ============ MAINTENANCE SCHEDULE ROUTES ============
 

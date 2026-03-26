@@ -260,6 +260,52 @@ router.get(
 );
 
 /**
+ * @route PUT /api/notifications/preferences
+ * @desc Update user notification preferences
+ * @access Private
+ */
+router.put(
+  '/preferences',
+  asyncHandler(async (req, res) => {
+    const userId = req.user?.id;
+
+    res.json({
+      success: true,
+      preferences: {
+        userId,
+        ...req.body,
+      },
+    });
+  })
+);
+
+/**
+ * @route PUT /api/notifications/:id
+ * @desc Update a notification (admin edit)
+ * @access Private
+ */
+router.put(
+  '/:id',
+  validateObjectId('id'),
+  asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (notificationModel) {
+      const updated = await notificationModel.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true,
+      });
+      if (!updated) {
+        return res.status(404).json({ success: false, message: 'Notification not found' });
+      }
+      return res.json({ success: true, data: updated });
+    }
+    // Fallback to service
+    const result = await NotificationsService.updateNotification(id, req.body);
+    res.json({ success: true, ...result });
+  })
+);
+
+/**
  * @route PATCH /api/notifications/:id/read
  * @desc Mark notification as read
  * @access Private
@@ -597,31 +643,6 @@ router.post(
       success: true,
       sent: recipients?.length || 0,
       deliveryId: `push_${Date.now()}`,
-    });
-  })
-);
-
-/**
- * @route GET /api/notifications/preferences
- * @desc Get user notification preferences (already implemented above)
- */
-
-/**
- * @route PUT /api/notifications/preferences
- * @desc Update user notification preferences
- * @access Private
- */
-router.put(
-  '/preferences',
-  asyncHandler(async (req, res) => {
-    const userId = req.user?.id;
-
-    res.json({
-      success: true,
-      preferences: {
-        userId,
-        ...req.body,
-      },
     });
   })
 );

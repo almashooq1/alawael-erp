@@ -1,0 +1,39 @@
+PASS __tests__/requestValidation.test.js
+  sanitizeInput
+    √ should trim whitespace from string body fields (5 ms)
+    √ should trim whitespace from query params (1 ms)
+    √ should trim whitespace from URL params
+    √ should recursively trim nested objects
+    √ should trim arrays (1 ms)
+    √ should leave non-string values (numbers, booleans, null) untouched (1 ms)
+    √ should handle missing body/query/params gracefully
+    √ should handle empty strings (1 ms)
+  handleValidationErrors
+    √ should call next() when there are no validation errors (23 ms)
+    √ should return 400 with errors when validation fails (21 ms)
+  commonValidations
+    √ should have all expected validator keys (1 ms)
+    √ email should be a validator chain with run() (1 ms)
+    √ password should be a validator chain
+    √ mongoId should be a function returning a validator
+    √ pagination should be an array of validators (1 ms)
+    √ date should be a function returning a validator
+    √ requiredString should accept field and length params
+    √ number should accept field with min/max (1 ms)
+    √ boolean should return a validator
+    √ array should return a validator
+  authValidations
+    √ should have login, register, resetPassword, changePassword (1 ms)
+    √ login should be an array with validators + error handler
+    √ register should include name, email, password validators
+  userValidations
+    √ should have updateProfile and getUserById (1 ms)
+    √ updateProfile should be an array
+    √ getUserById should include mongoId validator (1 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        5.612 s
+Ran all test suites matching /__tests__\\requestValidation.test.js/i.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

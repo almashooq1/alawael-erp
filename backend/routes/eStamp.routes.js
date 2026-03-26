@@ -611,7 +611,11 @@ router.post('/:id/apply', async (req, res) => {
     );
     await stamp.save();
 
-    logger.info('E-Stamp applied: %s on document %s', stamp.stampId, String(req.body.documentId).replace(/[\r\n]/g, ''));
+    logger.info(
+      'E-Stamp applied: %s on document %s',
+      stamp.stampId,
+      String(req.body.documentId).replace(/[\r\n]/g, '')
+    );
 
     res.json({
       success: true,

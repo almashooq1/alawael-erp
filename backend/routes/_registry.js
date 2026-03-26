@@ -1116,6 +1116,141 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     'Phase 25 mounted (6 modules: pharmacy, appointment-scheduling, insurance-claims, medical-equipment, medical-referrals, emr)'
   );
 
+  // ── Phase 26: Therapy & Rehabilitation Additions — إضافات العلاج والتأهيل ──
+  safeMount(app, ['/api/goal-bank', '/api/v1/goal-bank'], '../routes/goalBank.routes');
+  safeMount(app, ['/api/goal-progress', '/api/v1/goal-progress'], '../routes/goalProgress.routes');
+  safeMount(
+    app,
+    ['/api/group-programs', '/api/v1/group-programs'],
+    '../routes/groupPrograms.routes'
+  );
+  safeMount(app, ['/api/feedback', '/api/v1/feedback'], '../routes/feedback.routes');
+  safeMount(app, ['/api/therapy-rooms', '/api/v1/therapy-rooms'], '../routes/therapyRooms.routes');
+  safeMount(
+    app,
+    ['/api/therapy-programs', '/api/v1/therapy-programs'],
+    '../routes/therapyPrograms.routes'
+  );
+  safeMount(
+    app,
+    ['/api/standardized-assessments', '/api/v1/standardized-assessments'],
+    '../routes/standardizedAssessments.routes'
+  );
+  logger.info(
+    'Phase 26 mounted (7 modules: goal-bank, goal-progress, group-programs, feedback, therapy-rooms, therapy-programs, standardized-assessments)'
+  );
+
+  // ── Phase 27: Maintenance Domain — إدارة الصيانة ─────────────────────────
+  safeMount(
+    app,
+    ['/api/maintenance-inventory', '/api/v1/maintenance-inventory'],
+    '../routes/maintenanceInventory.routes'
+  );
+  safeMount(
+    app,
+    ['/api/maintenance-issues', '/api/v1/maintenance-issues'],
+    '../routes/maintenanceIssues.routes'
+  );
+  safeMount(
+    app,
+    ['/api/maintenance-predictions', '/api/v1/maintenance-predictions'],
+    '../routes/maintenancePredictions.routes'
+  );
+  safeMount(
+    app,
+    ['/api/maintenance-providers', '/api/v1/maintenance-providers'],
+    '../routes/maintenanceProviders.routes'
+  );
+  safeMount(
+    app,
+    ['/api/maintenance-tasks', '/api/v1/maintenance-tasks'],
+    '../routes/maintenanceTasks.routes'
+  );
+  logger.info(
+    'Phase 27 mounted (5 modules: maintenance-inventory, maintenance-issues, maintenance-predictions, maintenance-providers, maintenance-tasks)'
+  );
+
+  // ── Phase 28: Portal & Activities — البوابة والأنشطة ─────────────────────
+  safeMount(
+    app,
+    ['/api/portal-notifications', '/api/v1/portal-notifications'],
+    '../routes/portalNotifications.routes'
+  );
+  safeMount(app, ['/api/activities', '/api/v1/activities'], '../routes/activities.routes');
+  logger.info('Phase 28 mounted (2 modules: portal-notifications, activities)');
+
+  // ── Phase 29: Generic Programs — البرامج العامة ──────────────────────────
+  safeMount(app, ['/api/programs', '/api/v1/programs'], '../routes/programs.routes');
+  logger.info('Phase 29 mounted (1 module: programs)');
+
+  // ── Phase 30: Rehabilitation Advanced — التأهيل المتقدم ──────────────────
+  safeMount(
+    app,
+    ['/api/rehabilitation-advanced', '/api/v1/rehabilitation-advanced'],
+    '../routes/rehabilitation-advanced.routes'
+  );
+  logger.info(
+    'Phase 30 mounted (12 sub-modules: behavior-incidents, behavior-plans, vocational-profiles, job-coach-logs, home-programs, medication-records, autism-profiles, therapy-sessions, nutrition-plans, resource-rooms, staff-certifications, discharge-plans)'
+  );
+
+  // ── Phase 31: Rehabilitation Center — مركز التأهيل ───────────────────────
+  safeMount(
+    app,
+    ['/api/rehabilitation-center', '/api/v1/rehabilitation-center'],
+    '../routes/rehabilitation-center.routes'
+  );
+  logger.info(
+    'Phase 31 mounted (13 sub-modules: assessment-tools, beneficiary-assessments, individualized-plans, group-sessions, satisfaction-surveys, survey-responses, referrals, schedules, assistive-equipment, family-communications, waitlist, report-templates, generated-reports)'
+  );
+
+  // ── Phase 32: Rehabilitation Intelligent — التأهيل الذكي ─────────────────
+  safeMount(
+    app,
+    ['/api/rehabilitation-intelligent', '/api/v1/rehabilitation-intelligent'],
+    '../routes/rehabilitation-intelligent.routes'
+  );
+  logger.info(
+    'Phase 32 mounted (12 sub-modules: ai-recommendations, predictive-models, prediction-results, risk-assessments, quality-indicators, accreditation-standards, research-projects, training-programs, competency-assessments, emergency-protocols, emergency-incidents, government-integrations)'
+  );
+
+  // ── Phase 33: Rehabilitation Specialized — التأهيل التخصصي ───────────────
+  safeMount(
+    app,
+    ['/api/rehabilitation-specialized', '/api/v1/rehabilitation-specialized'],
+    '../routes/rehabilitation-specialized.routes'
+  );
+  logger.info(
+    'Phase 33 mounted (10 sub-modules: transportation, insurance-claims, billing-records, volunteers, donations, residential-units, activities, documents, events, clinical-notes)'
+  );
+
+  // ── Phase 34: Smart Attendance — الحضور الذكي ────────────────────────────
+  safeMount(
+    app,
+    ['/api/smart-attendance', '/api/v1/smart-attendance'],
+    '../routes/smart-attendance.routes'
+  );
+  logger.info(
+    'Phase 34 mounted (12 sub-modules: records, behavior-patterns, appeals, parent-notification-preferences, biometric-enrollments, anomaly-alerts, summary-reports, camera-devices, biometric-devices, face-recognition, fingerprint-data, camera-attendance)'
+  );
+
+  // ── Phase 35: Beneficiary Management — إدارة المستفيدين ──────────────────
+  safeMount(
+    app,
+    ['/api/beneficiary-management', '/api/v1/beneficiary-management'],
+    '../routes/beneficiary-management.routes'
+  );
+  logger.info(
+    'Phase 35 mounted (8 sub-modules: academic-records, achievements, attendance-records, counseling-sessions, financial-support, scholarships, skills-development, support-plans)'
+  );
+
+  // ── Phase 36: Accounting Operations — العمليات المحاسبية ──────────────────
+  safeMount(
+    app,
+    ['/api/accounting-operations', '/api/v1/accounting-operations'],
+    '../routes/accounting-operations.routes'
+  );
+  logger.info('Phase 36 mounted (2 sub-modules: expenses, payments)');
+
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;
   if (summary.failed === 0) {

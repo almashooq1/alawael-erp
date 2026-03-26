@@ -288,15 +288,16 @@ app.use(responseHandler);
 
 // Custom morgan token that strips sensitive query params (tokens, passwords, keys)
 // to prevent credential leakage in access logs
-const SENSITIVE_QS_KEYS = /(?:^|&)(token|password|secret|key|authorization|api_key|apikey|access_token|refresh_token)=[^&]*/gi;
-morgan.token('safe-url', (req) => {
+const SENSITIVE_QS_KEYS =
+  /(?:^|&)(token|password|secret|key|authorization|api_key|apikey|access_token|refresh_token)=[^&]*/gi;
+morgan.token('safe-url', req => {
   const url = req.originalUrl || req.url || '';
   const qIdx = url.indexOf('?');
   if (qIdx === -1) return url;
   const pathPart = url.substring(0, qIdx);
-  const qs = url.substring(qIdx + 1).replace(SENSITIVE_QS_KEYS, (m, k) =>
-    (m.startsWith('&') ? '&' : '') + `${k}=[REDACTED]`
-  );
+  const qs = url
+    .substring(qIdx + 1)
+    .replace(SENSITIVE_QS_KEYS, (m, k) => (m.startsWith('&') ? '&' : '') + `${k}=[REDACTED]`);
   return `${pathPart}?${qs}`;
 });
 app.use(morgan(':method :safe-url :status :response-time ms'));

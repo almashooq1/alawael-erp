@@ -24,7 +24,7 @@ const MAX_PAGE_LIMIT = 100;
 const clampLimit = (raw, fallback) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);
 
 // Safe error message — never leak internal error details in production
-const safeErrorMessage = (error) => {
+const safeErrorMessage = error => {
   if (process.env.NODE_ENV === 'production') return 'حدث خطأ في العملية';
   return error.message || 'حدث خطأ في العملية';
 };

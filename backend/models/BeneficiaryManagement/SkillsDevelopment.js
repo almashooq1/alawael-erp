@@ -40,11 +40,16 @@ const skillsDevelopmentSchema = new mongoose.Schema(
     },
 
     levelLabels: {
-      1: 'Novice',
-      2: 'Beginner',
-      3: 'Intermediate',
-      4: 'Advanced',
-      5: 'Expert',
+      type: Map,
+      of: String,
+      default: () =>
+        new Map([
+          ['1', 'Novice'],
+          ['2', 'Beginner'],
+          ['3', 'Intermediate'],
+          ['4', 'Advanced'],
+          ['5', 'Expert'],
+        ]),
     },
 
     // Level Progression History

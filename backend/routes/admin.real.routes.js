@@ -52,7 +52,12 @@ router.get('/users', async (req, res) => {
     if (status) filter.status = status;
     const skip = (Math.max(1, +page) - 1) * safeLimit;
     const [data, total] = await Promise.all([
-      User.find(filter).select('-password').sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
+      User.find(filter)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(safeLimit)
+        .lean(),
       User.countDocuments(filter),
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: safeLimit, total } });

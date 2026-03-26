@@ -68,7 +68,7 @@ describe('CashFlowDashboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorage.setItem('authToken', 'mock-token');
+    sessionStorage.setItem('authToken', 'mock-token');
   });
 
   describe('Component Rendering', () => {

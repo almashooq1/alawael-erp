@@ -56,7 +56,7 @@ describe('ValidationDashboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorage.setItem('authToken', 'mock-token');
+    sessionStorage.setItem('authToken', 'mock-token');
   });
 
   // ===== RENDERING TESTS =====
@@ -324,7 +324,7 @@ describe('ValidationDashboard', () => {
     });
 
     test('يجب التعامل مع عدم وجود authToken', async () => {
-      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
       API.getViolations.mockRejectedValue(new Error('Unauthorized'));
 
       const { message } = require('antd');

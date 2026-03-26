@@ -21,7 +21,7 @@ const IncidentTracking = () => {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/incidents?limit=50`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
       });
       setIncidents(response.data.data);

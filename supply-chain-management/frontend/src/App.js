@@ -26,7 +26,7 @@ function App() {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       apiClient
         .get('/api/auth/me')
@@ -80,7 +80,7 @@ function App() {
           </span>
           <button
             onClick={() => {
-              localStorage.removeItem('token');
+              sessionStorage.removeItem('token');
               window.location.reload();
             }}
           >

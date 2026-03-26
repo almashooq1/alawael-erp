@@ -9,6 +9,35 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../utils/logger');
 
+/**
+ * Acquire a distributed lock via Redis SET NX EX.
+ * Returns true if the lock was obtained, false otherwise.
+ */
+const acquireBackupLock = async (ttlSeconds = 3600) => {
+  try {
+    const redis = require('./redis');
+    const client = redis.getClient ? redis.getClient() : redis;
+    if (!client || typeof client.set !== 'function') return true; // no Redis → allow
+    const result = await client.set('backup:lock', process.pid.toString(), 'EX', ttlSeconds, 'NX');
+    return result === 'OK';
+  } catch {
+    // Redis unavailable — allow backup to proceed (single-instance fallback)
+    return true;
+  }
+};
+
+const releaseBackupLock = async () => {
+  try {
+    const redis = require('./redis');
+    const client = redis.getClient ? redis.getClient() : redis;
+    if (client && typeof client.del === 'function') {
+      await client.del('backup:lock');
+    }
+  } catch {
+    /* ignore */
+  }
+};
+
 const BACKUP_DIR = process.env.BACKUP_DIR || path.join(__dirname, '..', 'backups');
 const BACKUP_RETENTION_DAYS = parseInt(process.env.BACKUP_RETENTION_DAYS || '7', 10);
 
@@ -84,22 +113,36 @@ const scheduleBackups = () => {
   const BACKUP_INTERVAL = 24 * 60 * 60 * 1000;
 
   setInterval(async () => {
+    const locked = await acquireBackupLock();
+    if (!locked) {
+      logger.info('Backup skipped — another instance holds the lock');
+      return;
+    }
     try {
       await backupMongoDB();
       cleanOldBackups();
     } catch (error) {
       logger.error('Scheduled backup failed:', { error: error.message });
+    } finally {
+      await releaseBackupLock();
     }
   }, BACKUP_INTERVAL);
 
   // Run initial backup after 5 minutes
   setTimeout(
     async () => {
+      const locked = await acquireBackupLock();
+      if (!locked) {
+        logger.info('Initial backup skipped — another instance holds the lock');
+        return;
+      }
       try {
         await backupMongoDB();
         cleanOldBackups();
       } catch (error) {
         logger.error('Initial backup failed:', { error: error.message });
+      } finally {
+        await releaseBackupLock();
       }
     },
     5 * 60 * 1000

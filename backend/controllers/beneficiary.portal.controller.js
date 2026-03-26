@@ -14,6 +14,7 @@ const BeneficiaryProgress = require('../models/BeneficiaryProgress');
 const PortalMessage = require('../models/PortalMessage');
 const PortalNotification = require('../models/PortalNotification');
 const Document = require('../models/Document');
+const path = require('path');
 const { AppError, catchAsync } = require('../utils/errorHandler');
 const { sendEmail } = require('../services/email.service');
 const BeneficiaryService = require('../services/beneficiary.service');
@@ -939,7 +940,17 @@ exports.downloadDocument = catchAsync(async (req, res) => {
     });
   }
 
-  res.download(document.filePath);
+  // Path traversal protection: ensure file is within allowed uploads directory
+  const UPLOADS_DIR = path.resolve(process.env.UPLOADS_DIR || 'uploads');
+  const resolvedPath = path.resolve(document.filePath);
+  if (!resolvedPath.startsWith(UPLOADS_DIR)) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied: invalid file path',
+    });
+  }
+
+  res.download(resolvedPath);
 });
 
 /**

@@ -77,7 +77,7 @@ const ValidationDashboard = () => {
   const fetchViolations = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         severity: filter.severity !== 'all' ? filter.severity : '',
         type: filter.type !== 'all' ? filter.type : '',
@@ -124,7 +124,7 @@ const ValidationDashboard = () => {
 
   const resolveViolation = async violationId => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/validation/${violationId}/resolve`, {
         method: 'PATCH',
         headers: {
@@ -147,7 +147,7 @@ const ValidationDashboard = () => {
 
   const exportReport = async format => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/validation/export?format=${format}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

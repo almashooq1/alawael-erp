@@ -33,7 +33,7 @@ const IncidentManagement = () => {
       setLoading(true);
       const response = await axios.get(`${API_BASE}/incidents`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
       });
       setIncidents(response.data.data);
@@ -102,7 +102,7 @@ const IncidentManagement = () => {
           formData,
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,
+              Authorization: `Bearer ${sessionStorage.getItem('token')}`,
             },
           }
         );
@@ -111,7 +111,7 @@ const IncidentManagement = () => {
         // إنشاء جديد
         const response = await axios.post(`${API_BASE}/incidents`, formData, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           },
         });
         console.log('✅ Incident created:', response.data);
@@ -133,7 +133,7 @@ const IncidentManagement = () => {
     try {
       await axios.delete(`${API_BASE}/incidents/${id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
       });
       console.log('✅ Incident deleted');

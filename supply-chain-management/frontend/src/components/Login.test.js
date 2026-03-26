@@ -8,19 +8,19 @@ jest.mock('../utils/api', () => ({
   post: jest.fn(),
 }));
 
-// Mock localStorage
-const localStorageMock = (() => ({
+// Mock sessionStorage (tokens now use sessionStorage for XSS protection)
+const sessionStorageMock = (() => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
 }))();
-global.localStorage = localStorageMock;
+global.sessionStorage = sessionStorageMock;
 
 describe('Login Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorageMock.setItem.mockClear();
+    sessionStorageMock.setItem.mockClear();
   });
 
   test('renders login form with title', () => {

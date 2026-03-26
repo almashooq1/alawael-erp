@@ -2,6 +2,9 @@
 /**
  * Auth Service - Token Management and Authentication
  * Handles JWT token generation, validation, and storage for frontend
+ *
+ * Security: Uses sessionStorage instead of localStorage to limit XSS exposure.
+ * Tokens are scoped to the browser tab and cleared when the tab closes.
  */
 
 // Generate test token for development
@@ -18,29 +21,29 @@ export const generateTestToken = () => {
   return Buffer.from(JSON.stringify(tokenData)).toString('base64');
 };
 
-// Store token in localStorage
+// Store token in sessionStorage (more secure than localStorage — scoped to tab)
 export const setToken = token => {
   if (token) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('tokenExpiry', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('tokenExpiry', new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString());
   }
 };
 
-// Get token from localStorage
+// Get token from sessionStorage
 export const getToken = () => {
-  return localStorage.getItem('token');
+  return sessionStorage.getItem('token');
 };
 
-// Remove token from localStorage
+// Remove token from sessionStorage
 export const removeToken = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('tokenExpiry');
-  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('tokenExpiry');
+  sessionStorage.removeItem('user');
 };
 
 // Check if token is expired
 export const isTokenExpired = () => {
-  const expiry = localStorage.getItem('tokenExpiry');
+  const expiry = sessionStorage.getItem('tokenExpiry');
   if (!expiry) return true;
   return new Date() > new Date(expiry);
 };

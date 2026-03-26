@@ -15,6 +15,8 @@ const connectRedis = () => {
     host: process.env.REDIS_HOST || 'localhost',
     port: process.env.REDIS_PORT || 6379,
     password: process.env.REDIS_PASSWORD || undefined,
+    keyPrefix: process.env.REDIS_PREFIX || 'alawael:',
+    tls: process.env.REDIS_TLS === 'true' ? { rejectUnauthorized: true } : undefined,
     retryDelayOnFailover: 100,
     maxRetriesPerRequest: 3,
     enableReadyCheck: true,

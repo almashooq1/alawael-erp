@@ -11,6 +11,19 @@ const mongoose = require('mongoose');
 const EventEmitter = require('events');
 const logger = require('../../utils/logger');
 
+/**
+ * Escape HTML special characters to prevent injection in email templates
+ */
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 class AdvancedNotificationService extends EventEmitter {
   constructor() {
     super();
@@ -601,12 +614,12 @@ class AdvancedNotificationService extends EventEmitter {
       <body>
         <div class="container">
           <div class="header">
-            <h2>${notification.title}</h2>
+            <h2>${escapeHtml(notification.title)}</h2>
           </div>
           <div class="content">
-            <p>${notification.message}</p>
+            <p>${escapeHtml(notification.message)}</p>
             <p class="${notification.priority === 'high' ? 'priority-high' : ''}">
-              الأولوية: ${this.getPriorityLabel(notification.priority)}
+              الأولوية: ${escapeHtml(this.getPriorityLabel(notification.priority))}
             </p>
             <p class="timestamp">
               ${notification.timestamp.toLocaleString('ar-SA')}

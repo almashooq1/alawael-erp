@@ -1,411 +1,790 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 /**
-
-
-
- * Phase 11 Security Services Tests
- * Comprehensive test suite for Authentication, RBAC, and Encryption services
+ * Security Services — Comprehensive Test Suite
+ * AlAwael ERP — Jest 29
+ *
+ * Covers:
+ *   A. Rate Limiter         (middleware/rateLimiter.js)
+ *   B. Input Sanitization   (middleware/sanitize.js)
+ *   C. Encryption Service   (services/encryption-service.js)
+ *   D. Password Security    (services/securityService.js — bcrypt helpers)
+ *   E. Backup Service       (config/backup.js)
  */
 
-const authService = require('../services/security/authService');
-const rbacService = require('../services/security/rbacService');
-const encryptionService = require('../services/security/encryptionService');
+// ─── Top-level mocks (before any require) ──────────────────────────────────
 
-class SecurityTestSuite {
-  constructor() {
-    this.testResults = [];
-    this.testCount = 0;
-    this.passCount = 0;
-    this.failCount = 0;
-  }
+jest.mock('../utils/logger', () => ({
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  debug: jest.fn(),
+  child: jest.fn().mockReturnThis(),
+}));
 
-  runAllTests() {
-    console.log(
-      '\
-' + '='.repeat(70)
-    );
-    console.log('  PHASE 11 - SECURITY SERVICES TEST SUITE');
-    console.log(
-      '='.repeat(70) +
-        '\
-'
-    );
+jest.mock('../config/redis.config', () => ({
+  getRedisClient: jest.fn(() => null),
+}));
 
-    this.testAuthService();
-    this.testRBACService();
-    this.testEncryptionService();
+jest.mock('../config/secrets', () => ({
+  jwtSecret: 'test-jwt-secret-32charslong!!!!!',
+  jwtRefreshSecret: 'test-refresh-secret-32charslong!',
+  notificationJwtSecret: 'test-notif-secret',
+  encryptionKey: 'test-encryption-key-32charslong!',
+  hmacKey: 'test-hmac-key-32chars-long!!!!!!',
+  backupEncryptionPassword: 'test-backup-pw',
+  gpsEncryptionKey: 'test-gps-key',
+  sessionSecret: 'test-session-secret',
+  fcmServerKey: '',
+}));
 
-    this.printSummary();
-  }
+jest.mock('child_process', () => ({
+  execFile: jest.fn(),
+}));
 
-  testAuthService() {
-    console.log(
-      '\
-🔐 AUTHENTICATION SERVICE TESTS\
-'
-    );
+jest.mock('express-mongo-sanitize', () => {
+  return jest.fn(opts => {
+    // Return a middleware that strips keys starting with $ or containing .
+    return (req, _res, next) => {
+      const sanitize = obj => {
+        if (!obj || typeof obj !== 'object') return obj;
+        for (const key of Object.keys(obj)) {
+          if (key.startsWith('$') || key.includes('.')) {
+            if (opts && opts.onSanitize) opts.onSanitize({ req, key });
+            delete obj[key];
+          } else if (typeof obj[key] === 'object') {
+            sanitize(obj[key]);
+          }
+        }
+        return obj;
+      };
+      if (req.body) req.body = sanitize(req.body);
+      if (req.query) req.query = sanitize(req.query);
+      if (req.params) req.params = sanitize(req.params);
+      next();
+    };
+  });
+});
 
-    // Test 1: Register user
-    this.test('Register new user', () => {
-      const user = authService.registerUser({
-        username: 'testuser',
-        email: 'test@example.com',
-        password: 'SecurePass123!',
-      });
-      return user.id && user.username === 'testuser';
-    });
-
-    // Test 2: Authenticate successful
-    this.test('Authenticate user successfully', () => {
-      authService.registerUser({
-        username: 'user1',
-        email: 'user1@example.com',
-        password: 'Password123!',
-      });
-      const result = authService.authenticateUser('user1', 'Password123!');
-      return result.success && result.accessToken !== undefined;
-    });
-
-    // Test 3: Authenticate wrong password
-    this.test('Reject authentication with wrong password', () => {
-      authService.registerUser({
-        username: 'user2',
-        email: 'user2@example.com',
-        password: 'Correct123!',
-      });
-      const result = authService.authenticateUser('user2', 'Wrong123!');
-      return !result.success;
-    });
-
-    // Test 4: Verify token
-    this.test('Verify valid token', () => {
-      authService.registerUser({
-        username: 'user3',
-        email: 'user3@example.com',
-        password: 'Pass123!',
-      });
-      const auth = authService.authenticateUser('user3', 'Pass123!');
-      const verify = authService.verifyToken(auth.accessToken);
-      return verify.valid && verify.userId !== undefined;
-    });
-
-    // Test 5: Refresh token
-    this.test('Refresh access token', () => {
-      authService.registerUser({
-        username: 'user4',
-        email: 'user4@example.com',
-        password: 'Pass123!',
-      });
-      const auth = authService.authenticateUser('user4', 'Pass123!');
-      const refresh = authService.refreshAccessToken(auth.refreshToken);
-      return refresh.success && refresh.accessToken !== auth.accessToken;
-    });
-
-    // Test 6: Logout user
-    this.test('Logout user', () => {
-      authService.registerUser({
-        username: 'user5',
-        email: 'user5@example.com',
-        password: 'Pass123!',
-      });
-      const auth = authService.authenticateUser('user5', 'Pass123!');
-      const logout = authService.logoutUser(auth.sessionId);
-      return logout === true;
-    });
-
-    // Test 7: Enable 2FA
-    this.test('Enable two-factor authentication', () => {
-      const user = authService.registerUser({
-        username: 'user6',
-        email: 'user6@example.com',
-        password: 'Pass123!',
-      });
-      const twoFA = authService.enableTwoFactor(user.id);
-      return twoFA.secret !== undefined && twoFA.qrCode !== undefined;
-    });
-
-    // Test 8: Reset password
-    this.test('Reset password', () => {
-      authService.registerUser({
-        username: 'user7',
-        email: 'user7@example.com',
-        password: 'Pass123!',
-      });
-      const reset = authService.resetPassword('user7@example.com');
-      return reset.success && reset.resetToken !== undefined;
-    });
-
-    // Test 9: Update password
-    this.test('Update user password', () => {
-      const user = authService.registerUser({
-        username: 'user8',
-        email: 'user8@example.com',
-        password: 'OldPass123!',
-      });
-      const update = authService.updatePassword(user.id, 'OldPass123!', 'NewPass456!');
-      return update.success;
-    });
-
-    // Test 10: Lock account after failed attempts
-    this.test('Lock account after failed login attempts', () => {
-      authService.registerUser({
-        username: 'user9',
-        email: 'user9@example.com',
-        password: 'Pass123!',
-      });
-      // Simulate failed attempts
-      for (let i = 0; i < 5; i++) {
-        authService.authenticateUser('user9', 'WrongPass!');
+jest.mock('express-xss-sanitizer', () => ({
+  xss: jest.fn(() => (req, _res, next) => {
+    // Minimal XSS stripping: remove <script> tags from string values
+    const strip = obj => {
+      if (typeof obj === 'string') return obj.replace(/<script[^>]*>.*?<\/script>/gi, '');
+      if (obj && typeof obj === 'object') {
+        for (const k of Object.keys(obj)) obj[k] = strip(obj[k]);
       }
-      const result = authService.authenticateUser('user9', 'Pass123!');
-      return !result.success && result.error.includes('locked');
+      return obj;
+    };
+    if (req.body) req.body = strip(req.body);
+    if (req.query) req.query = strip(req.query);
+    next();
+  }),
+}));
+
+jest.mock('hpp', () => {
+  return jest.fn(() => (req, _res, next) => next());
+});
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const buildReqResMocks = (overrides = {}) => {
+  const req = {
+    method: 'GET',
+    path: '/',
+    ip: '127.0.0.1',
+    headers: {},
+    body: {},
+    query: {},
+    params: {},
+    connection: { remoteAddress: '127.0.0.1' },
+    ...overrides,
+  };
+  const res = {
+    status: jest.fn().mockReturnThis(),
+    json: jest.fn().mockReturnThis(),
+    set: jest.fn().mockReturnThis(),
+    getHeader: jest.fn(() => 60),
+  };
+  const next = jest.fn();
+  return { req, res, next };
+};
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  A. Rate Limiter
+// ═════════════════════════════════════════════════════════════════════════════
+describe('Rate Limiter (middleware/rateLimiter)', () => {
+  let rateLimiter;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Re-require so NODE_ENV changes take effect
+    jest.isolateModules(() => {
+      rateLimiter = require('../middleware/rateLimiter');
     });
-  }
+  });
 
-  testRBACService() {
-    console.log(
-      '\
-👮 RBAC SERVICE TESTS\
-'
-    );
+  it('should export generalLimiter as a function', () => {
+    expect(typeof rateLimiter.generalLimiter).toBe('function');
+  });
 
-    // Test 1: Create role
-    this.test('Create role', () => {
-      const role = rbacService.createRole({
-        name: 'Editor',
-        description: 'Can edit content',
+  it('should export loginLimiter as a function', () => {
+    expect(typeof rateLimiter.loginLimiter).toBe('function');
+  });
+
+  it('should export registerLimiter as a function', () => {
+    expect(typeof rateLimiter.registerLimiter).toBe('function');
+  });
+
+  it('should export apiLimiter as a function', () => {
+    expect(typeof rateLimiter.apiLimiter).toBe('function');
+  });
+
+  it('should export exportLimiter as a function', () => {
+    expect(typeof rateLimiter.exportLimiter).toBe('function');
+  });
+
+  it('should export sensitiveOperationLimiter as a function', () => {
+    expect(typeof rateLimiter.sensitiveOperationLimiter).toBe('function');
+  });
+
+  it('createCustomLimiter should return a middleware function', () => {
+    const limiter = rateLimiter.createCustomLimiter({ max: 10, windowMs: 5000 });
+    expect(typeof limiter).toBe('function');
+  });
+
+  it('userBasedLimiter should return a middleware function', () => {
+    const limiter = rateLimiter.userBasedLimiter(50, 30000);
+    expect(typeof limiter).toBe('function');
+  });
+
+  it('roleBasedLimiter should delegate to correct role limiter', () => {
+    const mw = rateLimiter.roleBasedLimiter({
+      admin: { max: 200, windowMs: 60000 },
+      user: { max: 50, windowMs: 60000 },
+    });
+    // When no user role, should just call next()
+    const { req, res, next } = buildReqResMocks();
+    mw(req, res, next);
+    expect(next).toHaveBeenCalled();
+  });
+
+  it('checkLimit should return allowed=true for unknown type', () => {
+    const result = rateLimiter.checkLimit('nonexistent', '1.2.3.4');
+    expect(result.allowed).toBe(true);
+    expect(result.remaining).toBe(Infinity);
+  });
+
+  it('checkLimit should return an object with allowed, remaining, resetAt', () => {
+    const result = rateLimiter.checkLimit('general', '10.0.0.1');
+    expect(result).toHaveProperty('allowed');
+    expect(result).toHaveProperty('remaining');
+    expect(result).toHaveProperty('resetAt');
+  });
+
+  it('resetLimiter should not throw for valid type', () => {
+    expect(() => rateLimiter.resetLimiter('general', '10.0.0.1')).not.toThrow();
+  });
+
+  it('resetLimiter should not throw for unknown type', () => {
+    expect(() => rateLimiter.resetLimiter('bogus', '10.0.0.1')).not.toThrow();
+  });
+
+  it('adaptiveLimiter should return a middleware function', () => {
+    const limiter = rateLimiter.adaptiveLimiter(100, 60000);
+    expect(typeof limiter).toBe('function');
+  });
+
+  it('backward-compat alias authLimiter = loginLimiter', () => {
+    expect(rateLimiter.authLimiter).toBe(rateLimiter.loginLimiter);
+  });
+
+  it('backward-compat alias createAccountLimiter = registerLimiter', () => {
+    expect(rateLimiter.createAccountLimiter).toBe(rateLimiter.registerLimiter);
+  });
+
+  it('passwordLimiter should be a function', () => {
+    expect(typeof rateLimiter.passwordLimiter).toBe('function');
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  B. Input Sanitization
+// ═════════════════════════════════════════════════════════════════════════════
+describe('Input Sanitization (middleware/sanitize)', () => {
+  let sanitizeInput;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.isolateModules(() => {
+      sanitizeInput = require('../middleware/sanitize');
+    });
+  });
+
+  const runMiddlewareChain = async (middlewares, req, res) => {
+    for (const mw of middlewares) {
+      await new Promise((resolve, reject) => {
+        mw(req, res, err => (err ? reject(err) : resolve()));
       });
-      return role.id && role.name === 'Editor';
-    });
-
-    // Test 2: Get role
-    this.test('Get role by ID', () => {
-      const role = rbacService.createRole({ name: 'Viewer' });
-      const retrieved = rbacService.getRole(role.id);
-      return retrieved.id === role.id;
-    });
-
-    // Test 3: List roles
-    this.test('List all roles', () => {
-      const roles = rbacService.listRoles();
-      return roles.length >= 4; // Admin, Manager, Employee, Viewer by default
-    });
-
-    // Test 4: Create permission
-    this.test('Create permission', () => {
-      const perm = rbacService.createPermission({
-        key: 'post:create',
-        name: 'Create Post',
-      });
-      return perm.id && perm.key === 'post:create';
-    });
-
-    // Test 5: Assign role to user
-    this.test('Assign role to user', () => {
-      const role = rbacService.createRole({ name: 'Publisher' });
-      const assignment = rbacService.assignRoleToUser('user123', role.id);
-      return assignment.assigned === true;
-    });
-
-    // Test 6: Revoke role from user
-    this.test('Revoke role from user', () => {
-      const role = rbacService.createRole({ name: 'Commentor' });
-      rbacService.assignRoleToUser('user456', role.id);
-      const revoke = rbacService.revokeRoleFromUser('user456', role.id);
-      return revoke.success === true;
-    });
-
-    // Test 7: Get user roles
-    this.test('Get user roles', () => {
-      const role1 = rbacService.createRole({ name: 'Role1' });
-      const role2 = rbacService.createRole({ name: 'Role2' });
-      rbacService.assignRoleToUser('user789', role1.id);
-      rbacService.assignRoleToUser('user789', role2.id);
-      const roles = rbacService.getUserRoles('user789');
-      return roles.length >= 2;
-    });
-
-    // Test 8: Check permission
-    this.test('Check user has permission', () => {
-      const role = rbacService.createRole({ name: 'ContentCreator' });
-      const perm = rbacService.createPermission({ key: 'content:publish' });
-      rbacService.addPermissionToRole(role.id, perm.id);
-      rbacService.assignRoleToUser('user999', role.id);
-      const hasPermission = rbacService.hasPermission('user999', 'content:publish');
-      return hasPermission === true;
-    });
-
-    // Test 9: Check any permission
-    this.test('Check user has any permission', () => {
-      const role = rbacService.createRole({ name: 'TestRole' });
-      const perm1 = rbacService.createPermission({ key: 'read:all' });
-      rbacService.addPermissionToRole(role.id, perm1.id);
-      rbacService.assignRoleToUser('user1000', role.id);
-      const hasAny = rbacService.hasAnyPermission('user1000', ['read:all', 'write:all']);
-      return hasAny === true;
-    });
-
-    // Test 10: Check all permissions
-    this.test('Check user has all permissions', () => {
-      const role = rbacService.createRole({ name: 'SuperRole' });
-      const perm1 = rbacService.createPermission({ key: 'read:all' });
-      const perm2 = rbacService.createPermission({ key: 'write:all' });
-      rbacService.addPermissionToRole(role.id, perm1.id);
-      rbacService.addPermissionToRole(role.id, perm2.id);
-      rbacService.assignRoleToUser('user1001', role.id);
-      const hasAll = rbacService.hasAllPermissions('user1001', ['read:all', 'write:all']);
-      return hasAll === true;
-    });
-  }
-
-  testEncryptionService() {
-    console.log(
-      '\
-🔒 ENCRYPTION SERVICE TESTS\
-'
-    );
-
-    // Test 1: Encrypt data
-    this.test('Encrypt data', () => {
-      const plaintext = 'Sensitive Information';
-      const encrypted = encryptionService.encrypt(plaintext);
-      return encrypted.encryptedId && encrypted.ciphertext && encrypted.iv;
-    });
-
-    // Test 2: Decrypt data
-    this.test('Decrypt data', () => {
-      const plaintext = 'Secret Message';
-      const encrypted = encryptionService.encrypt(plaintext);
-      const decrypted = encryptionService.decrypt(encrypted.encryptedId);
-      return decrypted === plaintext;
-    });
-
-    // Test 3: Hash data
-    this.test('Hash data one-way', () => {
-      const hash1 = encryptionService.hash('password123');
-      const hash2 = encryptionService.hash('password123');
-      return hash1 === hash2 && hash1.length === 64; // SHA256
-    });
-
-    // Test 4: Hash with salt
-    this.test('Hash with salt', () => {
-      const result = encryptionService.hashWithSalt('mypassword');
-      return result.hashed && result.salt && result.hashed.length === 64;
-    });
-
-    // Test 5: Verify hash
-    this.test('Verify hashed value', () => {
-      const data = 'original_data';
-      const { hashed, salt } = encryptionService.hashWithSalt(data);
-      const verified = encryptionService.verifyHash(data, hashed, salt);
-      return verified === true;
-    });
-
-    // Test 6: Generate key
-    this.test('Generate random key', () => {
-      const key1 = encryptionService.generateKey(32);
-      const key2 = encryptionService.generateKey(32);
-      return key1 && key2 && key1 !== key2;
-    });
-
-    // Test 7: Store key
-    this.test('Store encryption key', () => {
-      const key = encryptionService.generateKey(32);
-      const success = encryptionService.storeKey('test-key-1', key);
-      return success === true;
-    });
-
-    // Test 8: Rotate key
-    this.test('Rotate encryption key', () => {
-      encryptionService.storeKey('rotating-key', encryptionService.generateKey(32));
-      const rotation = encryptionService.rotateKey('rotating-key');
-      return rotation.keyId === 'rotating-key' && rotation.archivedKeyId.includes('archived');
-    });
-
-    // Test 9: Sign data
-    this.test('Sign data with HMAC', () => {
-      const data = 'Important Data';
-      const signature = encryptionService.sign(data);
-      return signature && signature.length > 0;
-    });
-
-    // Test 10: Verify signature
-    this.test('Verify data signature', () => {
-      const data = 'Signed Data';
-      const signature = encryptionService.sign(data);
-      const verified = encryptionService.verifySignature(data, signature);
-      return verified === true;
-    });
-
-    // Test 11: Encrypt field (PII)
-    this.test('Encrypt sensitive field', () => {
-      const encrypted = encryptionService.encryptField('email', 'user@example.com');
-      return encrypted.field === 'email' && encrypted.encrypted === true;
-    });
-
-    // Test 12: Decrypt field
-    this.test('Decrypt sensitive field', () => {
-      const encrypted = encryptionService.encryptField('ssn', '123-45-6789');
-      const decrypted = encryptionService.decryptField(encrypted.encryptedId);
-      return decrypted === '123-45-6789';
-    });
-  }
-
-  test(description, testFn) {
-    this.testCount++;
-    try {
-      const result = testFn();
-      if (result) {
-        this.passCount++;
-        console.log(`  ✅ ${description}`);
-      } else {
-        this.failCount++;
-        console.log(`  ❌ ${description} - Assertion failed`);
-      }
-    } catch (error) {
-      this.failCount++;
-      console.log(`  ❌ ${description} - ${error.message}`);
     }
-  }
+  };
 
-  printSummary() {
-    const successRate = ((this.passCount / this.testCount) * 100).toFixed(1);
-    console.log(
-      '\
-' + '='.repeat(70)
+  it('should export an array of middleware functions', () => {
+    expect(Array.isArray(sanitizeInput)).toBe(true);
+    expect(sanitizeInput.length).toBe(3); // mongoSanitize, xss, hpp
+    sanitizeInput.forEach(mw => expect(typeof mw).toBe('function'));
+  });
+
+  it('should strip XSS from request body', async () => {
+    const { req, res } = buildReqResMocks({
+      body: { name: 'hello<script>alert(1)</script>world' },
+    });
+    await runMiddlewareChain(sanitizeInput, req, res);
+    expect(req.body.name).not.toContain('<script>');
+    expect(req.body.name).toContain('hello');
+    expect(req.body.name).toContain('world');
+  });
+
+  it('should strip XSS from query params', async () => {
+    const { req, res } = buildReqResMocks({
+      query: { search: '<script>alert("xss")</script>safe' },
+    });
+    await runMiddlewareChain(sanitizeInput, req, res);
+    expect(req.query.search).not.toContain('<script>');
+    expect(req.query.search).toContain('safe');
+  });
+
+  it('should remove NoSQL injection keys ($gt) from body', async () => {
+    const { req, res } = buildReqResMocks({
+      body: { email: 'test@test.com', $gt: '' },
+    });
+    await runMiddlewareChain(sanitizeInput, req, res);
+    expect(req.body.$gt).toBeUndefined();
+    expect(req.body.email).toBe('test@test.com');
+  });
+
+  it('should remove dot-notation NoSQL injection from body', async () => {
+    const { req, res } = buildReqResMocks({
+      body: { 'password.gt': 'injected' },
+    });
+    await runMiddlewareChain(sanitizeInput, req, res);
+    expect(req.body['password.gt']).toBeUndefined();
+  });
+
+  it('should leave safe body data untouched', async () => {
+    const { req, res } = buildReqResMocks({
+      body: { name: 'Ahmad', age: 25, active: true },
+    });
+    await runMiddlewareChain(sanitizeInput, req, res);
+    expect(req.body).toEqual({ name: 'Ahmad', age: 25, active: true });
+  });
+
+  it('should handle empty body gracefully', async () => {
+    const { req, res } = buildReqResMocks({ body: {} });
+    await expect(runMiddlewareChain(sanitizeInput, req, res)).resolves.toBeUndefined();
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  C. Encryption Service
+// ═════════════════════════════════════════════════════════════════════════════
+describe('Encryption Service (services/encryption-service)', () => {
+  let encryptionService;
+
+  beforeAll(() => {
+    jest.isolateModules(() => {
+      encryptionService = require('../services/encryption-service');
+    });
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  // ── encrypt / decrypt round-trip ──
+  it('should encrypt and decrypt a string round-trip', () => {
+    const plaintext = 'Hello, AlAwael!';
+    const encrypted = encryptionService.encrypt(plaintext);
+
+    expect(encrypted).toHaveProperty('iv');
+    expect(encrypted).toHaveProperty('encryptedData');
+    expect(encrypted).toHaveProperty('authTag');
+    expect(typeof encrypted.iv).toBe('string');
+    expect(typeof encrypted.encryptedData).toBe('string');
+
+    const decrypted = encryptionService.decrypt(encrypted);
+    expect(decrypted).toBe(plaintext);
+  });
+
+  it('should encrypt and decrypt an object round-trip', () => {
+    const data = { user: 'admin', role: 'superuser', id: 42 };
+    const encrypted = encryptionService.encrypt(data);
+    const decrypted = encryptionService.decrypt(encrypted);
+    expect(decrypted).toEqual(data);
+  });
+
+  it('should produce different ciphertext for same plaintext (IV randomization)', () => {
+    const plaintext = 'deterministic test';
+    const a = encryptionService.encrypt(plaintext);
+    const b = encryptionService.encrypt(plaintext);
+    expect(a.iv).not.toBe(b.iv);
+    expect(a.encryptedData).not.toBe(b.encryptedData);
+  });
+
+  it('should throw when decrypting with tampered authTag', () => {
+    const encrypted = encryptionService.encrypt('tamper test');
+    encrypted.authTag = 'ff'.repeat(16); // wrong tag
+    expect(() => encryptionService.decrypt(encrypted)).toThrow();
+  });
+
+  it('should throw when decrypting with tampered IV', () => {
+    const encrypted = encryptionService.encrypt('iv tamper');
+    encrypted.iv = 'aa'.repeat(16); // wrong IV
+    expect(() => encryptionService.decrypt(encrypted)).toThrow();
+  });
+
+  it('should throw when decrypting with tampered ciphertext', () => {
+    const encrypted = encryptionService.encrypt('cipher tamper');
+    encrypted.encryptedData = 'deadbeef' + encrypted.encryptedData.slice(8);
+    expect(() => encryptionService.decrypt(encrypted)).toThrow();
+  });
+
+  // ── hashPassword / verifyPassword ──
+  it('should hash a password with salt (pbkdf2)', () => {
+    const hashed = encryptionService.hashPassword('MyP@ss123');
+    expect(typeof hashed).toBe('string');
+    expect(hashed).toContain('.'); // salt.hash format
+    const [salt, hash] = hashed.split('.');
+    expect(salt.length).toBeGreaterThan(0);
+    expect(hash.length).toBeGreaterThan(0);
+  });
+
+  it('should produce different hashes for the same password', () => {
+    const h1 = encryptionService.hashPassword('SamePass!');
+    const h2 = encryptionService.hashPassword('SamePass!');
+    expect(h1).not.toBe(h2); // different salts
+  });
+
+  it('should verify a correct password', () => {
+    const password = 'CorrectHorse!1';
+    const hashed = encryptionService.hashPassword(password);
+    expect(encryptionService.verifyPassword(password, hashed)).toBe(true);
+  });
+
+  it('should reject an incorrect password', () => {
+    const hashed = encryptionService.hashPassword('Right1!');
+    expect(encryptionService.verifyPassword('Wrong2@', hashed)).toBe(false);
+  });
+
+  // ── generateToken ──
+  it('should generate a hex token of default length', () => {
+    const token = encryptionService.generateToken();
+    expect(typeof token).toBe('string');
+    expect(token.length).toBe(64); // 32 bytes → 64 hex chars
+  });
+
+  it('should generate tokens of custom length', () => {
+    const token = encryptionService.generateToken(16);
+    expect(token.length).toBe(32); // 16 bytes → 32 hex chars
+  });
+
+  it('should generate unique tokens', () => {
+    const t1 = encryptionService.generateToken();
+    const t2 = encryptionService.generateToken();
+    expect(t1).not.toBe(t2);
+  });
+
+  // ── PII encryption ──
+  it('should encrypt PII fields and leave others intact', () => {
+    const pii = { email: 'a@b.com', phone: '+123', name: 'Ahmad' };
+    const encrypted = encryptionService.encryptPII(pii);
+    // email and phone should be encrypted objects
+    expect(typeof encrypted.email).toBe('object');
+    expect(encrypted.email).toHaveProperty('iv');
+    expect(typeof encrypted.phone).toBe('object');
+    // name is not in fieldsToEncrypt, stays as-is
+    expect(encrypted.name).toBe('Ahmad');
+  });
+
+  it('should decrypt PII fields round-trip', () => {
+    const pii = { email: 'test@example.com', phone: '+9665551234' };
+    const encrypted = encryptionService.encryptPII(pii);
+    const decrypted = encryptionService.decryptPII(encrypted);
+    expect(decrypted.email).toBe('test@example.com');
+    expect(decrypted.phone).toBe('+9665551234');
+  });
+
+  // ── HMAC ──
+  it('should create a deterministic HMAC for the same data', () => {
+    const hmac1 = encryptionService.createHMAC({ a: 1 });
+    const hmac2 = encryptionService.createHMAC({ a: 1 });
+    expect(hmac1).toBe(hmac2);
+  });
+
+  it('should create different HMACs for different data', () => {
+    const h1 = encryptionService.createHMAC({ a: 1 });
+    const h2 = encryptionService.createHMAC({ a: 2 });
+    expect(h1).not.toBe(h2);
+  });
+
+  it('should verify correct HMAC', () => {
+    const data = { important: true };
+    const sig = encryptionService.createHMAC(data);
+    expect(encryptionService.verifyHMAC(data, sig)).toBe(true);
+  });
+
+  it('should reject incorrect HMAC', () => {
+    const data = { important: true };
+    const sig = encryptionService.createHMAC(data);
+    // Tamper one character — same length so timingSafeEqual returns false
+    const bad = (sig[0] === 'a' ? 'b' : 'a') + sig.slice(1);
+    const result = encryptionService.verifyHMAC(data, bad);
+    expect(result).toBe(false);
+  });
+
+  // ── RSA Key Pair ──
+  it('should generate an RSA key pair (4096-bit)', () => {
+    const { publicKey, privateKey } = encryptionService.generateKeyPair();
+    expect(publicKey).toContain('BEGIN PUBLIC KEY');
+    expect(privateKey).toContain('BEGIN PRIVATE KEY');
+  });
+
+  // ── RSA file encrypt/decrypt ──
+  it('should encrypt and decrypt data with RSA key pair', () => {
+    const { publicKey, privateKey } = encryptionService.generateKeyPair();
+    const original = 'Sensitive file data';
+    const encrypted = encryptionService.encryptFileWithRSA(original, publicKey);
+    expect(Buffer.isBuffer(encrypted)).toBe(true);
+    const decrypted = encryptionService.decryptFileWithRSA(encrypted, privateKey);
+    expect(decrypted.toString()).toBe(original);
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  D. Password Security (securityService — private helpers)
+// ═════════════════════════════════════════════════════════════════════════════
+describe('Password Security (SecurityService policy validation)', () => {
+  let SecurityService;
+
+  beforeAll(() => {
+    // We need to mock mongoose models used inside securityService
+    jest.isolateModules(() => {
+      // Provide minimal mongoose model stubs so the module loads
+      jest.doMock('mongoose', () => {
+        const actualMongoose = jest.requireActual('mongoose');
+        const stubModel = name => {
+          // Return a fake model constructor with static methods
+          const M = function () {};
+          M.modelName = name;
+          M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) });
+          M.findById = jest.fn().mockResolvedValue(null);
+          M.findOne = jest.fn().mockResolvedValue(null);
+          M.findOneAndUpdate = jest.fn().mockResolvedValue({});
+          M.countDocuments = jest.fn().mockResolvedValue(0);
+          M.create = jest.fn().mockResolvedValue({ toObject: () => ({}) });
+          M.updateMany = jest.fn().mockResolvedValue({ modifiedCount: 0 });
+          M.aggregate = jest.fn().mockResolvedValue([]);
+          M.schema = new actualMongoose.Schema({});
+          return M;
+        };
+        return {
+          ...actualMongoose,
+          models: {},
+          model: jest.fn((name) => stubModel(name)),
+        };
+      });
+
+      jest.doMock('../models/User', () => {
+        const M = function () {};
+        M.findById = jest.fn().mockResolvedValue(null);
+        M.findByIdAndUpdate = jest.fn().mockResolvedValue(null);
+        M.countDocuments = jest.fn().mockResolvedValue(0);
+        return M;
+      });
+      jest.doMock('../models/Session', () => {
+        const M = function () {};
+        M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) });
+        M.findOne = jest.fn().mockResolvedValue(null);
+        M.countDocuments = jest.fn().mockResolvedValue(0);
+        M.updateMany = jest.fn().mockResolvedValue({ modifiedCount: 0 });
+        return M;
+      });
+      jest.doMock('../models/securityLog.model', () => {
+        const M = function () {};
+        M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnValue({ skip: jest.fn().mockReturnValue({ limit: jest.fn().mockReturnValue({ populate: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }) }) }) }) });
+        M.findOne = jest.fn().mockResolvedValue(null);
+        M.countDocuments = jest.fn().mockResolvedValue(0);
+        M.create = jest.fn().mockResolvedValue({});
+        M.aggregate = jest.fn().mockResolvedValue([]);
+        return M;
+      });
+
+      ({ SecurityService } = require('../services/securityService'));
+    });
+  });
+
+  beforeEach(() => jest.clearAllMocks());
+
+  // Access the private helper via prototype
+  const validate = (password, policy) => {
+    const svc = new SecurityService();
+    return svc._validatePasswordPolicy(password, policy);
+  };
+
+  const defaultPolicy = {
+    passwordMinLength: 8,
+    passwordRequireUppercase: true,
+    passwordRequireLowercase: true,
+    passwordRequireNumbers: true,
+    passwordRequireSpecial: true,
+  };
+
+  it('should accept a strong password meeting all criteria', () => {
+    expect(() => validate('Str0ng!Pass', defaultPolicy)).not.toThrow();
+  });
+
+  it('should reject a password shorter than minLength', () => {
+    expect(() => validate('Ab1!', defaultPolicy)).toThrow();
+  });
+
+  it('should reject password missing uppercase', () => {
+    expect(() => validate('nouppercase1!', defaultPolicy)).toThrow();
+  });
+
+  it('should reject password missing lowercase', () => {
+    expect(() => validate('NOLOWERCASE1!', defaultPolicy)).toThrow();
+  });
+
+  it('should reject password missing numbers', () => {
+    expect(() => validate('NoNumbers!!A', defaultPolicy)).toThrow();
+  });
+
+  it('should reject password missing special characters', () => {
+    expect(() => validate('NoSpecial1A', defaultPolicy)).toThrow();
+  });
+
+  it('should pass when policy does not require uppercase', () => {
+    const policy = { ...defaultPolicy, passwordRequireUppercase: false };
+    expect(() => validate('noupperbut1!', policy)).not.toThrow();
+  });
+
+  it('should respect custom minLength', () => {
+    const policy = { ...defaultPolicy, passwordMinLength: 12 };
+    expect(() => validate('Sh0rt!', policy)).toThrow();
+    expect(() => validate('LongEnoughPa$$1', policy)).not.toThrow();
+  });
+
+  it('_generateBackupCodes should produce unique codes', () => {
+    const svc = new SecurityService();
+    const codes = svc._generateBackupCodes(8);
+    expect(codes.length).toBe(8);
+    expect(new Set(codes).size).toBe(8); // all unique
+    codes.forEach(c => {
+      expect(typeof c).toBe('string');
+      expect(c.length).toBeGreaterThan(0);
+    });
+  });
+
+  it('_mapActionToEventType should categorize login actions', () => {
+    const svc = new SecurityService();
+    expect(svc._mapActionToEventType('login_success')).toBe('login');
+    expect(svc._mapActionToEventType('auth_failed')).toBe('login');
+  });
+
+  it('_mapActionToEventType should categorize logout actions', () => {
+    const svc = new SecurityService();
+    expect(svc._mapActionToEventType('logout')).toBe('logout');
+  });
+
+  it('_mapActionToEventType should categorize password/mfa actions', () => {
+    const svc = new SecurityService();
+    expect(svc._mapActionToEventType('password_changed')).toBe('modification');
+    expect(svc._mapActionToEventType('mfa_enabled')).toBe('modification');
+  });
+
+  it('_mapActionToEventType should categorize deletion actions', () => {
+    const svc = new SecurityService();
+    expect(svc._mapActionToEventType('delete_user')).toBe('deletion');
+  });
+
+  it('_mapActionToEventType should return access for unknown actions', () => {
+    const svc = new SecurityService();
+    expect(svc._mapActionToEventType('unknown_action')).toBe('access');
+  });
+
+  it('_calculateSecurityScore should return 100 for perfect metrics', () => {
+    const svc = new SecurityService();
+    const score = svc._calculateSecurityScore({
+      totalUsers: 10,
+      mfaEnabledUsers: 10,
+      failedLogins24h: 0,
+      criticalEvents: 0,
+    });
+    expect(score).toBe(100);
+  });
+
+  it('_calculateSecurityScore should penalize low MFA adoption', () => {
+    const svc = new SecurityService();
+    const score = svc._calculateSecurityScore({
+      totalUsers: 100,
+      mfaEnabledUsers: 10, // 10% — below 50%
+      failedLogins24h: 0,
+      criticalEvents: 0,
+    });
+    expect(score).toBeLessThan(100);
+  });
+
+  it('_calculateSecurityScore should penalize many failed logins', () => {
+    const svc = new SecurityService();
+    const score = svc._calculateSecurityScore({
+      totalUsers: 10,
+      mfaEnabledUsers: 10,
+      failedLogins24h: 25,
+      criticalEvents: 0,
+    });
+    expect(score).toBeLessThan(100);
+  });
+
+  it('_calculateSecurityScore should never go below 0', () => {
+    const svc = new SecurityService();
+    const score = svc._calculateSecurityScore({
+      totalUsers: 100,
+      mfaEnabledUsers: 0,
+      failedLogins24h: 100,
+      criticalEvents: 100,
+    });
+    expect(score).toBeGreaterThanOrEqual(0);
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  E. Backup Service
+// ═════════════════════════════════════════════════════════════════════════════
+describe('Backup Service (config/backup)', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const { execFile } = require('child_process');
+
+  let backup;
+  let BACKUP_DIR;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+    jest.isolateModules(() => {
+      backup = require('../config/backup');
+    });
+    BACKUP_DIR = process.env.BACKUP_DIR || path.join(__dirname, '..', 'config', '..', 'backups');
+  });
+
+  // ── ensureBackupDir ──
+  it('should create backup directory if it does not exist', () => {
+    const mkdirSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {});
+    const existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    backup.ensureBackupDir();
+    expect(mkdirSpy).toHaveBeenCalledWith(expect.any(String), { recursive: true });
+    existsSpy.mockRestore();
+    mkdirSpy.mockRestore();
+  });
+
+  it('should not create directory if it already exists', () => {
+    const mkdirSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation(() => {});
+    const existsSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    backup.ensureBackupDir();
+    expect(mkdirSpy).not.toHaveBeenCalled();
+    existsSpy.mockRestore();
+    mkdirSpy.mockRestore();
+  });
+
+  // ── backupMongoDB ──
+  it('should call execFile with mongodump and resolve with backup path', async () => {
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    execFile.mockImplementation((_cmd, _args, cb) => cb(null, 'ok', ''));
+
+    const result = await backup.backupMongoDB();
+    expect(execFile).toHaveBeenCalledWith(
+      'mongodump',
+      expect.arrayContaining(['--gzip']),
+      expect.any(Function)
     );
-    console.log('  TEST SUMMARY');
-    console.log('='.repeat(70));
-    console.log(`\
-  Total Tests: ${this.testCount}`);
-    console.log(`  ✅ Passed: ${this.passCount}`);
-    console.log(`  ❌ Failed: ${this.failCount}`);
-    console.log(`\
-  Success Rate: ${successRate}%`);
-    console.log(`\
-  Status: ${this.failCount === 0 ? '✅ ALL TESTS PASSED' : '❌ SOME TESTS FAILED'}`);
-    console.log(
-      '\
-' +
-        '='.repeat(70) +
-        '\
-'
-    );
-  }
-}
+    expect(typeof result).toBe('string');
+    expect(result).toContain('mongodb-backup-');
+    expect(result).toContain('.gz');
+  });
 
-if (require.main === module) {
-  const testSuite = new SecurityTestSuite();
-  testSuite.runAllTests();
-}
+  it('should reject when mongodump fails', async () => {
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    execFile.mockImplementation((_cmd, _args, cb) => cb(new Error('mongodump not found')));
 
-module.exports = SecurityTestSuite;
+    await expect(backup.backupMongoDB()).rejects.toThrow('mongodump not found');
+  });
 
-// Jest compatibility wrapper
-describe('Security Services', () => {
-  it('should load security test suite', () => {
-    const suite = new SecurityTestSuite();
-    expect(suite).toBeDefined();
+  it('backup file name should include a timestamp', async () => {
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    execFile.mockImplementation((_cmd, _args, cb) => cb(null, '', ''));
+
+    const result = await backup.backupMongoDB();
+    // Timestamp format: YYYY-MM-DDTHH-MM-SS-mmmZ → contains year
+    expect(result).toMatch(/mongodb-backup-\d{4}-\d{2}-\d{2}/);
+  });
+
+  // ── cleanOldBackups ──
+  it('should delete files older than retention period', () => {
+    const now = Date.now();
+    const oldTime = now - 10 * 24 * 60 * 60 * 1000; // 10 days ago
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readdirSync').mockReturnValue(['old-backup.gz']);
+    jest.spyOn(fs, 'statSync').mockReturnValue({ mtimeMs: oldTime });
+    const unlinkSpy = jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+
+    backup.cleanOldBackups();
+    expect(unlinkSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should keep files within retention period', () => {
+    const now = Date.now();
+    const recentTime = now - 1 * 24 * 60 * 60 * 1000; // 1 day ago
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readdirSync').mockReturnValue(['recent-backup.gz']);
+    jest.spyOn(fs, 'statSync').mockReturnValue({ mtimeMs: recentTime });
+    const unlinkSpy = jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+
+    backup.cleanOldBackups();
+    expect(unlinkSpy).not.toHaveBeenCalled();
+  });
+
+  it('should handle empty backup directory', () => {
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readdirSync').mockReturnValue([]);
+    const unlinkSpy = jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+
+    backup.cleanOldBackups();
+    expect(unlinkSpy).not.toHaveBeenCalled();
+  });
+
+  it('should delete multiple old files', () => {
+    const old = Date.now() - 15 * 24 * 60 * 60 * 1000;
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+    jest.spyOn(fs, 'readdirSync').mockReturnValue(['a.gz', 'b.gz', 'c.gz']);
+    jest.spyOn(fs, 'statSync').mockReturnValue({ mtimeMs: old });
+    const unlinkSpy = jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {});
+
+    backup.cleanOldBackups();
+    expect(unlinkSpy).toHaveBeenCalledTimes(3);
+  });
+
+  // ── scheduleBackups ──
+  it('should not schedule when ENABLE_AUTO_BACKUP is not set', () => {
+    const orig = process.env.ENABLE_AUTO_BACKUP;
+    delete process.env.ENABLE_AUTO_BACKUP;
+    const spy = jest.spyOn(global, 'setInterval');
+    backup.scheduleBackups();
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+    if (orig) process.env.ENABLE_AUTO_BACKUP = orig;
+  });
+
+  it('should export all expected functions', () => {
+    expect(typeof backup.backupMongoDB).toBe('function');
+    expect(typeof backup.cleanOldBackups).toBe('function');
+    expect(typeof backup.scheduleBackups).toBe('function');
+    expect(typeof backup.ensureBackupDir).toBe('function');
   });
 });

@@ -67,7 +67,7 @@ class EventStore extends EventEmitter {
   /**
    * Append event to store
    */
-  async append(event) {
+  async append(event, session = null) {
     const { eventType, aggregateType, aggregateId, payload, metadata = {} } = event;
 
     // Get next version number
@@ -90,8 +90,9 @@ class EventStore extends EventEmitter {
       version,
     });
 
-    // Save event
-    await eventDoc.save();
+    // Save event (with optional transaction session)
+    const saveOptions = session ? { session } : {};
+    await eventDoc.save(saveOptions);
 
     // Emit event for subscribers
     this.emit('event:appended', eventDoc);
@@ -113,7 +114,7 @@ class EventStore extends EventEmitter {
       const savedEvents = [];
 
       for (const event of events) {
-        const savedEvent = await this.append(event);
+        const savedEvent = await this.append(event, session);
         savedEvents.push(savedEvent);
       }
 

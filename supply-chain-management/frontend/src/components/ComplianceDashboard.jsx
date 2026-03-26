@@ -82,7 +82,7 @@ const ComplianceDashboard = () => {
   const fetchComplianceData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         from: dateRange[0].format('YYYY-MM-DD'),
         to: dateRange[1].format('YYYY-MM-DD'),
@@ -136,7 +136,7 @@ const ComplianceDashboard = () => {
 
   const resolveViolation = async violationId => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/compliance/${violationId}/resolve`, {
         method: 'PATCH',
         headers: {
@@ -162,7 +162,7 @@ const ComplianceDashboard = () => {
 
   const scheduleAudit = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/compliance/schedule-audit`, {
         method: 'POST',
         headers: {

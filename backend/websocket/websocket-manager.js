@@ -300,12 +300,17 @@ class WebSocketManager {
     // Check specific room patterns
     if (roomName.startsWith('department:')) {
       // Check if user belongs to department
-      return true; // Implement actual check
+      const deptId = roomName.split(':')[1];
+      return !!(
+        user.department === deptId ||
+        (Array.isArray(user.departments) && user.departments.includes(deptId))
+      );
     }
 
     if (roomName.startsWith('project:')) {
       // Check if user has access to project
-      return true; // Implement actual check
+      const projectId = roomName.split(':')[1];
+      return !!(Array.isArray(user.projects) && user.projects.includes(projectId));
     }
 
     return false;

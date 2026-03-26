@@ -75,7 +75,7 @@ const CashFlowDashboard = () => {
   const fetchCashFlowData = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         from: dateRange[0].format('YYYY-MM-DD'),
         to: dateRange[1].format('YYYY-MM-DD'),
@@ -104,7 +104,7 @@ const CashFlowDashboard = () => {
 
   const fetchForecasts = async () => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/cash-flow/forecast?days=30`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -140,7 +140,7 @@ const CashFlowDashboard = () => {
 
   const exportData = async format => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         from: dateRange[0].format('YYYY-MM-DD'),
         to: dateRange[1].format('YYYY-MM-DD'),

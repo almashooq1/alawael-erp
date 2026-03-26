@@ -38,6 +38,8 @@ async function initializeRedis() {
     // Create Redis client (ioredis)
     redisClient = new Redis(REDIS_URL, {
       password: REDIS_PASSWORD,
+      keyPrefix: process.env.REDIS_PREFIX || 'alawael:',
+      tls: process.env.REDIS_TLS === 'true' ? { rejectUnauthorized: true } : undefined,
       retryStrategy: retries => {
         if (retries > 10) {
           logger.error('❌ Redis: Too many reconnection attempts');

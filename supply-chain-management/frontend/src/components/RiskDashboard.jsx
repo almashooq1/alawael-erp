@@ -77,7 +77,7 @@ const RiskDashboard = () => {
   const fetchRisks = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/risk/assessment`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -128,7 +128,7 @@ const RiskDashboard = () => {
 
   const mitigateRisk = async (riskId, action) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/risk/${riskId}/mitigate`, {
         method: 'POST',
         headers: {
@@ -151,7 +151,7 @@ const RiskDashboard = () => {
 
   const exportData = async format => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch(`/api/finance/risk/export?format=${format}`, {
         headers: { Authorization: `Bearer ${token}` },
       });

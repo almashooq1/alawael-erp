@@ -8,18 +8,18 @@ jest.mock('../utils/api', () => ({
   post: jest.fn(),
 }));
 
-const localStorageMock = (() => ({
+const sessionStorageMock = (() => ({
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
   clear: jest.fn(),
 }))();
-global.localStorage = localStorageMock;
+global.sessionStorage = sessionStorageMock;
 
 describe('Register Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    localStorageMock.setItem.mockClear();
+    sessionStorageMock.setItem.mockClear();
   });
 
   test('renders without crashing', () => {

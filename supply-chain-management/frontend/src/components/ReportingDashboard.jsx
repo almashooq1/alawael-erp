@@ -69,7 +69,7 @@ const ReportingDashboard = () => {
   const fetchReports = useCallback(async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         type: reportType,
         period,
@@ -97,7 +97,7 @@ const ReportingDashboard = () => {
 
   const generateReport = async format => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const params = new URLSearchParams({
         type: reportType,
         period,
@@ -130,7 +130,7 @@ const ReportingDashboard = () => {
 
   const scheduleReport = async frequency => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = sessionStorage.getItem('authToken');
       const response = await fetch('/api/finance/reporting/schedule', {
         method: 'POST',
         headers: {

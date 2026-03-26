@@ -57,11 +57,12 @@ router.get('/dashboard/stats', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
+const { escapeRegex } = require('../utils/sanitize');
     const { page = 1, limit = 50, status, category, search } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (search) filter.name = { $regex: search, $options: 'i' };
+    if (search) filter.name = { $regex: escapeRegex(search), $options: 'i' };
     const skip = (Math.max(1, +page) - 1) * +limit;
     const [data, total] = await Promise.all([
       Vendor.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),

@@ -11,6 +11,7 @@ const {
   TaqatTrainingProgram,
   TaqatEmploymentStats,
 } = require('../models/taqat.models');
+const { escapeRegex } = require('../utils/sanitize');
 
 class TaqatService {
   // ============================================================
@@ -56,8 +57,8 @@ class TaqatService {
       if (filters.educationLevel) query['education.level'] = filters.educationLevel;
       if (filters.search) {
         query.$or = [
-          { 'fullName.ar': { $regex: filters.search, $options: 'i' } },
-          { 'fullName.en': { $regex: filters.search, $options: 'i' } },
+          { 'fullName.ar': { $regex: escapeRegex(filters.search), $options: 'i' } },
+          { 'fullName.en': { $regex: escapeRegex(filters.search), $options: 'i' } },
           { nationalId: filters.search },
         ];
       }
@@ -166,13 +167,13 @@ class TaqatService {
       if (filters.disabilityType) query.suitableDisabilityTypes = filters.disabilityType;
       if (filters.jobType) query.jobType = filters.jobType;
       if (filters.sector) query.sector = filters.sector;
-      if (filters.location) query.location = { $regex: filters.location, $options: 'i' };
+      if (filters.location) query.location = { $regex: escapeRegex(filters.location), $options: 'i' };
       if (filters.hadafSupported !== undefined) query.hadafSupported = filters.hadafSupported;
       if (filters.search) {
         query.$or = [
-          { 'title.ar': { $regex: filters.search, $options: 'i' } },
-          { 'title.en': { $regex: filters.search, $options: 'i' } },
-          { 'employer.name': { $regex: filters.search, $options: 'i' } },
+          { 'title.ar': { $regex: escapeRegex(filters.search), $options: 'i' } },
+          { 'title.en': { $regex: escapeRegex(filters.search), $options: 'i' } },
+          { 'employer.name': { $regex: escapeRegex(filters.search), $options: 'i' } },
         ];
       }
 

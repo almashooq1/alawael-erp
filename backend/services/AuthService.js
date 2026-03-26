@@ -17,7 +17,7 @@ class AuthService {
    */
   static generateToken(userId, email, role) {
     const { jwtSecret } = require('../config/secrets');
-    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresIn = process.env.JWT_EXPIRES_IN || '15m';
 
     const payload = {
       userId,

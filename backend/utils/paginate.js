@@ -18,7 +18,7 @@ const MAX_LIMIT = 200;
  * @param {import('mongoose').Query} query - Mongoose query (pre-exec)
  * @param {object} params - { page, limit } from req.query
  * @param {object} [opts] - { maxLimit, lean }
- * @returns {Promise<{ data: any[], meta: { page, limit, total, totalPages } }>}
+ * @returns {Promise<{ data: any[], meta: { page, limit, total, totalPages, hasNext, hasPrev } }>}
  */
 async function paginate(query, params = {}, opts = {}) {
   const page = Math.max(1, parseInt(params.page, 10) || 1);
@@ -33,13 +33,17 @@ async function paginate(query, params = {}, opts = {}) {
     countQuery.countDocuments(),
   ]);
 
+  const totalPages = Math.ceil(total / limit) || 1;
+
   return {
     data,
     meta: {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit) || 1,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
     },
   };
 }
@@ -50,7 +54,8 @@ async function paginate(query, params = {}, opts = {}) {
 function paginateMeta(total, { page = 1, limit = DEFAULT_LIMIT } = {}) {
   const p = Math.max(1, +page);
   const l = Math.min(Math.max(1, +limit), MAX_LIMIT);
-  return { page: p, limit: l, total, totalPages: Math.ceil(total / l) || 1 };
+  const totalPages = Math.ceil(total / l) || 1;
+  return { page: p, limit: l, total, totalPages, hasNext: p < totalPages, hasPrev: p > 1 };
 }
 
 module.exports = { paginate, paginateMeta, DEFAULT_LIMIT, MAX_LIMIT };

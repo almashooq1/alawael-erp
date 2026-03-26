@@ -1,15 +1,45 @@
+# Dependencies
 node_modules
 npm-debug.log*
+
+# Environment (secrets)
 .env
 .env.*
+!.env.example
+
+# Version control
 .git
 .gitignore
+
+# Documentation (not needed in prod image)
 *.md
+docs/
+
+# Test files
 tests
 __tests__
+e2e
 coverage
 .nyc_output
-.vscode
-.idea
+.jest-cache
 *.test.js
 *.spec.js
+jest.*.js
+
+# IDE / Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# Archives & backups
+_archived
+archive
+backups
+logs
+
+# Docker-in-Docker
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore

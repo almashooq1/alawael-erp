@@ -163,22 +163,23 @@ function getPermissionService() {
 }
 
 /**
- * Get unified JWT secret from environment or fallback
- * Single source of truth for all JWT operations
+ * Get unified JWT secret via centralized secrets module.
+ * Production: throws if JWT_SECRET not set.
+ * Dev/Test: consistent dev-only fallback.
  *
  * @returns {string} JWT secret
  */
 function getUnifiedJWTSecret() {
-  return process.env.JWT_SECRET || process.env.AUTH_SECRET || 'unified-jwt-secret-alawael-unified';
+  return require('../config/secrets').jwtSecret;
 }
 
 /**
- * Get JWT refresh secret from environment or use main secret
+ * Get JWT refresh secret via centralized secrets module.
  *
  * @returns {string} JWT refresh secret
  */
 function getUnifiedJWTRefreshSecret() {
-  return process.env.JWT_REFRESH_SECRET || getUnifiedJWTSecret() + '-refresh';
+  return require('../config/secrets').jwtRefreshSecret;
 }
 
 /**

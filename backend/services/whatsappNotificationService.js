@@ -358,13 +358,23 @@ class WhatsAppNotificationService extends EventEmitter {
    * بدء معالج قائمة الانتظار
    */
   startQueueProcessor() {
-    setInterval(() => {
+    this._queueInterval = setInterval(() => {
       if (!this.isProcessing && this.messageQueue.length > 0) {
         this.processQueue();
       }
     }, 1000);
 
     logger.info('▶️ معالج قائمة الانتظار نشط');
+  }
+
+  /**
+   * إيقاف معالج قائمة الانتظار
+   */
+  stopQueueProcessor() {
+    if (this._queueInterval) {
+      clearInterval(this._queueInterval);
+      this._queueInterval = null;
+    }
   }
 
   /**

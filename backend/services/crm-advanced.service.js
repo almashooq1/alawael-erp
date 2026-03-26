@@ -13,6 +13,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ════════════════════════════════════════════════════════════════
 // 1. SCHEMAS — النماذج
@@ -270,10 +271,10 @@ class CRMAdvancedService {
     if (city) filter.city = city;
     if (search) {
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { contactPerson: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+        { contactPerson: { $regex: escapeRegex(search), $options: 'i' } },
+        { email: { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -454,9 +455,9 @@ class CRMAdvancedService {
     }
     if (search) {
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { contactName: { $regex: search, $options: 'i' } },
-        { notes: { $regex: search, $options: 'i' } },
+        { title: { $regex: escapeRegex(search), $options: 'i' } },
+        { contactName: { $regex: escapeRegex(search), $options: 'i' } },
+        { notes: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -1152,10 +1153,10 @@ class CRMAdvancedService {
     if (source) filter.source = source;
     if (search) {
       filter.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: escapeRegex(search), $options: 'i' } },
+        { lastName: { $regex: escapeRegex(search), $options: 'i' } },
+        { email: { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

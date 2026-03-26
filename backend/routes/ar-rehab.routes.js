@@ -14,6 +14,8 @@
 
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
+const { authenticate } = require('../middleware/auth');
 const {
   MixedRealityEngine,
   HolographicDataVisualization,
@@ -30,13 +32,16 @@ const bciReady = new BrainComputerInterfaceReady('default');
 const crossReality = new CrossRealityCollaboration('default');
 const immersiveAnalytics = new ImmersiveAnalyticsDashboard('default');
 
+// ── All AR/XR routes require authentication ───────────────────────
+router.use(authenticate);
+
 // ═══════════════════════════════════════════════════════════════════════════
 // MR SESSIONS — جلسات الواقع المختلط
 // ═══════════════════════════════════════════════════════════════════════════
 
 router.post('/sessions', (req, res) => {
   try {
-    const sessionId = `mr_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const sessionId = `mr_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
     const session = mrEngine.initiateMRSession(sessionId, req.body);
     res.status(201).json({ success: true, data: session });
   } catch (error) {

@@ -7,6 +7,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -159,9 +160,9 @@ router.get('/:studentId/courses', async (req, res) => {
     if (featured === 'true') filter.isFeatured = true;
     if (search)
       filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search, 'i')] } },
+        { title: { $regex: escapeRegex(search), $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
+        { tags: { $in: [new RegExp(escapeRegex(search), 'i')] } },
       ];
 
     const skip = (parseInt(page) - 1) * parseInt(limit);

@@ -5,6 +5,37 @@ const logger = require('../utils/logger');
 
 router.use(authenticate);
 
+/* ── Field whitelists ───────────────────────────────────── */
+const ASSESSMENT_FIELDS = [
+  'beneficiary_id',
+  'beneficiary_name',
+  'date_of_birth',
+  'disability_type',
+  'disability_severity',
+  'scales',
+  'notes',
+  'recommendations',
+  'assessment_date',
+  'next_review_date',
+  'guardian_name',
+];
+const ADL_FIELDS = [
+  'beneficiary',
+  'assessmentDate',
+  'categories',
+  'overallScore',
+  'notes',
+  'recommendations',
+  'environmentalFactors',
+  'assistiveDevices',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
+
 /* ─────────────────────── Beneficiary List (for assessors) ─────────────────────── */
 
 // GET /beneficiaries — list beneficiaries eligible for assessment
@@ -72,9 +103,9 @@ router.post('/assessment/scale-results', async (req, res) => {
   try {
     const DisabilityAssessment = require('../models/disability-assessment.model');
     const assessment = await DisabilityAssessment.create({
-      ...req.body,
+      ...pick(req.body, ASSESSMENT_FIELDS),
       type: 'scale',
-      created_by: req.user?.id,
+      created_by: req.user.id,
     });
     res.status(201).json({ success: true, data: assessment, message: 'تم حفظ نتائج المقياس' });
   } catch (err) {
@@ -88,9 +119,9 @@ router.post('/assessment/test-results', async (req, res) => {
   try {
     const DisabilityAssessment = require('../models/disability-assessment.model');
     const assessment = await DisabilityAssessment.create({
-      ...req.body,
+      ...pick(req.body, ASSESSMENT_FIELDS),
       type: 'test',
-      created_by: req.user?.id,
+      created_by: req.user.id,
     });
     res.status(201).json({ success: true, data: assessment, message: 'تم حفظ نتائج الاختبار' });
   } catch (err) {
@@ -699,8 +730,8 @@ router.post('/adl', async (req, res) => {
   try {
     const ADLAssessment = require('../models/ADLAssessment');
     const assessment = await ADLAssessment.create({
-      ...req.body,
-      assessor: req.user?.id,
+      ...pick(req.body, ADL_FIELDS),
+      assessor: req.user.id,
     });
     res
       .status(201)

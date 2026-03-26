@@ -259,9 +259,9 @@ PORT=5000
 MONGODB_URI=mongodb+srv://USER:PASS@cluster.mongodb.net/alawael-erp?retryWrites=true&w=majority
 
 # Security - ولّد مفاتيح عشوائية بـ: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-JWT_SECRET=CHANGE_ME_1
-JWT_REFRESH_SECRET=CHANGE_ME_2
-SESSION_SECRET=CHANGE_ME_3
+JWT_SECRET=$(openssl rand -hex 64)
+JWT_REFRESH_SECRET=$(openssl rand -hex 64)
+SESSION_SECRET=$(openssl rand -hex 64)
 JWT_EXPIRE=24h
 
 # Domain

@@ -12,13 +12,14 @@
 const express = require('express');
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/secrets');
 
 // Load the stubs module
 const stubs = require('../routes/frontend-api-stubs');
 
-// Generate a valid JWT for write-operation tests (prefixed _ until needed)
-const JWT_SECRET = process.env.JWT_SECRET || 'test-secret-for-unit-tests';
-const _validToken = jwt.sign(
+// Use the same secret the auth middleware uses so tokens verify correctly
+const JWT_SECRET = jwtSecret;
+const validToken = jwt.sign(
   { id: 'test-user-1', email: 'test@test.com', role: 'admin' },
   JWT_SECRET,
   { expiresIn: '1h' }
@@ -39,7 +40,9 @@ describe('frontend-api-stubs: adminRouter', () => {
   const app = buildApp('/api/admin', stubs.adminRouter);
 
   test('GET /api/admin/overview returns success with data shape', async () => {
-    const res = await request(app).get('/api/admin/overview');
+    const res = await request(app)
+      .get('/api/admin/overview')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeDefined();
@@ -48,7 +51,9 @@ describe('frontend-api-stubs: adminRouter', () => {
   });
 
   test('GET /api/admin/users returns array of users', async () => {
-    const res = await request(app).get('/api/admin/users');
+    const res = await request(app)
+      .get('/api/admin/users')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -58,39 +63,51 @@ describe('frontend-api-stubs: adminRouter', () => {
   });
 
   test('GET /api/admin/alerts returns alerts array', async () => {
-    const res = await request(app).get('/api/admin/alerts');
+    const res = await request(app)
+      .get('/api/admin/alerts')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
   });
 
   test('GET /api/admin/settings returns settings object', async () => {
-    const res = await request(app).get('/api/admin/settings');
+    const res = await request(app)
+      .get('/api/admin/settings')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeDefined();
   });
 
   test('GET /api/admin/reports returns reports data', async () => {
-    const res = await request(app).get('/api/admin/reports');
+    const res = await request(app)
+      .get('/api/admin/reports')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
 
   test('GET /api/admin/audit-logs returns audit logs', async () => {
-    const res = await request(app).get('/api/admin/audit-logs');
+    const res = await request(app)
+      .get('/api/admin/audit-logs')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
 
   test('GET /api/admin/clinics returns clinics data', async () => {
-    const res = await request(app).get('/api/admin/clinics');
+    const res = await request(app)
+      .get('/api/admin/clinics')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
 
   test('GET /api/admin/notifications returns notifications', async () => {
-    const res = await request(app).get('/api/admin/notifications');
+    const res = await request(app)
+      .get('/api/admin/notifications')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
@@ -103,14 +120,18 @@ describe('frontend-api-stubs: accountRouter', () => {
   const app = buildApp('/api/account', stubs.accountRouter);
 
   test('GET /api/account/security returns security settings', async () => {
-    const res = await request(app).get('/api/account/security');
+    const res = await request(app)
+      .get('/api/account/security')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeDefined();
   });
 
   test('GET /api/account/sessions returns sessions array', async () => {
-    const res = await request(app).get('/api/account/sessions');
+    const res = await request(app)
+      .get('/api/account/sessions')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);
@@ -142,20 +163,26 @@ describe('frontend-api-stubs: paymentsRouter', () => {
   const app = buildApp('/api/payments', stubs.paymentsRouter);
 
   test('GET /api/payments/all returns payments list', async () => {
-    const res = await request(app).get('/api/payments/all');
+    const res = await request(app)
+      .get('/api/payments/all')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toBeDefined();
   });
 
   test('GET /api/payments/history returns payments history', async () => {
-    const res = await request(app).get('/api/payments/history');
+    const res = await request(app)
+      .get('/api/payments/history')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
   });
 
   test('GET /api/payments/subscriptions/active returns subscription info', async () => {
-    const res = await request(app).get('/api/payments/subscriptions/active');
+    const res = await request(app)
+      .get('/api/payments/subscriptions/active')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('plan');
@@ -180,7 +207,9 @@ describe('frontend-api-stubs: monitoringRouter', () => {
   const app = buildApp('/api/monitoring', stubs.monitoringRouter);
 
   test('GET /api/monitoring/dashboard returns system metrics', async () => {
-    const res = await request(app).get('/api/monitoring/dashboard');
+    const res = await request(app)
+      .get('/api/monitoring/dashboard')
+      .set('Authorization', `Bearer ${validToken}`);
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
     expect(res.body.data).toHaveProperty('cpu');

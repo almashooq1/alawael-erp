@@ -3,6 +3,7 @@ const Webhook = require('../models/Webhook');
 const WebhookDelivery = require('../models/WebhookDelivery');
 const logger = require('../utils/logger');
 const crypto = require('crypto');
+const { validateOutboundUrl } = require('../utils/urlValidator');
 
 /**
  * WebhookService
@@ -16,6 +17,9 @@ class WebhookService {
    */
   async registerWebhook(data) {
     try {
+      // SSRF protection — validate URL before storing
+      await validateOutboundUrl(data.url);
+
       const webhook = new Webhook({
         name: data.name || 'Webhook',
         description: data.description,

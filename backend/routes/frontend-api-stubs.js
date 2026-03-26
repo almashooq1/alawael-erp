@@ -14,14 +14,14 @@ const express = require('express');
 // ════════════════════════════════════════════════════════════════════════════
 // Use the centralized auth middleware — no parallel JWT verification
 // ════════════════════════════════════════════════════════════════════════════
-const { optionalAuth, requireAuth } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 
 // ════════════════════════════════════════════════════════════════════════════
 //  /api/admin
 // ════════════════════════════════════════════════════════════════════════════
 const adminRouter = express.Router();
 
-adminRouter.get('/overview', optionalAuth, (req, res) => {
+adminRouter.get('/overview', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -38,7 +38,7 @@ adminRouter.get('/overview', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/users', optionalAuth, (req, res) => {
+adminRouter.get('/users', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -87,7 +87,7 @@ adminRouter.get('/users', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/alerts', optionalAuth, (req, res) => {
+adminRouter.get('/alerts', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -116,7 +116,7 @@ adminRouter.get('/alerts', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/settings', optionalAuth, (req, res) => {
+adminRouter.get('/settings', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -160,7 +160,7 @@ adminRouter.get('/settings', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/reports', optionalAuth, (req, res) => {
+adminRouter.get('/reports', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -203,7 +203,7 @@ adminRouter.get('/reports', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/audit-logs', optionalAuth, (req, res) => {
+adminRouter.get('/audit-logs', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -266,7 +266,7 @@ adminRouter.get('/audit-logs', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/clinics', optionalAuth, (req, res) => {
+adminRouter.get('/clinics', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -316,7 +316,7 @@ adminRouter.get('/clinics', optionalAuth, (req, res) => {
   });
 });
 
-adminRouter.get('/notifications', optionalAuth, (req, res) => {
+adminRouter.get('/notifications', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -369,7 +369,7 @@ adminRouter.get('/notifications', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const accountRouter = express.Router();
 
-accountRouter.get('/security', optionalAuth, (req, res) => {
+accountRouter.get('/security', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -386,7 +386,7 @@ accountRouter.put('/security', requireAuth, (req, res) => {
   res.json({ success: true, message: 'تم تحديث إعدادات الأمان' });
 });
 
-accountRouter.get('/sessions', optionalAuth, (req, res) => {
+accountRouter.get('/sessions', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -421,11 +421,11 @@ accountRouter.post('/sessions/logout-all', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const paymentsRouter = express.Router();
 
-paymentsRouter.get('/all', optionalAuth, (req, res) => {
+paymentsRouter.get('/all', requireAuth, (req, res) => {
   res.json({ success: true, data: paymentsData(), total: 6 });
 });
 
-paymentsRouter.get('/history', optionalAuth, (req, res) => {
+paymentsRouter.get('/history', requireAuth, (req, res) => {
   res.json({ success: true, data: paymentsData(), total: 6 });
 });
 
@@ -453,7 +453,7 @@ paymentsRouter.post('/subscriptions/create', requireAuth, (req, res) => {
   res.json({ success: true, message: 'تم إنشاء الاشتراك', subscriptionId: 'sub_' + Date.now() });
 });
 
-paymentsRouter.get('/subscriptions/active', optionalAuth, (req, res) => {
+paymentsRouter.get('/subscriptions/active', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -529,7 +529,7 @@ function paymentsData() {
 // ════════════════════════════════════════════════════════════════════════════
 const monitoringRouter = express.Router();
 
-monitoringRouter.get('/dashboard', optionalAuth, (req, res) => {
+monitoringRouter.get('/dashboard', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -554,7 +554,7 @@ monitoringRouter.get('/dashboard', optionalAuth, (req, res) => {
   });
 });
 
-monitoringRouter.get('/cache', optionalAuth, (req, res) => {
+monitoringRouter.get('/cache', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -569,7 +569,7 @@ monitoringRouter.get('/cache', optionalAuth, (req, res) => {
   });
 });
 
-monitoringRouter.get('/queries', optionalAuth, (req, res) => {
+monitoringRouter.get('/queries', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -588,7 +588,7 @@ monitoringRouter.get('/queries', optionalAuth, (req, res) => {
   });
 });
 
-monitoringRouter.get('/realtime', optionalAuth, (req, res) => {
+monitoringRouter.get('/realtime', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -626,7 +626,7 @@ monitoringRouter.get('/database', (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const aiPredictionsRouter = express.Router();
 
-aiPredictionsRouter.get('/predictions/:userId', optionalAuth, (req, res) => {
+aiPredictionsRouter.get('/predictions/:userId', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -670,7 +670,7 @@ aiPredictionsRouter.get('/predictions/:userId', optionalAuth, (req, res) => {
   });
 });
 
-aiPredictionsRouter.get('/recommendations/:userId', optionalAuth, (req, res) => {
+aiPredictionsRouter.get('/recommendations/:userId', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -711,7 +711,7 @@ aiPredictionsRouter.get('/recommendations/:userId', optionalAuth, (req, res) => 
 // ════════════════════════════════════════════════════════════════════════════
 const hrSystemRouter = express.Router();
 
-hrSystemRouter.get('/attendance', optionalAuth, (req, res) => {
+hrSystemRouter.get('/attendance', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -770,7 +770,7 @@ hrSystemRouter.get('/attendance', optionalAuth, (req, res) => {
   });
 });
 
-hrSystemRouter.get('/payroll', optionalAuth, (req, res) => {
+hrSystemRouter.get('/payroll', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -823,7 +823,7 @@ hrSystemRouter.get('/payroll', optionalAuth, (req, res) => {
   });
 });
 
-hrSystemRouter.get('/leaves', optionalAuth, (req, res) => {
+hrSystemRouter.get('/leaves', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -878,7 +878,7 @@ hrSystemRouter.post('/attendance/checkout', requireAuth, (req, res) => {
   });
 });
 
-hrSystemRouter.get('/performance-reviews', optionalAuth, (req, res) => {
+hrSystemRouter.get('/performance-reviews', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -936,7 +936,7 @@ integratedCareRouter.post('/plans', requireAuth, (req, res) => {
   });
 });
 
-integratedCareRouter.get('/plans', optionalAuth, (req, res) => {
+integratedCareRouter.get('/plans', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -967,7 +967,7 @@ integratedCareRouter.get('/plans', optionalAuth, (req, res) => {
   });
 });
 
-integratedCareRouter.get('/sessions', optionalAuth, (req, res) => {
+integratedCareRouter.get('/sessions', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -996,7 +996,7 @@ integratedCareRouter.get('/sessions', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const securityRouter = express.Router();
 
-securityRouter.get('/logs/me', optionalAuth, (req, res) => {
+securityRouter.get('/logs/me', requireAuth, (req, res) => {
   const now = Date.now();
   res.json({
     success: true,
@@ -1068,7 +1068,7 @@ securityRouter.post('/mfa/enable', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const organizationRouter = express.Router();
 
-organizationRouter.get('/structure', optionalAuth, (req, res) => {
+organizationRouter.get('/structure', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1165,7 +1165,7 @@ const commData = [
   },
 ];
 
-communicationsRouter.get('/stats', optionalAuth, (req, res) => {
+communicationsRouter.get('/stats', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1179,7 +1179,7 @@ communicationsRouter.get('/stats', optionalAuth, (req, res) => {
   });
 });
 
-communicationsRouter.get('/', optionalAuth, (req, res) => {
+communicationsRouter.get('/', requireAuth, (req, res) => {
   res.json({ success: true, data: commData, total: commData.length });
 });
 
@@ -1199,7 +1199,7 @@ communicationsRouter.delete('/:id', requireAuth, (req, res) => {
   res.json({ success: true, message: 'تم حذف الرسالة' });
 });
 
-communicationsRouter.get('/therapist', optionalAuth, (req, res) => {
+communicationsRouter.get('/therapist', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1236,7 +1236,7 @@ communicationsRouter.get('/therapist', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const aiCommRouter = express.Router();
 
-aiCommRouter.get('/dashboard', optionalAuth, (req, res) => {
+aiCommRouter.get('/dashboard', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1267,7 +1267,7 @@ aiCommRouter.post('/send-message', requireAuth, (req, res) => {
   res.json({ success: true, message: 'تم إرسال الرسالة بنجاح', messageId: 'msg_' + Date.now() });
 });
 
-aiCommRouter.get('/emails', optionalAuth, (req, res) => {
+aiCommRouter.get('/emails', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1317,7 +1317,7 @@ aiCommRouter.post('/chatbot/chat', requireAuth, (req, res) => {
   });
 });
 
-aiCommRouter.get('/conversations/:id/messages', optionalAuth, (req, res) => {
+aiCommRouter.get('/conversations/:id/messages', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1354,7 +1354,7 @@ aiCommRouter.get('/conversations/:id/messages', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const exportImportRouter = express.Router();
 
-exportImportRouter.get('/export/excel', optionalAuth, (req, res) => {
+exportImportRouter.get('/export/excel', requireAuth, (req, res) => {
   res.json({
     success: true,
     message: 'تم تصدير البيانات بنجاح',
@@ -1362,7 +1362,7 @@ exportImportRouter.get('/export/excel', optionalAuth, (req, res) => {
   });
 });
 
-exportImportRouter.get('/export/pdf/:id', optionalAuth, (req, res) => {
+exportImportRouter.get('/export/pdf/:id', requireAuth, (req, res) => {
   res.json({
     success: true,
     message: 'تم إنشاء ملف PDF',
@@ -1388,7 +1388,7 @@ exportImportRouter.post('/import/excel', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const exportsRouter = express.Router();
 
-exportsRouter.get('/:format', optionalAuth, (req, res) => {
+exportsRouter.get('/:format', requireAuth, (req, res) => {
   res.json({
     success: true,
     message: `تم التصدير بصيغة ${req.params.format}`,
@@ -1425,7 +1425,7 @@ studentReportsRouter.post('/:id/comparison', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const rehabProgramsRouter = express.Router();
 
-rehabProgramsRouter.get('/', optionalAuth, (req, res) => {
+rehabProgramsRouter.get('/', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1470,7 +1470,7 @@ rehabProgramsRouter.get('/', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const documentsSmartRouter = express.Router();
 
-documentsSmartRouter.get('/templates', optionalAuth, (req, res) => {
+documentsSmartRouter.get('/templates', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1524,7 +1524,7 @@ documentsSmartRouter.post('/generate', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const studentsRouter = express.Router();
 
-studentsRouter.get('/:id/dashboard', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/dashboard', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1544,7 +1544,7 @@ studentsRouter.get('/:id/dashboard', optionalAuth, (req, res) => {
   });
 });
 
-studentsRouter.get('/:id/schedule', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/schedule', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1592,7 +1592,7 @@ studentsRouter.get('/:id/schedule', optionalAuth, (req, res) => {
   });
 });
 
-studentsRouter.get('/:id/grades', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/grades', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1645,7 +1645,7 @@ studentsRouter.get('/:id/grades', optionalAuth, (req, res) => {
   });
 });
 
-studentsRouter.get('/:id/attendance', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/attendance', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -1666,7 +1666,7 @@ studentsRouter.get('/:id/attendance', optionalAuth, (req, res) => {
   });
 });
 
-studentsRouter.get('/:id/assignments', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/assignments', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1706,7 +1706,7 @@ studentsRouter.get('/:id/assignments', optionalAuth, (req, res) => {
   });
 });
 
-studentsRouter.get('/:id/announcements', optionalAuth, (req, res) => {
+studentsRouter.get('/:id/announcements', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1773,7 +1773,7 @@ const incentivesData = [
   },
 ];
 
-compensationRouter.get('/incentives', optionalAuth, (req, res) => {
+compensationRouter.get('/incentives', requireAuth, (req, res) => {
   res.json({ success: true, data: incentivesData, total: incentivesData.length });
 });
 
@@ -1798,7 +1798,7 @@ compensationRouter.put('/incentives/:id/mark-paid', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const disabilityRouter = express.Router();
 
-disabilityRouter.get('/assessment/scale-results', optionalAuth, (req, res) => {
+disabilityRouter.get('/assessment/scale-results', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1832,7 +1832,7 @@ disabilityRouter.post('/assessment/scale-results', requireAuth, (req, res) => {
   });
 });
 
-disabilityRouter.get('/assessment/test-results', optionalAuth, (req, res) => {
+disabilityRouter.get('/assessment/test-results', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -1967,7 +1967,7 @@ const tasksData = [
   },
 ];
 
-pmRouter.get('/projects', optionalAuth, (req, res) => {
+pmRouter.get('/projects', requireAuth, (req, res) => {
   res.json({ success: true, data: projectsData, total: projectsData.length });
 });
 
@@ -1979,7 +1979,7 @@ pmRouter.post('/projects', requireAuth, (req, res) => {
   });
 });
 
-pmRouter.get('/projects/:id', optionalAuth, (req, res) => {
+pmRouter.get('/projects/:id', requireAuth, (req, res) => {
   const project = projectsData.find(p => p._id === req.params.id) || projectsData[0];
   res.json({ success: true, data: project });
 });
@@ -1988,7 +1988,7 @@ pmRouter.put('/projects/:id', requireAuth, (req, res) => {
   res.json({ success: true, message: 'تم تحديث المشروع' });
 });
 
-pmRouter.get('/projects/:projectId/tasks', optionalAuth, (req, res) => {
+pmRouter.get('/projects/:projectId/tasks', requireAuth, (req, res) => {
   const filtered = tasksData.filter(t => t.projectId === req.params.projectId);
   res.json({
     success: true,
@@ -2018,7 +2018,7 @@ pmRouter.delete('/tasks/:id', requireAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const analyticsExtraRouter = express.Router();
 
-analyticsExtraRouter.get('/hr', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/hr', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2038,7 +2038,7 @@ analyticsExtraRouter.get('/hr', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/system', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/system', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2052,7 +2052,7 @@ analyticsExtraRouter.get('/system', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/insights', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/insights', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -2078,7 +2078,7 @@ analyticsExtraRouter.get('/insights', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/dashboard', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/dashboard', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2090,7 +2090,7 @@ analyticsExtraRouter.get('/dashboard', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/trends/monthly', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/trends/monthly', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -2101,11 +2101,11 @@ analyticsExtraRouter.get('/trends/monthly', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/export', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/export', requireAuth, (req, res) => {
   res.json({ success: true, downloadUrl: '/downloads/analytics_export.xlsx' });
 });
 
-analyticsExtraRouter.get('/compare', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/compare', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2116,7 +2116,7 @@ analyticsExtraRouter.get('/compare', optionalAuth, (req, res) => {
   });
 });
 
-analyticsExtraRouter.get('/program/:id/performance', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/program/:id/performance', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2134,7 +2134,7 @@ analyticsExtraRouter.get('/program/:id/performance', optionalAuth, (req, res) =>
   });
 });
 
-analyticsExtraRouter.get('/predictive/:type', optionalAuth, (req, res) => {
+analyticsExtraRouter.get('/predictive/:type', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2153,7 +2153,7 @@ analyticsExtraRouter.get('/predictive/:type', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const dashboardExtrasRouter = express.Router();
 
-dashboardExtrasRouter.get('/summary-systems', optionalAuth, (req, res) => {
+dashboardExtrasRouter.get('/summary-systems', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2169,7 +2169,7 @@ dashboardExtrasRouter.get('/summary-systems', optionalAuth, (req, res) => {
   });
 });
 
-dashboardExtrasRouter.get('/top-kpis', optionalAuth, (req, res) => {
+dashboardExtrasRouter.get('/top-kpis', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -2191,7 +2191,7 @@ dashboardExtrasRouter.get('/top-kpis', optionalAuth, (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 const searchAdapterRouter = express.Router();
 
-searchAdapterRouter.get('/', optionalAuth, (req, res, next) => {
+searchAdapterRouter.get('/', requireAuth, (req, res, next) => {
   const { q, type } = req.query;
   if (!q && !type) return next(); // let it fall through
   // rewrite: type → sub-path, q → query
@@ -2204,7 +2204,7 @@ searchAdapterRouter.get('/', optionalAuth, (req, res, next) => {
 // ════════════════════════════════════════════════════════════════════════════
 const parentsRouter = express.Router();
 
-parentsRouter.get('/:parentId/dashboard', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/dashboard', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2252,7 +2252,7 @@ parentsRouter.get('/:parentId/dashboard', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/children-progress', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/children-progress', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -2286,7 +2286,7 @@ parentsRouter.get('/:parentId/children-progress', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/attendance', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/attendance', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2326,7 +2326,7 @@ parentsRouter.get('/:parentId/attendance', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/payments', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/payments', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2364,7 +2364,7 @@ parentsRouter.get('/:parentId/payments', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/documents', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/documents', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: [
@@ -2407,7 +2407,7 @@ parentsRouter.get('/:parentId/documents', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/appointments', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/appointments', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {
@@ -2469,7 +2469,7 @@ parentsRouter.get('/:parentId/appointments', optionalAuth, (req, res) => {
   });
 });
 
-parentsRouter.get('/:parentId/messages', optionalAuth, (req, res) => {
+parentsRouter.get('/:parentId/messages', requireAuth, (req, res) => {
   res.json({
     success: true,
     data: {

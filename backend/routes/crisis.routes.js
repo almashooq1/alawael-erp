@@ -11,6 +11,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const {
   EmergencyPlan,
   CrisisIncident,
@@ -18,6 +19,68 @@ const {
   EmergencyContact,
 } = require('../models/crisis.model');
 const logger = require('../utils/logger');
+
+// ── All crisis routes require authentication ──────────────────────
+router.use(authenticate);
+
+// ── Field whitelists (mass-assignment protection) ─────────────────
+const PLAN_FIELDS = [
+  'title',
+  'type',
+  'riskLevel',
+  'center',
+  'description',
+  'objectives',
+  'scope',
+  'procedures',
+  'communicationTree',
+  'requiredResources',
+  'expiresAt',
+];
+const INCIDENT_FIELDS = [
+  'title',
+  'type',
+  'severity',
+  'center',
+  'description',
+  'location',
+  'relatedPlan',
+  'incidentCommander',
+  'assignedTeam',
+];
+const DRILL_FIELDS = [
+  'title',
+  'type',
+  'center',
+  'relatedPlan',
+  'coordinator',
+  'scheduledDate',
+  'description',
+  'duration',
+  'participants',
+  'objectives',
+  'scenario',
+];
+const CONTACT_FIELDS = [
+  'name',
+  'category',
+  'center',
+  'role',
+  'phone',
+  'alternatePhone',
+  'email',
+  'person',
+  'priority',
+  'isActive',
+  'notes',
+];
+
+/** Pick only allowed fields from source object */
+const pick = (src, fields) => {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EMERGENCY PLANS — خطط الطوارئ
@@ -75,7 +138,10 @@ router.get('/plans/:id', async (req, res) => {
 
 router.post('/plans', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.create({ ...req.body, createdBy: req.user?._id });
+    const plan = await EmergencyPlan.create({
+      ...pick(req.body, PLAN_FIELDS),
+      createdBy: req.user._id,
+    });
     res.status(201).json({ success: true, data: plan });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -84,7 +150,7 @@ router.post('/plans', async (req, res) => {
 
 router.put('/plans/:id', async (req, res) => {
   try {
-    const plan = await EmergencyPlan.findByIdAndUpdate(req.params.id, req.body, {
+    const plan = await EmergencyPlan.findByIdAndUpdate(req.params.id, pick(req.body, PLAN_FIELDS), {
       new: true,
       runValidators: true,
     });
@@ -99,7 +165,7 @@ router.patch('/plans/:id/approve', async (req, res) => {
   try {
     const plan = await EmergencyPlan.findByIdAndUpdate(
       req.params.id,
-      { status: 'active', approvedBy: req.user?._id, approvedAt: new Date() },
+      { status: 'active', approvedBy: req.user._id, approvedAt: new Date() },
       { new: true }
     );
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
@@ -183,8 +249,8 @@ router.get('/incidents/:id', async (req, res) => {
 router.post('/incidents', async (req, res) => {
   try {
     const incident = await CrisisIncident.create({
-      ...req.body,
-      reportedBy: req.body.reportedBy || req.user?._id,
+      ...pick(req.body, INCIDENT_FIELDS),
+      reportedBy: req.user._id,
     });
     res.status(201).json({ success: true, data: incident });
   } catch (error) {
@@ -194,10 +260,14 @@ router.post('/incidents', async (req, res) => {
 
 router.put('/incidents/:id', async (req, res) => {
   try {
-    const incident = await CrisisIncident.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const incident = await CrisisIncident.findByIdAndUpdate(
+      req.params.id,
+      pick(req.body, INCIDENT_FIELDS),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
   } catch (error) {
@@ -214,7 +284,7 @@ router.patch('/incidents/:id/status', async (req, res) => {
     incident.status = newStatus;
     incident.timeline.push({
       action: `تغيير الحالة إلى ${newStatus}`,
-      performedBy: req.user?._id,
+      performedBy: req.user._id,
       notes,
     });
 
@@ -234,7 +304,8 @@ router.post('/incidents/:id/timeline', async (req, res) => {
     const incident = await CrisisIncident.findById(req.params.id);
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
 
-    incident.timeline.push({ ...req.body, performedBy: req.user?._id });
+    const { action, notes } = req.body;
+    incident.timeline.push({ action, notes, performedBy: req.user._id });
     await incident.save();
     res.json({ success: true, data: incident });
   } catch (error) {
@@ -247,7 +318,13 @@ router.post('/incidents/:id/corrective-action', async (req, res) => {
     const incident = await CrisisIncident.findById(req.params.id);
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
 
-    incident.correctiveActions.push(req.body);
+    const { description: caDesc, assignedTo, dueDate, priority: caPriority } = req.body;
+    incident.correctiveActions.push({
+      description: caDesc,
+      assignedTo,
+      dueDate,
+      priority: caPriority,
+    });
     await incident.save();
     res.json({ success: true, data: incident, message: 'تم إضافة الإجراء التصحيحي' });
   } catch (error) {
@@ -296,7 +373,10 @@ router.get('/drills', async (req, res) => {
 
 router.post('/drills', async (req, res) => {
   try {
-    const drill = await EmergencyDrill.create({ ...req.body, createdBy: req.user?._id });
+    const drill = await EmergencyDrill.create({
+      ...pick(req.body, DRILL_FIELDS),
+      createdBy: req.user._id,
+    });
     res.status(201).json({ success: true, data: drill });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -305,10 +385,14 @@ router.post('/drills', async (req, res) => {
 
 router.put('/drills/:id', async (req, res) => {
   try {
-    const drill = await EmergencyDrill.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const drill = await EmergencyDrill.findByIdAndUpdate(
+      req.params.id,
+      pick(req.body, DRILL_FIELDS),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!drill) return res.status(404).json({ success: false, error: 'التمرين غير موجود' });
     res.json({ success: true, data: drill });
   } catch (error) {
@@ -361,7 +445,7 @@ router.get('/contacts', async (req, res) => {
 
 router.post('/contacts', async (req, res) => {
   try {
-    const contact = await EmergencyContact.create(req.body);
+    const contact = await EmergencyContact.create(pick(req.body, CONTACT_FIELDS));
     res.status(201).json({ success: true, data: contact });
   } catch (error) {
     res.status(400).json({ success: false, error: error.message });
@@ -370,10 +454,14 @@ router.post('/contacts', async (req, res) => {
 
 router.put('/contacts/:id', async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const contact = await EmergencyContact.findByIdAndUpdate(
+      req.params.id,
+      pick(req.body, CONTACT_FIELDS),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, data: contact });
   } catch (error) {

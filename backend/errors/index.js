@@ -14,9 +14,11 @@
 const classes = require('./AppError');
 const handler = require('./errorHandler');
 const responses = require('./responseSystem');
+const codes = require('./errorCodes');
 
 module.exports = {
   ...classes,
   ...handler,
   ...responses,
+  ...codes,
 };

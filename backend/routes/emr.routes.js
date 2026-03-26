@@ -20,7 +20,12 @@ const {
   ClinicalNote,
   Allergy,
 } = require('../models/emr.model');
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
+
+// ── Auth: all EMR routes require authentication (PHI data) ───────────────
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MEDICAL RECORDS — السجلات الطبية
@@ -32,7 +37,7 @@ router.get('/records', async (req, res) => {
     const filter = { isDeleted: { $ne: true } };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (search) {
-      filter.$or = [{ mrn: { $regex: search, $options: 'i' } }];
+      filter.$or = [{ mrn: { $regex: escapeRegex(search), $options: 'i' } }];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [records, total] = await Promise.all([
@@ -233,9 +238,9 @@ router.get('/lab-results', async (req, res) => {
     if (overallStatus) filter.overallStatus = overallStatus;
     if (search) {
       filter.$or = [
-        { labOrderNumber: { $regex: search, $options: 'i' } },
-        { 'testName.ar': { $regex: search, $options: 'i' } },
-        { 'testName.en': { $regex: search, $options: 'i' } },
+        { labOrderNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'testName.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'testName.en': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);

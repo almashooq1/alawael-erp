@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 const FormTemplate = require('../models/FormTemplate');
 const FormSubmission = require('../models/FormSubmission');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════
 // 📂 CATEGORIES METADATA
@@ -61,10 +62,10 @@ async function listTemplates(query = {}) {
 
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { nameEn: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
-      { tags: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapeRegex(search), $options: 'i' } },
+      { nameEn: { $regex: escapeRegex(search), $options: 'i' } },
+      { description: { $regex: escapeRegex(search), $options: 'i' } },
+      { tags: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 

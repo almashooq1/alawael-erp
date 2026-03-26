@@ -279,9 +279,19 @@ class BackupSyncSystem extends EventEmitter {
    * Start automatic sync
    */
   startAutomaticSync() {
-    setInterval(() => {
+    this._syncInterval = setInterval(() => {
       this.emit('sync:auto-check');
     }, this.syncInterval);
+  }
+
+  /**
+   * Shutdown: clear sync interval
+   */
+  shutdown() {
+    if (this._syncInterval) {
+      clearInterval(this._syncInterval);
+      this._syncInterval = null;
+    }
   }
 
   /**

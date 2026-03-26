@@ -311,13 +311,23 @@ class UnifiedNotificationManager extends EventEmitter {
    * معالج قائمة الانتظار
    */
   startQueueProcessor() {
-    setInterval(async () => {
+    this._queueInterval = setInterval(async () => {
       if (!this.isProcessing && this.queue.length > 0) {
         await this.processQueue();
       }
     }, 1000);
 
     logger.info('▶️ معالج قائمة انتظار الإشعارات نشط');
+  }
+
+  /**
+   * إيقاف معالج قائمة الانتظار
+   */
+  stopQueueProcessor() {
+    if (this._queueInterval) {
+      clearInterval(this._queueInterval);
+      this._queueInterval = null;
+    }
   }
 
   /**

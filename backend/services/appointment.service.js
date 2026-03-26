@@ -14,6 +14,7 @@ const TherapistAvailability = require('../models/TherapistAvailability');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
 const { AppError } = require('../errors/AppError');
+const { escapeRegex } = require('../utils/sanitize');
 
 class AppointmentService {
   // ─── APPOINTMENT CRUD ───────────────────────────────────────────────
@@ -103,10 +104,10 @@ class AppointmentService {
 
     if (search) {
       filter.$or = [
-        { beneficiaryName: { $regex: search, $options: 'i' } },
-        { therapistName: { $regex: search, $options: 'i' } },
-        { appointmentNumber: { $regex: search, $options: 'i' } },
-        { reason: { $regex: search, $options: 'i' } },
+        { beneficiaryName: { $regex: escapeRegex(search), $options: 'i' } },
+        { therapistName: { $regex: escapeRegex(search), $options: 'i' } },
+        { appointmentNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { reason: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

@@ -2,14 +2,14 @@
 const csrfProtection = require('../../middleware/csrfProtection');
 
 describe('csrfProtection middleware', () => {
-  const originalEnv = process.env.CSRF_PROTECTION_ENABLED;
+  const originalEnv = process.env.CSRF_DISABLE;
 
   beforeEach(() => {
-    process.env.CSRF_PROTECTION_ENABLED = 'true';
+    delete process.env.CSRF_DISABLE;
   });
 
   afterEach(() => {
-    process.env.CSRF_PROTECTION_ENABLED = originalEnv;
+    process.env.CSRF_DISABLE = originalEnv;
   });
 
   const createRes = () => {

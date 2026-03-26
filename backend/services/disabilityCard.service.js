@@ -24,6 +24,7 @@ const getDisabilityCard = () => {
 let User;
 const _getUser = () => {
   if (!User) User = require('../models/User');
+const { escapeRegex } = require('../utils/sanitize');
   return User;
 };
 
@@ -153,10 +154,10 @@ class DisabilityCardService {
 
     if (search) {
       query.$or = [
-        { full_name: { $regex: search, $options: 'i' } },
-        { full_name_ar: { $regex: search, $options: 'i' } },
-        { national_id: { $regex: search, $options: 'i' } },
-        { card_number: { $regex: search, $options: 'i' } },
+        { full_name: { $regex: escapeRegex(search), $options: 'i' } },
+        { full_name_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { national_id: { $regex: escapeRegex(search), $options: 'i' } },
+        { card_number: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

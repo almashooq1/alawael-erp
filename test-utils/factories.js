@@ -22,7 +22,7 @@ const userDefaults = {
   createdAt: () => past(90),
 };
 
-export const createUser = (overrides = {}) =>
+const createUser = (overrides = {}) =>
   Object.fromEntries(
     Object.entries({ ...userDefaults, ...overrides }).map(([k, v]) => [
       k,
@@ -31,7 +31,7 @@ export const createUser = (overrides = {}) =>
   );
 
 // ─── Employee Factory ───────────────────────
-export const createEmployee = (overrides = {}) => ({
+const createEmployee = (overrides = {}) => ({
   _id: objectId(),
   employeeId: `EMP-${String(_counter).padStart(4, '0')}`,
   name: pick(['سعد الحربي', 'ريم القحطاني', 'تركي المالكي']),
@@ -45,7 +45,7 @@ export const createEmployee = (overrides = {}) => ({
 });
 
 // ─── Student / Beneficiary Factory ──────────
-export const createStudent = (overrides = {}) => ({
+const createStudent = (overrides = {}) => ({
   _id: objectId(),
   studentId: `STD-${String(_counter).padStart(4, '0')}`,
   name: pick(['عبدالله محمد', 'سارة أحمد', 'يوسف خالد']),
@@ -59,7 +59,7 @@ export const createStudent = (overrides = {}) => ({
 });
 
 // ─── Session Factory ────────────────────────
-export const createSession = (overrides = {}) => ({
+const createSession = (overrides = {}) => ({
   _id: objectId(),
   title: pick(['جلسة علاج طبيعي', 'جلسة نطق', 'جلسة علاج وظيفي', 'جلسة تعليمية']),
   therapist: createUser({ role: 'therapist' }),
@@ -72,7 +72,7 @@ export const createSession = (overrides = {}) => ({
 });
 
 // ─── Invoice Factory ────────────────────────
-export const createInvoice = (overrides = {}) => ({
+const createInvoice = (overrides = {}) => ({
   _id: objectId(),
   invoiceNumber: `INV-${String(_counter).padStart(5, '0')}`,
   client: pick(['مؤسسة الأوائل', 'شركة النور', 'مركز الرعاية']),
@@ -93,7 +93,7 @@ export const createInvoice = (overrides = {}) => ({
 });
 
 // ─── Leave Request Factory ──────────────────
-export const createLeaveRequest = (overrides = {}) => ({
+const createLeaveRequest = (overrides = {}) => ({
   _id: objectId(),
   employee: createEmployee(),
   type: pick(['annual', 'sick', 'emergency']),
@@ -106,7 +106,7 @@ export const createLeaveRequest = (overrides = {}) => ({
 });
 
 // ─── Attendance Record Factory ──────────────
-export const createAttendanceRecord = (overrides = {}) => ({
+const createAttendanceRecord = (overrides = {}) => ({
   _id: objectId(),
   employee: createEmployee(),
   date: past(1),
@@ -118,7 +118,7 @@ export const createAttendanceRecord = (overrides = {}) => ({
 });
 
 // ─── Notification Factory ───────────────────
-export const createNotification = (overrides = {}) => ({
+const createNotification = (overrides = {}) => ({
   _id: objectId(),
   title: pick(['جلسة جديدة', 'إجازة معتمدة', 'تنبيه نظام', 'رسالة جديدة']),
   message: 'محتوى الإشعار التجريبي',
@@ -136,18 +136,18 @@ export const createNotification = (overrides = {}) => ({
  * @param {object} [overrides]
  * @returns {Array}
  */
-export const createMany = (factory, count, overrides = {}) => Array.from({ length: count }, (_, i) => factory({ ...overrides, index: i }));
+const createMany = (factory, count, overrides = {}) => Array.from({ length: count }, (_, i) => factory({ ...overrides, index: i }));
 
 // ─── API Response Wrappers ──────────────────
-export const wrapListResponse = (data, total) => ({
+const wrapListResponse = (data, total) => ({
   data: { data, total: total || data.length, page: 1, pages: 1 },
 });
 
-export const wrapSingleResponse = data => ({
+const wrapSingleResponse = data => ({
   data: { data, success: true },
 });
 
-export const wrapErrorResponse = (status, message) => ({
+const wrapErrorResponse = (status, message) => ({
   response: {
     status,
     data: { message: message || 'خطأ', success: false },
@@ -155,11 +155,11 @@ export const wrapErrorResponse = (status, message) => ({
 });
 
 // Reset counter between test suites
-export const resetFactoryCounter = () => {
+const resetFactoryCounter = () => {
   _counter = 0;
 };
 
-export default {
+module.exports = {
   createUser,
   createEmployee,
   createStudent,

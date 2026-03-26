@@ -6,11 +6,18 @@ import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all inventory records
+// Get all inventory records (paginated)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const inventory = await Inventory.find().populate('product');
-    res.json(inventory);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
+    const skip = (page - 1) * limit;
+
+    const [inventory, total] = await Promise.all([
+      Inventory.find().populate('product').skip(skip).limit(limit).lean(),
+      Inventory.countDocuments(),
+    ]);
+    res.json({ data: inventory, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (_err) {
     res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }

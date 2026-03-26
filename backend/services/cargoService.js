@@ -4,6 +4,7 @@
 
 const Cargo = require('../models/Cargo');
 const _logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class CargoService {
   static async create(data) {
@@ -19,10 +20,10 @@ class CargoService {
     if (filter.status) query.status = filter.status;
     if (filter.search) {
       query.$or = [
-        { cargoNumber: { $regex: filter.search, $options: 'i' } },
-        { description: { $regex: filter.search, $options: 'i' } },
-        { 'shipper.name': { $regex: filter.search, $options: 'i' } },
-        { 'consignee.name': { $regex: filter.search, $options: 'i' } },
+        { cargoNumber: { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { description: { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { 'shipper.name': { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { 'consignee.name': { $regex: escapeRegex(filter.search), $options: 'i' } },
       ];
     }
 

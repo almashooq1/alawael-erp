@@ -1,0 +1,13 @@
+# If you discover a security vulnerability, please report it responsibly.
+#
+# Contact: security@alawael-erp.com
+# Preferred-Languages: ar, en
+# Canonical: https://alawael-erp.com/.well-known/security.txt
+# Expires: 2026-12-31T23:59:59.000Z
+#
+# We aim to acknowledge reports within 48 hours and provide
+# a resolution timeline within 5 business days.
+
+Contact: mailto:security@alawael-erp.com
+Preferred-Languages: ar, en
+Expires: 2026-12-31T23:59:59.000Z

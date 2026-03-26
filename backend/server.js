@@ -13,6 +13,17 @@ const http = require('http');
 const socketIO = require('socket.io');
 const logger = require('./utils/logger');
 
+// Bootstrap OpenTelemetry if enabled (must load before other modules)
+if (process.env.OTEL_ENABLED === 'true') {
+  try {
+    const { initializeOpenTelemetry } = require('./observability/opentelemetry');
+    initializeOpenTelemetry();
+    logger.info('OpenTelemetry SDK bootstrapped');
+  } catch (err) {
+    logger.warn('OpenTelemetry init skipped — missing dependencies or config:', err.message);
+  }
+}
+
 // Import the fully-configured Express app
 const app = require('./app');
 
@@ -29,6 +40,11 @@ const redisClient = require('./config/redis');
 // --- HTTP Server ---
 const server = http.createServer(app);
 
+// --- Timeouts (prevent hung connections) ---
+server.timeout = 30_000; // 30 s — max time a request can take
+server.keepAliveTimeout = 65_000; // 65 s — must be > ALB/Nginx idle (usually 60 s)
+server.headersTimeout = 66_000; // slightly higher than keepAliveTimeout
+
 // --- Socket.IO (disabled in tests) ---
 const io = isTestEnv
   ? null
@@ -40,7 +56,10 @@ const io = isTestEnv
             .map(s => s.trim())
             .filter(Boolean)
             .concat(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []);
-          return origins.length > 0 ? origins : ['http://localhost:3001', 'http://localhost:3000'];
+          if (origins.length > 0) return origins;
+          // In production, reject all if no origins configured
+          if (process.env.NODE_ENV === 'production') return false;
+          return ['http://localhost:3001', 'http://localhost:3000'];
         })(),
         methods: ['GET', 'POST'],
         credentials: true,
@@ -104,11 +123,15 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
       }
     }
   } catch (err) {
+    const safeMsg = (err.message || '').replace(
+      /mongodb(\+srv)?:\/\/[^@]+@/gi,
+      'mongodb://<credentials-hidden>@'
+    );
     if (process.env.NODE_ENV === 'production') {
-      logger.error('FATAL: Database connection failed in production:', err.message);
+      logger.error('FATAL: Database connection failed in production:', safeMsg);
       process.exit(1);
     }
-    logger.warn('Database connection failed, continuing in dev mode...');
+    logger.warn('Database connection failed, continuing in dev mode:', safeMsg);
   }
 
   // Initialize Redis
@@ -135,7 +158,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
   try {
     const { cleanupOldLogs } = require('./config/logging.advanced');
     cleanupOldLogs(7);
-    setInterval(() => cleanupOldLogs(7), 24 * 60 * 60 * 1000);
+    server._logCleanupInterval = setInterval(() => cleanupOldLogs(7), 24 * 60 * 60 * 1000);
     logger.info('Log cleanup scheduled (7-day retention)');
   } catch (err) {
     logger.info('Log cleanup setup skipped:', err.message);
@@ -188,6 +211,10 @@ if (require.main === module) {
 
     const onListening = () => {
       logger.info(`Server running at http://localhost:${port} (${host})`);
+      // Signal PM2 that the app is ready (required for wait_ready: true / zero-downtime reload)
+      if (typeof process.send === 'function') {
+        process.send('ready');
+      }
     };
 
     const onError = err => {

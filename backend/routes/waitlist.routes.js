@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const Waitlist = require('../models/Waitlist');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CRUD — عمليات قائمة الانتظار
@@ -23,8 +24,8 @@ router.get('/', async (req, res) => {
     if (priority) filter.priority = priority;
     if (search) {
       filter.$or = [
-        { department: { $regex: search, $options: 'i' } },
-        { notes: { $regex: search, $options: 'i' } },
+        { department: { $regex: escapeRegex(search), $options: 'i' } },
+        { notes: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

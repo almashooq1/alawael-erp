@@ -18,6 +18,7 @@ const AnonymizedDataset = require('../models/AnonymizedDataset');
 const ProgramEffectiveness = require('../models/ProgramEffectiveness');
 const BenchmarkingReport = require('../models/BenchmarkingReport');
 const ResearchDataExport = require('../models/ResearchDataExport');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §1  Research Studies — الدراسات البحثية
@@ -44,9 +45,9 @@ const getStudies = async (query = {}) => {
   if (principalInvestigator) filter.principalInvestigator = principalInvestigator;
   if (search) {
     filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { abstract: { $regex: search, $options: 'i' } },
-      { keywords: { $regex: search, $options: 'i' } },
+      { title: { $regex: escapeRegex(search), $options: 'i' } },
+      { abstract: { $regex: escapeRegex(search), $options: 'i' } },
+      { keywords: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 
@@ -122,9 +123,9 @@ const getOutcomeMeasures = async (query = {}) => {
   }
   if (search) {
     filter.$or = [
-      { name: { $regex: search, $options: 'i' } },
-      { abbreviation: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { name: { $regex: escapeRegex(search), $options: 'i' } },
+      { abbreviation: { $regex: escapeRegex(search), $options: 'i' } },
+      { description: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 

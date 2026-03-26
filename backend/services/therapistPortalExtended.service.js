@@ -42,6 +42,7 @@ const _getDocument = () => {
 };
 const _getMessage = () => {
   if (!_Message) _Message = require('../models/message.model');
+const { escapeRegex } = require('../utils/sanitize');
   return _Message;
 };
 
@@ -96,8 +97,8 @@ class TherapistPortalExtendedService {
     if (query.status) filter.status = query.status;
     if (query.search) {
       filter.$or = [
-        { title: { $regex: query.search, $options: 'i' } },
-        { description: { $regex: query.search, $options: 'i' } },
+        { title: { $regex: escapeRegex(query.search), $options: 'i' } },
+        { description: { $regex: escapeRegex(query.search), $options: 'i' } },
       ];
     }
 

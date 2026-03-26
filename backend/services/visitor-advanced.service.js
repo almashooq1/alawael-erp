@@ -6,6 +6,7 @@
 const mongoose = require('mongoose');
 const Visitor = require('../models/Visitor');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ─── Blacklist Schema ────────────────────────────────────────────────────────
 const blacklistSchema = new mongoose.Schema(
@@ -122,12 +123,12 @@ class VisitorAdvancedService {
 
     if (search) {
       filter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { nationalId: { $regex: search, $options: 'i' } },
-        { company: { $regex: search, $options: 'i' } },
-        { visitorId: { $regex: search, $options: 'i' } },
-        { hostName: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
+        { nationalId: { $regex: escapeRegex(search), $options: 'i' } },
+        { company: { $regex: escapeRegex(search), $options: 'i' } },
+        { visitorId: { $regex: escapeRegex(search), $options: 'i' } },
+        { hostName: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -570,9 +571,9 @@ class VisitorAdvancedService {
     if (activeOnly === true || activeOnly === 'true') filter.isActive = true;
     if (search) {
       filter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { nationalId: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: escapeRegex(search), $options: 'i' } },
+        { nationalId: { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

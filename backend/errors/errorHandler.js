@@ -38,6 +38,8 @@ const trackError = code => {
     errorFrequency.counts.clear();
     errorFrequency.lastReset = now;
   }
+  // Cap map size to prevent memory exhaustion under DDoS / error-cascade
+  if (errorFrequency.counts.size > 10000) return;
   const count = (errorFrequency.counts.get(code) || 0) + 1;
   errorFrequency.counts.set(code, count);
   if (count === errorFrequency.threshold) {
@@ -192,6 +194,11 @@ const unhandledRejectionHandler = () => {
       reason: reason?.message || reason,
       stack: reason?.stack,
     });
+    // In production, unhandled rejections indicate serious bugs.
+    // Exit after logging to avoid undefined state (Node 15+ does this by default).
+    if (process.env.NODE_ENV === 'production') {
+      setTimeout(() => process.exit(1), 1000);
+    }
   });
 };
 

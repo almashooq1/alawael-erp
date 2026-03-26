@@ -52,11 +52,15 @@ import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Get all suppliers
+// Get all suppliers (paginated)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const suppliers = await Supplier.find();
-    res.json(suppliers);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
+    const skip = (page - 1) * limit;
+
+    const [suppliers, total] = await Promise.all([Supplier.find().skip(skip).limit(limit).lean(), Supplier.countDocuments()]);
+    res.json({ data: suppliers, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (_err) {
     res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }

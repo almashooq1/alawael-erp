@@ -127,8 +127,8 @@ describe('Critical Flow: Employee Affairs', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 describe('Critical Flow: Health & System', () => {
-  test('should return healthy status from /api/health', async () => {
-    const res = await request(app).get('/api/health');
+  test('should return healthy status from /health', async () => {
+    const res = await request(app).get('/health');
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('status');

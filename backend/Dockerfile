@@ -1,39 +1,38 @@
 # Multi-stage build for production optimization
-# Stage 1: Builder
-FROM node:18-alpine AS builder
+# Stage 1: Builder — install all deps + compile
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files first (layer caching)
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+# Install all dependencies (including devDependencies for build step)
+RUN npm ci --legacy-peer-deps
 
 # Copy application code
 COPY . .
 
-# Stage 2: Production runtime
-FROM node:18-alpine
+# Stage 2: Production runtime — lean image
+FROM node:20-alpine
 
 WORKDIR /app
 
-
-# Install dumb-init for proper signal handling and mongodump for MongoDB backup
+# Install dumb-init for proper PID 1 signal handling, and mongodump for backups
 RUN apk add --no-cache dumb-init mongodb-tools
 
 # Create non-root user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies (without dev)
-RUN npm install --production --legacy-peer-deps && npm cache clean --force
+# Install production dependencies only (no dev)
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
-# Copy entire application from builder stage with correct ownership
-COPY --from=builder --chown=nodejs:nodejs /app . .
+# Copy application from builder stage with correct ownership
+COPY --from=builder --chown=nodejs:nodejs /app .
 
 # Create required directories with proper permissions
 RUN mkdir -p /backups/auto /app/uploads /app/logs && chown -R nodejs:nodejs /backups /app/uploads /app/logs
@@ -55,11 +54,11 @@ ENV PORT=3001 \
     NODE_ENV=production \
     USE_MOCK_DB=false \
     SKIP_SOCKET_IO=false \
-    DISABLE_REDIS=false \
-    SKIP_PHASE17=true
+    DISABLE_REDIS=false
 
-# Use dumb-init to handle signals properly (optional)
-# ENTRYPOINT ["/sbin/dumb-init", "--"]
+# Use dumb-init as PID 1 to handle signals properly
+# (forwards SIGTERM/SIGINT to Node.js for graceful shutdown)
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-# Start application
-CMD ["node", "server.js"]
+# Start application with source maps for better error traces
+CMD ["node", "--enable-source-maps", "server.js"]

@@ -515,8 +515,11 @@ const flushLogs = async () => {
   });
 };
 
-// Schedule log rotation check every hour
-setInterval(rotateLogs, 60 * 60 * 1000);
+// Schedule log rotation check every hour (store ID so it can be cleared on shutdown)
+const _logRotationInterval = setInterval(rotateLogs, 60 * 60 * 1000);
+
+/** Stop the hourly rotation timer (for graceful shutdown / tests). */
+const stopLogRotation = () => clearInterval(_logRotationInterval);
 
 module.exports = {
   Logger,
@@ -527,6 +530,7 @@ module.exports = {
   logStream,
   rotateLogs,
   flushLogs,
+  stopLogRotation,
   config,
   LOG_LEVELS,
 };

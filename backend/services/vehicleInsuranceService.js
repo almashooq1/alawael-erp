@@ -4,6 +4,7 @@
 
 const VehicleInsurance = require('../models/VehicleInsurance');
 const _logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class VehicleInsuranceService {
   static async create(data) {
@@ -16,7 +17,7 @@ class VehicleInsuranceService {
     if (filter.vehicle) query.vehicle = filter.vehicle;
     if (filter.status) query.status = filter.status;
     if (filter.type) query.type = filter.type;
-    if (filter.provider) query['provider.name'] = { $regex: filter.provider, $options: 'i' };
+    if (filter.provider) query['provider.name'] = { $regex: escapeRegex(filter.provider), $options: 'i' };
 
     const [policies, total] = await Promise.all([
       VehicleInsurance.find(query)

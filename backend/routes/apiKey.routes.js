@@ -19,7 +19,7 @@ router.get('/', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, data: keys, count: keys.length });
   } catch (err) {
     logger.error('api-keys list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -31,7 +31,7 @@ router.get('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, data: key });
   } catch (err) {
     logger.error('api-key get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -59,7 +59,7 @@ router.post('/', requireAuth, requireRole(['admin']), async (req, res) => {
     });
   } catch (err) {
     logger.error('api-key create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -81,7 +81,7 @@ router.put('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, data: key });
   } catch (err) {
     logger.error('api-key update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -93,7 +93,7 @@ router.put('/:id/revoke', requireAuth, requireRole(['admin']), async (req, res) 
     res.json({ success: true, message: 'API key revoked', data: key });
   } catch (err) {
     logger.error('api-key revoke error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -105,7 +105,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'API key deleted permanently' });
   } catch (err) {
     logger.error('api-key delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false });
   }
 });
 

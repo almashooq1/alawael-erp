@@ -22,14 +22,9 @@ function safeModel(name) {
 }
 
 // ── Auth ─────────────────────────────────────────────────────────
-let authenticate;
-try {
-  const auth = require('../middleware/auth');
-  authenticate = auth.authenticate || auth.authenticateToken;
-} catch {
-  authenticate = (_req, _res, next) => next();
-}
-if (authenticate) router.use(authenticate);
+const { authenticate } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════
 // 1. DASHBOARD — لوحة المعلومات
@@ -158,7 +153,7 @@ router.get('/:warehouseId/items', async (req, res) => {
     const filter = { warehouse: req.params.warehouseId };
     if (category) filter.category = category;
     if (status) filter.status = status;
-    if (search) filter.nameAr = { $regex: search, $options: 'i' };
+    if (search) filter.nameAr = { $regex: escapeRegex(search), $options: 'i' };
     const total = await WHItem.countDocuments(filter);
     const data = await WHItem.find(filter)
       .sort({ nameAr: 1 })

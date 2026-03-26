@@ -13,6 +13,10 @@ import '@fontsource/cairo/700.css';
 import App from './App';
 import { surfaceColors, neutralColors } from './theme/palette';
 import { initSentry } from './utils/sentry';
+import { validateFrontendEnv } from './config/validateEnv';
+
+// Validate environment variables early
+validateFrontendEnv();
 
 // Initialize Sentry error tracking (loads async, non-blocking)
 initSentry();

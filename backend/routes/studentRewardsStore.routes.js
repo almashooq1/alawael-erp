@@ -7,6 +7,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -195,7 +196,7 @@ router.get('/:studentId/store', async (req, res) => {
       if (minPoints) filter.pointsCost.$gte = parseInt(minPoints);
       if (maxPoints) filter.pointsCost.$lte = parseInt(maxPoints);
     }
-    if (search) filter.name = { $regex: search, $options: 'i' };
+    if (search) filter.name = { $regex: escapeRegex(search), $options: 'i' };
 
     const items = await RewardItem.find(filter).sort({ pointsCost: 1 }).lean();
     const balance = await getBalance(req.params.studentId);

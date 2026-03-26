@@ -82,7 +82,7 @@ const envSchema = Joi.object({
   // ─── Feature Flags ────────────────────────────────────────────────────────
   SMART_TEST_MODE: Joi.string().valid('true', 'false').optional(),
   ENABLE_SWAGGER: Joi.string().valid('true', 'false').optional(),
-  CSRF_PROTECTION_ENABLED: Joi.string().valid('true', 'false').optional(),
+  CSRF_DISABLE: Joi.string().valid('true', 'false').optional(),
   MFA_ENABLED: Joi.string().valid('true', 'false').optional(),
 })
   .unknown(true) // allow other env vars (PATH, etc.)

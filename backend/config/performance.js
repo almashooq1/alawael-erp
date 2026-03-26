@@ -280,7 +280,7 @@ const etagMiddleware = (req, res, next) => {
   res.json = data => {
     if (res.statusCode === 200 && data) {
       const body = JSON.stringify(data);
-      const hash = crypto.createHash('md5').update(body).digest('hex');
+      const hash = crypto.createHash('sha256').update(body).digest('hex').slice(0, 32);
       const etag = `"${hash}"`;
 
       res.set('ETag', etag);

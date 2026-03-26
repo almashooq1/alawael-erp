@@ -50,7 +50,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
     const data = chat.getDashboard(getUserId(req));
     res.json({ success: true, data });
   } catch (err) {
-    res.status(err.statusCode || 500).json({ success: false, error: err.message });
+    res.status(err.statusCode || 500).json({ success: false });
   }
 });
 
@@ -63,7 +63,7 @@ router.get('/users', authenticate, async (req, res) => {
     const data = chat.getUsers(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -72,7 +72,7 @@ router.get('/users/online', authenticate, async (req, res) => {
     const data = chat.getOnlineUsers();
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -86,7 +86,7 @@ router.get(
       const data = chat.getUserById(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -101,7 +101,7 @@ router.put(
       const data = chat.setUserStatus(getUserId(req), req.body.status);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -115,7 +115,7 @@ router.get('/conversations', authenticate, async (req, res) => {
     const data = chat.getConversations(getUserId(req));
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -129,7 +129,7 @@ router.get(
       const data = chat.getConversationById(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -144,7 +144,7 @@ router.post(
       const data = chat.createDirectConversation(getUserId(req), req.body.userId);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -162,7 +162,7 @@ router.post(
       const data = chat.createGroupConversation(getUserId(req), req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -177,7 +177,7 @@ router.put(
       const data = chat.updateConversation(req.params.id, getUserId(req), req.body);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -193,7 +193,7 @@ router.delete(
       const data = chat.deleteConversation(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -215,7 +215,7 @@ router.post(
       const data = chat.addParticipant(req.params.id, getUserId(req), req.body.userId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -233,7 +233,7 @@ router.delete(
       const data = chat.removeParticipant(req.params.id, getUserId(req), req.params.userId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -251,7 +251,7 @@ router.post(
       const data = chat.promoteToAdmin(req.params.id, getUserId(req), req.body.userId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -270,7 +270,7 @@ router.get(
       const data = chat.getMessages(req.params.id, getUserId(req), req.query);
       res.json({ success: true, ...data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -288,7 +288,7 @@ router.post(
       const data = chat.sendMessage(req.params.id, getUserId(req), req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -306,7 +306,7 @@ router.put(
       const data = chat.editMessage(req.params.id, getUserId(req), req.body.content);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -321,7 +321,7 @@ router.delete(
       const data = chat.deleteMessage(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -331,7 +331,7 @@ router.get('/messages/search', authenticate, async (req, res) => {
     const data = chat.searchMessages(getUserId(req), req.query.q);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(err.statusCode || 500).json({ success: false, error: err.message });
+    res.status(err.statusCode || 500).json({ success: false });
   }
 });
 
@@ -352,7 +352,7 @@ router.post(
       const data = chat.addReaction(req.params.id, getUserId(req), req.body.emoji);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -367,7 +367,7 @@ router.get(
       const data = chat.getReactions(req.params.id);
       res.json({ success: true, data, total: data.length });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -386,7 +386,7 @@ router.post(
       const data = chat.markAsRead(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -396,7 +396,7 @@ router.get('/unread', authenticate, async (req, res) => {
     const data = chat.getUnreadCount(getUserId(req));
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -414,7 +414,7 @@ router.get(
       const data = chat.getPinnedMessages(req.params.id);
       res.json({ success: true, data, total: data.length });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -432,7 +432,7 @@ router.post(
       const data = chat.pinMessage(req.params.id, req.body.messageId, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -450,7 +450,7 @@ router.delete(
       const data = chat.unpinMessage(req.params.id, req.params.messageId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -472,7 +472,7 @@ router.post(
       const data = chat.uploadAttachment(getUserId(req), req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -487,7 +487,7 @@ router.get(
       const data = chat.getAttachment(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -502,7 +502,7 @@ router.get(
       const data = chat.getConversationAttachments(req.params.id, getUserId(req));
       res.json({ success: true, data, total: data.length });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -524,7 +524,7 @@ router.post(
       const data = chat.setTyping(req.params.id, getUserId(req), req.body.isTyping);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -539,7 +539,7 @@ router.get(
       const data = chat.getTypingUsers(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      res.status(500).json({ success: false });
     }
   }
 );
@@ -553,7 +553,7 @@ router.get('/blocked', authenticate, async (req, res) => {
     const data = chat.getBlockedUsers(getUserId(req));
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -567,7 +567,7 @@ router.post(
       const data = chat.blockUser(getUserId(req), req.body.userId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );
@@ -582,7 +582,7 @@ router.delete(
       const data = chat.unblockUser(getUserId(req), req.params.userId);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false });
     }
   }
 );

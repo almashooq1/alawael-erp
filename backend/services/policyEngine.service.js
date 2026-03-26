@@ -625,8 +625,39 @@ class PolicyEngine extends EventEmitter {
         const contextPattern = new RegExp(`context\\.${key}\\b`, 'g');
         safeExpr = safeExpr.replace(contextPattern, JSON.stringify(value));
       }
-      // Evaluate the simplified expression
-      const result = Function('"use strict"; return (' + safeExpr + ')')();
+      // Safe evaluation: only allow simple comparison operations, no code execution
+      // Parse as: <left> <operator> <right>
+      const comparisonMatch = safeExpr.match(
+        /^\s*([\d.]+|'[^']*'|"[^"]*"|true|false|null)\s*(===|!==|==|!=|>=|<=|>|<)\s*([\d.]+|'[^']*'|"[^"]*"|true|false|null)\s*$/
+      );
+      if (!comparisonMatch) {
+        this.logger.warn(
+          `Expression too complex for safe evaluation: ${safeExpr.substring(0, 50)}`
+        );
+        return false;
+      }
+      const parseVal = v => {
+        if (v === 'true') return true;
+        if (v === 'false') return false;
+        if (v === 'null') return null;
+        if ((v.startsWith("'") && v.endsWith("'")) || (v.startsWith('"') && v.endsWith('"')))
+          return v.slice(1, -1);
+        return Number(v);
+      };
+      const left = parseVal(comparisonMatch[1]);
+      const op = comparisonMatch[2];
+      const right = parseVal(comparisonMatch[3]);
+      const ops = {
+        '===': (a, b) => a === b,
+        '!==': (a, b) => a !== b,
+        '==': (a, b) => a == b,
+        '!=': (a, b) => a != b,
+        '>': (a, b) => a > b,
+        '<': (a, b) => a < b,
+        '>=': (a, b) => a >= b,
+        '<=': (a, b) => a <= b,
+      };
+      const result = ops[op](left, right);
       return Boolean(result);
     } catch (error) {
       this.logger.error(`Error evaluating custom condition: ${error.message}`);

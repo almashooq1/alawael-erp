@@ -28,6 +28,8 @@ describe('paginateMeta', () => {
       limit: 10,
       total: 100,
       totalPages: 10,
+      hasNext: true,
+      hasPrev: false,
     });
   });
 

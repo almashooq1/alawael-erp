@@ -13,6 +13,60 @@ const express = require('express');
 const router = express.Router();
 const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../models/kitchen.model');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
+const { authenticate } = require('../middleware/auth');
+
+// All kitchen routes require authentication
+router.use(authenticate);
+
+// ── Field whitelists ────────────────────────────────────────────────────────
+const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
+
+const MENU_ITEM_FIELDS = [
+  'name',
+  'category',
+  'description',
+  'ingredients',
+  'nutritionalInfo',
+  'allergens',
+  'dietaryTags',
+  'preparationTime',
+  'servingSize',
+  'isActive',
+  'price',
+];
+const DAILY_MENU_FIELDS = [
+  'date',
+  'meals',
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snacks',
+  'notes',
+  'isPublished',
+];
+const MEAL_SERVICE_FIELDS = [
+  'date',
+  'mealType',
+  'menu',
+  'beneficiaries',
+  'servedCount',
+  'notes',
+  'feedback',
+  'servedBy',
+];
+const INVENTORY_FIELDS = [
+  'item',
+  'name',
+  'category',
+  'quantity',
+  'unit',
+  'minimumStock',
+  'supplier',
+  'unitPrice',
+  'expiryDate',
+  'notes',
+];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MENU ITEMS — عناصر القائمة
@@ -36,8 +90,8 @@ router.get('/menu-items', async (req, res) => {
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (search) {
       filter.$or = [
-        { 'name.ar': { $regex: search, $options: 'i' } },
-        { 'name.en': { $regex: search, $options: 'i' } },
+        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -59,7 +113,7 @@ router.get('/menu-items', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Kitchen] Menu items list error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -69,16 +123,19 @@ router.get('/menu-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, data: item });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
 router.post('/menu-items', async (req, res) => {
   try {
-    const item = await MenuItem.create({ ...req.body, createdBy: req.user?._id });
+    const item = await MenuItem.create({
+      ...pick(req.body, MENU_ITEM_FIELDS),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -91,7 +148,7 @@ router.put('/menu-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -105,7 +162,7 @@ router.delete('/menu-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, message: 'تم إلغاء تفعيل عنصر القائمة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -148,7 +205,7 @@ router.get('/daily-menus', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Kitchen] Daily menus list error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -169,16 +226,19 @@ router.get('/daily-menus/today', async (req, res) => {
     if (!menu) return res.json({ success: true, data: null, message: 'لا توجد قائمة طعام لليوم' });
     res.json({ success: true, data: menu });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
 router.post('/daily-menus', async (req, res) => {
   try {
-    const menu = await DailyMenu.create({ ...req.body, createdBy: req.user?._id });
+    const menu = await DailyMenu.create({
+      ...pick(req.body, DAILY_MENU_FIELDS),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: menu });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -191,7 +251,7 @@ router.put('/daily-menus/:id', async (req, res) => {
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -205,7 +265,7 @@ router.patch('/daily-menus/:id/approve', async (req, res) => {
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu, message: 'تمت الموافقة على القائمة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -249,16 +309,16 @@ router.get('/meal-service', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
 router.post('/meal-service', async (req, res) => {
   try {
-    const record = await MealService.create(req.body);
+    const record = await MealService.create(pick(req.body, MEAL_SERVICE_FIELDS));
     res.status(201).json({ success: true, data: record });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -271,7 +331,7 @@ router.put('/meal-service/:id', async (req, res) => {
     if (!record) return res.status(404).json({ success: false, error: 'سجل الخدمة غير موجود' });
     res.json({ success: true, data: record });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -313,7 +373,7 @@ router.get('/inventory', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -338,20 +398,20 @@ router.get('/inventory/alerts', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
 router.post('/inventory', async (req, res) => {
   try {
     const item = await KitchenInventory.create({
-      ...req.body,
+      ...pick(req.body, INVENTORY_FIELDS),
       restockedBy: req.user?._id,
       lastRestocked: new Date(),
     });
     res.status(201).json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -364,7 +424,7 @@ router.put('/inventory/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -379,7 +439,7 @@ router.patch('/inventory/:id/restock', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item, message: 'تم إعادة التخزين بنجاح' });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -419,7 +479,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 

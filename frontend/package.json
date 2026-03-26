@@ -15,7 +15,10 @@
     "quality:guard": "react-scripts test --passWithNoTests",
     "quality:fast": "npm run quality:guard -- --coverage --passWithNoTests",
     "quality:ci": "npm run quality:guard -- --coverage --passWithNoTests --watchAll=false",
-    "quality": "npm run quality:ci"
+    "quality": "npm run quality:ci",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "analyze": "npx source-map-explorer 'build/static/js/*.js'"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -70,5 +73,15 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:3001"
+  "proxy": "http://localhost:3001",
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 40,
+        "branches": 25,
+        "functions": 30,
+        "lines": 40
+      }
+    }
+  }
 }

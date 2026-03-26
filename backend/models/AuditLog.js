@@ -86,6 +86,17 @@ const auditLogSchema = new mongoose.Schema(
 auditLogSchema.index({ 'user.userId': 1, timestamp: -1 });
 auditLogSchema.index({ entity: 1, operation: 1 });
 
+// TTL index — auto-delete non-compliance logs after 1 year (365 days)
+// Compliance-relevant records are excluded by partial filter expression
+auditLogSchema.index(
+  { timestamp: 1 },
+  {
+    expireAfterSeconds: 365 * 24 * 60 * 60,
+    partialFilterExpression: { complianceRelevant: { $ne: true } },
+    name: 'ttl_audit_1yr_non_compliance',
+  }
+);
+
 auditLogSchema.statics.getUserActions = function (userId, limit = 50) {
   return this.find({ 'user.userId': userId }).sort({ timestamp: -1 }).limit(limit);
 };

@@ -521,7 +521,12 @@ router.post('/stamp-pdf/:stampId', upload.single('document'), async (req, res) =
     if (req.file) {
       pdfBytes = fs.readFileSync(req.file.path);
     } else if (req.body.documentUrl) {
-      const docPath = path.join(__dirname, '..', req.body.documentUrl);
+      // Path traversal protection: only allow files within uploads directory
+      const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+      const docPath = path.resolve(uploadsDir, path.basename(req.body.documentUrl));
+      if (!docPath.startsWith(uploadsDir)) {
+        return res.status(400).json({ success: false, message: 'مسار الملف غير صالح' });
+      }
       if (!fs.existsSync(docPath)) {
         return res.status(404).json({ success: false, message: 'ملف المستند غير موجود' });
       }

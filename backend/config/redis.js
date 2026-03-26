@@ -1,8 +1,12 @@
-/* eslint-disable no-unused-vars */
 /**
  * Redis Configuration
  * إعدادات Redis Cache
+ *
+ * Provides a singleton Redis client with JSON serialization,
+ * pattern deletion via SCAN (non-blocking), and graceful fallbacks.
  */
+
+'use strict';
 
 const Redis = require('ioredis');
 const logger = require('../utils/logger');
@@ -141,8 +145,10 @@ async function del(key) {
 }
 
 /**
- * Delete multiple keys matching pattern
- * حذف عدة مفاتيح حسب النمط
+ * Delete multiple keys matching pattern using SCAN (non-blocking).
+ * Uses SCAN instead of KEYS to avoid blocking the Redis server
+ * in production with large datasets.
+ * حذف عدة مفاتيح حسب النمط باستخدام SCAN (غير حاجب)
  */
 async function delPattern(pattern) {
   if (!isConnected || !redisClient) {
@@ -150,12 +156,19 @@ async function delPattern(pattern) {
   }
 
   try {
-    const keys = await redisClient.keys(pattern);
-    if (keys.length === 0) {
-      return 0;
-    }
-    await redisClient.del(keys);
-    return keys.length;
+    let cursor = '0';
+    let totalDeleted = 0;
+
+    do {
+      const [nextCursor, keys] = await redisClient.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+        totalDeleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    return totalDeleted;
   } catch (error) {
     logger.error(`Redis DEL pattern error for "${pattern}":`, error.message);
     return 0;

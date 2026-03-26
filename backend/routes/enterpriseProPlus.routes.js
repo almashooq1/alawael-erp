@@ -38,6 +38,7 @@ const {
   StrategicInitiative,
   SWOTAnalysis,
 } = require('../models/EnterpriseProPlus');
+const { escapeRegex } = require('../utils/sanitize');
 
 // Helper
 const _oid = id => new mongoose.Types.ObjectId(id);
@@ -146,9 +147,9 @@ router.get('/talent/candidates', authenticateToken, async (req, res) => {
     if (source) filter.source = source;
     if (search)
       filter.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: escapeRegex(search), $options: 'i' } },
+        { lastName: { $regex: escapeRegex(search), $options: 'i' } },
+        { email: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     const total = await Candidate.countDocuments(filter);
     const data = await Candidate.find(filter)
@@ -484,8 +485,8 @@ router.get('/vendors', authenticateToken, async (req, res) => {
     if (qualificationStatus) filter.qualificationStatus = qualificationStatus;
     if (search)
       filter.$or = [
-        { companyName: { $regex: search, $options: 'i' } },
-        { companyNameAr: { $regex: search, $options: 'i' } },
+        { companyName: { $regex: escapeRegex(search), $options: 'i' } },
+        { companyNameAr: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     const total = await Vendor.countDocuments(filter);
     const data = await Vendor.find(filter)

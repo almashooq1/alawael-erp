@@ -56,9 +56,12 @@ const logger = winston.createLogger({
     version: require('../package.json').version,
   },
   transports: [
-    // Console transport
+    // Console transport — JSON in production for log aggregators, colorized in dev
     new winston.transports.Console({
-      format: winston.format.combine(winston.format.colorize(), winston.format.simple()),
+      format:
+        process.env.NODE_ENV === 'production'
+          ? jsonFormat
+          : winston.format.combine(winston.format.colorize(), winston.format.simple()),
     }),
 
     // Error log file
@@ -106,6 +109,50 @@ const logger = winston.createLogger({
 });
 
 /**
+ * Sensitive-field sanitizer.
+ * Strips passwords, tokens, secrets, and credit card numbers from log metadata.
+ * Use before passing user-supplied data to any log call.
+ */
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'passwordHash',
+  'newPassword',
+  'oldPassword',
+  'confirmPassword',
+  'token',
+  'accessToken',
+  'refreshToken',
+  'resetToken',
+  'apiKey',
+  'apiSecret',
+  'secret',
+  'authorization',
+  'cookie',
+  'creditCard',
+  'cardNumber',
+  'cvv',
+  'ssn',
+]);
+
+const sanitizeLogData = (data, depth = 0) => {
+  if (depth > 5 || data === null || data === undefined) return data;
+  if (typeof data !== 'object') return data;
+  if (Array.isArray(data)) return data.map(item => sanitizeLogData(item, depth + 1));
+
+  const sanitized = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_KEYS.has(key.toLowerCase ? key.toLowerCase() : key)) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof value === 'object' && value !== null) {
+      sanitized[key] = sanitizeLogData(value, depth + 1);
+    } else {
+      sanitized[key] = value;
+    }
+  }
+  return sanitized;
+};
+
+/**
  * Middleware لـ logging الطلبات والاستجابات
  * Includes requestId from req.id for end-to-end tracing
  */
@@ -114,8 +161,8 @@ const requestLoggingMiddleware = (req, res, next) => {
   const originalSend = res.send;
   const requestId = req.id || undefined;
 
-  // تسجيل بيانات الطلب
-  const requestLog = {
+  // تسجيل بيانات الطلب (sanitized to strip tokens/passwords from query params)
+  const requestLog = sanitizeLogData({
     requestId,
     method: req.method,
     path: req.path,
@@ -123,7 +170,7 @@ const requestLoggingMiddleware = (req, res, next) => {
     ip: req.ip,
     userAgent: req.get('user-agent'),
     userId: req.user?.id,
-  };
+  });
 
   logger.debug('Incoming Request', { request: requestLog });
 
@@ -226,50 +273,6 @@ const getLogger = () => logger;
 const createChildLogger = requestId => {
   if (!requestId) return logger;
   return logger.child({ requestId });
-};
-
-/**
- * Sensitive-field sanitizer.
- * Strips passwords, tokens, secrets, and credit card numbers from log metadata.
- * Use before passing user-supplied data to any log call.
- */
-const SENSITIVE_KEYS = new Set([
-  'password',
-  'passwordHash',
-  'newPassword',
-  'oldPassword',
-  'confirmPassword',
-  'token',
-  'accessToken',
-  'refreshToken',
-  'resetToken',
-  'apiKey',
-  'apiSecret',
-  'secret',
-  'authorization',
-  'cookie',
-  'creditCard',
-  'cardNumber',
-  'cvv',
-  'ssn',
-]);
-
-const sanitizeLogData = (data, depth = 0) => {
-  if (depth > 5 || data === null || data === undefined) return data;
-  if (typeof data !== 'object') return data;
-  if (Array.isArray(data)) return data.map(item => sanitizeLogData(item, depth + 1));
-
-  const sanitized = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (SENSITIVE_KEYS.has(key.toLowerCase ? key.toLowerCase() : key)) {
-      sanitized[key] = '[REDACTED]';
-    } else if (typeof value === 'object' && value !== null) {
-      sanitized[key] = sanitizeLogData(value, depth + 1);
-    } else {
-      sanitized[key] = value;
-    }
-  }
-  return sanitized;
 };
 
 /**

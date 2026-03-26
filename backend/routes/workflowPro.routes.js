@@ -180,11 +180,30 @@ router.post('/forms/:id/validate', async (req, res) => {
             message: `الحقل "${field.nameAr}" يجب أن لا يتجاوز ${v.max}`,
           });
         }
-        if (v.pattern && !new RegExp(v.pattern).test(String(value))) {
-          errors.push({
-            field: field.name,
-            message: v.patternMessage || `الحقل "${field.nameAr}" غير صالح`,
-          });
+        if (v.pattern) {
+          // Guard against ReDoS: reject patterns that nest quantifiers
+          const DANGEROUS_RE = /(\+|\*|\{)\s*(\+|\*|\{)/;
+          let patternSafe = true;
+          try {
+            if (DANGEROUS_RE.test(v.pattern) || v.pattern.length > 256) {
+              patternSafe = false;
+            } else {
+              new RegExp(v.pattern); // syntax check
+            }
+          } catch {
+            patternSafe = false;
+          }
+          if (!patternSafe) {
+            errors.push({
+              field: field.name,
+              message: `نمط التحقق للحقل "${field.nameAr}" غير آمن أو غير صالح`,
+            });
+          } else if (!new RegExp(v.pattern).test(String(value))) {
+            errors.push({
+              field: field.name,
+              message: v.patternMessage || `الحقل "${field.nameAr}" غير صالح`,
+            });
+          }
         }
       }
     }

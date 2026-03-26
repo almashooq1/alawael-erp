@@ -20,7 +20,7 @@ describe('csrfProtection middleware', () => {
   beforeEach(() => {
     jest.resetModules();
     process.env = { ...originalEnv };
-    delete process.env.CSRF_PROTECTION_ENABLED;
+    delete process.env.CSRF_DISABLE;
     delete process.env.CSRF_EXCLUDE_PATHS;
     csrfProtection = require('../middleware/csrfProtection');
   });
@@ -66,11 +66,11 @@ describe('csrfProtection middleware', () => {
   beforeEach(() => next.mockClear());
 
   // ═══════════════════════════════════════════════════════════════════════
-  // 1. CSRF_PROTECTION_ENABLED=false bypass
+  // 1. CSRF_DISABLE=true bypass
   // ═══════════════════════════════════════════════════════════════════════
-  describe('disabled mode (CSRF_PROTECTION_ENABLED=false)', () => {
+  describe('disabled mode (CSRF_DISABLE=true)', () => {
     it('should call next() immediately when disabled', () => {
-      process.env.CSRF_PROTECTION_ENABLED = 'false';
+      process.env.CSRF_DISABLE = 'true';
       jest.resetModules();
       const mw = require('../middleware/csrfProtection');
       const req = mockReq({ method: 'POST' });

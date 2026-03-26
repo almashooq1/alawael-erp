@@ -10,13 +10,13 @@ const mongoose = require('mongoose');
 const fs = require('fs').promises;
 const path = require('path');
 const zlib = require('zlib');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const { promisify } = require('util');
 const { S3Client, GetObjectCommand, ListObjectsV2Command } = require('@aws-sdk/client-s3');
 const { Upload } = require('@aws-sdk/lib-storage');
 const logger = require('../utils/logger');
 
-const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 
 class BackupRestoreService {
   constructor() {
@@ -53,9 +53,7 @@ class BackupRestoreService {
 
       // Export database command
       const mongoUri = process.env.MONGODB_URI;
-      const command = `mongodump --uri="${mongoUri}" --archive=${backupPath}`;
-
-      await execPromise(command);
+      await execFilePromise('mongodump', ['--uri', mongoUri, '--archive=' + backupPath]);
 
       // Get file size
       const stats = await fs.stat(backupPath);
@@ -124,9 +122,7 @@ class BackupRestoreService {
 
       // Restore command
       const mongoUri = process.env.MONGODB_URI;
-      const command = `mongorestore --uri="${mongoUri}" --archive=${restorePath}`;
-
-      await execPromise(command);
+      await execFilePromise('mongorestore', ['--uri', mongoUri, '--archive=' + restorePath]);
 
       return {
         success: true,
@@ -243,7 +239,6 @@ class BackupRestoreService {
     // Daily backup at 2 AM
     schedule.scheduleJob('0 2 * * *', async () => {
       try {
-
         // Create backup
         const backup = await this.createLocalBackup();
 
@@ -269,7 +264,6 @@ class BackupRestoreService {
         logger.error(`❌ Weekly backup failed: ${error.message}`);
       }
     });
-
   }
 
   /**
@@ -335,9 +329,12 @@ class BackupRestoreService {
       const testDbUri =
         process.env.MONGODB_TEST_URI || process.env.MONGODB_URI.replace('?', '_test?');
 
-      const command = `mongorestore --uri="${testDbUri}" --archive=${backupPath} --dryRun`;
-
-      const { stdout, stderr } = await execPromise(command);
+      const { stdout } = await execFilePromise('mongorestore', [
+        '--uri',
+        testDbUri,
+        '--archive=' + backupPath,
+        '--dryRun',
+      ]);
 
       return {
         success: true,

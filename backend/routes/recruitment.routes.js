@@ -11,7 +11,12 @@
 const express = require('express');
 const router = express.Router();
 const { JobPosting, JobApplication, Interview } = require('../models/recruitment.model');
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
+
+// ── Auth: all recruitment routes require authentication ──────────────────
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // JOB POSTINGS — الوظائف
@@ -27,9 +32,9 @@ router.get('/jobs', async (req, res) => {
     if (level) filter.level = level;
     if (search) {
       filter.$or = [
-        { 'title.ar': { $regex: search, $options: 'i' } },
-        { 'title.en': { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { 'title.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'title.en': { $regex: escapeRegex(search), $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

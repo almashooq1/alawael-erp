@@ -8,6 +8,7 @@
  */
 
 const logger = require('../utils/logger');
+const crypto = require('crypto');
 const { escapeRegex } = require('../utils/sanitize');
 
 // ─── Audit Event Types ───────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ class AuditEntry {
     userAgent = null,
     requestId = null,
   }) {
-    this.id = `audit_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    this.id = `audit_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
     this.event = event;
     this.actor = actor ? { id: actor.id || actor._id, email: actor.email, role: actor.role } : null;
     this.target = target;

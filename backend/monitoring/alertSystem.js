@@ -79,13 +79,15 @@ class AlertSystem extends EventEmitter {
       this.onAlert(alert);
     }
 
-    this.notifiers.forEach(async notifier => {
-      try {
-        await notifier(alert);
-      } catch (error) {
-        logger.error('[AlertSystem] Notifier error:', error.message);
-      }
-    });
+    await Promise.allSettled(
+      this.notifiers.map(async notifier => {
+        try {
+          await notifier(alert);
+        } catch (error) {
+          logger.error('[AlertSystem] Notifier error:', error.message);
+        }
+      })
+    );
 
     return alert;
   }
@@ -112,13 +114,15 @@ class AlertSystem extends EventEmitter {
       this.onAlert(payload);
     }
 
-    this.notifiers.forEach(async notifier => {
-      try {
-        await notifier(payload);
-      } catch (error) {
-        logger.error('[AlertSystem] Notifier error:', error.message);
-      }
-    });
+    await Promise.allSettled(
+      this.notifiers.map(async notifier => {
+        try {
+          await notifier(payload);
+        } catch (error) {
+          logger.error('[AlertSystem] Notifier error:', error.message);
+        }
+      })
+    );
 
     return payload;
   }

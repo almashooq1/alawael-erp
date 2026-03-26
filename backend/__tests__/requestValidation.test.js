@@ -42,45 +42,45 @@ describe('sanitizeInput', () => {
   const next = jest.fn();
   beforeEach(() => next.mockClear());
 
-  it('should strip HTML tags from string body fields', () => {
+  it('should trim whitespace from string body fields', () => {
     const req = {
-      body: { name: '<script>alert("xss")</script>Hello', title: '<b>Bold</b>' },
+      body: { name: '  Hello World  ', title: '  Bold  ' },
       query: {},
       params: {},
     };
     sanitizeInput(req, mockRes(), next);
-    expect(req.body.name).toBe('alert("xss")Hello');
+    expect(req.body.name).toBe('Hello World');
     expect(req.body.title).toBe('Bold');
     expect(next).toHaveBeenCalled();
   });
 
-  it('should strip HTML from query params', () => {
+  it('should trim whitespace from query params', () => {
     const req = {
       body: {},
-      query: { search: '<img src=x onerror=alert(1)>term' },
+      query: { search: '  term  ' },
       params: {},
     };
     sanitizeInput(req, mockRes(), next);
     expect(req.query.search).toBe('term');
   });
 
-  it('should strip HTML from URL params', () => {
+  it('should trim whitespace from URL params', () => {
     const req = {
       body: {},
       query: {},
-      params: { id: '<div>123</div>' },
+      params: { id: '  123  ' },
     };
     sanitizeInput(req, mockRes(), next);
     expect(req.params.id).toBe('123');
   });
 
-  it('should recursively sanitize nested objects', () => {
+  it('should recursively trim nested objects', () => {
     const req = {
       body: {
         user: {
-          name: '<p>Test</p>',
+          name: '  Test  ',
           address: {
-            city: '<span>Riyadh</span>',
+            city: '  Riyadh  ',
           },
         },
       },
@@ -92,9 +92,9 @@ describe('sanitizeInput', () => {
     expect(req.body.user.address.city).toBe('Riyadh');
   });
 
-  it('should sanitize arrays', () => {
+  it('should trim arrays', () => {
     const req = {
-      body: { tags: ['<b>tag1</b>', '<i>tag2</i>', 'clean'] },
+      body: { tags: ['  tag1  ', '  tag2  ', 'clean'] },
       query: {},
       params: {},
     };

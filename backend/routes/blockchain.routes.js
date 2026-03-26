@@ -11,12 +11,26 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 const {
   BlockchainCertificate,
   CertificateTemplate,
   VerificationLog,
 } = require('../models/blockchain.model');
+const { authenticate } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 const logger = require('../utils/logger');
+
+// ── Auth: all routes below require authentication ────────────────────────────
+router.use(authenticate);
+
+// ── ObjectId param validation ────────────────────────────────────────────────
+router.param('id', (req, res, next, id) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, error: 'معرف غير صالح' });
+  }
+  next();
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // HELPERS — دوال مساعدة
@@ -48,7 +62,7 @@ router.get('/templates', async (req, res) => {
     const templates = await CertificateTemplate.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: templates });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -60,7 +74,7 @@ router.post('/templates', async (req, res) => {
     });
     res.status(201).json({ success: true, data: template });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -73,7 +87,7 @@ router.put('/templates/:id', async (req, res) => {
     if (!template) return res.status(404).json({ success: false, error: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -88,9 +102,10 @@ router.get('/certificates', async (req, res) => {
     if (status) filter.status = status;
     if (category) filter.category = category;
     if (recipient) {
+      const safeRecipient = escapeRegex(recipient);
       filter.$or = [
-        { 'recipient.name.ar': { $regex: recipient, $options: 'i' } },
-        { 'recipient.name.en': { $regex: recipient, $options: 'i' } },
+        { 'recipient.name.ar': { $regex: safeRecipient, $options: 'i' } },
+        { 'recipient.name.en': { $regex: safeRecipient, $options: 'i' } },
         { 'recipient.nationalId': recipient },
       ];
     }
@@ -117,7 +132,7 @@ router.get('/certificates', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -131,17 +146,32 @@ router.get('/certificates/:id', async (req, res) => {
     if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
     res.json({ success: true, data: cert });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
+
+// Allowed fields for certificate creation
+const CERT_ALLOWED_FIELDS = [
+  'recipient',
+  'title',
+  'data',
+  'issueDate',
+  'expiryDate',
+  'category',
+  'template',
+];
 
 router.post('/certificates', async (req, res) => {
   try {
     const previousHash = await getLastCertificateHash();
+    const picked = {};
+    for (const f of CERT_ALLOWED_FIELDS) {
+      if (req.body[f] !== undefined) picked[f] = req.body[f];
+    }
     const certData = {
-      ...req.body,
+      ...picked,
       previousHash,
-      createdBy: req.user?._id,
+      createdBy: req.user._id,
     };
 
     // Compute hash from certificate data
@@ -159,7 +189,7 @@ router.post('/certificates', async (req, res) => {
     const certificate = await BlockchainCertificate.create(certData);
     res.status(201).json({ success: true, data: certificate });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false });
   }
 });
 
@@ -176,20 +206,20 @@ router.patch('/certificates/:id/issue', async (req, res) => {
 
     cert.status = 'issued';
     cert.issueDate = new Date();
-    cert.issuer.issuedBy = req.user?._id;
+    cert.issuer.issuedBy = req.user._id;
 
     // Simulate blockchain transaction
     cert.blockchain = {
       network: 'internal',
       transactionHash: computeHash({ certId: cert._id, timestamp: Date.now() }),
-      blockNumber: Math.floor(Math.random() * 1000000) + 1,
+      blockNumber: (parseInt(crypto.randomBytes(4).toString('hex'), 16) % 1000000) + 1,
       timestamp: new Date(),
     };
 
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم إصدار الشهادة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -200,12 +230,12 @@ router.patch('/certificates/:id/sign', async (req, res) => {
 
     const signatureHash = computeHash({
       certHash: cert.hash,
-      signer: req.user?._id || req.body.signerName,
+      signer: req.user._id || req.body.signerName,
       timestamp: Date.now(),
     });
 
     cert.signatures.push({
-      signer: req.user?._id,
+      signer: req.user._id,
       signerName: req.body.signerName,
       signerTitle: req.body.signerTitle,
       signature: signatureHash,
@@ -214,7 +244,7 @@ router.patch('/certificates/:id/sign', async (req, res) => {
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم التوقيع بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -230,14 +260,14 @@ router.patch('/certificates/:id/revoke', async (req, res) => {
     cert.status = 'revoked';
     cert.revocation = {
       revokedAt: new Date(),
-      revokedBy: req.user?._id,
+      revokedBy: req.user._id,
       reason: req.body.reason || 'غير محدد',
     };
 
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم إلغاء الشهادة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -308,7 +338,7 @@ router.get('/verify/:hash', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -325,7 +355,7 @@ router.get('/verify/number/:certNumber', async (req, res) => {
     // Redirect to hash-based verification
     res.redirect(`/api/blockchain/verify/${cert.hash}`);
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -337,7 +367,7 @@ router.get('/verify/:certId/logs', async (req, res) => {
       .lean();
     res.json({ success: true, data: logs });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 
@@ -390,7 +420,7 @@ router.get('/dashboard', async (_req, res) => {
     });
   } catch (error) {
     logger.error('[Blockchain] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false });
   }
 });
 

@@ -36,7 +36,7 @@
     "lint:backend": "cd backend && npm run lint",
     "lint:frontend": "cd frontend && npm run lint",
     "predeploy": "node scripts/prepare-deploy.js",
-    "prepare": "husky install",
+    "prepare": "husky",
     "start": "cd backend && npm start",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",
@@ -58,13 +58,14 @@
       "prettier --write"
     ]
   },
-  "dependencies": {
-    "concurrently": "^8.2.0",
-    "winston": "^3.19.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "concurrently": "^8.2.0",
     "husky": "^9.0.0",
     "lint-staged": "^15.2.0"
+  },
+  "optionalDependencies": {
+    "winston": "^3.19.0"
   },
   "engines": {
     "node": ">=18.0.0",

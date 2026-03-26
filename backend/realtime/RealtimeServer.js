@@ -34,6 +34,12 @@ class RealtimeServer extends EventEmitter {
 
   handleConnection(ws, req) {
     try {
+      // Enforce max client limit to prevent memory exhaustion
+      if (this.clients.size >= this.options.maxClients) {
+        ws.close(1013, 'Max clients reached');
+        return;
+      }
+
       // Authenticate client
       const token = this.extractToken(req);
       const userId = this.authenticateToken(token);
@@ -251,7 +257,7 @@ class RealtimeServer extends EventEmitter {
   }
 
   startHeartbeat() {
-    setInterval(() => {
+    this._heartbeatTimer = setInterval(() => {
       this.clients.forEach((client, clientId) => {
         if (!client.isAlive) {
           client.ws.terminate();
@@ -267,7 +273,7 @@ class RealtimeServer extends EventEmitter {
 
   setupMessageBroker() {
     // Message persistence for offline users
-    setInterval(() => {
+    this._brokerTimer = setInterval(() => {
       if (this.messageQueue.length > this.options.messageBufferSize) {
         this.messageQueue.shift();
       }
@@ -320,11 +326,20 @@ class RealtimeServer extends EventEmitter {
     };
   }
 
-  // Shutdown
-  close() {
+  // Shutdown — clear intervals and close all connections
+  destroy() {
+    if (this._heartbeatTimer) clearInterval(this._heartbeatTimer);
+    if (this._brokerTimer) clearInterval(this._brokerTimer);
+    this._heartbeatTimer = null;
+    this._brokerTimer = null;
     this.wss.close();
     this.clients.clear();
     this.rooms.clear();
+  }
+
+  /** @deprecated Use destroy() instead */
+  close() {
+    this.destroy();
   }
 }
 

@@ -9,6 +9,7 @@
  * Server startup, Socket.IO, and database initialisation live in server.js.
  */
 
+require('express-async-errors'); // global async error catching — no more silent promise rejections
 const path = require('path');
 require('dotenv').config();
 // Fallback: also load from project root if backend/.env not present
@@ -32,7 +33,7 @@ if (isTestEnv) {
   process.env.USE_MOCK_DB = 'true';
   process.env.NODE_ENV = 'test';
   process.env.SMART_TEST_MODE = process.env.SMART_TEST_MODE || 'true';
-  process.env.CSRF_PROTECTION_ENABLED = 'false';
+  process.env.CSRF_DISABLE = 'true';
 }
 
 // ─── Utilities & Config ──────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ const { initializePerformanceOptimizations } = require('./utils/performance-opti
 
 // Request ID middleware for traceability
 const { requestIdMiddleware } = require('./middleware/requestId.middleware');
+const { requestLoggerMiddleware } = require('./middleware/requestLogger.middleware');
 
 // Centralised route registry (replaces 100+ inline imports)
 const { mountAllRoutes } = require('./routes/_registry');
@@ -134,7 +136,7 @@ if (process.env.NODE_ENV === 'development') {
 // ═══════════════════════════════════════════════════════════════════════════
 // 🔓 DEV BYPASS: Skip auth/security for Phase 29-33 (public for testing)
 // ═══════════════════════════════════════════════════════════════════════════
-if (process.env.NODE_ENV === 'development') {
+if (process.env.PHASE2933_PUBLIC === 'true') {
   app.use((req, res, next) => {
     if (req.path.startsWith('/api/phases-29-33')) {
       req.isPhase2933Public = true;
@@ -163,6 +165,7 @@ app.set('trust proxy', 1);
 
 // ─── Request ID (traceability — must be before everything else) ──────────────
 app.use(requestIdMiddleware);
+app.use(requestLoggerMiddleware); // attach req.log (child logger with requestId)
 
 // ─── Security Middleware (MUST be first) ──────────────────────────────────────
 app.use(securityHeaders); // Helmet with hardened CSP + Permissions-Policy
@@ -221,8 +224,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // ─── Body Parsing ────────────────────────────────────────────────────────────
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Upload routes allow larger payloads; API routes default to 1 MB
+app.use('/api/upload', express.json({ limit: '10mb' }));
+app.use('/api/upload', express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // ─── Input Sanitization ─────────────────────────────────────────────────────
 app.use(sanitizeInput);
@@ -246,8 +252,18 @@ app.use(apiVersionMiddleware);
 app.use(requestContext);
 app.use(metricsMiddleware);
 
-// Prometheus metrics endpoint
-app.get('/metrics', metricsHandler);
+// Prometheus metrics endpoint (protected by token in production)
+app.get(
+  '/metrics',
+  (req, res, next) => {
+    const token = process.env.METRICS_TOKEN;
+    if (token && req.headers.authorization !== `Bearer ${token}`) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+    next();
+  },
+  metricsHandler
+);
 // ─── Audit Trail (auto-audit write operations) ───────────────────────────────
 app.use(auditMiddleware());
 
@@ -288,7 +304,7 @@ if (isTestEnv) {
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
 const apiLimiterWithPhase2933Skip = (req, res, next) => {
   if (
-    process.env.NODE_ENV === 'development' &&
+    process.env.PHASE2933_PUBLIC === 'true' &&
     (req.path.startsWith('/phases-29-33') || req.path.startsWith('/api/phases-29-33'))
   ) {
     return next();
@@ -347,15 +363,7 @@ app.get('/health', (_req, res) => {
   });
 });
 
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'نظام الأوقاف يعمل بشكل صحيح',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
-  });
-});
-
+// NOTE: /api/health removed — use /health liveness probe instead (L316)
 // Kubernetes readiness probe — DB + Redis must be ready
 app.get('/readiness', (req, res) => {
   const dbReady = isTestEnv || mongoose.connection.readyState === 1;
@@ -393,6 +401,21 @@ app.use(express.static('public'));
 
 // ─── Integration Context Middleware (distributed tracing) ────────────────────
 app.use(createIntegrationContextMiddleware({ integrationBus, serviceName: 'alawael-erp' }));
+
+// ─── Cache-Control for API responses (prevent accidental proxy caching) ──────
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.set('Pragma', 'no-cache');
+  next();
+});
+
+// ─── Pagination Defaults (cap ?limit to prevent DB dumps) ────────────────────
+const { paginationDefaults } = require('./middleware/paginationDefaults');
+app.use('/api', paginationDefaults({ max: 100 }));
+
+// ─── Global Validation (safety-net: ObjectId params, query hygiene, body scan)
+const { globalValidation } = require('./middleware/globalValidation');
+app.use('/api', globalValidation());
 
 // ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
 mountAllRoutes(app, { authRateLimiter });

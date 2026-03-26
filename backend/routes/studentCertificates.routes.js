@@ -2,6 +2,7 @@
  * Student Certificates Routes
  * مسارات الشهادات والإفادات للطلاب
  */
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
@@ -69,7 +70,7 @@ const certificateSchema = new mongoose.Schema(
 certificateSchema.pre('save', function (next) {
   if (!this.certificateNumber) {
     const date = new Date();
-    this.certificateNumber = `CERT-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    this.certificateNumber = `CERT-${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
   }
   next();
 });

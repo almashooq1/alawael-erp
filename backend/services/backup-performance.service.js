@@ -16,6 +16,7 @@
  */
 
 const EventEmitter = require('events');
+const crypto = require('crypto');
 const os = require('os');
 const fs = require('fs').promises;
 const path = require('path');
@@ -460,16 +461,26 @@ class PerformanceOptimization extends EventEmitter {
    * Helper: Start continuous monitoring
    */
   startContinuousMonitoring() {
-    setInterval(() => {
+    this._monitorInterval = setInterval(() => {
       this.monitorPerformance();
     }, this.monitoringInterval);
+  }
+
+  /**
+   * Shutdown: clear monitoring interval
+   */
+  shutdown() {
+    if (this._monitorInterval) {
+      clearInterval(this._monitorInterval);
+      this._monitorInterval = null;
+    }
   }
 
   /**
    * Helper: Generate optimization ID
    */
   generateOptimizationId() {
-    return `opt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    return `opt-${Date.now()}-${crypto.randomBytes(5).toString('hex')}`;
   }
 }
 

@@ -1,7 +1,14 @@
 /**
- * Jest Configuration - Enhanced Version
- * Best practices for comprehensive testing
+ * Jest Configuration — AlAwael ERP Backend
+ *
+ * Professional test configuration with:
+ *  - MongoMemoryServer for isolated integration tests
+ *  - Path aliases matching jsconfig.json
+ *  - Coverage thresholds for CI gates
+ *  - Performance test isolation (run separately via npm run test:perf)
  */
+
+'use strict';
 
 module.exports = {
   // Test environment
@@ -11,7 +18,9 @@ module.exports = {
   globalSetup: '<rootDir>/jest.globalSetup.js',
   globalTeardown: '<rootDir>/jest.globalTeardown.js',
 
-  // Setup files
+  // Setup files — jest.env.js sets env vars BEFORE modules load,
+  // jest.setup.js runs AFTER the test framework is installed
+  setupFiles: ['<rootDir>/jest.env.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
   // Test match patterns — scoped to __tests__/ and tests/ only (prevents OOM from stray .test.js)
@@ -132,6 +141,10 @@ module.exports = {
   // Other settings
   bail: 0,
   forceExit: true,
-  detectOpenHandles: false,
+  // Enable open handle detection in CI to catch resource leaks
+  detectOpenHandles: !!process.env.CI,
   passWithNoTests: true,
+
+  // Cache for faster re-runs
+  cacheDirectory: '<rootDir>/.jest-cache',
 };

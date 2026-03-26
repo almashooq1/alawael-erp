@@ -43,6 +43,7 @@ const logger = require('../utils/logger');
 
 const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ──────────────────────────────────────────────────────
 // Module Registry — maps module names to model references
@@ -2424,9 +2425,9 @@ class ImportExportProService {
     if (userId) query.createdBy = userId;
     if (search) {
       query.$or = [
-        { jobName: { $regex: search, $options: 'i' } },
-        { jobNameAr: { $regex: search, $options: 'i' } },
-        { jobId: { $regex: search, $options: 'i' } },
+        { jobName: { $regex: escapeRegex(search), $options: 'i' } },
+        { jobNameAr: { $regex: escapeRegex(search), $options: 'i' } },
+        { jobId: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     if (dateRange) {

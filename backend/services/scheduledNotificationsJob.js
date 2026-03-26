@@ -4,10 +4,12 @@ const processScheduledNotifications = require('./processScheduledNotifications')
 const logger = require('../utils/logger');
 
 // جدولة تنفيذ الإشعارات المجدولة كل دقيقة
+let _intervalId = null;
+
 function startScheduledNotificationsJob() {
   // تأخير البداية لتجنب التضارب مع تهيئة قاعدة البيانات
   setTimeout(() => {
-    setInterval(async () => {
+    _intervalId = setInterval(async () => {
       try {
         // تحقق من أن قاعدة البيانات متصلة
         // readyState: 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
@@ -28,4 +30,11 @@ function startScheduledNotificationsJob() {
   }, 5000); // تأخير 5 ثواني قبل البدء
 }
 
-module.exports = startScheduledNotificationsJob;
+function stopScheduledNotificationsJob() {
+  if (_intervalId) {
+    clearInterval(_intervalId);
+    _intervalId = null;
+  }
+}
+
+module.exports = { startScheduledNotificationsJob, stopScheduledNotificationsJob };

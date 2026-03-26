@@ -20,6 +20,60 @@ const _logger = require('../utils/logger');
 // ─── Async wrapper ──────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+/* ── Field whitelists ────────────────────────────────────────────── */
+const COMPLAINT_FIELDS = [
+  'subject',
+  'description',
+  'category',
+  'priority',
+  'department',
+  'attachments',
+];
+const LOAN_FIELDS = [
+  'amount',
+  'type',
+  'reason',
+  'installments',
+  'startDate',
+  'department',
+  'repaymentMethod',
+];
+const DISCIPLINARY_FIELDS = [
+  'employeeId',
+  'type',
+  'severity',
+  'reason',
+  'description',
+  'date',
+  'witnesses',
+];
+const LETTER_FIELDS = [
+  'type',
+  'purpose',
+  'language',
+  'recipientName',
+  'recipientOrganization',
+  'notes',
+  'department',
+];
+const PROMOTION_FIELDS = [
+  'employeeId',
+  'type',
+  'fromPosition',
+  'toPosition',
+  'fromDepartment',
+  'toDepartment',
+  'effectiveDate',
+  'reason',
+  'notes',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // لوحة المعلومات الموسعة (MUST come before param routes)
 // ═══════════════════════════════════════════════════════════════════════════
@@ -60,7 +114,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const complaint = await service.createComplaint({
-      ...req.body,
+      ...pick(req.body, COMPLAINT_FIELDS),
       employeeId: req.body.employeeId || req.user?.id,
     });
     res.status(201).json({ success: true, data: complaint });
@@ -82,7 +136,7 @@ router.patch(
   authorize('admin', 'hr', 'manager'),
   asyncHandler(async (req, res) => {
     const complaint = await service.updateComplaintStatus(req.params.id, {
-      ...req.body,
+      ...pick(req.body, ['status', 'resolution', 'notes']),
       performedBy: req.user?.id,
     });
     res.json({ success: true, data: complaint });
@@ -117,7 +171,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const loan = await service.createLoan({
-      ...req.body,
+      ...pick(req.body, LOAN_FIELDS),
       employeeId: req.body.employeeId || req.user?.id,
     });
     res.status(201).json({ success: true, data: loan });
@@ -139,7 +193,7 @@ router.patch(
   authorize('admin', 'hr', 'finance', 'manager'),
   asyncHandler(async (req, res) => {
     const loan = await service.approveLoanStep(req.params.id, {
-      ...req.body,
+      ...pick(req.body, ['decision', 'notes', 'conditions']),
       approvedBy: req.user?.id,
     });
     res.json({ success: true, data: loan });
@@ -179,7 +233,7 @@ router.post(
   authorize('admin', 'hr', 'manager'),
   asyncHandler(async (req, res) => {
     const action = await service.createDisciplinaryAction({
-      ...req.body,
+      ...pick(req.body, DISCIPLINARY_FIELDS),
       issuedBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: action });
@@ -201,7 +255,7 @@ router.patch(
   authorize('admin', 'hr'),
   asyncHandler(async (req, res) => {
     const action = await service.approveDisciplinaryAction(req.params.id, {
-      ...req.body,
+      ...pick(req.body, ['decision', 'notes']),
       approvedBy: req.user?.id,
     });
     res.json({ success: true, data: action });
@@ -255,7 +309,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const letter = await service.createLetterRequest({
-      ...req.body,
+      ...pick(req.body, LETTER_FIELDS),
       employeeId: req.body.employeeId || req.user?.id,
       requestedBy: req.user?.id,
     });
@@ -278,7 +332,7 @@ router.patch(
   authorize('admin', 'hr'),
   asyncHandler(async (req, res) => {
     const letter = await service.updateLetterStatus(req.params.id, {
-      ...req.body,
+      ...pick(req.body, ['status', 'notes', 'content']),
       preparedBy: req.user?.id,
     });
     res.json({ success: true, data: letter });
@@ -304,7 +358,7 @@ router.post(
   authorize('admin', 'hr', 'manager'),
   asyncHandler(async (req, res) => {
     const request = await service.createPromotionTransfer({
-      ...req.body,
+      ...pick(req.body, PROMOTION_FIELDS),
       initiatedBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: request });
@@ -326,7 +380,7 @@ router.patch(
   authorize('admin', 'hr', 'manager'),
   asyncHandler(async (req, res) => {
     const request = await service.approvePromotionTransferStep(req.params.id, {
-      ...req.body,
+      ...pick(req.body, ['decision', 'notes']),
       approver: req.user?.id,
     });
     res.json({ success: true, data: request });
@@ -338,7 +392,10 @@ router.post(
   authenticateToken,
   authorize('admin', 'hr'),
   asyncHandler(async (req, res) => {
-    const request = await service.executePromotionTransfer(req.params.id, req.body);
+    const request = await service.executePromotionTransfer(
+      req.params.id,
+      pick(req.body, ['effectiveDate', 'notes'])
+    );
     res.json({ success: true, data: request });
   })
 );
@@ -385,7 +442,7 @@ router.post(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const request = await service.createOvertimeRequest({
-      ...req.body,
+      ...pick(req.body, ['date', 'hours', 'reason', 'department', 'type']),
       employeeId: req.body.employeeId || req.user?.id,
     });
     res.status(201).json({ success: true, data: request });

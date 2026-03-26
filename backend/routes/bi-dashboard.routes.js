@@ -26,20 +26,9 @@ function safeModel(name) {
   }
 }
 
-// ── Auth middleware (optional for development) ────────────────────
-let authenticate, _authorize;
-try {
-  const auth = require('../middleware/auth');
-  authenticate = auth.authenticate || auth.authenticateToken;
-  _authorize = auth.authorize;
-} catch {
-  authenticate = (_req, _res, next) => next();
-  _authorize = () => (_req, _res, next) => next();
-}
-
-if (authenticate) {
-  router.use(authenticate);
-}
+// ── Auth middleware ────────────────────────────────────────────────
+const { authenticate } = require('../middleware/auth');
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════
 // 1. EXECUTIVE OVERVIEW — النظرة التنفيذية الشاملة
@@ -162,7 +151,37 @@ router.post('/kpis', async (req, res) => {
     if (!BIKPI) {
       return res.status(501).json({ success: false, message: 'KPI model not available' });
     }
-    const kpi = new BIKPI({ ...req.body, owner: req.user?._id });
+    const {
+      name,
+      code,
+      category,
+      unit,
+      targetValue,
+      warningThreshold,
+      criticalThreshold,
+      frequency,
+      dataSource,
+      formula,
+      description,
+      department,
+      isActive,
+    } = req.body;
+    const kpi = new BIKPI({
+      name,
+      code,
+      category,
+      unit,
+      targetValue,
+      warningThreshold,
+      criticalThreshold,
+      frequency,
+      dataSource,
+      formula,
+      description,
+      department,
+      isActive,
+      owner: req.user._id,
+    });
     await kpi.save();
     res.status(201).json({ success: true, data: kpi, message: 'تم إنشاء مؤشر الأداء بنجاح' });
   } catch (err) {
@@ -576,7 +595,7 @@ router.get('/reports', async (req, res) => {
     if (type) filter.type = type;
 
     // Show user's reports + public reports
-    filter.$or = [{ owner: req.user?._id }, { isPublic: true }];
+    filter.$or = [{ owner: req.user._id }, { isPublic: true }];
 
     const reports = await BIReport.find(filter)
       .populate('owner', 'name email')
@@ -597,7 +616,35 @@ router.post('/reports', async (req, res) => {
       return res.status(501).json({ success: false, message: 'Report model not available' });
     }
 
-    const report = new BIReport({ ...req.body, owner: req.user?._id });
+    const {
+      title,
+      description,
+      type,
+      period,
+      startDate,
+      endDate,
+      modules,
+      sections,
+      filters,
+      layout,
+      isScheduled,
+      scheduleConfig,
+    } = req.body;
+    const report = new BIReport({
+      title,
+      description,
+      type,
+      period,
+      startDate,
+      endDate,
+      modules,
+      sections,
+      filters,
+      layout,
+      isScheduled,
+      scheduleConfig,
+      owner: req.user._id,
+    });
     await report.save();
     res.status(201).json({
       success: true,
@@ -634,8 +681,22 @@ router.put('/reports/:id', async (req, res) => {
       return res.status(501).json({ success: false, message: 'Report model not available' });
     }
     const report = await BIReport.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user?._id },
-      { ...req.body, $inc: { version: 1 } },
+      { _id: req.params.id, owner: req.user._id },
+      {
+        title: req.body.title,
+        description: req.body.description,
+        type: req.body.type,
+        period: req.body.period,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+        modules: req.body.modules,
+        sections: req.body.sections,
+        filters: req.body.filters,
+        layout: req.body.layout,
+        isScheduled: req.body.isScheduled,
+        scheduleConfig: req.body.scheduleConfig,
+        $inc: { version: 1 },
+      },
       { new: true, runValidators: true }
     );
     if (!report) {
@@ -655,7 +716,7 @@ router.delete('/reports/:id', async (req, res) => {
       return res.status(501).json({ success: false, message: 'Report model not available' });
     }
     const report = await BIReport.findOneAndUpdate(
-      { _id: req.params.id, owner: req.user?._id },
+      { _id: req.params.id, owner: req.user._id },
       { status: 'archived' },
       { new: true }
     );

@@ -191,7 +191,10 @@ class SystemReadinessChecker {
 
     for (const { name, host } of hosts) {
       try {
-        execSync(`ping -c 1 ${host}`, { timeout: 5000, stdio: 'pipe' });
+        require('child_process').execFileSync('ping', ['-c', '1', host], {
+          timeout: 5000,
+          stdio: 'pipe',
+        });
         console.log(`  ✅ ${name}: reachable`);
       } catch (error) {
         console.log(`  ⚠️ ${name}: unreachable (may be DNS issue)`);

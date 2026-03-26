@@ -19,6 +19,7 @@ const {
   SafetyCertificate,
 } = require('../models/medicalEquipment.model');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // EQUIPMENT — المعدات
@@ -33,11 +34,11 @@ router.get('/equipment', async (req, res) => {
     if (department) filter['location.department'] = department;
     if (search) {
       filter.$or = [
-        { assetTag: { $regex: search, $options: 'i' } },
-        { 'name.ar': { $regex: search, $options: 'i' } },
-        { 'name.en': { $regex: search, $options: 'i' } },
-        { serialNumber: { $regex: search, $options: 'i' } },
-        { manufacturer: { $regex: search, $options: 'i' } },
+        { assetTag: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
+        { serialNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { manufacturer: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);

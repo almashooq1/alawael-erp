@@ -6,6 +6,7 @@
 const RehabCenterLicense = require('../models/RehabCenterLicense');
 const logger = require('../utils/logger');
 const { AppError } = require('../utils/errorHandler');
+const { escapeRegex } = require('../utils/sanitize');
 
 class RehabCenterLicenseService {
   // ==================== CRUD ====================
@@ -76,8 +77,8 @@ class RehabCenterLicenseService {
     if (licenseType) query.licenseType = licenseType;
     if (priority) query.priority = priority;
     if (issuingAuthority)
-      query['issuingAuthority.name'] = { $regex: issuingAuthority, $options: 'i' };
-    if (city) query['center.city'] = { $regex: city, $options: 'i' };
+      query['issuingAuthority.name'] = { $regex: escapeRegex(issuingAuthority), $options: 'i' };
+    if (city) query['center.city'] = { $regex: escapeRegex(city), $options: 'i' };
     if (assignedTo) query.assignedTo = assignedTo;
     if (tags) query.tags = { $in: Array.isArray(tags) ? tags : [tags] };
 

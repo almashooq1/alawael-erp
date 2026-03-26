@@ -121,11 +121,23 @@ class RealtimeDashboardService {
    * Enable real-time updates
    */
   enableRealtimeUpdates() {
+    this._updateIntervals = this._updateIntervals || [];
     // Setup periodic update intervals for each data source
     for (const [sourceId, source] of this.dataConnections.entries()) {
-      setInterval(() => {
+      const id = setInterval(() => {
         this.fetchSourceData(sourceId);
       }, source.refreshInterval);
+      this._updateIntervals.push(id);
+    }
+  }
+
+  /**
+   * Shutdown — clear all update intervals
+   */
+  shutdown() {
+    if (this._updateIntervals) {
+      for (const id of this._updateIntervals) clearInterval(id);
+      this._updateIntervals = [];
     }
   }
 

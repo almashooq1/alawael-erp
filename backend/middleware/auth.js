@@ -50,8 +50,8 @@ const requireRole =
  */
 const authenticateToken = (req, res, next) => {
   try {
-    // Only allow pre-set req.user in test environment (for test mocks)
-    if (req.user && process.env.NODE_ENV === 'test') {
+    // Only allow pre-set req.user inside Jest runner (for test mocks)
+    if (req.user && process.env.JEST_WORKER_ID) {
       return next();
     }
 

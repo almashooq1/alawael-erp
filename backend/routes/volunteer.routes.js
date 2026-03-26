@@ -12,6 +12,7 @@ const express = require('express');
 const router = express.Router();
 const { Volunteer, VolunteerProgram, VolunteerShift } = require('../models/volunteer.model');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VOLUNTEERS — المتطوعين
@@ -26,9 +27,9 @@ router.get('/', async (req, res) => {
     if (skill) filter.skills = skill;
     if (search) {
       filter.$or = [
-        { 'name.ar': { $regex: search, $options: 'i' } },
-        { 'name.en': { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
+        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

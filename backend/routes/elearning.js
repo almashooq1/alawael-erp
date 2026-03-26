@@ -127,8 +127,31 @@ router.get('/courses/:id', async (req, res) => {
  */
 router.post('/courses', authenticate, authorize(['admin', 'instructor']), async (req, res) => {
   try {
+    const {
+      title,
+      description,
+      category,
+      level,
+      thumbnail,
+      price,
+      duration,
+      prerequisites,
+      tags,
+      language,
+      objectives,
+    } = req.body;
     const courseData = {
-      ...req.body,
+      title,
+      description,
+      category,
+      level,
+      thumbnail,
+      price,
+      duration,
+      prerequisites,
+      tags,
+      language,
+      objectives,
       instructor: req.user.id,
     };
 
@@ -280,8 +303,16 @@ router.post(
   authorize(['admin', 'instructor']),
   async (req, res) => {
     try {
+      const { title, content, type, videoUrl, duration, order, isPublished, resources } = req.body;
       const lessonData = {
-        ...req.body,
+        title,
+        content,
+        type,
+        videoUrl,
+        duration,
+        order,
+        isPublished,
+        resources,
         course: req.params.courseId,
       };
 
@@ -667,8 +698,25 @@ router.post(
   authorize(['admin', 'instructor']),
   async (req, res) => {
     try {
+      const {
+        title,
+        description,
+        lesson,
+        questions,
+        passingScore,
+        timeLimit,
+        maxAttempts,
+        settings,
+      } = req.body;
       const quizData = {
-        ...req.body,
+        title,
+        description,
+        lesson,
+        questions,
+        passingScore,
+        timeLimit,
+        maxAttempts,
+        settings,
         course: req.params.courseId,
       };
 
@@ -849,9 +897,9 @@ router.get('/certificate/verify/:verificationCode', async (req, res) => {
  * @desc    الحصول على شهادات المستخدم
  * @access  Private
  */
-router.get('/my-certificates', async (req, res) => {
+router.get('/my-certificates', authenticate, async (req, res) => {
   try {
-    const userId = req.user?.id || req.query.userId;
+    const userId = req.user.id;
 
     const certificates = await Certificate.find({ user: userId })
       .populate('course', 'title thumbnail')

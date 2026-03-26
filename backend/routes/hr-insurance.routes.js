@@ -13,6 +13,7 @@
  * ✅ تكامل الرواتب
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
@@ -427,7 +428,7 @@ router.post('/:id/claims', authenticateToken, async (req, res) => {
         .json({ success: false, message: 'الوثيقة غير نشطة — لا يمكن تقديم مطالبة' });
     }
 
-    const claimNumber = `CLM-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+    const claimNumber = `CLM-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     const claim = { ...req.body, claimNumber, status: 'submitted', submittedDate: new Date() };
 
     policy.claims.push(claim);
@@ -588,7 +589,7 @@ router.post(
 
       for (const emp of employees) {
         try {
-          const policyNum = `POL-${insuranceCompany.toUpperCase()}-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+          const policyNum = `POL-${insuranceCompany.toUpperCase()}-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
           const newPolicy = new EmployeeInsurance({
             employee: emp.employeeObjectId,
             employeeId: emp.employeeId,

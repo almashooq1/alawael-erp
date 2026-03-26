@@ -1798,7 +1798,8 @@ router.put(
 router.post(
   '/donations/:id/receipt',
   asyncHandler(async (req, res) => {
-    const receiptNumber = `RCT-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 9999)).padStart(4, '0')}`;
+    const crypto = require('crypto');
+    const receiptNumber = `RCT-${new Date().getFullYear()}-${String(crypto.randomInt(0, 10000)).padStart(4, '0')}`;
 
     if (Donation) {
       const donation = await Donation.findByIdAndUpdate(

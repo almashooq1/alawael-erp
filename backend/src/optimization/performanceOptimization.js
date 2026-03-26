@@ -360,12 +360,20 @@ class WebSocketOptimization {
    */
   setupOptimizations() {
     // تجميع الرسائل وبثها دفعة واحدة
-    setInterval(() => {
+    this._batchInterval = setInterval(() => {
       if (this.messageQueue.length > 0) {
         const messages = this.messageQueue.splice(0, 100);
         this.broadcastBatch(messages);
       }
     }, 100); // كل 100 ميلي ثانية
+  }
+
+  /** Stop the batch interval (for graceful shutdown / tests). */
+  destroy() {
+    if (this._batchInterval) {
+      clearInterval(this._batchInterval);
+      this._batchInterval = null;
+    }
   }
 
   /**
@@ -410,7 +418,7 @@ class MemoryOptimization {
    * مراقبة استخدام الذاكرة
    */
   static monitorMemory() {
-    setInterval(() => {
+    MemoryOptimization._memoryInterval = setInterval(() => {
       const used = process.memoryUsage();
 
       logger.info(
@@ -424,6 +432,14 @@ class MemoryOptimization {
         global.gc?.();
       }
     }, 30000); // كل 30 ثانية
+  }
+
+  /** Stop memory monitoring (for graceful shutdown / tests). */
+  static stopMonitoring() {
+    if (MemoryOptimization._memoryInterval) {
+      clearInterval(MemoryOptimization._memoryInterval);
+      MemoryOptimization._memoryInterval = null;
+    }
   }
 
   /**

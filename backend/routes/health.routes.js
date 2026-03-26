@@ -6,6 +6,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { Analytics, Asset, Schedule, DisabilityProgram } = require('../models');
+const redisClient = require('../config/redis');
 
 const router = express.Router();
 
@@ -115,8 +116,26 @@ router.get('/system', async (req, res) => {
     // Check MongoDB connection
     const mongoConnected = mongoose.connection.readyState === 1;
 
-    // Check Redis (if available)
+    // Check Redis (if available) — actual PING
     const redisEnabled = process.env.REDIS_ENABLED !== 'false';
+    let redisOk = false;
+    let redisPingMs = null;
+    if (redisEnabled) {
+      try {
+        const client = redisClient.getClient ? redisClient.getClient() : null;
+        if (client && typeof client.ping === 'function') {
+          const start = Date.now();
+          await Promise.race([
+            client.ping(),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('Redis ping timeout')), 3000)),
+          ]);
+          redisPingMs = Date.now() - start;
+          redisOk = true;
+        }
+      } catch {
+        redisOk = false;
+      }
+    }
 
     // Get database statistics
     const assetCount = await Asset.countDocuments().catch(() => 0);
@@ -149,7 +168,8 @@ router.get('/system', async (req, res) => {
       },
       services: {
         mongodb: mongoConnected ? 'operational' : 'degraded',
-        redis: redisEnabled ? 'operational' : 'disabled',
+        redis: redisEnabled ? (redisOk ? 'operational' : 'degraded') : 'disabled',
+        ...(redisPingMs !== null && { redisPingMs }),
       },
       timestamp: new Date().toISOString(),
     };

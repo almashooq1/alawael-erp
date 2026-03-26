@@ -38,8 +38,8 @@ services:
       - "5000:5000"
     environment:
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://mongo:27017/rehab_center
-      - REDIS_URL=redis://redis:6379
+      - MONGODB_URI=mongodb://${MONGO_USER:?Set MONGO_USER}:${MONGO_PASSWORD:?Set MONGO_PASSWORD}@mongo:27017/rehab_center?authSource=admin
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
       - JWT_SECRET=${JWT_SECRET}
       - API_KEY=${API_KEY}
       - PORT=5000
@@ -89,14 +89,14 @@ services:
     container_name: rehab-redis
     ports:
       - "6379:6379"
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD}
     volumes:
       - redis-data:/data
     networks:
       - rehab-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "REDISCLI_AUTH=$$REDIS_PASSWORD redis-cli ping"]
       interval: 10s
       timeout: 5s
       retries: 5

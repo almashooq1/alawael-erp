@@ -20,6 +20,74 @@ const {
   DrugInteraction,
 } = require('../models/pharmacy.model');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
+const { authenticate } = require('../middleware/auth');
+
+// All pharmacy routes require authentication
+router.use(authenticate);
+
+// ── Field whitelists ────────────────────────────────────────────────────────
+const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
+
+const MEDICATION_FIELDS = [
+  'name',
+  'genericName',
+  'code',
+  'category',
+  'dosageForm',
+  'strength',
+  'manufacturer',
+  'supplier',
+  'price',
+  'controlledSubstance',
+  'sideEffects',
+  'contraindications',
+  'storageConditions',
+  'description',
+  'activeIngredients',
+  'requiresPrescription',
+  'isActive',
+];
+const PRESCRIPTION_FIELDS = [
+  'patient',
+  'beneficiary',
+  'doctor',
+  'medications',
+  'diagnosis',
+  'notes',
+  'startDate',
+  'endDate',
+  'refills',
+  'status',
+];
+const DISPENSING_FIELDS = [
+  'prescription',
+  'patient',
+  'beneficiary',
+  'medications',
+  'notes',
+  'quantity',
+  'instructions',
+];
+const INVENTORY_FIELDS = [
+  'medication',
+  'batchNumber',
+  'quantity',
+  'unitPrice',
+  'expiryDate',
+  'supplier',
+  'storageLocation',
+  'notes',
+];
+const INTERACTION_FIELDS = [
+  'drug1',
+  'drug2',
+  'severity',
+  'description',
+  'mechanism',
+  'recommendation',
+  'evidence',
+];
 
 // ═══════════════════════════════════════════════════════════════════════════
 // MEDICATIONS — كتالوج الأدوية
@@ -35,10 +103,10 @@ router.get('/medications', async (req, res) => {
     if (active !== undefined) filter.isActive = active === 'true';
     if (search) {
       filter.$or = [
-        { 'name.ar': { $regex: search, $options: 'i' } },
-        { 'name.en': { $regex: search, $options: 'i' } },
-        { genericName: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
+        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
+        { genericName: { $regex: escapeRegex(search), $options: 'i' } },
+        { code: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -55,7 +123,7 @@ router.get('/medications', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] List medications error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأدوية', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الأدوية' });
   }
 });
 
@@ -66,19 +134,22 @@ router.get('/medications/:id', async (req, res) => {
     res.json({ success: true, data: medication });
   } catch (error) {
     logger.error('[Pharmacy] Get medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الدواء', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الدواء' });
   }
 });
 
 router.post('/medications', async (req, res) => {
   try {
-    const medication = new Medication({ ...req.body, createdBy: req.user?.id });
+    const medication = new Medication({
+      ...pick(req.body, MEDICATION_FIELDS),
+      createdBy: req.user?.id,
+    });
     await medication.save();
     logger.info(`[Pharmacy] Medication created: ${medication.code}`);
     res.status(201).json({ success: true, data: medication });
   } catch (error) {
     logger.error('[Pharmacy] Create medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الدواء', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة الدواء' });
   }
 });
 
@@ -86,14 +157,14 @@ router.put('/medications/:id', async (req, res) => {
   try {
     const medication = await Medication.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user?.id },
+      { ...pick(req.body, MEDICATION_FIELDS), updatedBy: req.user?.id },
       { new: true, runValidators: true }
     );
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, data: medication });
   } catch (error) {
     logger.error('[Pharmacy] Update medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الدواء', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث الدواء' });
   }
 });
 
@@ -108,7 +179,7 @@ router.delete('/medications/:id', async (req, res) => {
     res.json({ success: true, message: 'تم حذف الدواء بنجاح' });
   } catch (error) {
     logger.error('[Pharmacy] Delete medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف الدواء', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف الدواء' });
   }
 });
 
@@ -144,7 +215,7 @@ router.get('/prescriptions', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] List prescriptions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفات' });
   }
 });
 
@@ -159,19 +230,22 @@ router.get('/prescriptions/:id', async (req, res) => {
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Get prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفة' });
   }
 });
 
 router.post('/prescriptions', async (req, res) => {
   try {
-    const prescription = new Prescription({ ...req.body, createdBy: req.user?.id });
+    const prescription = new Prescription({
+      ...pick(req.body, PRESCRIPTION_FIELDS),
+      createdBy: req.user?.id,
+    });
     await prescription.save();
     logger.info(`[Pharmacy] Prescription created: ${prescription.prescriptionNumber}`);
     res.status(201).json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Create prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الوصفة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء الوصفة' });
   }
 });
 
@@ -186,7 +260,7 @@ router.put('/prescriptions/:id', async (req, res) => {
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Update prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الوصفة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث الوصفة' });
   }
 });
 
@@ -208,9 +282,7 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Verify prescription error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في التحقق من الوصفة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في التحقق من الوصفة' });
   }
 });
 
@@ -226,7 +298,7 @@ router.patch('/prescriptions/:id/cancel', async (req, res) => {
     res.json({ success: true, data: prescription });
   } catch (error) {
     logger.error('[Pharmacy] Cancel prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الوصفة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إلغاء الوصفة' });
   }
 });
 
@@ -255,16 +327,14 @@ router.get('/dispensing', async (req, res) => {
     res.json({ success: true, data: records, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
     logger.error('[Pharmacy] List dispensing error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب سجلات الصرف', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات الصرف' });
   }
 });
 
 router.post('/dispensing', async (req, res) => {
   try {
     const dispensing = new Dispensing({
-      ...req.body,
+      ...pick(req.body, DISPENSING_FIELDS),
       pharmacist: req.user?.id,
       createdBy: req.user?.id,
     });
@@ -292,7 +362,7 @@ router.post('/dispensing', async (req, res) => {
     res.status(201).json({ success: true, data: dispensing });
   } catch (error) {
     logger.error('[Pharmacy] Create dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الصرف', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تسجيل الصرف' });
   }
 });
 
@@ -317,7 +387,7 @@ router.patch('/dispensing/:id/return', async (req, res) => {
     res.json({ success: true, data: dispensing, message: 'تم إرجاع الأدوية بنجاح' });
   } catch (error) {
     logger.error('[Pharmacy] Return dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إرجاع الأدوية', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إرجاع الأدوية' });
   }
 });
 
@@ -348,19 +418,22 @@ router.get('/inventory', async (req, res) => {
     res.json({ success: true, data: batches, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
     logger.error('[Pharmacy] List inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المخزون', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المخزون' });
   }
 });
 
 router.post('/inventory', async (req, res) => {
   try {
-    const batch = new PharmacyInventory({ ...req.body, createdBy: req.user?.id });
+    const batch = new PharmacyInventory({
+      ...pick(req.body, INVENTORY_FIELDS),
+      createdBy: req.user?.id,
+    });
     await batch.save();
     logger.info(`[Pharmacy] Inventory batch added: ${batch.batchNumber}`);
     res.status(201).json({ success: true, data: batch });
   } catch (error) {
     logger.error('[Pharmacy] Add inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الدفعة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة الدفعة' });
   }
 });
 
@@ -374,7 +447,7 @@ router.put('/inventory/:id', async (req, res) => {
     res.json({ success: true, data: batch });
   } catch (error) {
     logger.error('[Pharmacy] Update inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الدفعة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث الدفعة' });
   }
 });
 
@@ -416,9 +489,7 @@ router.get('/inventory/expiry-alerts', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] Expiry alerts error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في جلب تنبيهات الانتهاء', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب تنبيهات الانتهاء' });
   }
 });
 
@@ -444,18 +515,21 @@ router.get('/interactions', async (req, res) => {
     res.json({ success: true, data: interactions, total });
   } catch (error) {
     logger.error('[Pharmacy] List interactions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التفاعلات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب التفاعلات' });
   }
 });
 
 router.post('/interactions', async (req, res) => {
   try {
-    const interaction = new DrugInteraction({ ...req.body, createdBy: req.user?.id });
+    const interaction = new DrugInteraction({
+      ...pick(req.body, INTERACTION_FIELDS),
+      createdBy: req.user?.id,
+    });
     await interaction.save();
     res.status(201).json({ success: true, data: interaction });
   } catch (error) {
     logger.error('[Pharmacy] Create interaction error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التفاعل', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة التفاعل' });
   }
 });
 
@@ -489,7 +563,7 @@ router.post('/interactions/check', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] Check interactions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في فحص التفاعلات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في فحص التفاعلات' });
   }
 });
 
@@ -558,7 +632,7 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Pharmacy] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم' });
   }
 });
 

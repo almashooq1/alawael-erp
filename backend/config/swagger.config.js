@@ -29,6 +29,10 @@ const options = {
         description: 'Development Server',
       },
       {
+        url: 'https://staging.alaweal.org/api/v1',
+        description: 'Staging Server',
+      },
+      {
         url: 'https://api.alawael.com/v1',
         description: 'Production Server',
       },
@@ -137,6 +141,69 @@ const options = {
             },
           },
         },
+
+        LoginRequest: {
+          type: 'object',
+          required: ['email', 'password'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'admin@alawael.com' },
+            password: { type: 'string', format: 'password', example: '••••••••' },
+          },
+        },
+
+        LoginResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            token: { type: 'string', description: 'JWT bearer token' },
+            refreshToken: { type: 'string', description: 'Refresh token' },
+            user: { $ref: '#/components/schemas/User' },
+          },
+        },
+
+        Beneficiary: {
+          type: 'object',
+          required: ['name', 'nationalId'],
+          properties: {
+            _id: { type: 'string', format: 'mongodb-objectid' },
+            name: { type: 'string', description: 'اسم المستفيد' },
+            nameAr: { type: 'string', description: 'الاسم بالعربية' },
+            nationalId: { type: 'string', description: 'رقم الهوية الوطنية' },
+            dateOfBirth: { type: 'string', format: 'date' },
+            gender: { type: 'string', enum: ['male', 'female'] },
+            phone: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            status: { type: 'string', enum: ['active', 'inactive', 'suspended', 'graduated'] },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+
+        Employee: {
+          type: 'object',
+          required: ['name', 'employeeId'],
+          properties: {
+            _id: { type: 'string', format: 'mongodb-objectid' },
+            name: { type: 'string', description: 'اسم الموظف' },
+            employeeId: { type: 'string', description: 'رقم الموظف' },
+            department: { type: 'string' },
+            position: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            phone: { type: 'string' },
+            status: { type: 'string', enum: ['active', 'inactive', 'on_leave', 'terminated'] },
+            hireDate: { type: 'string', format: 'date' },
+            createdAt: { type: 'string', format: 'date-time' },
+          },
+        },
+
+        SuccessResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            message: { type: 'string' },
+            messageAr: { type: 'string' },
+            data: { type: 'object' },
+          },
+        },
       },
 
       responses: {
@@ -184,6 +251,21 @@ const options = {
     },
 
     security: [{ bearerAuth: [] }, { apiKey: [] }],
+
+    tags: [
+      { name: 'Auth', description: 'المصادقة وإدارة الجلسات — Authentication & Sessions' },
+      { name: 'Users', description: 'إدارة المستخدمين — User Management' },
+      { name: 'Beneficiaries', description: 'إدارة المستفيدين — Beneficiary Management' },
+      { name: 'Employees', description: 'إدارة الموظفين — Employee Management' },
+      { name: 'Finance', description: 'الإدارة المالية — Finance & Accounting' },
+      { name: 'HR', description: 'الموارد البشرية — Human Resources' },
+      { name: 'Attendance', description: 'الحضور والانصراف — Attendance Tracking' },
+      { name: 'Documents', description: 'إدارة المستندات — Document Management' },
+      { name: 'Notifications', description: 'الإشعارات — Notifications' },
+      { name: 'Reports', description: 'التقارير — Reporting & Analytics' },
+      { name: 'Settings', description: 'الإعدادات — System Settings' },
+      { name: 'Health', description: 'فحص صحة النظام — Health & Monitoring' },
+    ],
   },
 
   apis: ['./routes/**/*.js', './api/**/*.js'],

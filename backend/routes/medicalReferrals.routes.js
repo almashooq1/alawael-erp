@@ -11,6 +11,7 @@ const express = require('express');
 const router = express.Router();
 const { MedicalReferral, ReferralFollowUp } = require('../models/medicalReferral.model');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // REFERRALS — الإحالات
@@ -38,9 +39,9 @@ router.get('/', async (req, res) => {
     if (specialty) filter['referredTo.specialty'] = specialty;
     if (search) {
       filter.$or = [
-        { referralNumber: { $regex: search, $options: 'i' } },
-        { 'clinicalInfo.reasonForReferral.ar': { $regex: search, $options: 'i' } },
-        { 'clinicalInfo.reasonForReferral.en': { $regex: search, $options: 'i' } },
+        { referralNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'clinicalInfo.reasonForReferral.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'clinicalInfo.reasonForReferral.en': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     if (dateFrom || dateTo) {

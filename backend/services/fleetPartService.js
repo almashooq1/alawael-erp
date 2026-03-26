@@ -4,6 +4,7 @@
 
 const FleetPart = require('../models/FleetPart');
 const _logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 class FleetPartService {
   static async create(data) {
@@ -18,10 +19,10 @@ class FleetPartService {
     if (filter.brand) query.brand = filter.brand;
     if (filter.search) {
       query.$or = [
-        { name: { $regex: filter.search, $options: 'i' } },
-        { nameAr: { $regex: filter.search, $options: 'i' } },
-        { sku: { $regex: filter.search, $options: 'i' } },
-        { partNumber: { $regex: filter.search, $options: 'i' } },
+        { name: { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { nameAr: { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { sku: { $regex: escapeRegex(filter.search), $options: 'i' } },
+        { partNumber: { $regex: escapeRegex(filter.search), $options: 'i' } },
       ];
     }
 

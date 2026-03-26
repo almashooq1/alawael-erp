@@ -2,7 +2,9 @@
  * Legal Affairs Routes — مسارات الشؤون القانونية
  */
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 
 function safeModel(name) {
   try {
@@ -16,14 +18,40 @@ function safeModel(name) {
   }
 }
 
-let authenticate;
-try {
-  const auth = require('../middleware/auth');
-  authenticate = auth.authenticate || auth.authenticateToken;
-} catch {
-  authenticate = (_r, _s, n) => n();
+router.use(authenticate);
+
+/* ── Field whitelists ───────────────────────────────────── */
+const CASE_FIELDS = [
+  'title',
+  'type',
+  'priority',
+  'description',
+  'parties',
+  'court',
+  'caseNumber',
+  'filingDate',
+  'nextHearing',
+  'assignedTo',
+  'financials',
+  'documents',
+];
+const CONSULTATION_FIELDS = [
+  'title',
+  'description',
+  'type',
+  'priority',
+  'category',
+  'dueDate',
+  'assignedTo',
+  'notes',
+  'documents',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
 }
-if (authenticate) router.use(authenticate);
 
 // ── Dashboard ────────────────────────────────────────────────────
 router.get('/dashboard', async (_req, res) => {
@@ -97,9 +125,7 @@ router.get('/dashboard', async (_req, res) => {
       },
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في لوحة الشؤون القانونية', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة الشؤون القانونية' });
   }
 });
 
@@ -121,7 +147,7 @@ router.get('/cases', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 
@@ -132,31 +158,31 @@ router.get('/cases/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 
 router.post('/cases', async (req, res) => {
   try {
     const LC = safeModel('LegalCase');
-    const data = await LC.create(req.body);
+    const data = await LC.create(pick(req.body, CASE_FIELDS));
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القضية', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء القضية' });
   }
 });
 
 router.put('/cases/:id', async (req, res) => {
   try {
     const LC = safeModel('LegalCase');
-    const data = await LC.findByIdAndUpdate(req.params.id, req.body, {
+    const data = await LC.findByIdAndUpdate(req.params.id, pick(req.body, CASE_FIELDS), {
       new: true,
       runValidators: true,
     });
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحديث', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
   }
 });
 
@@ -171,7 +197,7 @@ router.delete('/cases/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 
@@ -192,33 +218,35 @@ router.get('/consultations', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 
 router.post('/consultations', async (req, res) => {
   try {
     const LCons = safeModel('LegalConsultation');
-    const num = `LC-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const num = `LC-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
     const data = await LCons.create({
-      ...req.body,
+      ...pick(req.body, CONSULTATION_FIELDS),
       consultationNumber: num,
-      requestedBy: req.user?._id,
+      requestedBy: req.user._id,
     });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الاستشارة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء الاستشارة' });
   }
 });
 
 router.put('/consultations/:id', async (req, res) => {
   try {
     const LCons = safeModel('LegalConsultation');
-    const data = await LCons.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const data = await LCons.findByIdAndUpdate(req.params.id, pick(req.body, CONSULTATION_FIELDS), {
+      new: true,
+    });
     if (!data) return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 
@@ -262,7 +290,7 @@ router.get('/calendar', async (req, res) => {
 
     res.json({ success: true, data: events });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ' });
   }
 });
 

@@ -399,7 +399,7 @@ class AdvancedAnalytics extends EventEmitter {
    * Start continuous analysis
    */
   startContinuousAnalysis() {
-    setInterval(() => {
+    this._analysisInterval = setInterval(() => {
       this.getRecommendations();
       this.calculateRiskAssessment();
       this.predictSuccessRate();
@@ -459,6 +459,16 @@ class AdvancedAnalytics extends EventEmitter {
     } catch (error) {
       logger.error('❌ Report export failed:', error.message);
       throw error;
+    }
+  }
+
+  /**
+   * Shutdown — clear intervals
+   */
+  shutdown() {
+    if (this._analysisInterval) {
+      clearInterval(this._analysisInterval);
+      this._analysisInterval = null;
     }
   }
 }

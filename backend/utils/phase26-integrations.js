@@ -2,6 +2,8 @@
 // Phase 26: Advanced Integrations
 // Zapier, Workflow Automation, API Marketplace, Custom Connectors
 
+const crypto = require('crypto');
+
 class IntegrationConnector {
   constructor() {
     this.connectors = new Map();
@@ -234,7 +236,7 @@ class APIMarketplace {
       apiId,
       subscriberId: subscriptionData.subscriberId,
       tier: subscriptionData.tier,
-      apiKey: `sk_${Math.random().toString(36).substr(2, 32)}`,
+      apiKey: `sk_${crypto.randomBytes(24).toString('base64url')}`,
       rateLimit: subscriptionData.tier === 'premium' ? 10000 : 1000,
       subscribedAt: new Date(),
     };

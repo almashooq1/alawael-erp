@@ -495,7 +495,7 @@ class AlertService extends EventEmitter {
 
   setupAutoAlertCleanup() {
     // Cleanup resolved alerts older than 30 days every hour
-    setInterval(
+    this._cleanupInterval = setInterval(
       async () => {
         try {
           const cutoffDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
@@ -504,14 +504,22 @@ class AlertService extends EventEmitter {
             status: 'resolved',
             resolvedAt: { $lt: cutoffDate },
           });
-
         } catch (error) {
           logger.error(`❌ Alert cleanup failed: ${error.message}`);
         }
       },
       60 * 60 * 1000
     ); // Every hour
+  }
 
+  /**
+   * Shutdown — clear intervals
+   */
+  shutdown() {
+    if (this._cleanupInterval) {
+      clearInterval(this._cleanupInterval);
+      this._cleanupInterval = null;
+    }
   }
 }
 

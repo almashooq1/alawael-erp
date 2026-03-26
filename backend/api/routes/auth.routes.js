@@ -29,8 +29,8 @@ const { jwtSecret, jwtRefreshSecret } = require('../../config/secrets');
 // JWT
 const JWT_SECRET = jwtSecret;
 const JWT_REFRESH_SECRET = jwtRefreshSecret;
-const ACCESS_TOKEN_EXPIRY = '24h';
-const REFRESH_TOKEN_EXPIRY = '7d';
+const ACCESS_TOKEN_EXPIRY = process.env.JWT_ACCESS_EXPIRY || '15m';
+const REFRESH_TOKEN_EXPIRY = process.env.JWT_REFRESH_EXPIRY || '7d';
 
 /**
  * @route   POST /api/auth/register

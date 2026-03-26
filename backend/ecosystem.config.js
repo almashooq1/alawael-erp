@@ -21,8 +21,8 @@ module.exports = {
       // Script to run
       script: './server.js',
 
-      // Number of instances (max = number of CPU cores)
-      instances: 2,
+      // Number of instances (max = number of CPU cores, 0 = auto-detect)
+      instances: process.env.PM2_INSTANCES || 2,
 
       // Execution mode (cluster for multi-process, fork for single)
       exec_mode: 'cluster',
@@ -65,11 +65,17 @@ module.exports = {
       // Cron expression for scheduled restart (daily at midnight)
       cron_restart: '0 0 * * *',
 
-      // Time to kill process after sending SIGTERM (5 seconds)
-      kill_timeout: 5000,
+      // Time to kill process after sending SIGTERM
+      // MUST be >= gracefulShutdown.js FORCE_TIMEOUT (30s) + buffer
+      // to allow in-flight requests and DB connections to close cleanly
+      kill_timeout: 35000,
 
       // Time to wait for app to start before considering it dead
       listen_timeout: 10000,
+
+      // Wait for process.send('ready') before considering app online
+      // Enables zero-downtime reload in cluster mode
+      wait_ready: true,
 
       // Allow process manager to listen on message events
       shutdown_with_message: true,
@@ -77,17 +83,14 @@ module.exports = {
       // Max concurrent clients
       max_clients: null,
 
-      // Delay between restart attempts (exponential backoff)
-      wait_ready: false,
-
-      // Amount of memory to pretend the app takes for priority in cluster mode
+      // Disable PM2 built-in monitoring (use custom APM instead)
       pmx: false,
 
       // Application arguments
       args: '',
 
       // Additional node arguments (900MB heap < 1G PM2 limit → allows graceful GC)
-      node_args: '--max-old-space-size=900',
+      node_args: '--max-old-space-size=900 --enable-source-maps',
 
       // Ignore changes to these files when restarting
       ignore_files: ['.git', '.gitignore', 'README.md', '.env.example', 'package-lock.json'],

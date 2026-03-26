@@ -1,4 +1,12 @@
-/* eslint-disable no-unused-vars */
+/**
+ * ESLint Flat Configuration — AlAwael ERP Backend
+ *
+ * Professional setup with security rules, strict mode for production code,
+ * and relaxed rules for tests.
+ */
+
+'use strict';
+
 const js = require('@eslint/js');
 const globals = require('globals');
 
@@ -45,27 +53,18 @@ module.exports = [
       sourceType: 'commonjs',
       globals: {
         ...globals.node,
-        process: 'readonly',
-        __dirname: 'readonly',
-        __filename: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'writable',
-        console: 'readonly',
-        Buffer: 'readonly',
-        setTimeout: 'readonly',
-        clearTimeout: 'readonly',
-        setInterval: 'readonly',
-        clearInterval: 'readonly',
-        setImmediate: 'readonly',
-        clearImmediate: 'readonly',
+        // Modern Web APIs available in Node 18+
         fetch: 'readonly',
         URL: 'readonly',
         URLSearchParams: 'readonly',
+        AbortController: 'readonly',
+        AbortSignal: 'readonly',
+        structuredClone: 'readonly',
       },
     },
     rules: {
       ...js.configs.recommended.rules,
+      // ── Code Quality ──
       'no-unused-vars': [
         'warn',
         {
@@ -74,14 +73,27 @@ module.exports = [
           caughtErrors: 'none',
         },
       ],
-      'no-console': 'off',
-      'no-undef': 'warn',
+      'no-console': 'off', // using structured logger instead
+      'no-undef': 'error', // catch real bugs — require explicit imports
       'no-empty': 'warn',
       'no-useless-catch': 'off',
       'no-constant-condition': 'warn',
       'no-unused-expressions': 'warn',
       'prefer-const': 'warn',
-      'no-var': 'warn',
+      'no-var': 'error', // always use let/const
+      // ── Safety ──
+      eqeqeq: ['error', 'always', { null: 'ignore' }], // prevent type coercion bugs
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-return-await': 'warn', // redundant await in return
+      'no-throw-literal': 'error', // always throw Error objects
+      'no-self-compare': 'error',
+      'no-template-curly-in-string': 'warn', // catch 'Hello ${name}' typos
+      // ── Async Best Practice ──
+      'no-async-promise-executor': 'error',
+      'no-promise-executor-return': 'warn',
+      'require-atomic-updates': 'warn',
     },
   },
   // Frontend/React configuration
@@ -111,15 +123,7 @@ module.exports = [
     files: ['**/*.test.js', '**/*.spec.js', 'tests/**/*.js', '__tests__/**/*.js'],
     languageOptions: {
       globals: {
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly',
-        jest: 'readonly',
+        ...globals.jest,
       },
     },
     rules: {
@@ -131,9 +135,12 @@ module.exports = [
           caughtErrors: 'none',
         },
       ],
+      // Relaxed rules for tests
+      'no-throw-literal': 'off',
+      'no-undef': 'warn',
     },
   },
-  // Routes files configuration
+  // Routes files configuration (legacy global injection — will be phased out)
   {
     files: ['**/routes/**/*.js'],
     languageOptions: {

@@ -9,6 +9,65 @@ const logger = require('../utils/logger');
 
 router.use(authenticate);
 
+// ── Whitelist helper: pick only allowed fields from request body ──
+const ALLOWED_DONATION_FIELDS = [
+  'type',
+  'donorName',
+  'donorPhone',
+  'donorEmail',
+  'donorId',
+  'isAnonymous',
+  'amount',
+  'currency',
+  'paymentMethod',
+  'paymentReference',
+  'purpose',
+  'campaign',
+  'restrictedTo',
+  'status',
+  'receiptDate',
+  'isRecurring',
+  'recurringFrequency',
+  'donationDate',
+  'notes',
+  'campaignId',
+];
+
+function pickFields(body, allowedFields) {
+  const result = {};
+  for (const key of allowedFields) {
+    if (body[key] !== undefined) result[key] = body[key];
+  }
+  return result;
+}
+
+function validateDonationBody(body) {
+  const errors = [];
+  if (body.amount !== undefined) {
+    const amount = Number(body.amount);
+    if (isNaN(amount) || amount <= 0) errors.push('مبلغ التبرع يجب أن يكون رقماً موجباً');
+  }
+  if (body.type !== undefined) {
+    const validTypes = [
+      'cash',
+      'in_kind',
+      'endowment',
+      'zakat',
+      'sadaqah',
+      'recurring',
+      'conditional',
+    ];
+    if (!validTypes.includes(body.type)) errors.push('نوع التبرع غير صالح');
+  }
+  if (body.donorId !== undefined && !/^[a-fA-F0-9]{24}$/.test(body.donorId)) {
+    errors.push('معرف المتبرع غير صالح');
+  }
+  if (body.campaignId !== undefined && !/^[a-fA-F0-9]{24}$/.test(body.campaignId)) {
+    errors.push('معرف الحملة غير صالح');
+  }
+  return errors;
+}
+
 // GET /dashboard/stats — donation dashboard statistics
 router.get('/dashboard/stats', async (req, res) => {
   try {
@@ -127,29 +186,40 @@ router.post('/', async (req, res) => {
     const Donor = require('../models/Donor');
     const Campaign = require('../models/Campaign');
 
+    // Validate input
+    const errors = validateDonationBody(req.body);
+    if (errors.length) {
+      return res.status(400).json({ success: false, message: errors.join(', ') });
+    }
+
+    // Whitelist fields — prevent mass-assignment
+    const fields = pickFields(req.body, ALLOWED_DONATION_FIELDS);
+    const amount = Number(fields.amount) || 0;
+
     // Auto-generate receipt number
     const count = await Donation.countDocuments();
     const receiptNo = `DON-${String(count + 1).padStart(6, '0')}`;
 
     const donation = await Donation.create({
-      ...req.body,
+      ...fields,
+      amount,
       donationNumber: receiptNo,
       receiptNumber: receiptNo,
       createdBy: req.user?.id,
     });
 
-    // Update donor stats
-    if (req.body.donorId) {
-      await Donor.findByIdAndUpdate(req.body.donorId, {
-        $inc: { totalDonations: req.body.amount || 0, donationsCount: 1 },
+    // Update donor stats (use validated amount)
+    if (fields.donorId) {
+      await Donor.findByIdAndUpdate(fields.donorId, {
+        $inc: { totalDonations: amount, donationsCount: 1 },
         lastDonation: new Date(),
       });
     }
 
-    // Update campaign stats
-    if (req.body.campaignId) {
-      await Campaign.findByIdAndUpdate(req.body.campaignId, {
-        $inc: { collectedAmount: req.body.amount || 0, donorsCount: 1 },
+    // Update campaign stats (use validated amount)
+    if (fields.campaignId) {
+      await Campaign.findByIdAndUpdate(fields.campaignId, {
+        $inc: { collectedAmount: amount, donorsCount: 1 },
       });
     }
 

@@ -11,7 +11,14 @@ const logger = require('../utils/logger');
 class OAuthService {
   constructor() {
     this.ssoService = new SSOService();
-    this.OAUTH_CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET || 'oauth-secret';
+    const isProd = process.env.NODE_ENV === 'production';
+    this.OAUTH_CLIENT_SECRET =
+      process.env.OAUTH_CLIENT_SECRET ||
+      (isProd
+        ? (() => {
+            throw new Error('[SECURITY] OAUTH_CLIENT_SECRET required in production');
+          })()
+        : 'dev-only-oauth-secret');
   }
 
   /**

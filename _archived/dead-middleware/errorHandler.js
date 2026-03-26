@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const { appendFile } = require('fs').promises;
+const crypto = require('crypto');
 const { ApiError } = require('../utils/apiResponse');
 const logger = require('../utils/logger');
 
@@ -147,7 +148,7 @@ const errorHandler = (err, req, res, _next) => {
   const response = formatErrorResponse(err, req, isDevelopment);
 
   // Set response headers
-  res.set('X-Error-Id', `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  res.set('X-Error-Id', `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`);
   res.set('X-Error-Timestamp', new Date().toISOString());
 
   // Send response

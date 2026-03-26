@@ -169,12 +169,12 @@ class NotificationAnalyticsSystem extends EventEmitter {
    */
   startMetricsCollection() {
     // تجميع كل ساعة
-    setInterval(() => {
+    this._hourlyInterval = setInterval(() => {
       this.collectHourlyMetrics();
     }, 3600000);
 
     // تجميع يومي
-    setInterval(() => {
+    this._dailyInterval = setInterval(() => {
       this.collectDailyMetrics();
     }, 86400000);
 
@@ -718,6 +718,20 @@ class NotificationAnalyticsSystem extends EventEmitter {
     } catch (error) {
       logger.error(`❌ خطأ في تنظيف الإحصائيات القديمة: ${error.message}`);
       throw error;
+    }
+  }
+
+  /**
+   * Shutdown — clear intervals
+   */
+  shutdown() {
+    if (this._hourlyInterval) {
+      clearInterval(this._hourlyInterval);
+      this._hourlyInterval = null;
+    }
+    if (this._dailyInterval) {
+      clearInterval(this._dailyInterval);
+      this._dailyInterval = null;
     }
   }
 }

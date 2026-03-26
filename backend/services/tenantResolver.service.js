@@ -413,9 +413,19 @@ class TenantResolverService extends EventEmitter {
    * بدء فترة تنظيف الذاكرة المؤقتة
    */
   startCacheCleanup() {
-    setInterval(() => {
+    this._cleanupInterval = setInterval(() => {
       this.clearExpiredCache();
     }, 60 * 1000); // Every minute
+  }
+
+  /**
+   * Stop cache cleanup interval
+   */
+  stopCacheCleanup() {
+    if (this._cleanupInterval) {
+      clearInterval(this._cleanupInterval);
+      this._cleanupInterval = null;
+    }
   }
 
   /**

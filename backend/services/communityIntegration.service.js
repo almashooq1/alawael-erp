@@ -11,6 +11,7 @@ const EventParticipation = require('../models/EventParticipation');
 const IntegrationAssessment = require('../models/IntegrationAssessment');
 const AwarenessProgram = require('../models/AwarenessProgram');
 const _logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // COMMUNITY ACTIVITIES — الأنشطة المجتمعية
@@ -50,9 +51,9 @@ async function getActivities(query = {}) {
   if (city) filter['location.city'] = city;
   if (search) {
     filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { titleAr: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: escapeRegex(search), $options: 'i' } },
+      { titleAr: { $regex: escapeRegex(search), $options: 'i' } },
+      { description: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
   if (startDateFrom || startDateTo) {
@@ -164,8 +165,8 @@ async function getPartnerships(query = {}) {
   if (status) filter.status = status;
   if (search) {
     filter.$or = [
-      { organizationName: { $regex: search, $options: 'i' } },
-      { organizationNameAr: { $regex: search, $options: 'i' } },
+      { organizationName: { $regex: escapeRegex(search), $options: 'i' } },
+      { organizationNameAr: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 
@@ -537,9 +538,9 @@ async function getAwarenessPrograms(query = {}) {
   if (coverageArea) filter.coverageArea = coverageArea;
   if (search) {
     filter.$or = [
-      { title: { $regex: search, $options: 'i' } },
-      { titleAr: { $regex: search, $options: 'i' } },
-      { description: { $regex: search, $options: 'i' } },
+      { title: { $regex: escapeRegex(search), $options: 'i' } },
+      { titleAr: { $regex: escapeRegex(search), $options: 'i' } },
+      { description: { $regex: escapeRegex(search), $options: 'i' } },
     ];
   }
 

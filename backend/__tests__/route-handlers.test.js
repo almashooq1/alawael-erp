@@ -56,8 +56,8 @@ jest.mock('../middleware/auth.middleware', () => ({
       next(),
 }));
 describe('Route Handlers', () => {
-  it('should respond to GET /api/health', async () => {
-    const res = await request(app).get('/api/health');
+  it('should respond to GET /health', async () => {
+    const res = await request(app).get('/health');
     expect(res.status).toBeGreaterThanOrEqual(200);
     expect(res.status).toBeLessThan(300);
     expect(res.body).toHaveProperty('status', 'ok');

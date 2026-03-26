@@ -11,6 +11,7 @@ const {
   KnowledgeRating,
 } = require('../models/KnowledgeBase');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // BOOKMARK SCHEMA (new — user bookmarks)
@@ -79,9 +80,9 @@ class KnowledgeCenterService {
     if (search && search.trim()) {
       const s = search.trim();
       filter.$or = [
-        { title: { $regex: s, $options: 'i' } },
-        { description: { $regex: s, $options: 'i' } },
-        { content: { $regex: s, $options: 'i' } },
+        { title: { $regex: escapeRegex(s), $options: 'i' } },
+        { description: { $regex: escapeRegex(s), $options: 'i' } },
+        { content: { $regex: escapeRegex(s), $options: 'i' } },
         { tags: { $in: [new RegExp(s, 'i')] } },
         { keywords: { $in: [new RegExp(s, 'i')] } },
       ];
@@ -446,9 +447,9 @@ class KnowledgeCenterService {
 
     // Use $text for full-text search if available, with regex fallback
     filter.$or = [
-      { title: { $regex: searchTerm, $options: 'i' } },
-      { description: { $regex: searchTerm, $options: 'i' } },
-      { content: { $regex: searchTerm, $options: 'i' } },
+      { title: { $regex: escapeRegex(searchTerm), $options: 'i' } },
+      { description: { $regex: escapeRegex(searchTerm), $options: 'i' } },
+      { content: { $regex: escapeRegex(searchTerm), $options: 'i' } },
       { tags: { $in: [new RegExp(searchTerm, 'i')] } },
     ];
 

@@ -20,11 +20,18 @@ const upload = multer({ storage });
 
 const router = express.Router();
 
-// Get all shipments
+// Get all shipments (paginated)
 router.get('/', authMiddleware, async (req, res) => {
   try {
-    const shipments = await Shipment.find().populate('order');
-    res.json(shipments);
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
+    const skip = (page - 1) * limit;
+
+    const [shipments, total] = await Promise.all([
+      Shipment.find().populate('order').skip(skip).limit(limit).lean(),
+      Shipment.countDocuments(),
+    ]);
+    res.json({ data: shipments, page, limit, total, totalPages: Math.ceil(total / limit) });
   } catch (_err) {
     res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
   }

@@ -15,7 +15,7 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_DB: whatsapp
     ports:

@@ -584,12 +584,22 @@ class AdvancedSecurity extends EventEmitter {
    * Helper: Start security monitoring
    */
   startSecurityMonitoring() {
-    setInterval(
+    this._monitoringInterval = setInterval(
       () => {
         this.detectSuspiciousActivity();
       },
       5 * 60 * 1000
     ); // Every 5 minutes
+  }
+
+  /**
+   * Shutdown — clear intervals
+   */
+  shutdown() {
+    if (this._monitoringInterval) {
+      clearInterval(this._monitoringInterval);
+      this._monitoringInterval = null;
+    }
   }
 }
 

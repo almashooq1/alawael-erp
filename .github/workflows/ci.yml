@@ -167,12 +167,54 @@ jobs:
           echo "css_kb=$CSS_KB" >> $GITHUB_OUTPUT
           echo "📦 Bundle: ${TOTAL_MB}MB total | JS: ${JS_MB}MB | CSS: ${CSS_KB}KB"
 
+      - name: Enforce bundle size limit
+        working-directory: frontend
+        run: |
+          MAX_JS_MB=5
+          JS_BYTES=$(du -sb build/static/js/ 2>/dev/null | cut -f1 || echo "0")
+          JS_MB=$(echo "scale=2; $JS_BYTES/1048576" | bc)
+          echo "JS bundle: ${JS_MB}MB (limit: ${MAX_JS_MB}MB)"
+          if [ $(echo "$JS_MB > $MAX_JS_MB" | bc -l) -eq 1 ]; then
+            echo "::error::❌ JS bundle size ${JS_MB}MB exceeds ${MAX_JS_MB}MB limit!"
+            exit 1
+          fi
+          echo "✅ JS bundle size within limit"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: frontend-build
           path: frontend/build/
           retention-days: 7
+
+  # ═══════════════════════════════════════════════════════════════════
+  #  3b. Frontend Tests (Jest)
+  # ═══════════════════════════════════════════════════════════════════
+  test-frontend:
+    name: "🧪 Frontend Tests"
+    runs-on: ubuntu-latest
+    needs: lint
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: |
+          npm install -g npm@latest
+          npm ci
+
+      - name: Run Jest tests
+        working-directory: frontend
+        run: npx react-scripts test --passWithNoTests --watchAll=false --ci
+        env:
+          CI: "true"
 
   # ═══════════════════════════════════════════════════════════════════
   #  4. Security Audit
@@ -224,12 +266,34 @@ jobs:
           fi
 
   # ═══════════════════════════════════════════════════════════════════
+  #  4b. SAST — Static Application Security Testing (Semgrep)
+  # ═══════════════════════════════════════════════════════════════════
+  sast:
+    name: "🛡️ SAST Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true          # advisory — don't block merges yet
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep SAST
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/javascript
+            p/nodejs
+            p/owasp-top-ten
+            p/security-audit
+        env:
+          SEMGREP_RULES: "p/javascript p/nodejs p/owasp-top-ten p/security-audit"
+
+  # ═══════════════════════════════════════════════════════════════════
   #  5. CI Summary + PR Comment
   # ═══════════════════════════════════════════════════════════════════
   summary:
     name: "📋 CI Summary"
     runs-on: ubuntu-latest
-    needs: [lint, test-backend, build-frontend, security]
+    needs: [lint, test-backend, build-frontend, test-frontend, security, sast]
     if: always()
     steps:
       - name: Build summary
@@ -237,7 +301,9 @@ jobs:
           LINT="${{ needs.lint.result }}"
           TESTS="${{ needs.test-backend.result }}"
           BUILD="${{ needs.build-frontend.result }}"
+          FTESTS="${{ needs.test-frontend.result }}"
           SEC="${{ needs.security.result }}"
+          SAST="${{ needs.sast.result }}"
 
           status_icon() {
             case "$1" in
@@ -256,7 +322,9 @@ jobs:
           echo "| 🔍 Lint & Quality | $(status_icon $LINT) $LINT |" >> $GITHUB_STEP_SUMMARY
           echo "| 🧪 Backend Tests | $(status_icon $TESTS) $TESTS |" >> $GITHUB_STEP_SUMMARY
           echo "| 📦 Frontend Build | $(status_icon $BUILD) $BUILD |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Frontend Tests | $(status_icon $FTESTS) $FTESTS |" >> $GITHUB_STEP_SUMMARY
           echo "| 🔒 Security Audit | $(status_icon $SEC) $SEC |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🛡️ SAST Scan | $(status_icon $SAST) $SAST |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
           echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY

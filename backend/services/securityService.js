@@ -12,6 +12,7 @@ const logger = require('../utils/logger');
 
 /* ── Security Policy Schema (stored in-memory with DB persistence) ── */
 const mongoose = require('mongoose');
+const { escapeRegex } = require('../utils/sanitize');
 
 const SecurityPolicySchema = new mongoose.Schema(
   {
@@ -493,7 +494,7 @@ class SecurityService {
   async getLoginAttempts(query = {}) {
     const { page = 1, limit = 50, email, ip, success } = query;
     const filter = {};
-    if (email) filter.email = { $regex: email, $options: 'i' };
+    if (email) filter.email = { $regex: escapeRegex(email), $options: 'i' };
     if (ip) filter.ip = ip;
     if (success !== undefined) filter.success = success === 'true';
 

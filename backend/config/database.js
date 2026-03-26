@@ -126,6 +126,9 @@ const connectDB = async () => {
       if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
         throw new Error('MONGODB_URI is required in production');
       }
+      if (!process.env.MONGODB_URI && process.env.NODE_ENV !== 'test') {
+        console.warn('[DB] MONGODB_URI not set — using localhost fallback (dev only)');
+      }
       const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
 
       const conn = await mongoose.connect(mongoURI, {

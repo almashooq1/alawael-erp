@@ -18,8 +18,8 @@ services:
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=rehab_agi
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DB_USER=${POSTGRES_USER:-postgres}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
@@ -38,8 +38,8 @@ services:
     container_name: rehab-postgres
     environment:
       - POSTGRES_DB=rehab_agi
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     ports:
       - "5432:5432"
     volumes:
@@ -100,8 +100,8 @@ services:
     ports:
       - "3001:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
     volumes:
       - grafana-data:/var/lib/grafana
     networks:

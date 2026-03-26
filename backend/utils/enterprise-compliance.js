@@ -2,6 +2,8 @@
 // Phase 20: Enterprise Compliance & White-Label
 // GDPR/CCPA Compliance, SSO, Audit Logging, Data Residency
 
+const crypto = require('crypto');
+
 class ComplianceManager {
   constructor() {
     this.compliancePolicies = new Map();
@@ -65,7 +67,7 @@ class ComplianceManager {
   recordConsent(tenantId, userId, consentData) {
     const { type, purpose, dataCategories, thirdParties, expiryDate } = consentData;
 
-    const consentId = `consent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const consentId = `consent_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
     const consent = {
       id: consentId,
@@ -132,7 +134,7 @@ class ComplianceManager {
    * @returns {Object} Exported data
    */
   exportUserData(tenantId, userId) {
-    const exportId = `export_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const exportId = `export_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
     const userData = {
       id: exportId,
@@ -176,7 +178,7 @@ class ComplianceManager {
    * @returns {Object} Response
    */
   deleteUserData(tenantId, userId) {
-    const deletionId = `deletion_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const deletionId = `deletion_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
     // Anonymize instead of hard delete (retention obligations)
     const anonymizedUser = {
@@ -450,7 +452,7 @@ class SSO_Manager {
     const user = this._validateToken(token, config);
 
     // Create session
-    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const sessionId = `sess_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
     const session = {
       id: sessionId,
       tenantId,

@@ -55,6 +55,7 @@ const getMessage = () => {
 };
 const getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
+const { escapeRegex } = require('../utils/sanitize');
   return _Beneficiary;
 };
 
@@ -208,8 +209,8 @@ class TherapistPortalService {
     const filter = { _id: { $in: beneficiaryIds } };
     if (query.search) {
       filter.$or = [
-        { name: { $regex: query.search, $options: 'i' } },
-        { mrn: { $regex: query.search, $options: 'i' } },
+        { name: { $regex: escapeRegex(query.search), $options: 'i' } },
+        { mrn: { $regex: escapeRegex(query.search), $options: 'i' } },
       ];
     }
     if (query.status) filter.status = query.status;

@@ -10,6 +10,62 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
+const { authenticate } = require('../middleware/auth');
+
+/* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+router.use(authenticate);
+
+/* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const DECISION_FIELDS = [
+  'title',
+  'subject',
+  'body',
+  'documentType',
+  'priority',
+  'status',
+  'department',
+  'category',
+  'effectiveDate',
+  'expiryDate',
+  'attachments',
+  'tags',
+  'recipients',
+  'notes',
+];
+const CORRESPONDENCE_FIELDS = [
+  'subject',
+  'body',
+  'direction',
+  'department',
+  'category',
+  'priority',
+  'from',
+  'to',
+  'attachments',
+  'tags',
+  'dueDate',
+  'confidentiality',
+];
+const FOLLOWUP_FIELDS = ['notes', 'action', 'nextAction', 'dueDate', 'status'];
+const DELEGATION_FIELDS = [
+  'title',
+  'description',
+  'delegateTo',
+  'delegateToName',
+  'startDate',
+  'endDate',
+  'permissions',
+  'department',
+  'scope',
+  'conditions',
+  'notes',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
 
 /* ━━━ Models ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 let AdminDecision, Correspondence, Delegation;
@@ -190,7 +246,7 @@ router.post(
       req.body.documentType || 'decision'
     );
     const doc = new AdminDecision({
-      ...req.body,
+      ...pick(req.body, DECISION_FIELDS),
       decisionNumber,
       createdBy: uid(req),
       createdByName: uname(req),
@@ -464,7 +520,7 @@ router.post(
     if (!Correspondence) throw new AppError('Model unavailable', 503);
     const refNum = await Correspondence.generateRefNumber(req.body.direction || 'incoming');
     const doc = new Correspondence({
-      ...req.body,
+      ...pick(req.body, CORRESPONDENCE_FIELDS),
       referenceNumber: refNum,
       createdBy: uid(req),
       createdByName: uname(req),
@@ -595,7 +651,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const doc = await Correspondence.findById(req.params.id);
     if (!doc) throw new AppError('غير موجود', 404);
-    doc.followUps.push({ ...req.body, createdBy: uname(req) });
+    doc.followUps.push({ ...pick(req.body, FOLLOWUP_FIELDS), createdBy: uname(req) });
     doc.addAuditEntry('follow_up_added', uid(req), uname(req), 'تم إضافة متابعة');
     await doc.save();
     res.json({ success: true, data: doc });
@@ -692,7 +748,7 @@ router.post(
     if (!Delegation) throw new AppError('Model unavailable', 503);
     const delegationNumber = await Delegation.generateDelegationNumber();
     const doc = new Delegation({
-      ...req.body,
+      ...pick(req.body, DELEGATION_FIELDS),
       delegationNumber,
       createdBy: uid(req),
       createdByName: uname(req),

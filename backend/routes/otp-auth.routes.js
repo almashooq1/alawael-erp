@@ -21,7 +21,7 @@ const User = require('../models/User');
 
 // JWT Secret
 const { jwtSecret: JWT_SECRET } = require('../config/secrets');
-const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
+const JWT_EXPIRE = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRE || '15m';
 
 // Rate limiters for OTP endpoints — strict to prevent brute-force
 const otpSendLimiter = createCustomLimiter({
@@ -389,7 +389,7 @@ router.post(
 
       // إنشاء Refresh Token
       const refreshToken = jwt.sign({ id: user._id, type: 'refresh' }, JWT_SECRET, {
-        expiresIn: '30d',
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       });
 
       res.json({
@@ -398,7 +398,7 @@ router.post(
         data: {
           token,
           refreshToken,
-          expiresIn: 7 * 24 * 60 * 60, // 7 أيام بالثواني
+          expiresIn: 15 * 60, // 15 دقيقة بالثواني
           user: {
             id: user._id,
             email: user.email,

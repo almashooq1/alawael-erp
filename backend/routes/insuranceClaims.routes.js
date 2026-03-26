@@ -17,7 +17,12 @@ const {
   InsuranceClaim,
   ClaimItem,
 } = require('../models/insuranceClaim.model');
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { escapeRegex } = require('../utils/sanitize');
+
+// ── Auth: all insurance routes require authentication ────────────────────
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // INSURANCE CONTRACTS — عقود التأمين
@@ -32,10 +37,10 @@ router.get('/contracts', async (req, res) => {
     if (classType) filter.classType = classType;
     if (search) {
       filter.$or = [
-        { contractNumber: { $regex: search, $options: 'i' } },
-        { 'name.ar': { $regex: search, $options: 'i' } },
-        { 'name.en': { $regex: search, $options: 'i' } },
-        { 'insuranceCompany.name.ar': { $regex: search, $options: 'i' } },
+        { contractNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'insuranceCompany.name.ar': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -240,7 +245,7 @@ router.get('/claims', async (req, res) => {
     if (status) filter.status = status;
     if (claimType) filter.claimType = claimType;
     if (search) {
-      filter.$or = [{ claimNumber: { $regex: search, $options: 'i' } }];
+      filter.$or = [{ claimNumber: { $regex: escapeRegex(search), $options: 'i' } }];
     }
     if (dateFrom || dateTo) {
       filter.visitDate = {};

@@ -361,7 +361,7 @@ class HealthCheckService {
    */
 
   setupAutoHealthCheck(intervalMinutes = 5) {
-    setInterval(
+    this._healthCheckInterval = setInterval(
       async () => {
         try {
           const report = await this.runFullHealthCheck();
@@ -394,6 +394,16 @@ class HealthCheckService {
       lastCheck: this.healthStatus.timestamp,
       components: this.healthStatus.checks,
     };
+  }
+
+  /**
+   * Shutdown — clear intervals
+   */
+  shutdown() {
+    if (this._healthCheckInterval) {
+      clearInterval(this._healthCheckInterval);
+      this._healthCheckInterval = null;
+    }
   }
 }
 

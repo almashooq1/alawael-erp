@@ -668,11 +668,15 @@ class AdvancedAlertRulesEngine extends EventEmitter {
    */
   async executeWebhookAction(rule, eventData) {
     try {
-      const axios = require('axios');
+      const httpClient = require('../utils/httpClient');
+      const { validateOutboundUrl } = require('../utils/urlValidator');
+
+      // SSRF protection — validate webhook URL before firing
+      await validateOutboundUrl(rule.actions.webhook.url);
 
       const payload = rule.actions.webhook.payload || eventData;
 
-      await axios({
+      await httpClient({
         method: rule.actions.webhook.method,
         url: rule.actions.webhook.url,
         headers: rule.actions.webhook.headers,

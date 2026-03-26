@@ -41,7 +41,7 @@ const helmetMiddleware = helmet({
       upgradeInsecureRequests: hasSSL ? [] : null,
     },
     // Report-only in development for easier debugging
-    reportOnly: !isProd,
+    reportOnly: process.env.CSP_REPORT_ONLY === 'true',
   },
 
   // Cross-Origin Resource Policy — allow cross-origin API calls from frontend

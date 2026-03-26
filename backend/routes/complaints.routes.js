@@ -12,6 +12,35 @@ const Complaint = require('../models/Complaint');
 
 router.use(authenticate);
 
+/* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const CREATE_FIELDS = [
+  'subject',
+  'description',
+  'type',
+  'source',
+  'category',
+  'priority',
+  'department',
+  'attachments',
+  'beneficiaryId',
+];
+const UPDATE_FIELDS = [
+  'status',
+  'priority',
+  'assignedTo',
+  'resolution',
+  'notes',
+  'category',
+  'department',
+  'internalNotes',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
+
 // GET / — List all complaints (paginated, filterable)
 router.get('/', async (req, res) => {
   try {
@@ -111,7 +140,7 @@ router.post(
   async (req, res) => {
     try {
       const doc = new Complaint({
-        ...req.body,
+        ...pick(req.body, CREATE_FIELDS),
         submittedBy: req.user._id || req.userId,
         createdBy: req.user._id || req.userId,
       });
@@ -141,7 +170,7 @@ router.put(
   ]),
   async (req, res) => {
     try {
-      const updates = { ...req.body };
+      const updates = pick(req.body, UPDATE_FIELDS);
       if (updates.status === 'resolved' && !updates.resolvedAt) {
         updates.resolvedAt = new Date();
       }

@@ -254,8 +254,8 @@ services:
     environment:
       <<: *common-env
       PORT: 3020
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_agent?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD:-RedisPass2026!}@redis:6379
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_agent?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}@redis:6379
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       BACKEND_URL: http://backend:3001
     ports:
@@ -281,7 +281,7 @@ services:
     environment:
       <<: *common-env
       PORT: 3030
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_finance?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_finance?authSource=admin
       BACKEND_URL: http://backend:3001
     ports:
       - "${FINANCE_PORT:-3030}:3030"
@@ -306,7 +306,7 @@ services:
     environment:
       <<: *common-env
       PORT: 3040
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-SecurePass2026!}@mongodb:27017/alawael_scm?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_scm?authSource=admin
       BACKEND_URL: http://backend:3001
     ports:
       - "${SCM_BACKEND_PORT:-3040}:3040"
@@ -369,7 +369,7 @@ services:
     profiles: ["monitoring"]
     <<: *restart-policy
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-Admin2026!}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?Set GRAFANA_PASSWORD in .env}
       GF_SECURITY_ADMIN_USER: admin
     ports:
       - "3060:3000"

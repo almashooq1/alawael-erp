@@ -285,14 +285,44 @@ class MetricsService {
       const varPattern = new RegExp(`\\b${key}\\b`, 'g');
       expression = expression.replace(varPattern, JSON.stringify(value));
     }
-    // Evaluate simple math expression safely
+    // Evaluate simple math expression safely — no Function() constructor
     try {
-      // Only allow numeric result from simple math
-      const result = expression
-        .split(/[+\-*/]/)
-        .every(part => !isNaN(parseFloat(part.trim())) || part.trim() === '')
-        ? Function('"use strict"; return (' + expression + ')')()
-        : NaN;
+      // Tokenize and compute with a safe arithmetic parser
+      const tokens = expression.match(/([\d.]+|[+\-*/()])/g);
+      if (!tokens || tokens.join('') !== expression.replace(/\s/g, '')) {
+        throw new Error('صيغة المعادلة غير صالحة');
+      }
+      // Simple arithmetic evaluator using shunting-yard for +, -, *, /
+      const output = [];
+      const ops = [];
+      const prec = { '+': 1, '-': 1, '*': 2, '/': 2 };
+      const apply = (op, b, a) => {
+        if (op === '+') return a + b;
+        if (op === '-') return a - b;
+        if (op === '*') return a * b;
+        if (op === '/') return b === 0 ? NaN : a / b;
+      };
+      for (const tok of tokens) {
+        if (!isNaN(parseFloat(tok))) {
+          output.push(parseFloat(tok));
+        } else if (tok === '(') {
+          ops.push(tok);
+        } else if (tok === ')') {
+          while (ops.length && ops[ops.length - 1] !== '(') {
+            output.push(apply(ops.pop(), output.pop(), output.pop()));
+          }
+          ops.pop(); // remove '('
+        } else if (prec[tok]) {
+          while (ops.length && prec[ops[ops.length - 1]] >= prec[tok]) {
+            output.push(apply(ops.pop(), output.pop(), output.pop()));
+          }
+          ops.push(tok);
+        }
+      }
+      while (ops.length) {
+        output.push(apply(ops.pop(), output.pop(), output.pop()));
+      }
+      const result = output[0];
       if (typeof result !== 'number' || isNaN(result)) {
         throw new Error('نتيجة المعادلة غير رقمية');
       }

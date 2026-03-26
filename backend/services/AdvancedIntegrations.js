@@ -5,7 +5,7 @@
  * Google Maps, SMS, Email, Payment Processing, Push Notifications
  */
 
-const axios = require('axios');
+const axios = require('../utils/httpClient');
 const logger = require('../utils/logger.js');
 
 /**

@@ -24,6 +24,7 @@ const { AppError } = require('../errors/AppError');
 const safeRequire = (path, name) => {
   try {
     return require(path);
+const { escapeRegex } = require('../utils/sanitize');
   } catch (e) {
     logger.warn(`[Finance Extended] ${name} model not available`);
     return null;
@@ -58,7 +59,7 @@ router.get(
     const filter = {};
     if (type) filter.type = type;
     if (status) filter.status = status;
-    if (bankName) filter.bankName = { $regex: bankName, $options: 'i' };
+    if (bankName) filter.bankName = { $regex: escapeRegex(bankName), $options: 'i' };
     if (fromDate || toDate) {
       filter.dueDate = {};
       if (fromDate) filter.dueDate.$gte = new Date(fromDate);
@@ -617,8 +618,8 @@ router.get(
       const invoiceFilter = {};
       if (partyName) {
         if (partyType === 'customer')
-          invoiceFilter.customerName = { $regex: partyName, $options: 'i' };
-        else invoiceFilter.vendorName = { $regex: partyName, $options: 'i' };
+          invoiceFilter.customerName = { $regex: escapeRegex(partyName), $options: 'i' };
+        else invoiceFilter.vendorName = { $regex: escapeRegex(partyName), $options: 'i' };
       }
 
       const invoices = await AccountingInvoice.find(invoiceFilter).sort({ date: -1 }).lean();

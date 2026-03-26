@@ -37,10 +37,10 @@ const commonValidations = {
   // Email validation
   email: body('email').trim().isEmail().withMessage('Invalid email format').normalizeEmail(),
 
-  // Password validation
+  // Password validation (NIST SP 800-63B: minimum 8 characters)
   password: body('password')
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters'),
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters'),
 
   // MongoDB ObjectId validation
   mongoId: (field = 'id') => param(field).isMongoId().withMessage(`Invalid ${field} format`),
@@ -134,10 +134,10 @@ const authValidations = {
   resetPassword: [commonValidations.email, handleValidationErrors],
 
   changePassword: [
-    body('oldPassword').isLength({ min: 6 }).withMessage('Old password is required'),
+    body('oldPassword').isLength({ min: 8 }).withMessage('Old password is required'),
     body('newPassword')
-      .isLength({ min: 6 })
-      .withMessage('New password must be at least 6 characters'),
+      .isLength({ min: 8 })
+      .withMessage('New password must be at least 8 characters'),
     handleValidationErrors,
   ],
 };
@@ -165,21 +165,26 @@ const userValidations = {
 };
 
 /**
- * Sanitize input
+ * Sanitize input — lightweight pass-through middleware.
  * تنظيف المدخلات
+ *
+ * NOTE: Heavy HTML/XSS sanitization is handled upstream by express-xss-sanitizer
+ * (see middleware/sanitize.js). This middleware provides additional normalization
+ * like trimming whitespace from string fields to prevent storage of padded data.
  */
 const sanitizeInput = (req, res, next) => {
-  // Remove any HTML tags from string inputs
-  const sanitize = obj => {
+  const normalize = (obj, depth = 0) => {
+    // Prevent deeply nested objects from causing stack overflow (max 10 levels)
+    if (depth > 10) return obj;
     if (typeof obj === 'string') {
-      return obj.replace(/<[^>]*>/g, '');
+      return obj.trim();
     }
     if (Array.isArray(obj)) {
-      return obj.map(sanitize);
+      return obj.map(item => normalize(item, depth + 1));
     }
     if (obj && typeof obj === 'object') {
       return Object.keys(obj).reduce((acc, key) => {
-        acc[key] = sanitize(obj[key]);
+        acc[key] = normalize(obj[key], depth + 1);
         return acc;
       }, {});
     }
@@ -187,13 +192,13 @@ const sanitizeInput = (req, res, next) => {
   };
 
   if (req.body) {
-    req.body = sanitize(req.body);
+    req.body = normalize(req.body);
   }
   if (req.query) {
-    req.query = sanitize(req.query);
+    req.query = normalize(req.query);
   }
   if (req.params) {
-    req.params = sanitize(req.params);
+    req.params = normalize(req.params);
   }
 
   next();

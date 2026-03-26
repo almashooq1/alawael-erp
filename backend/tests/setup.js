@@ -10,7 +10,7 @@ process.env.MONGO_TEST_URI = process.env.MONGO_TEST_URI || 'mongodb://localhost:
 process.env.JWT_SECRET = 'test_secret_key';
 process.env.USE_MOCK_DB = 'true';
 process.env.SMART_TEST_MODE = 'true';
-process.env.CSRF_PROTECTION_ENABLED = 'false';
+process.env.CSRF_DISABLE = 'true';
 process.env.DISABLE_REDIS = 'true';
 
 // زيادة وقت الانتظار للاختبارات

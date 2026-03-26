@@ -58,6 +58,26 @@ CHANGELOG.md
 _archived/
 archive/
 backups/
+alawael-wiki/
+data/
+dashboard/
+finance-module/
+frontend-finance/
+intelligent-agent/
+mobile/
+postman/
+secretary_ai/
+whatsapp/
+templates/
+scripts/
+monitoring/
+infrastructure/
+kubernetes/
+k8s/
+helm/
+deploy/
+deployment/
+devops/
 
 # CI/CD
 .github

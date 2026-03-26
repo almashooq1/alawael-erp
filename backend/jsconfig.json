@@ -9,12 +9,20 @@
       "@models/*": ["models/*"],
       "@services/*": ["services/*"],
       "@controllers/*": ["controllers/*"],
-      "@config/*": ["config/*"]
+      "@config/*": ["config/*"],
+      "@middleware/*": ["middleware/*"],
+      "@errors/*": ["errors/*"],
+      "@routes/*": ["routes/*"]
     },
-    "checkJs": false,
+    "checkJs": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "strict": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["**/*.js"],
-  "exclude": ["node_modules", "coverage", "dist", "logs"]
+  "exclude": ["node_modules", "coverage", "dist", "logs", ".jest-cache", "_archived"]
 }

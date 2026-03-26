@@ -6,7 +6,7 @@
  * ML-powered analysis for session documentation, patient progress, and predictive alerts
  */
 
-const axios = require('axios');
+const axios = require('../utils/httpClient');
 const EventEmitter = require('events');
 const logger = require('../utils/logger');
 

@@ -5,8 +5,69 @@ const { authenticate, authorize } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+
+/* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const CASE_FIELDS = [
+  'patientName',
+  'nationalId',
+  'dateOfBirth',
+  'gender',
+  'phone',
+  'email',
+  'address',
+  'emergencyContact',
+  'caseType',
+  'status',
+  'priority',
+  'department',
+  'referralSource',
+  'insuranceInfo',
+  'medicalHistory',
+  'allergies',
+  'currentMedications',
+  'primaryDiagnosis',
+  'notes',
+];
+const DIAGNOSIS_FIELDS = [
+  'diagnosisCode',
+  'diagnosisName',
+  'description',
+  'severity',
+  'type',
+  'notes',
+  'date',
+];
+const TREATMENT_PLAN_FIELDS = [
+  'name',
+  'description',
+  'goals',
+  'startDate',
+  'endDate',
+  'status',
+  'notes',
+  'frequency',
+  'type',
+];
+const SESSION_FIELDS = ['date', 'duration', 'notes', 'status', 'objectives', 'outcomes', 'type'];
+const REFERRAL_FIELDS = [
+  'referralTo',
+  'referralType',
+  'reason',
+  'priority',
+  'notes',
+  'department',
+  'externalProvider',
+  'dueDate',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const uploadDir = path.join(__dirname, '../uploads/medical-files');
@@ -18,7 +79,7 @@ const storage = multer.diskStorage({
     }
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const uniqueSuffix = Date.now() + '-' + crypto.randomBytes(16).toString('hex');
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
@@ -46,7 +107,7 @@ const upload = multer({
 router.post('/', authenticate, authorize(['admin', 'doctor', 'case_manager']), async (req, res) => {
   try {
     const caseData = {
-      ...req.body,
+      ...pick(req.body, CASE_FIELDS),
       createdBy: req.user._id,
       lastModifiedBy: req.user._id,
     };
@@ -215,7 +276,7 @@ router.put(
   async (req, res) => {
     try {
       const updateData = {
-        ...req.body,
+        ...pick(req.body, CASE_FIELDS),
         lastModifiedBy: req.user._id,
         lastUpdateDate: new Date(),
       };
@@ -294,7 +355,7 @@ router.post(
       }
 
       const diagnosis = {
-        ...req.body,
+        ...pick(req.body, DIAGNOSIS_FIELDS),
         doctor: {
           name: req.user.name,
           id: req.user._id,
@@ -345,7 +406,7 @@ router.put(
         });
       }
 
-      Object.assign(diagnosis, req.body);
+      Object.assign(diagnosis, pick(req.body, DIAGNOSIS_FIELDS));
       caseDoc.lastModifiedBy = req.user._id;
       await caseDoc.save();
 
@@ -526,7 +587,7 @@ router.put(
         });
       }
 
-      Object.assign(plan, req.body);
+      Object.assign(plan, pick(req.body, TREATMENT_PLAN_FIELDS));
       caseDoc.lastModifiedBy = req.user._id;
       await caseDoc.save();
 
@@ -571,7 +632,7 @@ router.post(
       }
 
       const session = {
-        ...req.body,
+        ...pick(req.body, SESSION_FIELDS),
         sessionNumber: plan.sessions.length + 1,
         therapist: {
           name: req.user.name,

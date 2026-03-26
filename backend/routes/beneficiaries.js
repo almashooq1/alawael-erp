@@ -13,6 +13,11 @@ const router = express.Router();
 const Beneficiary = require('../models/Beneficiary');
 const BeneficiaryProgress = require('../models/BeneficiaryProgress');
 const logger = require('../utils/logger');
+const { authenticate } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
+
+// All beneficiary routes require authentication
+router.use(authenticate);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -68,19 +73,20 @@ router.get('/', async (req, res) => {
     if (status && status !== 'all') filter.status = status;
     if (category && category !== 'all') filter.category = category;
     if (gender && gender !== 'all') filter.gender = gender;
-    if (city) filter['address.city'] = new RegExp(city, 'i');
+    if (city) filter['address.city'] = new RegExp(escapeRegex(city), 'i');
 
     if (search) {
+      const safe = escapeRegex(search);
       filter.$or = [
-        { firstName: new RegExp(search, 'i') },
-        { lastName: new RegExp(search, 'i') },
-        { firstName_ar: new RegExp(search, 'i') },
-        { lastName_ar: new RegExp(search, 'i') },
-        { name: new RegExp(search, 'i') },
-        { fullNameArabic: new RegExp(search, 'i') },
-        { nationalId: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') },
-        { mrn: new RegExp(search, 'i') },
+        { firstName: new RegExp(safe, 'i') },
+        { lastName: new RegExp(safe, 'i') },
+        { firstName_ar: new RegExp(safe, 'i') },
+        { lastName_ar: new RegExp(safe, 'i') },
+        { name: new RegExp(safe, 'i') },
+        { fullNameArabic: new RegExp(safe, 'i') },
+        { nationalId: new RegExp(safe, 'i') },
+        { email: new RegExp(safe, 'i') },
+        { mrn: new RegExp(safe, 'i') },
       ];
     }
 

@@ -21,7 +21,7 @@ const fs = require('fs').promises;
 const crypto = require('crypto');
 const path = require('path');
 const zlib = require('zlib');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const EventEmitter = require('events');
 const logger = require('../utils/logger');
 
@@ -193,16 +193,18 @@ class EnhancedBackupService extends EventEmitter {
     try {
       const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_db';
 
-      const command = `mongodump --uri="${mongoUri}" --archive="${backupPath}" --gzip`;
-
       return new Promise((resolve, reject) => {
-        const child = exec(command, (error, _stdout, _stderr) => {
-          if (error) {
-            reject(new Error('حدث خطأ داخلي'));
-          } else {
-            resolve();
+        const child = execFile(
+          'mongodump',
+          ['--uri', mongoUri, '--archive=' + backupPath, '--gzip'],
+          (error, _stdout, _stderr) => {
+            if (error) {
+              reject(new Error('حدث خطأ داخلي'));
+            } else {
+              resolve();
+            }
           }
-        });
+        );
 
         // Monitor progress
         const progressInterval = setInterval(async () => {
@@ -352,21 +354,24 @@ class EnhancedBackupService extends EventEmitter {
 
       // Restore database
       const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/erp_db';
-      const command = `mongorestore --uri="${mongoUri}" --archive="${restorePath}" --gzip`;
 
       return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-          if (error) {
-            reject(new Error('حدث خطأ داخلي'));
-          } else {
-            logger.info(`✅ Backup restored successfully [${backupId}]`);
-            resolve({
-              success: true,
-              backupId,
-              restoredAt: new Date().toISOString(),
-            });
+        execFile(
+          'mongorestore',
+          ['--uri', mongoUri, '--archive=' + restorePath, '--gzip'],
+          (error, stdout, stderr) => {
+            if (error) {
+              reject(new Error('حدث خطأ داخلي'));
+            } else {
+              logger.info(`✅ Backup restored successfully [${backupId}]`);
+              resolve({
+                success: true,
+                backupId,
+                restoredAt: new Date().toISOString(),
+              });
+            }
           }
-        });
+        );
       });
     } catch (error) {
       logger.error(`❌ Restore failed:`, error.message);

@@ -59,6 +59,70 @@ class HRService {
     }
   }
 
+  // الحصول على موظف بالمعرف
+  async getEmployee(employeeId) {
+    try {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        throw new Error('الموظف غير موجود');
+      }
+      return employee;
+    } catch (error) {
+      throw new Error(error.message || 'حدث خطأ داخلي');
+    }
+  }
+
+  // جلب جميع الموظفين مع فلترة وبحث وصفحات
+  async getAllEmployees(filters = {}) {
+    try {
+      const query = {};
+      const { department, status, search, page = 1, limit = 100 } = filters;
+
+      if (department) query.department = department;
+      if (status) query.status = status;
+      if (search) {
+        const safeSearch = escapeRegex(search);
+        query.$or = [
+          { firstName: new RegExp(safeSearch, 'i') },
+          { lastName: new RegExp(safeSearch, 'i') },
+          { email: new RegExp(safeSearch, 'i') },
+          { employeeId: new RegExp(safeSearch, 'i') },
+          { phone: new RegExp(safeSearch, 'i') },
+        ];
+      }
+
+      const skip = (Math.max(1, Number(page)) - 1) * Math.min(Number(limit), 200);
+      const safeLimit = Math.min(Number(limit) || 100, 200);
+
+      const [employees, total] = await Promise.all([
+        Employee.find(query)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(safeLimit)
+          .lean(),
+        Employee.countDocuments(query),
+      ]);
+
+      return { employees, total, page: Number(page), limit: safeLimit };
+    } catch (error) {
+      throw new Error('حدث خطأ داخلي');
+    }
+  }
+
+  // حذف موظف
+  async deleteEmployee(employeeId) {
+    try {
+      const employee = await Employee.findById(employeeId);
+      if (!employee) {
+        throw new Error('الموظف غير موجود');
+      }
+      await Employee.findByIdAndDelete(employeeId);
+      return employee;
+    } catch (error) {
+      throw new Error(error.message || 'حدث خطأ داخلي');
+    }
+  }
+
   // الحصول على ملف الموظف الشامل
   async getEmployeeProfile(employeeId) {
     try {

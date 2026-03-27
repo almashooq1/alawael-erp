@@ -22,6 +22,37 @@ const MAX_PAGE_LIMIT = 100;
 // ============= إدارة الموظفين =============
 
 /**
+ * جلب جميع الموظفين (مع فلترة وبحث)
+ * GET /api/hr-advanced/employees
+ */
+router.get('/employees', authenticateToken, async (req, res) => {
+  try {
+    const { department, status, search, page = 1, limit = 100 } = req.query;
+    const result = await HRService.getAllEmployees({
+      department,
+      status,
+      search,
+      page: Math.max(1, parseInt(page, 10) || 1),
+      limit: Math.min(parseInt(limit, 10) || 100, MAX_PAGE_LIMIT),
+    });
+
+    res.json({
+      success: true,
+      count: result.employees.length,
+      total: result.total,
+      page: result.page,
+      limit: result.limit,
+      data: result.employees,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب بيانات الموظفين',
+    });
+  }
+});
+
+/**
  * إنشاء موظف جديد
  * POST /api/hr/employees
  */
@@ -114,6 +145,37 @@ router.post('/employees/search', authenticateToken, async (req, res) => {
     res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
+
+/**
+ * حذف موظف
+ * DELETE /api/hr-advanced/employees/:id
+ */
+router.delete(
+  '/employees/:id',
+  authenticateToken,
+  authorizeRole(['HR', 'Admin']),
+  async (req, res) => {
+    try {
+      const employee = await HRService.deleteEmployee(req.params.id);
+
+      await HRAuditService.logOperation({
+        userId: req.user.id,
+        action: 'DELETE_EMPLOYEE',
+        entityType: 'Employee',
+        entityId: req.params.id,
+        status: 'success',
+      });
+
+      res.json({
+        success: true,
+        message: 'تم حذف الموظف بنجاح',
+        data: employee,
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: error.message || 'خطأ في حذف الموظف' });
+    }
+  }
+);
 
 // ============= نظام الرواتب =============
 

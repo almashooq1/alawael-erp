@@ -40,6 +40,8 @@ async function initializeRedis() {
       password: REDIS_PASSWORD,
       keyPrefix: process.env.REDIS_PREFIX || 'alawael:',
       tls: process.env.REDIS_TLS === 'true' ? { rejectUnauthorized: true } : undefined,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
       retryStrategy: retries => {
         if (retries > 10) {
           logger.error('❌ Redis: Too many reconnection attempts');
@@ -48,6 +50,14 @@ async function initializeRedis() {
         return Math.min(retries * 100, 3000);
       },
     });
+
+    // Explicitly connect — errors are caught by the 'error' event handler above
+    try {
+      await redisClient.connect();
+    } catch (err) {
+      logger.warn('Redis initial connection failed:', err.message);
+      logger.info('⚠️  Continuing without Redis cache');
+    }
 
     // Error handler
     redisClient.on('error', err => {

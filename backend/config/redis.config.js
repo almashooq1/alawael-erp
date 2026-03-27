@@ -8,7 +8,7 @@ const logger = require('../utils/logger');
 
 let redis = null;
 
-const connectRedis = () => {
+const connectRedis = async () => {
   if (redis) return redis;
 
   redis = new Redis({
@@ -18,9 +18,9 @@ const connectRedis = () => {
     keyPrefix: process.env.REDIS_PREFIX || 'alawael:',
     tls: process.env.REDIS_TLS === 'true' ? { rejectUnauthorized: true } : undefined,
     retryDelayOnFailover: 100,
-    maxRetriesPerRequest: 3,
+    maxRetriesPerRequest: null,
     enableReadyCheck: true,
-    lazyConnect: false,
+    lazyConnect: true,
     // Limit reconnection attempts to avoid log spam when Redis is unavailable
     retryStrategy: times => {
       if (times > 5) {
@@ -46,6 +46,14 @@ const connectRedis = () => {
   redis.on('reconnecting', () => {
     logger.info('🔄 Redis Reconnecting...');
   });
+
+  // Explicitly connect — errors are caught by the 'error' event handler
+  try {
+    await redis.connect();
+  } catch (err) {
+    logger.warn('Redis initial connection failed:', err.message);
+    logger.info('⚠️  Continuing without Redis cache');
+  }
 
   return redis;
 };
@@ -84,10 +92,7 @@ const checkRedisHealth = async () => {
 };
 
 const getRedisClient = () => {
-  if (!redis) {
-    return connectRedis();
-  }
-  return redis;
+  return redis; // Returns null if connectRedis() has not been called yet
 };
 
 // دوال مساعدة للتخزين المؤقت

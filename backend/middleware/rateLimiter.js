@@ -41,7 +41,7 @@ const getRedisStore = (prefix = 'rl:') => {
 
     _redisStoreAvailable = true;
     return new RedisStore({
-      // ioredis-compatible call function
+      // ioredis-compatible sendCommand: command name + args array
       sendCommand: (...args) => client.call(...args),
       prefix,
     });

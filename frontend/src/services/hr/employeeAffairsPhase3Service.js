@@ -26,32 +26,32 @@ export const fetchContracts = (params = {}) =>
 export const fetchContractById = id => safeFetch(`${BASE}/contracts/${id}`, demoContracts[0]);
 
 export const createContract = data =>
-  safeFetch(
-    `${BASE}/contracts`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/contracts`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const renewContract = (id, data) =>
-  safeFetch(
-    `${BASE}/contracts/${id}/renew`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/contracts/${id}/renew`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const amendContract = (id, data) =>
-  safeFetch(
-    `${BASE}/contracts/${id}/amend`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/contracts/${id}/amend`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const terminateContract = (id, data) =>
-  safeFetch(
-    `${BASE}/contracts/${id}/terminate`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/contracts/${id}/terminate`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const fetchExpiringContracts = (days = 60) =>
   safeFetch(`${BASE}/contracts/expiring?days=${days}`, []);
@@ -68,25 +68,25 @@ export const fetchSettlementById = id =>
   safeFetch(`${BASE}/vacation-settlement/${id}`, demoSettlements[0]);
 
 export const createSettlement = data =>
-  safeFetch(
-    `${BASE}/vacation-settlement`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/vacation-settlement`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const approveSettlement = (id, data) =>
-  safeFetch(
-    `${BASE}/vacation-settlement/${id}/approve`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/vacation-settlement/${id}/approve`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const disburseSettlement = (id, data) =>
-  safeFetch(
-    `${BASE}/vacation-settlement/${id}/disburse`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/vacation-settlement/${id}/disburse`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const fetchSettlementStats = () =>
   safeFetch(`${BASE}/vacation-settlement/stats`, demoSettlementStats);
@@ -100,27 +100,28 @@ export const fetchWarnings = (params = {}) =>
 export const fetchWarningById = id => safeFetch(`${BASE}/warnings/${id}`, demoWarnings[0]);
 
 export const createWarning = data =>
-  safeFetch(
-    `${BASE}/warnings`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/warnings`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
-export const issueWarning = id => safeFetch(`${BASE}/warnings/${id}/issue`, null, { method: 'PUT' });
+export const issueWarning = id =>
+  safeFetch(`${BASE}/warnings/${id}/issue`, null, { method: 'PUT' });
 
 export const acknowledgeWarning = (id, data) =>
-  safeFetch(
-    `${BASE}/warnings/${id}/acknowledge`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/warnings/${id}/acknowledge`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const appealWarning = (id, data) =>
-  safeFetch(
-    `${BASE}/warnings/${id}/appeal`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/warnings/${id}/appeal`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const fetchEmployeeWarnings = employeeId =>
   safeFetch(`${BASE}/warnings/employee/${employeeId}`, []);
@@ -136,35 +137,34 @@ export const fetchClearances = (params = {}) =>
 export const fetchClearanceById = id => safeFetch(`${BASE}/clearance/${id}`, demoClearances[0]);
 
 export const initiateClearance = data =>
-  safeFetch(
-    `${BASE}/clearance`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/clearance`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const updateClearanceItem = (clearanceId, itemId, data) =>
-  safeFetch(
-    `${BASE}/clearance/${clearanceId}/item/${itemId}`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/clearance/${clearanceId}/item/${itemId}`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const calculateFinalSettlement = (id, data) =>
-  safeFetch(
-    `${BASE}/clearance/${id}/settlement`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/clearance/${id}/settlement`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const conductExitInterview = (id, data) =>
-  safeFetch(
-    `${BASE}/clearance/${id}/exit-interview`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/clearance/${id}/exit-interview`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
-export const fetchClearanceStats = () =>
-  safeFetch(`${BASE}/clearance/stats`, demoClearanceStats);
+export const fetchClearanceStats = () => safeFetch(`${BASE}/clearance/stats`, demoClearanceStats);
 
 /* ══════════════════════════════════════════════════════════════════════
    5. EXIT/RE-ENTRY VISAS — تأشيرات الخروج والعودة
@@ -175,32 +175,32 @@ export const fetchVisaRequests = (params = {}) =>
 export const fetchVisaById = id => safeFetch(`${BASE}/exit-visas/${id}`, demoVisas[0]);
 
 export const createVisaRequest = data =>
-  safeFetch(
-    `${BASE}/exit-visas`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/exit-visas`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const approveVisaRequest = (id, data) =>
-  safeFetch(
-    `${BASE}/exit-visas/${id}/approve`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/exit-visas/${id}/approve`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const issueVisaDoc = (id, data) =>
-  safeFetch(
-    `${BASE}/exit-visas/${id}/issue`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/exit-visas/${id}/issue`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const recordTravel = (id, data) =>
-  safeFetch(
-    `${BASE}/exit-visas/${id}/travel`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/exit-visas/${id}/travel`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const recordReturn = id =>
   safeFetch(`${BASE}/exit-visas/${id}/return`, null, { method: 'PUT' });
@@ -217,11 +217,11 @@ export const fetchBenefitPackages = () =>
   safeFetch(`${BASE}/benefit-packages`, demoBenefitPackages);
 
 export const createBenefitPackage = data =>
-  safeFetch(
-    `${BASE}/benefit-packages`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/benefit-packages`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const fetchEmployeeBenefits = (params = {}) =>
   safeFetch(`${BASE}/employee-benefits${qs(params)}`, demoEmployeeBenefits);
@@ -230,25 +230,25 @@ export const fetchEmployeeBenefitById = id =>
   safeFetch(`${BASE}/employee-benefits/${id}`, demoEmployeeBenefits[0]);
 
 export const assignBenefit = data =>
-  safeFetch(
-    `${BASE}/employee-benefits`,
-    null,
-    { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/employee-benefits`, null, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const adjustBenefitAllowance = (id, data) =>
-  safeFetch(
-    `${BASE}/employee-benefits/${id}/adjust`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/employee-benefits/${id}/adjust`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const claimAirTicket = (id, data) =>
-  safeFetch(
-    `${BASE}/employee-benefits/${id}/claim-ticket`,
-    null,
-    { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }
-  );
+  safeFetch(`${BASE}/employee-benefits/${id}/claim-ticket`, null, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
 
 export const fetchBenefitStats = () =>
   safeFetch(`${BASE}/employee-benefits/stats`, demoBenefitStats);

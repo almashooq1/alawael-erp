@@ -35,7 +35,14 @@ class AdvancedDatabaseService extends EventEmitter {
   async initialize() {
     try {
       // تهيئة Redis
-      this.redis = new Redis(this.config.redisUrl);
+      this.redis = new Redis({
+        ...(typeof this.config.redisUrl === 'string'
+          ? { host: this.config.redisUrl.replace(/^redis:\/\//, '').split(':')[0] || 'localhost' }
+          : {}),
+        maxRetriesPerRequest: null,
+        lazyConnect: true,
+        retryStrategy: times => (times > 5 ? null : Math.min(times * 200, 3000)),
+      });
       this.redis.on('connect', () => this.emit('redis:connected'));
       this.redis.on('error', err => this.emit('redis:error', err));
 

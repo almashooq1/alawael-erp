@@ -196,6 +196,8 @@ class RedisCacheProvider extends EventEmitter {
       port: this.config.port,
       password: this.config.password,
       db: this.config.db,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
     });
 
     this.client.on('connect', () => {

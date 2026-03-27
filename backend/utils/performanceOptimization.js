@@ -20,7 +20,14 @@ const _helmet = require('helmet');
  */
 class CacheManager {
   constructor(redisUrl = 'redis://localhost:6379') {
-    this.client = new Redis(redisUrl);
+    this.client = new Redis({
+      ...(redisUrl
+        ? { host: redisUrl.replace(/^redis:\/\//, '').split(':')[0] || 'localhost' }
+        : {}),
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
+      retryStrategy: times => (times > 5 ? null : Math.min(times * 200, 3000)),
+    });
     this.client.on('error', err => logger.error('Redis error:', err));
     this.defaultTTL = 3600; // 1 hour
   }

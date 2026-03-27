@@ -62,14 +62,13 @@ const initializeRedis = () => {
       password: process.env.REDIS_PASSWORD || undefined,
       db: parseInt(process.env.REDIS_DB, 10) || 0,
       retryStrategy: times => {
-        if (times > 10) return null; // Stop retrying after 10 attempts
-        const delay = Math.min(times * 100, 3000);
-        return delay;
+        if (times > 3) return null; // Stop retrying quickly when Redis is unavailable
+        return Math.min(times * 500, 3000);
       },
       enableReadyCheck: true,
       enableOfflineQueue: false,
-      maxRetriesPerRequest: 3,
-      lazyConnect: false,
+      maxRetriesPerRequest: null,
+      lazyConnect: true,
       connectTimeout: 10000,
       commandTimeout: 5000,
       keepAlive: 30000,
@@ -88,6 +87,11 @@ const initializeRedis = () => {
 
     redis.on('close', () => {
       logger.info('Redis connection closed');
+    });
+
+    // Explicitly connect (lazyConnect: true)
+    redis.connect().catch(err => {
+      logger.warn('Redis initial connection failed:', err.message);
     });
 
     return redis;

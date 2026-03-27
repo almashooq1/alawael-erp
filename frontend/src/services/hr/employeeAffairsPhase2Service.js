@@ -61,10 +61,10 @@ export const rateTask = (id, data) =>
 // ═══════════════════════════════════════════════════════════════════════════
 export const getHousingUnits = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(
-    `${BASE}/housing/units?${qs}`,
-    { units: DEMO_HOUSING_UNITS, total: DEMO_HOUSING_UNITS.length }
-  );
+  return safeFetch(`${BASE}/housing/units?${qs}`, {
+    units: DEMO_HOUSING_UNITS,
+    total: DEMO_HOUSING_UNITS.length,
+  });
 };
 export const createHousingUnit = data =>
   safeFetch(`${BASE}/housing/units`, null, {
@@ -98,17 +98,19 @@ export const createTransportationRoute = data =>
     body: JSON.stringify(data),
   });
 export const assignEmployeeToRoute = (routeId, employeeId) =>
-  safeFetch(`${BASE}/transportation/routes/${routeId}/assign/${employeeId}`, null, { method: 'PATCH' });
+  safeFetch(`${BASE}/transportation/routes/${routeId}/assign/${employeeId}`, null, {
+    method: 'PATCH',
+  });
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Custody — العهد
 // ═══════════════════════════════════════════════════════════════════════════
 export const getCustodies = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(
-    `${BASE}/custody?${qs}`,
-    { custodies: DEMO_CUSTODIES, total: DEMO_CUSTODIES.length }
-  );
+  return safeFetch(`${BASE}/custody?${qs}`, {
+    custodies: DEMO_CUSTODIES,
+    total: DEMO_CUSTODIES.length,
+  });
 };
 export const getCustodyStats = () => safeFetch(`${BASE}/custody/stats`, DEMO_CUSTODY_STATS);
 export const createCustody = data =>
@@ -138,10 +140,7 @@ export const getEmployeeCustodies = employeeId =>
 // ═══════════════════════════════════════════════════════════════════════════
 export const getWorkPermits = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(
-    `${BASE}/permits?${qs}`,
-    { permits: DEMO_PERMITS, total: DEMO_PERMITS.length }
-  );
+  return safeFetch(`${BASE}/permits?${qs}`, { permits: DEMO_PERMITS, total: DEMO_PERMITS.length });
 };
 export const getWorkPermitStats = () => safeFetch(`${BASE}/permits/stats`, DEMO_PERMIT_STATS);
 export const getExpiringPermits = (days = 30) => safeFetch(`${BASE}/permits/expiring?days=${days}`);
@@ -164,10 +163,7 @@ export const renewWorkPermit = (id, data) =>
 // ═══════════════════════════════════════════════════════════════════════════
 export const getRewards = (params = {}) => {
   const qs = new URLSearchParams(params).toString();
-  return safeFetch(
-    `${BASE}/rewards?${qs}`,
-    { rewards: DEMO_REWARDS, total: DEMO_REWARDS.length }
-  );
+  return safeFetch(`${BASE}/rewards?${qs}`, { rewards: DEMO_REWARDS, total: DEMO_REWARDS.length });
 };
 export const getRewardStats = () => safeFetch(`${BASE}/rewards/stats`, DEMO_REWARD_STATS);
 export const createReward = data =>
@@ -195,8 +191,7 @@ export const getEmployeeRewardPoints = employeeId =>
 // ═══════════════════════════════════════════════════════════════════════════
 // Shifts — الورديات
 // ═══════════════════════════════════════════════════════════════════════════
-export const getShiftDefinitions = () =>
-  safeFetch(`${BASE}/shifts/definitions`, DEMO_SHIFT_DEFS);
+export const getShiftDefinitions = () => safeFetch(`${BASE}/shifts/definitions`, DEMO_SHIFT_DEFS);
 export const createShiftDefinition = data =>
   safeFetch(`${BASE}/shifts/definitions`, null, {
     method: 'POST',

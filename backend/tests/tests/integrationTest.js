@@ -388,7 +388,11 @@ class IntegrationCompatibilityTest {
       },
       {
         name: 'Null/Undefined Handling',
-        test: () => { const n = null; const u = undefined; return n === null && u === undefined; },
+        test: () => {
+          const n = null;
+          const u = undefined;
+          return n === null && u === undefined;
+        },
       },
       {
         name: 'JSON Serialization',

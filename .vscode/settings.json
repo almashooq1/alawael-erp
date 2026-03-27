@@ -54,6 +54,8 @@
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
     "**/*.log": true,
+    "_archived": true,
+    "backups": true,
     "**/package-lock.json": false // Keep visible for npm management
   },
 
@@ -67,7 +69,12 @@
     "**/.next": true,
     "**/out": true,
     "**/*.log": true,
-    "**/package-lock.json": true
+    "**/package-lock.json": true,
+    "_archived/**": true,
+    "docs/archive/**": true,
+    "docs/wiki/**": true,
+    "backups/**": true,
+    "services/**": true
   },
 
   // CRITICAL: Disable file watching for heavy directories
@@ -88,13 +95,16 @@
     "**/supply-chain-management/**/node_modules/**": true,
     "**/whatsapp/node_modules/**": true,
     "**/graphql/node_modules/**": true,
-    "**/erp_new_system/**/node_modules/**": true,
     "**/.terraform/**": true,
     "**/terraform.tfstate*": true,
     "**/.vscode-test/**": true,
     "**/.nyc_output/**": true,
     "**/tmp/**": true,
-    "**/temp/**": true
+    "**/temp/**": true,
+    "_archived/**": true,
+    "backups/**": true,
+    "docs/archive/**": true,
+    "services/**": true
   },
 
   // ────────────────────────────────────────────────────────────

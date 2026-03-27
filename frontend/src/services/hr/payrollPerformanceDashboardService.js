@@ -43,7 +43,7 @@ export const getDashboardKPIs = async () => {
         pendingLeaves: raw?.keyMetrics?.pendingLeaves ?? raw?.pendingLeaves ?? 0,
         totalPayroll:
           raw?.totalPayroll ??
-          (raw?.salaryAnalysis?.averageBaseSalary ?? raw?.salaryAnalysis?.averageSalary
+          ((raw?.salaryAnalysis?.averageBaseSalary ?? raw?.salaryAnalysis?.averageSalary)
             ? (raw.salaryAnalysis.averageBaseSalary ?? raw.salaryAnalysis.averageSalary) *
               (raw?.keyMetrics?.totalEmployees || 1)
             : 0),

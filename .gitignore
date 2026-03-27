@@ -75,6 +75,7 @@ docker-compose.override.local.yml
 # 6. SSL & Certificates
 # ───────────────────────────────────────────────────────────────
 ssl/
+certs/
 *.pem
 *.key
 *.crt
@@ -119,7 +120,6 @@ intelligent-agent/node_modules/
 intelligent-agent/dist/
 intelligent-agent/.next/
 intelligent-agent/models/
-data/large/
 
 # ───────────────────────────────────────────────────────────────
 # 9. Testing Outputs
@@ -138,6 +138,7 @@ backend/.test-mongo-uri
 # 10. Uploads & Misc
 # ───────────────────────────────────────────────────────────────
 uploads/
+backups/
 .pytest_cache/
 __pycache__/
 *.pyc
@@ -158,6 +159,7 @@ _*.js
 _*.txt
 _*.ps1
 _*.json
+_*.tmp
 __*.txt
 
 # ───────────────────────────────────────────────────────────────
@@ -176,3 +178,8 @@ port*-process.json
 dead-analysis.txt
 dead-files-report.txt
 build_output.txt
+
+# ───────────────────────────────────────────────────────────────
+# 13. Archived Code & Legacy Backups
+# ───────────────────────────────────────────────────────────────
+_archived/

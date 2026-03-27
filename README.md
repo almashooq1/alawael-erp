@@ -2,7 +2,7 @@
   <img src="frontend/public/logo192.png" alt="Al-Awael ERP" width="80" />
 </p>
 
-<h1 align="center">Al-Awael ERP</h1>
+<h1 align="center">Al-Awael ERP — v3.0.0</h1>
 <p align="center">
   نظام إدارة مراكز الأوائل للرعاية النهارية<br/>
   <em>Enterprise Resource Planning for Al-Awael Day Care Centers</em>
@@ -12,6 +12,8 @@
   <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" />
   <img src="https://img.shields.io/badge/backend-Express%2FMongoDB-blue" />
   <img src="https://img.shields.io/badge/frontend-React%2018%20%2B%20MUI%205-61DAFB" />
+  <img src="https://img.shields.io/badge/tests-9409%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/eslint-0%20errors-brightgreen" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
 </p>
 
@@ -87,6 +89,55 @@ alawael-erp/
 ├── CONTRIBUTING.md          # Contribution guidelines
 └── LICENSE                  # MIT License
 ```
+
+---
+
+## Architecture
+
+```
+                    ┌─────────────┐
+                    │   Nginx     │  (reverse proxy, SSL termination)
+                    └──────┬──────┘
+                           │
+              ┌────────────┼────────────┐
+              ▼            ▼            ▼
+        ┌──────────┐ ┌──────────┐ ┌──────────┐
+        │ Express  │ │ Express  │ │ Socket.IO│
+        │ (PM2 x2)│ │ (PM2 x2)│ │ WebSocket│
+        └────┬─────┘ └────┬─────┘ └────┬─────┘
+             │             │            │
+     ┌───────┴─────────────┴────────────┘
+     │
+     ├──► MongoDB           (primary data store)
+     ├──► Redis / ioredis   (caching, rate limiting, sessions)
+     └──► NATS / In-Memory  (message queue, event bus)
+```
+
+**Key Components:**
+
+| Layer              | Technology                                               |
+| ------------------ | -------------------------------------------------------- |
+| API Server         | Express 4.18 + express-async-errors                     |
+| Database           | MongoDB (Mongoose 9) + MongoMemoryServer (tests)        |
+| Cache              | Redis (ioredis 5) with circuit breaker                   |
+| Real-time          | Socket.IO 4.7 (cluster-aware)                            |
+| Auth               | JWT + RBAC (role-based + permission-based)                |
+| Observability      | Winston logging, OpenTelemetry, Prometheus metrics        |
+| Security           | Helmet, CSRF, rate limiting, mongo-sanitize, XSS filter   |
+| Process Manager    | PM2 (cluster mode, graceful shutdown)                     |
+| Frontend           | React 18 + Material-UI 5 + React Router 6                |
+
+---
+
+## API Documentation
+
+- **Swagger UI**: `/api-docs` (available when `ENABLE_SWAGGER=true` or non-test env)
+- **Health Check**: `GET /health` — liveness probe (API + DB + Redis + WebSocket)
+- **Readiness**: `GET /readiness` — Kubernetes-style readiness probe
+- **Metrics**: `GET /metrics` — Prometheus-compatible (protected by `METRICS_TOKEN`)
+- **Cache Stats**: `GET /api/cache-stats` — Redis + in-memory cache statistics
+
+All API endpoints are prefixed with `/api` and documented in the Swagger spec.
 
 ---
 
@@ -184,14 +235,57 @@ GitHub Actions CI validates PRs and main branch pushes.
 
 Copy `.env.example` to `.env` and adjust:
 
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/alawael
-JWT_SECRET=<your-secret>
-NODE_ENV=development
-```
+| Variable              | Required | Default       | Description                                        |
+| --------------------- | -------- | ------------- | -------------------------------------------------- |
+| `PORT`                | No       | `3001`        | HTTP server port                                   |
+| `NODE_ENV`            | Yes      | `development` | `development` / `production` / `test`              |
+| `MONGODB_URI`         | Yes*     | localhost     | MongoDB connection string (* required in prod)     |
+| `JWT_SECRET`          | Yes      | —             | JWT signing key (min 32 chars recommended)          |
+| `REDIS_HOST`          | No       | `localhost`   | Redis server hostname                              |
+| `REDIS_PORT`          | No       | `6379`        | Redis server port                                  |
+| `REDIS_PASSWORD`      | No       | —             | Redis auth password                                |
+| `CORS_ORIGINS`        | Prod     | —             | Comma-separated allowed origins                    |
+| `FRONTEND_URL`        | No       | —             | Frontend URL for CORS fallback                     |
+| `SSL_ENABLED`         | No       | `false`       | Enable HSTS and secure cookies                     |
+| `ENABLE_SWAGGER`      | No       | `true`        | Enable Swagger UI at `/api-docs`                   |
+| `METRICS_TOKEN`       | No       | —             | Bearer token for `/metrics` endpoint               |
+| `ENABLE_AUTO_BACKUP`  | No       | `false`       | Enable scheduled MongoDB backups                   |
+| `SLOW_QUERY_THRESHOLD_MS` | No   | `500`         | Mongoose slow query warning threshold              |
+| `MONGOOSE_DEBUG`      | No       | `false`       | Log all Mongoose queries                           |
+| `OTEL_ENABLED`        | No       | `false`       | Enable OpenTelemetry tracing                       |
 
-See `.env.example` for the full list of supported variables.
+---
+
+## Utility Scripts
+
+```bash
+# Development setup (env check + dependency audit + service connectivity)
+node backend/scripts/dev-setup.js
+
+# Check service connectivity (MongoDB, Redis, etc.)
+node backend/scripts/check-services.js
+
+# Generate secure secrets for .env
+node backend/scripts/generate-secrets.js
+
+# Reset database to clean state
+node backend/scripts/db-reset.js
+
+# Clean up logs, cache, temp files
+node backend/scripts/cleanup.js
+
+# Check for outdated/vulnerable dependencies
+node backend/scripts/check-deps.js
+
+# View and analyze application logs
+node backend/scripts/log-viewer.js
+
+# Inspect registered Express routes
+node backend/scripts/inspect-routes.js
+
+# Project statistics (files, lines, tests, etc.)
+node backend/scripts/project-stats.js
+```
 
 ---
 

@@ -36,6 +36,10 @@ const { seedDatabase } = require('./db/seeders/initialData');
 const { createIndexes } = require('./config/database.optimization');
 const { scheduleBackups } = require('./config/backup');
 const redisClient = require('./config/redis');
+const { registerGlobalPlugins } = require('./config/mongoose.plugins');
+
+// Register Mongoose global plugins (slow-query logging, toJSON, prod safety)
+registerGlobalPlugins();
 
 // --- HTTP Server ---
 const server = http.createServer(app);

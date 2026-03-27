@@ -73,6 +73,10 @@ const {
 // const { ApiResponse } = require('./middleware/dto.middleware');
 const securityHeaders = require('./middleware/securityHeaders');
 const csrfProtection = require('./middleware/csrfProtection');
+const { jsonDepthLimiter, validateSecurityConfig } = require('./middleware/securityHardening');
+
+// Run security config audit at startup (logs warnings for risky settings)
+validateSecurityConfig();
 
 // Performance optimization modules
 const {
@@ -229,6 +233,9 @@ app.use('/api/upload', express.json({ limit: '10mb' }));
 app.use('/api/upload', express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// ─── JSON Depth Limiter (DoS protection against deeply nested payloads) ──────
+app.use(jsonDepthLimiter);
 
 // ─── Input Sanitization ─────────────────────────────────────────────────────
 app.use(sanitizeInput);

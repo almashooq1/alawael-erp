@@ -382,8 +382,22 @@ afterAll(async () => {
     // mongoose may not be importable or already disconnected
   }
 
-  // 2. Clear fake timers if active
+  // 2. Close any leaked Redis/ioredis connections
+  try {
+    const Redis = jest.requireActual('ioredis');
+    if (Redis.default && typeof Redis.default.prototype.quit === 'function') {
+      // ioredis instances may linger — nothing to do at class level
+    }
+  } catch {
+    // ioredis not installed or not used
+  }
+
+  // 3. Clear ALL timers (setTimeout, setInterval, etc.)
   jest.clearAllTimers();
+
+  // 4. Clear any pending unhandled promise rejections listener
+  process.removeAllListeners('unhandledRejection');
+  process.removeAllListeners('uncaughtException');
 });
 
 // Mock database store

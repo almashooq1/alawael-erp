@@ -111,7 +111,9 @@ class LoadTester extends EventEmitter {
         );
 
         // Add delay between requests (simulate think time)
-        await new Promise((resolve) => { setTimeout(resolve, Math.random() * 100); });
+        await new Promise(resolve => {
+          setTimeout(resolve, Math.random() * 100);
+        });
       }
 
       users.push(Promise.all(userPromises));
@@ -157,7 +159,9 @@ class LoadTester extends EventEmitter {
       this.displayMetrics(metrics);
 
       // Wait between steps
-      await new Promise(resolve => { setTimeout(resolve, 2000); });
+      await new Promise(resolve => {
+        setTimeout(resolve, 2000);
+      });
     }
 
     return results;
@@ -223,7 +227,9 @@ class LoadTester extends EventEmitter {
       });
 
       this.displayMetrics(metrics);
-      await new Promise(resolve => { setTimeout(resolve, 1000); });
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      });
     }
 
     return results;

@@ -306,7 +306,9 @@ describe('🌐 API & Interface Testing', () => {
               return await fn();
             } catch (error) {
               lastError = error;
-              await new Promise((r) => { setTimeout(r, this.delayMs * Math.pow(this.backoffFactor, i)); });
+              await new Promise(r => {
+                setTimeout(r, this.delayMs * Math.pow(this.backoffFactor, i));
+              });
             }
           }
           throw lastError;

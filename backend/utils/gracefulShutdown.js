@@ -55,7 +55,12 @@ const setupGracefulShutdown = (server, io = null) => {
 
     try {
       // Wait for in-flight requests to finish (up to 5s)
-      await Promise.race([serverClosed, new Promise((resolve) => { setTimeout(resolve, 5000); })]);
+      await Promise.race([
+        serverClosed,
+        new Promise(resolve => {
+          setTimeout(resolve, 5000);
+        }),
+      ]);
 
       // Close Socket.IO connections
       if (io) {

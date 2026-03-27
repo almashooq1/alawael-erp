@@ -129,37 +129,36 @@ const cacheConfig = {
 
 // إنشاء عميل Redis
 const createRedisClient = async () => {
-  let client;
-
-  if (cacheConfig.redis.cluster && process.env.NODE_ENV === 'production') {
-    // Cluster Mode (ioredis)
-    client = new Redis.Cluster(cacheConfig.redis.cluster.nodes, cacheConfig.redis.cluster.options);
-  } else {
-    // Standalone Mode (ioredis)
-    client = new Redis({
-      host: cacheConfig.redis.host,
-      port: cacheConfig.redis.port,
-      password: cacheConfig.redis.password,
-      db: cacheConfig.redis.db,
-      connectTimeout: cacheConfig.redis.socket.connectTimeout,
-      keepAlive: cacheConfig.redis.socket.keepAlive,
-      retryStrategy: cacheConfig.redis.socket.reconnectStrategy,
-    });
-  }
-
-  client.on('connect', () => {
-    // console.log('✅ Redis: متصل بنجاح');
+  // Always use standalone mode — cluster nodes (redis-1/2/3) don't exist on VPS
+  const client = new Redis({
+    host: cacheConfig.redis.host,
+    port: cacheConfig.redis.port,
+    password: cacheConfig.redis.password,
+    db: cacheConfig.redis.db,
+    connectTimeout: 3000,
+    maxRetriesPerRequest: 3,
+    lazyConnect: true,
+    retryStrategy: times => {
+      if (times > 3) return null; // stop reconnecting after 3 attempts
+      return Math.min(times * 200, 2000);
+    },
   });
 
   client.on('error', err => {
     logger.error('Redis Error:', { error: err.message });
   });
 
-  client.on('ready', () => {
-    // console.log('🚀 Redis: جاهز للاستخدام');
-  });
-
-  // ioredis auto-connects
+  // Explicitly connect with timeout — fail fast if Redis isn't available
+  try {
+    await Promise.race([
+      client.connect(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connect timeout')), 4000)),
+    ]);
+  } catch (err) {
+    logger.error('Redis connect failed, returning null:', { error: err.message });
+    try { client.disconnect(); } catch { /* ignore */ }
+    return null;
+  }
 
   return client;
 };

@@ -36,7 +36,13 @@ const getRedis = async () => {
   if (redisInitFailed) return null; // Don't retry after permanent failure
   try {
     const { createRedisClient } = require('../config/cache.config');
-    redisClient = await createRedisClient();
+    const client = await createRedisClient();
+    if (!client) {
+      // createRedisClient returned null → connection failed, don't retry
+      redisInitFailed = true;
+      return null;
+    }
+    redisClient = client;
     return redisClient;
   } catch {
     // Redis unavailable — blacklist will be skipped (graceful degradation)
@@ -70,7 +76,10 @@ module.exports = {
       const key = PREFIX + hash;
       const ttl = decoded.exp - Math.floor(Date.now() / 1000);
       if (ttl > 0) {
-        await redis.set(key, '1', 'EX', ttl);
+        await Promise.race([
+          redis.set(key, '1', 'EX', ttl),
+          new Promise(resolve => setTimeout(resolve, 3000)),
+        ]);
       }
     } catch (err) {
       // Still store in fallback on error
@@ -94,7 +103,11 @@ module.exports = {
       const redis = await getRedis();
       if (!redis) return false; // Redis down + not in fallback → allow (best-effort)
 
-      const result = await redis.get(PREFIX + hash);
+      // Timeout guard: never let a Redis call hang the auth middleware
+      const result = await Promise.race([
+        redis.get(PREFIX + hash),
+        new Promise(resolve => setTimeout(() => resolve(null), 3000)),
+      ]);
       return result === '1';
     } catch (err) {
       logger.error('Token blacklist check error:', { error: err.message });

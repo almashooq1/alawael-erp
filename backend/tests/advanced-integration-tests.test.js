@@ -422,7 +422,7 @@ describe('📢 Event-Driven Integration', () => {
 
     if ([200, 201].includes(createRes.status)) {
       // Allow time for event propagation
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => { setTimeout(resolve, 500); });
 
       const listenerRes = await request(app).get('/api/events/recent').timeout(5000);
 

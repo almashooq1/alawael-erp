@@ -3,7 +3,7 @@
 class AIService {
   static async summarizeNotes(text) {
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => { setTimeout(resolve, 500); });
 
     if (!text) return '';
 

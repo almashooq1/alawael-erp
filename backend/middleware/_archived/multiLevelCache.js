@@ -179,7 +179,7 @@ class MultiLevelCacheManager {
       }
 
       // Avoid blocking
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise(resolve => { setImmediate(resolve); });
     }
 
     this.isWarming = false;

@@ -262,7 +262,9 @@ describe('Administrative Communications Service', () => {
       const data = {
         name: 'Official Invitation Template',
         type: 'invitation',
+        // eslint-disable-next-line no-template-curly-in-string
         subject: 'دعوة لحضور ${eventName}',
+        // eslint-disable-next-line no-template-curly-in-string
         content: 'يسرنا دعوتكم لحضور ${eventName} بتاريخ ${date}',
         variables: ['eventName', 'date'],
       };
@@ -280,7 +282,9 @@ describe('Administrative Communications Service', () => {
         {
           name: 'Meeting Invitation',
           type: 'invitation',
+          // eslint-disable-next-line no-template-curly-in-string
           subject: 'دعوة لاجتماع ${title}',
+          // eslint-disable-next-line no-template-curly-in-string
           content: 'ندعوكم لحضور اجتماع ${title} في ${location}',
           variables: ['title', 'location'],
         },

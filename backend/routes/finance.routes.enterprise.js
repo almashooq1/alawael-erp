@@ -58,7 +58,7 @@ const CompanyLoan = LoanModels?.CompanyLoan || null;
 const LoanDrawdown = LoanModels?.LoanDrawdown || null;
 
 const BankAccount = safeRequire('../models/BankAccount', 'BankAccount');
-const JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
+const _JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
 const AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
 
 router.use(authenticateToken);
@@ -1043,7 +1043,7 @@ router.post(
     if (!CompanyLoan) throw new AppError('Model not available', 500);
     const loan = await CompanyLoan.findById(req.params.id);
     if (!loan) throw new AppError('Loan not found', 404);
-    const { amount, principalPortion, profitPortion } = req.body;
+    const { amount, principalPortion, _profitPortion } = req.body;
     loan.outstandingBalance = Math.max(0, loan.outstandingBalance - (principalPortion || amount));
     loan.paidInstallments = (loan.paidInstallments || 0) + 1;
     // Update next installment in schedule

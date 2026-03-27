@@ -936,7 +936,7 @@ describe('🔄 Phase 11: Advanced Disaster Recovery & Business Continuity', () =
       const disaster = drPlan.simulateDisaster(scenario.id);
       drPlan.executeRecovery(disaster.incident.id);
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => { setTimeout(resolve, 150); });
 
       const metrics = drPlan.getRecoveryMetrics(disaster.incident.id);
       expect(metrics).toBeDefined();
@@ -1131,7 +1131,7 @@ describe('🔄 Phase 11: Advanced Disaster Recovery & Business Continuity', () =
     test('should maintain version consistency across regions', async () => {
       deployment.deployToAllRegions('deploy-1', '2.5.0');
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => { setTimeout(resolve, 150); });
 
       const status = deployment.getRegionStatus();
       status.regions.forEach(region => {

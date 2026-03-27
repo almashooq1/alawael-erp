@@ -393,7 +393,7 @@ function registerHealthChecks() {
     const start = Date.now();
     try {
       // Mock database check (replace with actual DB ping)
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => { setTimeout(resolve, 10); });
       return {
         status: 'healthy',
         responseTime: Date.now() - start + 'ms',

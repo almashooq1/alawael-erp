@@ -435,7 +435,7 @@ class SecurityManager {
        * Get audit trail for user
        */
       async getUserAuditTrail(userId, limit = 100) {
-        return await this.db
+        return this.db
           .collection('audit_logs')
           .find({ userId })
           .sort({ timestamp: -1 })
@@ -448,7 +448,7 @@ class SecurityManager {
        */
       async getSecurityEvents(eventType, days = 7) {
         const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-        return await this.db
+        return this.db
           .collection('audit_logs')
           .find({
             eventType: eventType,

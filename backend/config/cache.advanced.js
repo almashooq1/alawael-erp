@@ -215,7 +215,7 @@ class CacheManager {
           }
         });
 
-        await new Promise(resolve => stream.on('end', resolve));
+        await new Promise(resolve => { stream.on('end', resolve); })
       }
 
       // console.log(`🗑️ Invalidated ${deletedCount} keys matching pattern: ${pattern}`);

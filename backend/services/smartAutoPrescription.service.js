@@ -57,6 +57,7 @@ class SmartAutoPrescriptionService {
           time: '09:00',
           type: 'ROBOTICS',
           device: 'ARM_REHAB_V2',
+          // eslint-disable-next-line no-template-curly-in-string
           duration: '${sessionDuration / 2} min',
           intensity: 'ADAPTIVE',
         },

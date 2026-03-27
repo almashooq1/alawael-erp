@@ -92,7 +92,7 @@ describe('gracefulShutdown', () => {
     process.emit('SIGTERM');
 
     // Allow async operations to settle
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => { setTimeout(r, 50); });
 
     const res = {
       set: jest.fn(),
@@ -128,7 +128,7 @@ describe('gracefulShutdown', () => {
     };
     setupGracefulShutdown(mockServer);
     process.emit('SIGTERM');
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => { setTimeout(r, 50); });
     expect(mockServer.close).toHaveBeenCalled();
   });
 
@@ -146,7 +146,7 @@ describe('gracefulShutdown', () => {
     };
     setupGracefulShutdown(mockServer);
     process.emit('SIGTERM');
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => { setTimeout(r, 100); });
     expect(mongoose.connection.close).toHaveBeenCalled();
   });
 
@@ -161,7 +161,7 @@ describe('gracefulShutdown', () => {
     };
     setupGracefulShutdown(mockServer, mockIo);
     process.emit('SIGTERM');
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => { setTimeout(r, 50); });
     expect(mockIo.close).toHaveBeenCalled();
   });
 
@@ -176,7 +176,7 @@ describe('gracefulShutdown', () => {
     setupGracefulShutdown(mockServer);
     process.emit('SIGTERM');
     process.emit('SIGTERM');
-    await new Promise(r => setTimeout(r, 50));
+    await new Promise(r => { setTimeout(r, 50); });
     // server.close called only once (second signal returns early)
     expect(mockServer.close).toHaveBeenCalledTimes(1);
   });

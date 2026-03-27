@@ -102,7 +102,7 @@ const scanObject = (obj, depth = 0, path = 'body') => {
 const globalValidation = (options = {}) => {
   const {
     maxQueryValueLength = MAX_QUERY_VALUE_LENGTH,
-    maxBodyDepth = MAX_BODY_DEPTH,
+    _maxBodyDepth = MAX_BODY_DEPTH,
     strictObjectIds = true,
     scanBody = true,
   } = options;

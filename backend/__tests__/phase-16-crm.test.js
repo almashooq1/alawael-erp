@@ -516,7 +516,7 @@ describe('Phase 16: Advanced CRM & Customer Management', () => {
       });
 
       const act1 = await crmService.logActivity(customer.id, { type: 'call' });
-      await new Promise(resolve => setTimeout(resolve, 10)); // Ensure different timestamps
+      await new Promise(resolve => { setTimeout(resolve, 10); }); // Ensure different timestamps
       const act2 = await crmService.logActivity(customer.id, { type: 'email' });
 
       const activities = await crmService.getCustomerActivities(customer.id);
@@ -553,7 +553,7 @@ describe('Phase 16: Advanced CRM & Customer Management', () => {
 
       for (const type of types) {
         await crmService.logActivity(customer.id, { type });
-        await new Promise(resolve => setTimeout(resolve, 5)); // Ensure different timestamps
+        await new Promise(resolve => { setTimeout(resolve, 5); }); // Ensure different timestamps
       }
 
       const activities = await crmService.getCustomerActivities(customer.id);

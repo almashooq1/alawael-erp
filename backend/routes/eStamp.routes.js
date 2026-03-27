@@ -31,7 +31,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
 const { escapeRegex } = require('../utils/sanitize');
-const validateObjectId = require('../middleware/validateObjectId');
+const _validateObjectId = require('../middleware/validateObjectId');
 
 const MAX_PAGE_LIMIT = 100;
 

@@ -13,7 +13,7 @@ router.use(authenticate);
 // List tickets
 router.get('/tickets', async (req, res) => {
   try {
-    const { status, priority, page = 1, limit = 20 } = req.query;
+    const { _status, _priority, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

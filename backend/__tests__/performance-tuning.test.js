@@ -1006,7 +1006,7 @@ describe('🚀 Phase 12: Advanced Performance Tuning & Optimization', () => {
     test('should track processing time', async () => {
       const batch = [1, 2, 3];
       await processor.processBatch(batch, async item => {
-        await new Promise(r => setTimeout(r, 1));
+        await new Promise(r => { setTimeout(r, 1); });
         return item;
       });
       const stats = processor.getStats();

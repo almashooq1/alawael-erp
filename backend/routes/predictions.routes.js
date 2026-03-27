@@ -9,10 +9,10 @@ const { authenticate } = require('../middleware/auth');
 
 // Mock AI Service for development
 const mockAiService = {
-  predictPerformance: async data => ({ score: 95 }),
-  predictAbsence: async employeeId => ({ probability: 0.15 }),
-  predictTrend: async data => ({ trend: 'increasing' }),
-  forecastRevenue: async params => ({ revenue: 1000000 }),
+  predictPerformance: async _data => ({ score: 95 }),
+  predictAbsence: async _employeeId => ({ probability: 0.15 }),
+  predictTrend: async _data => ({ trend: 'increasing' }),
+  forecastRevenue: async _params => ({ revenue: 1000000 }),
 };
 
 /**

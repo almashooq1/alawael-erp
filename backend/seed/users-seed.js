@@ -60,7 +60,7 @@ async function seed() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@alawael.com';
   const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Admin@123456';
 
-  const users = ROLES.map((role, i) => ({
+  const users = ROLES.map((role, _i) => ({
     email: role === 'super_admin' ? adminEmail : `${role}@alawael.com`,
     password: role === 'super_admin' ? adminPassword : `Test@${role}123`,
     fullName: `${ROLE_LABELS[role]} (${role})`,

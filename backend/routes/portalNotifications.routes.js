@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const PortalNotification = require('../models/PortalNotification');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ── Helpers ────────────────────────────────────────────────────────────

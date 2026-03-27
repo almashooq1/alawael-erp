@@ -342,7 +342,7 @@ describe('🔒 Security Utils', () => {
       expect(blockedResult.allowed).toBe(false);
 
       // Wait for window to reset
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => { setTimeout(resolve, 150); });
 
       const allowedResult = limiter.checkLimit(ip);
       expect(allowedResult.allowed).toBe(true);

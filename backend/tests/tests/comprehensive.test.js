@@ -114,7 +114,7 @@ describe('API Endpoints - Basic Tests', () => {
 describe('Performance Tests', () => {
   test('API response time within limits', async () => {
     const startTime = Date.now();
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => { setTimeout(resolve, 50); });
     const responseTime = Date.now() - startTime;
     expect(responseTime).toBeLessThanOrEqual(200);
   });
@@ -757,7 +757,7 @@ describe('Performance Tests', () => {
   test('should respond to API call within 200ms', async () => {
     try {
       const startTime = Date.now();
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       const responseTime = Date.now() - startTime;
       expect(responseTime).toBeLessThan(200);
     } catch (e) {

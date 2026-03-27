@@ -75,7 +75,7 @@ async function waitForServer(maxAttempts = 30) {
       return true;
     } catch (e) {
       attempts++;
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => { setTimeout(r, 200); });
     }
   }
   throw new Error('Server not ready after 6 seconds');

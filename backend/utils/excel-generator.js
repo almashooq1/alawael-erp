@@ -64,7 +64,7 @@ class ExcelGenerator {
       });
     });
 
-    return await this._saveWorkbook(workbook, 'accounts');
+    return this._saveWorkbook(workbook, 'accounts');
   }
 
   /**
@@ -117,7 +117,7 @@ class ExcelGenerator {
     worksheet.getColumn('debit').numFmt = '#,##0.00';
     worksheet.getColumn('credit').numFmt = '#,##0.00';
 
-    return await this._saveWorkbook(workbook, 'journal-entries');
+    return this._saveWorkbook(workbook, 'journal-entries');
   }
 
   /**
@@ -170,7 +170,7 @@ class ExcelGenerator {
       worksheet.getColumn(col).numFmt = '#,##0.00';
     });
 
-    return await this._saveWorkbook(workbook, 'invoices');
+    return this._saveWorkbook(workbook, 'invoices');
   }
 
   /**
@@ -205,7 +205,7 @@ class ExcelGenerator {
       this._addIncomeStatementData(worksheet, reportData);
     }
 
-    return await this._saveWorkbook(workbook, reportType);
+    return this._saveWorkbook(workbook, reportType);
   }
 
   /**
@@ -356,7 +356,7 @@ class ExcelGenerator {
     worksheet.addRow(['* Required fields']);
     worksheet.addRow(['Type: asset, liability, equity, revenue, expense']);
 
-    return await this._saveWorkbook(workbook, 'accounts-template');
+    return this._saveWorkbook(workbook, 'accounts-template');
   }
 }
 

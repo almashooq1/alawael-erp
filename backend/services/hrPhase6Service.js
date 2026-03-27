@@ -8,11 +8,11 @@ const Performance = require('../models/performance.model');
 class HRPhase6Service {
   // --- Employee Management ---
   async getEmployees(filter = {}) {
-    return await Employee.find(filter).select('-password');
+    return Employee.find(filter).select('-password');
   }
 
   async getEmployeeById(id) {
-    return await Employee.findById(id);
+    return Employee.findById(id);
   }
 
   // --- Payroll System ---
@@ -70,7 +70,7 @@ class HRPhase6Service {
     if (month && year) {
       query.month = `${year}-${month.toString().padStart(2, '0')}`;
     }
-    return await Payroll.find(query).populate('employeeId', 'firstName lastName position');
+    return Payroll.find(query).populate('employeeId', 'firstName lastName position');
   }
 
   // --- Attendance System ---
@@ -90,7 +90,7 @@ class HRPhase6Service {
     } else {
       if (!record.checkIn) record.checkIn = new Date();
     }
-    return await record.save();
+    return record.save();
   }
 
   async checkOut(employeeId) {
@@ -100,7 +100,7 @@ class HRPhase6Service {
 
     if (record) {
       record.checkOut = new Date();
-      return await record.save();
+      return record.save();
     }
     throw new Error('No check-in record found for today');
   }
@@ -109,17 +109,17 @@ class HRPhase6Service {
     const queryDate = new Date(date);
     queryDate.setHours(0, 0, 0, 0);
 
-    return await Attendance.find({ date: queryDate }).populate('employeeId', 'firstName lastName');
+    return Attendance.find({ date: queryDate }).populate('employeeId', 'firstName lastName');
   }
 
   // --- Leave Management ---
   async requestLeave(leaveData) {
     const leave = new Leave(leaveData);
-    return await leave.save();
+    return leave.save();
   }
 
   async approveLeave(leaveId, approverId) {
-    return await Leave.findByIdAndUpdate(
+    return Leave.findByIdAndUpdate(
       leaveId,
       { status: 'approved', approvedBy: approverId },
       { new: true }
@@ -128,17 +128,17 @@ class HRPhase6Service {
 
   async getLeaves(status) {
     const query = status ? { status } : {};
-    return await Leave.find(query).populate('employeeId', 'firstName lastName');
+    return Leave.find(query).populate('employeeId', 'firstName lastName');
   }
 
   // --- Performance Appraisal ---
   async createAppraisal(appraisalData) {
     const appraisal = new Performance(appraisalData);
-    return await appraisal.save();
+    return appraisal.save();
   }
 
   async getEmployeePerformance(employeeId) {
-    return await Performance.find({ employeeId }).sort({ 'period.startDate': -1 });
+    return Performance.find({ employeeId }).sort({ 'period.startDate': -1 });
   }
 }
 

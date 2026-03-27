@@ -99,7 +99,7 @@ describe('CrossModuleSubscribers', () => {
       );
 
       // Wait for async propagation
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(settlementHandler).toHaveBeenCalledTimes(1);
       expect(settlementHandler).toHaveBeenCalledWith(
@@ -129,7 +129,7 @@ describe('CrossModuleSubscribers', () => {
         method: 'bank_transfer',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(kpiHandler).toHaveBeenCalledTimes(1);
       expect(kpiHandler).toHaveBeenCalledWith(
@@ -159,7 +159,7 @@ describe('CrossModuleSubscribers', () => {
         type: 'unexcused',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(flagHandler).toHaveBeenCalledTimes(1);
       expect(flagHandler).toHaveBeenCalledWith(
@@ -189,7 +189,7 @@ describe('CrossModuleSubscribers', () => {
         ip: '192.168.1.1',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(alertHandler).toHaveBeenCalledTimes(1);
       expect(alertHandler).toHaveBeenCalledWith(
@@ -220,7 +220,7 @@ describe('CrossModuleSubscribers', () => {
         reason: 'promotion',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(budgetHandler).toHaveBeenCalledTimes(1);
       expect(budgetHandler).toHaveBeenCalledWith(
@@ -250,7 +250,7 @@ describe('CrossModuleSubscribers', () => {
         currency: 'SAR',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(auditHandler).toHaveBeenCalledTimes(1);
       expect(auditHandler).toHaveBeenCalledWith(
@@ -283,7 +283,7 @@ describe('CrossModuleSubscribers', () => {
         outcome: 'good',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(kpiHandler).toHaveBeenCalledTimes(1);
       expect(kpiHandler).toHaveBeenCalledWith(
@@ -314,7 +314,7 @@ describe('CrossModuleSubscribers', () => {
         assessor: 'Dr. Smith',
       });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(kpiHandler).toHaveBeenCalledTimes(1);
       expect(kpiHandler).toHaveBeenCalledWith(

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
-const { validateRequest } = require('../middleware/validation');
+const { _validateRequest } = require('../middleware/validation');
 const { DisabilityRehabilitationService } = require('../services/disabilityRehabilitationService');
 const logger = require('../utils/logger');
 

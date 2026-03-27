@@ -250,11 +250,11 @@ router.get('/', async (req, res) => {
     const {
       page = 1,
       limit = 20,
-      sender,
-      recipient,
-      unread,
+      _sender,
+      _recipient,
+      _unread,
       sort = '-createdAt',
-      search,
+      _search,
     } = req.query;
 
     const userId = req.user?.id || req.user?.userId;
@@ -486,7 +486,7 @@ router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
-    const userId = req.user?.id || req.user?.userId;
+    const _userId = req.user?.id || req.user?.userId;
 
     if (!id) {
       return res.status(400).json({
@@ -924,7 +924,7 @@ router.post('/send', async (req, res) => {
 router.get('/conversation/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.user?.userId;
+    const _userId = req.user?.id || req.user?.userId;
 
     if (!id) {
       return res.status(400).json({

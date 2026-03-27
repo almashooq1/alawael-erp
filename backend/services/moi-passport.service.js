@@ -340,7 +340,7 @@ class MOIPassportService extends EventEmitter {
    * Sleep utility
    */
   _sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => { setTimeout(resolve, ms); });
   }
 
   /**

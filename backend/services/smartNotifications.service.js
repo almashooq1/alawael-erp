@@ -378,7 +378,7 @@ class SmartNotificationsService extends EventEmitter {
 
     const method = deliveryMethods[channel];
     if (method) {
-      return await method();
+      return method();
     }
   }
 

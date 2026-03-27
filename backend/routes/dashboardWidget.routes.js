@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { protect, authorize } = require('../middleware/auth');
+const { protect, _authorize } = require('../middleware/auth');
 const dashboardController = require('../controllers/dashboardWidget.controller');
 
 /**

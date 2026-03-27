@@ -60,7 +60,7 @@ try {
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[Finance Routes] RBAC module not available, using fallback');
-  createRBACMiddleware = permission => (req, res, next) => {
+  createRBACMiddleware = permission => (_req, _res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
     throw new AppError('Authorization service temporarily unavailable', 503);
   };
@@ -102,12 +102,12 @@ router.get(
 
       // Get invoices summary
       const invoices = AccountingInvoice ? await AccountingInvoice.find().limit(10000).lean() : [];
-      const paidInvoices = invoices.filter(i => i.status === 'paid');
+      const _paidInvoices = invoices.filter(i => i.status === 'paid');
       const overdueInvoices = invoices.filter(i => i.status === 'overdue');
       const pendingInvoices = invoices.filter(i => ['draft', 'sent'].includes(i.status));
 
       // Get journal entries for revenue calculation
-      const journals = JournalEntry
+      const _journals = JournalEntry
         ? await JournalEntry.find({ status: 'posted', isDeleted: { $ne: true } }).lean()
         : [];
 
@@ -858,7 +858,7 @@ router.post(
 router.get(
   '/payments',
   asyncHandler(async (req, res) => {
-    const { status, page, limit } = req.query;
+    const { _status, _page, _limit } = req.query;
 
     const payments = []; // In real app, fetch from database
 
@@ -2093,7 +2093,7 @@ router.get(
       'نوفمبر',
       'ديسمبر',
     ];
-    const monthlyTrend = months.slice(0, now.getMonth() + 1).map((month, i) => ({
+    const monthlyTrend = months.slice(0, now.getMonth() + 1).map((month, _i) => ({
       month,
       operating: Math.round((operating.total / (now.getMonth() + 1)) * (0.8 + Math.random() * 0.4)),
       investing: Math.round((investing.total / (now.getMonth() + 1)) * (0.8 + Math.random() * 0.4)),

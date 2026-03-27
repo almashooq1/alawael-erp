@@ -333,7 +333,7 @@ class AdvancedDatabaseService extends EventEmitter {
   }
 
   async getIndexUsageStats(model) {
-    return await model.aggregate([{ $indexStats: {} }]);
+    return model.aggregate([{ $indexStats: {} }]);
   }
 
   getMetrics() {

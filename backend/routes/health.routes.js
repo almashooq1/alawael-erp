@@ -28,7 +28,7 @@ router.get('/db', async (req, res) => {
     const _dbHealth = await Promise.race([
       Asset.countDocuments().lean(),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Database query timeout')), 5000)
+        setTimeout(() => { reject(new Error('Database query timeout')); }, 5000)
       ),
     ]);
 
@@ -127,7 +127,7 @@ router.get('/system', async (req, res) => {
           const start = Date.now();
           await Promise.race([
             client.ping(),
-            new Promise((_, rej) => setTimeout(() => rej(new Error('Redis ping timeout')), 3000)),
+            new Promise((_, rej) => { setTimeout(() => rej(new Error('Redis ping timeout')), 3000); }),
           ]);
           redisPingMs = Date.now() - start;
           redisOk = true;

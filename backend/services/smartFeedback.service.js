@@ -78,7 +78,7 @@ class SmartFeedbackService {
    * Get Detractor List (Unhappy Parents)
    */
   static async getDetractors() {
-    return await Feedback.find({
+    return Feedback.find({
       requiresFollowUp: true,
       followUpStatus: 'OPEN',
     })

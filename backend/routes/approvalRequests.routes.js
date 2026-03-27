@@ -13,7 +13,7 @@ router.use(authenticate);
 // List approval requests
 router.get('/', async (req, res) => {
   try {
-    const { status, type, page = 1, limit = 20 } = req.query;
+    const { _status, _type, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

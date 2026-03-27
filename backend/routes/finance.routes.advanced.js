@@ -27,7 +27,7 @@ const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { asyncHandler } = require('../errors/errorHandler');
-const { AppError } = require('../errors/AppError');
+const { _AppError } = require('../errors/AppError');
 
 // ─── Models ──────────────────────────────────────────────────────────────────
 const safeRequire = (path, name) => {
@@ -45,7 +45,7 @@ const Expense = safeRequire('../models/Expense', 'Expense');
 const AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
 const CostCenter = safeRequire('../models/CostCenter', 'CostCenter');
 const FixedAsset = safeRequire('../models/FixedAsset', 'FixedAsset');
-const Transaction = safeRequire('../models/Transaction', 'Transaction');
+const _Transaction = safeRequire('../models/Transaction', 'Transaction');
 const Budget = safeRequire('../models/Budget', 'Budget');
 const RecurringTransaction = safeRequire('../models/RecurringTransaction', 'RecurringTransaction');
 const BankReconciliation = safeRequire('../models/BankReconciliation', 'BankReconciliation');
@@ -1509,12 +1509,12 @@ router.get(
 router.get(
   '/budget-vs-actual',
   asyncHandler(async (req, res) => {
-    const { fiscalYear, period } = req.query;
+    const { fiscalYear, _period } = req.query;
     const year = Number(fiscalYear) || new Date().getFullYear();
 
-    let budgets = [];
+    let _budgets = [];
     if (Budget) {
-      budgets = await Budget.find({ year, isDeleted: { $ne: true } }).lean();
+      _budgets = await Budget.find({ year, isDeleted: { $ne: true } }).lean();
     }
 
     const categories = [
@@ -2153,7 +2153,7 @@ router.get(
 router.get(
   '/audit-trail',
   asyncHandler(async (req, res) => {
-    const { module, action, startDate, endDate, page = 1, limit = 50 } = req.query;
+    const { module, action, _startDate, _endDate, _page = 1, _limit = 50 } = req.query;
 
     const sampleAuditEntries = [
       {
@@ -2797,7 +2797,7 @@ router.delete(
 router.get(
   '/reports/profit-loss',
   asyncHandler(async (req, res) => {
-    const { fromDate, toDate, costCenter } = req.query;
+    const { fromDate, toDate, _costCenter } = req.query;
 
     const revenue = {
       operatingRevenue: [

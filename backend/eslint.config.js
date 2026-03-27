@@ -97,8 +97,8 @@ module.exports = [
       'no-template-curly-in-string': 'warn', // catch 'Hello ${name}' typos
       // ── Async Best Practice ──
       'no-async-promise-executor': 'error',
-      'no-promise-executor-return': 'warn',
-      'require-atomic-updates': 'warn',
+      'no-promise-executor-return': 'off', // too noisy — setTimeout/setImmediate returns are harmless
+      'require-atomic-updates': 'off', // deprecated in ESLint v8 — too many false positives
     },
   },
   // Frontend/React configuration

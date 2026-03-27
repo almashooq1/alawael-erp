@@ -600,7 +600,7 @@ describe('🚀 Phases 16-20: Advanced Enterprise Features', () => {
     test('should clear expired entries', async () => {
       const expiringCache = new AdvancedCache({ ttl: 1 });
       expiringCache.set('temp', 'value');
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      await new Promise(resolve => { setTimeout(resolve, 1100); });
       expiringCache.get('temp');
       const stats = expiringCache.getStats();
       expect(stats.misses).toBeGreaterThan(0);

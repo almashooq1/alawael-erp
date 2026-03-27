@@ -453,7 +453,7 @@ describe('BranchERPIntegrationService', () => {
   describe('Error Handling and Edge Cases', () => {
     it('should handle network timeouts', async () => {
       mockFetch.mockImplementationOnce(
-        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 100))
+        () => new Promise((_, reject) => setTimeout(() => { reject(new Error('Timeout')); }, 100))
       );
 
       const result = await service.syncBranchesToERP();

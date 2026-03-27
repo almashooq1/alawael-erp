@@ -19,7 +19,7 @@
  */
 
 const express = require('express');
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const router = express.Router();
 
 const {
@@ -1243,7 +1243,7 @@ router.post('/versions/:definitionId/:version/restore', authMiddleware, async (r
     });
 
     // Restore
-    const { _id, __v, createdAt, updatedAt, ...restoreData } = ver.snapshot;
+    const { _id, __v, _createdAt, _updatedAt, ...restoreData } = ver.snapshot;
     await WorkflowDefinition.findByIdAndUpdate(req.params.definitionId, {
       ...restoreData,
       updatedBy: uid(req),
@@ -1295,7 +1295,7 @@ router.put('/notification-prefs', authMiddleware, async (req, res) => {
 router.get('/calendar', authMiddleware, async (req, res) => {
   try {
     const userId = uid(req);
-    const { start, end, view = 'month' } = req.query;
+    const { start, end, _view = 'month' } = req.query;
 
     const startDate = start ? new Date(start) : new Date(new Date().setDate(1));
     const endDate = end

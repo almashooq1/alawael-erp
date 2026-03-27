@@ -173,7 +173,7 @@ class AuditLogService {
           : AuditEventTypes.AUTH_LOGIN_FAILED
         : AuditEventTypes.AUTH_LOGOUT;
 
-    return await this.logEvent({
+    return this.logEvent({
       eventType,
       severity: success ? 'info' : 'medium',
       status: success ? 'success' : 'failure',
@@ -203,7 +203,7 @@ class AuditLogService {
 
     const changes = oldData && newData ? this.calculateChanges(oldData, newData) : null;
 
-    return await this.logEvent({
+    return this.logEvent({
       eventType: eventTypeMap[operation] || AuditEventTypes.DATA_UPDATED,
       severity: operation === 'delete' ? 'medium' : 'low',
       status: 'success',
@@ -222,7 +222,7 @@ class AuditLogService {
    * تسجيل حدث أمني
    */
   static async logSecurityEvent(eventType, user, req, details, severity = 'high') {
-    return await this.logEvent({
+    return this.logEvent({
       eventType,
       severity,
       status: 'failure',
@@ -258,7 +258,7 @@ class AuditLogService {
       }
     }
 
-    return await this.logEvent({
+    return this.logEvent({
       eventType: success ? AuditEventTypes.API_REQUEST : AuditEventTypes.API_ERROR,
       severity: success ? 'info' : 'medium',
       status: success ? 'success' : 'failure',

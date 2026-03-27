@@ -251,7 +251,7 @@ router.post(
 
       const { identifier, method = 'auto', purpose = 'login' } = req.body;
 
-      const metadata = {
+      const _metadata = {
         ipAddress: req.ip || req.socket?.remoteAddress,
         userAgent: req.headers['user-agent'],
       };
@@ -299,7 +299,7 @@ router.post(
 
       const { identifier, method = 'auto' } = req.body;
 
-      const metadata = {
+      const _metadata = {
         ipAddress: req.ip || req.socket?.remoteAddress,
         userAgent: req.headers['user-agent'],
         deviceId: req.headers['x-device-id'],
@@ -449,7 +449,7 @@ router.post(
         });
       }
 
-      const metadata = {
+      const _metadata = {
         ipAddress: req.ip || req.socket?.remoteAddress,
         userAgent: req.headers['user-agent'],
         name, // تخزين الاسم للتسجيل لاحقاً

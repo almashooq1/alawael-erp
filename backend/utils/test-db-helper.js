@@ -5,7 +5,7 @@
  * Prevents MongoDB Memory Server concurrency timeouts
  */
 
-const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const delay = ms => new Promise(resolve => { setTimeout(resolve, ms); });
 
 class TestDBHelper {
   /**
@@ -109,7 +109,7 @@ class TestDBHelper {
    */
   static async withTimeout(promise, timeoutMs = 10000) {
     const timeout = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('Operation timeout')), timeoutMs)
+      setTimeout(() => { reject(new Error('Operation timeout')); }, timeoutMs)
     );
     return Promise.race([promise, timeout]);
   }
@@ -121,7 +121,7 @@ class TestDBHelper {
     const existing = await Model.findOne(filter);
     if (existing) return existing;
 
-    return await this.createDocument(Model, await createFn());
+    return this.createDocument(Model, await createFn());
   }
 }
 

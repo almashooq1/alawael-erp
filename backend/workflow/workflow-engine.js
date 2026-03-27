@@ -227,7 +227,7 @@ class WorkflowEngine {
 
     // Delay action
     this.registerAction('delay', async (params, _context) => {
-      await new Promise(resolve => setTimeout(resolve, params.duration || 1000));
+      await new Promise(resolve => { setTimeout(resolve, params.duration || 1000); });
       return { delayed: true };
     });
 
@@ -403,7 +403,7 @@ class WorkflowEngine {
         throw error;
       } else if (step.onError === 'retry' && step.retryCount > 0) {
         step.retryCount--;
-        await new Promise(resolve => setTimeout(resolve, workflowConfig.retryDelay));
+        await new Promise(resolve => { setTimeout(resolve, workflowConfig.retryDelay); });
         return this.executeStep(instance, step);
       }
 
@@ -457,7 +457,7 @@ class WorkflowEngine {
    */
   async executeDelay(step) {
     const duration = step.params?.duration || 1000;
-    await new Promise(resolve => setTimeout(resolve, duration));
+    await new Promise(resolve => { setTimeout(resolve, duration); });
     return { delayed: true, duration };
   }
 

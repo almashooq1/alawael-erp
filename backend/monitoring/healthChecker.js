@@ -73,7 +73,7 @@ class HealthChecker {
 
     try {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Check timeout')), check.timeout)
+        setTimeout(() => { reject(new Error('Check timeout')); }, check.timeout)
       );
 
       const checkPromise = Promise.resolve(check.checkFn());

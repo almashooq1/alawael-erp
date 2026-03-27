@@ -145,7 +145,7 @@ describe('📊 Advanced Monitoring & Observability', () => {
         const start = Date.now();
         try {
           // Simulate DB check
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+          await new Promise((resolve) => { setTimeout(resolve, Math.random() * 50); });
           this.checks.database = {
             status: 'healthy',
             latency: Date.now() - start,
@@ -162,7 +162,7 @@ describe('📊 Advanced Monitoring & Observability', () => {
       async checkCache() {
         const start = Date.now();
         try {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 30));
+          await new Promise((resolve) => { setTimeout(resolve, Math.random() * 30); });
           this.checks.cache = {
             status: 'healthy',
             latency: Date.now() - start,
@@ -178,7 +178,7 @@ describe('📊 Advanced Monitoring & Observability', () => {
       async checkExternalAPIs() {
         const start = Date.now();
         try {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+          await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
           this.checks.externalAPIs = {
             status: 'healthy',
             latency: Date.now() - start,

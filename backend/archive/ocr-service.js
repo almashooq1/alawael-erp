@@ -440,7 +440,7 @@ class OCRService {
     const fullResult = await this.processDocument(filePath, options);
 
     // Wait for completion (simplified)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => { setTimeout(resolve, 1000); });
 
     const extractedRegions = regions.map(region => ({
       ...region,

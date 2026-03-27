@@ -282,7 +282,7 @@ router.get('/:id/analytics', async (req, res) => {
 function generateScheduleSuggestions(scheduler) {
   // منطق لتوليد المقترحات الذكية
   const suggestions = [];
-  const { planStartDate, planEndDate, sessionsPerWeek } = scheduler.schedulingPlan;
+  const { planStartDate, planEndDate, _sessionsPerWeek } = scheduler.schedulingPlan;
 
   const currentDate = new Date(planStartDate);
   let sessionCount = 0;
@@ -314,7 +314,7 @@ function generateScheduleSuggestions(scheduler) {
 
 function detectScheduleConflicts(scheduler) {
   const conflicts = [];
-  const { suggestedSchedule } = scheduler.schedulingPlan;
+  const { _suggestedSchedule } = scheduler.schedulingPlan;
 
   // منطق الكشف عن التعارضات
   // مثال: الجلسات المتتالية دون فترة راحة
@@ -329,7 +329,7 @@ function generateResolutionStrategies(conflicts) {
   }));
 }
 
-function calculateRecommendedDuration(scheduler) {
+function calculateRecommendedDuration(_scheduler) {
   return {
     suggestedDuration: 60,
     reason: 'مدة معيارية موصى بها',
@@ -338,7 +338,7 @@ function calculateRecommendedDuration(scheduler) {
   };
 }
 
-function calculateScheduleEfficiency(scheduler) {
+function calculateScheduleEfficiency(_scheduler) {
   // حساب كفاءة الجدولة
   return {
     overallEfficiency: 85,
@@ -347,7 +347,7 @@ function calculateScheduleEfficiency(scheduler) {
   };
 }
 
-function generateScheduleRecommendations(scheduler) {
+function generateScheduleRecommendations(_scheduler) {
   return ['زيادة عدد الجلسات الأسبوعية', 'إضافة فترات راحة أطول', 'تنويع الأنشطة'];
 }
 

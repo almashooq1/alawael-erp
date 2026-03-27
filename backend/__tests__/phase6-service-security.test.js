@@ -584,9 +584,9 @@ describe('Phase 6: Service Layer & Security Testing', () => {
       );
 
       await mockServices.notificationService.sendNotification(user.id, 'First', 'info');
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => { setTimeout(resolve, 10); });
       await mockServices.notificationService.sendNotification(user.id, 'Second', 'info');
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise(resolve => { setTimeout(resolve, 10); });
       await mockServices.notificationService.sendNotification(user.id, 'Third', 'info');
 
       const notifications = await mockServices.notificationService.getUserNotifications(user.id);

@@ -221,7 +221,7 @@ describe('Backend Advanced Features Tests', () => {
         // Check any queued messages first (e.g., welcome message sent before listeners attach)
         const queued = messageQueue.find(msg => (!predicate ? true : predicate(msg)));
         if (queued) {
-          return resolve(queued);
+          resolve(queued);
         }
 
         const timer = setTimeout(() => {
@@ -278,7 +278,7 @@ describe('Backend Advanced Features Tests', () => {
       );
 
       // Server does not echo subscription, just ensure the socket stays open
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => { setTimeout(resolve, 100); });
       expect(client.socket.readyState).toBe(WebSocket.OPEN);
       client.socket.close();
     });

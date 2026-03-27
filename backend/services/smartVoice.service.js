@@ -9,7 +9,7 @@ class SmartVoiceService {
    */
   static async transcribeAudio(file) {
     // Simulate API latency
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => { setTimeout(resolve, 2000); });
 
     // Mock transcription based on file size/name or random
     // In real life: call OpenAI Whisper or Google STT

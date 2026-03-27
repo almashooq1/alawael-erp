@@ -193,7 +193,7 @@ router.get(
  */
 router.get('/finance/charts', authenticate, authorize('admin', 'finance'), async (req, res) => {
   try {
-    const { period = 'month' } = req.query;
+    const { _period = 'month' } = req.query;
     res.json({
       success: true,
       data: {
@@ -250,7 +250,7 @@ router.get('/projects', authenticate, cacheMiddleware(60), async (req, res) => {
  */
 router.get('/tasks', authenticate, async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const _userId = req.user?.id;
     res.json({
       success: true,
       data: {
@@ -369,7 +369,7 @@ router.get('/kpis', authenticate, cacheMiddleware(60), async (req, res) => {
 router.get('/charts/:type', authenticate, cacheMiddleware(120), async (req, res) => {
   try {
     const { type } = req.params;
-    const { period = 'month' } = req.query;
+    const { _period = 'month' } = req.query;
 
     const chartData = {
       revenue: { labels: [], data: [] },

@@ -458,7 +458,7 @@ router.get('/notifications', authenticateToken, async (req, res) => {
  */
 router.patch('/notifications/:id/read', authenticateToken, async (req, res) => {
   try {
-    const result = await HRNotificationService.markAsRead(req.params.id);
+    const _result = await HRNotificationService.markAsRead(req.params.id);
     res.json({ success: true, message: 'تم تعليم الإشعار كمقروء' });
   } catch (error) {
     res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });

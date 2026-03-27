@@ -163,7 +163,7 @@ class MongoDBSetupTest {
           serverSelectionTimeoutMS: 5000,
           socketTimeoutMS: 5000,
         }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 6000)),
+        new Promise((_, reject) => { setTimeout(() => reject(new Error('Connection timeout')), 6000); }),
       ]);
 
       this.log('✓ Successfully connected to MongoDB', 'success');

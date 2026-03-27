@@ -345,15 +345,15 @@ describe('Phase 17: Supply Chain & Logistics', () => {
         items: [{ sku: 'ITEM-001', quantity: 50, unitPrice: 100 }],
       });
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       let current = service.updateOrderStatus(order.id, 'confirmed');
       expect(current.status).toBe('confirmed');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       current = service.updateOrderStatus(order.id, 'shipped');
       expect(current.status).toBe('shipped');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       current = service.updateOrderStatus(order.id, 'received');
       expect(current.status).toBe('received');
     });
@@ -438,7 +438,7 @@ describe('Phase 17: Supply Chain & Logistics', () => {
         destination: 'Boston, USA',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       const updated = service.updateShipmentStatus(shipment.id, 'shipped');
       expect(updated.status).toBe('shipped');
     });
@@ -468,13 +468,13 @@ describe('Phase 17: Supply Chain & Logistics', () => {
 
       const shipmentId = shipment.id;
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       service.updateShipmentStatus(shipmentId, 'shipped');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       service.updateShipmentStatus(shipmentId, 'in_transit');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       const final = service.updateShipmentStatus(shipmentId, 'delivered');
 
       expect(final.status).toBe('delivered');
@@ -600,7 +600,7 @@ describe('Phase 17: Supply Chain & Logistics', () => {
         reason: 'Wrong size',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       const approved = service.approveReturn(returnRequest.id);
 
       expect(approved.status).toBe('approved');
@@ -613,10 +613,10 @@ describe('Phase 17: Supply Chain & Logistics', () => {
         reason: 'Not satisfied',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       service.approveReturn(returnRequest.id);
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       const refunded = service.processRefund(returnRequest.id, 500);
 
       expect(refunded.status).toBe('refunded');
@@ -642,11 +642,11 @@ describe('Phase 17: Supply Chain & Logistics', () => {
 
       expect(returnRequest.status).toBe('pending');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       let current = service.approveReturn(returnRequest.id);
       expect(current.status).toBe('approved');
 
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       current = service.processRefund(returnRequest.id, 450);
       expect(current.status).toBe('refunded');
       expect(current.refundAmount).toBe(450);

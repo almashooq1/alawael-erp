@@ -28,14 +28,14 @@ class TherapySessionService {
       ...sessionData,
       therapist: userId,
     });
-    return await session.save();
+    return session.save();
   }
 
   static async getSessions(caseId, filters = {}) {
     const query = { caseId };
     if (filters.status) query.status = filters.status;
     if (filters.therapist) query.therapist = filters.therapist;
-    return await TherapySession.find(query)
+    return TherapySession.find(query)
       .populate('caseId')
       .populate('beneficiaryId')
       .populate('therapist', 'name')
@@ -43,7 +43,7 @@ class TherapySessionService {
   }
 
   static async updateSession(sessionId, updateData) {
-    return await TherapySession.findByIdAndUpdate(sessionId, updateData, { new: true });
+    return TherapySession.findByIdAndUpdate(sessionId, updateData, { new: true });
   }
 
   static async getSessionStats(caseId) {
@@ -65,11 +65,11 @@ class TherapySessionService {
 class ProgressTrackingService {
   static async createTracking(trackingData) {
     const tracking = new ProgressTracking(trackingData);
-    return await tracking.save();
+    return tracking.save();
   }
 
   static async updateGoalProgress(caseId, goalId, progressData) {
-    return await ProgressTracking.findOneAndUpdate(
+    return ProgressTracking.findOneAndUpdate(
       { caseId, 'goals.goalId': goalId },
       {
         $set: {
@@ -89,7 +89,7 @@ class ProgressTrackingService {
   }
 
   static async getProgressReport(caseId) {
-    return await ProgressTracking.findOne({ caseId }).populate('caseId').populate('beneficiaryId');
+    return ProgressTracking.findOne({ caseId }).populate('caseId').populate('beneficiaryId');
   }
 
   static async calculateStatistics(caseId) {
@@ -117,7 +117,7 @@ class ProgressTrackingService {
 
 class FamilyCommunicationService {
   static async sendMessage(beneficiaryId, messageData) {
-    return await FamilyCommunication.findOneAndUpdate(
+    return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
       { $push: { messages: { ...messageData, sentDate: new Date() } } },
       { new: true, upsert: true }
@@ -130,7 +130,7 @@ class FamilyCommunicationService {
   }
 
   static async sendFamilyReport(beneficiaryId, reportData) {
-    return await FamilyCommunication.findOneAndUpdate(
+    return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
       { $push: { familyReports: { ...reportData, createdDate: new Date() } } },
       { new: true, upsert: true }
@@ -138,7 +138,7 @@ class FamilyCommunicationService {
   }
 
   static async recordMeeting(beneficiaryId, meetingData) {
-    return await FamilyCommunication.findOneAndUpdate(
+    return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
       { $push: { meetings: { ...meetingData, date: new Date() } } },
       { new: true, upsert: true }
@@ -157,7 +157,7 @@ class FamilyCommunicationService {
 
 class MedicalRecordsService {
   static async addMedicalVisit(beneficiaryId, visitData) {
-    return await MedicalRecords.findOneAndUpdate(
+    return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
       { $push: { medicalVisits: { ...visitData, date: new Date() } } },
       { new: true, upsert: true }
@@ -165,7 +165,7 @@ class MedicalRecordsService {
   }
 
   static async addPrescription(beneficiaryId, prescriptionData) {
-    return await MedicalRecords.findOneAndUpdate(
+    return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
       { $push: { prescriptions: { ...prescriptionData, startDate: new Date() } } },
       { new: true, upsert: true }
@@ -173,7 +173,7 @@ class MedicalRecordsService {
   }
 
   static async addLabResult(beneficiaryId, resultData) {
-    return await MedicalRecords.findOneAndUpdate(
+    return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
       { $push: { labResults: { ...resultData, date: new Date() } } },
       { new: true, upsert: true }
@@ -181,7 +181,7 @@ class MedicalRecordsService {
   }
 
   static async getMedicalHistory(beneficiaryId) {
-    return await MedicalRecords.findOne({ beneficiaryId })
+    return MedicalRecords.findOne({ beneficiaryId })
       .populate('beneficiaryId')
       .populate('caseId');
   }
@@ -212,7 +212,7 @@ class AttendanceService {
       behavior: attendanceData.behavior,
     };
 
-    return await Attendance.findOneAndUpdate(
+    return Attendance.findOneAndUpdate(
       { beneficiaryId },
       { $push: { dailyRecords: record } },
       { new: true, upsert: true }
@@ -220,7 +220,7 @@ class AttendanceService {
   }
 
   static async recordLeave(beneficiaryId, leaveData) {
-    return await Attendance.findOneAndUpdate(
+    return Attendance.findOneAndUpdate(
       { beneficiaryId },
       { $push: { leaves: { ...leaveData, startDate: new Date(leaveData.startDate) } } },
       { new: true, upsert: true }
@@ -264,7 +264,7 @@ class AttendanceService {
   }
 
   static async recordBehavior(beneficiaryId, date, behaviorData) {
-    return await Attendance.updateOne(
+    return Attendance.updateOne(
       { beneficiaryId, 'dailyRecords.date': new Date(date) },
       { $set: { 'dailyRecords.$.behavior': behaviorData } }
     );

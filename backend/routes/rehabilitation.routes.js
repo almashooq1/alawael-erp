@@ -10,7 +10,7 @@
 const express = require('express');
 const router = express.Router();
 const rehabilitationService = require('../services/rehabilitation.service');
-const { authenticateToken, authorize } = require('../middleware/auth');
+const { authenticateToken, _authorize } = require('../middleware/auth');
 const asyncHandler = require('../utils/errorHandler').asyncHandler;
 
 /**

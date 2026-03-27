@@ -8,7 +8,7 @@
 
 const express = require('express');
 const tenantController = require('../controllers/tenant.controller');
-const { authenticateToken } = require('../middleware/auth');
+const { _authenticateToken } = require('../middleware/auth');
 
 const router = express.Router();
 

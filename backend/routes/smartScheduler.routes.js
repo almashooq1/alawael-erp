@@ -17,7 +17,7 @@ router.use(authenticate);
 
 router.get('/', async (req, res) => {
   try {
-    const { type, status, startDate, endDate, page = 1, limit = 20 } = req.query;
+    const { _type, status, startDate, endDate, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (status) filter.status = status;
     if (startDate || endDate) {
@@ -80,8 +80,8 @@ router.post('/', async (req, res) => {
       type,
       startTime,
       endTime,
-      participants,
-      recurrence,
+      _participants,
+      _recurrence,
       // Parent portal fields
       date,
       time,

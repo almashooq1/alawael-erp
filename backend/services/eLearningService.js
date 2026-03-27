@@ -17,7 +17,7 @@ class ELearningService {
   async createCourse(courseData) {
     if (useMock) return { ...courseData, _id: 'course_' + Date.now() };
     const course = new Course(courseData);
-    return await course.save();
+    return course.save();
   }
 
   async getAllCourses(filter = {}) {
@@ -39,7 +39,7 @@ class ELearningService {
         },
       ];
     }
-    return await Course.find(filter).populate('instructor', 'name email').sort({ createdAt: -1 });
+    return Course.find(filter).populate('instructor', 'name email').sort({ createdAt: -1 });
   }
 
   async getCourseById(courseId) {
@@ -65,14 +65,14 @@ class ELearningService {
 
   async updateCourse(courseId, updateData) {
     if (useMock) return { ...updateData, _id: courseId };
-    return await Course.findByIdAndUpdate(courseId, updateData, { new: true });
+    return Course.findByIdAndUpdate(courseId, updateData, { new: true });
   }
 
   async deleteCourse(courseId) {
     if (useMock) return { _id: courseId };
     await Lesson.deleteMany({ courseId });
     await Quiz.deleteMany({ courseId });
-    return await Course.findByIdAndDelete(courseId);
+    return Course.findByIdAndDelete(courseId);
   }
 
   // --- Lesson Management ---
@@ -80,17 +80,17 @@ class ELearningService {
   async addLesson(lessonData) {
     if (useMock) return { ...lessonData, _id: 'lesson_' + Date.now() };
     const lesson = new Lesson(lessonData);
-    return await lesson.save();
+    return lesson.save();
   }
 
   async updateLesson(lessonId, updateData) {
     if (useMock) return { ...updateData, _id: lessonId };
-    return await Lesson.findByIdAndUpdate(lessonId, updateData, { new: true });
+    return Lesson.findByIdAndUpdate(lessonId, updateData, { new: true });
   }
 
   async deleteLesson(lessonId) {
     if (useMock) return { _id: lessonId };
-    return await Lesson.findByIdAndDelete(lessonId);
+    return Lesson.findByIdAndDelete(lessonId);
   }
 
   // --- Quiz Management ---
@@ -98,12 +98,12 @@ class ELearningService {
   async createQuiz(quizData) {
     if (useMock) return { ...quizData, _id: 'quiz_' + Date.now() };
     const quiz = new Quiz(quizData);
-    return await quiz.save();
+    return quiz.save();
   }
 
   async getQuizById(quizId) {
     if (useMock) return { _id: quizId, title: 'Mock Quiz', questions: [] };
-    return await Quiz.findById(quizId);
+    return Quiz.findById(quizId);
   }
 
   // --- Enrollment & Progress ---
@@ -120,7 +120,7 @@ class ELearningService {
     // Update course stats
     await Course.findByIdAndUpdate(courseId, { $inc: { 'stats.studentsEnrolled': 1 } });
 
-    return await enrollment.save();
+    return enrollment.save();
   }
 
   async getStudentEnrollments(userId) {
@@ -133,7 +133,7 @@ class ELearningService {
         },
       ];
     }
-    return await Enrollment.find({ student: userId })
+    return Enrollment.find({ student: userId })
       .populate('course', 'title thumbnailUrl category')
       .sort('-enrolledAt');
   }

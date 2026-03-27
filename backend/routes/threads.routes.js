@@ -83,7 +83,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
  */
 router.get('/', async (req, res) => {
   try {
-    const userId = req.user?.id || req.user?.userId;
+    const _userId = req.user?.id || req.user?.userId;
     const { page = 1, limit = 20 } = req.query;
 
     const threads = (await messagingService.getThreads()) || [];
@@ -113,7 +113,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.user?.userId;
+    const _userId = req.user?.id || req.user?.userId;
 
     if (!id) {
       return res.status(400).json({

@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const CMSService = require('../services/cmsService');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, _authorize } = require('../middleware/auth');
 
 // ============ PAGES ============
 

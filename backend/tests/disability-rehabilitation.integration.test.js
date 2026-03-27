@@ -68,7 +68,7 @@ describe('Disability Rehabilitation API Integration Tests', () => {
 
   beforeAll(async () => {
     // Connect to test database
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => { setTimeout(resolve, 500); });
   });
 
   afterAll(async () => {
@@ -80,7 +80,7 @@ describe('Disability Rehabilitation API Integration Tests', () => {
       ) {
         await Promise.race([
           DisabilityRehabilitation.deleteMany({}),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Cleanup timeout')), 5000)),
+          new Promise((_, reject) => { setTimeout(() => reject(new Error('Cleanup timeout')), 5000); }),
         ]);
       }
     } catch (err) {

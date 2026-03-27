@@ -25,7 +25,7 @@ class DmsService {
     doc.lastModified = new Date();
     doc.lastModifiedBy = userId;
 
-    return await doc.save();
+    return doc.save();
   }
 
   // --- Electronic Signature ---
@@ -44,7 +44,7 @@ class DmsService {
       status: 'signed',
     });
 
-    return await doc.save();
+    return doc.save();
   }
 
   // --- Permissions / Sharing ---
@@ -62,7 +62,7 @@ class DmsService {
         sharedAt: new Date(),
       });
     }
-    return await doc.save();
+    return doc.save();
   }
 
   // --- Mock OCR ---
@@ -70,11 +70,11 @@ class DmsService {
     const doc = await Document.findById(docId);
     doc.ocrStatus = 'completed';
     doc.extractedText = `Extracted text content from ${doc.fileName}... [Simulated OCR Result]`;
-    return await doc.save();
+    return doc.save();
   }
 
   async getDocument(docId) {
-    return await Document.findById(docId).populate(
+    return Document.findById(docId).populate(
       'signatures.signedBy',
       'firstName lastName email'
     );

@@ -404,7 +404,7 @@ describe('Unified Error Handler', () => {
       await handler(mockReq(), mockRes(), next);
 
       // Wait for the microtask queue to flush
-      await new Promise(r => setImmediate(r));
+      await new Promise(r => { setImmediate(r); });
 
       expect(next).toHaveBeenCalledWith(error);
     });

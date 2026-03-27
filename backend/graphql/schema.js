@@ -478,13 +478,13 @@ const resolvers = {
   // Field resolvers
   User: {
     orders: async (user, _, { db }) => {
-      return await db.collection('orders').find({ userId: user._id }).toArray();
+      return db.collection('orders').find({ userId: user._id }).toArray();
     },
   },
 
   Product: {
     reviews: async (product, _, { db }) => {
-      return await db.collection('reviews').find({ productId: product._id }).toArray();
+      return db.collection('reviews').find({ productId: product._id }).toArray();
     },
   },
 

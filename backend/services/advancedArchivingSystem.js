@@ -411,7 +411,7 @@ class AdvancedArchivingSystem {
       try {
         // التحقق من صحة البيانات
         if (!data) {
-          return reject(new Error('Invalid data for compression'));
+          reject(new Error('Invalid data for compression'));
         }
 
         const buffer =

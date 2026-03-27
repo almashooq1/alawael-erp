@@ -17,7 +17,7 @@ router.use(authenticateToken);
 router.patch('/:id/mark-read', async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?.id || req.user?.userId;
+    const _userId = req.user?.id || req.user?.userId;
 
     if (!id) {
       return res.status(400).json({

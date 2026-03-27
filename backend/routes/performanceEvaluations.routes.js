@@ -13,7 +13,7 @@ router.use(authenticate);
 // List evaluations
 router.get('/', async (req, res) => {
   try {
-    const { employeeId, period, status, page = 1, limit = 20 } = req.query;
+    const { _employeeId, _period, _status, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

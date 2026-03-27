@@ -91,7 +91,7 @@ describe('SystemIntegrationBus', () => {
       await bus.publish('hr', 'employee.hired', { name: 'John' });
 
       // Subscribers dispatched via setImmediate
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledWith(
@@ -110,7 +110,7 @@ describe('SystemIntegrationBus', () => {
       await bus.publish('hr', 'employee.hired', { name: 'A' });
       await bus.publish('hr', 'salary.changed', { amount: 5000 });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler).toHaveBeenCalledTimes(2);
     });
@@ -123,7 +123,7 @@ describe('SystemIntegrationBus', () => {
       await bus.publish('finance', 'payment.received', { amount: 200 });
       await bus.publish('hr', 'employee.hired', { name: 'X' }); // should not match
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler).toHaveBeenCalledTimes(2);
     });
@@ -134,7 +134,7 @@ describe('SystemIntegrationBus', () => {
 
       await bus.publish('hr', 'employee.hired', { name: 'Y' });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler).not.toHaveBeenCalled();
     });
@@ -154,7 +154,7 @@ describe('SystemIntegrationBus', () => {
         }
       );
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       const event = handler.mock.calls[0][0];
       expect(event.metadata).toBeDefined();
@@ -171,7 +171,7 @@ describe('SystemIntegrationBus', () => {
 
       await bus.publish('hr', 'employee.hired', { name: 'A' });
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler1).toHaveBeenCalledTimes(1);
       expect(handler2).toHaveBeenCalledTimes(1);
@@ -184,7 +184,7 @@ describe('SystemIntegrationBus', () => {
 
       // Should not throw
       await bus.publish('hr', 'employee.hired', { name: 'A' });
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
     });
 
     it('should deliver events to global * subscriber', async () => {
@@ -194,7 +194,7 @@ describe('SystemIntegrationBus', () => {
       await bus.publish('hr', 'test', {});
       await bus.publish('finance', 'test', {});
 
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(handler).toHaveBeenCalledTimes(2);
     });
@@ -204,13 +204,13 @@ describe('SystemIntegrationBus', () => {
       const unsub = bus.subscribe('hr.test', handler);
 
       await bus.publish('hr', 'test', {});
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
       expect(handler).toHaveBeenCalledTimes(1);
 
       unsub(); // unsubscribe
 
       await bus.publish('hr', 'test', {});
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
       expect(handler).toHaveBeenCalledTimes(1); // still 1
     });
   });
@@ -226,7 +226,7 @@ describe('SystemIntegrationBus', () => {
       bus.subscribe('hr.test', handler);
 
       await bus.publish('hr', 'test', { x: 1 });
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(mw).toHaveBeenCalledTimes(1);
       expect(handler).toHaveBeenCalledTimes(1);
@@ -242,7 +242,7 @@ describe('SystemIntegrationBus', () => {
       bus.subscribe('hr.test', handler);
 
       await bus.publish('hr', 'test', { x: 1 });
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       const delivered = handler.mock.calls[0][0];
       expect(delivered.payload.enriched).toBe(true);
@@ -272,7 +272,7 @@ describe('SystemIntegrationBus', () => {
       bus.subscribe('hr.test', handler);
 
       const result = await bus.publish('hr', 'test', {});
-      await new Promise(r => setTimeout(r, 50));
+      await new Promise(r => { setTimeout(r, 50); });
 
       expect(result).toBeNull();
       expect(handler).not.toHaveBeenCalled();

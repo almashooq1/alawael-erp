@@ -104,7 +104,7 @@ describe('Integration Routes', () => {
     jest.restoreAllMocks();
 
     // Allow any pending operations to complete
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
   });
   describe('Slack Integration', () => {
     it('should configure Slack webhook', async () => {

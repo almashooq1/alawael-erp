@@ -9,10 +9,10 @@ const SSOService = require('../services/sso.service');
 const OAuthService = require('../services/oauth.service');
 const {
   verifySSOToken,
-  requireRole,
-  requirePermission,
-  verifyOptionalSSO,
-  auditLog,
+  _requireRole,
+  _requirePermission,
+  _verifyOptionalSSO,
+  _auditLog,
 } = require('../middleware/sso-auth.middleware');
 const logger = require('../utils/logger');
 const User = require('../models/User');
@@ -168,7 +168,7 @@ router.post('/logout', verifySSOToken(), async (req, res) => {
  * POST /api/sso/logout-all
  * تسجيل الخروج من جميع الأجهزة
  */
-router.post('/logout-all', verifySSOToken(), async (req, res, next) => {
+router.post('/logout-all', verifySSOToken(), async (req, res, _next) => {
   try {
     const userId = req.user.userId;
 
@@ -195,7 +195,7 @@ router.post('/logout-all', verifySSOToken(), async (req, res, next) => {
  * GET /api/sso/sessions
  * الحصول على جميع جلسات المستخدم النشطة
  */
-router.get('/sessions', verifySSOToken(), async (req, res, next) => {
+router.get('/sessions', verifySSOToken(), async (req, res, _next) => {
   try {
     const userId = req.user.userId;
     const sessions = await ssoService.getUserActiveSessions(userId);
@@ -218,7 +218,7 @@ router.get('/sessions', verifySSOToken(), async (req, res, next) => {
  * DELETE /api/sso/sessions/:sessionId
  * إنهاء جلسة محددة
  */
-router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res, next) => {
+router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res, _next) => {
   try {
     const { sessionId } = req.params;
     const userId = req.user.userId;
@@ -329,7 +329,7 @@ router.post('/verify-token', async (req, res) => {
  * GET /api/sso/introspect
  * فحص التوكن (Token Introspection)
  */
-router.get('/introspect', verifySSOToken(), async (req, res, next) => {
+router.get('/introspect', verifySSOToken(), async (req, res, _next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     const introspection = await ssoService.introspectToken(token);
@@ -419,7 +419,7 @@ router.get('/oauth2/authorize', sensitiveOperationLimiter, async (req, res) => {
     }
 
     // For demonstration, redirect to login with oauth params
-    const result = await oAuthService.initiateAuthorizationCodeFlow(
+    const _result = await oAuthService.initiateAuthorizationCodeFlow(
       client_id,
       redirect_uri,
       scope || 'openid profile email',
@@ -505,7 +505,7 @@ router.post('/oauth2/token', sensitiveOperationLimiter, async (req, res) => {
  * GET /api/sso/oauth2/userinfo
  * OpenID Connect UserInfo endpoint
  */
-router.get('/oauth2/userinfo', verifySSOToken(), async (req, res, next) => {
+router.get('/oauth2/userinfo', verifySSOToken(), async (req, res, _next) => {
   try {
     const accessToken = req.headers.authorization?.split(' ')[1];
     const userInfo = await oAuthService.getUserInfo(accessToken);
@@ -567,7 +567,7 @@ router.post('/oauth2/revoke', async (req, res) => {
  * POST /api/sso/oauth2/register
  * Dynamic Client Registration
  */
-router.post('/oauth2/register', async (req, res, next) => {
+router.post('/oauth2/register', async (req, res, _next) => {
   try {
     const { client_name, redirect_uris, response_types, grant_types, scopes } = req.body;
 
@@ -621,7 +621,7 @@ router.get('/me', verifySSOToken(), (req, res) => {
  * PUT /api/sso/me
  * تحديث معلومات المستخدم
  */
-router.put('/me', verifySSOToken(), async (req, res, next) => {
+router.put('/me', verifySSOToken(), async (req, res, _next) => {
   try {
     const { metadata } = req.body;
     const sessionId = req.sessionId;

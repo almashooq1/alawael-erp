@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, _authorize } = require('../middleware/auth');
 
 // Mock database storage
 const communityData = {

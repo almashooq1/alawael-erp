@@ -360,18 +360,18 @@ class EquipmentAlertsService {
   static async getAlertsByType(type) {
     switch (type) {
       case 'warranty':
-        return await this.checkWarrantyAlerts();
+        return this.checkWarrantyAlerts();
       case 'maintenance':
         return [
           ...(await this.checkOverdueMaintenances()),
           ...(await this.checkUpcomingMaintenances()),
         ];
       case 'lending':
-        return await this.checkOverdueLendings();
+        return this.checkOverdueLendings();
       case 'faults':
-        return await this.checkCriticalFaults();
+        return this.checkCriticalFaults();
       case 'calibration':
-        return await this.checkUpcomingCalibrations();
+        return this.checkUpcomingCalibrations();
       default:
         return [];
     }

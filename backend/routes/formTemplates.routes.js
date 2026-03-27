@@ -27,7 +27,7 @@ require('../models/FormSubmission');
 const ctrl = require('../controllers/formTemplate.controller');
 
 // ─── Auth Middleware ───────────────────────────────────────────────────────
-const { optionalAuth, authenticateToken, requireRole } = require('../middleware/auth');
+const { optionalAuth, authenticateToken, _requireRole } = require('../middleware/auth');
 
 // ─── Service (for seeding) ─────────────────────────────────────────────────
 const formTemplateService = require('../services/formTemplate.service');

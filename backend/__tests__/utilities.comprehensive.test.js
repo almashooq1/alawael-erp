@@ -500,8 +500,8 @@ describe('Promise Utilities', () => {
   });
 
   test('should use Promise.race', async () => {
-    const p1 = new Promise(resolve => setTimeout(() => resolve(1), 100));
-    const p2 = new Promise(resolve => setTimeout(() => resolve(2), 50));
+    const p1 = new Promise(resolve => setTimeout(() => { resolve(1); }, 100))
+    const p2 = new Promise(resolve => setTimeout(() => { resolve(2); }, 50))
     const result = await Promise.race([p1, p2]);
     expect(result).toBe(2);
   });

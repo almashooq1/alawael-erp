@@ -71,7 +71,7 @@ class HealthCheck {
     return Promise.race([
       checkFn(),
       new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Health check timeout')), timeout)
+        setTimeout(() => { reject(new Error('Health check timeout')); }, timeout)
       ),
     ]);
   }

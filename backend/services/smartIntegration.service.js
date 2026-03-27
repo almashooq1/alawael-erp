@@ -51,7 +51,7 @@ class SmartIntegrationService {
    */
   async submitToMoH(payloadType, data) {
     // Simulate external API call latency
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise(resolve => { setTimeout(resolve, 800); });
 
     logger.info(`[INTEGRATION] Sending ${payloadType} to MoH Gateway...`);
 

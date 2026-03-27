@@ -40,7 +40,7 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const question = query => new Promise(resolve => rl.question(query, resolve));
+const question = query => new Promise(resolve => { rl.question(query, resolve); })
 
 // ==================================================
 // Restore Manager Class

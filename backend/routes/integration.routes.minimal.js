@@ -15,7 +15,7 @@ router.use(authenticate);
 // Slack Integration
 // ============================================
 
-router.post('/slack/configure', authorize(['admin', 'system_admin']), async (req, res, next) => {
+router.post('/slack/configure', authorize(['admin', 'system_admin']), async (req, res, _next) => {
   try {
     const { webhookUrl, channels } = req.body;
     const result = await integrationService.configureSlack(webhookUrl, channels);
@@ -25,7 +25,7 @@ router.post('/slack/configure', authorize(['admin', 'system_admin']), async (req
   }
 });
 
-router.post('/slack/send', authorize(['admin', 'system_admin']), async (req, res, next) => {
+router.post('/slack/send', authorize(['admin', 'system_admin']), async (req, res, _next) => {
   try {
     const { channel, message, options } = req.body;
     const result = await integrationService.sendSlackMessage(channel, message, options);
@@ -39,7 +39,7 @@ router.post('/slack/send', authorize(['admin', 'system_admin']), async (req, res
 // Email Integration
 // ============================================
 
-router.post('/email/configure', authorize(['admin', 'system_admin']), async (req, res, next) => {
+router.post('/email/configure', authorize(['admin', 'system_admin']), async (req, res, _next) => {
   try {
     const config = req.body;
     if (!config.smtpHost || !config.smtpPort) {
@@ -52,7 +52,7 @@ router.post('/email/configure', authorize(['admin', 'system_admin']), async (req
   }
 });
 
-router.post('/email/send', authorize(['admin', 'system_admin']), async (req, res, next) => {
+router.post('/email/send', authorize(['admin', 'system_admin']), async (req, res, _next) => {
   try {
     const { to, subject, body, options } = req.body;
     const result = await integrationService.sendEmail(to, subject, body, options);
@@ -62,7 +62,7 @@ router.post('/email/send', authorize(['admin', 'system_admin']), async (req, res
   }
 });
 
-router.post('/email/bulk', authorize(['admin', 'system_admin']), async (req, res, next) => {
+router.post('/email/bulk', authorize(['admin', 'system_admin']), async (req, res, _next) => {
   try {
     const { recipients, subject, template, data } = req.body;
     const result = await integrationService.sendBulkEmail(recipients, subject, template, data);
@@ -76,7 +76,7 @@ router.post('/email/bulk', authorize(['admin', 'system_admin']), async (req, res
 // Webhook Integration
 // ============================================
 
-router.post('/webhooks/register', authorize(['admin', 'system_admin']), (req, res, next) => {
+router.post('/webhooks/register', authorize(['admin', 'system_admin']), (req, res, _next) => {
   try {
     const { event, url, options } = req.body;
     const result = integrationService.registerWebhook(event, url, options);
@@ -89,7 +89,7 @@ router.post('/webhooks/register', authorize(['admin', 'system_admin']), (req, re
 router.post(
   '/webhooks/:id/trigger',
   authorize(['admin', 'system_admin']),
-  async (req, res, next) => {
+  async (req, res, _next) => {
     try {
       const { data } = req.body;
       const webhook = integrationService.webhooks
@@ -108,7 +108,7 @@ router.post(
   }
 );
 
-router.delete('/webhooks/:id', authorize(['admin', 'system_admin']), (req, res, next) => {
+router.delete('/webhooks/:id', authorize(['admin', 'system_admin']), (req, res, _next) => {
   try {
     const result = integrationService.deleteWebhook(req.params.id);
     res.json(result);

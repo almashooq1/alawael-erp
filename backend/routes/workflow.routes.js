@@ -857,7 +857,7 @@ router.post('/instances/start', authMiddleware, async (req, res) => {
 
 router.get('/instances', authMiddleware, async (req, res) => {
   try {
-    const { status, priority, category, search, mine, page = 1, limit = 20 } = req.query;
+    const { status, priority, _category, _search, mine, page = 1, limit = 20 } = req.query;
     const query = {};
     if (status) query.status = status;
     if (priority) query.priority = priority;
@@ -975,7 +975,7 @@ router.post('/instances/:id/resume', authMiddleware, async (req, res) => {
 
 router.get('/tasks', authMiddleware, async (req, res) => {
   try {
-    const { status, priority, overdue, search, page = 1, limit = 20 } = req.query;
+    const { status, _priority, overdue, _search, page = 1, limit = 20 } = req.query;
     const query = { assignee: uid(req) };
 
     if (status) {
@@ -1091,7 +1091,7 @@ router.post('/tasks/bulk/complete', authMiddleware, async (req, res) => {
     const results = [];
     for (const taskId of taskIds || []) {
       try {
-        const task = await engine.completeTask(taskId, action, uid(req), comment || '');
+        const _task = await engine.completeTask(taskId, action, uid(req), comment || '');
         results.push({ taskId, success: true });
       } catch (err) {
         results.push({ taskId, success: false, error: err.message });

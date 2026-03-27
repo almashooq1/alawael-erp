@@ -36,7 +36,7 @@ router.get('/', (_req, res) => {
  */
 router.post('/email', authorize(['admin', 'system_admin']), async (req, res) => {
   try {
-    const { to, subject, body, attachments } = req.body;
+    const { to, subject, body, _attachments } = req.body;
 
     if (!to || !subject || !body) {
       return res.status(400).json({
@@ -141,7 +141,7 @@ router.post('/whatsapp', authorize(['admin', 'system_admin']), async (req, res) 
  */
 router.post('/notifications', authorize(['admin', 'system_admin']), async (req, res) => {
   try {
-    const { userId, title, body, data } = req.body;
+    const { userId, title, body, _data } = req.body;
 
     if (!userId || !title || !body) {
       return res.status(400).json({

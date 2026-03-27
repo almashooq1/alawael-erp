@@ -822,7 +822,7 @@ class SmartGPSTrackingService {
    * الحصول على الرحلة النشطة
    */
   static async getActiveTrip(vehicleId) {
-    return await Trip.findOne({
+    return Trip.findOne({
       vehicle: vehicleId,
       status: { $in: ['جارية', 'active', 'in-progress'] },
     });

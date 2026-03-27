@@ -34,7 +34,7 @@ async function runTests(port, serverName) {
 
   for (const t of tests) {
     await test(port, t.path, t.desc);
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => { setTimeout(r, 200); });
   }
 }
 

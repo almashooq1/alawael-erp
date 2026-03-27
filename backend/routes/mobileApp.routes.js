@@ -7,7 +7,7 @@
  */
 
 const express = require('express');
-const { protect, authorize } = require('../middleware/auth');
+const { protect, _authorize } = require('../middleware/auth');
 const mobileAppController = require('../controllers/mobileApp.controller');
 
 const router = express.Router();

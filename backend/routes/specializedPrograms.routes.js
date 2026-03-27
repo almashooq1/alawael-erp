@@ -13,7 +13,7 @@ router.use(authenticate);
 // List programs
 router.get('/', async (req, res) => {
   try {
-    const { category, status, page = 1, limit = 20 } = req.query;
+    const { _category, _status, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

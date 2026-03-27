@@ -62,7 +62,7 @@ class SmartClinicalService {
    */
   static async suggestGoals(domain, age) {
     // Find matching goals
-    return await GoalBank.find({
+    return GoalBank.find({
       domain: domain.toUpperCase(),
       targetAgeMin: { $lte: age },
       targetAgeMax: { $gte: age },

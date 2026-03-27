@@ -896,7 +896,7 @@ class DisabilityCardService {
     logger.info(`[MOHR API] ${action} called with NID: ${maskNID(data.national_id)}`);
 
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     switch (action) {
       case 'register':
@@ -939,7 +939,7 @@ class DisabilityCardService {
    */
   async _callAbsherApi(action, data) {
     logger.info(`[Absher API] ${action} called with NID: ${maskNID(data.national_id)}`);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     switch (action) {
       case 'link':
@@ -1022,7 +1022,7 @@ class DisabilityCardService {
    */
   async _callSocialSecurityApi(action, data) {
     logger.info(`[Social Security API] ${action} called for NID: ${maskNID(data.national_id)}`);
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     switch (action) {
       case 'register':

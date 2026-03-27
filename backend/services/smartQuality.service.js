@@ -177,7 +177,7 @@ class SmartQualityService {
    * Get Dashboard Stats
    */
   static async getStats() {
-    return await ComplianceLog.aggregate([
+    return ComplianceLog.aggregate([
       { $match: { status: 'OPEN' } },
       { $group: { _id: '$domain', count: { $sum: 1 } } },
     ]);

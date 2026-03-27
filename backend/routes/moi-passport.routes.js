@@ -42,7 +42,7 @@ router.use(passportVerificationMiddleware);
  */
 const validateRequest = (req, res, next) => {
   try {
-    const { body, user } = req;
+    const { _body, user } = req;
     req.userId = user?.id || 'system';
     next();
   } catch (error) {
@@ -485,7 +485,7 @@ router.get('/audit-logs', (req, res) => {
 // ERROR HANDLING
 // ============================================================================
 
-router.use((error, req, res, next) => {
+router.use((error, req, res, _next) => {
   Logger.error('Passport route error:', error);
 
   res.status(error.statusCode || 500).json({

@@ -128,7 +128,7 @@ class SmartPayrollService {
    * Get Stats for a Month
    */
   static async getMonthStats(monthStr) {
-    return await Payroll.aggregate([
+    return Payroll.aggregate([
       { $match: { month: monthStr } },
       {
         $group: {

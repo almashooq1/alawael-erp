@@ -228,7 +228,7 @@ class IntegrationService extends EventEmitter {
   }
 
   async listIntegrations() {
-    return await Integration.find({}, 'name type status lastSync');
+    return Integration.find({}, 'name type status lastSync');
   }
 
   // --- In-memory API ---

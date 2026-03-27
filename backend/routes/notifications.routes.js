@@ -19,7 +19,7 @@ try {
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[Notifications Routes] RBAC module not available, using fallback');
-  createRBACMiddleware = permission => (req, res, next) => {
+  createRBACMiddleware = permission => (req, res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
     return res
       .status(503)
@@ -601,7 +601,7 @@ router.post(
 router.post(
   '/email',
   asyncHandler(async (req, res) => {
-    const { title, message, recipients } = req.body;
+    const { _title, _message, recipients } = req.body;
 
     res.status(201).json({
       success: true,
@@ -619,7 +619,7 @@ router.post(
 router.post(
   '/sms',
   asyncHandler(async (req, res) => {
-    const { message, recipients } = req.body;
+    const { _message, recipients } = req.body;
 
     res.status(201).json({
       success: true,
@@ -637,7 +637,7 @@ router.post(
 router.post(
   '/push',
   asyncHandler(async (req, res) => {
-    const { title, message, recipients } = req.body;
+    const { _title, _message, recipients } = req.body;
 
     res.status(201).json({
       success: true,
@@ -720,7 +720,7 @@ router.patch(
 router.post(
   '/cleanup',
   asyncHandler(async (req, res) => {
-    const { olderThan } = req.body;
+    const { _olderThan } = req.body;
 
     res.json({
       success: true,

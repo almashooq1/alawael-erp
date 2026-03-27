@@ -72,7 +72,7 @@ router.post('/emails/send', async (req, res) => {
 // POST /chatbot/chat
 router.post('/chatbot/chat', async (req, res) => {
   try {
-    const { message } = req.body;
+    const { _message } = req.body;
     // Simple echo chatbot — replace with AI integration when available
     res.json({ success: true, data: { reply: 'شكراً لرسالتك. سيتم الرد عليك قريباً.', timestamp: new Date() } });
   } catch (err) {

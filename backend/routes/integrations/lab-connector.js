@@ -299,7 +299,7 @@ class LabConnector extends EventEmitter {
       if (retries < this.config.maxRetries && this.isRetryable(error)) {
         const delay = this.config.retryDelay * Math.pow(2, retries) + Math.random() * 1000;
         this.emit('retry', { operation: operationName, attempt: retries + 1, delay });
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => { setTimeout(resolve, delay); });
         return this.executeWithRetry(fn, operationName, retries + 1);
       }
 

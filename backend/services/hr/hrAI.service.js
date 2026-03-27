@@ -403,7 +403,7 @@ class HRAIService {
   /* ═══════════════════════════════════════════════════
    *  5) لوحة التحكم الذكية — مؤشرات HR الرئيسية
    * ═══════════════════════════════════════════════════ */
-  static async smartDashboard({ Employee, Attendance, LeaveRequest, Payroll, Onboarding }) {
+  static async smartDashboard({ Employee, Attendance, LeaveRequest, _Payroll, Onboarding }) {
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
@@ -585,7 +585,7 @@ class HRAIService {
   /* ═══════════════════════════════════════════════════
    *  7) تحليل تكلفة القوى العاملة
    * ═══════════════════════════════════════════════════ */
-  static async workforceCostAnalysis({ Employee, Payroll }) {
+  static async workforceCostAnalysis({ _Employee, Payroll }) {
     const now = new Date();
     const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 

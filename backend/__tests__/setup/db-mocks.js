@@ -27,7 +27,7 @@ mongoose.startSession = jest.fn(async () => ({
   abortTransaction: jest.fn(),
   endSession: jest.fn(),
   withTransaction: jest.fn(async callback => {
-    return await callback({});
+    return callback({});
   }),
 }));
 

@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const Program = require('../models/Program');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ── GET / — list programs (filter by category, status, tags) ───────────

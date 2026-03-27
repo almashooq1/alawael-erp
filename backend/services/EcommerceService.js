@@ -110,7 +110,7 @@ class EcommerceService {
       return results;
     } catch (_error) {
       // Fallback: error details not needed, just use regex search
-      return await Product.find({
+      return Product.find({
         $or: [
           { name: { $regex: escapeRegex(query), $options: 'i' } },
           { description: { $regex: escapeRegex(query), $options: 'i' } },

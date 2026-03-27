@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const EcommerceService = require('../services/EcommerceService');
 const authenticate = require('../middleware/authenticate');
-const { authenticateToken } = require('../middleware/auth');
+const { _authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // RBAC Integration (Role-Based Access Control)
@@ -17,7 +17,7 @@ try {
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[E-Commerce Routes] RBAC module not available, using fallback');
-  createRBACMiddleware = permission => (req, res, next) => {
+  createRBACMiddleware = permission => (req, res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
     return res
       .status(503)
@@ -478,7 +478,7 @@ router.delete('/wishlist/:productId', authenticate, async (req, res) => {
  */
 router.get('/orders', async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
+    const { _status, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

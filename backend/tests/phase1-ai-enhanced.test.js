@@ -630,12 +630,12 @@ perfDescribe('🔥 Edge Cases & Error Handling', () => {
 
   test('should timeout long-running predictions', async () => {
     Analytics.find.mockImplementation(
-      () => new Promise(resolve => setTimeout(() => resolve(mockAnalyticsData), 15000))
+      () => new Promise(resolve => setTimeout(() => { resolve(mockAnalyticsData); }, 15000))
     );
 
     const result = await Promise.race([
       service.predictPerformance('user-123'),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000)),
+      new Promise((_, reject) => { setTimeout(() => reject(new Error('Timeout')), 10000); }),
     ]).catch(e => ({ error: e.message }));
 
     expect(result.error).toBe('Timeout');

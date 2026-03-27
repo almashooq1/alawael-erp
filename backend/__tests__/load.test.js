@@ -63,7 +63,7 @@ class LoadTestRunner {
       const result = await Promise.race([
         requestFn(userId, requestId),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timeout')), this.config.timeout)
+          setTimeout(() => { reject(new Error('Request timeout')); }, this.config.timeout)
         ),
       ]);
 
@@ -247,7 +247,7 @@ describe('🚀 Load Testing', () => {
         numUsers,
         requestsPerUser,
         async (userId, requestId) => {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+          await new Promise((resolve) => { setTimeout(resolve, Math.random() * 100); });
           return { userId, requestId, timestamp: Date.now() };
         }
       );
@@ -267,7 +267,7 @@ describe('🚀 Load Testing', () => {
         numUsers,
         requestsPerUser,
         async (userId, requestId) => {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 150));
+          await new Promise((resolve) => { setTimeout(resolve, Math.random() * 150); });
           return { userId, requestId };
         }
       );
@@ -288,7 +288,7 @@ describe('🚀 Load Testing', () => {
         numUsers,
         requestsPerUser,
         async (userId, requestId) => {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 200));
+          await new Promise(resolve => { setTimeout(resolve, Math.random() * 200); });
           return { userId, requestId };
         }
       );
@@ -303,7 +303,7 @@ describe('🚀 Load Testing', () => {
       const runner = new LoadTestRunner();
 
       const results = await runner.runConcurrentRequests(200, 5, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
         return { userId, requestId, burst: true };
       });
 
@@ -329,7 +329,7 @@ describe('🚀 Load Testing', () => {
             data: Math.random(),
           }));
 
-        await new Promise(resolve => setTimeout(resolve, 5));
+        await new Promise(resolve => { setTimeout(resolve, 5); });
         return data;
       });
 
@@ -349,7 +349,7 @@ describe('🚀 Load Testing', () => {
             const tempObjects = Array(1000)
               .fill(0)
               .map(() => ({ data: Math.random() }));
-            await new Promise(resolve => setTimeout(resolve, 1));
+            await new Promise(resolve => { setTimeout(resolve, 1); });
             return tempObjects.length;
           });
 
@@ -372,7 +372,7 @@ describe('🚀 Load Testing', () => {
 
       await runner.runConcurrentRequests(30, 50, async (userId, requestId) => {
         const delay = Math.random() * 500;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => { setTimeout(resolve, delay); });
         return { delay };
       });
 
@@ -387,7 +387,7 @@ describe('🚀 Load Testing', () => {
       const runner = new LoadTestRunner();
 
       await runner.runConcurrentRequests(20, 50, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => { setTimeout(resolve, 100); });
         return { processed: true };
       });
 
@@ -409,7 +409,7 @@ describe('🚀 Load Testing', () => {
         if (Math.random() < 0.1) {
           throw new Error('Simulated failure');
         }
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
         return { success: true };
       });
 
@@ -432,7 +432,7 @@ describe('🚀 Load Testing', () => {
             if (Math.random() < 0.3 && attempt < 2) {
               throw new Error('Temporary failure');
             }
-            await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+            await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
             return { success: true, attempts: attempt + 1 };
           } catch (error) {
             lastError = error;
@@ -463,7 +463,7 @@ describe('🚀 Load Testing', () => {
           throw new Error('Invalid response');
         }
 
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
         return { success: true };
       });
 
@@ -480,7 +480,7 @@ describe('🚀 Load Testing', () => {
       const startTime = Date.now();
 
       await runner.runConcurrentRequests(40, 40, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
         return { processed: true };
       });
 
@@ -500,7 +500,7 @@ describe('🚀 Load Testing', () => {
         const runner = new LoadTestRunner();
 
         await runner.runConcurrentRequests(numUsers, 20, async (userId, requestId) => {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+          await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
           return { userId, requestId };
         });
 
@@ -529,7 +529,7 @@ describe('🚀 Load Testing', () => {
         currentConcurrency++;
         peakConcurrency = Math.max(peakConcurrency, currentConcurrency);
 
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 50));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 50); });
 
         currentConcurrency--;
         return { poolStatus: currentConcurrency };
@@ -547,7 +547,7 @@ describe('🚀 Load Testing', () => {
 
       await runner.runConcurrentRequests(20, 30, async (userId, requestId) => {
         const delay = Math.random() < 0.1 ? 2000 : Math.random() * 500;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => { setTimeout(resolve, delay); });
         return { delayed: true };
       });
 
@@ -569,7 +569,7 @@ describe('🚀 Load Testing', () => {
         for (let i = 0; i < 1000; i++) {
           sum += Math.sqrt(i);
         }
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
         return { computed: sum };
       });
 
@@ -582,7 +582,7 @@ describe('🚀 Load Testing', () => {
       const runner = new LoadTestRunner();
 
       await runner.runConcurrentRequests(50, 15, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 30));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 30); });
         return { handled: true };
       });
 
@@ -599,7 +599,7 @@ describe('🚀 Load Testing', () => {
 
       await runner.runConcurrentRequests(30, 30, async (userId, requestId) => {
         const queryTime = Math.random() * 90 + 10;
-        await new Promise(resolve => setTimeout(resolve, queryTime));
+        await new Promise(resolve => { setTimeout(resolve, queryTime); });
 
         return {
           query: `SELECT * FROM users WHERE id = ${userId}`,
@@ -620,7 +620,7 @@ describe('🚀 Load Testing', () => {
         const isWrite = Math.random() < 0.3;
         const operationTime = isWrite ? Math.random() * 150 + 50 : Math.random() * 50;
 
-        await new Promise(resolve => setTimeout(resolve, operationTime));
+        await new Promise(resolve => { setTimeout(resolve, operationTime); });
 
         return {
           operation: isWrite ? 'WRITE' : 'READ',
@@ -649,11 +649,11 @@ describe('🚀 Load Testing', () => {
               const requestType = Math.random();
 
               if (requestType < 0.4) {
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+                await new Promise(resolve => { setTimeout(resolve, Math.random() * 100 + 50); });
               } else if (requestType < 0.7) {
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 150 + 150));
+                await new Promise(resolve => { setTimeout(resolve, Math.random() * 150 + 150); });
               } else {
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 300));
+                await new Promise(resolve => { setTimeout(resolve, Math.random() * 200 + 300); });
               }
 
               return { requestType, userId, requestId };
@@ -678,7 +678,7 @@ describe('🚀 Load Testing', () => {
         const levelRunner = new LoadTestRunner();
 
         await levelRunner.runConcurrentRequests(load, 10, async (userId, requestId) => {
-          await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+          await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
           return { load, userId };
         });
 
@@ -699,17 +699,17 @@ describe('🚀 Load Testing', () => {
       const runner = new LoadTestRunner();
 
       await runner.runConcurrentRequests(20, 20, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
         return { phase: 'normal' };
       });
 
       await runner.runConcurrentRequests(100, 5, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 150));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 150); });
         return { phase: 'spike' };
       });
 
       await runner.runConcurrentRequests(20, 10, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
         return { phase: 'normal' };
       });
 
@@ -725,7 +725,7 @@ describe('🚀 Load Testing', () => {
       const runner = new LoadTestRunner();
 
       await runner.runConcurrentRequests(50, 50, async (userId, requestId) => {
-        await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
+        await new Promise(resolve => { setTimeout(resolve, Math.random() * 100); });
         return { benchmark: true };
       });
 

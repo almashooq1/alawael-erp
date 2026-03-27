@@ -732,7 +732,7 @@ class CampaignManager {
 
         // تأخير بين الدُفعات
         if (i + batchSize < recipients.length) {
-          await new Promise(resolve => setTimeout(resolve, batchDelayMs));
+          await new Promise(resolve => { setTimeout(resolve, batchDelayMs); });
         }
       }
 
@@ -1593,7 +1593,7 @@ class FlowEngine {
 
       case 'delay': {
         const ms = (step.config?.minutes || 1) * 60 * 1000;
-        await new Promise(resolve => setTimeout(resolve, Math.min(ms, 5000))); // max 5s in sync
+        await new Promise((resolve) => { setTimeout(resolve, Math.min(ms, 5000)); }); // max 5s in sync
         break;
       }
 

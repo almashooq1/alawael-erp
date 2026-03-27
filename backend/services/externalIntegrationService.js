@@ -385,7 +385,7 @@ class ExternalIntegrationService {
     } catch (error) {
       if (attempt < 3) {
         // إعادة المحاولة
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        await new Promise(resolve => { setTimeout(resolve, 1000 * attempt); });
         return this.executeWebhook(webhook, data, attempt + 1);
       }
 

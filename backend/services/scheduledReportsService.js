@@ -96,7 +96,7 @@ class ScheduledReportsService {
 
       // محاكاة توليد التقرير
       // Simulate report generation
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => { setTimeout(resolve, 2000); });
 
       reportRecord.status = 'completed';
       reportRecord.endTime = new Date().toISOString();
@@ -162,7 +162,7 @@ class ScheduledReportsService {
       logger.info(`[Scheduled Reports] Sending ${reportName} to ${recipients.length} recipients`);
       // محاكاة إرسال البريد
       // Simulate email sending
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => { setTimeout(resolve, 1000); });
       logger.info(`[Scheduled Reports] Email sent for ${reportName}`);
     } catch (error) {
       logger.error('[Scheduled Reports] Error sending email:', error);

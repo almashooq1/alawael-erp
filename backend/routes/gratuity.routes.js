@@ -10,7 +10,7 @@ const express = require('express');
 const router = express.Router();
 const GratuityService = require('../services/hr/gratuityService');
 const Gratuity = require('../models/gratuity.model');
-const GratuityAudit = require('../models/gratuityAudit.model');
+const _GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
 const MAX_PAGE_LIMIT = 100;

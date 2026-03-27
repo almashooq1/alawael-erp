@@ -349,7 +349,7 @@ smartAttendanceSchema.statics.recordCheckIn = async function (employeeId, checkI
     checkInNotes: checkInData.notes,
   });
 
-  return await attendance.save();
+  return attendance.save();
 };
 
 // Static method لتسجيل الخروج
@@ -374,7 +374,7 @@ smartAttendanceSchema.statics.recordCheckOut = async function (employeeId, check
   attendance.checkOutPhoto = checkOutData.photo;
   attendance.checkOutNotes = checkOutData.notes;
 
-  return await attendance.save();
+  return attendance.save();
 };
 
 // Static method للحصول على سجل اليوم
@@ -382,7 +382,7 @@ smartAttendanceSchema.statics.getTodayRecord = async function (employeeId) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  return await this.findOne({
+  return this.findOne({
     employeeId,
     date: today,
     isDeleted: false,

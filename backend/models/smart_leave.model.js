@@ -355,7 +355,7 @@ smartLeaveSchema.statics.createLeaveRequest = async function (employeeId, leaveD
     },
   ];
 
-  return await newLeave.save();
+  return newLeave.save();
 };
 
 // Instance method للموافقة على الإجازة
@@ -376,7 +376,7 @@ smartLeaveSchema.methods.approve = async function (approverId, level, comments) 
     this.overallStatus = 'approved';
   }
 
-  return await this.save();
+  return this.save();
 };
 
 // Instance method لرفض الإجازة
@@ -395,7 +395,7 @@ smartLeaveSchema.methods.reject = async function (approverId, level, reason) {
   this.overallStatus = 'rejected';
   this.statusReason = reason;
 
-  return await this.save();
+  return this.save();
 };
 
 // Instance method لإلغاء الإجازة
@@ -409,7 +409,7 @@ smartLeaveSchema.methods.cancel = async function (cancelledBy, reason) {
     cancellationReason: reason,
   };
 
-  return await this.save();
+  return this.save();
 };
 
 module.exports = mongoose.models.SmartLeave || mongoose.model('SmartLeave', smartLeaveSchema);

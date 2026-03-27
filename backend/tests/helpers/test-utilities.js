@@ -332,7 +332,7 @@ class TestHelpers {
       if (Date.now() - start > timeout) {
         throw new Error('Wait condition timeout');
       }
-      await new Promise(resolve => setTimeout(resolve, interval));
+      await new Promise(resolve => { setTimeout(resolve, interval); });
     }
   }
 
@@ -357,7 +357,7 @@ class TestHelpers {
       } catch (error) {
         lastError = error;
         const delay = initialDelay * Math.pow(2, i);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => { setTimeout(resolve, delay); });
       }
     }
     throw lastError;

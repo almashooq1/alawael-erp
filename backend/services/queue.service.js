@@ -20,14 +20,14 @@ const aiPredictionsQueue = new Queue('ai-predictions-queue', { redis: redisConfi
 emailQueue.process(async job => {
   logger.info(`📧 Processing email job ${job.id} for ${job.data.to}`);
   // Simulate email sending
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => { setTimeout(resolve, 1000); });
   logger.info(`✅ Email sent to ${job.data.to}`);
 });
 
 reportsQueue.process(async job => {
   logger.info(`📊 Generating report ${job.data.reportId} (${job.data.type})`);
   // Simulate heavy calculation
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise(resolve => { setTimeout(resolve, 5000); });
   logger.info(`✅ Report ${job.data.reportId} generated`);
 });
 

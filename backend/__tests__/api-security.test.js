@@ -636,7 +636,7 @@ describe('🔒 Phase 10: Advanced API Security & Rate Limiting', () => {
       limiter.isAllowed('user1');
       expect(limiter.isAllowed('user1')).toBe(false);
 
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => { setTimeout(resolve, 150); });
 
       expect(limiter.isAllowed('user1')).toBe(true);
     });
@@ -758,7 +758,7 @@ describe('🔒 Phase 10: Advanced API Security & Rate Limiting', () => {
       });
 
       const token = manager.createToken({ userId: 'user123' });
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => { setTimeout(resolve, 150); });
 
       const result = manager.verifyToken(token);
       expect(result.valid).toBe(false);

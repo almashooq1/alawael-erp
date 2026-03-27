@@ -561,7 +561,7 @@ Work Duration: ${attendance.workDuration?.totalHours?.regular || 0}h`,
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return await SmartAttendance.findOne({
+    return SmartAttendance.findOne({
       employeeId,
       date: today,
       isDeleted: false,
@@ -577,7 +577,7 @@ Work Duration: ${attendance.workDuration?.totalHours?.regular || 0}h`,
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 1);
 
-    return await SmartAttendance.find({
+    return SmartAttendance.find({
       employeeId,
       date: { $gte: startDate, $lt: endDate },
       isDeleted: false,

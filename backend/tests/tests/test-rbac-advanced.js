@@ -326,7 +326,7 @@ class RBACTestSuite {
       this.assert(cached.test === 'data', 'Cache data correct');
 
       // محاولة استرجاع بعد انتهاء الصلاحية
-      await new Promise(resolve => setTimeout(resolve, 5100));
+      await new Promise(resolve => { setTimeout(resolve, 5100); });
       const expired = this.middleware.getFromSmartCache(key);
       this.assert(expired === null, 'Expired cache removed');
     } catch (error) {

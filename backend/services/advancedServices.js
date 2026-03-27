@@ -12,7 +12,7 @@ const { Financial, Reports, Settings } = require('../models/advanced.models');
 
 class FinancialService {
   static async addInvoice(beneficiaryId, invoiceData) {
-    return await Financial.findOneAndUpdate(
+    return Financial.findOneAndUpdate(
       { beneficiaryId },
       {
         $push: { invoices: invoiceData },
@@ -23,7 +23,7 @@ class FinancialService {
   }
 
   static async recordPayment(beneficiaryId, paymentData) {
-    return await Financial.findOneAndUpdate(
+    return Financial.findOneAndUpdate(
       { beneficiaryId },
       {
         $push: { payments: paymentData },
@@ -48,7 +48,7 @@ class FinancialService {
   }
 
   static async generateInvoice(beneficiaryId, invoiceData) {
-    return await this.addInvoice(beneficiaryId, {
+    return this.addInvoice(beneficiaryId, {
       ...invoiceData,
       invoiceNumber: `INV-${Date.now()}`,
       date: new Date(),
@@ -56,7 +56,7 @@ class FinancialService {
   }
 
   static async applyDiscount(beneficiaryId, discountData) {
-    return await Financial.findOneAndUpdate(
+    return Financial.findOneAndUpdate(
       { beneficiaryId },
       { $push: { discounts: { ...discountData, date: new Date() } } },
       { new: true }
@@ -70,7 +70,7 @@ class FinancialService {
 
 class ReportsService {
   static async createCustomReport(caseId, reportData) {
-    return await Reports.findOneAndUpdate(
+    return Reports.findOneAndUpdate(
       { caseId },
       {
         $push: {
@@ -85,7 +85,7 @@ class ReportsService {
   }
 
   static async generateProgressReport(caseId) {
-    return await Reports.findOneAndUpdate(
+    return Reports.findOneAndUpdate(
       { caseId },
       {
         $push: {
@@ -113,7 +113,7 @@ class ReportsService {
   }
 
   static async updateStatistics(caseId, stats) {
-    return await Reports.findOneAndUpdate(
+    return Reports.findOneAndUpdate(
       { caseId },
       { $set: { statistics: stats } },
       { new: true, upsert: true }
@@ -134,11 +134,11 @@ class ReportsService {
 
 class SettingsService {
   static async getSettings(centerId) {
-    return await Settings.findOne({ centerId });
+    return Settings.findOne({ centerId });
   }
 
   static async updateCenterSettings(centerId, settings) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId },
       { $set: { centerSettings: settings } },
       { new: true, upsert: true }
@@ -151,7 +151,7 @@ class SettingsService {
   }
 
   static async createRole(centerId, roleData) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId },
       { $push: { roles: roleData } },
       { new: true, upsert: true }
@@ -159,7 +159,7 @@ class SettingsService {
   }
 
   static async updateRole(centerId, roleName, permissions) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId, 'roles.name': roleName },
       { $set: { 'roles.$.permissions': permissions } },
       { new: true }
@@ -167,7 +167,7 @@ class SettingsService {
   }
 
   static async logAudit(centerId, auditData) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId },
       {
         $push: {
@@ -198,7 +198,7 @@ class SettingsService {
   }
 
   static async updateSystemSettings(centerId, settings) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId },
       { $set: { systemSettings: settings } },
       { new: true, upsert: true }
@@ -206,7 +206,7 @@ class SettingsService {
   }
 
   static async createBackup(centerId) {
-    return await Settings.findOneAndUpdate(
+    return Settings.findOneAndUpdate(
       { centerId },
       {
         $push: {

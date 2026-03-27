@@ -326,7 +326,7 @@ auditLogSchema.methods = {
       reviewedAt: new Date(),
       reviewNotes: notes,
     };
-    return await this.save();
+    return this.save();
   },
 
   /**
@@ -334,7 +334,7 @@ auditLogSchema.methods = {
    */
   async setFlags(flags) {
     Object.assign(this.flags, flags);
-    return await this.save();
+    return this.save();
   },
 
   /**
@@ -378,7 +378,7 @@ auditLogSchema.statics = {
       if (endDate) query.timestamp.$lte = new Date(endDate);
     }
 
-    return await this.find(query).sort({ timestamp: -1 }).limit(limit).skip(skip).lean();
+    return this.find(query).sort({ timestamp: -1 }).limit(limit).skip(skip).lean();
   },
 
   /**
@@ -386,7 +386,7 @@ auditLogSchema.statics = {
    */
   async getByEventType(eventType, options = {}) {
     const { limit = 100, skip = 0 } = options;
-    return await this.find({ eventType }).sort({ timestamp: -1 }).limit(limit).skip(skip).lean();
+    return this.find({ eventType }).sort({ timestamp: -1 }).limit(limit).skip(skip).lean();
   },
 
   /**
@@ -394,7 +394,7 @@ auditLogSchema.statics = {
    */
   async getCriticalEvents(hours = 24) {
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    return await this.find({
+    return this.find({
       severity: { $in: ['critical', 'high'] },
       timestamp: { $gte: since },
     })
@@ -407,7 +407,7 @@ auditLogSchema.statics = {
    */
   async getSuspiciousActivities(hours = 24) {
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
-    return await this.find({
+    return this.find({
       $or: [{ 'flags.isAnomaly': true }, { eventType: { $regex: /^security\./ } }],
       timestamp: { $gte: since },
     })
@@ -464,7 +464,7 @@ auditLogSchema.statics = {
   async analyzeUserPattern(userId, days = 7) {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    return await this.aggregate([
+    return this.aggregate([
       {
         $match: {
           userId: new mongoose.Types.ObjectId(userId),
@@ -517,7 +517,7 @@ auditLogSchema.statics = {
     const { avgCount, stdDev } = avgActivity[0];
     const anomalyThreshold = avgCount + threshold * stdDev;
 
-    return await this.aggregate([
+    return this.aggregate([
       {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
       },

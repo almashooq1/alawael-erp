@@ -226,7 +226,7 @@ describe('Advanced HR System Tests', () => {
 
     test('POST /api/hr/attendance/checkout - Record check-out', async () => {
       // Wait a moment to simulate work time
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => { setTimeout(resolve, 1000); });
 
       const response = await request(app)
         .post('/api/hr/attendance/checkout')

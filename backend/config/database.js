@@ -27,7 +27,7 @@ const calculateBackoffDelay = attemptNumber => {
 
 // ==================== WAIT HELPER ====================
 // Helper function to wait/sleep for specified milliseconds
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const wait = ms => new Promise(resolve => { setTimeout(resolve, ms); });
 
 // ==================== CONNECTION HEALTH TRACKING ====================
 // Track connection health status
@@ -60,7 +60,7 @@ const connectDB = async () => {
       mongoServer = await Promise.race([
         MongoMemoryServer.create(),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('MongoMemoryServer startup timeout after 30s')), 30000)
+          setTimeout(() => { reject(new Error('MongoMemoryServer startup timeout after 30s')); }, 30000)
         ),
       ]);
 
@@ -272,7 +272,7 @@ const disconnectDB = async () => {
 
       // Set a timeout to prevent hanging disconnections
       const disconnectTimeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Disconnection timeout')), 10000)
+        setTimeout(() => { reject(new Error('Disconnection timeout')); }, 10000)
       );
 
       await Promise.race([mongoose.connection.close(), disconnectTimeout]);

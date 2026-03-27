@@ -64,6 +64,6 @@ global.createMockUser = (overrides = {}) => {
   };
 };
 
-global.delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+global.delay = ms => new Promise(resolve => { setTimeout(resolve, ms); });
 
 console.log('✅ Jest setup complete');

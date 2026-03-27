@@ -78,7 +78,7 @@ module.exports = {
       if (ttl > 0) {
         await Promise.race([
           redis.set(key, '1', 'EX', ttl),
-          new Promise(resolve => setTimeout(resolve, 3000)),
+          new Promise(resolve => { setTimeout(resolve, 3000); }),
         ]);
       }
     } catch (err) {
@@ -106,7 +106,7 @@ module.exports = {
       // Timeout guard: never let a Redis call hang the auth middleware
       const result = await Promise.race([
         redis.get(PREFIX + hash),
-        new Promise(resolve => setTimeout(() => resolve(null), 3000)),
+        new Promise(resolve => { setTimeout(() => resolve(null), 3000); }),
       ]);
       return result === '1';
     } catch (err) {

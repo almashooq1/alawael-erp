@@ -36,9 +36,9 @@ const PaymentVoucher = safeRequire('../models/PaymentVoucher', 'PaymentVoucher')
 const TaxCalendar = safeRequire('../models/TaxCalendar', 'TaxCalendar');
 const Account = safeRequire('../models/Account', 'Account');
 const AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
-const Expense = safeRequire('../models/Expense', 'Expense');
+const _Expense = safeRequire('../models/Expense', 'Expense');
 const AccountingSettings = safeRequire('../models/AccountingSettings', 'AccountingSettings');
-const JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
+const _JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
 const Transaction = safeRequire('../models/Transaction', 'Transaction');
 
 // Auth required for all routes
@@ -608,7 +608,7 @@ router.get(
 router.get(
   '/customer-statements',
   asyncHandler(async (req, res) => {
-    const { partyType = 'customer', partyName, fromDate, toDate } = req.query;
+    const { partyType = 'customer', partyName, _fromDate, _toDate } = req.query;
 
     // Try to gather from invoices and payments
     let transactions = [];

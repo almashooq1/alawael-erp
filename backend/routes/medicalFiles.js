@@ -313,7 +313,7 @@ router.get('/download/:fileType/:fileName', authenticate, async (req, res) => {
     }
 
     // الحصول على معلومات الملف
-    const stats = await fs.stat(filePath);
+    const _stats = await fs.stat(filePath);
 
     // تحميل الملف
     res.download(filePath, fileName, err => {

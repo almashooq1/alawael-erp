@@ -120,7 +120,7 @@ async function benchmarkEndpoint(endpoint, requestCount) {
   responses.push({ ...coldResponse, request: 1, type: 'cold' });
 
   // Wait a bit
-  await new Promise(resolve => setTimeout(resolve, 100));
+  await new Promise(resolve => { setTimeout(resolve, 100); });
 
   // Warm cache requests
   for (let i = 2; i <= requestCount; i++) {
@@ -128,7 +128,7 @@ async function benchmarkEndpoint(endpoint, requestCount) {
     responses.push({ ...response, request: i, type: i === 2 ? 'warm' : 'cached' });
 
     // Small delay between requests
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise(resolve => { setTimeout(resolve, 50); });
   }
 
   // Calculate stats

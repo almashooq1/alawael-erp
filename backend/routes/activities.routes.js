@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const Activity = require('../models/Activity');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ── GET / — list activities (filter by program, type, status, date range) ──

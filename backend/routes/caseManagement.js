@@ -62,7 +62,7 @@ const TREATMENT_PLAN_FIELDS = [
   'type',
 ];
 const SESSION_FIELDS = ['date', 'duration', 'notes', 'status', 'objectives', 'outcomes', 'type'];
-const REFERRAL_FIELDS = [
+const _REFERRAL_FIELDS = [
   'referralTo',
   'referralType',
   'reason',

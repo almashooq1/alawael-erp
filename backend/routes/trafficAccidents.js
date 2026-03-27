@@ -120,7 +120,7 @@ router.patch(
  * POST /api/traffic-accidents/:id/approve
  * الموافقة على التقرير
  */
-router.post('/:id/approve', authorize('approve_accident_report'), (req, res, next) => {
+router.post('/:id/approve', authorize('approve_accident_report'), (req, res, _next) => {
   req.body.status = 'approved';
   trafficAccidentController.updateReportStatus(req, res);
 });

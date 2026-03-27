@@ -115,7 +115,7 @@ class QiwaService extends EventEmitter {
             this.retryConfig.retryDelay *
             Math.pow(this.retryConfig.backoffMultiplier, config.retryCount - 1);
 
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise(resolve => { setTimeout(resolve, delay); });
           return this.client(config);
         }
 

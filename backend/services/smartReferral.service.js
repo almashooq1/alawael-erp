@@ -11,7 +11,7 @@ class SmartReferralService {
    */
   static async processReferralDocument(file) {
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => { setTimeout(resolve, 1500); });
 
     // In a real app, we would perform Optical Character Recognition (OCR) here
     // const text = await tesseract.recognize(file.path);

@@ -52,7 +52,7 @@ class PerformanceOptimizer {
         return value;
       } catch (error) {
         logger.error(`Cache error for ${key}:`, error);
-        return await computeFn();
+        return computeFn();
       }
     }
 

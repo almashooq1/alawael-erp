@@ -448,7 +448,7 @@ class DriverAPITests {
     console.log(`الـ URL: ${BASE_URL}\n`);
 
     // انتظر قليلاً للتأكد من أن الـ server جاهز
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => { setTimeout(resolve, 2000); });
 
     try {
       // إعداد البيانات الأساسية

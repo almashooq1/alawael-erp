@@ -121,7 +121,7 @@ class BackupQueueSystem extends EventEmitter {
       this.emit('job:started', job);
 
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Job timeout')), job.timeout)
+        setTimeout(() => { reject(new Error('Job timeout')); }, job.timeout)
       );
 
       const jobPromise = this.runJobLogic(job);

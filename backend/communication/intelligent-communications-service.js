@@ -1646,7 +1646,7 @@ class IntelligentCommunicationsService {
     }
 
     // Default to admin if no manager found
-    return await User.findOne({ role: 'admin' });
+    return User.findOne({ role: 'admin' });
   }
 
   // ============================================

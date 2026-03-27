@@ -460,7 +460,7 @@ class ParentCommunicationService {
    * إشعار الحضور
    */
   async notifyAttendance(parentId, studentId, attendanceData) {
-    return await this._sendNotification(parentId, {
+    return this._sendNotification(parentId, {
       type: 'attendance',
       title: 'تنبيه الحضور',
       body:
@@ -475,7 +475,7 @@ class ParentCommunicationService {
    * إشعار سلوكي
    */
   async notifyBehavior(parentId, studentId, behaviorData) {
-    return await this._sendNotification(parentId, {
+    return this._sendNotification(parentId, {
       type: 'behavior',
       title: behaviorData.type === 'positive' ? 'سلوك إيجابي' : 'تنبيه سلوكي',
       body: behaviorData.description,
@@ -487,7 +487,7 @@ class ParentCommunicationService {
    * إشعار تحديث IEP
    */
   async notifyIEPUpdate(parentId, studentId, iepData) {
-    return await this._sendNotification(parentId, {
+    return this._sendNotification(parentId, {
       type: 'iep_update',
       title: 'تحديث البرنامج التعليمي الفردي',
       body: 'تم تحديث البرنامج التعليمي الفردي لطالبك. يرجى المراجعة.',
@@ -499,7 +499,7 @@ class ParentCommunicationService {
    * إشعار تقدم IEP
    */
   async notifyIEPProgress(parentId, studentId, progressData) {
-    return await this._sendNotification(parentId, {
+    return this._sendNotification(parentId, {
       type: 'iep_progress',
       title: 'تحديث تقدم الأهداف',
       body: `تم تحديث تقدم طالبك في الأهداف التعليمية. نسبة الإنجاز: ${progressData.overallProgress}%`,

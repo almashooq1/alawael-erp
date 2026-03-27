@@ -10,25 +10,25 @@ class IntegratedCareService {
   async createPlan(data) {
     // Generate simple ID
     data.planNumber = `CP-${Date.now()}`;
-    return await CarePlan.create(data);
+    return CarePlan.create(data);
   }
 
   async getPlanByStudent(studentId) {
-    return await CarePlan.findOne({ beneficiary: studentId }).sort({ createdAt: -1 });
+    return CarePlan.findOne({ beneficiary: studentId }).sort({ createdAt: -1 });
   }
 
   async updatePlan(id, updateData) {
-    return await CarePlan.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    return CarePlan.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
   }
 
   // --- GROUPS ---
 
   async createGroup(data) {
-    return await GroupProgram.create(data);
+    return GroupProgram.create(data);
   }
 
   async addStudentToGroup(groupId, studentId) {
-    return await GroupProgram.findByIdAndUpdate(
+    return GroupProgram.findByIdAndUpdate(
       groupId,
       { $addToSet: { students: studentId } },
       { new: true, runValidators: true }
@@ -38,7 +38,7 @@ class IntegratedCareService {
   async logGroupSession(groupId, sessionData) {
     const group = await GroupProgram.findById(groupId);
     group.sessions.push(sessionData);
-    return await group.save();
+    return group.save();
   }
 
   // --- SESSIONS ---
@@ -104,7 +104,7 @@ class IntegratedCareService {
   }
 
   async getStudentHistory(studentId) {
-    return await DailySession.find({ student: studentId }).sort({ date: -1 });
+    return DailySession.find({ student: studentId }).sort({ date: -1 });
   }
 
   // --- REPORTS ---

@@ -247,7 +247,7 @@ afterEach(async () => {
     jest.clearAllTimers();
 
     // Give event loop a chance to process
-    await new Promise(resolve => setImmediate(resolve));
+    await new Promise(resolve => { setImmediate(resolve); });
   } catch (error) {
     console.warn('Error during afterEach cleanup:', error);
   }

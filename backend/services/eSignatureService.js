@@ -3,8 +3,8 @@
 // Uses HMAC-SHA256 cryptographic signatures with optional PDF embedding
 
 const crypto = require('crypto');
-const path = require('path');
-const fs = require('fs').promises;
+const _path = require('path');
+const _fs = require('fs').promises;
 const logger = require('../utils/logger');
 
 // Signing secret – falls back to JWT_SECRET so every deployment has one
@@ -84,7 +84,7 @@ class ESignatureService {
           const pages = pdfDoc.getPages();
           if (pages.length > 0) {
             const firstPage = pages[0];
-            const { width } = firstPage.getSize();
+            const { _width } = firstPage.getSize();
             const { rgb } = require('pdf-lib');
             firstPage.drawText(
               `موقع رقمياً بواسطة: ${signatureRecord.signer.name} | ${timestamp}`,

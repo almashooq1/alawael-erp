@@ -642,7 +642,7 @@ describe('Phase 5.4: Performance Optimization & Bottleneck Analysis', () => {
           });
   
           // Small delay between iterations
-          await new Promise(resolve => setTimeout(resolve, 10));
+          await new Promise(resolve => { setTimeout(resolve, 10); });
         }
   
         // Check for monotonic increase (sign of leak)

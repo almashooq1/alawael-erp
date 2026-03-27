@@ -102,7 +102,7 @@ describe('ModuleConnector', () => {
     it('should timeout long-running services', async () => {
       const slowHandler = jest
         .fn()
-        .mockImplementation(() => new Promise(resolve => setTimeout(resolve, 5000)));
+        .mockImplementation(() => new Promise((resolve) => { setTimeout(resolve, 5000); }));
 
       connector.registerModule('hr', {
         services: { slow: slowHandler },
@@ -227,7 +227,7 @@ describe('CircuitBreaker', () => {
     }
 
     // Wait for timeout
-    await new Promise(r => setTimeout(r, 60));
+    await new Promise(r => { setTimeout(r, 60); });
 
     // Should attempt (half-open)
     const result = await breaker.execute(() => Promise.resolve('ok'));
@@ -240,7 +240,7 @@ describe('CircuitBreaker', () => {
       await breaker.execute(() => Promise.reject(new Error('fail'))).catch(() => {});
     }
 
-    await new Promise(r => setTimeout(r, 60));
+    await new Promise(r => { setTimeout(r, 60); });
 
     // Two successes should close it (successThreshold: 2)
     await breaker.execute(() => Promise.resolve('ok'));

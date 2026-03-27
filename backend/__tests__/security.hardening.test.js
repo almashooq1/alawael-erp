@@ -265,6 +265,7 @@ describe('⚠️ A3: Injection', () => {
     };
 
     expect(validateExpression('user.name')).toBe(true);
+    // eslint-disable-next-line no-template-curly-in-string
     expect(validateExpression('${Runtime.getRuntime().exec()}')).toBe(false);
   });
 });

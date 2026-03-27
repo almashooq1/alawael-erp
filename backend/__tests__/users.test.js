@@ -88,7 +88,7 @@ describe('User Management Routes', () => {
 
   beforeAll(async () => {
     // Wait a tick to ensure other test suites have finished loading
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     try {
       // Try to get DB from app globals or require fresh
@@ -487,7 +487,7 @@ describe('User Management Routes', () => {
       );
 
       // Wait a moment to ensure token is expired
-      await new Promise(r => setTimeout(r, 100));
+      await new Promise(r => { setTimeout(r, 100); });
 
       const res = await request(app)
         .get('/api/users')

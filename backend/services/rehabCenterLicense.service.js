@@ -347,7 +347,7 @@ class RehabCenterLicenseService {
 
   /** إحصائيات شاملة */
   async getStatistics() {
-    return await RehabCenterLicense.getStatistics();
+    return RehabCenterLicense.getStatistics();
   }
 
   /** إحصائيات لوحة المعلومات */

@@ -358,7 +358,7 @@ class DuplicateDetector {
     if (!strategy) {
       throw new Error(`Strategy '${name}' not found`);
     }
-    return await strategy(data);
+    return strategy(data);
   }
 }
 

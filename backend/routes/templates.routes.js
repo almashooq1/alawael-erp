@@ -13,7 +13,7 @@ router.use(authenticate);
 // List templates
 router.get('/', async (req, res) => {
   try {
-    const { category, type, page = 1, limit = 20 } = req.query;
+    const { _category, _type, page = 1, limit = 20 } = req.query;
     res.json({
       success: true,
       data: [],

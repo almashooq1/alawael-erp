@@ -229,7 +229,7 @@ async function main() {
       break;
     } catch (e) {
       if (i < 9) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => { setTimeout(resolve, 500); });
       }
     }
   }

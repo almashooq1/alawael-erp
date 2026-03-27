@@ -121,7 +121,7 @@ describe('Memory Models - Employee, Attendance, Leave, Finance', () => {
     it('should find attendance by employee', async () => {
       await Attendance.create({ employeeId: 1, checkIn: new Date() });
       // Add small delay to ensure different IDs
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       await Attendance.create({ employeeId: 1, checkIn: new Date() });
       await Attendance.create({ employeeId: 2, checkIn: new Date() });
 
@@ -361,7 +361,7 @@ describe('Memory Models - Employee, Attendance, Leave, Finance', () => {
         department: 'IT',
       });
       // Add small delay to ensure different timestamp-based IDs
-      await new Promise(resolve => setTimeout(resolve, 5));
+      await new Promise(resolve => { setTimeout(resolve, 5); });
       const emp2 = await Employee.create({
         name: 'Employee 2',
         department: 'HR',

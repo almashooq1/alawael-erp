@@ -11,7 +11,7 @@ describe('Auth integration', () => {
     try {
       jest.clearAllTimers();
       if (app && app.close) {
-        await new Promise(resolve => app.close(resolve));
+        await new Promise(resolve => { app.close(resolve); })
       }
     } catch (_err) {
       // Ignore cleanup errors

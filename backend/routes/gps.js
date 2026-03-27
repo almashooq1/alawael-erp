@@ -6,7 +6,7 @@
 
 const express = require('express');
 const GPSTrackingController = require('../controllers/gpsTracking.controller');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, _authorize } = require('../middleware/auth');
 
 const router = express.Router();
 

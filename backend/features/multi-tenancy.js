@@ -149,21 +149,21 @@ class TenancyManager {
    * Get Tenant by ID
    */
   static async getTenantById(tenantId) {
-    return await Tenant.findOne({ tenantId });
+    return Tenant.findOne({ tenantId });
   }
 
   /**
    * Get Tenant by Domain
    */
   static async getTenantByDomain(domain) {
-    return await Tenant.findOne({ domain });
+    return Tenant.findOne({ domain });
   }
 
   /**
    * Update Tenant
    */
   static async updateTenant(tenantId, updates) {
-    return await Tenant.findOneAndUpdate(
+    return Tenant.findOneAndUpdate(
       { tenantId },
       { ...updates, updatedAt: new Date() },
       { new: true }
@@ -178,7 +178,7 @@ class TenancyManager {
     await this.archiveTenantData(tenantId);
 
     // Delete tenant
-    return await Tenant.deleteOne({ tenantId });
+    return Tenant.deleteOne({ tenantId });
   }
 
   /**
@@ -219,7 +219,7 @@ class TenancyManager {
    * Update Feature Flags
    */
   static async updateFeatureFlags(tenantId, flags) {
-    return await this.updateTenant(tenantId, {
+    return this.updateTenant(tenantId, {
       features: flags,
     });
   }
@@ -228,7 +228,7 @@ class TenancyManager {
    * Update Quotas
    */
   static async updateQuotas(tenantId, quotas) {
-    return await this.updateTenant(tenantId, {
+    return this.updateTenant(tenantId, {
       quotas,
     });
   }
@@ -289,7 +289,7 @@ class TenancyManager {
    * List All Tenants
    */
   static async listTenants(filter = {}) {
-    return await Tenant.find(filter).select('-metadata');
+    return Tenant.find(filter).select('-metadata');
   }
 
   /**

@@ -9,7 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticateToken, optionalAuth } = require('../middleware/auth');
+const { _authenticateToken, optionalAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ── Helpers ────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ router.get('/stats', optionalAuth, async (_req, res) => {
     const Document = getModel('Document');
     // Clinical
     const TherapyProgram = getModel('TherapyProgram');
-    const TherapeuticPlan = getModel('TherapeuticPlan');
+    const _TherapeuticPlan = getModel('TherapeuticPlan');
     const CarePlan = getModel('CarePlan');
     const Assessment = getModel('Assessment');
     const Feedback = getModel('Feedback');
@@ -118,9 +118,9 @@ router.get('/stats', optionalAuth, async (_req, res) => {
     const ApprovalRequest = getModel('ApprovalRequest');
     // Finance
     const Expense = getModel('Expense');
-    const Budget = getModel('Budget');
-    const Transaction = getModel('Transaction');
-    const CashFlow = getModel('CashFlow');
+    const _Budget = getModel('Budget');
+    const _Transaction = getModel('Transaction');
+    const _CashFlow = getModel('CashFlow');
     // Supply chain
     const Supplier = getModel('Supplier');
     const PurchaseOrder = getModel('PurchaseOrder');

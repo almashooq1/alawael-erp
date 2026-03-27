@@ -381,7 +381,7 @@ describe('💰 Query Result Caching', () => {
     expect(result1.count).toBe(1);
 
     // Wait for cache to expire
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     // Second call (cache expired)
     const result2 = await DatabaseOptimization.getCachedQuery(

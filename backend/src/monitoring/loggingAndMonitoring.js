@@ -359,7 +359,7 @@ class MonitoringSystem {
    * الحصول على مقاييس Prometheus
    */
   async getMetrics() {
-    return await prometheus.register.metrics();
+    return prometheus.register.metrics();
   }
 
   /**

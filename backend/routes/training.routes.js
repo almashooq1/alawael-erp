@@ -107,7 +107,7 @@ router.put('/courses/:id', authenticate, async (req, res) => {
 router.delete('/courses/:id', authenticate, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const Course = safeModel('TrainingCourse');
+    const _Course = safeModel('TrainingCourse');
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

@@ -1369,7 +1369,7 @@ describe('🔥 Advanced Edge Cases & Error Handling', () => {
       const start = Date.now();
       const _result = await Promise.race([
         AuditLogService.search({}, { limit: 1000, skip: 0 }),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000)),
+        new Promise((_, reject) => { setTimeout(() => reject(new Error('Timeout')), 10000); }),
       ]);
 
       const duration = Date.now() - start;

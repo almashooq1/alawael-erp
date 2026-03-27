@@ -131,7 +131,7 @@ userSchema.pre('save', async function () {
 
 // Method to compare passwords
 userSchema.methods.comparePassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  return bcrypt.compare(enteredPassword, this.password);
 };
 
 // ============ PAGE SCHEMA ============

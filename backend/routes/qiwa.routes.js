@@ -50,7 +50,7 @@ router.use(authenticate);
 router.get(
   '/employees',
   handleAsyncError(async (req, res) => {
-    const { page = 1, limit = 20, status } = req.query;
+    const { page = 1, limit = 20, _status } = req.query;
     res.json({
       success: true,
       data: [],
@@ -728,7 +728,7 @@ router.post(
 /**
  * Global error handler
  */
-router.use((error, req, res, next) => {
+router.use((error, req, res, _next) => {
   logger.error('[Qiwa Routes Error]', { message: error.message, stack: error.stack });
 
   const statusCode = error.statusCode || 500;

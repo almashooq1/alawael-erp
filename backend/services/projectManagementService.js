@@ -452,12 +452,12 @@ class ProjectManagementService {
   // --- Additional DB-friendly methods ---
   async getProjects() {
     if (useMock) return this.listProjects();
-    return await Project.find({}).populate('manager', 'fullName').populate('team', 'fullName');
+    return Project.find({}).populate('manager', 'fullName').populate('team', 'fullName');
   }
 
   async getProjectTasks(projectId) {
     if (useMock) return this.getTasks(projectId);
-    return await Task.find({ projectId }).populate('assignee', 'fullName');
+    return Task.find({ projectId }).populate('assignee', 'fullName');
   }
 }
 

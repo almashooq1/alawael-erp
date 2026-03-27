@@ -12,7 +12,7 @@
  */
 const express = require('express');
 const router = express.Router();
-const { body, param, query } = require('express-validator');
+const { body, _param, _query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');

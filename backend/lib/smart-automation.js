@@ -121,7 +121,7 @@ class SmartAutomation {
   async executeAction(actionName, context) {
     const handler = this.actions.get(actionName);
     if (!handler) throw new Error(`Action ${actionName} not registered`);
-    return await handler(context);
+    return handler(context);
   }
 
   /**

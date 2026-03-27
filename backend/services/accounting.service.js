@@ -563,7 +563,7 @@ class AccountingService {
 
     if (!invoice) throw new Error('الفاتورة غير موجودة');
 
-    return await PDFGenerator.generateInvoice(invoice);
+    return PDFGenerator.generateInvoice(invoice);
   }
 
   // ===================================================================

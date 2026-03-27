@@ -52,12 +52,12 @@ beforeAll(async () => {
 
   app = require('../server');
   // Wait for server initialization
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => { setTimeout(resolve, 1000); });
 });
 
 afterAll(async () => {
   if (server) {
-    await new Promise(resolve => server.close(resolve));
+    await new Promise(resolve => { server.close(resolve); })
   }
 });
 
@@ -110,7 +110,7 @@ const _createTestUser = async (overrides = {}) => {
 
   // Create user in mock DB
   if (User.create && typeof User.create === 'function') {
-    return await User.create(user);
+    return User.create(user);
   }
   return user;
 };
@@ -602,7 +602,7 @@ describe('📋 Session Management', () => {
   test('should expire inactive sessions', async () => {
     const token = generateToken('user-123');
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise(resolve => { setTimeout(resolve, 100); });
 
     const res = await request(app)
       .get('/api/protected-route')

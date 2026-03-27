@@ -204,7 +204,7 @@ async function waitForCondition(condition, options = {}) {
       // Ignore errors, retry
     }
 
-    await new Promise(resolve => setTimeout(resolve, interval));
+    await new Promise(resolve => { setTimeout(resolve, interval); });
   }
 
   return { success: false, error: message };

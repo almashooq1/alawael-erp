@@ -109,7 +109,7 @@ class AdvancedMessagingAlertSystem {
     this.messages.set(message.id, message);
 
     // محاولة الإرسال
-    return await this.deliverMessage(message);
+    return this.deliverMessage(message);
   }
 
   /**
@@ -347,7 +347,7 @@ class AdvancedMessagingAlertSystem {
     this.alerts.set(alert.id, alert);
 
     // تنفيذ الإجراء
-    return await this.executeAlertAction(rule, alert, workflows);
+    return this.executeAlertAction(rule, alert, workflows);
   }
 
   /**
@@ -356,16 +356,16 @@ class AdvancedMessagingAlertSystem {
   async executeAlertAction(rule, alert, workflows) {
     switch (rule.action.type) {
       case 'notify':
-        return await this.notifyRecipients(rule, alert);
+        return this.notifyRecipients(rule, alert);
 
       case 'escalate':
-        return await this.escalateIssue(rule, alert, workflows);
+        return this.escalateIssue(rule, alert, workflows);
 
       case 'pause':
-        return await this.pauseWorkflows(alert, workflows);
+        return this.pauseWorkflows(alert, workflows);
 
       case 'cancel':
-        return await this.cancelWorkflows(alert, workflows);
+        return this.cancelWorkflows(alert, workflows);
 
       default:
         return { success: false, error: 'Unknown action type' };

@@ -44,7 +44,7 @@ async function connectMongoDB() {
 
     await Promise.race([
       dbPromise,
-      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2000)),
+      new Promise((_, reject) => { setTimeout(() => reject(new Error('timeout')), 2000); }),
     ]);
 
     mongoConnected = true;
@@ -90,7 +90,7 @@ const mongoTimeout = fn => {
 
       // Set timeout for operation
       const timeout = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Operation timeout')), 3000)
+        setTimeout(() => { reject(new Error('Operation timeout')); }, 3000)
       );
 
       return Promise.race([fn(...args), timeout]);

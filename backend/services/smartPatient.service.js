@@ -109,7 +109,7 @@ class SmartPatientService {
    * Get Progress Chart Data for a Goal
    */
   static async getGoalTrend(goalId) {
-    return await GoalProgressHistory.find({ goalId })
+    return GoalProgressHistory.find({ goalId })
       .sort({ recordedDate: 1 })
       .select('percentage recordedDate note');
   }

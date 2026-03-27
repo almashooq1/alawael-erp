@@ -185,7 +185,7 @@ assessmentSchema.methods.approve = async function (userId, notes) {
   this.reviewedBy = userId;
   this.reviewDate = new Date();
   this.reviewNotes = notes;
-  return await this.save();
+  return this.save();
 };
 
 assessmentSchema.methods.reject = async function (userId, reason) {
@@ -193,12 +193,12 @@ assessmentSchema.methods.reject = async function (userId, reason) {
   this.reviewedBy = userId;
   this.reviewDate = new Date();
   this.reviewNotes = reason;
-  return await this.save();
+  return this.save();
 };
 
 assessmentSchema.methods.archive = async function () {
   this.isArchived = true;
-  return await this.save();
+  return this.save();
 };
 
 // الدوال الثابتة

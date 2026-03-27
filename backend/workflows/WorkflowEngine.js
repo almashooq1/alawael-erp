@@ -373,7 +373,7 @@ class WorkflowEngine extends EventEmitter {
    * Get pending tasks for user
    */
   async getPendingTasks(userId) {
-    return await this.db
+    return this.db
       .collection('workflow_tasks')
       .find({
         assignedTo: userId,
@@ -455,7 +455,7 @@ class WorkflowEngine extends EventEmitter {
    * Get workflow instance status
    */
   async getWorkflowStatus(instanceId) {
-    return await this.db.collection('workflow_instances').findOne({ id: instanceId });
+    return this.db.collection('workflow_instances').findOne({ id: instanceId });
   }
 
   /**

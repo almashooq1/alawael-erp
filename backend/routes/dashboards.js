@@ -5,7 +5,7 @@
 
 const express = require('express');
 const DashboardController = require('../controllers/dashboardController');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 
 const router = express.Router();

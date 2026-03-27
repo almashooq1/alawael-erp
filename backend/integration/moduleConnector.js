@@ -217,7 +217,7 @@ class ModuleConnector extends EventEmitter {
           return Promise.race([
             service.handler(params),
             new Promise((_, reject) =>
-              setTimeout(() => reject(new Error(`Timeout after ${timeout}ms`)), timeout)
+              setTimeout(() => { reject(new Error(`Timeout after ${timeout}ms`)); }, timeout)
             ),
           ]);
         });
@@ -226,7 +226,7 @@ class ModuleConnector extends EventEmitter {
       } catch (error) {
         lastError = error;
         if (attempt < retries) {
-          await new Promise(r => setTimeout(r, retryDelay * Math.pow(2, attempt)));
+          await new Promise((r) => { setTimeout(r, retryDelay * Math.pow(2, attempt)); });
         }
       }
     }
@@ -310,7 +310,7 @@ class ModuleConnector extends EventEmitter {
           const health = await Promise.race([
             mod.healthFn(),
             new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('Health check timeout')), 5000)
+              setTimeout(() => { reject(new Error('Health check timeout')); }, 5000)
             ),
           ]);
           results[name] = {

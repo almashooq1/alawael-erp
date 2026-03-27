@@ -15,7 +15,7 @@ try {
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[Inventory Routes] RBAC module not available, using fallback');
-  createRBACMiddleware = permission => (req, res, next) => {
+  createRBACMiddleware = permission => (req, res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
     return res
       .status(503)

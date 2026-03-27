@@ -38,10 +38,10 @@ const PettyCashTransaction = PettyCashModels?.PettyCashTransaction || null;
 const EmployeeLoan = safeRequire('../models/EmployeeLoan', 'EmployeeLoan');
 const Account = safeRequire('../models/Account', 'Account');
 const AccountingInvoice = safeRequire('../models/AccountingInvoice', 'AccountingInvoice');
-const Expense = safeRequire('../models/Expense', 'Expense');
+const _Expense = safeRequire('../models/Expense', 'Expense');
 const JournalEntry = safeRequire('../models/JournalEntry', 'JournalEntry');
-const Transaction = safeRequire('../models/Transaction', 'Transaction');
-const FinancialTransaction = safeRequire('../models/FinancialTransaction', 'FinancialTransaction');
+const _Transaction = safeRequire('../models/Transaction', 'Transaction');
+const _FinancialTransaction = safeRequire('../models/FinancialTransaction', 'FinancialTransaction');
 
 // Auth required for all routes
 router.use(authenticateToken);
@@ -54,7 +54,7 @@ router.use(authenticateToken);
 router.get(
   '/profit-loss',
   asyncHandler(async (req, res) => {
-    const { startDate, endDate, comparative, costCenter } = req.query;
+    const { startDate, endDate, _comparative, _costCenter } = req.query;
     const start = startDate ? new Date(startDate) : new Date(new Date().getFullYear(), 0, 1);
     const end = endDate ? new Date(endDate) : new Date();
 
@@ -1029,7 +1029,7 @@ router.get(
 router.get(
   '/vendor-payments',
   asyncHandler(async (req, res) => {
-    const { status: payStatus, vendorId } = req.query;
+    const { status: payStatus, _vendorId } = req.query;
 
     if (AccountingInvoice) {
       try {

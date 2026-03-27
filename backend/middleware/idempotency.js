@@ -17,7 +17,7 @@
 
 'use strict';
 
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 // In-memory fallback when Redis is unavailable
 const memoryStore = new Map();

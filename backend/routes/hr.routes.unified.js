@@ -11,8 +11,8 @@ const router = express.Router();
 const {
   authenticate,
   authorize,
-  checkPermission,
-  validate,
+  _checkPermission,
+  _validate,
 } = require('../middleware/index.unified');
 const { validate: runValidation } = require('../middleware/validate');
 const hrV = require('../middleware/validators/hr.validators');

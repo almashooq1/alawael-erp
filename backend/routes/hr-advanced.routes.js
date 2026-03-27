@@ -256,9 +256,16 @@ router.get(
   authorizeRole(['HR', 'Manager', 'Admin']),
   async (req, res) => {
     try {
+      // Default to last 30 days when dates are not provided
+      const now = new Date();
+      const endDate = req.query.endDate ? new Date(req.query.endDate) : now;
+      const startDate = req.query.startDate
+        ? new Date(req.query.startDate)
+        : new Date(now.getFullYear(), now.getMonth(), 1); // first day of current month
+
       const report = await HRReportService.generateHROverviewReport(
-        new Date(req.query.startDate),
-        new Date(req.query.endDate)
+        startDate,
+        endDate
       );
       res.json({ success: true, data: report });
     } catch (error) {

@@ -23,8 +23,37 @@ export const createPerformanceReview = data =>
 /* ─── Dashboard KPIs ─── */
 export const getDashboardKPIs = async () => {
   try {
-    const res = await apiClient.get('/hr-advanced/reports/overview');
-    return { data: res?.data ?? res, isDemo: false };
+    // Send default date range (current month) so the backend doesn't receive undefined
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const endDate = now.toISOString();
+    const res = await apiClient.get(
+      `/hr-advanced/reports/overview?startDate=${startDate}&endDate=${endDate}`
+    );
+    const raw = res?.data ?? res;
+    // Flatten the nested report structure into the KPI shape the dashboard expects
+    return {
+      data: {
+        totalEmployees: raw?.keyMetrics?.totalEmployees ?? raw?.totalEmployees ?? 0,
+        activeEmployees: raw?.keyMetrics?.activeEmployees ?? raw?.activeEmployees ?? 0,
+        newHires: raw?.keyMetrics?.newHires ?? raw?.newHires ?? 0,
+        turnoverRate: raw?.keyMetrics?.turnoverRate ?? raw?.turnoverRate ?? 0,
+        onLeave: raw?.onLeave ?? 0,
+        attendanceRate: raw?.attendanceRate ?? 0,
+        pendingLeaves: raw?.pendingLeaves ?? 0,
+        totalPayroll:
+          raw?.totalPayroll ??
+          (raw?.salaryAnalysis?.averageSalary
+            ? raw.salaryAnalysis.averageSalary * (raw?.keyMetrics?.totalEmployees || 1)
+            : 0),
+        avgRating: raw?.avgRating ?? 0,
+        departments:
+          raw?.distribution?.byDepartment?.map(d => d._id || d.name) ??
+          raw?.departments ??
+          [],
+      },
+      isDemo: false,
+    };
   } catch {
     return {
       data: {

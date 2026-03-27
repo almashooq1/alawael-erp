@@ -31,7 +31,14 @@ const useHRDashboard = () => {
       setLeaves(Array.isArray(leaveRes.data) ? leaveRes.data : []);
       setReviews(Array.isArray(revRes.data) ? revRes.data : []);
       setIsDemo(kpiRes.isDemo || attRes.isDemo);
-    } catch {
+
+      if (process.env.NODE_ENV === 'development' && (kpiRes.isDemo || attRes.isDemo)) {
+        console.warn('[HRDashboard] Partial demo mode — kpi:', kpiRes.isDemo, 'att:', attRes.isDemo);
+      }
+    } catch (err) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('[HRDashboard] loadDashboard failed:', err);
+      }
       setIsDemo(true);
     } finally {
       setLoading(false);

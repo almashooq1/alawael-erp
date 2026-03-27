@@ -21,10 +21,10 @@ const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
 
 // ─── Models ──────────────────────────────────────────────────────────────────
+const { escapeRegex } = require('../utils/sanitize');
 const safeRequire = (path, name) => {
   try {
     return require(path);
-const { escapeRegex } = require('../utils/sanitize');
   } catch (e) {
     logger.warn(`[Finance Extended] ${name} model not available`);
     return null;

@@ -53,9 +53,9 @@ const getMessage = () => {
   if (!_Message) _Message = require('../models/message.model');
   return _Message;
 };
+const { escapeRegex } = require('../utils/sanitize');
 const getBeneficiary = () => {
   if (!_Beneficiary) _Beneficiary = require('../models/Beneficiary');
-const { escapeRegex } = require('../utils/sanitize');
   return _Beneficiary;
 };
 

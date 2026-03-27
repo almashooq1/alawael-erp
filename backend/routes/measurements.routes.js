@@ -27,6 +27,7 @@ const {
 } = require('../models/RehabilitationProgramModels');
 
 const MeasurementService = require('../services/MeasurementService');
+const SmartEngine = require('../services/SmartMeasurementProgramEngine');
 const measurementService = new MeasurementService();
 
 // All data routes require authentication

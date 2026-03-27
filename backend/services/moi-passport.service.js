@@ -416,12 +416,11 @@ class MOIPassportService extends EventEmitter {
       });
 
       Logger.error('Passport verification failed:', error);
-      throw {
+      throw Object.assign(new Error('حدث خطأ داخلي'), {
         success: false,
-        error: 'حدث خطأ داخلي',
         type: 'PASSPORT_VERIFICATION_ERROR',
         timestamp: new Date(),
-      };
+      });
     }
   }
 
@@ -487,12 +486,11 @@ class MOIPassportService extends EventEmitter {
       });
 
       Logger.error('National ID verification failed:', error);
-      throw {
+      throw Object.assign(new Error('حدث خطأ داخلي'), {
         success: false,
-        error: 'حدث خطأ داخلي',
         type: 'NATIONAL_ID_VERIFICATION_ERROR',
         timestamp: new Date(),
-      };
+      });
     }
   }
 
@@ -562,12 +560,11 @@ class MOIPassportService extends EventEmitter {
       });
 
       Logger.error('Iqama verification failed:', error);
-      throw {
+      throw Object.assign(new Error('حدث خطأ داخلي'), {
         success: false,
-        error: 'حدث خطأ داخلي',
         type: 'IQAMA_VERIFICATION_ERROR',
         timestamp: new Date(),
-      };
+      });
     }
   }
 
@@ -628,12 +625,11 @@ class MOIPassportService extends EventEmitter {
       });
 
       Logger.error('Exit/Re-entry request failed:', error);
-      throw {
+      throw Object.assign(new Error('حدث خطأ داخلي'), {
         success: false,
-        error: 'حدث خطأ داخلي',
         type: 'EXIT_REENTRY_REQUEST_ERROR',
         timestamp: new Date(),
-      };
+      });
     }
   }
 
@@ -689,11 +685,10 @@ class MOIPassportService extends EventEmitter {
       };
     } catch (error) {
       Logger.error('Failed to get traveler profile:', error);
-      throw {
+      throw Object.assign(new Error('حدث خطأ داخلي'), {
         success: false,
-        error: 'حدث خطأ داخلي',
         type: 'TRAVELER_PROFILE_ERROR',
-      };
+      });
     }
   }
 

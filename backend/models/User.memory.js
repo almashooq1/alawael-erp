@@ -165,7 +165,7 @@ const UserModel = {
       const users = data.users || [];
       const found = users.find(u => {
         if (query.email) return u.email === query.email;
-        if (query._id) return u._id == query._id;
+        if (query._id) return String(u._id) === String(query._id);
         return false;
       });
       return found ? new InMemoryUser(found) : null;
@@ -177,7 +177,7 @@ const UserModel = {
     const promise = (async () => {
       const data = db.read();
       const users = data.users || [];
-      const found = users.find(u => u._id == id);
+      const found = users.find(u => String(u._id) === String(id));
       return found ? new InMemoryUser(found) : null;
     })();
     return chainable(promise);
@@ -236,7 +236,7 @@ const UserModel = {
   async findByIdAndDelete(id) {
     const data = db.read();
     const users = data.users || [];
-    const index = users.findIndex(u => u._id == id);
+    const index = users.findIndex(u => String(u._id) === String(id));
 
     if (index >= 0) {
       const deleted = users[index];

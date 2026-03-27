@@ -43,6 +43,11 @@ module.exports = [
       'tests/load/**',
       // Standalone test runners (not Jest — use import/ES modules)
       'tests/tests/loadTesting.js',
+      // Browser JS / test-template files (not backend Node code)
+      'static/**',
+      'test-templates/**',
+      'test-utils/**',
+      'public/**',
     ],
   },
   // Base JavaScript configuration

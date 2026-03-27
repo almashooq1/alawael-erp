@@ -11,7 +11,7 @@ const crypto = require('crypto');
 
 // Only allow alphanumeric, hyphens, underscores, dots, and base64url chars
 // Max 128 chars to prevent header injection and log poisoning
-const VALID_REQUEST_ID = /^[a-zA-Z0-9_\-\.=+/]{1,128}$/;
+const VALID_REQUEST_ID = /^[a-zA-Z0-9_\-.=+/]{1,128}$/;
 
 /**
  * Generate a URL-safe unique ID (22 chars, 128 bits entropy).

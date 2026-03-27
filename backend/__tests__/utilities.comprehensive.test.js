@@ -349,8 +349,9 @@ describe('Type Checking Utilities', () => {
   });
 
   test('should check if value is null', () => {
-    expect(null === null).toBe(true);
-    expect(undefined === null).toBe(false);
+    const val = null;
+    expect(val === null).toBe(true);
+    expect(undefined === null).toBe(false); // eslint-disable-line eqeqeq
   });
 
   test('should check if array is array', () => {

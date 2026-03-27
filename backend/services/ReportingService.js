@@ -434,7 +434,7 @@ class ReportScheduler {
   /**
    * Calculate next run time
    */
-  _calculateNextRun(frequency, time) {
+  _calculateNextRun(frequency, time, options = {}) {
     const now = new Date();
 
     switch (frequency) {

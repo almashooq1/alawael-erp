@@ -650,8 +650,8 @@ class PolicyEngine extends EventEmitter {
       const ops = {
         '===': (a, b) => a === b,
         '!==': (a, b) => a !== b,
-        '==': (a, b) => a == b,
-        '!=': (a, b) => a != b,
+        '==': (a, b) => a === b,
+        '!=': (a, b) => a !== b,
         '>': (a, b) => a > b,
         '<': (a, b) => a < b,
         '>=': (a, b) => a >= b,

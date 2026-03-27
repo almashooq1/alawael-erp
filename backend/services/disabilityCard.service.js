@@ -27,10 +27,10 @@ const getDisabilityCard = () => {
   return DisabilityCard;
 };
 
+const { escapeRegex } = require('../utils/sanitize');
 let User;
 const _getUser = () => {
   if (!User) User = require('../models/User');
-  const { escapeRegex } = require('../utils/sanitize');
   return User;
 };
 

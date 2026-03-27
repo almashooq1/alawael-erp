@@ -49,17 +49,17 @@ describe('Item 151 — contracts.routes.js ObjectId validation', () => {
 
   test('GET /:id route guarded with validObjectId', () => {
     // The GET /:id handler must call validObjectId before findById
-    const getIdBlock = src.match(/router\.get\('\/\:id'[\s\S]*?validObjectId/);
+    const getIdBlock = src.match(/router\.get\('\/:id'[\s\S]*?validObjectId/);
     expect(getIdBlock).toBeTruthy();
   });
 
   test('PUT /:id route guarded with validObjectId', () => {
-    const putBlock = src.match(/router\.put\('\/\:id'[\s\S]*?validObjectId/);
+    const putBlock = src.match(/router\.put\('\/:id'[\s\S]*?validObjectId/);
     expect(putBlock).toBeTruthy();
   });
 
   test('DELETE /:id route guarded with validObjectId', () => {
-    const delBlock = src.match(/router\.delete\('\/\:id'[\s\S]*?validObjectId/);
+    const delBlock = src.match(/router\.delete\('\/:id'[\s\S]*?validObjectId/);
     expect(delBlock).toBeTruthy();
   });
 });
@@ -79,17 +79,17 @@ describe('Item 152 — meetings.routes.js ObjectId validation', () => {
   });
 
   test('GET /:id route guarded with validObjectId', () => {
-    const match = src.match(/router\.get\('\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.get\('\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('PUT /:id route guarded with validObjectId', () => {
-    const match = src.match(/router\.put\('\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.put\('\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('DELETE /:id route guarded with validObjectId', () => {
-    const match = src.match(/router\.delete\('\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.delete\('\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 });
@@ -109,22 +109,22 @@ describe('Item 153 — training.routes.js ObjectId validation', () => {
   });
 
   test('PUT /courses/:id route guarded', () => {
-    const match = src.match(/router\.put\('\/courses\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.put\('\/courses\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('DELETE /courses/:id route guarded', () => {
-    const match = src.match(/router\.delete\('\/courses\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.delete\('\/courses\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('PUT /sessions/:id route guarded', () => {
-    const match = src.match(/router\.put\('\/sessions\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.put\('\/sessions\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('PUT /plans/:id route guarded', () => {
-    const match = src.match(/router\.put\('\/plans\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.put\('\/plans\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 });
@@ -144,17 +144,17 @@ describe('Item 154 — helpdesk.routes.js ObjectId validation', () => {
   });
 
   test('PUT /tickets/:id route guarded', () => {
-    const match = src.match(/router\.put\('\/tickets\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.put\('\/tickets\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('DELETE /tickets/:id route guarded', () => {
-    const match = src.match(/router\.delete\('\/tickets\/\:id'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.delete\('\/tickets\/:id'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 
   test('POST /tickets/:id/comments route guarded', () => {
-    const match = src.match(/router\.post\('\/tickets\/\:id\/comments'[\s\S]*?validObjectId/);
+    const match = src.match(/router\.post\('\/tickets\/:id\/comments'[\s\S]*?validObjectId/);
     expect(match).toBeTruthy();
   });
 });

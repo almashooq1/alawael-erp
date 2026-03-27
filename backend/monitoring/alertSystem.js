@@ -48,7 +48,7 @@ class AlertSystem extends EventEmitter {
     });
   }
 
-  triggerAlert(rule, context = {}) {
+  async triggerAlert(rule, context = {}) {
     const now = Date.now();
     const key = rule.id;
     const last = this.lastTriggered.get(key);
@@ -92,7 +92,7 @@ class AlertSystem extends EventEmitter {
     return alert;
   }
 
-  createManualAlert(alert) {
+  async createManualAlert(alert) {
     const now = Date.now();
     const payload = {
       id: alert.id || `manual-${now}`,

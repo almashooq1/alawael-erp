@@ -88,7 +88,7 @@ class SmartPatientIntegratorService {
       };
     } catch (error) {
       logger.error('Integrator Error:', error);
-      throw { message: 'Failed to build Digital Twin', error: 'حدث خطأ داخلي' };
+      throw Object.assign(new Error('Failed to build Digital Twin'), { error: 'حدث خطأ داخلي' });
     }
   }
 

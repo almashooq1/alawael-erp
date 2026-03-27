@@ -40,9 +40,9 @@ const _getDocument = () => {
   if (!_Document) _Document = require('../models/Document');
   return _Document;
 };
+const { escapeRegex } = require('../utils/sanitize');
 const _getMessage = () => {
   if (!_Message) _Message = require('../models/message.model');
-const { escapeRegex } = require('../utils/sanitize');
   return _Message;
 };
 

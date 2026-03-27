@@ -39,7 +39,8 @@ const requireAuth = async (req, res, next) => {
 const requireRole =
   (...roles) =>
   (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const userRole = (req.user?.role || '').toLowerCase();
+    if (!req.user || !roles.some(r => r.toLowerCase() === userRole)) {
       return res.status(403).json({ success: false, message: 'Forbidden' });
     }
     next();
@@ -135,7 +136,8 @@ const authorize =
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'Authentication required' });
     }
-    if (roles && roles.length > 0 && !roles.includes(req.user.role)) {
+    const userRole = (req.user.role || '').toLowerCase();
+    if (roles && roles.length > 0 && !roles.some(r => r.toLowerCase() === userRole)) {
       return res.status(403).json({ success: false, message: 'Insufficient permissions' });
     }
     next();

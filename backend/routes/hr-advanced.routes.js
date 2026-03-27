@@ -253,20 +253,17 @@ router.get('/performance/:employeeId', authenticateToken, async (req, res) => {
 router.get(
   '/reports/overview',
   authenticateToken,
-  authorizeRole(['HR', 'Manager', 'Admin']),
+  authorizeRole(['hr', 'hr_manager', 'manager', 'admin', 'super_admin']),
   async (req, res) => {
     try {
-      // Default to last 30 days when dates are not provided
+      // Default to current month when dates are not provided
       const now = new Date();
       const endDate = req.query.endDate ? new Date(req.query.endDate) : now;
       const startDate = req.query.startDate
         ? new Date(req.query.startDate)
         : new Date(now.getFullYear(), now.getMonth(), 1); // first day of current month
 
-      const report = await HRReportService.generateHROverviewReport(
-        startDate,
-        endDate
-      );
+      const report = await HRReportService.generateHROverviewReport(startDate, endDate);
       res.json({ success: true, data: report });
     } catch (error) {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });

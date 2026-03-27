@@ -219,6 +219,9 @@ const employeeAffairsExpandedRoutes = require('../routes/employeeAffairs.expande
 const employeeAffairsPhase2Routes = require('../routes/employeeAffairs.phase2.routes');
 const employeeAffairsPhase3Routes = require('../routes/employeeAffairs.phase3.routes');
 
+// HR Smart System — AI, Analytics, Onboarding, Documents (النظام الذكي لشؤون الموظفين)
+const hrSmartRoutes = require('../routes/hr/smart.routes');
+
 // WhatsApp Communication System (نظام الوتساب)
 const whatsappRoutes = require('../communication/whatsapp-routes');
 const whatsappEnhancedRoutes = require('../communication/whatsapp-enhanced-routes');
@@ -539,6 +542,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ── Employee Affairs Phase 3 (شؤون الموظفين — المرحلة الثالثة) ──
   dualMount(app, 'employee-affairs-phase3', employeeAffairsPhase3Routes);
   logger.info('Employee Affairs Phase 3 routes mounted (50+ endpoints)');
+
+  // ── HR Smart System — AI, Analytics, Onboarding, Documents ──
+  dualMount(app, 'hr-smart', hrSmartRoutes);
+  logger.info(
+    'HR Smart routes mounted: AI predictions, analytics, onboarding, documents (35+ endpoints)'
+  );
 
   // ── WhatsApp Communication System (نظام الوتساب) ──
   dualMount(app, 'whatsapp', whatsappRoutes);

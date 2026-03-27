@@ -351,5 +351,8 @@
   // TypeScript workspace SDK
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.preferences.importModuleSpecifier": "relative"
+  "typescript.preferences.importModuleSpecifier": "relative",
+
+  // Prevent TS from picking up tsconfig.json inside node_modules
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false
 }

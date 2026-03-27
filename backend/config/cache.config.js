@@ -152,11 +152,17 @@ const createRedisClient = async () => {
   try {
     await Promise.race([
       client.connect(),
-      new Promise((_, reject) => setTimeout(() => reject(new Error('Redis connect timeout')), 4000)),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Redis connect timeout')), 4000)
+      ),
     ]);
   } catch (err) {
     logger.error('Redis connect failed, returning null:', { error: err.message });
-    try { client.disconnect(); } catch { /* ignore */ }
+    try {
+      client.disconnect();
+    } catch {
+      /* ignore */
+    }
     return null;
   }
 

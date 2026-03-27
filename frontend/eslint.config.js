@@ -2,6 +2,7 @@ const js = require('@eslint/js');
 const globals = require('globals');
 const unusedImports = require('eslint-plugin-unused-imports');
 const reactHooks = require('eslint-plugin-react-hooks');
+const reactPlugin = require('eslint-plugin-react');
 
 module.exports = [
   {
@@ -12,6 +13,7 @@ module.exports = [
     plugins: {
       'unused-imports': unusedImports,
       'react-hooks': reactHooks,
+      react: reactPlugin,
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -31,6 +33,8 @@ module.exports = [
     rules: {
       ...js.configs.recommended.rules,
       'no-unused-vars': 'off',
+      'react/jsx-uses-react': 'warn',
+      'react/jsx-uses-vars': 'warn',
       'unused-imports/no-unused-imports': 'warn',
       'unused-imports/no-unused-vars': [
         'warn',

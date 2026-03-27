@@ -9,6 +9,7 @@ import AttendanceModule from './modules/AttendanceModule';
 import LeaveModule from './modules/LeaveModule';
 import PayrollModule from './modules/PayrollModule';
 import PerformanceModule from './modules/PerformanceModule';
+import SmartHRModule from './modules/SmartHRModule';
 import AttendanceReport from './pages/AttendanceReport';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
@@ -81,6 +82,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <AttendanceReport />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/smart-hr/*"
+              element={
+                <PrivateRoute>
+                  <SmartHRModule />
                 </PrivateRoute>
               }
             />

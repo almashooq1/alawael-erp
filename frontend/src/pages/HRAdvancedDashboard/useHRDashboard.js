@@ -33,7 +33,12 @@ const useHRDashboard = () => {
       setIsDemo(kpiRes.isDemo || attRes.isDemo);
 
       if (process.env.NODE_ENV === 'development' && (kpiRes.isDemo || attRes.isDemo)) {
-        console.warn('[HRDashboard] Partial demo mode — kpi:', kpiRes.isDemo, 'att:', attRes.isDemo);
+        console.warn(
+          '[HRDashboard] Partial demo mode — kpi:',
+          kpiRes.isDemo,
+          'att:',
+          attRes.isDemo
+        );
       }
     } catch (err) {
       if (process.env.NODE_ENV === 'development') {

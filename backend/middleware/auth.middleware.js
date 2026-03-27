@@ -177,7 +177,8 @@ const requireRole = (...args) => {
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = (req.user.role || '').toLowerCase();
+    if (!allowedRoles.some(r => r.toLowerCase() === userRole)) {
       return res.status(403).json({
         success: false,
         error: 'Insufficient permissions',

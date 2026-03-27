@@ -36,21 +36,20 @@ export const getDashboardKPIs = async () => {
       data: {
         totalEmployees: raw?.keyMetrics?.totalEmployees ?? raw?.totalEmployees ?? 0,
         activeEmployees: raw?.keyMetrics?.activeEmployees ?? raw?.activeEmployees ?? 0,
-        newHires: raw?.keyMetrics?.newHires ?? raw?.newHires ?? 0,
-        turnoverRate: raw?.keyMetrics?.turnoverRate ?? raw?.turnoverRate ?? 0,
-        onLeave: raw?.onLeave ?? 0,
-        attendanceRate: raw?.attendanceRate ?? 0,
-        pendingLeaves: raw?.pendingLeaves ?? 0,
+        newHires: raw?.keyMetrics?.newHires ?? raw?.keyMetrics?.newEmployees ?? raw?.newHires ?? 0,
+        turnoverRate: parseFloat(raw?.keyMetrics?.turnoverRate) || raw?.turnoverRate || 0,
+        onLeave: raw?.keyMetrics?.onLeave ?? raw?.onLeave ?? 0,
+        attendanceRate: raw?.keyMetrics?.attendanceRate ?? raw?.attendanceRate ?? 0,
+        pendingLeaves: raw?.keyMetrics?.pendingLeaves ?? raw?.pendingLeaves ?? 0,
         totalPayroll:
           raw?.totalPayroll ??
-          (raw?.salaryAnalysis?.averageSalary
-            ? raw.salaryAnalysis.averageSalary * (raw?.keyMetrics?.totalEmployees || 1)
+          (raw?.salaryAnalysis?.averageBaseSalary ?? raw?.salaryAnalysis?.averageSalary
+            ? (raw.salaryAnalysis.averageBaseSalary ?? raw.salaryAnalysis.averageSalary) *
+              (raw?.keyMetrics?.totalEmployees || 1)
             : 0),
-        avgRating: raw?.avgRating ?? 0,
+        avgRating: raw?.keyMetrics?.avgRating ?? raw?.avgRating ?? 0,
         departments:
-          raw?.distribution?.byDepartment?.map(d => d._id || d.name) ??
-          raw?.departments ??
-          [],
+          raw?.distribution?.byDepartment?.map(d => d._id || d.name) ?? raw?.departments ?? [],
       },
       isDemo: false,
     };

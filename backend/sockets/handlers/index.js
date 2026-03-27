@@ -55,7 +55,10 @@ function initializeHandlers(io) {
 
     // Error handler
     socket.on('error', error => {
-      logger.error(`[Socket.IO] Socket error (${socket.id}):`, error);
+      const safeError = error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : String(error);
+      logger.error(`[Socket.IO] Socket error (${socket.id}):`, safeError);
       socket.emit('error', {
         message: 'حدث خطأ في الاتصال',
         code: 'SOCKET_ERROR',
@@ -74,7 +77,10 @@ function initializeHandlers(io) {
 
   // Global error handling
   io.engine.on('connection_error', err => {
-    logger.error('[Socket.IO] Connection error:', err);
+    const safeErr = err instanceof Error
+      ? { message: err.message, code: err.code, context: err.context }
+      : String(err);
+    logger.error('[Socket.IO] Connection error:', safeErr);
   });
 
   logger.info('[Socket.IO] All handlers initialized successfully');

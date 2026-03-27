@@ -24,7 +24,18 @@ const customFormat = winston.format.combine(
     let log = `${timestamp} [${level.toUpperCase()}]: ${message}`;
 
     if (metadata && Object.keys(metadata).length > 0) {
-      log += ` | ${JSON.stringify(metadata)}`;
+      try {
+        const seen = new WeakSet();
+        log += ` | ${JSON.stringify(metadata, (_key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) return '[Circular]';
+            seen.add(value);
+          }
+          return value;
+        })}`;
+      } catch {
+        log += ' | [unserializable metadata]';
+      }
     }
 
     if (stack) {

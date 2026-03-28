@@ -30,4 +30,11 @@ const dailySessionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+goalProgressSchema.index({ student: 1 });
+goalProgressSchema.index({ specialist: 1 });
+goalProgressSchema.index({ date: -1 });
+goalProgressSchema.index({ student: 1, date: -1 });
+goalProgressSchema.index({ plan: 1 });
 module.exports = mongoose.models.DailySession || mongoose.model('DailySession', dailySessionSchema);

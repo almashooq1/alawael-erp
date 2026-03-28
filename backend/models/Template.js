@@ -42,4 +42,11 @@ const TemplateSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+TemplateSchema.index({ category: 1 });
+TemplateSchema.index({ status: 1 });
+TemplateSchema.index({ createdBy: 1 });
+TemplateSchema.index({ orgId: 1, category: 1, status: 1 });
+TemplateSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.Template || mongoose.model('Template', TemplateSchema);

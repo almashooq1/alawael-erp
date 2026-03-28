@@ -14,4 +14,10 @@ const shiftSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+shiftSchema.index({ department: 1 });
+shiftSchema.index({ type: 1 });
+shiftSchema.index({ isActive: 1 });
+shiftSchema.index({ department: 1, isActive: 1 });
 module.exports = mongoose.models.Shift || mongoose.model('Shift', shiftSchema);

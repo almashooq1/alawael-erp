@@ -32,4 +32,11 @@ const approvalRequestSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+approvalRequestSchema.index({ requester: 1 });
+approvalRequestSchema.index({ status: 1 });
+approvalRequestSchema.index({ requestType: 1 });
+approvalRequestSchema.index({ requester: 1, status: 1 });
+approvalRequestSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.ApprovalRequest || mongoose.model('ApprovalRequest', approvalRequestSchema);

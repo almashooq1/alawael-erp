@@ -59,6 +59,12 @@ if (!useMock) {
     updatedAt: Date,
   });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+PredictionSchema.index({ userId: 1 });
+PredictionSchema.index({ predictionType: 1 });
+PredictionSchema.index({ userId: 1, predictionType: 1 });
+PredictionSchema.index({ createdAt: -1 });
   module.exports = mongoose.models.Prediction || mongoose.model('Prediction', PredictionSchema);
 } else {
   const store = [];

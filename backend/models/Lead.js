@@ -39,4 +39,12 @@ const leadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+leadSchema.index({ status: 1 });
+leadSchema.index({ assignedTo: 1 });
+leadSchema.index({ source: 1 });
+leadSchema.index({ nextFollowUpDate: 1 });
+leadSchema.index({ status: 1, assignedTo: 1 });
+leadSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.Lead || mongoose.model('Lead', leadSchema);

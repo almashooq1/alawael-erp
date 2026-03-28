@@ -1240,9 +1240,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
 
   // ── Phase 34: Smart Attendance — الحضور الذكي ────────────────────────────
+  // NOTE: smart-attendance is already mounted via dualMount (Wave 2) using smart_attendance.routes.js
+  // The smart-attendance.routes.js (hyphen) provides additional CRUD sub-modules
   safeMount(
     app,
-    ['/api/smart-attendance', '/api/v1/smart-attendance'],
+    ['/api/smart-attendance-crud', '/api/v1/smart-attendance-crud'],
     '../routes/smart-attendance.routes'
   );
   logger.info(

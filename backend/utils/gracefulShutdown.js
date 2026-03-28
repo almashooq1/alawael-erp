@@ -21,6 +21,21 @@ let isShuttingDown = false;
 // Must be < PM2 kill_timeout (35s) to avoid SIGKILL during cleanup
 const FORCE_TIMEOUT_MS = parseInt(process.env.SHUTDOWN_TIMEOUT, 10) || 30000;
 
+// ── Service shutdown hook registry ────────────────────────────────────────
+// Services call registerShutdownHook(name, fn) to ensure clean teardown.
+const shutdownHooks = [];
+
+/**
+ * Register a cleanup function to be called during graceful shutdown.
+ * @param {string} name   Human-readable label (for logging)
+ * @param {Function} fn   Async or sync cleanup function (max 5s per hook)
+ */
+const registerShutdownHook = (name, fn) => {
+  if (typeof fn !== 'function') return;
+  shutdownHooks.push({ name, fn });
+  logger.debug(`[Shutdown] Hook registered: ${name}`);
+};
+
 /**
  * Setup graceful shutdown
  * إعداد إيقاف التشغيل السلس
@@ -100,6 +115,21 @@ const setupGracefulShutdown = (server, io = null) => {
       ]);
       logger.info('[Shutdown] Redis connections closed');
 
+      // ── Run registered service shutdown hooks ──────────────────────────
+      if (shutdownHooks.length > 0) {
+        logger.info(`[Shutdown] Running ${shutdownHooks.length} service hook(s)...`);
+        const hookResults = await Promise.allSettled(
+          shutdownHooks.map(({ name, fn }) =>
+            Promise.resolve()
+              .then(() => fn())
+              .then(() => logger.info(`[Shutdown] Hook OK: ${name}`))
+              .catch(e => logger.warn(`[Shutdown] Hook FAIL: ${name} — ${e.message}`))
+          )
+        );
+        const failed = hookResults.filter(r => r.status === 'rejected').length;
+        if (failed) logger.warn(`[Shutdown] ${failed}/${shutdownHooks.length} hooks failed`);
+      }
+
       clearTimeout(forceShutdownTimeout);
       logger.info('[Shutdown] Completed successfully');
       process.exit(0);
@@ -148,4 +178,5 @@ const shutdownMiddleware = (req, res, next) => {
 module.exports = {
   setupGracefulShutdown,
   shutdownMiddleware,
+  registerShutdownHook,
 };

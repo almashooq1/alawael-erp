@@ -28,4 +28,11 @@ const standardizedAssessmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+sectionSchema.index({ beneficiary: 1 });
+sectionSchema.index({ evaluator: 1 });
+sectionSchema.index({ date: -1 });
+sectionSchema.index({ beneficiary: 1, date: -1 });
+sectionSchema.index({ name: 1 });
 module.exports = mongoose.models.StandardizedAssessment || mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);

@@ -46,4 +46,12 @@ const therapeuticPlanSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+goalSchema.index({ beneficiary: 1 });
+goalSchema.index({ program: 1 });
+goalSchema.index({ status: 1 });
+goalSchema.index({ beneficiary: 1, status: 1 });
+goalSchema.index({ careManager: 1 });
+goalSchema.index({ startDate: -1 });
 module.exports = mongoose.models.TherapeuticPlan || mongoose.model('TherapeuticPlan', therapeuticPlanSchema);

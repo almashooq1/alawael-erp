@@ -18,4 +18,11 @@ const goalProgressHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+goalProgressHistorySchema.index({ planId: 1 });
+goalProgressHistorySchema.index({ goalId: 1 });
+goalProgressHistorySchema.index({ planId: 1, goalId: 1 });
+goalProgressHistorySchema.index({ recordedDate: -1 });
+goalProgressHistorySchema.index({ recordedBy: 1 });
 module.exports = mongoose.models.GoalProgressHistory || mongoose.model('GoalProgressHistory', goalProgressHistorySchema);

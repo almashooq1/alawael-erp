@@ -24,4 +24,12 @@ const waitlistSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+waitlistSchema.index({ beneficiary: 1 });
+waitlistSchema.index({ status: 1 });
+waitlistSchema.index({ department: 1 });
+waitlistSchema.index({ priority: 1 });
+waitlistSchema.index({ status: 1, department: 1 });
+waitlistSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.Waitlist || mongoose.model('Waitlist', waitlistSchema);

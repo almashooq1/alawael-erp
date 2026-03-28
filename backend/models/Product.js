@@ -43,6 +43,11 @@ productSchema.pre('save', function (next) {
   next();
 });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+productSchema.index({ status: 1 });
+productSchema.index({ name: 1 });
+productSchema.index({ createdAt: -1 });
 const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
 
 module.exports = Product;

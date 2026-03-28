@@ -55,6 +55,14 @@ if (!useMock) {
     cancelledAt: Date,
   });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+SubscriptionSchema.index({ userId: 1 });
+SubscriptionSchema.index({ status: 1 });
+SubscriptionSchema.index({ plan: 1 });
+SubscriptionSchema.index({ userId: 1, status: 1 });
+SubscriptionSchema.index({ nextBillingDate: 1 });
+SubscriptionSchema.index({ createdAt: -1 });
   module.exports = mongoose.models.Subscription || mongoose.model('Subscription', SubscriptionSchema);
 } else {
   class MockSubscription {

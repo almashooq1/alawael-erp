@@ -47,4 +47,11 @@ const TaskSchema = new mongoose.Schema({
   updatedAt: Date,
 });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+TaskSchema.index({ projectId: 1 });
+TaskSchema.index({ status: 1 });
+TaskSchema.index({ projectId: 1, status: 1 });
+TaskSchema.index({ dueDate: 1 });
+TaskSchema.index({ createdAt: -1 });
 module.exports = mongoose.models.Task || mongoose.model('Task', TaskSchema);

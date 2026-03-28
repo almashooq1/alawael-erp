@@ -23,4 +23,12 @@ const complianceLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+complianceLogSchema.index({ domain: 1 });
+complianceLogSchema.index({ status: 1 });
+complianceLogSchema.index({ severity: 1 });
+complianceLogSchema.index({ relatedId: 1 });
+complianceLogSchema.index({ domain: 1, status: 1 });
+complianceLogSchema.index({ detectedAt: -1 });
 module.exports = mongoose.models.ComplianceLog || mongoose.model('ComplianceLog', complianceLogSchema);

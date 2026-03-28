@@ -37,6 +37,13 @@ if (!useMock) {
     createdAt: { type: Date, default: Date.now },
   });
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+AnalyticsSchema.index({ userId: 1 });
+AnalyticsSchema.index({ metricType: 1 });
+AnalyticsSchema.index({ timestamp: -1 });
+AnalyticsSchema.index({ userId: 1, metricType: 1, timestamp: -1 });
+AnalyticsSchema.index({ period: 1 });
   module.exports = mongoose.models.Analytics || mongoose.model('Analytics', AnalyticsSchema);
 } else {
   const store = [];

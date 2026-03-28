@@ -40,4 +40,9 @@ const quizSchema = new mongoose.Schema(
   }
 );
 
+
+// ── Indexes ───────────────────────────────────────────────────────────────
+questionSchema.index({ courseId: 1 });
+questionSchema.index({ lessonId: 1 });
+questionSchema.index({ courseId: 1, lessonId: 1 });
 module.exports = mongoose.models.Quiz || mongoose.model('Quiz', quizSchema);

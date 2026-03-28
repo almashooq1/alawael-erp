@@ -8,7 +8,10 @@ const router = express.Router();
 const SmartAttendanceService = require('../services/hr/smart_attendance_service');
 const SmartLeave = require('../models/smart_leave.model');
 const SmartAttendance = require('../models/advanced_attendance.model');
-const { authenticateToken: authMiddleware, requireRole: roleMiddleware } = require('../middleware/auth');
+const {
+  authenticateToken: authMiddleware,
+  requireRole: roleMiddleware,
+} = require('../middleware/auth');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ========================

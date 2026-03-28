@@ -97,10 +97,14 @@ router.post('/', async (req, res) => {
 // ── Update curriculum ────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
-    const curriculum = await Curriculum.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    })
+    const curriculum = await Curriculum.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    )
       .populate('subject', 'name code')
       .populate('teacher', 'fullName');
     if (!curriculum) return res.status(404).json({ success: false, message: 'المنهج غير موجود' });

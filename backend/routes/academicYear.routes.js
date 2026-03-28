@@ -53,13 +53,11 @@ router.get('/current', async (req, res) => {
     }
     res.json({ success: true, data: current });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: 'خطأ في جلب العام الدراسي الحالي',
-        error: safeError(error),
-      });
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب العام الدراسي الحالي',
+      error: safeError(error),
+    });
   }
 });
 

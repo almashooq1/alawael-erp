@@ -235,7 +235,10 @@ router.get(
     const org = req.user.organization;
     const filter = { organization: org };
     if (req.query.status) filter.status = req.query.status;
-    const recons = await AccountReconciliation.find(filter).sort({ createdAt: -1 }).limit(50).lean();
+    const recons = await AccountReconciliation.find(filter)
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
     res.json({ success: true, data: recons });
   })
 );
@@ -298,7 +301,8 @@ router.get(
     if (!IntercompanyTransaction) return res.json({ success: true, data: [] });
     const txns = await IntercompanyTransaction.find({ organization: req.user.organization })
       .sort({ createdAt: -1 })
-      .limit(100).lean();
+      .limit(100)
+      .lean();
     res.json({ success: true, data: txns });
   })
 );
@@ -421,7 +425,8 @@ router.get(
     if (!DunningHistory) return res.json({ success: true, data: [] });
     const history = await DunningHistory.find({ organization: req.user.organization })
       .sort({ sentAt: -1 })
-      .limit(100).lean();
+      .limit(100)
+      .lean();
     res.json({ success: true, data: history });
   })
 );
@@ -641,7 +646,8 @@ router.get(
     if (!TreasuryTransfer) return res.json({ success: true, data: [] });
     const transfers = await TreasuryTransfer.find({ organization: req.user.organization })
       .sort({ transferDate: -1 })
-      .limit(50).lean();
+      .limit(50)
+      .lean();
     res.json({ success: true, data: transfers });
   })
 );
@@ -867,7 +873,8 @@ router.get(
     if (!FinancialApproval) return res.json({ success: true, data: [] });
     const all = await FinancialApproval.find({ organization: req.user.organization })
       .sort({ createdAt: -1 })
-      .limit(100).lean();
+      .limit(100)
+      .lean();
     res.json({ success: true, data: all });
   })
 );
@@ -1067,7 +1074,10 @@ router.get(
   '/company-loans/covenants/check',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan) return res.json({ success: true, data: [] });
-    const loans = await CompanyLoan.find({ organization: req.user.organization, status: 'active' }).lean();
+    const loans = await CompanyLoan.find({
+      organization: req.user.organization,
+      status: 'active',
+    }).lean();
     const allCovenants = [];
     loans.forEach(l => {
       (l.covenants || []).forEach(c => {

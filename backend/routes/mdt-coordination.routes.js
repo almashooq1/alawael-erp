@@ -303,18 +303,21 @@ router.get('/meetings-stats', async (req, res) => {
       MDTMeeting.countDocuments(dateFilter),
       MDTMeeting.aggregate([
         { $match: dateFilter },
-        { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $limit: 1000 },
       ]),
       MDTMeeting.aggregate([
         { $match: dateFilter },
-        { $group: { _id: '$type', count: { $sum: 1 } } }, { $limit: 1000 }
+        { $group: { _id: '$type', count: { $sum: 1 } } },
+        { $limit: 1000 },
       ]),
       MDTMeeting.aggregate([
         { $match: dateFilter },
         {
           $project: { attendeeCount: { $size: { $ifNull: ['$attendees', []] } } },
         },
-        { $group: { _id: null, avg: { $avg: '$attendeeCount' } } }, { $limit: 1000 }
+        { $group: { _id: null, avg: { $avg: '$attendeeCount' } } },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -638,14 +641,19 @@ router.get('/plans-stats', async (req, res) => {
   try {
     const [total, statusCounts, avgProgress, avgGoals, overdueReviews] = await Promise.all([
       UnifiedRehabPlan.countDocuments(),
-      UnifiedRehabPlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      UnifiedRehabPlan.aggregate([
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $limit: 1000 },
+      ]),
       UnifiedRehabPlan.aggregate([
         { $match: { status: 'ACTIVE' } },
-        { $group: { _id: null, avg: { $avg: '$overallProgress' } } }, { $limit: 1000 }
+        { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
+        { $limit: 1000 },
       ]),
       UnifiedRehabPlan.aggregate([
         { $project: { goalCount: { $size: { $ifNull: ['$goals', []] } } } },
-        { $group: { _id: null, avg: { $avg: '$goalCount' } } }, { $limit: 1000 }
+        { $group: { _id: null, avg: { $avg: '$goalCount' } } },
+        { $limit: 1000 },
       ]),
       UnifiedRehabPlan.countDocuments({
         reviewDate: { $lte: new Date() },
@@ -921,8 +929,14 @@ router.get('/referrals-stats', async (req, res) => {
     const [total, statusCounts, priorityCounts, departmentStats, avgResponseTime] =
       await Promise.all([
         ReferralTicket.countDocuments(),
-        ReferralTicket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
-        ReferralTicket.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        ReferralTicket.aggregate([
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
+        ReferralTicket.aggregate([
+          { $group: { _id: '$priority', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         ReferralTicket.aggregate([
           { $group: { _id: '$toDepartment', count: { $sum: 1 } } },
           { $sort: { count: -1 } },
@@ -937,7 +951,8 @@ router.get('/referrals-stats', async (req, res) => {
               },
             },
           },
-          { $group: { _id: null, avg: { $avg: '$responseTime' } } }, { $limit: 1000 }
+          { $group: { _id: null, avg: { $avg: '$responseTime' } } },
+          { $limit: 1000 },
         ]),
       ]);
 
@@ -1003,7 +1018,8 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
               $sum: { $cond: [{ $eq: ['$goals.status', 'ACHIEVED'] }, 1, 0] },
             },
           },
-        }, { $limit: 1000 }
+        },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -1054,7 +1070,8 @@ router.get('/dashboard/team-workload', authorize(['admin', 'manager']), async (r
             caseCount: { $sum: 1 },
           },
         },
-        { $sort: { caseCount: -1 } }, { $limit: 1000 }
+        { $sort: { caseCount: -1 } },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -1158,7 +1175,8 @@ router.get('/dashboard/overdue', authorize(['admin', 'manager']), async (req, re
             meetingNumber: 1,
             actionItem: '$generalActionItems',
           },
-        }, { $limit: 1000 }
+        },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -1447,7 +1465,8 @@ router.get('/dashboard/overview', async (req, res) => {
       UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
       UnifiedRehabPlan.aggregate([
         { $match: { status: 'ACTIVE' } },
-        { $group: { _id: null, avg: { $avg: '$overallProgress' } } }, { $limit: 1000 }
+        { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
+        { $limit: 1000 },
       ]),
       ReferralTicket.countDocuments(),
       ReferralTicket.countDocuments({ status: 'PENDING' }),
@@ -1510,7 +1529,11 @@ router.get('/stats', authorize(['admin', 'manager']), async (req, res) => {
       UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
       ReferralTicket.countDocuments({ status: 'PENDING' }),
       MDTMeeting.countDocuments({ status: 'COMPLETED' }),
-      MDTMeeting.aggregate([{ $unwind: '$generalDecisions' }, { $count: 'total' }, { $limit: 1000 }]),
+      MDTMeeting.aggregate([
+        { $unwind: '$generalDecisions' },
+        { $count: 'total' },
+        { $limit: 1000 },
+      ]),
     ]);
 
     res.json({

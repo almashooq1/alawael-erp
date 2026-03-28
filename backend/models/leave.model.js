@@ -38,4 +38,9 @@ const leaveSchema = new mongoose.Schema(
   }
 );
 
+// Compound indexes for common query patterns
+leaveSchema.index({ employeeId: 1, status: 1 });
+leaveSchema.index({ startDate: 1, endDate: 1 });
+leaveSchema.index({ status: 1, createdAt: -1 });
+
 module.exports = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);

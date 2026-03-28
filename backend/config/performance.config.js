@@ -280,9 +280,20 @@ class PerformanceMonitor {
   start() {
     // مراقبة الذاكرة
     if (this.config.monitoring.metrics.collect) {
-      setInterval(() => {
+      this._metricsInterval = setInterval(() => {
         this.collectMetrics();
       }, this.config.monitoring.metrics.interval * 1000);
+      this._metricsInterval.unref();
+    }
+  }
+
+  /**
+   * إيقاف المراقبة
+   */
+  stop() {
+    if (this._metricsInterval) {
+      clearInterval(this._metricsInterval);
+      this._metricsInterval = null;
     }
   }
 

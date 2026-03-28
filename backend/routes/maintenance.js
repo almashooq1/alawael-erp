@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, _authorize } = require('../middleware/auth');
 const { MaintenanceService } = require('../services/maintenanceService');
 const logger = require('../utils/logger');
@@ -27,7 +26,7 @@ router.use((_req, res, next) => {
 router.get(
   '/schedules',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedules = await maintenanceService.getAllSchedules(req.query);
       res.status(200).json({
@@ -42,7 +41,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
-  })
+  }
 );
 
 /**
@@ -53,7 +52,7 @@ router.get(
 router.post(
   '/schedules',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { vehicleId, maintenanceType, scheduledDate, estimatedDuration, description } =
         req.body;
@@ -85,7 +84,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -96,7 +95,7 @@ router.post(
 router.get(
   '/schedules/:scheduleId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await maintenanceService.getScheduleById(req.params.scheduleId);
 
@@ -118,7 +117,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -129,7 +128,7 @@ router.get(
 router.put(
   '/schedules/:scheduleId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await maintenanceService.updateSchedule(req.params.scheduleId, req.body);
 
@@ -151,7 +150,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -162,7 +161,7 @@ router.put(
 router.delete(
   '/schedules/:scheduleId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await maintenanceService.deleteSchedule(req.params.scheduleId);
 
@@ -184,7 +183,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -195,7 +194,7 @@ router.delete(
 router.get(
   '/predict/:vehicleId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const prediction = await maintenanceService.predictMaintenanceNeeds(req.params.vehicleId);
 
@@ -217,7 +216,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to predict maintenance',
       });
     }
-  })
+  }
 );
 
 /**
@@ -228,7 +227,7 @@ router.get(
 router.post(
   '/records',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { vehicleId, maintenanceType, completionDate, cost, notes, parts } = req.body;
 
@@ -260,7 +259,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create record',
       });
     }
-  })
+  }
 );
 
 /**
@@ -271,7 +270,7 @@ router.post(
 router.get(
   '/records/:recordId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const record = await maintenanceService.getRecordById(req.params.recordId);
 
@@ -293,7 +292,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch record',
       });
     }
-  })
+  }
 );
 
 /**
@@ -304,7 +303,7 @@ router.get(
 router.get(
   '/vehicle/:vehicleId/history',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const history = await maintenanceService.getVehicleMaintenanceHistory(req.params.vehicleId);
 
@@ -326,7 +325,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch history',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

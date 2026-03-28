@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate } = require('../middleware/auth');
 const { PerformanceAnalyticsService } = require('../services/performanceAnalyticsService');
 const logger = require('../utils/logger');
@@ -27,7 +26,7 @@ router.use((_req, res, next) => {
 router.get(
   '/overview',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const overview = await analyticsService.getOverview(req.query);
       res.status(200).json({
@@ -41,7 +40,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
-  })
+  }
 );
 
 /**
@@ -52,7 +51,7 @@ router.get(
 router.get(
   '/dashboard',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const dashboard = await analyticsService.getDashboard(req.query);
       res.status(200).json({
@@ -66,7 +65,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch dashboard',
       });
     }
-  })
+  }
 );
 
 /**
@@ -77,7 +76,7 @@ router.get(
 router.get(
   '/module/:moduleName',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const analytics = await analyticsService.getModuleAnalytics(req.params.moduleName, req.query);
 
@@ -92,7 +91,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
-  })
+  }
 );
 
 /**
@@ -103,7 +102,7 @@ router.get(
 router.get(
   '/user/:userId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const analytics = await analyticsService.getUserAnalytics(req.params.userId);
 
@@ -125,7 +124,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
       });
     }
-  })
+  }
 );
 
 /**
@@ -136,7 +135,7 @@ router.get(
 router.get(
   '/performance-trends',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const trends = await analyticsService.getPerformanceTrends(req.query);
 
@@ -151,7 +150,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch trends',
       });
     }
-  })
+  }
 );
 
 /**
@@ -162,7 +161,7 @@ router.get(
 router.get(
   '/kpi',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const kpis = await analyticsService.getKPIs(req.query);
 
@@ -177,7 +176,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch KPIs',
       });
     }
-  })
+  }
 );
 
 /**
@@ -188,7 +187,7 @@ router.get(
 router.post(
   '/track-event',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { eventName, eventData, metadata } = req.body;
 
@@ -218,7 +217,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to track event',
       });
     }
-  })
+  }
 );
 
 /**
@@ -229,7 +228,7 @@ router.post(
 router.get(
   '/health-check',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const health = await analyticsService.getHealthStatus();
 
@@ -244,7 +243,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to check health',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

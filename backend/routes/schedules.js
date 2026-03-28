@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
 const { ScheduleManagementService } = require('../services/scheduleManagementService');
 const logger = require('../utils/logger');
@@ -27,7 +26,7 @@ router.use((_req, res, next) => {
 router.get(
   '/',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedules = await scheduleService.getAllSchedules(req.query);
       res.status(200).json({
@@ -42,7 +41,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
-  })
+  }
 );
 
 /**
@@ -54,7 +53,7 @@ router.post(
   '/',
   authenticate,
   authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { title, description, startDate, endDate, resourceId, type } = req.body;
 
@@ -86,7 +85,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -97,7 +96,7 @@ router.post(
 router.get(
   '/resource/:resourceId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByResource(req.params.resourceId);
 
@@ -113,7 +112,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
-  })
+  }
 );
 
 /**
@@ -124,7 +123,7 @@ router.get(
 router.get(
   '/date-range/:startDate/:endDate',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByDateRange(
         new Date(req.params.startDate),
@@ -143,7 +142,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
       });
     }
-  })
+  }
 );
 
 /**
@@ -154,7 +153,7 @@ router.get(
 router.get(
   '/:scheduleId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await scheduleService.getScheduleById(req.params.scheduleId);
 
@@ -176,7 +175,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -188,7 +187,7 @@ router.put(
   '/:scheduleId',
   authenticate,
   authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await scheduleService.updateSchedule(req.params.scheduleId, req.body);
 
@@ -210,7 +209,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -222,7 +221,7 @@ router.delete(
   '/:scheduleId',
   authenticate,
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await scheduleService.deleteSchedule(req.params.scheduleId);
 
@@ -244,7 +243,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete schedule',
       });
     }
-  })
+  }
 );
 
 /**
@@ -255,7 +254,7 @@ router.delete(
 router.post(
   '/:scheduleId/confirm',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await scheduleService.confirmSchedule(req.params.scheduleId, req.user.id);
 
@@ -277,7 +276,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to confirm schedule',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

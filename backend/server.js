@@ -229,7 +229,7 @@ module.exports.server = server;
 
 // --- Start Server ---
 if (require.main === module) {
-  const startServer = (port) => {
+  const startServer = port => {
     const host = '0.0.0.0';
     const isProduction = process.env.NODE_ENV === 'production';
 

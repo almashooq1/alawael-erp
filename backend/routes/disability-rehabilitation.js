@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
 const { _validateRequest } = require('../middleware/validation');
 const { DisabilityRehabilitationService } = require('../services/disabilityRehabilitationService');
@@ -30,7 +29,7 @@ router.use(authenticate);
  */
 router.get(
   '/programs',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const programs = await disabilityService.getAllPrograms(req.query);
       res.status(200).json({
@@ -45,7 +44,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch programs',
       });
     }
-  })
+  }
 );
 
 /**
@@ -56,7 +55,7 @@ router.get(
 router.post(
   '/programs',
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { name, description, duration, targetAudience, objectives } = req.body;
 
@@ -87,7 +86,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create program',
       });
     }
-  })
+  }
 );
 
 /**
@@ -97,7 +96,7 @@ router.post(
  */
 router.get(
   '/programs/:programId',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const program = await disabilityService.getProgramById(req.params.programId);
 
@@ -119,7 +118,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch program',
       });
     }
-  })
+  }
 );
 
 /**
@@ -130,7 +129,7 @@ router.get(
 router.put(
   '/programs/:programId',
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const program = await disabilityService.updateProgram(req.params.programId, req.body);
 
@@ -152,7 +151,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update program',
       });
     }
-  })
+  }
 );
 
 /**
@@ -163,7 +162,7 @@ router.put(
 router.delete(
   '/programs/:programId',
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await disabilityService.deleteProgram(req.params.programId);
 
@@ -185,7 +184,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete program',
       });
     }
-  })
+  }
 );
 
 /**
@@ -196,7 +195,7 @@ router.delete(
 router.post(
   '/sessions',
   authorize(['admin', 'therapist']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { programId, beneficiaryId, duration, sessionDate, notes } = req.body;
 
@@ -227,7 +226,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create session',
       });
     }
-  })
+  }
 );
 
 /**
@@ -237,7 +236,7 @@ router.post(
  */
 router.get(
   '/sessions',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const sessions = await disabilityService.getAllSessions(req.query);
 
@@ -253,7 +252,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch sessions',
       });
     }
-  })
+  }
 );
 
 /**
@@ -263,7 +262,7 @@ router.get(
  */
 router.get(
   '/sessions/:sessionId',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const session = await disabilityService.getSessionById(req.params.sessionId);
 
@@ -285,7 +284,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch session',
       });
     }
-  })
+  }
 );
 
 /**
@@ -296,7 +295,7 @@ router.get(
 router.put(
   '/sessions/:sessionId',
   authorize(['admin', 'therapist']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const session = await disabilityService.updateSession(req.params.sessionId, req.body);
 
@@ -318,7 +317,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update session',
       });
     }
-  })
+  }
 );
 
 /**
@@ -329,7 +328,7 @@ router.put(
 router.post(
   '/goals',
   authorize(['admin', 'therapist']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { beneficiaryId, description, targetDate, category, priority } = req.body;
 
@@ -360,7 +359,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create goal',
       });
     }
-  })
+  }
 );
 
 /**
@@ -370,7 +369,7 @@ router.post(
  */
 router.get(
   '/goals/:goalId',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const goal = await disabilityService.getGoalById(req.params.goalId);
 
@@ -392,7 +391,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch goal',
       });
     }
-  })
+  }
 );
 
 /**
@@ -403,7 +402,7 @@ router.get(
 router.post(
   '/assessments',
   authorize(['admin', 'therapist']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { beneficiaryId, programId, results, notes, assessmentDate } = req.body;
 
@@ -434,7 +433,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create assessment',
       });
     }
-  })
+  }
 );
 
 /**
@@ -444,7 +443,7 @@ router.post(
  */
 router.get(
   '/assessments/:assessmentId',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const assessment = await disabilityService.getAssessmentById(req.params.assessmentId);
 
@@ -466,7 +465,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch assessment',
       });
     }
-  })
+  }
 );
 
 /**
@@ -476,7 +475,7 @@ router.get(
  */
 router.get(
   '/performance/:beneficiaryId',
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const performance = await disabilityService.getBeneficiaryPerformance(
         req.params.beneficiaryId
@@ -500,7 +499,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch performance data',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
 const { AssetManagementService } = require('../services/assetManagementService');
 const logger = require('../utils/logger');
@@ -27,7 +26,7 @@ router.use((_req, res, next) => {
 router.get(
   '/',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const assets = await assetService.getAllAssets(req.query);
       res.status(200).json({
@@ -42,7 +41,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
       });
     }
-  })
+  }
 );
 
 /**
@@ -54,7 +53,7 @@ router.post(
   '/',
   authenticate,
   authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { name, category, description, value, location, status } = req.body;
 
@@ -86,7 +85,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to create asset',
       });
     }
-  })
+  }
 );
 
 /**
@@ -97,7 +96,7 @@ router.post(
 router.get(
   '/category/:category',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const assets = await assetService.getAssetsByCategory(req.params.category);
 
@@ -113,7 +112,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
       });
     }
-  })
+  }
 );
 
 /**
@@ -124,7 +123,7 @@ router.get(
 router.get(
   '/depreciation/report',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const report = await assetService.getDepreciationReport();
 
@@ -139,7 +138,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to generate report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -150,7 +149,7 @@ router.get(
 router.get(
   '/:assetId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const asset = await assetService.getAssetById(req.params.assetId);
 
@@ -172,7 +171,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch asset',
       });
     }
-  })
+  }
 );
 
 /**
@@ -184,7 +183,7 @@ router.put(
   '/:assetId',
   authenticate,
   authorize(['manager', 'admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const asset = await assetService.updateAsset(req.params.assetId, req.body);
 
@@ -206,7 +205,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update asset',
       });
     }
-  })
+  }
 );
 
 /**
@@ -218,7 +217,7 @@ router.delete(
   '/:assetId',
   authenticate,
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await assetService.deleteAsset(req.params.assetId);
 
@@ -240,7 +239,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete asset',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

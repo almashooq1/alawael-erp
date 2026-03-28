@@ -6,11 +6,10 @@
  */
 
 const CostCenter = require('../models/CostCenter');
-const asyncHandler = require('express-async-handler');
 const { escapeRegex } = require('../utils/sanitize');
 
 // الحصول على جميع مراكز التكلفة
-exports.getAllCostCenters = asyncHandler(async (req, res) => {
+exports.getAllCostCenters = async (req, res) => {
   const { type, status, department, search } = req.query;
 
   const filter = {};
@@ -34,10 +33,10 @@ exports.getAllCostCenters = asyncHandler(async (req, res) => {
     data: costCenters,
     count: costCenters.length,
   });
-});
+};
 
 // إنشاء مركز تكلفة جديد
-exports.createCostCenter = asyncHandler(async (req, res) => {
+exports.createCostCenter = async (req, res) => {
   const costCenterData = {
     ...req.body,
     createdBy: req.user._id,
@@ -50,10 +49,10 @@ exports.createCostCenter = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم إنشاء مركز التكلفة بنجاح',
   });
-});
+};
 
 // تحديث مركز تكلفة
-exports.updateCostCenter = asyncHandler(async (req, res) => {
+exports.updateCostCenter = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -72,10 +71,10 @@ exports.updateCostCenter = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم تحديث مركز التكلفة بنجاح',
   });
-});
+};
 
 // تسجيل تكلفة
-exports.recordCost = asyncHandler(async (req, res) => {
+exports.recordCost = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -92,10 +91,10 @@ exports.recordCost = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم تسجيل التكلفة بنجاح',
   });
-});
+};
 
 // تسجيل إيراد
-exports.recordRevenue = asyncHandler(async (req, res) => {
+exports.recordRevenue = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -112,10 +111,10 @@ exports.recordRevenue = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم تسجيل الإيراد بنجاح',
   });
-});
+};
 
 // تحديث مؤشر أداء
-exports.updateKPI = asyncHandler(async (req, res) => {
+exports.updateKPI = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -132,10 +131,10 @@ exports.updateKPI = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم تحديث مؤشر الأداء بنجاح',
   });
-});
+};
 
 // توزيع التكاليف
-exports.allocateCosts = asyncHandler(async (req, res) => {
+exports.allocateCosts = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -161,10 +160,10 @@ exports.allocateCosts = asyncHandler(async (req, res) => {
     data: allocations,
     message: 'تم توزيع التكاليف بنجاح',
   });
-});
+};
 
 // تقرير الأداء
-exports.getPerformanceReport = asyncHandler(async (req, res) => {
+exports.getPerformanceReport = async (req, res) => {
   const { year, quarter } = req.query;
 
   const report = await CostCenter.getPerformanceReport(parseInt(year), quarter);
@@ -173,10 +172,10 @@ exports.getPerformanceReport = asyncHandler(async (req, res) => {
     success: true,
     data: report,
   });
-});
+};
 
 // المراكز المتجاوزة للميزانية
-exports.getOverBudget = asyncHandler(async (req, res) => {
+exports.getOverBudget = async (req, res) => {
   const centers = await CostCenter.getOverBudget();
 
   res.json({
@@ -184,10 +183,10 @@ exports.getOverBudget = asyncHandler(async (req, res) => {
     data: centers,
     count: centers.length,
   });
-});
+};
 
 // الحصول على مركز واحد
-exports.getCostCenterById = asyncHandler(async (req, res) => {
+exports.getCostCenterById = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id).populate(
     'manager accountant department branch parentCostCenter'
   );
@@ -203,10 +202,10 @@ exports.getCostCenterById = asyncHandler(async (req, res) => {
     success: true,
     data: costCenter,
   });
-});
+};
 
 // حذف مركز تكلفة
-exports.deleteCostCenter = asyncHandler(async (req, res) => {
+exports.deleteCostCenter = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -222,10 +221,10 @@ exports.deleteCostCenter = asyncHandler(async (req, res) => {
     success: true,
     message: 'تم حذف مركز التكلفة بنجاح',
   });
-});
+};
 
 // تحديث الميزانية
-exports.updateBudget = asyncHandler(async (req, res) => {
+exports.updateBudget = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -247,10 +246,10 @@ exports.updateBudget = asyncHandler(async (req, res) => {
     data: costCenter,
     message: 'تم تحديث الميزانية بنجاح',
   });
-});
+};
 
 // تحليل الميزانية
-exports.getBudgetAnalysis = asyncHandler(async (req, res) => {
+exports.getBudgetAnalysis = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -273,10 +272,10 @@ exports.getBudgetAnalysis = asyncHandler(async (req, res) => {
     success: true,
     data: analysis,
   });
-});
+};
 
 // الحصول على KPIs
-exports.getKPIs = asyncHandler(async (req, res) => {
+exports.getKPIs = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -290,10 +289,10 @@ exports.getKPIs = asyncHandler(async (req, res) => {
     success: true,
     data: costCenter.kpis,
   });
-});
+};
 
 // تحليل الربحية
-exports.getProfitabilityAnalysis = asyncHandler(async (req, res) => {
+exports.getProfitabilityAnalysis = async (req, res) => {
   const costCenter = await CostCenter.findById(req.params.id);
 
   if (!costCenter) {
@@ -315,10 +314,10 @@ exports.getProfitabilityAnalysis = asyncHandler(async (req, res) => {
     success: true,
     data: analysis,
   });
-});
+};
 
 // الإحصائيات
-exports.getStats = asyncHandler(async (req, res) => {
+exports.getStats = async (req, res) => {
   const totalCenters = await CostCenter.countDocuments({ isActive: true });
 
   const centersByType = await CostCenter.aggregate([
@@ -339,10 +338,10 @@ exports.getStats = asyncHandler(async (req, res) => {
       totalBudget: totalBudget[0]?.total || 0,
     },
   });
-});
+};
 
 // حسب النوع
-exports.getByType = asyncHandler(async (req, res) => {
+exports.getByType = async (req, res) => {
   const { type } = req.query;
 
   const centers = await CostCenter.getByType(type);
@@ -352,6 +351,6 @@ exports.getByType = asyncHandler(async (req, res) => {
     data: centers,
     count: centers.length,
   });
-});
+};
 
 module.exports = exports;

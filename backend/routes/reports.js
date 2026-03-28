@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
 const { ReportService } = require('../services/reportService');
 const logger = require('../utils/logger');
@@ -27,7 +26,7 @@ router.use((_req, res, next) => {
 router.get(
   '/',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const reports = await reportService.getAvailableReports(req.query);
       res.status(200).json({
@@ -42,7 +41,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch reports',
       });
     }
-  })
+  }
 );
 
 /**
@@ -53,7 +52,7 @@ router.get(
 router.post(
   '/generate',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { reportType, filters, format } = req.body;
 
@@ -83,7 +82,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to generate report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -94,7 +93,7 @@ router.post(
 router.get(
   '/type/disability-summary',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const report = await reportService.getDisabilitySummary(req.query);
 
@@ -109,7 +108,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -120,7 +119,7 @@ router.get(
 router.get(
   '/type/maintenance-schedule',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const report = await reportService.getMaintenanceSchedule(req.query);
 
@@ -135,7 +134,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -146,7 +145,7 @@ router.get(
 router.get(
   '/:reportId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const report = await reportService.getReportById(req.params.reportId);
 
@@ -168,7 +167,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -179,7 +178,7 @@ router.get(
 router.get(
   '/:reportId/download',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const file = await reportService.downloadReport(req.params.reportId, req.query.format);
 
@@ -201,7 +200,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to download report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -213,7 +212,7 @@ router.delete(
   '/:reportId',
   authenticate,
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await reportService.deleteReport(req.params.reportId);
 
@@ -235,7 +234,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete report',
       });
     }
-  })
+  }
 );
 
 /**
@@ -246,7 +245,7 @@ router.delete(
 router.post(
   '/export-batch',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { reportIds, format } = req.body;
 
@@ -277,7 +276,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to export batch',
       });
     }
-  })
+  }
 );
 
 /**
@@ -288,7 +287,7 @@ router.post(
 router.get(
   '/schedule/:reportId',
   authenticate,
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const schedule = await reportService.getReportSchedule(req.params.reportId);
 
@@ -310,7 +309,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

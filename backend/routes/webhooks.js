@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const asyncHandler = require('express-async-handler');
 const { authenticate, authorize } = require('../middleware/auth');
 const { WebhookService } = require('../services/webhookService');
 const logger = require('../utils/logger');
@@ -28,7 +27,7 @@ router.get(
   '/',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const webhooks = await webhookService.getAllWebhooks(req.query);
       res.status(200).json({
@@ -43,7 +42,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch webhooks',
       });
     }
-  })
+  }
 );
 
 /**
@@ -55,7 +54,7 @@ router.post(
   '/register',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const { url, events, secret, description } = req.body;
 
@@ -100,7 +99,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to register webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -112,7 +111,7 @@ router.get(
   '/:webhookId',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
 
@@ -134,7 +133,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -146,7 +145,7 @@ router.put(
   '/:webhookId',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const webhook = await webhookService.updateWebhook(req.params.webhookId, req.body);
 
@@ -168,7 +167,7 @@ router.put(
         error: 'حدث خطأ في الخادم' || 'Failed to update webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -180,7 +179,7 @@ router.delete(
   '/:webhookId',
   authenticate,
   authorize(['admin']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const result = await webhookService.deleteWebhook(req.params.webhookId);
 
@@ -202,7 +201,7 @@ router.delete(
         error: 'حدث خطأ في الخادم' || 'Failed to delete webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -214,7 +213,7 @@ router.post(
   '/:webhookId/trigger',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
 
@@ -242,7 +241,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to trigger webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -254,7 +253,7 @@ router.post(
   '/:webhookId/test',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const webhook = await webhookService.getWebhookById(req.params.webhookId);
 
@@ -278,7 +277,7 @@ router.post(
         error: 'حدث خطأ في الخادم' || 'Failed to test webhook',
       });
     }
-  })
+  }
 );
 
 /**
@@ -290,7 +289,7 @@ router.get(
   '/:webhookId/deliveries',
   authenticate,
   authorize(['admin', 'manager']),
-  asyncHandler(async (req, res) => {
+  async (req, res) => {
     try {
       const deliveries = await webhookService.getDeliveryHistory(req.params.webhookId, req.query);
 
@@ -313,7 +312,7 @@ router.get(
         error: 'حدث خطأ في الخادم' || 'Failed to fetch deliveries',
       });
     }
-  })
+  }
 );
 
 // Error handling middleware

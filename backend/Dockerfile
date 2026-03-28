@@ -14,8 +14,8 @@ COPY package*.json ./
 RUN npm ci --only=production --ignore-scripts && \
     npm cache clean --force && \
     find node_modules \( -name "*.md" -o -name "*.txt" -o -name "CHANGELOG*" \
-      -o -name "LICENSE*" -o -name "*.map" -o -name ".npmignore" \) \
-      -type f -delete 2>/dev/null || true
+    -o -name "LICENSE*" -o -name "*.map" -o -name ".npmignore" \) \
+    -type f -delete 2>/dev/null || true
 
 # Stage 2: Production runtime — lean image
 FROM node:20-alpine

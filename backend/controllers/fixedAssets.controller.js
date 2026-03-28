@@ -6,11 +6,10 @@
  */
 
 const FixedAsset = require('../models/FixedAsset');
-const asyncHandler = require('express-async-handler');
 const { escapeRegex, stripDangerousKeys } = require('../utils/sanitize');
 
 // الحصول على جميع الأصول
-exports.getAllAssets = asyncHandler(async (req, res) => {
+exports.getAllAssets = async (req, res) => {
   const { category, status, department, search, page = 1, limit = 50 } = req.query;
 
   const filter = {};
@@ -41,10 +40,10 @@ exports.getAllAssets = asyncHandler(async (req, res) => {
     currentPage: page,
     total: count,
   });
-});
+};
 
 // إنشاء أصل جديد
-exports.createAsset = asyncHandler(async (req, res) => {
+exports.createAsset = async (req, res) => {
   const assetData = {
     ...stripDangerousKeys(req.body),
     createdBy: req.user._id,
@@ -57,10 +56,10 @@ exports.createAsset = asyncHandler(async (req, res) => {
     data: asset,
     message: 'تم إضافة الأصل بنجاح',
   });
-});
+};
 
 // تحديث أصل
-exports.updateAsset = asyncHandler(async (req, res) => {
+exports.updateAsset = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -79,10 +78,10 @@ exports.updateAsset = asyncHandler(async (req, res) => {
     data: asset,
     message: 'تم تحديث الأصل بنجاح',
   });
-});
+};
 
 // تسجيل الإهلاك
-exports.recordDepreciation = asyncHandler(async (req, res) => {
+exports.recordDepreciation = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -100,10 +99,10 @@ exports.recordDepreciation = asyncHandler(async (req, res) => {
     data: { asset, journalEntry },
     message: 'تم تسجيل الإهلاك بنجاح',
   });
-});
+};
 
 // تسجيل صيانة
-exports.recordMaintenance = asyncHandler(async (req, res) => {
+exports.recordMaintenance = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -120,10 +119,10 @@ exports.recordMaintenance = asyncHandler(async (req, res) => {
     data: asset,
     message: 'تم تسجيل الصيانة بنجاح',
   });
-});
+};
 
 // التخلص من أصل
-exports.disposeAsset = asyncHandler(async (req, res) => {
+exports.disposeAsset = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -140,10 +139,10 @@ exports.disposeAsset = asyncHandler(async (req, res) => {
     data: result,
     message: 'تم التخلص من الأصل بنجاح',
   });
-});
+};
 
 // تقرير الإهلاك الشهري
-exports.getDepreciationReport = asyncHandler(async (req, res) => {
+exports.getDepreciationReport = async (req, res) => {
   const { year, month } = req.query;
 
   const report = await FixedAsset.getMonthlyDepreciationReport(parseInt(year), parseInt(month));
@@ -152,10 +151,10 @@ exports.getDepreciationReport = asyncHandler(async (req, res) => {
     success: true,
     data: report,
   });
-});
+};
 
 // الأصول المستحقة للصيانة
-exports.getDueForMaintenance = asyncHandler(async (req, res) => {
+exports.getDueForMaintenance = async (req, res) => {
   const { daysAhead = 30 } = req.query;
 
   const assets = await FixedAsset.getDueForMaintenance(parseInt(daysAhead));
@@ -165,10 +164,10 @@ exports.getDueForMaintenance = asyncHandler(async (req, res) => {
     data: assets,
     count: assets.length,
   });
-});
+};
 
 // الحصول على أصل واحد
-exports.getAssetById = asyncHandler(async (req, res) => {
+exports.getAssetById = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id).populate(
     'department branch responsiblePerson'
   );
@@ -184,10 +183,10 @@ exports.getAssetById = asyncHandler(async (req, res) => {
     success: true,
     data: asset,
   });
-});
+};
 
 // حذف أصل
-exports.deleteAsset = asyncHandler(async (req, res) => {
+exports.deleteAsset = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -203,10 +202,10 @@ exports.deleteAsset = asyncHandler(async (req, res) => {
     success: true,
     message: 'تم حذف الأصل بنجاح',
   });
-});
+};
 
 // إهلاك جماعي
-exports.bulkDepreciation = asyncHandler(async (req, res) => {
+exports.bulkDepreciation = async (req, res) => {
   const { assetIds, date } = req.body;
 
   const results = [];
@@ -231,10 +230,10 @@ exports.bulkDepreciation = asyncHandler(async (req, res) => {
     count: results.length,
     message: 'تم تسجيل الإهلاك بنجاح',
   });
-});
+};
 
 // سجل الصيانة
-exports.getMaintenanceHistory = asyncHandler(async (req, res) => {
+exports.getMaintenanceHistory = async (req, res) => {
   const asset = await FixedAsset.findById(req.params.id);
 
   if (!asset) {
@@ -248,10 +247,10 @@ exports.getMaintenanceHistory = asyncHandler(async (req, res) => {
     success: true,
     data: asset.maintenanceHistory,
   });
-});
+};
 
 // الإحصائيات
-exports.getStats = asyncHandler(async (req, res) => {
+exports.getStats = async (req, res) => {
   const totalAssets = await FixedAsset.countDocuments({ isActive: true });
   const activeAssets = await FixedAsset.countDocuments({ status: 'active' });
 
@@ -274,10 +273,10 @@ exports.getStats = asyncHandler(async (req, res) => {
       totalValue: totalValue[0]?.total || 0,
     },
   });
-});
+};
 
 // حسب الفئة
-exports.getByCategory = asyncHandler(async (req, res) => {
+exports.getByCategory = async (req, res) => {
   const { category } = req.query;
 
   const assets = await FixedAsset.getByCategory(category);
@@ -287,10 +286,10 @@ exports.getByCategory = asyncHandler(async (req, res) => {
     data: assets,
     count: assets.length,
   });
-});
+};
 
 // الضمانات المنتهية
-exports.getExpiredWarranties = asyncHandler(async (req, res) => {
+exports.getExpiredWarranties = async (req, res) => {
   const assets = await FixedAsset.getExpiredWarranties();
 
   res.json({
@@ -298,6 +297,6 @@ exports.getExpiredWarranties = asyncHandler(async (req, res) => {
     data: assets,
     count: assets.length,
   });
-});
+};
 
 module.exports = exports;

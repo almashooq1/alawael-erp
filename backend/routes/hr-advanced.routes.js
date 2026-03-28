@@ -48,8 +48,7 @@ router.get('/employees', authenticateToken, async (req, res) => {
     console.error('[HR] GET /employees error:', error.message, error.stack);
     res.status(500).json({
       success: false,
-      message: 'خطأ في جلب بيانات الموظفين',
-      _debug: error.message,
+      message: '[V3] خطأ في جلب بيانات الموظفين: ' + (error.message || 'unknown'),
     });
   }
 });

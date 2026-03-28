@@ -45,6 +45,7 @@ router.get('/employees', authenticateToken, async (req, res) => {
       data: result.employees,
     });
   } catch (error) {
+    console.error('[HR] GET /employees error:', error.message);
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب بيانات الموظفين',

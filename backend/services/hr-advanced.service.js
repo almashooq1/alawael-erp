@@ -442,4 +442,4 @@ class HRService {
   }
 }
 
-module.exports = HRService;
+module.exports = new HRService();

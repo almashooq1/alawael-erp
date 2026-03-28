@@ -45,7 +45,7 @@ registerGlobalPlugins();
 const server = http.createServer(app);
 
 // --- Timeouts (prevent hung connections) ---
-server.timeout = 30_000; // 30 s — max time a request can take
+server.timeout = 120_000; // 120 s — aligned with nginx proxy timeouts
 server.keepAliveTimeout = 65_000; // 65 s — must be > ALB/Nginx idle (usually 60 s)
 server.headersTimeout = 66_000; // slightly higher than keepAliveTimeout
 
@@ -194,6 +194,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
   }
 })().catch(err => {
   logger.error('Startup initialization failed:', err);
+  if (process.env.NODE_ENV === 'production') process.exit(1);
 });
 
 // --- Unhandled Rejection / Uncaught Exception Safety Net ---
@@ -228,8 +229,9 @@ module.exports.server = server;
 
 // --- Start Server ---
 if (require.main === module) {
-  const startServer = (port, attemptsLeft = 5) => {
+  const startServer = (port) => {
     const host = '0.0.0.0';
+    const isProduction = process.env.NODE_ENV === 'production';
 
     const onListening = () => {
       logger.info(`Server running at http://localhost:${port} (${host})`);
@@ -240,12 +242,12 @@ if (require.main === module) {
     };
 
     const onError = err => {
-      if (err && err.code === 'EADDRINUSE' && attemptsLeft > 0) {
+      if (err && err.code === 'EADDRINUSE' && !isProduction) {
         const nextPort = Number(port) + 1;
         logger.warn(`Port ${port} in use, retrying on ${nextPort}...`);
         server.removeListener('error', onError);
         server.removeListener('listening', onListening);
-        startServer(nextPort, attemptsLeft - 1);
+        startServer(nextPort);
       } else {
         logger.error('Failed to start server:', err ? err.message : 'Unknown error');
         process.exit(1);

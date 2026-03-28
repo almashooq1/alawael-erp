@@ -1,41 +1,43 @@
-# Multi-stage build for production optimization
-# Stage 1: Builder — install all deps + compile
-FROM node:20-alpine AS builder
+# ═══════════════════════════════════════════════════════════════
+# ALAWAEL ERP - Backend Standalone Dockerfile
+# Optimized multi-stage build: deps → production
+# ═══════════════════════════════════════════════════════════════
+
+# Stage 1: Install production dependencies only
+FROM node:20-alpine AS dependencies
 
 WORKDIR /app
 
-# Copy package files first (layer caching)
 COPY package*.json ./
 
-# Install all dependencies (including devDependencies for build step)
-RUN npm ci --legacy-peer-deps
-
-# Copy application code
-COPY . .
+# Production-only deps, deterministic install, clean cache
+RUN npm ci --only=production --ignore-scripts && \
+    npm cache clean --force && \
+    find node_modules \( -name "*.md" -o -name "*.txt" -o -name "CHANGELOG*" \
+      -o -name "LICENSE*" -o -name "*.map" -o -name ".npmignore" \) \
+      -type f -delete 2>/dev/null || true
 
 # Stage 2: Production runtime — lean image
 FROM node:20-alpine
 
-WORKDIR /app
-
-# Install dumb-init for proper PID 1 signal handling, and mongodump for backups
-RUN apk add --no-cache dumb-init mongodb-tools
+# tini for proper PID 1 signal handling + curl for health checks
+RUN apk add --no-cache tini curl
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy package files
-COPY package*.json ./
+WORKDIR /app
 
-# Install production dependencies only (no dev)
-RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
+# Copy production node_modules from dependencies stage
+COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
 
-# Copy application from builder stage with correct ownership
-COPY --from=builder --chown=nodejs:nodejs /app .
+# Copy application source (filtered by .dockerignore)
+COPY --chown=nodejs:nodejs . .
 
 # Create required directories with proper permissions
-RUN mkdir -p /backups/auto /app/uploads /app/logs && chown -R nodejs:nodejs /backups /app/uploads /app/logs
+RUN mkdir -p uploads logs temp && \
+    chown -R nodejs:nodejs uploads logs temp
 
 # Switch to non-root user
 USER nodejs
@@ -43,22 +45,17 @@ USER nodejs
 # Expose port
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:' + (process.env.PORT || 3001) + '/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)});"
+# Health check using curl (faster than node -e)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -sf http://localhost:${PORT:-3001}/health || exit 1
 
-# Environment variables (can be overridden at runtime)
-# NOTE: USE_MOCK_DB, DISABLE_REDIS, SKIP_SOCKET_IO default to false
-# so the production image connects to real services by default.
+# Environment variables (runtime-overridable)
 ENV PORT=3001 \
     NODE_ENV=production \
-    USE_MOCK_DB=false \
-    SKIP_SOCKET_IO=false \
-    DISABLE_REDIS=false
+    NODE_OPTIONS="--max-old-space-size=1024 --enable-source-maps"
 
-# Use dumb-init as PID 1 to handle signals properly
-# (forwards SIGTERM/SIGINT to Node.js for graceful shutdown)
-ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+# Use tini as init system for proper signal handling
+ENTRYPOINT ["/sbin/tini", "--"]
 
-# Start application with source maps for better error traces
-CMD ["node", "--enable-source-maps", "server.js"]
+# Start application
+CMD ["node", "server.js"]

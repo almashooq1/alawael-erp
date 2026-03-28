@@ -46,6 +46,7 @@ services:
         --rename-command DEBUG ""
         --save 900 1
         --save 300 10
+        --save 60 1000
         --tcp-keepalive 60
     deploy:
       resources:
@@ -68,9 +69,14 @@ services:
     tmpfs:
       - /tmp
       - /app/logs
-      - /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
     security_opt:
       - no-new-privileges:true
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
     environment:
       NODE_ENV: production
       LOG_LEVEL: warn
@@ -93,11 +99,11 @@ services:
         max-file: "10"
     restart: always
     healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/health',(r)=>{process.exit(r.statusCode===200?0:1)})"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:3001/health || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   # ─── Frontend (Production) ──────────────────────────────────────────────
   frontend:
@@ -153,3 +159,8 @@ services:
       options:
         max-size: "20m"
         max-file: "5"
+
+# Persistent volumes for production data
+volumes:
+  uploads_data:
+    driver: local

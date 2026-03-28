@@ -13,7 +13,7 @@ const pkg = (() => {
 
 const config = {
   server: {
-    port: process.env.PORT || 5001,
+    port: process.env.PORT || 3001,
     nodeEnv: process.env.NODE_ENV || 'production',
     host: process.env.HOST || '0.0.0.0',
   },

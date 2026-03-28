@@ -7,6 +7,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const logger = require('./utils/logger');
 
 /**
  * Async Handler Wrapper
@@ -19,6 +20,8 @@ const asyncHandler = fn => (req, res, next) => {
 /**
  * Authentication Middleware
  * Verifies JWT token from Authorization header
+ * NOTE: This middleware MARKS requests as authenticated/unauthenticated.
+ * Use requireAuth() on protected routes to enforce authentication.
  */
 const authMiddleware = (req, res, next) => {
   try {
@@ -26,19 +29,17 @@ const authMiddleware = (req, res, next) => {
     const token = authHeader?.split(' ')[1];
 
     if (!token) {
-      // Allow request but mark as unauthenticated
       req.userId = null;
+      req.user = null;
       return next();
     }
 
-    // Verify JWT token
     try {
       const { jwtSecret } = require('./config/secrets');
       const decoded = jwt.verify(token, jwtSecret);
       req.userId = decoded.userId || decoded.sub || decoded.id || null;
       req.user = decoded;
     } catch (err) {
-      // Invalid token — mark as unauthenticated (never trust req.body for identity)
       req.userId = null;
       req.user = null;
     }
@@ -50,11 +51,32 @@ const authMiddleware = (req, res, next) => {
 };
 
 /**
+ * Require Authentication Middleware
+ * Rejects unauthenticated requests with 401.
+ * Mount AFTER authMiddleware on protected routes.
+ */
+const requireAuth = (req, res, next) => {
+  if (!req.userId) {
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized',
+      message: 'Authentication required',
+    });
+  }
+  next();
+};
+
+/**
  * Error Handler Middleware
- * Centralized error handling
+ * Centralized error handling with structured logging
  */
 const errorHandler = (err, _req, res, _next) => {
-  console.error('Error:', err);
+  logger.error('Request error:', {
+    name: err.name,
+    message: err.message,
+    status: err.status,
+    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+  });
 
   // Mongoose validation error
   if (err.name === 'ValidationError') {
@@ -96,18 +118,33 @@ const errorHandler = (err, _req, res, _next) => {
 
 /**
  * CORS Middleware
- * Handles cross-origin requests
+ * Handles cross-origin requests with proper origin validation
  */
 const corsMiddleware = (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const origin = req.headers.origin;
+
+  // In production, validate origin; in dev, allow localhost
+  if (allowedOrigins.length > 0 && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else if (process.env.NODE_ENV !== 'production') {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+  }
+  // In production with no matching origin: no ACAO header → browser blocks
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
   );
+  res.header('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
 
   next();
@@ -115,14 +152,14 @@ const corsMiddleware = (req, res, next) => {
 
 /**
  * Request Logger Middleware
- * Logs all incoming requests
+ * Logs all incoming requests using structured logger
  */
 const requestLogger = (req, res, next) => {
   const startTime = Date.now();
 
   res.on('finish', () => {
     const duration = Date.now() - startTime;
-    console.log(`[${req.method}] ${req.path} - ${res.statusCode} (${duration}ms)`);
+    logger.info(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
   });
 
   next();
@@ -149,7 +186,8 @@ const validateRequest = schema => (req, res, next) => {
 
 /**
  * Rate Limiting Middleware
- * Basic request rate limiting
+ * In-memory rate limiting (suitable for single-process; use express-rate-limit
+ * with Redis store for cluster mode)
  */
 const rateLimit = (windowMs = 60000, maxRequests = 100) => {
   const requests = new Map();
@@ -207,6 +245,7 @@ const requestIdMiddleware = (req, res, next) => {
 module.exports = {
   asyncHandler,
   authMiddleware,
+  requireAuth,
   errorHandler,
   corsMiddleware,
   requestLogger,

@@ -30,7 +30,7 @@ module.exports = {
       // Environment variables
       env: {
         NODE_ENV: 'production',
-        PORT: 5000,
+        PORT: 3001,
       },
 
       // Log files
@@ -44,8 +44,8 @@ module.exports = {
       // Merge logs from all instances
       merge_logs: true,
 
-      // Maximum memory before restart (1GB — aligned with node_args heap)
-      max_memory_restart: '1G',
+      // Maximum memory before restart (1.5GB — headroom above 1024MB heap)
+      max_memory_restart: '1500M',
 
       // Don't watch files for changes in production
       watch: false,
@@ -62,8 +62,8 @@ module.exports = {
       // Auto-restart crashed process
       autorestart: true,
 
-      // Cron expression for scheduled restart (daily at midnight)
-      cron_restart: '0 0 * * *',
+      // Cron restart disabled — max_memory_restart handles instability
+      // cron_restart: '0 0 * * *',
 
       // Time to kill process after sending SIGTERM
       // MUST be >= gracefulShutdown.js FORCE_TIMEOUT (30s) + buffer
@@ -89,8 +89,8 @@ module.exports = {
       // Application arguments
       args: '',
 
-      // Additional node arguments (900MB heap < 1G PM2 limit → allows graceful GC)
-      node_args: '--max-old-space-size=900 --enable-source-maps',
+      // Node heap = 1024MB (aligned with Dockerfile, < PM2 1.5G limit)
+      node_args: '--max-old-space-size=1024 --enable-source-maps',
 
       // Ignore changes to these files when restarting
       ignore_files: ['.git', '.gitignore', 'README.md', '.env.example', 'package-lock.json'],

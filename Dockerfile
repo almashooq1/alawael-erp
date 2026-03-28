@@ -22,7 +22,7 @@ COPY backend/package.json backend/package-lock.json ./
 RUN npm ci --only=production --ignore-scripts && \
     npm cache clean --force && \
     # Remove unnecessary files from node_modules to reduce image size
-    find node_modules -name "*.md" -o -name "*.txt" -o -name "CHANGELOG*" -o -name "LICENSE*" | head -500 | xargs rm -f 2>/dev/null || true
+    find node_modules \( -name "*.md" -o -name "*.txt" -o -name "CHANGELOG*" -o -name "LICENSE*" -o -name "*.map" -o -name ".npmignore" \) -type f -delete 2>/dev/null || true
 
 # ═══════════════════════════════════════════════════════════════
 
@@ -32,7 +32,7 @@ FROM node:20-alpine AS production
 # Install security updates + minimal runtime deps
 RUN apk update && \
     apk upgrade --no-cache && \
-    apk add --no-cache tini curl dumb-init && \
+    apk add --no-cache tini curl && \
     rm -rf /var/cache/apk/* /tmp/*
 
 # Create app user (non-root)

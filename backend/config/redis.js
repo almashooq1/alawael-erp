@@ -40,7 +40,7 @@ async function initializeRedis() {
       password: REDIS_PASSWORD,
       keyPrefix: process.env.REDIS_PREFIX || 'alawael:',
       tls: process.env.REDIS_TLS === 'true' ? { rejectUnauthorized: true } : undefined,
-      maxRetriesPerRequest: null,
+      maxRetriesPerRequest: 3,
       lazyConnect: true,
       retryStrategy: retries => {
         if (retries > 10) {

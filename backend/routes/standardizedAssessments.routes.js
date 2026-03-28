@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const StandardizedAssessment = require('../models/StandardizedAssessment');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/standardized-assessments — list assessments */
 router.get('/', requireAuth, async (req, res) => {
@@ -36,7 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('standardizedAssessment list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -50,7 +51,7 @@ router.get('/tools', requireAuth, async (req, res) => {
     res.json({ success: true, data: tools });
   } catch (err) {
     logger.error('standardizedAssessment tools error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -68,7 +69,7 @@ router.get('/beneficiary/:beneficiaryId/history', requireAuth, async (req, res) 
     res.json({ success: true, data });
   } catch (err) {
     logger.error('standardizedAssessment history error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -83,7 +84,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: assessment });
   } catch (err) {
     logger.error('standardizedAssessment get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -125,7 +126,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (
     res.json({ success: true, message: 'Assessment deleted' });
   } catch (err) {
     logger.error('standardizedAssessment delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

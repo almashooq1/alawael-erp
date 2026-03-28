@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/PublicRelations`)[n];
@@ -45,7 +46,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -68,7 +69,7 @@ router.get('/media', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -78,7 +79,7 @@ router.post('/media', authenticate, async (req, res) => {
     const doc = await Media.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -89,7 +90,7 @@ router.put('/media/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -99,7 +100,7 @@ router.delete('/media/:id', authenticate, async (req, res) => {
     await Media.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -121,7 +122,7 @@ router.get('/campaigns', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -131,7 +132,7 @@ router.post('/campaigns', authenticate, async (req, res) => {
     const doc = await Camp.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -142,7 +143,7 @@ router.put('/campaigns/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -153,7 +154,7 @@ router.get('/partnerships', authenticate, async (req, res) => {
     const docs = await Part.find().sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -163,7 +164,7 @@ router.post('/partnerships', authenticate, async (req, res) => {
     const doc = await Part.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -174,7 +175,7 @@ router.put('/partnerships/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

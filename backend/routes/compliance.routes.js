@@ -7,7 +7,12 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
+
+// ─── Authentication Middleware ────────────────────────────────────────────
+router.use(authenticate);
 
 // Safe-require models (project uses safeRequire pattern)
 let InternalControl, ComplianceItem, ComplianceLog, ComplianceMetric;
@@ -74,7 +79,7 @@ router.get('/dashboard', async (req, res) => {
     res.json({ success: true, data: results });
   } catch (error) {
     logger.error('[Compliance] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -115,7 +120,7 @@ router.get('/controls', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -199,7 +204,7 @@ router.get('/items', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -281,7 +286,7 @@ router.get('/logs', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -308,7 +313,7 @@ router.patch('/logs/:id/resolve', async (req, res) => {
     if (!log) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, data: log, message: 'تم حل المشكلة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -347,7 +352,7 @@ router.get('/metrics', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

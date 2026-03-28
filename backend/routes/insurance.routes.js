@@ -10,7 +10,11 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const InsuranceController = require('../controllers/insurance.controller');
+
+// ─── Authentication Middleware ────────────────────────────────────────
+router.use(authenticate);
 
 // ─── البيانات المرجعية ───────────────────────────────────────────────
 router.get('/companies', InsuranceController.getInsuranceCompanies);

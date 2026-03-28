@@ -25,6 +25,7 @@ const _logger = require('../utils/logger');
 
 // ── Service ──
 const library = require('../services/library.service');
+const { safeError } = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -45,7 +46,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
     const data = library.getDashboard();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -54,7 +55,7 @@ router.get('/statistics', authenticate, async (req, res) => {
     const data = library.getStatistics();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -63,7 +64,7 @@ router.get('/resource-types', authenticate, async (req, res) => {
     const data = library.getResourceTypes();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -76,7 +77,7 @@ router.get('/categories', authenticate, async (req, res) => {
     const data = library.getCategories();
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -155,7 +156,7 @@ router.get('/resources', authenticate, async (req, res) => {
     const result = library.getResources(req.query);
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -281,7 +282,7 @@ router.get('/loans', authenticate, async (req, res) => {
     const result = library.getLoans(req.query);
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -290,7 +291,7 @@ router.get('/loans/overdue', authenticate, async (req, res) => {
     const result = library.getLoans({ ...req.query, overdue: 'true' });
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -369,7 +370,7 @@ router.get('/reservations', authenticate, async (req, res) => {
     const data = library.getReservations(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -417,7 +418,7 @@ router.get('/members', authenticate, async (req, res) => {
     const data = library.getMembers(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -521,7 +522,7 @@ router.get('/suppliers', authenticate, async (req, res) => {
     const data = library.getSuppliers();
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -550,7 +551,7 @@ router.get('/maintenance', authenticate, async (req, res) => {
     const data = library.getMaintenanceRecords(req.query.resourceId);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 

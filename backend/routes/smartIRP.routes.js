@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const SmartIRPService = require('../services/smartIRP.service');
 const SmartIRP = require('../models/SmartIRP');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 // ── IRP CRUD ─────────────────────────────────────────────────────
 
@@ -34,7 +35,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data: irps, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('smart-irp list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -49,7 +50,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -91,7 +92,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'manager']), async (req
     res.json({ success: true, message: 'IRP archived', data: irp });
   } catch (err) {
     logger.error('smart-irp archive error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -155,7 +156,7 @@ router.get('/:id/analytics', requireAuth, async (req, res) => {
     res.json({ success: true, data: analytics });
   } catch (err) {
     logger.error('smart-irp analytics error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -168,7 +169,7 @@ router.get('/:id/family-report', requireAuth, async (req, res) => {
     res.json({ success: true, data: report });
   } catch (err) {
     logger.error('smart-irp family-report error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -183,7 +184,7 @@ router.post(
       res.json({ success: true, data: irp });
     } catch (err) {
       logger.error('smart-irp auto-review error:', err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -195,7 +196,7 @@ router.post('/scheduled-reviews', requireAuth, requireRole(['admin']), async (re
     res.json({ success: true, data: results });
   } catch (err) {
     logger.error('smart-irp scheduled-reviews error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

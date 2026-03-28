@@ -112,6 +112,7 @@ import {
   AutomatedBackupRoutes,
   WafRateLimitRoutes,
   PrintCenterRoutes,
+  CarePlanRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -344,6 +345,7 @@ function AppContent() {
                               {AutomatedBackupRoutes()}
                               {WafRateLimitRoutes()}
                               {PrintCenterRoutes()}
+                              {CarePlanRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

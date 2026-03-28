@@ -21,6 +21,7 @@ const {
 } = require('../models/BeneficiaryPortal');
 const { jwtSecret } = require('../config/secrets');
 const { paginate } = require('../utils/paginate');
+const { loginLimiter, registerLimiter } = require('../middleware/rateLimiter');
 
 // ==================== ROOT ENDPOINT ====================
 router.get('/', (req, res) => {
@@ -88,7 +89,7 @@ const authenticateBeneficiary = async (req, res, next) => {
 // ==================== AUTHENTICATION ====================
 
 // Beneficiary Registration
-router.post('/auth/register', async (req, res) => {
+router.post('/auth/register', registerLimiter, async (req, res) => {
   try {
     const { firstName, lastName, email, phone, password, confirmPassword } = req.body;
 
@@ -157,7 +158,7 @@ router.post('/auth/register', async (req, res) => {
 });
 
 // Beneficiary Login
-router.post('/auth/login', async (req, res) => {
+router.post('/auth/login', loginLimiter, async (req, res) => {
   try {
     const { email, password, twoFactorCode } = req.body;
 

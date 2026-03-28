@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceProvider = require('../models/MaintenanceProvider');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/maintenance-providers — list providers */
 router.get('/', requireAuth, async (req, res) => {
@@ -34,7 +35,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('maintenanceProvider list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -59,7 +60,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     res.json({ success: true, data: { summary: stats[0] || {}, byType } });
   } catch (err) {
     logger.error('maintenanceProvider stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -73,7 +74,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: provider });
   } catch (err) {
     logger.error('maintenanceProvider get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -122,7 +123,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Provider deleted' });
   } catch (err) {
     logger.error('maintenanceProvider delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

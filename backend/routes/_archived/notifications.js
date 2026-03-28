@@ -16,6 +16,7 @@ const notificationAnalyticsController = require('../controllers/notificationAnal
 // تحليلات الإشعارات (usage, delivery, engagement)
 router.get('/analytics/summary', notificationAnalyticsController.getSummary);
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 const NotificationService = require('../services/notificationService');
 // اختبار إرسال إشعار متعدد القنوات (للتكامل)
@@ -31,7 +32,7 @@ router.post('/send', async (req, res) => {
     });
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 const notificationController = require('../controllers/notificationController');

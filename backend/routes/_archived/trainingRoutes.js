@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -44,7 +45,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: programs, total: programs.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -82,7 +83,7 @@ router.get('/:trainingId', authenticate, (req, res) => {
 
     res.json({ success: true, data: program });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -117,7 +118,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newProgram, message: 'Training program created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -146,7 +147,7 @@ router.put('/:trainingId', authenticate, (req, res) => {
       message: 'Training program updated successfully',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -180,7 +181,7 @@ router.post('/:trainingId/enroll', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: enrollment, message: 'Employee enrolled successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -210,7 +211,7 @@ router.get('/:trainingId/enrollments', authenticate, (req, res) => {
 
     res.json({ success: true, data: enrollments, total: enrollments.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

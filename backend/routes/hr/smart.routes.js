@@ -40,6 +40,7 @@ const HRAIService = require('../../services/hr/hrAI.service');
 const HRAnalyticsService = require('../../services/hr/hrAnalytics.service');
 const OnboardingService = require('../../services/hr/onboarding.service');
 const DocumentService = require('../../services/hr/document.service');
+const { safeError } = require('../../utils/safeError');
 
 // ═══════════════════════════════════════════════════
 //  AI — ذكاء اصطناعي
@@ -72,7 +73,7 @@ router.get(
       const result = await HRAIService.suggestTraining(req.params.employeeId, models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -87,7 +88,7 @@ router.get(
       const result = await HRAIService.analyzeAttendancePatterns(req.query.department, models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -105,7 +106,7 @@ router.get(
       );
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -116,7 +117,7 @@ router.get('/ai/dashboard', authenticate, authorize('admin', 'hr', 'manager'), a
     const result = await HRAIService.smartDashboard(models());
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -130,7 +131,7 @@ router.get(
       const result = await HRAIService.promotionRecommendations(models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -141,7 +142,7 @@ router.get('/ai/workforce-cost', authenticate, authorize('admin', 'hr'), async (
     const result = await HRAIService.workforceCostAnalysis(models());
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -159,7 +160,7 @@ router.get(
       const result = await HRAnalyticsService.workforceReport(models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -174,7 +175,7 @@ router.get(
       const result = await HRAnalyticsService.leaveReport(req.query, models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -189,7 +190,7 @@ router.get(
       const result = await HRAnalyticsService.attendanceReport(req.query, models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -200,7 +201,7 @@ router.get('/analytics/payroll', authenticate, authorize('admin', 'hr'), async (
     const result = await HRAnalyticsService.payrollReport(req.query, models());
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -214,7 +215,7 @@ router.get(
       const result = await HRAnalyticsService.performanceReport(req.query, models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -229,7 +230,7 @@ router.get(
       const result = await HRAnalyticsService.saudizationReport(models());
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -253,7 +254,7 @@ router.get(
       const result = await OnboardingService.dashboard();
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -277,7 +278,7 @@ router.get('/onboarding', authenticate, authorize('admin', 'hr', 'manager'), asy
     const result = await OnboardingService.list(req.query);
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -295,7 +296,7 @@ router.get(
           .json({ success: false, message: 'لم يتم العثور على بيانات التهيئة' });
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -343,7 +344,7 @@ router.get('/documents/dashboard', authenticate, authorize('admin', 'hr'), async
     const result = await DocumentService.dashboard();
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -354,7 +355,7 @@ router.get('/documents/expiring', authenticate, authorize('admin', 'hr'), async 
     const result = await DocumentService.getExpiringDocuments(days);
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -364,7 +365,7 @@ router.get('/documents/expired', authenticate, authorize('admin', 'hr'), async (
     const result = await DocumentService.getExpiredDocuments();
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -391,7 +392,7 @@ router.get(
       const result = await DocumentService.getByEmployee(req.params.employeeId, req.query);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );

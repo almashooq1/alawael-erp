@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -39,7 +40,7 @@ router.post('/chat', authenticate, (req, res) => {
 
     res.json({ success: true, data: response });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -77,7 +78,7 @@ router.get('/recommendations/:userId', authenticate, (req, res) => {
 
     res.json({ success: true, data: recommendations });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -111,7 +112,7 @@ router.get('/insights', authenticate, (req, res) => {
 
     res.json({ success: true, data: insights });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -146,7 +147,7 @@ router.post('/predict', authenticate, (req, res) => {
 
     res.json({ success: true, data: prediction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -177,7 +178,7 @@ router.post('/analyze', authenticate, (req, res) => {
 
     res.json({ success: true, data: analysis });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -214,7 +215,7 @@ router.get('/chat-history/:userId', authenticate, (req, res) => {
 
     res.json({ success: true, data: chatHistory });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -242,7 +243,7 @@ router.get('/predictions/attendance', authenticate, (req, res) => {
 
     res.json(prediction);
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -272,7 +273,7 @@ router.get('/predictions/salary', authenticate, (req, res) => {
 
     res.json(prediction);
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -301,7 +302,7 @@ router.get('/predictions/leaves', authenticate, (req, res) => {
 
     res.json(prediction);
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

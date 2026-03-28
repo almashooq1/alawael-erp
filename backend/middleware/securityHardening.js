@@ -94,7 +94,9 @@ function validateSecurityConfig() {
 
   // CORS origins
   if (isProd && !process.env.CORS_ORIGINS && !process.env.CORS_ORIGIN) {
-    warnings.push('No CORS_ORIGINS set in production — cross-origin requests may be rejected or overly open');
+    warnings.push(
+      'No CORS_ORIGINS set in production — cross-origin requests may be rejected or overly open'
+    );
   }
 
   // HTTPS / HSTS
@@ -107,7 +109,7 @@ function validateSecurityConfig() {
     warnings.push('SKIP_RATE_LIMIT is true in production — rate limiting is disabled');
   }
 
-  // CSRF 
+  // CSRF
   if (process.env.CSRF_DISABLE === 'true' && isProd) {
     warnings.push('CSRF_DISABLE is true in production — CSRF protection is OFF');
   }

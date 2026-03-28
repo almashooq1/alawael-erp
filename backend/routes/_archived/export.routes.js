@@ -18,6 +18,7 @@ const exceljs = require('exceljs');
 const { authenticate } = require('../middleware/auth');
 const fs = require('fs');
 const path = require('path');
+const { safeError } = require('../../utils/safeError');
 
 // Ensure exports directory exists
 const exportsDir = path.join(__dirname, '../exports');
@@ -93,14 +94,14 @@ router.post('/pdf', authenticate, (req, res) => {
       res.status(500).json({
         success: false,
         message: 'Error creating PDF',
-        error: err.message,
+        error: safeError(err),
       });
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Error exporting to PDF',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -166,14 +167,14 @@ router.post('/excel', authenticate, (req, res) => {
         res.status(500).json({
           success: false,
           message: 'Error creating Excel',
-          error: err.message,
+          error: safeError(err),
         });
       });
   } catch (error) {
     res.status(500).json({
       success: false,
       message: 'Error exporting to Excel',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -224,7 +225,7 @@ router.post('/csv', authenticate, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error exporting to CSV',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -266,7 +267,7 @@ router.get('/status/:id', authenticate, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error retrieving export status',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

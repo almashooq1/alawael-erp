@@ -101,7 +101,7 @@ router.get(
       }));
 
       // Get invoices summary
-      const invoices = AccountingInvoice ? await AccountingInvoice.find().limit(10000).lean() : [];
+      const invoices = AccountingInvoice ? await AccountingInvoice.find().limit(5000).lean() : []; // TODO: convert to aggregation pipeline
       const _paidInvoices = invoices.filter(i => i.status === 'paid');
       const overdueInvoices = invoices.filter(i => i.status === 'overdue');
       const pendingInvoices = invoices.filter(i => ['draft', 'sent'].includes(i.status));
@@ -320,7 +320,6 @@ router.post(
       notes,
       receipts,
     });
-
 
     // Ensure we're sending valid JSON
     const responseBody = result || { success: true, transaction: {} };
@@ -2129,12 +2128,16 @@ router.get(
   '/vat-returns',
   asyncHandler(async (req, res) => {
     const year = new Date().getFullYear();
-    // Calculate from invoices and expenses
-    const invoices = AccountingInvoice ? await AccountingInvoice.find({}).limit(10000).lean() : [];
-    const expenses = Expense ? await Expense.find({}).limit(10000).lean() : [];
+    // Calculate totals via aggregation (no full table scan)
+    const [invAgg] = AccountingInvoice
+      ? await AccountingInvoice.aggregate([{ $group: { _id: null, total: { $sum: '$subtotal' } } }])
+      : [null];
+    const [expAgg] = Expense
+      ? await Expense.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }])
+      : [null];
 
-    const totalSales = invoices.reduce((s, i) => s + (i.subtotal || 0), 0) || 850000;
-    const totalPurchases = expenses.reduce((s, e) => s + (e.amount || 0), 0) || 320000;
+    const totalSales = invAgg?.total || 850000;
+    const totalPurchases = expAgg?.total || 320000;
 
     const quarters = [
       { period: `Q1 ${year}`, startDate: `${year}-01-01`, endDate: `${year}-03-31` },

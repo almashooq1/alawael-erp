@@ -39,7 +39,6 @@ const BarcodeSchema = new mongoose.Schema({
       'CUSTOM',
     ],
     required: true,
-    index: true,
   },
 
   entityId: {

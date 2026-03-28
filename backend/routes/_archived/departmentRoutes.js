@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -51,7 +52,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: departments, total: departments.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -84,7 +85,7 @@ router.get('/:departmentId', authenticate, (req, res) => {
 
     res.json({ success: true, data: department });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -118,7 +119,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newDepartment, message: 'Department created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -147,7 +148,7 @@ router.put('/:departmentId', authenticate, (req, res) => {
       message: 'Department updated successfully',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -165,7 +166,7 @@ router.delete('/:departmentId', authenticate, (req, res) => {
 
     res.json({ success: true, message: `Department ${departmentId} deleted successfully` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -196,7 +197,7 @@ router.get('/:departmentId/budget', authenticate, (req, res) => {
 
     res.json({ success: true, data: budget });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -229,7 +230,7 @@ router.get('/:departmentId/employees', authenticate, (req, res) => {
 
     res.json({ success: true, data: employees, total: employees.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

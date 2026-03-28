@@ -16,6 +16,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { validateInput } = require('../middleware/validation');
+const { safeError } = require('../../utils/safeError');
 
 /**
  * @route   GET /api/users
@@ -46,7 +47,7 @@ router.get('/', authenticate, authorize(['admin', 'manager']), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error retrieving users',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -91,7 +92,7 @@ router.post('/', authenticate, authorize(['admin']), validateInput, (req, res) =
     res.status(500).json({
       success: false,
       message: 'Error creating user',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -130,7 +131,7 @@ router.get('/:id', authenticate, authorize(['admin', 'manager']), (req, res) => 
     res.status(500).json({
       success: false,
       message: 'Error retrieving user',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -168,7 +169,7 @@ router.patch('/:id', authenticate, authorize(['admin']), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error updating user',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -203,7 +204,7 @@ router.delete('/:id', authenticate, authorize(['admin']), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error deleting user',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -245,7 +246,7 @@ router.post('/batch', authenticate, authorize(['admin']), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error creating users',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

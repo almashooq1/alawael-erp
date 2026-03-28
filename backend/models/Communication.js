@@ -29,7 +29,6 @@ const communicationSchema = new mongoose.Schema(
       type: String,
       enum: ['incoming', 'outgoing', 'internal'],
       required: true,
-      index: true,
     },
 
     // معلومات المرسل والمستقبل
@@ -75,7 +74,6 @@ const communicationSchema = new mongoose.Schema(
       type: String,
       enum: ['low', 'medium', 'high', 'urgent'],
       default: 'medium',
-      index: true,
     },
 
     // التصنيف
@@ -160,7 +158,6 @@ const communicationSchema = new mongoose.Schema(
     isArchived: {
       type: Boolean,
       default: false,
-      index: true,
     },
     tags: [
       {

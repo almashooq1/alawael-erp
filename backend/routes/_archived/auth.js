@@ -8,6 +8,7 @@ const AuthService = require('../services/authService');
 const { validateRegistration, validateLogin } = require('../middleware/validation');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const logger = require('../utils/logger');
+const { safeError } = require('../../utils/safeError');
 
 // تسجيل مستخدم جديد
 router.post('/register', validateRegistration, (req, res, _next) => {
@@ -35,7 +36,7 @@ router.post('/register', validateRegistration, (req, res, _next) => {
     return res.status(500).json({
       success: false,
       message: 'Registration failed',
-      ...(process.env.NODE_ENV !== 'production' && { error: error.message }),
+      ...(process.env.NODE_ENV !== 'production' && { error: safeError(error) }),
     });
   }
 });
@@ -98,7 +99,7 @@ router.post('/login', validateLogin, async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: 'Login failed',
-      ...(process.env.NODE_ENV !== 'production' && { error: error.message }),
+      ...(process.env.NODE_ENV !== 'production' && { error: safeError(error) }),
     });
   }
 });
@@ -120,7 +121,7 @@ router.post('/logout', (req, res, _next) => {
       data: result || {},
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'Logout failed', error: error.message });
+    return res.status(500).json({ success: false, message: 'Logout failed', error: safeError(error) });
   }
 });
 

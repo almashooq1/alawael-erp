@@ -259,7 +259,7 @@ router.get('/audit-logs', async (req, res) => {
 router.get('/clinics', async (req, res) => {
   try {
     const Branch = require('../models/Branch');
-    const clinics = await Branch.find().lean();
+    const clinics = await Branch.find().limit(200).lean();
     res.json({ success: true, data: clinics });
   } catch (err) {
     logger.error('Admin clinics error:', err);

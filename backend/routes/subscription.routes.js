@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 const UserSubscription = require('../models/UserSubscription');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════════════════
 // PLANS — إدارة خطط الاشتراك
@@ -23,7 +24,7 @@ router.get('/plans', requireAuth, async (req, res) => {
     res.json({ success: true, data: plans, count: plans.length });
   } catch (err) {
     logger.error('subscription plans list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -35,7 +36,7 @@ router.get('/plans/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: plan });
   } catch (err) {
     logger.error('subscription plan get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -82,7 +83,7 @@ router.delete('/plans/:id', requireAuth, requireRole(['admin']), async (req, res
     res.json({ success: true, message: 'Plan deleted' });
   } catch (err) {
     logger.error('subscription plan delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -111,7 +112,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data: subs, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('subscriptions list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -124,7 +125,7 @@ router.get('/my', requireAuth, async (req, res) => {
     res.json({ success: true, data: sub });
   } catch (err) {
     logger.error('my subscription error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -205,7 +206,7 @@ router.get('/expiring', requireAuth, requireRole(['admin']), async (req, res) =>
     res.json({ success: true, data: subs, count: subs.length });
   } catch (err) {
     logger.error('expiring subscriptions error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -235,7 +236,7 @@ router.get('/stats', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, data: { total, active, cancelled, expired, byPlan } });
   } catch (err) {
     logger.error('subscription stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -90,7 +91,7 @@ router.get('/', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المستودعات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المستودعات', error: safeError(err) });
   }
 });
 
@@ -102,7 +103,7 @@ router.get('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ', error: safeError(err) });
   }
 });
 
@@ -113,7 +114,7 @@ router.post('/', async (req, res) => {
     const data = await WH.create(req.body);
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المستودع', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء المستودع', error: safeError(err) });
   }
 });
 
@@ -127,7 +128,7 @@ router.put('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المستودع', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث المستودع', error: safeError(err) });
   }
 });
 
@@ -138,7 +139,7 @@ router.delete('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف المستودع', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف المستودع', error: safeError(err) });
   }
 });
 
@@ -162,7 +163,7 @@ router.get('/:warehouseId/items', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأصناف', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الأصناف', error: safeError(err) });
   }
 });
 
@@ -172,7 +173,7 @@ router.post('/:warehouseId/items', async (req, res) => {
     const data = await WHItem.create({ ...req.body, warehouse: req.params.warehouseId });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الصنف', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة الصنف', error: safeError(err) });
   }
 });
 
@@ -183,7 +184,7 @@ router.put('/items/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الصنف', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث الصنف', error: safeError(err) });
   }
 });
 
@@ -207,7 +208,7 @@ router.get('/transactions/list', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحركات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الحركات', error: safeError(err) });
   }
 });
 
@@ -222,7 +223,7 @@ router.post('/transactions', async (req, res) => {
     });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحركة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحركة', error: safeError(err) });
   }
 });
 
@@ -236,7 +237,7 @@ router.put('/transactions/:id/approve', async (req, res) => {
     await tx.save();
     res.json({ success: true, data: tx });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الحركة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في اعتماد الحركة', error: safeError(err) });
   }
 });
 
@@ -250,7 +251,7 @@ router.put('/transactions/:id/complete', async (req, res) => {
     await tx.save();
     res.json({ success: true, data: tx });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إكمال الحركة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إكمال الحركة', error: safeError(err) });
   }
 });
 
@@ -270,7 +271,7 @@ router.get('/alerts/low-stock', async (_req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التنبيهات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب التنبيهات', error: safeError(err) });
   }
 });
 

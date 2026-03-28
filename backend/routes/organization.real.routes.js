@@ -54,7 +54,7 @@ router.get('/structure', async (req, res) => {
     // Fallback: branches
     try {
       const Branch = require('../models/Branch');
-      const branches = await Branch.find().lean();
+      const branches = await Branch.find().limit(200).lean();
       return res.json({ success: true, data: { name: 'مركز الأوائل للتأهيل', branches } });
     } catch (_) {
       return res.json({

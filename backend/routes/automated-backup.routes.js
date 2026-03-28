@@ -42,6 +42,9 @@ try {
 
 const guard = [authenticate, authorize(['admin', 'system_admin', 'super_admin'])];
 
+// Global auth: all backup endpoints require authentication
+router.use(authenticate);
+
 /* ══════════════════════════════════════════════════════════════════════
    BACKUP OPERATIONS — عمليات النسخ الاحتياطي
    ══════════════════════════════════════════════════════════════════════ */

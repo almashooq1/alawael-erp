@@ -8,7 +8,12 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate, authorize } = require('../middleware/auth');
 const RateLimitWafService = require('../services/rate-limit-waf.service');
+
+// All WAF/rate-limit endpoints require admin auth
+router.use(authenticate);
+router.use(authorize('admin', 'system_admin', 'super_admin'));
 
 const wafService = new RateLimitWafService();
 

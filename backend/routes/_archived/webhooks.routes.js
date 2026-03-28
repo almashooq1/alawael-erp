@@ -5,6 +5,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 /**
@@ -33,7 +34,7 @@ router.post('/register', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -87,7 +88,7 @@ router.post('/:id/trigger', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

@@ -567,7 +567,7 @@ router.post('/oauth2/revoke', async (req, res) => {
  * POST /api/sso/oauth2/register
  * Dynamic Client Registration
  */
-router.post('/oauth2/register', async (req, res, _next) => {
+router.post('/oauth2/register', sensitiveOperationLimiter, async (req, res, _next) => {
   try {
     const { client_name, redirect_uris, response_types, grant_types, scopes } = req.body;
 

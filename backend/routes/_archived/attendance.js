@@ -5,6 +5,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 const {
   AttendanceService,
@@ -53,7 +54,7 @@ router.post('/check-in', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -88,7 +89,7 @@ router.post('/check-out', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -124,7 +125,7 @@ router.get('/records/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -157,7 +158,7 @@ router.post('/manual-entry', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -195,7 +196,7 @@ router.get('/daily-status/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -232,7 +233,7 @@ router.post('/request', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -256,7 +257,7 @@ router.put('/approve/:leaveId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -278,7 +279,7 @@ router.get('/balance/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -303,7 +304,7 @@ router.get('/pending', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -336,7 +337,7 @@ router.get('/history/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -366,7 +367,7 @@ router.post('/monthly', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -391,7 +392,7 @@ router.get('/monthly/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -425,7 +426,7 @@ router.get('/comprehensive/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -475,7 +476,7 @@ router.get('/department-daily', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -532,7 +533,7 @@ router.get('/annual/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -604,7 +605,7 @@ router.get('/statistics/:employeeId', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });

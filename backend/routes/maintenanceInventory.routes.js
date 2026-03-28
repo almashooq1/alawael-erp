@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceInventory = require('../models/MaintenanceInventory');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/maintenance-inventory — list inventory items */
 router.get('/', requireAuth, async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('maintenanceInventory list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -64,7 +65,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     res.json({ success: true, data: { summary: stats[0] || {}, categoryBreakdown } });
   } catch (err) {
     logger.error('maintenanceInventory stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -79,7 +80,7 @@ router.get('/low-stock', requireAuth, async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (err) {
     logger.error('maintenanceInventory lowStock error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -95,7 +96,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: item });
   } catch (err) {
     logger.error('maintenanceInventory get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -145,7 +146,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Item deleted' });
   } catch (err) {
     logger.error('maintenanceInventory delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

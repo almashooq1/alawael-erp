@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // TODO: Implement comprehensive authentication with JWT, OAuth, and MFA
@@ -22,7 +23,7 @@ router.post('/login', (req, res) => {
     // TODO: Validate credentials against database
     res.json({ success: true, data: { token: 'placeholder_token', user: { email } } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -37,7 +38,7 @@ router.post('/register', (req, res) => {
     // TODO: Validate and hash password, store in database
     res.status(201).json({ success: true, data: { user: { email, name } } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -48,7 +49,7 @@ router.post('/logout', (req, res) => {
     // TODO: Invalidate session/token
     res.json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -59,7 +60,7 @@ router.post('/refresh', (req, res) => {
     // TODO: Validate existing token and issue new one
     res.json({ success: true, data: { token: 'new_placeholder_token' } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -74,7 +75,7 @@ router.post('/verify', (req, res) => {
     // TODO: Validate verification code
     res.json({ success: true, message: 'Verified successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

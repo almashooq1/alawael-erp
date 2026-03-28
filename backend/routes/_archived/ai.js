@@ -5,6 +5,7 @@ const router = express.Router();
 
 // AIService: منطق التوقع الحقيقي
 const AIService = require('../services/aiService');
+const { safeError } = require('../../utils/safeError');
 
 // POST /api/ai/predict-absence
 router.post('/predict-absence', async (req, res) => {
@@ -27,7 +28,7 @@ router.post('/predict-absence', async (req, res) => {
     const aiResult = await AIService.predictAttendance(dayData);
     res.json({ studentId, ...aiResult });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: safeError(err) });
   }
 });
 

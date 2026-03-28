@@ -4,8 +4,12 @@
  */
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const { Exam, ExamSubmission } = require('../models/Exam');
 const { safeError } = require('../utils/safeError');
+
+// ── Auth guard ──────────────────────────────────────────────
+router.use(authenticate);
 
 // ══════════════════════════════════════════════════════════════
 //  EXAM CRUD

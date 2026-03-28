@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 // ── List / Search ────────────────────────────────────────────────
 
@@ -43,7 +44,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('goalBank list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -57,7 +58,7 @@ router.get('/domains', requireAuth, async (req, res) => {
     res.json({ success: true, data: domains });
   } catch (err) {
     logger.error('goalBank domains error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/categories', requireAuth, async (req, res) => {
     res.json({ success: true, data: categories });
   } catch (err) {
     logger.error('goalBank categories error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -86,7 +87,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: goal });
   } catch (err) {
     logger.error('goalBank get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -136,7 +137,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Goal deleted' });
   } catch (err) {
     logger.error('goalBank delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

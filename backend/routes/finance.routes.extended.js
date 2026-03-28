@@ -289,18 +289,29 @@ router.get(
   asyncHandler(async (req, res) => {
     let stats;
     if (Cheque) {
-      const all = await Cheque.find().lean();
-      const issued = all.filter(c => c.type === 'issued');
-      const received = all.filter(c => c.type === 'received');
+      const [agg] = await Cheque.aggregate([
+        {
+          $facet: {
+            byType: [{ $group: { _id: '$type', count: { $sum: 1 }, amount: { $sum: '$amount' } } }],
+            byStatus: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+            overdue: [
+              { $match: { status: 'pending', dueDate: { $lt: new Date() } } },
+              { $count: 'count' },
+            ],
+          },
+        },
+      ]);
+      const typeMap = Object.fromEntries((agg.byType || []).map(t => [t._id, t]));
+      const statusMap = Object.fromEntries((agg.byStatus || []).map(s => [s._id, s.count]));
       stats = {
-        totalIssued: issued.length,
-        totalReceived: received.length,
-        issuedAmount: issued.reduce((s, c) => s + c.amount, 0),
-        receivedAmount: received.reduce((s, c) => s + c.amount, 0),
-        pending: all.filter(c => c.status === 'pending').length,
-        cleared: all.filter(c => c.status === 'cleared').length,
-        bounced: all.filter(c => c.status === 'bounced').length,
-        overdue: all.filter(c => c.status === 'pending' && new Date(c.dueDate) < new Date()).length,
+        totalIssued: typeMap.issued?.count || 0,
+        totalReceived: typeMap.received?.count || 0,
+        issuedAmount: typeMap.issued?.amount || 0,
+        receivedAmount: typeMap.received?.amount || 0,
+        pending: statusMap.pending || 0,
+        cleared: statusMap.cleared || 0,
+        bounced: statusMap.bounced || 0,
+        overdue: agg.overdue?.[0]?.count || 0,
       };
     } else {
       stats = {
@@ -569,17 +580,24 @@ router.get(
   asyncHandler(async (req, res) => {
     let summary;
     if (PaymentVoucher) {
-      const all = await PaymentVoucher.find().lean();
-      const receipts = all.filter(v => v.type === 'receipt');
-      const payments = all.filter(v => v.type === 'payment');
+      const [agg] = await PaymentVoucher.aggregate([
+        {
+          $facet: {
+            byType: [{ $group: { _id: '$type', count: { $sum: 1 }, amount: { $sum: '$amount' } } }],
+            byStatus: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
+          },
+        },
+      ]);
+      const typeMap = Object.fromEntries((agg.byType || []).map(t => [t._id, t]));
+      const statusMap = Object.fromEntries((agg.byStatus || []).map(s => [s._id, s.count]));
       summary = {
-        totalReceipts: receipts.reduce((s, v) => s + v.amount, 0),
-        totalPayments: payments.reduce((s, v) => s + v.amount, 0),
-        receiptCount: receipts.length,
-        paymentCount: payments.length,
-        draft: all.filter(v => v.status === 'draft').length,
-        approved: all.filter(v => v.status === 'approved').length,
-        posted: all.filter(v => v.status === 'posted').length,
+        totalReceipts: typeMap.receipt?.amount || 0,
+        totalPayments: typeMap.payment?.amount || 0,
+        receiptCount: typeMap.receipt?.count || 0,
+        paymentCount: typeMap.payment?.count || 0,
+        draft: statusMap.draft || 0,
+        approved: statusMap.approved || 0,
+        posted: statusMap.posted || 0,
       };
     } else {
       summary = {
@@ -731,9 +749,8 @@ router.get(
 
     if (AccountingInvoice) {
       const field = type === 'customer' ? 'customerName' : 'vendorName';
-      const invoices = await AccountingInvoice.find({}).select(field).lean();
-      const uniqueNames = [...new Set(invoices.map(i => i[field]).filter(Boolean))];
-      parties = uniqueNames.map(name => ({ name, hasBalance: true }));
+      const uniqueNames = await AccountingInvoice.distinct(field);
+      parties = uniqueNames.filter(Boolean).map(name => ({ name, hasBalance: true }));
     }
 
     if (parties.length === 0) {

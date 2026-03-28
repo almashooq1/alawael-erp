@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware (placeholder - update with actual auth)
@@ -32,7 +33,7 @@ router.get('/status', authenticate, (_req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -59,7 +60,7 @@ router.get('/check', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -84,7 +85,7 @@ router.post('/report', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -119,7 +120,7 @@ router.post('/vehicle/validate-data', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -162,7 +163,7 @@ router.get('/inspection-schedule/:vehicleType', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -187,7 +188,7 @@ router.get('/fleet/critical-issues', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

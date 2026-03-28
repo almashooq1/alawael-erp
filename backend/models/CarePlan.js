@@ -48,7 +48,7 @@ const carePlanSchema = new mongoose.Schema(
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
     // Meta
-    planNumber: { type: String, unique: true },
+    planNumber: { type: String },
     startDate: { type: Date, required: true },
     reviewDate: Date,
     status: { type: String, enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'], default: 'DRAFT' },
@@ -89,5 +89,12 @@ const carePlanSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ─── Compound Indexes ────────────────────────────────────────────────────────
+carePlanSchema.index({ beneficiary: 1, status: 1 });
+carePlanSchema.index({ status: 1, startDate: -1 });
+carePlanSchema.index({ reviewDate: 1, status: 1 });
+carePlanSchema.index({ planNumber: 1 }, { unique: true, sparse: true });
+carePlanSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.models.CarePlan || mongoose.model('CarePlan', carePlanSchema);

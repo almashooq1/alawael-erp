@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -266,7 +267,7 @@ router.post('/assessment/perform', async (req, res) => {
     });
   } catch (err) {
     logger.error('Perform assessment error:', err);
-    res.status(500).json({ success: false, message: err.message || 'خطأ في تنفيذ التقييم' });
+    res.status(500).json({ success: false, message: safeError(err) || 'خطأ في تنفيذ التقييم' });
   }
 });
 
@@ -298,7 +299,7 @@ router.post('/assessment/batch', async (req, res) => {
     });
   } catch (err) {
     logger.error('Batch assessment error:', err);
-    res.status(500).json({ success: false, message: err.message || 'خطأ في التقييم المتعدد' });
+    res.status(500).json({ success: false, message: safeError(err) || 'خطأ في التقييم المتعدد' });
   }
 });
 

@@ -7,6 +7,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const { BranchERPIntegrationService } = require('../integration/erp-branch-integration');
 const logger = require('../utils/logger');
 
@@ -65,6 +66,9 @@ router.get('/health', (_req, res) => {
     });
   }
 });
+
+// All endpoints below require authentication
+router.use(authenticate);
 
 /**
  * Get Integration Status

@@ -23,6 +23,7 @@ const {
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { safeError } = require('../utils/safeError');
 
 // ── Auth: all EMR routes require authentication (PHI data) ───────────────
 router.use(authenticate);
@@ -272,7 +273,7 @@ router.get('/lab-results/:id', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('[EMR] Get lab result error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب النتيجة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب النتيجة', error: safeError(error) });
   }
 });
 
@@ -300,7 +301,7 @@ router.put('/lab-results/:id', async (req, res) => {
     res.json({ success: true, data: result });
   } catch (error) {
     logger.error('[EMR] Update lab result error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث النتيجة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث النتيجة', error: safeError(error) });
   }
 });
 
@@ -367,7 +368,7 @@ router.get('/clinical-notes/:id', async (req, res) => {
     res.json({ success: true, data: note });
   } catch (error) {
     logger.error('[EMR] Get clinical note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظة', error: safeError(error) });
   }
 });
 
@@ -474,7 +475,7 @@ router.get('/allergies', async (req, res) => {
     res.json({ success: true, data: allergies, total });
   } catch (error) {
     logger.error('[EMR] List allergies error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحساسية', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الحساسية', error: safeError(error) });
   }
 });
 
@@ -628,7 +629,7 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     logger.error('[EMR] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
   }
 });
 

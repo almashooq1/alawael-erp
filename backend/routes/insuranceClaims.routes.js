@@ -20,6 +20,7 @@ const {
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { safeError } = require('../utils/safeError');
 
 // ── Auth: all insurance routes require authentication ────────────────────
 router.use(authenticate);
@@ -51,7 +52,7 @@ router.get('/contracts', async (req, res) => {
     res.json({ success: true, data: contracts, total });
   } catch (error) {
     logger.error('[InsuranceClaims] List contracts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب العقود', error: safeError(error) });
   }
 });
 
@@ -62,7 +63,7 @@ router.get('/contracts/:id', async (req, res) => {
     res.json({ success: true, data: contract });
   } catch (error) {
     logger.error('[InsuranceClaims] Get contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقد', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب العقد', error: safeError(error) });
   }
 });
 
@@ -74,7 +75,7 @@ router.post('/contracts', async (req, res) => {
     res.status(201).json({ success: true, data: contract });
   } catch (error) {
     logger.error('[InsuranceClaims] Create contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء العقد', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء العقد', error: safeError(error) });
   }
 });
 
@@ -88,7 +89,7 @@ router.put('/contracts/:id', async (req, res) => {
     res.json({ success: true, data: contract });
   } catch (error) {
     logger.error('[InsuranceClaims] Update contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث العقد', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث العقد', error: safeError(error) });
   }
 });
 
@@ -98,7 +99,7 @@ router.delete('/contracts/:id', async (req, res) => {
     res.json({ success: true, message: 'تم حذف العقد بنجاح' });
   } catch (error) {
     logger.error('[InsuranceClaims] Delete contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف العقد', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف العقد', error: safeError(error) });
   }
 });
 
@@ -201,7 +202,7 @@ router.patch('/pre-auth/:id/approve', async (req, res) => {
     res.json({ success: true, data: preAuth, message: 'تمت الموافقة بنجاح' });
   } catch (error) {
     logger.error('[InsuranceClaims] Approve pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: safeError(error) });
   }
 });
 
@@ -218,7 +219,7 @@ router.patch('/pre-auth/:id/deny', async (req, res) => {
     res.json({ success: true, data: preAuth });
   } catch (error) {
     logger.error('[InsuranceClaims] Deny pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الرفض', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في الرفض', error: safeError(error) });
   }
 });
 
@@ -265,7 +266,7 @@ router.get('/claims', async (req, res) => {
     res.json({ success: true, data: claims, total });
   } catch (error) {
     logger.error('[InsuranceClaims] List claims error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبات', error: safeError(error) });
   }
 });
 
@@ -283,7 +284,7 @@ router.get('/claims/:id', async (req, res) => {
     res.json({ success: true, data: { ...claim.toObject(), items } });
   } catch (error) {
     logger.error('[InsuranceClaims] Get claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبة', error: safeError(error) });
   }
 });
 
@@ -446,7 +447,7 @@ router.post('/claim-items', async (req, res) => {
     res.status(201).json({ success: true, data: item });
   } catch (error) {
     logger.error('[InsuranceClaims] Create claim item error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة البند', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة البند', error: safeError(error) });
   }
 });
 
@@ -461,7 +462,7 @@ router.delete('/claim-items/:id', async (req, res) => {
     res.json({ success: true, message: 'تم حذف البند بنجاح' });
   } catch (error) {
     logger.error('[InsuranceClaims] Delete claim item error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف البند', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف البند', error: safeError(error) });
   }
 });
 
@@ -533,7 +534,7 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     logger.error('[InsuranceClaims] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
   }
 });
 

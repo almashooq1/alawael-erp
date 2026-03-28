@@ -12,6 +12,10 @@ const router = express.Router();
 const { MedicalReferral, ReferralFollowUp } = require('../models/medicalReferral.model');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
+
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // REFERRALS — الإحالات
@@ -64,7 +68,7 @@ router.get('/', async (req, res) => {
     res.json({ success: true, data: referrals, total });
   } catch (error) {
     logger.error('[Referrals] List referrals error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالات', error: safeError(error) });
   }
 });
 
@@ -89,7 +93,7 @@ router.get('/:id', async (req, res) => {
     res.json({ success: true, data: { ...referral.toObject(), followUps } });
   } catch (error) {
     logger.error('[Referrals] Get referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالة', error: safeError(error) });
   }
 });
 
@@ -105,7 +109,7 @@ router.post('/', async (req, res) => {
     res.status(201).json({ success: true, data: referral });
   } catch (error) {
     logger.error('[Referrals] Create referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء الإحالة', error: safeError(error) });
   }
 });
 
@@ -119,7 +123,7 @@ router.put('/:id', async (req, res) => {
     res.json({ success: true, data: referral });
   } catch (error) {
     logger.error('[Referrals] Update referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث الإحالة', error: safeError(error) });
   }
 });
 
@@ -129,7 +133,7 @@ router.delete('/:id', async (req, res) => {
     res.json({ success: true, message: 'تم حذف الإحالة بنجاح' });
   } catch (error) {
     logger.error('[Referrals] Delete referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف الإحالة', error: safeError(error) });
   }
 });
 
@@ -170,7 +174,7 @@ router.patch('/:id/reject', async (req, res) => {
     res.json({ success: true, data: referral });
   } catch (error) {
     logger.error('[Referrals] Reject referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في رفض الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في رفض الإحالة', error: safeError(error) });
   }
 });
 
@@ -188,7 +192,7 @@ router.patch('/:id/send', async (req, res) => {
     res.json({ success: true, data: referral, message: 'تم إرسال الإحالة' });
   } catch (error) {
     logger.error('[Referrals] Send referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إرسال الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إرسال الإحالة', error: safeError(error) });
   }
 });
 
@@ -208,7 +212,7 @@ router.patch('/:id/complete', async (req, res) => {
     res.json({ success: true, data: referral, message: 'تم إكمال الإحالة' });
   } catch (error) {
     logger.error('[Referrals] Complete referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إكمال الإحالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إكمال الإحالة', error: safeError(error) });
   }
 });
 
@@ -330,7 +334,7 @@ router.get('/dashboard/stats', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Referrals] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
   }
 });
 

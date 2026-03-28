@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/therapy-rooms — list rooms */
 router.get('/', requireAuth, async (req, res) => {
@@ -21,7 +22,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (err) {
     logger.error('therapyRoom list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -37,7 +38,7 @@ router.get('/available', requireAuth, async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (err) {
     logger.error('therapyRoom available error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -49,7 +50,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: room });
   } catch (err) {
     logger.error('therapyRoom get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -87,7 +88,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Room deleted' });
   } catch (err) {
     logger.error('therapyRoom delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -105,7 +106,7 @@ router.patch(
       res.json({ success: true, data: room });
     } catch (err) {
       logger.error('therapyRoom maintenance toggle error:', err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );

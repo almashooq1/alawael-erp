@@ -28,6 +28,7 @@ const {
 } = require('../models/WorkflowPro');
 
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 router.use(authenticateToken);
 
@@ -66,7 +67,7 @@ router.get('/forms', async (req, res) => {
     });
   } catch (err) {
     logger.error('GET /forms error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في جلب النماذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب النماذج', error: safeError(err) });
   }
 });
 
@@ -79,7 +80,7 @@ router.get('/forms/:id', async (req, res) => {
     if (!form) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
     res.json({ success: true, data: form });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب النموذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب النموذج', error: safeError(err) });
   }
 });
 
@@ -90,7 +91,7 @@ router.post('/forms', async (req, res) => {
     res.status(201).json({ success: true, data: form, message: 'تم إنشاء النموذج بنجاح' });
   } catch (err) {
     logger.error('POST /forms error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء النموذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء النموذج', error: safeError(err) });
   }
 });
 
@@ -104,7 +105,7 @@ router.put('/forms/:id', async (req, res) => {
     if (!form) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
     res.json({ success: true, data: form, message: 'تم تحديث النموذج بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث النموذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث النموذج', error: safeError(err) });
   }
 });
 
@@ -115,7 +116,7 @@ router.delete('/forms/:id', async (req, res) => {
     if (!form) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
     res.json({ success: true, message: 'تم حذف النموذج بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف النموذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف النموذج', error: safeError(err) });
   }
 });
 
@@ -136,7 +137,7 @@ router.post('/forms/:id/clone', async (req, res) => {
     const clone = await WorkflowFormTemplate.create(original);
     res.status(201).json({ success: true, data: clone, message: 'تم نسخ النموذج بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في نسخ النموذج', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في نسخ النموذج', error: safeError(err) });
   }
 });
 
@@ -210,7 +211,7 @@ router.post('/forms/:id/validate', async (req, res) => {
 
     res.json({ success: true, valid: errors.length === 0, errors });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحقق', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في التحقق', error: safeError(err) });
   }
 });
 
@@ -314,7 +315,7 @@ router.get('/escalations/rules/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب القاعدة', error: safeError(err) });
   }
 });
 
@@ -325,7 +326,7 @@ router.post('/escalations/rules', async (req, res) => {
     res.status(201).json({ success: true, data: rule, message: 'تم إنشاء قاعدة التصعيد بنجاح' });
   } catch (err) {
     logger.error('POST /escalations/rules error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء القاعدة', error: safeError(err) });
   }
 });
 
@@ -339,7 +340,7 @@ router.put('/escalations/rules/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule, message: 'تم تحديث القاعدة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث القاعدة', error: safeError(err) });
   }
 });
 
@@ -350,7 +351,7 @@ router.delete('/escalations/rules/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, message: 'تم حذف القاعدة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف القاعدة', error: safeError(err) });
   }
 });
 
@@ -401,7 +402,7 @@ router.get('/escalations/logs', async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل التصعيد', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب سجل التصعيد', error: safeError(err) });
   }
 });
 
@@ -426,7 +427,7 @@ router.post('/escalations/logs/:id/resolve', async (req, res) => {
 
     res.json({ success: true, data: log, message: 'تم حل التصعيد بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حل التصعيد', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حل التصعيد', error: safeError(err) });
   }
 });
 
@@ -558,7 +559,7 @@ router.post('/escalations/simulate', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في المحاكاة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في المحاكاة', error: safeError(err) });
   }
 });
 
@@ -593,7 +594,7 @@ router.get('/sla-policies', async (req, res) => {
     });
   } catch (err) {
     logger.error('GET /sla-policies error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في جلب السياسات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب السياسات', error: safeError(err) });
   }
 });
 
@@ -606,7 +607,7 @@ router.get('/sla-policies/:id', async (req, res) => {
     if (!policy) return res.status(404).json({ success: false, message: 'السياسة غير موجودة' });
     res.json({ success: true, data: policy });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب السياسة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب السياسة', error: safeError(err) });
   }
 });
 
@@ -617,7 +618,7 @@ router.post('/sla-policies', async (req, res) => {
     res.status(201).json({ success: true, data: policy, message: 'تم إنشاء سياسة SLA بنجاح' });
   } catch (err) {
     logger.error('POST /sla-policies error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء السياسة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء السياسة', error: safeError(err) });
   }
 });
 
@@ -631,7 +632,7 @@ router.put('/sla-policies/:id', async (req, res) => {
     if (!policy) return res.status(404).json({ success: false, message: 'السياسة غير موجودة' });
     res.json({ success: true, data: policy, message: 'تم تحديث السياسة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث السياسة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث السياسة', error: safeError(err) });
   }
 });
 
@@ -642,7 +643,7 @@ router.delete('/sla-policies/:id', async (req, res) => {
     if (!policy) return res.status(404).json({ success: false, message: 'السياسة غير موجودة' });
     res.json({ success: true, message: 'تم حذف السياسة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف السياسة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف السياسة', error: safeError(err) });
   }
 });
 
@@ -724,7 +725,7 @@ router.post('/sla-policies/check-compliance', async (req, res) => {
     res.json({ success: true, data: results, message: `تم فحص ${results.length} سياسة SLA` });
   } catch (err) {
     logger.error('POST /sla-policies/check-compliance error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في فحص الامتثال', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في فحص الامتثال', error: safeError(err) });
   }
 });
 
@@ -775,7 +776,7 @@ router.get('/sla-policies/dashboard', async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في لوحة SLA', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في لوحة SLA', error: safeError(err) });
   }
 });
 
@@ -797,7 +798,7 @@ router.get('/sla-policies/stats', async (_req, res) => {
     ]);
     res.json({ success: true, data: { total, active, inactive: total - active, byScopeType } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إحصائيات SLA', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إحصائيات SLA', error: safeError(err) });
   }
 });
 
@@ -818,7 +819,7 @@ router.post('/sla-policies/:id/clone', async (req, res) => {
     const clone = await WorkflowSLAPolicy.create(original);
     res.status(201).json({ success: true, data: clone, message: 'تم نسخ السياسة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في نسخ السياسة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في نسخ السياسة', error: safeError(err) });
   }
 });
 
@@ -908,7 +909,7 @@ router.get('/kpi/realtime', async (_req, res) => {
     });
   } catch (err) {
     logger.error('GET /kpi/realtime error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في مؤشرات الأداء', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في مؤشرات الأداء', error: safeError(err) });
   }
 });
 
@@ -927,7 +928,7 @@ router.get('/kpi/trends', async (req, res) => {
 
     res.json({ success: true, data: snapshots });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اتجاهات الأداء', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في اتجاهات الأداء', error: safeError(err) });
   }
 });
 
@@ -993,7 +994,7 @@ router.post('/kpi/snapshot', async (req, res) => {
     res.json({ success: true, data: snapshot, message: 'تم توليد لقطة مؤشرات الأداء' });
   } catch (err) {
     logger.error('POST /kpi/snapshot error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في توليد اللقطة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في توليد اللقطة', error: safeError(err) });
   }
 });
 
@@ -1086,7 +1087,7 @@ router.get('/kpi/workload-distribution', async (_req, res) => {
       })),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في توزيع عبء العمل', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في توزيع عبء العمل', error: safeError(err) });
   }
 });
 
@@ -1112,7 +1113,7 @@ router.get('/kpi/completion-trend', async (req, res) => {
 
     res.json({ success: true, data: trend.map(t => ({ date: t._id, completed: t.count })) });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اتجاه الإنجاز', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في اتجاه الإنجاز', error: safeError(err) });
   }
 });
 
@@ -1146,7 +1147,7 @@ router.get('/kpi/category-breakdown', async (_req, res) => {
 
     res.json({ success: true, data: breakdown });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحليل الفئات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحليل الفئات', error: safeError(err) });
   }
 });
 
@@ -1165,7 +1166,7 @@ router.get('/kpi/snapshots', async (req, res) => {
     ]);
     res.json({ success: true, data: snapshots, total, page: Number(page) });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب اللقطات', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب اللقطات', error: safeError(err) });
   }
 });
 
@@ -1219,7 +1220,7 @@ router.get('/approval-chains/:id', async (req, res) => {
     if (!chain) return res.status(404).json({ success: false, message: 'السلسلة غير موجودة' });
     res.json({ success: true, data: chain });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب السلسلة', error: safeError(err) });
   }
 });
 
@@ -1230,7 +1231,7 @@ router.post('/approval-chains', async (req, res) => {
     res.status(201).json({ success: true, data: chain, message: 'تم إنشاء سلسلة الموافقات بنجاح' });
   } catch (err) {
     logger.error('POST /approval-chains error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء السلسلة', error: safeError(err) });
   }
 });
 
@@ -1244,7 +1245,7 @@ router.put('/approval-chains/:id', async (req, res) => {
     if (!chain) return res.status(404).json({ success: false, message: 'السلسلة غير موجودة' });
     res.json({ success: true, data: chain, message: 'تم تحديث السلسلة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث السلسلة', error: safeError(err) });
   }
 });
 
@@ -1255,7 +1256,7 @@ router.delete('/approval-chains/:id', async (req, res) => {
     if (!chain) return res.status(404).json({ success: false, message: 'السلسلة غير موجودة' });
     res.json({ success: true, message: 'تم حذف السلسلة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف السلسلة', error: safeError(err) });
   }
 });
 
@@ -1276,7 +1277,7 @@ router.post('/approval-chains/:id/clone', async (req, res) => {
     const clone = await WorkflowApprovalChain.create(original);
     res.status(201).json({ success: true, data: clone, message: 'تم نسخ السلسلة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في نسخ السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في نسخ السلسلة', error: safeError(err) });
   }
 });
 
@@ -1301,7 +1302,7 @@ router.post('/approval-chains/:id/start', async (req, res) => {
 
     res.status(201).json({ success: true, data: instance, message: 'تم بدء سلسلة الموافقات' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في بدء السلسلة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في بدء السلسلة', error: safeError(err) });
   }
 });
 
@@ -1389,7 +1390,7 @@ router.post('/approval-chains/instances/:id/decide', async (req, res) => {
           : 'تم الرفض',
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اتخاذ القرار', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في اتخاذ القرار', error: safeError(err) });
   }
 });
 
@@ -1431,7 +1432,7 @@ router.get('/approval-chains/instances/:id/timeline', async (req, res) => {
 
     res.json({ success: true, data: { instance, timeline } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الخط الزمني', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الخط الزمني', error: safeError(err) });
   }
 });
 
@@ -1558,7 +1559,7 @@ router.get('/automations/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب القاعدة', error: safeError(err) });
   }
 });
 
@@ -1569,7 +1570,7 @@ router.post('/automations', async (req, res) => {
     res.status(201).json({ success: true, data: rule, message: 'تم إنشاء قاعدة الأتمتة بنجاح' });
   } catch (err) {
     logger.error('POST /automations error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء القاعدة', error: safeError(err) });
   }
 });
 
@@ -1583,7 +1584,7 @@ router.put('/automations/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule, message: 'تم تحديث القاعدة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث القاعدة', error: safeError(err) });
   }
 });
 
@@ -1594,7 +1595,7 @@ router.delete('/automations/:id', async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, message: 'تم حذف القاعدة بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف القاعدة', error: safeError(err) });
   }
 });
 
@@ -1684,7 +1685,7 @@ router.post('/automations/:id/test', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اختبار القاعدة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في اختبار القاعدة', error: safeError(err) });
   }
 });
 
@@ -1714,7 +1715,7 @@ router.get('/automations/logs', async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل الأتمتة', error: err.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب سجل الأتمتة', error: safeError(err) });
   }
 });
 

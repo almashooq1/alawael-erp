@@ -14,6 +14,7 @@ const { JobPosting, JobApplication, Interview } = require('../models/recruitment
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { safeError } = require('../utils/safeError');
 
 // ── Auth: all recruitment routes require authentication ──────────────────
 router.use(authenticate);
@@ -62,7 +63,7 @@ router.get('/jobs', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Recruitment] Jobs list error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -75,7 +76,7 @@ router.get('/jobs/:id', async (req, res) => {
     if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
     res.json({ success: true, data: job });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -111,7 +112,7 @@ router.patch('/jobs/:id/publish', async (req, res) => {
     if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
     res.json({ success: true, data: job, message: 'تم نشر الوظيفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -125,7 +126,7 @@ router.patch('/jobs/:id/close', async (req, res) => {
     if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
     res.json({ success: true, data: job, message: 'تم إغلاق الوظيفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -139,7 +140,7 @@ router.delete('/jobs/:id', async (req, res) => {
     if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -177,7 +178,7 @@ router.get('/applications', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -210,7 +211,7 @@ router.get('/applications/pipeline', async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -223,7 +224,7 @@ router.get('/applications/:id', async (req, res) => {
     if (!app) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
     res.json({ success: true, data: app });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -262,7 +263,7 @@ router.patch('/applications/:id/stage', async (req, res) => {
     await application.save();
     res.json({ success: true, data: application });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -277,7 +278,7 @@ router.patch('/applications/:id/rate', async (req, res) => {
     if (!application) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
     res.json({ success: true, data: application });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -301,7 +302,7 @@ router.patch('/applications/:id/offer', async (req, res) => {
     await application.save();
     res.json({ success: true, data: application, message: 'تم إرسال العرض الوظيفي' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -345,7 +346,7 @@ router.get('/interviews', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -384,7 +385,7 @@ router.patch('/interviews/:id/evaluate', async (req, res) => {
     await interview.save();
     res.json({ success: true, data: interview, message: 'تم حفظ التقييم' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -447,7 +448,7 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Recruitment] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

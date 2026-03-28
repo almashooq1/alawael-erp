@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const TherapyProgram = require('../models/TherapyProgram');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/therapy-programs — list programs */
 router.get('/', requireAuth, async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('therapyProgram list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -42,7 +43,7 @@ router.get('/departments', requireAuth, async (req, res) => {
     res.json({ success: true, data: departments.filter(Boolean).sort() });
   } catch (err) {
     logger.error('therapyProgram departments error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -54,7 +55,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: program });
   } catch (err) {
     logger.error('therapyProgram get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -92,7 +93,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
     logger.error('therapyProgram delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -110,7 +111,7 @@ router.patch(
       res.json({ success: true, data: program });
     } catch (err) {
       logger.error('therapyProgram toggle error:', err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );

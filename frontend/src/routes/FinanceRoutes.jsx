@@ -82,6 +82,10 @@ const FinancialWorkflow = lazyWithRetry(() => import('../pages/finance/Financial
 const TaxPlanning = lazyWithRetry(() => import('../pages/finance/TaxPlanning'));
 const FinancialAuditManager = lazyWithRetry(() => import('../pages/finance/FinancialAuditManager'));
 
+// New Gap-Fix Pages - الضرائب السعودية والعمليات المالية
+const SaudiTaxPage = lazyWithRetry(() => import('../pages/finance/SaudiTaxPage'));
+const FinanceOperationsPage = lazyWithRetry(() => import('../pages/finance/FinanceOperationsPage'));
+
 export default function FinanceRoutes() {
   return (
     <>
@@ -170,6 +174,14 @@ export default function FinanceRoutes() {
       <Route path="budget-management" element={<BudgetManagement />} />
       {/* Donations */}
       <Route path="donations" element={<DonationsDashboard />} />
+
+      {/* Saudi Tax & ZATCA — الضرائب السعودية */}
+      <Route path="saudi-tax" element={<SaudiTaxPage />} />
+      <Route path="accounting/saudi-tax" element={<SaudiTaxPage />} />
+
+      {/* Finance Operations — العمليات المالية */}
+      <Route path="finance-operations" element={<FinanceOperationsPage />} />
+      <Route path="accounting/operations" element={<FinanceOperationsPage />} />
     </>
   );
 }

@@ -24,6 +24,10 @@ const {
   AssetTrackingSystem,
 } = require('../utils/phase28-iot');
 const logger = require('../utils/logger');
+const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
+
+router.use(authenticate);
 
 // Singleton instances (per-process)
 const deviceManager = new IoTDeviceManager();
@@ -115,7 +119,7 @@ router.get('/sensors/streams/:streamId/data', (req, res) => {
     });
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -125,7 +129,7 @@ router.get('/sensors/streams/:streamId/aggregate', (req, res) => {
     const data = sensorIngestion.aggregateData(req.params.streamId, granularity || '1m');
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -169,7 +173,7 @@ router.post('/maintenance/:deviceId/analyze', (req, res) => {
     const result = maintenanceEngine.analyzeDeviceHealth(req.params.deviceId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -179,7 +183,7 @@ router.post('/maintenance/:deviceId/predict', (req, res) => {
     const result = maintenanceEngine.predictFailure(req.params.deviceId, historicalData || []);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -197,7 +201,7 @@ router.get('/maintenance/:deviceId/history', (req, res) => {
     const result = maintenanceEngine.getMaintenanceHistory(req.params.deviceId);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -262,7 +266,7 @@ router.post('/protocols/mqtt/publish', (req, res) => {
     const result = protocolSupport.writeMQTTMessage(topic, message);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -272,7 +276,7 @@ router.post('/protocols/mqtt/subscribe', (req, res) => {
     const result = protocolSupport.subscribeMQTT(topic);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -324,7 +328,7 @@ router.get('/dashboard', (_req, res) => {
     });
   } catch (error) {
     logger.error('[IoT] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

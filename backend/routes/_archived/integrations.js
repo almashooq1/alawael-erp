@@ -7,7 +7,7 @@ router.post('/send', async (req, res) => {
     const response = await axios({ url, method: method || 'post', data, headers });
     res.json({ success: true, response: response.data });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -20,6 +20,7 @@ router.post('/webhook/:source', async (req, res) => {
 });
 // Integration Routes
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const IntegrationService = require('../services/integrationService');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 

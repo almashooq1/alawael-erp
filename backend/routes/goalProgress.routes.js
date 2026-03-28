@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const GoalProgressHistory = require('../models/GoalProgressHistory');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/goal-progress — list progress records (filter by planId, goalId) */
 router.get('/', requireAuth, async (req, res) => {
@@ -36,7 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('goalProgress list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -51,7 +52,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: record });
   } catch (err) {
     logger.error('goalProgress get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -68,7 +69,7 @@ router.get('/plan/:planId/trend', requireAuth, async (req, res) => {
     res.json({ success: true, data: records });
   } catch (err) {
     logger.error('goalProgress trend error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -107,7 +108,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (
     res.json({ success: true, message: 'Record deleted' });
   } catch (err) {
     logger.error('goalProgress delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

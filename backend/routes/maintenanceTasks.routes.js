@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceTask = require('../models/MaintenanceTask');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/maintenance-tasks — list tasks */
 router.get('/', requireAuth, async (req, res) => {
@@ -44,7 +45,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('maintenanceTask list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -81,7 +82,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     res.json({ success: true, data: { summary: stats[0] || {}, byCategory } });
   } catch (err) {
     logger.error('maintenanceTask stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -98,7 +99,7 @@ router.get('/overdue', requireAuth, async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (err) {
     logger.error('maintenanceTask overdue error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -113,7 +114,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: task });
   } catch (err) {
     logger.error('maintenanceTask get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -156,7 +157,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Task deleted' });
   } catch (err) {
     logger.error('maintenanceTask delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

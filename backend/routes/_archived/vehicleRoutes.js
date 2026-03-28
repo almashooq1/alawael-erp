@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -42,7 +43,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: vehicles, total: vehicles.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/:vehicleId', authenticate, (req, res) => {
 
     res.json({ success: true, data: vehicle });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -112,7 +113,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newVehicle, message: 'Vehicle created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -137,7 +138,7 @@ router.put('/:vehicleId', authenticate, (req, res) => {
 
     res.json({ success: true, data: updatedVehicle, message: 'Vehicle updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -155,7 +156,7 @@ router.delete('/:vehicleId', authenticate, (req, res) => {
 
     res.json({ success: true, message: `Vehicle ${vehicleId} deleted successfully` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -186,7 +187,7 @@ router.get('/:vehicleId/insurance-validity', authenticate, (req, res) => {
 
     res.json({ success: true, data: insuranceData });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -213,7 +214,7 @@ router.get('/:vehicleId/inspection-validity', authenticate, (req, res) => {
 
     res.json({ success: true, data: inspectionData });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

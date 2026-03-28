@@ -9,6 +9,10 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
+
+router.use(authenticate);
 
 // Safe-load all models needed for aggregation
 function safeModel(name) {
@@ -85,7 +89,7 @@ router.get('/executive', async (req, res) => {
     res.json({ success: true, data });
   } catch (error) {
     logger.error('[BI] Executive dashboard error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -137,7 +141,7 @@ router.get('/kpis', async (req, res) => {
 
     res.json({ success: true, data: kpis });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -204,7 +208,7 @@ router.get('/trends', async (req, res) => {
 
     res.json({ success: true, data: { metric, period: days, trends: trendData } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -246,7 +250,7 @@ router.get('/modules', async (req, res) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -316,7 +320,7 @@ router.get('/reports/summary', async (req, res) => {
 
     res.json({ success: true, data: summary });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

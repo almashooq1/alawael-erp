@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -38,7 +39,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: operations, total: operations.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/recruitment', authenticate, (req, res) => {
 
     res.json({ success: true, data: recruitment });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -125,7 +126,7 @@ router.get('/onboarding/:employeeId', authenticate, (req, res) => {
 
     res.json({ success: true, data: onboarding });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -158,7 +159,7 @@ router.post('/recruitment/position', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: position, message: 'Position created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -197,7 +198,7 @@ router.get('/relations/:employeeId', authenticate, (req, res) => {
 
     res.json({ success: true, data: relations });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -231,7 +232,7 @@ router.get('/succession', authenticate, (req, res) => {
 
     res.json({ success: true, data: succession });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -275,7 +276,7 @@ router.post('/offboarding/:employeeId', authenticate, (req, res) => {
 
     res.json({ success: true, data: offboarding, message: 'Offboarding process initiated' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

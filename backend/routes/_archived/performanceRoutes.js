@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -42,7 +43,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: reviews, total: reviews.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -103,7 +104,7 @@ router.get('/:performanceId', authenticate, (req, res) => {
 
     res.json({ success: true, data: review });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -135,7 +136,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: review, message: 'Performance review created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -164,7 +165,7 @@ router.put('/:performanceId', authenticate, (req, res) => {
       message: 'Performance review updated successfully',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -221,7 +222,7 @@ router.get('/:employeeId/kpis', authenticate, (req, res) => {
 
     res.json({ success: true, data: kpis });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -261,7 +262,7 @@ router.get('/analytics/summary', authenticate, (req, res) => {
 
     res.json({ success: true, data: analytics });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

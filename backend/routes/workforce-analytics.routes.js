@@ -22,6 +22,7 @@ const logger = require('../utils/logger');
 
 // ── Service ──
 const WorkforceAnalyticsService = require('../services/workforce-analytics.service');
+const { safeError } = require('../utils/safeError');
 const service = new WorkforceAnalyticsService();
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -37,7 +38,7 @@ router.get('/health-score', authenticate, async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Workforce health-score error:', err.message);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -50,7 +51,7 @@ router.get('/analytics/department/:departmentId', authenticate, async (req, res)
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Department analytics error:', err.message);
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -83,7 +84,7 @@ router.get('/headcount-plans', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.headcountPlans || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -134,7 +135,7 @@ router.get('/forecasts', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.forecasts || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -180,7 +181,7 @@ router.get('/succession-plans', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.successionPlans || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -291,7 +292,7 @@ router.get('/salary-bands', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.salaryBands || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 

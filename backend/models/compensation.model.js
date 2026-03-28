@@ -14,7 +14,6 @@ const compensationStructureSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     description: String,
     isActive: { type: Boolean, default: true, index: true },
@@ -244,7 +243,6 @@ const individualIncentiveSchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee',
       required: true,
-      index: true,
     },
     employeeName: String,
     departmentId: mongoose.Schema.Types.ObjectId,
@@ -330,7 +328,6 @@ const performancePenaltySchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee',
       required: true,
-      index: true,
     },
     employeeName: String,
 
@@ -374,7 +371,6 @@ const performancePenaltySchema = new Schema(
       type: String,
       enum: ['reported', 'under-review', 'approved', 'appealed', 'enforced'],
       default: 'reported',
-      index: true,
     },
 
     appealDetails: {
@@ -400,12 +396,11 @@ const benefitsSummarySchema = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Employee',
       required: true,
-      index: true,
     },
     employeeName: String,
     departmentId: mongoose.Schema.Types.ObjectId,
     departmentName: String,
-    year: { type: Number, required: true, index: true },
+    year: { type: Number, required: true },
 
     // ملخص سنوي
     baseSalary: Number,
@@ -636,8 +631,15 @@ compensationStructureSchema.statics.getActiveStructures = function () {
 
 // ========== التصدير ==========
 module.exports = {
-  CompensationStructure: mongoose.models.CompensationStructure || mongoose.model('CompensationStructure', compensationStructureSchema),
-  IndividualIncentive: mongoose.models.IndividualIncentive || mongoose.model('IndividualIncentive', individualIncentiveSchema),
-  PerformancePenalty: mongoose.models.PerformancePenalty || mongoose.model('PerformancePenalty', performancePenaltySchema),
-  BenefitsSummary: mongoose.models.BenefitsSummary || mongoose.model('BenefitsSummary', benefitsSummarySchema),
+  CompensationStructure:
+    mongoose.models.CompensationStructure ||
+    mongoose.model('CompensationStructure', compensationStructureSchema),
+  IndividualIncentive:
+    mongoose.models.IndividualIncentive ||
+    mongoose.model('IndividualIncentive', individualIncentiveSchema),
+  PerformancePenalty:
+    mongoose.models.PerformancePenalty ||
+    mongoose.model('PerformancePenalty', performancePenaltySchema),
+  BenefitsSummary:
+    mongoose.models.BenefitsSummary || mongoose.model('BenefitsSummary', benefitsSummarySchema),
 };

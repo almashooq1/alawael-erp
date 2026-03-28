@@ -9,7 +9,7 @@ router.use(authenticate);
 router.get('/templates', async (req, res) => {
   try {
     const Template = require('../models/Template');
-    const data = await Template.find().sort({ createdAt: -1 }).lean();
+    const data = await Template.find().sort({ createdAt: -1 }).limit(200).lean();
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Smart docs templates error:', err);
@@ -21,7 +21,11 @@ router.get('/templates', async (req, res) => {
 router.post('/generate', async (req, res) => {
   try {
     const Document = require('../models/Document');
-    const doc = await Document.create({ ...req.body, createdBy: req.user?.id, type: 'smart-generated' });
+    const doc = await Document.create({
+      ...req.body,
+      createdBy: req.user?.id,
+      type: 'smart-generated',
+    });
     res.status(201).json({ success: true, data: doc, message: 'تم إنشاء المستند' });
   } catch (err) {
     logger.error('Smart docs generate error:', err);

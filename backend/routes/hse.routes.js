@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { schemas } = require('../middleware/validationSchemas');
 const { SafetyIncident, SafetyInspection } = require('../models/HSE');
+const { safeError } = require('../utils/safeError');
 
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, async (req, res) => {
@@ -77,11 +80,11 @@ router.get('/incidents', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحوادث', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب الحوادث', error: safeError(error) });
   }
 });
 
-router.post('/incidents', authenticate, async (req, res) => {
+router.post('/incidents', authenticate, validate(schemas.hse.reportIncident), async (req, res) => {
   try {
     const doc = new SafetyIncident({ ...req.body, reportedBy: req.user._id || req.user.id });
     await doc.save();
@@ -114,7 +117,7 @@ router.delete(
       if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
       res.json({ success: true, message: 'تم حذف الحادثة بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في حذف الحادثة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف الحادثة', error: safeError(error) });
     }
   }
 );
@@ -137,7 +140,7 @@ router.get('/inspections', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التفتيشات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب التفتيشات', error: safeError(error) });
   }
 });
 
@@ -174,7 +177,7 @@ router.delete(
       if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
       res.json({ success: true, message: 'تم حذف التفتيش بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في حذف التفتيش', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف التفتيش', error: safeError(error) });
     }
   }
 );

@@ -15,6 +15,7 @@ const logger = require('../utils/logger');
 let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
+const { safeError } = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (_err) {
   logger.warn('[Analytics Routes] RBAC module not available, using fallback');
@@ -48,7 +49,7 @@ router.get('/metrics', createRBACMiddleware(['analytics:read']), (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -91,7 +92,7 @@ router.get('/metrics/:name', createRBACMiddleware(['analytics:read']), (req, res
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -129,7 +130,7 @@ router.put('/metrics/:name', createRBACMiddleware(['analytics:update']), (req, r
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -164,7 +165,7 @@ router.post('/metrics', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -191,7 +192,7 @@ router.put('/metrics/:name/threshold', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -217,7 +218,7 @@ router.get('/dashboards', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -254,7 +255,7 @@ router.get('/dashboards/:name', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -288,7 +289,7 @@ router.post('/dashboards', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -315,7 +316,7 @@ router.post('/dashboards/:name/widgets', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -359,7 +360,7 @@ router.get('/trends/:metricName', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -382,7 +383,7 @@ router.get('/trends/:metric1/:metric2', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -420,7 +421,7 @@ router.get('/aggregate/:metricName', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -452,7 +453,7 @@ router.post('/snapshots', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -481,7 +482,7 @@ router.get('/snapshots', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -511,7 +512,7 @@ router.get('/snapshots/:id', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -548,7 +549,7 @@ router.post('/snapshots/compare', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -582,7 +583,7 @@ router.post('/alerts', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -604,7 +605,7 @@ router.get('/alerts', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -626,7 +627,7 @@ router.get('/alerts/active', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -651,7 +652,7 @@ router.get('/stats', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -672,7 +673,7 @@ router.get('/health', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -701,7 +702,7 @@ router.get('/export', (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

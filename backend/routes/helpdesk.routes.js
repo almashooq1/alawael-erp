@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validate');
+const { schemas } = require('../middleware/validationSchemas');
 const { HelpDeskTicket, HelpDeskArticle } = require('../models/HelpDesk');
+const { safeError } = require('../utils/safeError');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -93,17 +96,17 @@ router.get('/tickets', authenticate, async (req, res) => {
 
     res.json({ success: true, data, pagination: { total, page: +page, limit: +limit } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذاكر', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب التذاكر', error: safeError(error) });
   }
 });
 
-router.post('/tickets', authenticate, async (req, res) => {
+router.post('/tickets', authenticate, validate(schemas.helpdesk.createTicket), async (req, res) => {
   try {
     const ticket = new HelpDeskTicket({ ...req.body, requester: req.user._id });
     await ticket.save();
     res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التذكرة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء التذكرة', error: safeError(error) });
   }
 });
 
@@ -117,7 +120,7 @@ router.put('/tickets/:id', authenticate, async (req, res) => {
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التذكرة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في تحديث التذكرة', error: safeError(error) });
   }
 });
 
@@ -128,7 +131,7 @@ router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res)
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, message: 'تم حذف التذكرة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف التذكرة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في حذف التذكرة', error: safeError(error) });
   }
 });
 
@@ -146,7 +149,7 @@ router.post('/tickets/:id/comments', authenticate, async (req, res) => {
     await ticket.save();
     res.json({ success: true, data: ticket });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التعليق', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إضافة التعليق', error: safeError(error) });
   }
 });
 
@@ -170,7 +173,7 @@ router.get('/articles', authenticate, async (req, res) => {
 
     res.json({ success: true, data, pagination: { total, page: +page, limit: +limit } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المقالات', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في جلب المقالات', error: safeError(error) });
   }
 });
 
@@ -180,7 +183,7 @@ router.post('/articles', authenticate, async (req, res) => {
     await article.save();
     res.status(201).json({ success: true, data: article });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المقالة', error: error.message });
+    res.status(500).json({ success: false, message: 'خطأ في إنشاء المقالة', error: safeError(error) });
   }
 });
 

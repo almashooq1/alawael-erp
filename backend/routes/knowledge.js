@@ -127,7 +127,7 @@ router.get('/search', async (req, res) => {
 // Get categories
 router.get('/categories', async (req, res) => {
   try {
-    const categories = await KnowledgeCategory.find().sort({ order: 1 });
+    const categories = await KnowledgeCategory.find().sort({ order: 1 }).limit(200).lean();
     res.json({ success: true, data: categories });
   } catch (error) {
     res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });

@@ -17,6 +17,7 @@ const multer = require('multer');
 const { authenticate, authorize } = require('../middleware/auth');
 const path = require('path');
 const fs = require('fs');
+const { safeError } = require('../../utils/safeError');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -97,7 +98,7 @@ router.post('/file', authenticate, upload.single('file'), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading file',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -142,7 +143,7 @@ router.post('/bulk', authenticate, upload.array('files', 10), (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error uploading files',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -184,7 +185,7 @@ router.get('/:id', authenticate, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error retrieving file metadata',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -219,7 +220,7 @@ router.delete('/:id', authenticate, authorize(['admin', 'manager']), (req, res) 
     res.status(500).json({
       success: false,
       message: 'Error deleting file',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -264,7 +265,7 @@ router.get('/documents/:docId', authenticate, (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error retrieving document',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

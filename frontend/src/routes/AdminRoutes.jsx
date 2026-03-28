@@ -46,6 +46,9 @@ const DirList = lazyWithRetry(() => import('../pages/electronic-directives/Direc
 const DirCompose = lazyWithRetry(() => import('../pages/electronic-directives/ComposeDirective'));
 const DirDetail = lazyWithRetry(() => import('../pages/electronic-directives/DirectiveDetail'));
 
+// System Settings Page — إعدادات النظام
+const SystemSettingsPage = lazyWithRetry(() => import('../pages/SystemAdmin/SystemSettingsPage'));
+
 export default function AdminRoutes() {
   return (
     <>
@@ -120,6 +123,24 @@ export default function AdminRoutes() {
       <Route path="electronic-directives/list" element={<DirList />} />
       <Route path="electronic-directives/compose" element={<DirCompose />} />
       <Route path="electronic-directives/view/:id" element={<DirDetail />} />
+
+      {/* System Settings — إعدادات النظام */}
+      <Route
+        path="system-settings"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin']}>
+            <SystemSettingsPage />
+          </RoleGuard>
+        }
+      />
+      <Route
+        path="admin-portal/system-settings"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin']}>
+            <SystemSettingsPage />
+          </RoleGuard>
+        }
+      />
     </>
   );
 }

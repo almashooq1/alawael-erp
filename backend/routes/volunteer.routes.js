@@ -13,6 +13,10 @@ const router = express.Router();
 const { Volunteer, VolunteerProgram, VolunteerShift } = require('../models/volunteer.model');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
+
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // VOLUNTEERS — المتطوعين
@@ -51,7 +55,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Volunteers] List error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -61,7 +65,7 @@ router.get('/:id', async (req, res) => {
     if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
     res.json({ success: true, data: vol });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -97,7 +101,7 @@ router.patch('/:id/approve', async (req, res) => {
     if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
     res.json({ success: true, data: vol, message: 'تمت الموافقة على المتطوع' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -110,7 +114,7 @@ router.get('/:id/hours', async (req, res) => {
     const totalHours = shifts.reduce((sum, s) => sum + (s.hoursWorked || 0), 0);
     res.json({ success: true, data: { totalHours, shifts } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -148,7 +152,7 @@ router.get('/programs/list', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -200,7 +204,7 @@ router.post('/programs/:id/enroll', async (req, res) => {
 
     res.json({ success: true, data: program, message: 'تم تسجيل المتطوع في البرنامج' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -244,7 +248,7 @@ router.get('/shifts/list', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -267,7 +271,7 @@ router.patch('/shifts/:id/check-in', async (req, res) => {
     if (!shift) return res.status(404).json({ success: false, error: 'الوردية غير موجودة' });
     res.json({ success: true, data: shift });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -288,7 +292,7 @@ router.patch('/shifts/:id/check-out', async (req, res) => {
 
     res.json({ success: true, data: shift });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -318,7 +322,7 @@ router.get('/dashboard/stats', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

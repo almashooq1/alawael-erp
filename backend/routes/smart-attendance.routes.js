@@ -10,6 +10,7 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 const {
   SmartAttendanceRecord,
   AttendanceBehaviorPattern,
@@ -59,7 +60,7 @@ function buildCrud(Model, modelName, opts = {}) {
       });
     } catch (err) {
       logger.error(`${modelName} GET / error:`, err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   });
 
@@ -74,7 +75,7 @@ function buildCrud(Model, modelName, opts = {}) {
       res.json({ success: true, data: { total, byStatus } });
     } catch (err) {
       logger.error(`${modelName} GET /stats error:`, err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   });
 
@@ -86,7 +87,7 @@ function buildCrud(Model, modelName, opts = {}) {
       res.json({ success: true, data: doc });
     } catch (err) {
       logger.error(`${modelName} GET /:id error:`, err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   });
 
@@ -124,7 +125,7 @@ function buildCrud(Model, modelName, opts = {}) {
       res.json({ success: true, message: `${modelName} deleted` });
     } catch (err) {
       logger.error(`${modelName} DELETE /:id error:`, err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   });
 

@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const ZKTecoService = require('../services/hr/zktecoService');
+const { safeError } = require('../utils/safeError');
 const {
   authenticateToken: authMiddleware,
   requireRole: roleMiddleware,
@@ -34,7 +35,7 @@ router.get('/devices', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب الأجهزة',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -51,7 +52,7 @@ router.get('/stats', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب الإحصائيات',
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -189,7 +190,7 @@ router.post('/test-connection', roleMiddleware('admin', 'hr_manager'), async (re
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -255,7 +256,7 @@ router.post('/sync-all', roleMiddleware('admin', 'hr_manager'), async (req, res)
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -407,7 +408,7 @@ router.post('/health-check', roleMiddleware('admin', 'hr_manager'), async (req, 
     const results = await ZKTecoService.healthCheck();
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: safeError(error) });
   }
 });
 
@@ -420,7 +421,7 @@ router.get('/connections', async (req, res) => {
     const status = ZKTecoService.getConnectionsStatus();
     res.json({ success: true, data: status, count: status.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: safeError(error) });
   }
 });
 
@@ -433,7 +434,7 @@ router.get('/detailed-stats', async (req, res) => {
     const stats = await ZKTecoService.getDetailedStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ success: false, message: safeError(error) });
   }
 });
 

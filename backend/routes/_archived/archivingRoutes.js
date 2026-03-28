@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware (placeholder - update with actual auth)
@@ -32,7 +33,7 @@ router.get('/status', authenticate, (_req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -65,7 +66,7 @@ router.post('/archive', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -93,7 +94,7 @@ router.get('/list', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -125,7 +126,7 @@ router.post('/restore', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -159,7 +160,7 @@ router.post('/classify', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -186,7 +187,7 @@ router.get('/search', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -210,7 +211,7 @@ router.delete('/:archiveId', authenticate, (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

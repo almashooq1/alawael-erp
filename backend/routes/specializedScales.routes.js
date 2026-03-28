@@ -21,11 +21,15 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const {
   SpecializedAssessmentScale,
   SpecializedScaleResult,
 } = require('../models/SpecializedAssessmentScale');
 const { escapeRegex } = require('../utils/sanitize');
+
+// ── Auth guard ──────────────────────────────────────────────
+router.use(authenticate);
 
 /* ─── Helper ───────────────────────────────────────────────────────────────── */
 

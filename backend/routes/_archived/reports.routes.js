@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 /**
@@ -32,7 +33,7 @@ router.get('/templates', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -68,7 +69,7 @@ router.get('/templates/:name', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -266,7 +267,7 @@ router.get('/scheduled', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -335,7 +336,7 @@ router.delete('/scheduled/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -371,7 +372,7 @@ router.get('/history', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -392,7 +393,7 @@ router.get('/stats', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });
@@ -438,7 +439,7 @@ router.post('/export', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: safeError(error),
     });
   }
 });

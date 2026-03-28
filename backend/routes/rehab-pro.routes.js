@@ -21,6 +21,9 @@ try {
 const mw =
   typeof auth === 'function' ? auth : auth.protect || auth.verifyToken || ((_r, _s, n) => n());
 
+// Global auth: all rehab-pro endpoints require authentication
+router.use(mw);
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // Dashboard — لوحة التحكم
 // ═══════════════════════════════════════════════════════════════════════════════

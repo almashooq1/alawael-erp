@@ -153,7 +153,7 @@ const beneficiarySchema = new mongoose.Schema(
 
     dateOfBirth: { type: Date, index: true },
     gender: { type: String, enum: ['male', 'female'], index: true },
-    nationalId: { type: String, unique: true, sparse: true, trim: true, index: true },
+    nationalId: { type: String, unique: true, sparse: true, trim: true },
     passportNumber: { type: String, sparse: true, trim: true },
     mrn: { type: String, unique: true, sparse: true, trim: true },
     nationality: { type: String, default: 'Saudi' },
@@ -170,7 +170,7 @@ const beneficiarySchema = new mongoose.Schema(
     profilePhoto: { url: String, filename: String, uploadDate: Date },
 
     // ── Contact Info ───────────────────────────────────────
-    email: { type: String, lowercase: true, trim: true, sparse: true },
+    email: { type: String, lowercase: true, trim: true },
     phone: { type: String, trim: true },
     contactInfo: {
       primaryPhone: { type: String, trim: true },
@@ -340,7 +340,6 @@ const beneficiarySchema = new mongoose.Schema(
         'INACTIVE',
       ],
       default: 'active',
-      index: true,
     },
     registrationDate: { type: Date, default: Date.now, index: true },
     joinDate: { type: Date },

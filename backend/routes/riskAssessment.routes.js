@@ -15,16 +15,34 @@ router.use(authenticate);
 // ─── Risk matrix overview (before /:id) ──────────────────────────────────────
 router.get('/matrix/overview', async (req, res) => {
   try {
-    const risks = await RiskAssessment.find({}).lean();
-    const matrix = { critical: 0, high: 0, medium: 0, low: 0 };
-    risks.forEach(r => {
-      const score = (r.probability || 1) * (r.impact || 1);
-      if (score >= 16) matrix.critical++;
-      else if (score >= 9) matrix.high++;
-      else if (score >= 4) matrix.medium++;
-      else matrix.low++;
-    });
-    res.json({ success: true, data: { matrix, total: risks.length }, message: 'مصفوفة المخاطر' });
+    const [result] = await RiskAssessment.aggregate([
+      {
+        $addFields: {
+          riskScore: { $multiply: [{ $ifNull: ['$probability', 1] }, { $ifNull: ['$impact', 1] }] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          critical: { $sum: { $cond: [{ $gte: ['$riskScore', 16] }, 1, 0] } },
+          high: {
+            $sum: {
+              $cond: [{ $and: [{ $gte: ['$riskScore', 9] }, { $lt: ['$riskScore', 16] }] }, 1, 0],
+            },
+          },
+          medium: {
+            $sum: {
+              $cond: [{ $and: [{ $gte: ['$riskScore', 4] }, { $lt: ['$riskScore', 9] }] }, 1, 0],
+            },
+          },
+          low: { $sum: { $cond: [{ $lt: ['$riskScore', 4] }, 1, 0] } },
+        },
+      },
+    ]);
+    const data = result || { total: 0, critical: 0, high: 0, medium: 0, low: 0 };
+    const matrix = { critical: data.critical, high: data.high, medium: data.medium, low: data.low };
+    res.json({ success: true, data: { matrix, total: data.total }, message: 'مصفوفة المخاطر' });
   } catch (error) {
     logger.error('Error fetching risk matrix:', error);
     res.status(500).json({ success: false, message: 'خطأ في جلب مصفوفة المخاطر' });

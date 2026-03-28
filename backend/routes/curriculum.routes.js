@@ -4,8 +4,12 @@
  */
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const { Curriculum } = require('../models/Curriculum');
 const { safeError } = require('../utils/safeError');
+
+// ── Auth guard ──────────────────────────────────────────────
+router.use(authenticate);
 
 // ── Get all curricula ────────────────────────────────────────
 router.get('/', async (req, res) => {

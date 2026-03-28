@@ -10,6 +10,10 @@ const router = express.Router();
 const Waitlist = require('../models/Waitlist');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const { authenticate } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
+
+router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CRUD — عمليات قائمة الانتظار
@@ -61,7 +65,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     logger.error('[Waitlist] List error:', error.message);
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -90,7 +94,7 @@ router.get('/stats', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -104,7 +108,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ success: false, error: 'السجل غير موجود في قائمة الانتظار' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -148,7 +152,7 @@ router.delete('/:id', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -175,7 +179,7 @@ router.patch('/:id/offer', async (req, res) => {
 
     res.json({ success: true, data: entry, message: 'تم تقديم العرض بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -190,7 +194,7 @@ router.patch('/:id/book', async (req, res) => {
     await entry.save();
     res.json({ success: true, data: entry, message: 'تم الحجز بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -204,7 +208,7 @@ router.patch('/:id/expire', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, data: entry, message: 'تم إنهاء صلاحية السجل' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -222,7 +226,7 @@ router.patch('/:id/priority', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -242,7 +246,7 @@ router.post('/auto-expire', async (req, res) => {
       modified: result.modifiedCount,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

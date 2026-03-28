@@ -119,6 +119,9 @@ export { default as WorkforceAnalyticsRoutes } from './WorkforceAnalyticsRoutes'
 // === Phase 22: Learning & Development LMS (التدريب الإلكتروني للموظفين) ===
 export { default as LearningDevelopmentRoutes } from './LearningDevelopmentRoutes';
 
+// === Gap-Fix: Care Plans (خطط الرعاية) ===
+export { default as CarePlanRoutes } from './CarePlanRoutes';
+
 // === Phase 23: Automated Backup System (نظام النسخ الاحتياطي التلقائي) ===
 export { default as AutomatedBackupRoutes } from './AutomatedBackupRoutes';
 

@@ -101,7 +101,6 @@ const auditLogSchema = new mongoose.Schema(
       type: String,
       required: true,
       enum: Object.values(AuditEventTypes),
-      index: true,
     },
     eventCategory: {
       type: String,
@@ -124,7 +123,6 @@ const auditLogSchema = new mongoose.Schema(
       type: String,
       enum: Object.values(SeverityLevels),
       default: 'info',
-      index: true,
     },
     status: {
       type: String,
@@ -137,7 +135,6 @@ const auditLogSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      index: true,
     },
     username: String,
     userEmail: String,
@@ -146,11 +143,9 @@ const auditLogSchema = new mongoose.Schema(
     // معلومات الجلسة
     sessionId: {
       type: String,
-      index: true,
     },
     ipAddress: {
       type: String,
-      index: true,
     },
     userAgent: String,
     deviceInfo: {

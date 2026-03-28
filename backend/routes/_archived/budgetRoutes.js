@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -42,7 +43,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: budgets, total: budgets.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -84,7 +85,7 @@ router.get('/:budgetId', authenticate, (req, res) => {
 
     res.json({ success: true, data: budget });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -118,7 +119,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newBudget, message: 'Budget created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -143,7 +144,7 @@ router.put('/:budgetId', authenticate, (req, res) => {
 
     res.json({ success: true, data: updatedBudget, message: 'Budget updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -178,7 +179,7 @@ router.post('/:budgetId/allocate', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: allocation, message: 'Budget allocated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -233,7 +234,7 @@ router.get('/:budgetId/spending', authenticate, (req, res) => {
 
     res.json({ success: true, data: spending });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -264,7 +265,7 @@ router.get('/:budgetId/forecast', authenticate, (req, res) => {
 
     res.json({ success: true, data: forecast });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -42,7 +43,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: documents, total: documents.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -75,7 +76,7 @@ router.get('/:documentId', authenticate, (req, res) => {
 
     res.json({ success: true, data: document });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -109,7 +110,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newDocument, message: 'Document uploaded successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -134,7 +135,7 @@ router.put('/:documentId', authenticate, (req, res) => {
 
     res.json({ success: true, data: updatedDocument, message: 'Document updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -152,7 +153,7 @@ router.delete('/:documentId', authenticate, (req, res) => {
 
     res.json({ success: true, message: `Document ${documentId} deleted successfully` });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -179,7 +180,7 @@ router.get('/search/:query', authenticate, (req, res) => {
 
     res.json({ success: true, data: results, query });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

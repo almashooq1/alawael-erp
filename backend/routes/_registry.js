@@ -255,6 +255,12 @@ const familySatisfactionRoutes = require('../routes/familySatisfaction.routes');
 // Noor Integration (نظام نور — وزارة التعليم)
 const noorRoutes = require('../routes/noor.routes');
 
+// Gap-Fix Routes (خطط الرعاية, إعدادات النظام, الضريبة, العمليات المالية)
+const carePlanRoutes = require('../routes/carePlan.routes');
+const systemSettingsRoutes = require('../routes/systemSettings.routes');
+const saudiTaxRoutes = require('../routes/saudiTax.routes');
+const financeOperationsRoutes = require('../routes/financeOperations.routes');
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -1259,6 +1265,15 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '../routes/accounting-operations.routes'
   );
   logger.info('Phase 36 mounted (2 sub-modules: expenses, payments)');
+
+  // ── Care Plans, System Settings, Saudi Tax, Finance Operations ─────────
+  dualMount(app, 'care-plans', carePlanRoutes);
+  dualMount(app, 'system-settings', systemSettingsRoutes);
+  dualMount(app, 'saudi-tax', saudiTaxRoutes);
+  dualMount(app, 'finance-operations', financeOperationsRoutes);
+  logger.info(
+    'New gap-fix routes mounted (4 modules: care-plans, system-settings, saudi-tax, finance-operations)'
+  );
 
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;

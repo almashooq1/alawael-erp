@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -42,7 +43,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: facilities, total: facilities.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -81,7 +82,7 @@ router.get('/:facilityId', authenticate, (req, res) => {
 
     res.json({ success: true, data: facility });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -115,7 +116,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newFacility, message: 'Facility created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -140,7 +141,7 @@ router.put('/:facilityId', authenticate, (req, res) => {
 
     res.json({ success: true, data: updatedFacility, message: 'Facility updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -182,7 +183,7 @@ router.get('/:facilityId/maintenance', authenticate, (req, res) => {
 
     res.json({ success: true, data: maintenance });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -216,7 +217,7 @@ router.post('/:facilityId/maintenance', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: maintenance, message: 'Maintenance scheduled successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -253,7 +254,7 @@ router.get('/:facilityId/assets', authenticate, (req, res) => {
 
     res.json({ success: true, data: assets, total: assets.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

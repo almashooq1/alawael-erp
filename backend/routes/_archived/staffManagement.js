@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../../utils/safeError');
 const router = express.Router();
 
 // Middleware placeholder
@@ -40,7 +41,7 @@ router.get('/', authenticate, (req, res) => {
     ];
     res.json({ success: true, data: staff, total: staff.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -75,7 +76,7 @@ router.get('/:staffId', authenticate, (req, res) => {
 
     res.json({ success: true, data: staff });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -109,7 +110,7 @@ router.post('/', authenticate, (req, res) => {
       .status(201)
       .json({ success: true, data: newStaff, message: 'Staff member created successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -134,7 +135,7 @@ router.put('/:staffId', authenticate, (req, res) => {
 
     res.json({ success: true, data: updatedStaff, message: 'Staff member updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -172,7 +173,7 @@ router.get('/:staffId/performance', authenticate, (req, res) => {
 
     res.json({ success: true, data: performance });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -210,7 +211,7 @@ router.get('/:staffId/schedule', authenticate, (req, res) => {
 
     res.json({ success: true, data: schedule });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    res.status(500).json({ success: false, error: safeError(error) });
   }
 });
 

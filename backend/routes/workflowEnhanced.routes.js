@@ -42,6 +42,7 @@ const {
 } = require('../models/WorkflowEnhanced');
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
+const { safeError } = require('../utils/safeError');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -652,7 +653,7 @@ router.post('/webhooks', authMiddleware, async (req, res) => {
     });
     res.status(201).json({ success: true, data: wh, message: 'تم إنشاء الـ Webhook' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
   }
 });
 
@@ -791,7 +792,7 @@ router.post('/reports', authMiddleware, async (req, res) => {
     });
     res.status(201).json({ success: true, data: report, message: 'تم حفظ التقرير' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
   }
 });
 
@@ -2688,7 +2689,7 @@ router.post('/templates/extended/:templateId/deploy', authMiddleware, async (req
       message: `تم نشر قالب "${tmpl.nameAr}" بنجاح`,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: error.message });
+    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
   }
 });
 

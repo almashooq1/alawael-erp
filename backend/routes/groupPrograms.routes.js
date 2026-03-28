@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const GroupProgram = require('../models/GroupProgram');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/group-programs — list programs */
 router.get('/', requireAuth, async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('groupProgram list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -47,7 +48,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: program });
   } catch (err) {
     logger.error('groupProgram get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -95,7 +96,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
     logger.error('groupProgram delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -141,7 +142,7 @@ router.delete(
       res.json({ success: true, data: program });
     } catch (err) {
       logger.error('groupProgram removeStudent error:', err);
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -175,7 +176,7 @@ router.get('/:id/sessions', requireAuth, async (req, res) => {
     res.json({ success: true, data: program.sessions, total: program.sessions.length });
   } catch (err) {
     logger.error('groupProgram sessions error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

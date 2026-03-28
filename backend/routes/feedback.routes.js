@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const Feedback = require('../models/Feedback');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 /** GET /api/feedback — list feedback (filter by beneficiary, therapist, sentiment, followUp) */
 router.get('/', requireAuth, async (req, res) => {
@@ -42,7 +43,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     logger.error('feedback list error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -121,7 +122,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     });
   } catch (err) {
     logger.error('feedback stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -136,7 +137,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: feedback });
   } catch (err) {
     logger.error('feedback get error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -174,7 +175,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     res.json({ success: true, message: 'Feedback deleted' });
   } catch (err) {
     logger.error('feedback delete error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

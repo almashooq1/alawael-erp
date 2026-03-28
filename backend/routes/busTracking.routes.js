@@ -26,6 +26,7 @@ const MAX_PAGE_LIMIT = 100;
 
 // ── Service ──
 const busTracking = require('../services/busTracking.service');
+const { safeError } = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -47,7 +48,7 @@ router.get('/buses', authenticate, async (req, res) => {
     const buses = busTracking.getAllBuses(req.query);
     res.json({ success: true, data: buses, total: buses.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -124,7 +125,7 @@ router.get('/routes', authenticate, async (req, res) => {
     const routes = busTracking.getAllRoutes(req.query);
     res.json({ success: true, data: routes, total: routes.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -296,7 +297,7 @@ router.get('/trips/active', authenticate, async (req, res) => {
     const trips = busTracking.getActiveTrips();
     res.json({ success: true, data: trips, total: trips.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -306,7 +307,7 @@ router.get('/trips/history', authenticate, async (req, res) => {
     const trips = busTracking.getTripHistory(req.query);
     res.json({ success: true, data: trips, total: trips.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -359,7 +360,7 @@ router.get('/tracking', authenticate, async (req, res) => {
     const locations = busTracking.getAllBusLocations();
     res.json({ success: true, data: locations, total: locations.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -390,7 +391,7 @@ router.get('/boarding/history', authenticate, async (req, res) => {
     const events = busTracking.getBoardingHistory(req.query);
     res.json({ success: true, data: events, total: events.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -455,7 +456,7 @@ router.get('/notifications', authenticate, [query('phone').notEmpty()], async (r
     });
     res.json({ success: true, data: notifs, total: notifs.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -501,7 +502,7 @@ router.get('/safety/alerts', authenticate, async (req, res) => {
     const alerts = busTracking.getSafetyAlerts(req.query);
     res.json({ success: true, data: alerts, total: alerts.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -543,7 +544,7 @@ router.get('/dashboard/overview', authenticate, async (req, res) => {
     const dashboard = busTracking.getDashboard();
     res.json({ success: true, data: dashboard });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ success: false, error: safeError(err) });
   }
 });
 

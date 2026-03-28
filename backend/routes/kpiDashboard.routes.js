@@ -13,30 +13,40 @@ router.use(authenticate);
 // ─── Dashboard overview (before /:id) ────────────────────────────────────────
 router.get('/dashboard/overview', async (req, res) => {
   try {
-    const kpis = await KPI.find({}).lean();
-    let onTarget = 0,
-      atRisk = 0,
-      belowTarget = 0;
-    kpis.forEach(k => {
-      const pct = k.target > 0 ? (k.actual / k.target) * 100 : 0;
-      if (pct >= 90) onTarget++;
-      else if (pct >= 70) atRisk++;
-      else belowTarget++;
-    });
+    const [result] = await KPI.aggregate([
+      {
+        $addFields: {
+          pct: {
+            $cond: [
+              { $gt: ['$target', 0] },
+              { $multiply: [{ $divide: ['$actual', '$target'] }, 100] },
+              0,
+            ],
+          },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: 1 },
+          onTarget: { $sum: { $cond: [{ $gte: ['$pct', 90] }, 1, 0] } },
+          atRisk: {
+            $sum: { $cond: [{ $and: [{ $gte: ['$pct', 70] }, { $lt: ['$pct', 90] }] }, 1, 0] },
+          },
+          belowTarget: { $sum: { $cond: [{ $lt: ['$pct', 70] }, 1, 0] } },
+          avgCompletion: { $avg: '$pct' },
+        },
+      },
+    ]);
+    const data = result || { total: 0, onTarget: 0, atRisk: 0, belowTarget: 0, avgCompletion: 0 };
     res.json({
       success: true,
       data: {
-        total: kpis.length,
-        onTarget,
-        atRisk,
-        belowTarget,
-        avgCompletion:
-          kpis.length > 0
-            ? (
-                kpis.reduce((sum, k) => sum + (k.target > 0 ? (k.actual / k.target) * 100 : 0), 0) /
-                kpis.length
-              ).toFixed(1)
-            : 0,
+        total: data.total,
+        onTarget: data.onTarget,
+        atRisk: data.atRisk,
+        belowTarget: data.belowTarget,
+        avgCompletion: (data.avgCompletion || 0).toFixed(1),
       },
       message: 'نظرة عامة على المؤشرات',
     });

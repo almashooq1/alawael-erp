@@ -8,6 +8,7 @@ const router = express.Router();
 const Program = require('../models/Program');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { safeError } = require('../utils/safeError');
 
 // ── GET / — list programs (filter by category, status, tags) ───────────
 router.get('/', requireAuth, async (req, res) => {
@@ -45,7 +46,7 @@ router.get('/', requireAuth, async (req, res) => {
     });
   } catch (err) {
     logger.error('Programs GET / error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -79,7 +80,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     });
   } catch (err) {
     logger.error('Programs GET /stats error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -90,7 +91,7 @@ router.get('/categories', requireAuth, async (req, res) => {
     res.json({ success: true, data: categories });
   } catch (err) {
     logger.error('Programs GET /categories error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -104,7 +105,7 @@ router.get('/active', requireAuth, async (req, res) => {
     res.json({ success: true, data, count: data.length });
   } catch (err) {
     logger.error('Programs GET /active error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -116,7 +117,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: doc });
   } catch (err) {
     logger.error('Programs GET /:id error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -157,7 +158,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
     logger.error('Programs DELETE /:id error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -182,7 +183,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
     res.json({ success: true, data: doc });
   } catch (err) {
     logger.error('Programs PATCH /:id/status error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -207,7 +208,7 @@ router.patch('/:id/participants', requireAuth, async (req, res) => {
     res.json({ success: true, data: doc });
   } catch (err) {
     logger.error('Programs PATCH /:id/participants error:', err);
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ success: false, message: safeError(err) });
   }
 });
 

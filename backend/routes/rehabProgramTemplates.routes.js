@@ -26,8 +26,12 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
 const { RehabProgramTemplate, ProgramEnrollment } = require('../models/RehabProgramTemplate');
 const { escapeRegex } = require('../utils/sanitize');
+
+// ── Auth guard ──────────────────────────────────────────────
+router.use(authenticate);
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

@@ -38,7 +38,7 @@ const authenticate = (req, res, next) => {
       next();
     });
   } catch (error) {
-    logger.error('Auth middleware error:', { error: error.message, stack: error.stack });
+    logger.error('Auth middleware error:', { error: error.message });
     res.status(500).json({ success: false, message: 'Authentication failed' });
   }
 };

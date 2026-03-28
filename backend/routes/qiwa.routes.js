@@ -729,7 +729,7 @@ router.post(
  * Global error handler
  */
 router.use((error, req, res, _next) => {
-  logger.error('[Qiwa Routes Error]', { message: error.message, stack: error.stack });
+  logger.error('[Qiwa Routes Error]', { message: 'حدث خطأ داخلي' });
 
   const statusCode = error.statusCode || 500;
   const response = {
@@ -737,11 +737,6 @@ router.use((error, req, res, _next) => {
     error: 'Internal server error',
     requestId: req.requestId,
   };
-
-  if (process.env.NODE_ENV === 'development') {
-    response.details = error.data || {};
-    response.stack = error.stack;
-  }
 
   res.status(statusCode).json(response);
 });

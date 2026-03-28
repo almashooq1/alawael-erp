@@ -1,4 +1,5 @@
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 /**
  * Rehabilitation Expansion Controller — متحكمات التوسعة في خدمات تأهيل ذوي الإعاقة
  *
@@ -26,9 +27,10 @@ const buildQuery = (req, extraFilters = {}) => {
   if (req.query.category) query.category = req.query.category;
   if (req.query.priority) query.priority = req.query.priority;
   if (req.query.search) {
+    const safe = escapeRegex(String(req.query.search));
     query.$or = [
-      { beneficiaryName: { $regex: req.query.search, $options: 'i' } },
-      { notes: { $regex: req.query.search, $options: 'i' } },
+      { beneficiaryName: { $regex: safe, $options: 'i' } },
+      { notes: { $regex: safe, $options: 'i' } },
     ];
   }
   return query;
@@ -439,10 +441,11 @@ const disabilityRights = {
       if (req.query.priority) query.priority = req.query.priority;
       if (req.query.caseType) query.caseType = req.query.caseType;
       if (req.query.search) {
+        const safe = escapeRegex(String(req.query.search));
         query.$or = [
-          { caseNumber: { $regex: req.query.search, $options: 'i' } },
-          { description: { $regex: req.query.search, $options: 'i' } },
-          { 'complainant.name': { $regex: req.query.search, $options: 'i' } },
+          { caseNumber: { $regex: safe, $options: 'i' } },
+          { description: { $regex: safe, $options: 'i' } },
+          { 'complainant.name': { $regex: safe, $options: 'i' } },
         ];
       }
       const { skip, limit, page } = paginate(req);
@@ -1108,9 +1111,10 @@ const accessibilityAudit = {
       if (req.query.grade) query.grade = req.query.grade;
       if (req.query.complianceLevel) query.complianceLevel = req.query.complianceLevel;
       if (req.query.search) {
+        const safe = escapeRegex(String(req.query.search));
         query.$or = [
-          { facilityName: { $regex: req.query.search, $options: 'i' } },
-          { facilityNameAr: { $regex: req.query.search, $options: 'i' } },
+          { facilityName: { $regex: safe, $options: 'i' } },
+          { facilityNameAr: { $regex: safe, $options: 'i' } },
         ];
       }
       const { skip, limit, page } = paginate(req);
@@ -1250,10 +1254,11 @@ const earlyDetection = {
       if (req.query.status) query.status = req.query.status;
       if (req.query.riskLevel) query['riskFactors.overallRiskLevel'] = req.query.riskLevel;
       if (req.query.search) {
+        const safe = escapeRegex(String(req.query.search));
         query.$or = [
-          { 'child.name': { $regex: req.query.search, $options: 'i' } },
-          { 'child.nameAr': { $regex: req.query.search, $options: 'i' } },
-          { 'child.parentName': { $regex: req.query.search, $options: 'i' } },
+          { 'child.name': { $regex: safe, $options: 'i' } },
+          { 'child.nameAr': { $regex: safe, $options: 'i' } },
+          { 'child.parentName': { $regex: safe, $options: 'i' } },
         ];
       }
       const { skip, limit, page } = paginate(req);

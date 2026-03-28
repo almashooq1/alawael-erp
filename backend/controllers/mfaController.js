@@ -207,7 +207,7 @@ exports.verifyAndEnableTOTP = async (req, res) => {
 exports.initiateEmailOTP = async (req, res) => {
   try {
     const userId = req.user._id;
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password');
 
     // Generate OTP
     const otpData = mfaService.generateEmailOTP();
@@ -366,7 +366,7 @@ exports.initiateSMSOTP = async (req, res) => {
       });
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select('-password');
 
     // Generate OTP
     const otpData = mfaService.generateSMSOTP();

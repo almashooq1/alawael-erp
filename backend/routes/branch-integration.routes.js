@@ -451,7 +451,7 @@ router.get('/validate', async (req, res) => {
 // =============================================
 
 router.use((err, _req, res, _next) => {
-  logger.error('Integration route error:', { message: err.message, stack: err.stack });
+  logger.error('Integration route error:', { message: err.message });
 
   res.status(500).json({
     success: false,

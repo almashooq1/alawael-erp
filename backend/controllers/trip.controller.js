@@ -616,7 +616,7 @@ class TripController {
       const { driverId, startDate, endDate } = req.body;
 
       const User = require('../models/User');
-      const driver = await User.findById(driverId);
+      const driver = await User.findById(driverId).select('-password');
 
       if (!driver) {
         return res.status(404).json({

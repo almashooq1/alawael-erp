@@ -1055,7 +1055,7 @@ securityRouter.post('/mfa/setup', requireAuth, (req, res) => {
     success: true,
     message: 'تم إعداد المصادقة الثنائية',
     qrCode: 'data:image/png;base64,mockQRcode',
-    secret: process.env.NODE_ENV === 'production' ? undefined : 'STUB_MFA_SECRET',
+    secret: undefined, // Never expose MFA secrets in API responses
   });
 });
 

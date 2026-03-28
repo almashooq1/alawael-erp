@@ -17,14 +17,12 @@ const researchService = require('../services/research.service');
 
 const handleError = (res, error, context) => {
   logger.error(`Research controller error [${context}]:`, {
-    message: error.message,
-    stack: error.stack,
+    message: 'حدث خطأ داخلي',
   });
   const status = error.name === 'ValidationError' ? 400 : 500;
   return res.status(status).json({
     success: false,
     message: status === 400 ? error.message : 'حدث خطأ في الخادم',
-    error: process.env.NODE_ENV === 'development' ? error.message : undefined,
   });
 };
 

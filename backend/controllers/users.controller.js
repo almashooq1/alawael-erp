@@ -179,7 +179,7 @@ const updateUser = async (req, res) => {
   try {
     const { name, nameEn, email, phone, branch, role, jobTitle, department, isActive } = req.body;
 
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -227,7 +227,7 @@ const updateUser = async (req, res) => {
  */
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
 
     if (!user) {
       return res.status(404).json({
@@ -260,7 +260,7 @@ const deleteUser = async (req, res) => {
  */
 const toggleUserStatus = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
 
     if (!user) {
       return res.status(404).json({
@@ -295,7 +295,7 @@ const updateUserPermissions = async (req, res) => {
   try {
     const { permissions } = req.body;
 
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).select('-password');
     if (!user) {
       return res.status(404).json({
         success: false,

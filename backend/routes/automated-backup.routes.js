@@ -36,8 +36,12 @@ let authenticate, authorize;
 try {
   ({ authenticate, authorize } = require('../middleware/auth'));
 } catch {
-  authenticate = (_req, _res, next) => next();
-  authorize = () => (_req, _res, next) => next();
+  authenticate = (_req, _res, _next) => {
+    return _res.status(503).json({ success: false, message: 'Authentication service unavailable' });
+  };
+  authorize = () => (_req, _res, _next) => {
+    return _res.status(503).json({ success: false, message: 'Authorization service unavailable' });
+  };
 }
 
 const guard = [authenticate, authorize(['admin', 'system_admin', 'super_admin'])];

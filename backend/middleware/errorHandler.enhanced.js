@@ -109,7 +109,6 @@ const handleJWTExpiredError = () => {
 const sendErrorDev = (err, req, res) => {
   logger.error('DEV ERROR', {
     message: err.message,
-    stack: err.stack,
     path: req.path,
     requestId: req.id,
   });
@@ -119,8 +118,6 @@ const sendErrorDev = (err, req, res) => {
     statusCode: err.statusCode || 500,
     code: err.code || 'INTERNAL_ERROR',
     message: 'حدث خطأ داخلي',
-    error: err,
-    stack: err.stack,
     path: req.path,
     method: req.method,
     requestId: req.id || undefined,
@@ -147,7 +144,6 @@ const sendErrorProd = (err, req, res) => {
   else {
     logger.error('PROD ERROR (non-operational)', {
       message: 'حدث خطأ داخلي',
-      stack: err.stack,
       path: req.path,
       requestId: req.id,
     });

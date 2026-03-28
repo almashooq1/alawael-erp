@@ -21,7 +21,6 @@ const handleError = (error, res, defaultStatus = 500) => {
   res.status(status).json({
     success: false,
     error: message,
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
   });
 };
 

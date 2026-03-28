@@ -31,7 +31,7 @@ class DriverController {
       } = req.body;
 
       // التحقق من وجود المستخدم
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).select('-password');
       if (!user) {
         return res.status(400).json({
           success: false,

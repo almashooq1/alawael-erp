@@ -162,9 +162,13 @@ router.post(
         await user.save({ validateBeforeSave: false });
 
         // إنشاء التوكن
-        const token = jwt.sign({ id: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() }, JWT_SECRET, {
-          expiresIn: JWT_EXPIRE,
-        });
+        const token = jwt.sign(
+          { id: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() },
+          JWT_SECRET,
+          {
+            expiresIn: JWT_EXPIRE,
+          }
+        );
 
         return res.json({
           success: true,
@@ -384,7 +388,13 @@ router.post(
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: user._id, email: user.email, phone: user.phone, role: user.role, jti: crypto.randomUUID() },
+        {
+          id: user._id,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          jti: crypto.randomUUID(),
+        },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );
@@ -547,7 +557,13 @@ router.post(
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: newUser._id, email: newUser.email, phone: newUser.phone, role: newUser.role, jti: crypto.randomUUID() },
+        {
+          id: newUser._id,
+          email: newUser.email,
+          phone: newUser.phone,
+          role: newUser.role,
+          jti: crypto.randomUUID(),
+        },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );

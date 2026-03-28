@@ -304,7 +304,7 @@ const notificationController = {
       }
 
       // التحقق من وجود المستخدم
-      const user = await User.findById(userId);
+      const user = await User.findById(userId).select('-password');
       if (!user) {
         return res.status(404).json({
           success: false,
@@ -340,7 +340,7 @@ const notificationController = {
       // إرسال Push Notification عبر FCM إذا كان لدى المستخدم توكنات FCM وقناة push مفعلة
       try {
         const fcmService = require('../services/fcmService');
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).select('-password');
         const channels = user.notificationChannels || {};
         if (user.fcmTokens && user.fcmTokens.length > 0 && (channels.push || channels.mobile)) {
           await fcmService.sendPushNotification(user.fcmTokens, {

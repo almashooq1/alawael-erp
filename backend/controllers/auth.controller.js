@@ -244,7 +244,7 @@ const updatePassword = async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('+password');
 
     const isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
@@ -381,7 +381,7 @@ const resetPassword = async (req, res) => {
  */
 const refreshToken = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('-password');
 
     if (!user || !user.isActive) {
       return res.status(401).json({

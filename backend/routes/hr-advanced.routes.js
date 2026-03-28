@@ -47,7 +47,7 @@ router.get('/employees', authenticateToken, async (req, res) => {
       data: result.employees,
     });
   } catch (error) {
-    logger.error('[HR] GET /employees error:', { message: error.message, stack: error.stack });
+    logger.error('[HR] GET /employees error:', { message: 'حدث خطأ داخلي' });
     res.status(500).json({
       success: false,
       message: 'خطأ في جلب بيانات الموظفين',

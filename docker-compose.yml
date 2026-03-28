@@ -221,9 +221,8 @@ services:
     <<: *restart-policy
     command: >
       --jetstream
-      --store_dir=/data
-      --http_port=8222
-      --max_payload=8MB
+      --store_dir /data
+      --http_port 8222
     ports:
       - "${NATS_PORT:-4222}:4222"
       - "${NATS_MONITOR_PORT:-8222}:8222"
@@ -374,7 +373,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80"]
       <<: *healthcheck-defaults
     deploy:
       resources:
@@ -578,7 +577,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80"]
       <<: *healthcheck-defaults
     deploy:
       resources:

@@ -160,7 +160,7 @@ router.put(
       }
 
       const { role } = req.body;
-      const targetUser = await User.findById(req.params.id);
+      const targetUser = await User.findById(req.params.id).select('-password');
       if (!targetUser) {
         return res.status(404).json({ success: false, error: 'المستخدم غير موجود' });
       }
@@ -226,7 +226,7 @@ router.put(
         return res.status(400).json({ success: false, errors: errors.array() });
       }
 
-      const targetUser = await User.findById(req.params.id);
+      const targetUser = await User.findById(req.params.id).select('-password');
       if (!targetUser) {
         return res.status(404).json({ success: false, error: 'المستخدم غير موجود' });
       }

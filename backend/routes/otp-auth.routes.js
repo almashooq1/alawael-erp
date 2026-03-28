@@ -6,7 +6,9 @@
 
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
 const { createCustomLimiter } = require('../middleware/rateLimiter');
 const {
@@ -149,7 +151,7 @@ router.post(
         // Look up user from database
         const user = await User.findOne({
           $or: [{ email: identifier }, { phone: identifier }],
-        });
+        }).select('-password');
 
         if (!user) {
           throw new UnauthorizedError('المستخدم غير موجود');
@@ -160,7 +162,7 @@ router.post(
         await user.save({ validateBeforeSave: false });
 
         // إنشاء التوكن
-        const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, JWT_SECRET, {
+        const token = jwt.sign({ id: user._id, email: user.email, role: user.role, jti: crypto.randomUUID() }, JWT_SECRET, {
           expiresIn: JWT_EXPIRE,
         });
 
@@ -361,7 +363,7 @@ router.post(
       // البحث عن المستخدم في قاعدة البيانات بالبريد أو الجوال
       const isEmail = identifier.includes('@');
       const query = isEmail ? { email: identifier } : { phone: identifier };
-      const user = await User.findOne(query);
+      const user = await User.findOne(query).select('-password');
 
       if (!user) {
         throw new UnauthorizedError('المستخدم غير مسجل. يرجى إنشاء حساب أولاً');
@@ -382,7 +384,7 @@ router.post(
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: user._id, email: user.email, phone: user.phone, role: user.role },
+        { id: user._id, email: user.email, phone: user.phone, role: user.role, jti: crypto.randomUUID() },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );
@@ -535,9 +537,9 @@ router.post(
         userData.phoneVerified = true;
       }
 
-      // حفظ كلمة المرور إذا تم تقديمها
+      // حفظ كلمة المرور إذا تم تقديمها (hash explicitly)
       if (password) {
-        userData.password = password;
+        userData.password = await bcrypt.hash(password, 12);
       }
 
       const newUser = new User(userData);
@@ -545,7 +547,7 @@ router.post(
 
       // إنشاء التوكن
       const token = jwt.sign(
-        { id: newUser._id, email: newUser.email, phone: newUser.phone, role: newUser.role },
+        { id: newUser._id, email: newUser.email, phone: newUser.phone, role: newUser.role, jti: crypto.randomUUID() },
         JWT_SECRET,
         { expiresIn: JWT_EXPIRE }
       );

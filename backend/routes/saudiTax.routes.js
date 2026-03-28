@@ -79,10 +79,7 @@ router.post(
 );
 router.put(
   '/vat-returns/:id',
-  [
-    param('id').isMongoId().withMessage('معرف غير صالح'),
-    validateReq,
-  ],
+  [param('id').isMongoId().withMessage('معرف غير صالح'), validateReq],
   wrap(async req => saudiTaxService.updateVATReturn(req.params.id, req.body, getUserId(req)))
 );
 router.post(
@@ -113,10 +110,7 @@ router.post(
 );
 router.put(
   '/filings/:id',
-  [
-    param('id').isMongoId().withMessage('معرف غير صالح'),
-    validateReq,
-  ],
+  [param('id').isMongoId().withMessage('معرف غير صالح'), validateReq],
   wrap(async req => saudiTaxService.updateTaxFiling(req.params.id, req.body, getUserId(req)))
 );
 router.post(
@@ -138,26 +132,17 @@ router.get(
 );
 router.post(
   '/withholding',
-  [
-    body('amount').isNumeric().withMessage('المبلغ مطلوب ويجب أن يكون رقماً'),
-    validateReq,
-  ],
+  [body('amount').isNumeric().withMessage('المبلغ مطلوب ويجب أن يكون رقماً'), validateReq],
   wrap(async req => saudiTaxService.createWithholdingTax(req.body, getUserId(req)))
 );
 router.put(
   '/withholding/:id',
-  [
-    param('id').isMongoId().withMessage('معرف غير صالح'),
-    validateReq,
-  ],
+  [param('id').isMongoId().withMessage('معرف غير صالح'), validateReq],
   wrap(async req => saudiTaxService.updateWithholdingTax(req.params.id, req.body, getUserId(req)))
 );
 router.delete(
   '/withholding/:id',
-  [
-    param('id').isMongoId().withMessage('معرف غير صالح'),
-    validateReq,
-  ],
+  [param('id').isMongoId().withMessage('معرف غير صالح'), validateReq],
   wrap(async req => saudiTaxService.deleteWithholdingTax(req.params.id))
 );
 

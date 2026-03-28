@@ -33,10 +33,11 @@ const validate = (req, res, next) => {
 };
 
 // ── Shared validators ────────────────────────────────────────────────────
-const mongoId = (field) => param(field).isMongoId().withMessage(`${field} غير صالح`);
-const reqMongoId = (field) => body(field).isMongoId().withMessage(`${field} مطلوب وصالح`);
+const mongoId = field => param(field).isMongoId().withMessage(`${field} غير صالح`);
+const reqMongoId = field => body(field).isMongoId().withMessage(`${field} مطلوب وصالح`);
 const reqString = (field, label) => body(field).trim().notEmpty().withMessage(`${label} مطلوب`);
-const optNumber = (field, label) => body(field).optional().isNumeric().withMessage(`${label} يجب أن يكون رقماً`);
+const optNumber = (field, label) =>
+  body(field).optional().isNumeric().withMessage(`${label} يجب أن يكون رقماً`);
 
 // ── Auth: all insurance routes require authentication ────────────────────
 router.use(authenticate);
@@ -83,27 +84,30 @@ router.get('/contracts/:id', async (req, res) => {
   }
 });
 
-router.post('/contracts', [
-  reqString('type', 'نوع العقد'),
-  body('startDate').isISO8601().withMessage('تاريخ البداية مطلوب'),
-  body('endDate').isISO8601().withMessage('تاريخ الانتهاء مطلوب'),
-  validate,
-], async (req, res) => {
-  try {
-    const contract = new InsuranceContract({ ...req.body, createdBy: req.user?.id });
-    await contract.save();
-    logger.info(`[InsuranceClaims] Contract created: ${contract.contractNumber}`);
-    res.status(201).json({ success: true, data: contract });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Create contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء العقد', error: safeError(error) });
+router.post(
+  '/contracts',
+  [
+    reqString('type', 'نوع العقد'),
+    body('startDate').isISO8601().withMessage('تاريخ البداية مطلوب'),
+    body('endDate').isISO8601().withMessage('تاريخ الانتهاء مطلوب'),
+    validate,
+  ],
+  async (req, res) => {
+    try {
+      const contract = new InsuranceContract({ ...req.body, createdBy: req.user?.id });
+      await contract.save();
+      logger.info(`[InsuranceClaims] Contract created: ${contract.contractNumber}`);
+      res.status(201).json({ success: true, data: contract });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Create contract error:', { message: error.message });
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في إنشاء العقد', error: safeError(error) });
+    }
   }
-});
+);
 
-router.put('/contracts/:id', [
-  mongoId('id'),
-  validate,
-], async (req, res) => {
+router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
     const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -113,7 +117,9 @@ router.put('/contracts/:id', [
     res.json({ success: true, data: contract });
   } catch (error) {
     logger.error('[InsuranceClaims] Update contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث العقد', error: safeError(error) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث العقد', error: safeError(error) });
   }
 });
 
@@ -193,29 +199,34 @@ router.get('/pre-auth/:id', async (req, res) => {
   }
 });
 
-router.post('/pre-auth', [
-  reqMongoId('beneficiary'),
-  reqMongoId('contract'),
-  reqString('urgency', 'درجة الاستعجال'),
-  validate,
-], async (req, res) => {
-  try {
-    const preAuth = new PreAuthorization({ ...req.body, requestedBy: req.user?.id });
-    await preAuth.save();
-    logger.info(`[InsuranceClaims] Pre-auth created: ${preAuth.preAuthNumber}`);
-    res.status(201).json({ success: true, data: preAuth });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء الموافقة المسبقة', error: safeError(error) });
+router.post(
+  '/pre-auth',
+  [
+    reqMongoId('beneficiary'),
+    reqMongoId('contract'),
+    reqString('urgency', 'درجة الاستعجال'),
+    validate,
+  ],
+  async (req, res) => {
+    try {
+      const preAuth = new PreAuthorization({ ...req.body, requestedBy: req.user?.id });
+      await preAuth.save();
+      logger.info(`[InsuranceClaims] Pre-auth created: ${preAuth.preAuthNumber}`);
+      res.status(201).json({ success: true, data: preAuth });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: 'خطأ في إنشاء الموافقة المسبقة',
+          error: safeError(error),
+        });
+    }
   }
-});
+);
 
-router.patch('/pre-auth/:id/approve', [
-  mongoId('id'),
-  validate,
-], async (req, res) => {
+router.patch('/pre-auth/:id/approve', [mongoId('id'), validate], async (req, res) => {
   try {
     const preAuth = await PreAuthorization.findByIdAndUpdate(
       req.params.id,
@@ -238,26 +249,26 @@ router.patch('/pre-auth/:id/approve', [
   }
 });
 
-router.patch('/pre-auth/:id/deny', [
-  mongoId('id'),
-  reqString('reason', 'سبب الرفض'),
-  validate,
-], async (req, res) => {
-  try {
-    const preAuth = await PreAuthorization.findByIdAndUpdate(
-      req.params.id,
-      { status: 'denied', denialReason: req.body.reason },
-      { new: true }
-    );
-    if (!preAuth)
-      return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
-    logger.info(`[InsuranceClaims] Pre-auth denied: ${preAuth.preAuthNumber}`);
-    res.json({ success: true, data: preAuth });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Deny pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الرفض', error: safeError(error) });
+router.patch(
+  '/pre-auth/:id/deny',
+  [mongoId('id'), reqString('reason', 'سبب الرفض'), validate],
+  async (req, res) => {
+    try {
+      const preAuth = await PreAuthorization.findByIdAndUpdate(
+        req.params.id,
+        { status: 'denied', denialReason: req.body.reason },
+        { new: true }
+      );
+      if (!preAuth)
+        return res.status(404).json({ success: false, message: 'الموافقة المسبقة غير موجودة' });
+      logger.info(`[InsuranceClaims] Pre-auth denied: ${preAuth.preAuthNumber}`);
+      res.json({ success: true, data: preAuth });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Deny pre-auth error:', { message: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الرفض', error: safeError(error) });
+    }
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CLAIMS — المطالبات
@@ -302,7 +313,9 @@ router.get('/claims', async (req, res) => {
     res.json({ success: true, data: claims, total });
   } catch (error) {
     logger.error('[InsuranceClaims] List claims error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبات', error: safeError(error) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب المطالبات', error: safeError(error) });
   }
 });
 
@@ -320,43 +333,49 @@ router.get('/claims/:id', async (req, res) => {
     res.json({ success: true, data: { ...claim.toObject(), items } });
   } catch (error) {
     logger.error('[InsuranceClaims] Get claim error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المطالبة', error: safeError(error) });
-  }
-});
-
-router.post('/claims', [
-  reqMongoId('beneficiary'),
-  reqMongoId('contract'),
-  reqString('claimType', 'نوع المطالبة'),
-  validate,
-], async (req, res) => {
-  try {
-    const { items, ...claimData } = req.body;
-    const claim = new InsuranceClaim({ ...claimData, createdBy: req.user?.id });
-    await claim.save();
-
-    // Create claim items if provided
-    if (items && items.length > 0) {
-      const claimItems = items.map((item, idx) => ({
-        ...item,
-        claim: claim._id,
-        sequence: idx + 1,
-        totalNet:
-          item.totalNet ||
-          item.unitPrice * item.quantity * (item.factor || 1) - (item.discount || 0),
-      }));
-      await ClaimItem.insertMany(claimItems);
-    }
-
-    logger.info(`[InsuranceClaims] Claim created: ${claim.claimNumber}`);
-    res.status(201).json({ success: true, data: claim });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Create claim error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء المطالبة', error: safeError(error) });
+      .json({ success: false, message: 'خطأ في جلب المطالبة', error: safeError(error) });
   }
 });
+
+router.post(
+  '/claims',
+  [
+    reqMongoId('beneficiary'),
+    reqMongoId('contract'),
+    reqString('claimType', 'نوع المطالبة'),
+    validate,
+  ],
+  async (req, res) => {
+    try {
+      const { items, ...claimData } = req.body;
+      const claim = new InsuranceClaim({ ...claimData, createdBy: req.user?.id });
+      await claim.save();
+
+      // Create claim items if provided
+      if (items && items.length > 0) {
+        const claimItems = items.map((item, idx) => ({
+          ...item,
+          claim: claim._id,
+          sequence: idx + 1,
+          totalNet:
+            item.totalNet ||
+            item.unitPrice * item.quantity * (item.factor || 1) - (item.discount || 0),
+        }));
+        await ClaimItem.insertMany(claimItems);
+      }
+
+      logger.info(`[InsuranceClaims] Claim created: ${claim.claimNumber}`);
+      res.status(201).json({ success: true, data: claim });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Create claim error:', { message: error.message });
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في إنشاء المطالبة', error: safeError(error) });
+    }
+  }
+);
 
 router.put('/claims/:id', async (req, res) => {
   try {
@@ -408,44 +427,48 @@ router.patch('/claims/:id/submit', async (req, res) => {
 });
 
 // Adjudicate claim
-router.patch('/claims/:id/adjudicate', [
-  mongoId('id'),
-  body('approvedAmount').isNumeric().withMessage('المبلغ المعتمد يجب أن يكون رقماً'),
-  validate,
-], async (req, res) => {
-  try {
-    const { approvedAmount, deniedAmount, adjustmentAmount, denialReasons } = req.body;
-    const claim = await InsuranceClaim.findById(req.params.id);
-    if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
+router.patch(
+  '/claims/:id/adjudicate',
+  [
+    mongoId('id'),
+    body('approvedAmount').isNumeric().withMessage('المبلغ المعتمد يجب أن يكون رقماً'),
+    validate,
+  ],
+  async (req, res) => {
+    try {
+      const { approvedAmount, deniedAmount, adjustmentAmount, denialReasons } = req.body;
+      const claim = await InsuranceClaim.findById(req.params.id);
+      if (!claim) return res.status(404).json({ success: false, message: 'المطالبة غير موجودة' });
 
-    claim.adjudication = {
-      processDate: new Date(),
-      adjudicatedBy: req.user?.name || 'System',
-      approvedAmount: approvedAmount || 0,
-      deniedAmount: deniedAmount || 0,
-      adjustmentAmount: adjustmentAmount || 0,
-      paymentAmount: approvedAmount || 0,
-      denialReasons: denialReasons || [],
-    };
+      claim.adjudication = {
+        processDate: new Date(),
+        adjudicatedBy: req.user?.name || 'System',
+        approvedAmount: approvedAmount || 0,
+        deniedAmount: deniedAmount || 0,
+        adjustmentAmount: adjustmentAmount || 0,
+        paymentAmount: approvedAmount || 0,
+        denialReasons: denialReasons || [],
+      };
 
-    if (approvedAmount >= claim.totalNet) {
-      claim.status = 'approved';
-    } else if (approvedAmount > 0) {
-      claim.status = 'partially_approved';
-    } else {
-      claim.status = 'denied';
+      if (approvedAmount >= claim.totalNet) {
+        claim.status = 'approved';
+      } else if (approvedAmount > 0) {
+        claim.status = 'partially_approved';
+      } else {
+        claim.status = 'denied';
+      }
+      await claim.save();
+
+      logger.info(`[InsuranceClaims] Claim adjudicated: ${claim.claimNumber} → ${claim.status}`);
+      res.json({ success: true, data: claim });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Adjudicate claim error:', { message: error.message });
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في معالجة المطالبة', error: safeError(error) });
     }
-    await claim.save();
-
-    logger.info(`[InsuranceClaims] Claim adjudicated: ${claim.claimNumber} → ${claim.status}`);
-    res.json({ success: true, data: claim });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Adjudicate claim error:', { message: error.message });
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في معالجة المطالبة', error: safeError(error) });
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CLAIM ITEMS — بنود المطالبة
@@ -466,40 +489,46 @@ router.get('/claim-items/:claimId', async (req, res) => {
   }
 });
 
-router.post('/claim-items', [
-  reqMongoId('claim'),
-  body('unitPrice').isNumeric().withMessage('سعر الوحدة مطلوب'),
-  body('quantity').optional().isInt({ min: 1 }).withMessage('الكمية يجب أن تكون رقم صحيح'),
-  validate,
-], async (req, res) => {
-  try {
-    const count = await ClaimItem.countDocuments({ claim: req.body.claim });
-    const item = new ClaimItem({
-      ...req.body,
-      sequence: count + 1,
-      totalNet:
-        req.body.totalNet ||
-        req.body.unitPrice * (req.body.quantity || 1) * (req.body.factor || 1) -
-          (req.body.discount || 0),
-    });
-    await item.save();
+router.post(
+  '/claim-items',
+  [
+    reqMongoId('claim'),
+    body('unitPrice').isNumeric().withMessage('سعر الوحدة مطلوب'),
+    body('quantity').optional().isInt({ min: 1 }).withMessage('الكمية يجب أن تكون رقم صحيح'),
+    validate,
+  ],
+  async (req, res) => {
+    try {
+      const count = await ClaimItem.countDocuments({ claim: req.body.claim });
+      const item = new ClaimItem({
+        ...req.body,
+        sequence: count + 1,
+        totalNet:
+          req.body.totalNet ||
+          req.body.unitPrice * (req.body.quantity || 1) * (req.body.factor || 1) -
+            (req.body.discount || 0),
+      });
+      await item.save();
 
-    // Update claim totals
-    const allItems = await ClaimItem.find({ claim: req.body.claim, isDeleted: { $ne: true } });
-    const totalNet = allItems.reduce((sum, i) => sum + (i.totalNet || 0), 0);
-    const totalDiscount = allItems.reduce((sum, i) => sum + (i.discount || 0), 0);
-    await InsuranceClaim.findByIdAndUpdate(req.body.claim, {
-      totalGross: totalNet + totalDiscount,
-      totalNet,
-      totalDiscount,
-    });
+      // Update claim totals
+      const allItems = await ClaimItem.find({ claim: req.body.claim, isDeleted: { $ne: true } });
+      const totalNet = allItems.reduce((sum, i) => sum + (i.totalNet || 0), 0);
+      const totalDiscount = allItems.reduce((sum, i) => sum + (i.discount || 0), 0);
+      await InsuranceClaim.findByIdAndUpdate(req.body.claim, {
+        totalGross: totalNet + totalDiscount,
+        totalNet,
+        totalDiscount,
+      });
 
-    res.status(201).json({ success: true, data: item });
-  } catch (error) {
-    logger.error('[InsuranceClaims] Create claim item error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة البند', error: safeError(error) });
+      res.status(201).json({ success: true, data: item });
+    } catch (error) {
+      logger.error('[InsuranceClaims] Create claim item error:', { message: error.message });
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في إضافة البند', error: safeError(error) });
+    }
   }
-});
+);
 
 router.delete('/claim-items/:id', async (req, res) => {
   try {
@@ -584,7 +613,9 @@ router.get('/dashboard', async (req, res) => {
     });
   } catch (error) {
     logger.error('[InsuranceClaims] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
   }
 });
 

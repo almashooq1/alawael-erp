@@ -101,10 +101,7 @@ router.post(
   '/benefits/health-insurance/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'admin']),
-  [
-    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
-    validate,
-  ],
+  [param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'), validate],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.enrollHealthInsurance(
@@ -126,10 +123,7 @@ router.post(
   '/benefits/retirement/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'admin']),
-  [
-    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
-    validate,
-  ],
+  [param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'), validate],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.enrollRetirementPlan(

@@ -299,8 +299,7 @@ router.post('/users', async (req, res) => {
       status: status || 'active',
       password: tempPass,
     });
-    const safeUser = user.toObject();
-    delete safeUser.password;
+    const safeUser = await User.findById(user._id).select('-password').lean();
     res.status(201).json({ success: true, data: safeUser, message: 'تم إنشاء المستخدم' });
   } catch (err) {
     logger.error('Admin create user error:', err);

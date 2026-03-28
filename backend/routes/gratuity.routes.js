@@ -55,7 +55,16 @@ router.post(
   authorizeRole(['hr', 'finance', 'manager', 'admin']),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
-    body('scenario').optional().isIn(['RESIGNATION','DISMISSAL_WITHOUT_CAUSE','DISMISSAL_WITH_FAULT','RETIREMENT','DEATH']).withMessage('سيناريو غير صالح'),
+    body('scenario')
+      .optional()
+      .isIn([
+        'RESIGNATION',
+        'DISMISSAL_WITHOUT_CAUSE',
+        'DISMISSAL_WITH_FAULT',
+        'RETIREMENT',
+        'DEATH',
+      ])
+      .withMessage('سيناريو غير صالح'),
     validate,
   ],
   async (req, res) => {
@@ -180,7 +189,15 @@ router.post(
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
     body('terminationDate').isISO8601().withMessage('تاريخ الإنهاء مطلوب'),
-    body('scenario').isIn(['RESIGNATION','DISMISSAL_WITHOUT_CAUSE','DISMISSAL_WITH_FAULT','RETIREMENT','DEATH']).withMessage('سيناريو غير صالح'),
+    body('scenario')
+      .isIn([
+        'RESIGNATION',
+        'DISMISSAL_WITHOUT_CAUSE',
+        'DISMISSAL_WITH_FAULT',
+        'RETIREMENT',
+        'DEATH',
+      ])
+      .withMessage('سيناريو غير صالح'),
     validate,
   ],
   async (req, res) => {
@@ -459,10 +476,7 @@ router.post(
   '/:gratuityId/process-payment',
   authenticateToken,
   authorizeRole(['finance', 'admin']),
-  [
-    body('paymentMethod').trim().notEmpty().withMessage('طريقة الدفع مطلوبة'),
-    validate,
-  ],
+  [body('paymentMethod').trim().notEmpty().withMessage('طريقة الدفع مطلوبة'), validate],
   async (req, res) => {
     try {
       const { gratuityId } = req.params;

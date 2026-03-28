@@ -269,7 +269,6 @@ router.post('/login', authLimiter, async (req, res) => {
     });
   } catch (error) {
     logger.error('❌ Login error:', error.message);
-    logger.error('Stack:', error.stack);
     return res.status(500).json({
       success: false,
       message: 'حدث خطأ داخلي',

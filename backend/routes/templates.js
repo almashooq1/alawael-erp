@@ -30,7 +30,8 @@ const storage = multer.diskStorage({
   },
 });
 // Allowed file types for template attachments
-const ALLOWED_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|png|jpg|jpeg|gif|webp|svg|zip)$/i;
+const ALLOWED_EXTENSIONS =
+  /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|png|jpg|jpeg|gif|webp|svg|zip)$/i;
 const ALLOWED_MIMES = [
   'application/pdf',
   'application/msword',

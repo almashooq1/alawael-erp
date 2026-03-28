@@ -21,6 +21,22 @@ const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
+const { body, param, validationResult } = require('express-validator');
+
+/** Reusable validation-error handler */
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array().map(e => e.msg) });
+  }
+  next();
+};
+
+// ── Shared validators ────────────────────────────────────────────────────
+const mongoId = (field) => param(field).isMongoId().withMessage(`${field} غير صالح`);
+const reqMongoId = (field) => body(field).isMongoId().withMessage(`${field} مطلوب وصالح`);
+const reqString = (field, label) => body(field).trim().notEmpty().withMessage(`${label} مطلوب`);
+const optNumber = (field, label) => body(field).optional().isNumeric().withMessage(`${label} يجب أن يكون رقماً`);
 
 // ── Auth: all insurance routes require authentication ────────────────────
 router.use(authenticate);
@@ -67,7 +83,12 @@ router.get('/contracts/:id', async (req, res) => {
   }
 });
 
-router.post('/contracts', async (req, res) => {
+router.post('/contracts', [
+  reqString('type', 'نوع العقد'),
+  body('startDate').isISO8601().withMessage('تاريخ البداية مطلوب'),
+  body('endDate').isISO8601().withMessage('تاريخ الانتهاء مطلوب'),
+  validate,
+], async (req, res) => {
   try {
     const contract = new InsuranceContract({ ...req.body, createdBy: req.user?.id });
     await contract.save();
@@ -79,7 +100,10 @@ router.post('/contracts', async (req, res) => {
   }
 });
 
-router.put('/contracts/:id', async (req, res) => {
+router.put('/contracts/:id', [
+  mongoId('id'),
+  validate,
+], async (req, res) => {
   try {
     const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -169,7 +193,12 @@ router.get('/pre-auth/:id', async (req, res) => {
   }
 });
 
-router.post('/pre-auth', async (req, res) => {
+router.post('/pre-auth', [
+  reqMongoId('beneficiary'),
+  reqMongoId('contract'),
+  reqString('urgency', 'درجة الاستعجال'),
+  validate,
+], async (req, res) => {
   try {
     const preAuth = new PreAuthorization({ ...req.body, requestedBy: req.user?.id });
     await preAuth.save();
@@ -183,7 +212,10 @@ router.post('/pre-auth', async (req, res) => {
   }
 });
 
-router.patch('/pre-auth/:id/approve', async (req, res) => {
+router.patch('/pre-auth/:id/approve', [
+  mongoId('id'),
+  validate,
+], async (req, res) => {
   try {
     const preAuth = await PreAuthorization.findByIdAndUpdate(
       req.params.id,
@@ -206,7 +238,11 @@ router.patch('/pre-auth/:id/approve', async (req, res) => {
   }
 });
 
-router.patch('/pre-auth/:id/deny', async (req, res) => {
+router.patch('/pre-auth/:id/deny', [
+  mongoId('id'),
+  reqString('reason', 'سبب الرفض'),
+  validate,
+], async (req, res) => {
   try {
     const preAuth = await PreAuthorization.findByIdAndUpdate(
       req.params.id,
@@ -288,7 +324,12 @@ router.get('/claims/:id', async (req, res) => {
   }
 });
 
-router.post('/claims', async (req, res) => {
+router.post('/claims', [
+  reqMongoId('beneficiary'),
+  reqMongoId('contract'),
+  reqString('claimType', 'نوع المطالبة'),
+  validate,
+], async (req, res) => {
   try {
     const { items, ...claimData } = req.body;
     const claim = new InsuranceClaim({ ...claimData, createdBy: req.user?.id });
@@ -367,7 +408,11 @@ router.patch('/claims/:id/submit', async (req, res) => {
 });
 
 // Adjudicate claim
-router.patch('/claims/:id/adjudicate', async (req, res) => {
+router.patch('/claims/:id/adjudicate', [
+  mongoId('id'),
+  body('approvedAmount').isNumeric().withMessage('المبلغ المعتمد يجب أن يكون رقماً'),
+  validate,
+], async (req, res) => {
   try {
     const { approvedAmount, deniedAmount, adjustmentAmount, denialReasons } = req.body;
     const claim = await InsuranceClaim.findById(req.params.id);
@@ -421,7 +466,12 @@ router.get('/claim-items/:claimId', async (req, res) => {
   }
 });
 
-router.post('/claim-items', async (req, res) => {
+router.post('/claim-items', [
+  reqMongoId('claim'),
+  body('unitPrice').isNumeric().withMessage('سعر الوحدة مطلوب'),
+  body('quantity').optional().isInt({ min: 1 }).withMessage('الكمية يجب أن تكون رقم صحيح'),
+  validate,
+], async (req, res) => {
   try {
     const count = await ClaimItem.countDocuments({ claim: req.body.claim });
     const item = new ClaimItem({

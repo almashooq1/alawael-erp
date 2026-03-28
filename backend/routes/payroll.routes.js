@@ -17,6 +17,16 @@ const PayrollCalculationService = require('../services/payrollCalculationService
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
+const { body, param, validationResult } = require('express-validator');
+
+/** Validation error handler */
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array().map(e => e.msg) });
+  }
+  next();
+};
 
 // ============= مسارات الرواتب =============
 
@@ -38,7 +48,7 @@ router.get('/monthly/:month/:year', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -66,7 +76,7 @@ router.get('/:payrollId', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -107,7 +117,7 @@ router.get('/employee/:employeeId/year/:year', authenticateToken, async (req, re
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -123,6 +133,12 @@ router.post(
   '/create',
   authenticateToken,
   requireRole('hr', 'admin', 'payroll'),
+  [
+    body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    body('month').isInt({ min: 1, max: 12 }).withMessage('الشهر يجب أن يكون بين 1-12'),
+    body('year').isInt({ min: 2020, max: 2100 }).withMessage('السنة غير صالحة'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const { employeeId, month, year } = req.body;
@@ -162,7 +178,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -179,6 +195,11 @@ router.post(
   '/process-monthly',
   authenticateToken,
   requireRole('admin', 'payroll'),
+  [
+    body('month').isInt({ min: 1, max: 12 }).withMessage('الشهر يجب أن يكون بين 1-12'),
+    body('year').isInt({ min: 2020, max: 2100 }).withMessage('السنة غير صالحة'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const { month, year } = req.body;
@@ -191,7 +212,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -228,7 +249,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -265,7 +286,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -302,7 +323,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -341,7 +362,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -378,7 +399,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -409,7 +430,7 @@ router.get('/stats/:month/:year', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -434,7 +455,7 @@ router.get('/compensation/structures', authenticateToken, async (req, res) => {
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -463,7 +484,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -487,7 +508,7 @@ router.get('/compensation/incentives/pending', authenticateToken, async (req, re
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -520,7 +541,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -557,7 +578,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -596,7 +617,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -627,7 +648,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -664,7 +685,7 @@ router.put(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -699,7 +720,7 @@ router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, asyn
     });
   } catch (error) {
     const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { error: error.message, stack: error.stack });
+    logger.error('Payroll error:', { message: error.message });
     res.status(status).json({
       success: false,
       error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -729,7 +750,7 @@ router.post(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
@@ -766,7 +787,7 @@ router.get(
       });
     } catch (error) {
       const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-      logger.error('Payroll error:', { error: error.message, stack: error.stack });
+      logger.error('Payroll error:', { message: error.message });
       res.status(status).json({
         success: false,
         error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',

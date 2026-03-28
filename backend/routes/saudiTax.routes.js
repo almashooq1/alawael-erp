@@ -15,8 +15,18 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const saudiTaxService = require('../services/saudiTax.service');
 const logger = require('../utils/logger');
+const { body, param, validationResult } = require('express-validator');
 
 router.use(authenticate);
+
+/** Validation error handler */
+const validateReq = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array().map(e => e.msg) });
+  }
+  next();
+};
 
 const wrap = fn => async (req, res) => {
   try {
@@ -60,10 +70,19 @@ router.get(
 );
 router.post(
   '/vat-returns',
+  [
+    body('period').trim().notEmpty().withMessage('فترة الإقرار مطلوبة'),
+    body('totalSales').optional().isNumeric().withMessage('إجمالي المبيعات يجب أن يكون رقماً'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.createVATReturn(req.body, getUserId(req)))
 );
 router.put(
   '/vat-returns/:id',
+  [
+    param('id').isMongoId().withMessage('معرف غير صالح'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.updateVATReturn(req.params.id, req.body, getUserId(req)))
 );
 router.post(
@@ -85,10 +104,19 @@ router.get(
 );
 router.post(
   '/filings',
+  [
+    body('type').trim().notEmpty().withMessage('نوع الإقرار مطلوب'),
+    body('period').trim().notEmpty().withMessage('فترة الإقرار مطلوبة'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.createTaxFiling(req.body, getUserId(req)))
 );
 router.put(
   '/filings/:id',
+  [
+    param('id').isMongoId().withMessage('معرف غير صالح'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.updateTaxFiling(req.params.id, req.body, getUserId(req)))
 );
 router.post(
@@ -110,14 +138,26 @@ router.get(
 );
 router.post(
   '/withholding',
+  [
+    body('amount').isNumeric().withMessage('المبلغ مطلوب ويجب أن يكون رقماً'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.createWithholdingTax(req.body, getUserId(req)))
 );
 router.put(
   '/withholding/:id',
+  [
+    param('id').isMongoId().withMessage('معرف غير صالح'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.updateWithholdingTax(req.params.id, req.body, getUserId(req)))
 );
 router.delete(
   '/withholding/:id',
+  [
+    param('id').isMongoId().withMessage('معرف غير صالح'),
+    validateReq,
+  ],
   wrap(async req => saudiTaxService.deleteWithholdingTax(req.params.id))
 );
 

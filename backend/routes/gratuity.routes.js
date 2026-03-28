@@ -12,8 +12,18 @@ const GratuityService = require('../services/hr/gratuityService');
 const Gratuity = require('../models/gratuity.model');
 const _GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
+const { body, param, validationResult } = require('express-validator');
 
 const MAX_PAGE_LIMIT = 100;
+
+/** Validation error handler */
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array().map(e => e.msg) });
+  }
+  next();
+};
 
 /* ─── Validate :gratuityId param as ObjectId ──────────────────────────────── */
 router.param('gratuityId', (req, res, next, val) => {
@@ -43,6 +53,11 @@ router.post(
   '/calculate',
   authenticateToken,
   authorizeRole(['hr', 'finance', 'manager', 'admin']),
+  [
+    body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    body('scenario').optional().isIn(['RESIGNATION','DISMISSAL_WITHOUT_CAUSE','DISMISSAL_WITH_FAULT','RETIREMENT','DEATH']).withMessage('سيناريو غير صالح'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const { employeeId, terminationDate, scenario = 'RESIGNATION' } = req.body;
@@ -162,6 +177,12 @@ router.post(
   '/create',
   authenticateToken,
   authorizeRole(['hr', 'finance', 'admin']),
+  [
+    body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    body('terminationDate').isISO8601().withMessage('تاريخ الإنهاء مطلوب'),
+    body('scenario').isIn(['RESIGNATION','DISMISSAL_WITHOUT_CAUSE','DISMISSAL_WITH_FAULT','RETIREMENT','DEATH']).withMessage('سيناريو غير صالح'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const { employeeId, terminationDate, scenario } = req.body;
@@ -438,6 +459,10 @@ router.post(
   '/:gratuityId/process-payment',
   authenticateToken,
   authorizeRole(['finance', 'admin']),
+  [
+    body('paymentMethod').trim().notEmpty().withMessage('طريقة الدفع مطلوبة'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const { gratuityId } = req.params;

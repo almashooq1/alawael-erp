@@ -6,6 +6,16 @@ const express = require('express');
 const router = express.Router();
 const HRCompensationBenefitsService = require('../services/hr/compensationBenefitsService');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
+const { body, param, validationResult } = require('express-validator');
+
+/** Validation error handler */
+const validate = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array().map(e => e.msg) });
+  }
+  next();
+};
 
 // ========== خطط التعويضات ==========
 
@@ -14,6 +24,11 @@ router.post(
   '/compensation/plans',
   authenticateToken,
   authorizeRole(['hr', 'finance', 'admin']),
+  [
+    body('name').trim().notEmpty().withMessage('اسم الخطة مطلوب'),
+    body('baseSalary').isNumeric().withMessage('الراتب الأساسي يجب أن يكون رقماً'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.createCompensationPlan({
@@ -37,6 +52,11 @@ router.post(
   '/compensation/assign/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'finance', 'admin']),
+  [
+    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    body('planId').isMongoId().withMessage('معرف الخطة غير صالح'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.assignCompensationPlan(
@@ -81,6 +101,10 @@ router.post(
   '/benefits/health-insurance/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'admin']),
+  [
+    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.enrollHealthInsurance(
@@ -102,6 +126,10 @@ router.post(
   '/benefits/retirement/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'admin']),
+  [
+    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.enrollRetirementPlan(
@@ -123,6 +151,12 @@ router.post(
   '/benefits/grant/:employeeId',
   authenticateToken,
   authorizeRole(['hr', 'manager', 'admin']),
+  [
+    param('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
+    body('type').trim().notEmpty().withMessage('نوع الميزة مطلوب'),
+    body('value').isNumeric().withMessage('قيمة الميزة يجب أن تكون رقماً'),
+    validate,
+  ],
   async (req, res) => {
     try {
       const result = await HRCompensationBenefitsService.grantBenefit(req.params.employeeId, {

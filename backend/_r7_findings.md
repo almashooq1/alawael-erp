@@ -128,7 +128,7 @@
 ## PRIORITY RANKING (by production impact):
 
 1. **CRITICAL: Request Validation** — 230 files, ~1500 endpoints accept any data
-2. **HIGH: Attendance Model Stub** — attendance data uses in-memory DB, not MongoDB  
+2. **HIGH: Attendance Model Stub** — attendance data uses in-memory DB, not MongoDB
 3. **HIGH: smart-attendance Duplicate Mount** — route conflict in production
 4. **MEDIUM: Missing Model Indexes** — 27 models lack proper indexes
 5. **MEDIUM: Memory Leak Risks** — 12 services have intervals not cleaned up on shutdown

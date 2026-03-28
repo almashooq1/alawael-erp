@@ -146,6 +146,18 @@ function startRealtimeBroadcasts(io, server) {
   server._kpiInterval = kpiInterval;
   server._dashboardInterval = dashboardInterval;
 
+  // Register cleanup hook for graceful shutdown
+  try {
+    const { registerShutdownHook } = require('./gracefulShutdown');
+    registerShutdownHook('realtimeDashboard', () => {
+      clearInterval(kpiInterval);
+      clearInterval(dashboardInterval);
+      logger.info('[Realtime] Broadcasts stopped');
+    });
+  } catch (_e) {
+    // gracefulShutdown not yet initialized — server._* refs will be cleared there
+  }
+
   logger.info('[Realtime] KPI + Dashboard broadcasts started');
 }
 

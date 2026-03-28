@@ -197,23 +197,9 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
   if (process.env.NODE_ENV === 'production') process.exit(1);
 });
 
-// --- Unhandled Rejection / Uncaught Exception Safety Net ---
-process.on('unhandledRejection', reason => {
-  logger.error(
-    '[Process] Unhandled promise rejection:',
-    reason instanceof Error ? reason.message : reason
-  );
-  // In production, exit so PM2/container restarts cleanly
-  if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
-  }
-});
-
-process.on('uncaughtException', err => {
-  logger.error('[Process] Uncaught exception:', err.message);
-  // Always exit — process is in undefined state
-  process.exit(1);
-});
+// NOTE: unhandledRejection / uncaughtException handlers are registered
+// centrally in errors/errorHandler.js (called from app.js).
+// Do NOT add duplicate handlers here — they cause race conditions in PM2 cluster mode.
 
 // --- Graceful Shutdown ---
 const { setupGracefulShutdown } = require('./utils/gracefulShutdown');

@@ -12,6 +12,11 @@ const notificationTemplateAuditSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Indexes ───────────────────────────────────────────────────────────────────
+notificationTemplateAuditSchema.index({ template: 1, performedAt: -1 });
+notificationTemplateAuditSchema.index({ performedBy: 1, performedAt: -1 });
+notificationTemplateAuditSchema.index({ action: 1 });
+
 const NotificationTemplateAudit =
   mongoose.models.NotificationTemplateAudit ||
   mongoose.model('NotificationTemplateAudit', notificationTemplateAuditSchema);

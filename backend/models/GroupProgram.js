@@ -44,4 +44,9 @@ const groupProgramSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Indexes ───────────────────────────────────────────────────────────────────
+groupProgramSchema.index({ status: 1, type: 1 });
+groupProgramSchema.index({ supervisor: 1 });
+groupProgramSchema.index({ students: 1 });
+
 module.exports = mongoose.models.GroupProgram || mongoose.model('GroupProgram', groupProgramSchema);

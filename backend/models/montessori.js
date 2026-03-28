@@ -121,6 +121,27 @@ MontessoriProgramSchema.pre('findOneAndUpdate', function () {
   this.set({ updatedAt: Date.now() });
 });
 
+// ── Indexes ───────────────────────────────────────────────────────────────────
+StudentSchema.index({ parent: 1 });
+StudentSchema.index({ fullName: 1 });
+MontessoriPlanSchema.index({ student: 1 });
+MontessoriPlanSchema.index({ createdBy: 1 });
+SessionSchema.index({ student: 1, date: -1 });
+SessionSchema.index({ plan: 1 });
+EvaluationSchema.index({ student: 1, date: -1 });
+EvaluationSchema.index({ plan: 1 });
+EvaluationSchema.index({ area: 1 });
+ActivitySchema.index({ area: 1 });
+TeamMemberSchema.index({ user: 1 }, { unique: true, sparse: true });
+TeamMemberSchema.index({ role: 1 });
+ParentSchema.index({ user: 1 }, { unique: true, sparse: true });
+ParentSchema.index({ phone: 1 });
+MediaFileSchema.index({ uploadedBy: 1 });
+ReportSchema.index({ student: 1, date: -1 });
+ReportSchema.index({ plan: 1 });
+MontessoriProgramSchema.index({ status: 1 });
+MontessoriProgramSchema.index({ createdBy: 1 });
+
 module.exports = {
   Student: mongoose.models.Student || mongoose.model('Student', StudentSchema),
   MontessoriPlan:

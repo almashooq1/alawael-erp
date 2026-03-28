@@ -14,4 +14,8 @@ const therapyRoomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// ── Indexes ───────────────────────────────────────────────────────────────────
+therapyRoomSchema.index({ type: 1, isMaintenance: 1 });
+therapyRoomSchema.index({ name: 1 });
+
 module.exports = mongoose.models.TherapyRoom || mongoose.model('TherapyRoom', therapyRoomSchema);

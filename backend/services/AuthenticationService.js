@@ -260,12 +260,13 @@ class AuthenticationService {
    */
   static generateRefreshToken(user) {
     try {
+      const { jwtRefreshSecret } = require('../config/secrets');
       const token = jwt.sign(
         {
           id: user.id,
           type: 'refresh',
         },
-        JWT_SECRET,
+        jwtRefreshSecret,
         {
           expiresIn: '30d',
           algorithm: 'HS256',

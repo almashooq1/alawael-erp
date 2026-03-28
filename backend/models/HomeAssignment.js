@@ -35,4 +35,5 @@ homeAssignmentSchema.index({ beneficiary: 1, status: 1 });
 homeAssignmentSchema.index({ assignedBy: 1, status: 1 });
 homeAssignmentSchema.index({ status: 1, startDate: -1 });
 
-module.exports = mongoose.models.HomeAssignment || mongoose.model('HomeAssignment', homeAssignmentSchema);
+module.exports =
+  mongoose.models.HomeAssignment || mongoose.model('HomeAssignment', homeAssignmentSchema);

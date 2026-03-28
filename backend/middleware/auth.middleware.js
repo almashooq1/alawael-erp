@@ -277,7 +277,7 @@ const verifyToken = token => {
  * Generate Token Helper
  * إنشاء توكن جديد
  */
-const generateToken = (userData, expiresIn = '24h') => {
+const generateToken = (userData, expiresIn = '1h') => {
   return jwt.sign(
     {
       id: userData.id,
@@ -352,9 +352,10 @@ const refreshToken = (req, res) => {
 /**
  * Generate token with session tracking
  */
-const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresIn = '24h') => {
+const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresIn = '1h') => {
   const token = generateToken(userData, expiresIn);
-  const refreshToken = jwt.sign({ id: userData.id, type: 'refresh' }, jwtSecret, {
+  const { jwtRefreshSecret } = require('../config/secrets');
+  const refreshToken = jwt.sign({ id: userData.id, type: 'refresh' }, jwtRefreshSecret, {
     expiresIn: '7d',
   });
 

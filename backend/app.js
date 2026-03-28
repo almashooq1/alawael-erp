@@ -342,6 +342,7 @@ if (isTestEnv) {
 // ─── Rate Limiting ───────────────────────────────────────────────────────────
 const apiLimiterWithPhase2933Skip = (req, res, next) => {
   if (
+    process.env.NODE_ENV !== 'production' &&
     process.env.PHASE2933_PUBLIC === 'true' &&
     (req.path.startsWith('/phases-29-33') || req.path.startsWith('/api/phases-29-33'))
   ) {

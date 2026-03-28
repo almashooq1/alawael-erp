@@ -388,7 +388,8 @@ router.post(
       );
 
       // إنشاء Refresh Token
-      const refreshToken = jwt.sign({ id: user._id, type: 'refresh' }, JWT_SECRET, {
+      const { jwtRefreshSecret } = require('../config/secrets');
+      const refreshToken = jwt.sign({ id: user._id, type: 'refresh' }, jwtRefreshSecret, {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
       });
 

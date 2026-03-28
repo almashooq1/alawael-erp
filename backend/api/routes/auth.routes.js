@@ -448,7 +448,11 @@ router.put('/profile', authenticateToken, async (req, res) => {
 
     // Validate & sanitize input
     if (fullName !== undefined) {
-      if (typeof fullName !== 'string' || fullName.trim().length < 2 || fullName.trim().length > 100) {
+      if (
+        typeof fullName !== 'string' ||
+        fullName.trim().length < 2 ||
+        fullName.trim().length > 100
+      ) {
         return res.status(400).json({
           success: false,
           message: 'Full name must be between 2 and 100 characters',

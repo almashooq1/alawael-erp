@@ -29,9 +29,34 @@ const storage = multer.diskStorage({
     cb(null, unique + '-' + file.originalname.replace(/\s+/g, '_'));
   },
 });
+// Allowed file types for template attachments
+const ALLOWED_EXTENSIONS = /\.(pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|png|jpg|jpeg|gif|webp|svg|zip)$/i;
+const ALLOWED_MIMES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/csv',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/svg+xml',
+  'application/zip',
+];
 const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max upload
+  fileFilter: (req, file, cb) => {
+    if (!ALLOWED_EXTENSIONS.test(file.originalname) || !ALLOWED_MIMES.includes(file.mimetype)) {
+      return cb(new Error('نوع الملف غير مسموح — Unsupported file type'), false);
+    }
+    cb(null, true);
+  },
 });
 
 // رفع ملف مرفق (جميع الأنواع)

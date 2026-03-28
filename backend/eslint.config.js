@@ -11,6 +11,12 @@ const js = require('@eslint/js');
 const globals = require('globals');
 
 module.exports = [
+  // Global linter options
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: false,
+    },
+  },
   // Global ignores
   {
     ignores: [
@@ -102,6 +108,7 @@ module.exports = [
       'no-async-promise-executor': 'error',
       'no-promise-executor-return': 'off', // too noisy — setTimeout/setImmediate returns are harmless
       'require-atomic-updates': 'off', // deprecated in ESLint v8 — too many false positives
+      'no-constant-binary-expression': 'off', // new in ESLint v9 recommended — too many false positives in existing codebase
     },
   },
   // Frontend/React configuration

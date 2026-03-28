@@ -1,0 +1,5 @@
+﻿
+> alawael-erp-backend@1.0.0 test:guard:maintenance-mocks
+> node scripts/testing/check-maintenance-mocks-centralized.js
+
+ظ£à Maintenance mock centralization check passed.

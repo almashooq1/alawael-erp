@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { Curriculum } = require('../models/Curriculum');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth guard ──────────────────────────────────────────────
 router.use(authenticate);
@@ -96,7 +97,7 @@ router.post('/', async (req, res) => {
 // ── Update curriculum ────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
-    const curriculum = await Curriculum.findByIdAndUpdate(req.params.id, req.body, {
+    const curriculum = await Curriculum.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     })

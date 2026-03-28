@@ -18,7 +18,7 @@ const {
   VerificationLog,
 } = require('../models/blockchain.model');
 const { authenticate } = require('../middleware/auth');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 
 // ── Auth: all routes below require authentication ────────────────────────────
@@ -69,7 +69,7 @@ router.get('/templates', async (req, res) => {
 router.post('/templates', async (req, res) => {
   try {
     const template = await CertificateTemplate.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: template });
@@ -80,7 +80,7 @@ router.post('/templates', async (req, res) => {
 
 router.put('/templates/:id', async (req, res) => {
   try {
-    const template = await CertificateTemplate.findByIdAndUpdate(req.params.id, req.body, {
+    const template = await CertificateTemplate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

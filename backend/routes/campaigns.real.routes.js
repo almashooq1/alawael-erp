@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -49,7 +50,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
-    const data = await Campaign.create({ ...req.body, createdBy: req.user?.id });
+    const data = await Campaign.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data, message: 'تم إنشاء الحملة بنجاح' });
   } catch (err) {
     logger.error('Campaign create error:', err);
@@ -61,7 +62,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
-    const data = await Campaign.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+    const data = await Campaign.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data, message: 'تم تحديث الحملة بنجاح' });
   } catch (err) {

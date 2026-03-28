@@ -8,6 +8,7 @@ const { AcademicYear } = require('../models/AcademicYear');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -78,7 +79,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 // ── Create academic year ─────────────────────────────────────
 router.post('/', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const year = new AcademicYear(req.body);
+    const year = new AcademicYear(stripUpdateMeta(req.body));
     if (req.user) year.createdBy = req.user._id || req.user.id;
     await year.save();
     res.status(201).json({ success: true, data: year, message: 'تم إنشاء العام الدراسي بنجاح' });
@@ -92,7 +93,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 // ── Update academic year ─────────────────────────────────────
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const year = await AcademicYear.findByIdAndUpdate(req.params.id, req.body, {
+    const year = await AcademicYear.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

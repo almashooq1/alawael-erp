@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const StandardizedAssessment = require('../models/StandardizedAssessment');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 /** GET /api/standardized-assessments — list assessments */
 router.get('/', requireAuth, async (req, res) => {
@@ -17,7 +18,7 @@ router.get('/', requireAuth, async (req, res) => {
     const filter = {};
     if (beneficiary) filter.beneficiary = beneficiary;
     if (evaluator) filter.evaluator = evaluator;
-    if (name) filter.name = { $regex: name, $options: 'i' };
+    if (name) filter.name = { $regex: escapeRegex(String(name)), $options: 'i' };
     if (startDate || endDate) {
       filter.date = {};
       if (startDate) filter.date.$gte = new Date(startDate);

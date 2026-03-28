@@ -10,6 +10,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Authentication Middleware ────────────────────────────────────────────
 router.use(authenticate);
@@ -128,7 +129,7 @@ router.post('/controls', async (req, res) => {
   try {
     if (!InternalControl)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.create(req.body);
+    const control = await InternalControl.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: control });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -139,7 +140,7 @@ router.put('/controls/:id', async (req, res) => {
   try {
     if (!InternalControl)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.findByIdAndUpdate(req.params.id, req.body, {
+    const control = await InternalControl.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -212,7 +213,7 @@ router.post('/items', async (req, res) => {
   try {
     if (!ComplianceItem)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const item = await ComplianceItem.create(req.body);
+    const item = await ComplianceItem.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: item });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -223,7 +224,7 @@ router.put('/items/:id', async (req, res) => {
   try {
     if (!ComplianceItem)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const item = await ComplianceItem.findByIdAndUpdate(req.params.id, req.body, {
+    const item = await ComplianceItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -360,7 +361,7 @@ router.post('/metrics', async (req, res) => {
   try {
     if (!ComplianceMetric)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const metric = await ComplianceMetric.create(req.body);
+    const metric = await ComplianceMetric.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: metric });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -371,7 +372,7 @@ router.put('/metrics/:id', async (req, res) => {
   try {
     if (!ComplianceMetric)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const metric = await ComplianceMetric.findByIdAndUpdate(req.params.id, req.body, {
+    const metric = await ComplianceMetric.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

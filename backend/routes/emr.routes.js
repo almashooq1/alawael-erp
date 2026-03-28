@@ -22,7 +22,7 @@ const {
 } = require('../models/emr.model');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
 
 // ── Auth: all EMR routes require authentication (PHI data) ───────────────
@@ -123,7 +123,7 @@ router.post('/records', async (req, res) => {
 
 router.put('/records/:id', async (req, res) => {
   try {
-    const record = await MedicalRecord.findByIdAndUpdate(req.params.id, req.body, {
+    const record = await MedicalRecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -293,7 +293,7 @@ router.post('/lab-results', async (req, res) => {
 
 router.put('/lab-results/:id', async (req, res) => {
   try {
-    const result = await LabResult.findByIdAndUpdate(req.params.id, req.body, {
+    const result = await LabResult.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -401,7 +401,7 @@ router.put('/clinical-notes/:id', async (req, res) => {
         .status(400)
         .json({ success: false, message: 'لا يمكن تعديل ملاحظة نهائية، استخدم التعديل' });
     }
-    Object.assign(note, req.body);
+    Object.assign(note, stripUpdateMeta(req.body));
     await note.save();
     res.json({ success: true, data: note });
   } catch (error) {
@@ -511,7 +511,7 @@ router.post('/allergies', async (req, res) => {
 
 router.put('/allergies/:id', async (req, res) => {
   try {
-    const allergy = await Allergy.findByIdAndUpdate(req.params.id, req.body, {
+    const allergy = await Allergy.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

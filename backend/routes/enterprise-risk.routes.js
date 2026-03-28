@@ -6,6 +6,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EnterpriseRisk`)[n];
@@ -84,7 +85,7 @@ router.get('/risks', authenticate, async (req, res) => {
 router.post('/risks', authenticate, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
-    const doc = await Risk.create({ ...req.body, createdBy: req.user?._id });
+    const doc = await Risk.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     res.status(500).json({ success: false, message: safeError(err) });
@@ -94,7 +95,7 @@ router.post('/risks', authenticate, async (req, res) => {
 router.put('/risks/:id', authenticate, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
-    const doc = await Risk.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await Risk.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -144,7 +145,7 @@ router.get('/assessments', authenticate, async (req, res) => {
 router.post('/assessments', authenticate, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
-    const doc = await Assessment.create({ ...req.body, createdBy: req.user?._id });
+    const doc = await Assessment.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     res.status(500).json({ success: false, message: safeError(err) });
@@ -154,7 +155,7 @@ router.post('/assessments', authenticate, async (req, res) => {
 router.put('/assessments/:id', authenticate, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
-    const doc = await Assessment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {

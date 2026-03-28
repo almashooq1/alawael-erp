@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ── List / Search ────────────────────────────────────────────────
 
@@ -27,7 +28,7 @@ router.get('/', requireAuth, async (req, res) => {
     } = req.query;
     const filter = {};
     if (domain) filter.domain = domain;
-    if (category) filter.category = { $regex: category, $options: 'i' };
+    if (category) filter.category = { $regex: escapeRegex(String(category)), $options: 'i' };
     if (difficulty) filter.difficulty = difficulty;
     if (ageMin) filter.targetAgeMax = { $gte: Number(ageMin) };
     if (ageMax) filter.targetAgeMin = { $lte: Number(ageMax) };

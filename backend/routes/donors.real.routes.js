@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -45,7 +46,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Donor = require('../models/Donor');
-    const data = await Donor.create(req.body);
+    const data = await Donor.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data, message: 'تم إضافة المتبرع بنجاح' });
   } catch (err) {
     logger.error('Donor create error:', err);
@@ -57,7 +58,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const Donor = require('../models/Donor');
-    const data = await Donor.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+    const data = await Donor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'المتبرع غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المتبرع بنجاح' });
   } catch (err) {

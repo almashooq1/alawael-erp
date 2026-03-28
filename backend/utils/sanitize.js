@@ -35,8 +35,36 @@ const stripDangerousKeys = obj => {
   return clean;
 };
 
+/**
+ * Strip fields that must never be set by user input in update operations.
+ * Prevents mass-assignment attacks (e.g. setting role, isAdmin, createdBy).
+ *
+ * @param {object} obj - Input object (usually req.body)
+ * @returns {object} Cleaned object without meta/privileged fields
+ */
+const UPDATE_BLACKLIST = new Set([
+  '_id', '__v', 'id',
+  'createdBy', 'createdAt', 'updatedAt',
+  'role', 'roles', 'isAdmin', 'isSuperAdmin',
+  'permissions', 'password', 'passwordHash',
+  '__proto__', 'constructor', 'prototype',
+]);
+
+const stripUpdateMeta = obj => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    if (!UPDATE_BLACKLIST.has(key)) {
+      clean[key] = obj[key];
+    }
+  }
+  return clean;
+};
+
 module.exports = {
   escapeRegex,
   stripDangerousKeys,
+  stripUpdateMeta,
   DANGEROUS_KEYS,
+  UPDATE_BLACKLIST,
 };

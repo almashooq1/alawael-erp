@@ -8,6 +8,7 @@ const Classroom = require('../models/Classroom');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -82,7 +83,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
 // ── Create classroom ─────────────────────────────────────────
 router.post('/', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const classroom = new Classroom(req.body);
+    const classroom = new Classroom(stripUpdateMeta(req.body));
     await classroom.save();
     res.status(201).json({ success: true, data: classroom, message: 'تم إنشاء الفصل بنجاح' });
   } catch (error) {
@@ -98,7 +99,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 // ── Update classroom ─────────────────────────────────────────
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const classroom = await Classroom.findByIdAndUpdate(req.params.id, req.body, {
+    const classroom = await Classroom.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

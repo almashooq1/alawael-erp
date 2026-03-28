@@ -1,11 +1,14 @@
 /**
- * safeFetch — Shared fetch wrapper with demo-data fallback
- * طبقة آمنة للاتصال بالخادم مع بيانات احتياطية
+ * safeFetch — Shared fetch wrapper for HR API calls
+ * طبقة آمنة للاتصال بالخادم — لا تُرجع بيانات تجريبية
+ *
+ * On success → { data, isDemo: false }
+ * On error   → { data: [], isDemo: false, error: message }
  */
 import apiClient from '../api.client';
 import logger from '../../utils/logger';
 
-export async function safeFetch(endpoint, fallback, options = {}) {
+export async function safeFetch(endpoint, _fallbackUnused, options = {}) {
   try {
     const res =
       options.method === 'POST'
@@ -18,7 +21,7 @@ export async function safeFetch(endpoint, fallback, options = {}) {
     const data = res?.data ?? res;
     return { data: Array.isArray(data) ? data : data?.data || data, isDemo: false };
   } catch (err) {
-    logger.warn(`HR API ${endpoint} unavailable:`, err?.message);
-    return { data: fallback, isDemo: true };
+    logger.error(`HR API ${endpoint} error:`, err?.message);
+    return { data: [], isDemo: false, error: err?.message || 'API error' };
   }
 }

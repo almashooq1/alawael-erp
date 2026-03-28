@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const authorizeRole = authorize; // Alias for compatibility
+const logger = require('../utils/logger');
 
 // استيراد الخدمات
 const HRService = require('../services/hr-advanced.service');
@@ -45,10 +46,10 @@ router.get('/employees', authenticateToken, async (req, res) => {
       data: result.employees,
     });
   } catch (error) {
-    console.error('[HR] GET /employees error:', error.message, error.stack);
+    logger.error('[HR] GET /employees error:', { message: error.message, stack: error.stack });
     res.status(500).json({
       success: false,
-      message: '[V3] خطأ في جلب بيانات الموظفين: ' + (error.message || 'unknown'),
+      message: 'خطأ في جلب بيانات الموظفين',
     });
   }
 });

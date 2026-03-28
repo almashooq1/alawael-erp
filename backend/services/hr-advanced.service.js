@@ -9,6 +9,7 @@ const Payroll = require('../models/payroll.model');
 const Training = require('../models/training.model');
 const Performance = require('../models/performance.model');
 const { escapeRegex } = require('../utils/sanitize');
+const logger = require('../utils/logger');
 
 class HRService {
   /**
@@ -105,7 +106,7 @@ class HRService {
 
       return { employees, total, page: Number(page), limit: safeLimit };
     } catch (error) {
-      console.error('[HRService.getAllEmployees] real error:', error.message, error.stack);
+      logger.error('[HRService.getAllEmployees]', { message: error.message, stack: error.stack });
       throw error;
     }
   }

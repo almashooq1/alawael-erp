@@ -124,9 +124,6 @@ const LeaveManagement = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {isDemo && (
-            <Chip icon={<WarningIcon />} label="بيانات تجريبية" color="warning" size="small" />
-          )}
           <Tooltip title="تحديث">
             <IconButton onClick={loadLeaves} disabled={loading}>
               <RefreshIcon />
@@ -161,12 +158,6 @@ const LeaveManagement = () => {
         </Box>
       </Box>
 
-      {isDemo && (
-        <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-          يتم عرض بيانات تجريبية. عند توفر API المتصل بقاعدة البيانات سيتم تحميل البيانات الحقيقية
-          تلقائياً.
-        </Alert>
-      )}
 
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

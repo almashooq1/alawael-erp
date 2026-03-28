@@ -279,11 +279,7 @@ export default function FacilityManagementPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-      {isDemo && (
-        <Alert severity="warning" sx={{ mb: 2, borderRadius: 2 }}>
-          البيانات المعروضة تجريبية — سيتم استبدالها تلقائياً عند توفر بيانات حقيقية من الخادم
-        </Alert>
-      )}
+
       {/* Header */}
       <Card
         sx={{

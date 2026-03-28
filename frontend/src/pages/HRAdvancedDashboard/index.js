@@ -118,15 +118,7 @@ const HRAdvancedDashboard = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          {isDemo && (
-            <Chip
-              icon={<WarningIcon />}
-              label="بيانات تجريبية"
-              color="warning"
-              variant="filled"
-              size="small"
-            />
-          )}
+
           <Tooltip title="تحديث البيانات">
             <IconButton onClick={loadDashboard}>
               <RefreshIcon />
@@ -135,12 +127,7 @@ const HRAdvancedDashboard = () => {
         </Box>
       </Box>
 
-      {isDemo && (
-        <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-          API الموارد البشرية غير متاح حالياً — يتم عرض بيانات تجريبية. البيانات الحقيقية ستظهر عند
-          توفر الخادم.
-        </Alert>
-      )}
+
 
       {/* KPI Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

@@ -46,18 +46,14 @@ const EmployeeManagement = () => {
           <Typography variant="body2" color="text.secondary">تسجيل وإدارة بيانات الموظفين والعقود والمعلومات الوظيفية</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-          {h.isDemo && <Chip icon={<WarningIcon />} label="بيانات تجريبية" color="warning" size="small" />}
+
           <Tooltip title="تحديث"><IconButton onClick={h.loadEmployees} disabled={h.loading}><RefreshIcon /></IconButton></Tooltip>
           <Button variant="outlined" startIcon={<DownloadIcon />} onClick={h.handleExport} size="small">تصدير</Button>
           <Button variant="contained" startIcon={<AddIcon />} onClick={h.openAdd}>تسجيل موظف جديد</Button>
         </Box>
       </Box>
 
-      {h.isDemo && (
-        <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-          يتم عرض بيانات تجريبية. عند توفر API المتصل بقاعدة البيانات سيتم تحميل البيانات الحقيقية تلقائياً.
-        </Alert>
-      )}
+
 
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

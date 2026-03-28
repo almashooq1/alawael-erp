@@ -8,7 +8,7 @@ import logger from '../utils/logger';
 const BASE = '/zkteco';
 
 /**
- * Wrapper آمن للاتصال بالخادم
+ * Wrapper آمن للاتصال بالخادم — بدون بيانات تجريبية
  */
 async function safeCall(fn, fallback = null) {
   try {
@@ -16,8 +16,8 @@ async function safeCall(fn, fallback = null) {
     const data = res?.data ?? res;
     return { data: data?.data || data, success: data?.success ?? true, isDemo: false };
   } catch (err) {
-    logger.warn(`ZKTeco API error: ${err?.message}`);
-    if (fallback !== null) return { data: fallback, success: false, isDemo: true };
+    logger.error(`ZKTeco API error: ${err?.message}`);
+    if (fallback !== null) return { data: fallback, success: false, isDemo: false, error: err?.message };
     throw err;
   }
 }

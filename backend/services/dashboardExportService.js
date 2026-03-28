@@ -309,13 +309,13 @@ class DashboardExportService {
 
     return `
     لوحة التحكم التنفيذية - Executive Dashboard Report
-    
+
     ملخص تنفيذي | Executive Summary:
     - إجمالي المؤشرات: ${summary.totalKPIs}
     - على المسار: ${summary.kpisOnTrack}
     - محفوف بالمخاطر: ${summary.kpisAtRisk}
     - حالات حرجة: ${summary.kpisCritical}
-    
+
     الحالة العامة: ${
       summary.kpisCritical > 0
         ? 'حرجة | Critical'
@@ -323,7 +323,7 @@ class DashboardExportService {
           ? 'محفوف بالمخاطر | At Risk'
           : 'صحي | Healthy'
     }
-    
+
     تم إنشاء التقرير: ${new Date().toLocaleString('ar-SA')}
     `;
   }

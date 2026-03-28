@@ -494,18 +494,14 @@ const AttendanceManagement = () => {
               <Typography variant="body2" color="text.secondary">متابعة حضور وانصراف الموظفين وإدارة السجلات</Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
-              {isDemo && <Chip icon={<WarningIcon />} label="بيانات تجريبية" color="warning" size="small" />}
+
               <Tooltip title="تحديث"><IconButton onClick={loadAttendance} disabled={loading}><RefreshIcon /></IconButton></Tooltip>
               <Button variant="outlined" startIcon={<DownloadIcon />} onClick={handleExport} size="small">تصدير CSV</Button>
               <Button variant="outlined" startIcon={<PrintIcon />} onClick={() => window.print()} size="small">طباعة</Button>
             </Box>
           </Box>
 
-          {isDemo && (
-            <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-              يتم عرض بيانات تجريبية. عند توفر API المتصل بقاعدة البيانات سيتم تحميل البيانات الحقيقية تلقائياً.
-            </Alert>
-          )}
+
 
           {/* ZKTeco Banner */}
           {zktecoStats && zktecoStats.totalDevices > 0 && (

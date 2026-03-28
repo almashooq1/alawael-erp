@@ -56,25 +56,17 @@ export const getDashboardKPIs = async () => {
   } catch {
     return {
       data: {
-        totalEmployees: DEMO_EMPLOYEES.length,
-        activeEmployees: DEMO_EMPLOYEES.filter(e => e.status === 'active').length,
-        onLeave: DEMO_EMPLOYEES.filter(e => e.status === 'on_leave').length,
-        attendanceRate: 87.5,
-        pendingLeaves: DEMO_LEAVES.filter(l => l.status === 'pending').length,
-        totalPayroll: DEMO_PAYROLL.reduce((s, p) => s + p.netSalary, 0),
-        avgRating: 4.1,
-        departments: [
-          'تقنية المعلومات',
-          'الموارد البشرية',
-          'المالية',
-          'التعليم',
-          'العلاج الطبيعي',
-          'الإدارة',
-          'العلاج الوظيفي',
-          'علاج النطق',
-        ],
+        totalEmployees: 0,
+        activeEmployees: 0,
+        onLeave: 0,
+        attendanceRate: 0,
+        pendingLeaves: 0,
+        totalPayroll: 0,
+        avgRating: 0,
+        departments: [],
       },
-      isDemo: true,
+      isDemo: false,
+      error: 'API غير متاح',
     };
   }
 };

@@ -12,7 +12,7 @@
 const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, authorize: _authorize } = require('../middleware/auth');
 const saudiTaxService = require('../services/saudiTax.service');
 const logger = require('../utils/logger');
 const { body, param, validationResult } = require('express-validator');

@@ -12,7 +12,7 @@
 const VATReturn = require('../models/VATReturn');
 const TaxFiling = require('../models/TaxFiling');
 const WithholdingTax = require('../models/WithholdingTax');
-const TaxCalendar = require('../models/TaxCalendar');
+const _TaxCalendar = require('../models/TaxCalendar'); // reserved for future calendar endpoints
 const logger = require('../utils/logger');
 
 class SaudiTaxService {

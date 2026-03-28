@@ -17,7 +17,7 @@ const PayrollCalculationService = require('../services/payrollCalculationService
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
-const { body, param, validationResult } = require('express-validator');
+const { body, param: _param, validationResult } = require('express-validator');
 
 /** Validation error handler */
 const validate = (req, res, next) => {

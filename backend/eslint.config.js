@@ -27,6 +27,9 @@ module.exports = [
       // Generated files
       '**/*.min.js',
       '**/*.bundle.js',
+      // Archived / legacy files not in active use
+      '**/routes/_archived/**',
+      '**/routes/_archived',
       // Legacy files with encoding issues
       'erp_new_system/**',
       // Circular symlink issue

@@ -36,7 +36,7 @@ const validate = (req, res, next) => {
 const mongoId = field => param(field).isMongoId().withMessage(`${field} غير صالح`);
 const reqMongoId = field => body(field).isMongoId().withMessage(`${field} مطلوب وصالح`);
 const reqString = (field, label) => body(field).trim().notEmpty().withMessage(`${label} مطلوب`);
-const optNumber = (field, label) =>
+const _optNumber = (field, label) =>
   body(field).optional().isNumeric().withMessage(`${label} يجب أن يكون رقماً`);
 
 // ── Auth: all insurance routes require authentication ────────────────────
@@ -215,13 +215,11 @@ router.post(
       res.status(201).json({ success: true, data: preAuth });
     } catch (error) {
       logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'خطأ في إنشاء الموافقة المسبقة',
-          error: safeError(error),
-        });
+      res.status(500).json({
+        success: false,
+        message: 'خطأ في إنشاء الموافقة المسبقة',
+        error: safeError(error),
+      });
     }
   }
 );

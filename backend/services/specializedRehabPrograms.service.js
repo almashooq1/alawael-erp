@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger'); // reserved for future structured logging
 
 // ── Helper: paginate ──────────────────────────────────────────────────────────
 const paginate = async (Model, filter, opts = {}) => {

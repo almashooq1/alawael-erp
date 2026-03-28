@@ -12,7 +12,7 @@ const GratuityService = require('../services/hr/gratuityService');
 const Gratuity = require('../models/gratuity.model');
 const _GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
-const { body, param, validationResult } = require('express-validator');
+const { body, param: _param, validationResult } = require('express-validator');
 
 const MAX_PAGE_LIMIT = 100;
 

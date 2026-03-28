@@ -14,7 +14,7 @@
 const Invoice = require('../models/Invoice');
 const JournalEntry = require('../models/JournalEntry');
 const PettyCash = require('../models/PettyCash');
-const CashFlow = require('../models/CashFlow');
+const _CashFlow = require('../models/CashFlow'); // reserved for future cash flow endpoints
 const Cheque = require('../models/Cheque');
 const BankReconciliation = require('../models/BankReconciliation');
 const CreditNote = require('../models/CreditNote');

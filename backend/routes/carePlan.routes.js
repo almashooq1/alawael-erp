@@ -11,7 +11,7 @@
 const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, authorize: _authorize } = require('../middleware/auth');
 const carePlanService = require('../services/carePlan.service');
 const logger = require('../utils/logger');
 

@@ -38,7 +38,7 @@ const {
   StrategicInitiative,
   SWOTAnalysis,
 } = require('../models/EnterpriseProPlus');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
 
 // Helper
@@ -1218,7 +1218,7 @@ router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, a
       );
       kr.updates.push({ value: currentValue, note, updatedBy: req.user?.id });
     }
-    Object.assign(kr, req.body);
+    Object.assign(kr, stripUpdateMeta(req.body));
     // Recalculate objective progress
     const krCount = doc.keyResults.length;
     if (krCount > 0) {

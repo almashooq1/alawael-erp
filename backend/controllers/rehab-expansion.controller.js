@@ -1,5 +1,5 @@
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 /**
  * Rehabilitation Expansion Controller — متحكمات التوسعة في خدمات تأهيل ذوي الإعاقة
  *
@@ -1709,7 +1709,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       const mod = record.modifications.id(req.params.modId);
       if (!mod) return res.status(404).json({ success: false, message: 'التعديل غير موجود' });
-      Object.assign(mod, req.body);
+      Object.assign(mod, stripUpdateMeta(req.body));
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث حالة التعديل' });
     } catch (err) {

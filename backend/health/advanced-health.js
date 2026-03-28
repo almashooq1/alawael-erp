@@ -7,10 +7,10 @@
 const mongoose = require('mongoose');
 const os = require('os');
 const v8 = require('v8');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const { promisify } = require('util');
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Health Check Configuration
@@ -366,9 +366,10 @@ class DiskHealthCheck extends HealthCheck {
 
   async performCheck() {
     try {
-      // Check disk usage (Linux/Mac)
-      const { stdout } = await execAsync(`df -h ${this.path} | tail -1`);
-      const parts = stdout.trim().split(/\s+/);
+      // Check disk usage (Linux/Mac) — use execFile to prevent command injection
+      const { stdout } = await execFileAsync('df', ['-h', this.path]);
+      const lines = stdout.trim().split('\n');
+      const parts = lines[lines.length - 1].split(/\s+/);
 
       const total = parts[1];
       const used = parts[2];

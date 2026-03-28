@@ -145,7 +145,7 @@ router.put('/:id/units/:unitId', async (req, res) => {
     if (!curriculum) return res.status(404).json({ success: false, message: 'المنهج غير موجود' });
     const unit = curriculum.units.id(req.params.unitId);
     if (!unit) return res.status(404).json({ success: false, message: 'الوحدة غير موجودة' });
-    Object.assign(unit, req.body);
+    Object.assign(unit, stripUpdateMeta(req.body));
     await curriculum.save();
     res.json({ success: true, data: curriculum, message: 'تم تحديث الوحدة بنجاح' });
   } catch (error) {

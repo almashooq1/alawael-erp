@@ -23,7 +23,7 @@ const {
   SAUDI_HEALTH_INSURANCE_COMPANIES,
   COVERAGE_CLASSES,
 } = require('../models/EmployeeInsurance');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -223,7 +223,7 @@ router.put(
         return res.status(404).json({ success: false, message: 'وثيقة التأمين غير موجودة' });
       }
 
-      Object.assign(policy, req.body);
+      Object.assign(policy, stripUpdateMeta(req.body));
       policy.updatedBy = req.user.id;
       policy.activityLog.push({
         action: 'POLICY_UPDATED',
@@ -330,7 +330,7 @@ router.put(
         return res.status(404).json({ success: false, message: 'التابع غير موجود' });
       }
 
-      Object.assign(dep, req.body);
+      Object.assign(dep, stripUpdateMeta(req.body));
       policy.activityLog.push({
         action: 'DEPENDENT_UPDATED',
         actionAr: 'تم تحديث بيانات تابع',
@@ -473,7 +473,7 @@ router.put(
       }
 
       const oldStatus = claim.status;
-      Object.assign(claim, req.body);
+      Object.assign(claim, stripUpdateMeta(req.body));
 
       if (req.body.status === 'approved' || req.body.status === 'partially_approved') {
         claim.reviewedDate = new Date();

@@ -6,7 +6,7 @@
  */
 
 const CostCenter = require('../models/CostCenter');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 // الحصول على جميع مراكز التكلفة
 exports.getAllCostCenters = async (req, res) => {
@@ -62,7 +62,7 @@ exports.updateCostCenter = async (req, res) => {
     });
   }
 
-  Object.assign(costCenter, req.body);
+  Object.assign(costCenter, stripUpdateMeta(req.body));
   costCenter.updatedBy = req.user._id;
   await costCenter.save();
 

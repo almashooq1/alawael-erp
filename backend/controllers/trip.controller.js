@@ -7,6 +7,7 @@ const Trip = require('../models/Trip');
 const Vehicle = require('../models/Vehicle');
 const GPSTrackingService = require('../services/gpsTracking.service');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 class TripController {
   /**
@@ -669,7 +670,7 @@ class TripController {
       }
 
       // Update the trip
-      Object.assign(trip, req.body);
+      Object.assign(trip, stripUpdateMeta(req.body));
       await trip.save();
 
       res.json({

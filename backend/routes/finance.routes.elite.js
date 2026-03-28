@@ -22,6 +22,7 @@ const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Safe Model Loader ──────────────────────────────────────────────────
 const safeRequire = (path, name) => {
@@ -314,7 +315,7 @@ router.put(
     if (!dashboard) throw new AppError('Dashboard not found', 404);
     const widget = dashboard.widgets.find(w => w.widgetId === req.params.widgetId);
     if (!widget) throw new AppError('Widget not found', 404);
-    Object.assign(widget, req.body);
+    Object.assign(widget, stripUpdateMeta(req.body));
     dashboard.updatedBy = req.user._id;
     await dashboard.save();
     res.json({ success: true, data: dashboard });

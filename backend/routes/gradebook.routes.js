@@ -8,6 +8,7 @@ const { Gradebook, SemesterReport } = require('../models/Gradebook');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -162,7 +163,7 @@ router.put(
       if (!gradebook) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       const entry = gradebook.entries.id(req.params.entryId);
       if (!entry) return res.status(404).json({ success: false, message: 'الدرجة غير موجودة' });
-      Object.assign(entry, req.body);
+      Object.assign(entry, stripUpdateMeta(req.body));
       gradebook.calculateTotals();
       await gradebook.save();
       res.json({ success: true, data: gradebook, message: 'تم تحديث الدرجة بنجاح' });

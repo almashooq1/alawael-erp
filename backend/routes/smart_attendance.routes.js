@@ -9,6 +9,7 @@ const SmartAttendanceService = require('../services/hr/smart_attendance_service'
 const SmartLeave = require('../models/smart_leave.model');
 const SmartAttendance = require('../models/advanced_attendance.model');
 const { authenticateToken: authMiddleware, requireRole: roleMiddleware } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ========================
 // نقاط نهائية تسجيل الحضور
@@ -236,7 +237,7 @@ router.put(
       });
 
       // تحديث البيانات
-      Object.assign(attendance, req.body);
+      Object.assign(attendance, stripUpdateMeta(req.body));
 
       await attendance.save();
 

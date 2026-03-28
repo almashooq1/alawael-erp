@@ -177,7 +177,7 @@ router.put(
       const semester = year.semesters.id(req.params.semesterId);
       if (!semester)
         return res.status(404).json({ success: false, message: 'الفصل الدراسي غير موجود' });
-      Object.assign(semester, req.body);
+      Object.assign(semester, stripUpdateMeta(req.body));
       await year.save();
       res.json({ success: true, data: year, message: 'تم تحديث الفصل الدراسي بنجاح' });
     } catch (error) {

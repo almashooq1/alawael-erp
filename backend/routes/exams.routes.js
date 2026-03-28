@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { Exam, ExamSubmission } = require('../models/Exam');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth guard ──────────────────────────────────────────────
 router.use(authenticate);
@@ -150,7 +151,7 @@ router.put('/:id/questions/:qId', async (req, res) => {
     if (!exam) return res.status(404).json({ success: false, message: 'الاختبار غير موجود' });
     const question = exam.questions.id(req.params.qId);
     if (!question) return res.status(404).json({ success: false, message: 'السؤال غير موجود' });
-    Object.assign(question, req.body);
+    Object.assign(question, stripUpdateMeta(req.body));
     await exam.save();
     res.json({ success: true, data: exam, message: 'تم تحديث السؤال بنجاح' });
   } catch (error) {

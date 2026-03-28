@@ -22,6 +22,7 @@ const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Safe Model Loader ──────────────────────────────────────────────────
 const safeRequire = (path, name) => {
@@ -158,7 +159,7 @@ router.patch(
     if (!checklist) throw new AppError('Checklist not found', 404);
     const task = checklist.tasks.id(req.params.taskId);
     if (!task) throw new AppError('Task not found', 404);
-    Object.assign(task, req.body);
+    Object.assign(task, stripUpdateMeta(req.body));
     if (req.body.status === 'completed') {
       task.completedBy = req.user.id;
       task.completedAt = new Date();

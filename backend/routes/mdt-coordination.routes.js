@@ -17,6 +17,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -228,7 +229,7 @@ router.patch(
       const caseItem = meeting.cases.id(req.params.caseId);
       if (!caseItem) return res.status(404).json({ success: false, message: 'الحالة غير موجودة' });
 
-      Object.assign(caseItem, req.body);
+      Object.assign(caseItem, stripUpdateMeta(req.body));
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث بيانات الحالة' });
     } catch (error) {
@@ -574,7 +575,7 @@ router.put(
       const goal = plan.goals.id(req.params.goalId);
       if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
 
-      Object.assign(goal, req.body);
+      Object.assign(goal, stripUpdateMeta(req.body));
       await plan.save();
       res.json({ success: true, data: plan, message: 'تم تحديث الهدف بنجاح' });
     } catch (error) {

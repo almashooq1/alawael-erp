@@ -8,6 +8,7 @@ const { Timetable } = require('../models/Timetable');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -146,7 +147,7 @@ router.put(
       if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
       const slot = timetable.slots.id(req.params.slotId);
       if (!slot) return res.status(404).json({ success: false, message: 'الحصة غير موجودة' });
-      Object.assign(slot, req.body);
+      Object.assign(slot, stripUpdateMeta(req.body));
       await timetable.save();
       res.json({ success: true, data: timetable, message: 'تم تحديث الحصة بنجاح' });
     } catch (error) {

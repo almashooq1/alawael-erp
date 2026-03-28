@@ -10,6 +10,7 @@ const {
   ElectronicDirectivesService,
 } = require('./electronic-directives-service');
 const authMiddleware = require('../middleware/advancedAuth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // Apply authentication to all routes
 router.use(authMiddleware.authenticate);
@@ -172,7 +173,7 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    Object.assign(directive, req.body);
+    Object.assign(directive, stripUpdateMeta(req.body));
     directive.updatedBy = req.user._id;
     directive.updatedAt = new Date();
     await directive.save();

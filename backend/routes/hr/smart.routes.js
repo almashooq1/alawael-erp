@@ -58,7 +58,7 @@ router.get(
     } catch (err) {
       res
         .status(err.message === 'الموظف غير موجود' ? 404 : 500)
-        .json({ success: false, message: err.message });
+        .json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -268,7 +268,7 @@ router.post('/onboarding', authenticate, authorize('admin', 'hr'), async (req, r
     });
     res.status(201).json({ success: true, data: result });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -314,7 +314,7 @@ router.put(
       });
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -329,7 +329,7 @@ router.post(
       const result = await OnboardingService.submitFeedback(req.params.id, req.body);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -378,7 +378,7 @@ router.post('/documents', authenticate, authorize('admin', 'hr'), async (req, re
     });
     res.status(201).json({ success: true, data: result });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -406,7 +406,7 @@ router.put('/documents/:id/verify', authenticate, authorize('admin', 'hr'), asyn
     });
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -419,7 +419,7 @@ router.post('/documents/:id/versions', authenticate, authorize('admin', 'hr'), a
     });
     res.json({ success: true, data: result });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

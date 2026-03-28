@@ -7,6 +7,7 @@
 const IndependentLivingService = require('../services/independentLiving.service');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class IndependentLivingController {
   // ═══════════════════════════════════════════════════════
   //  تقييم مهارات الحياة اليومية (ADL)
@@ -32,7 +33,7 @@ class IndependentLivingController {
         return res.status(400).json({
           success: false,
           message: 'خطأ في بيانات التقييم',
-          error: error.message,
+          error: safeError(error),
         });
       }
       res.status(500).json({
@@ -230,7 +231,7 @@ class IndependentLivingController {
         return res.status(400).json({
           success: false,
           message: 'خطأ في بيانات الخطة',
-          error: error.message,
+          error: safeError(error),
         });
       }
       res.status(500).json({
@@ -465,7 +466,7 @@ class IndependentLivingController {
         return res.status(400).json({
           success: false,
           message: 'خطأ في بيانات التقدم',
-          error: error.message,
+          error: safeError(error),
         });
       }
       res.status(500).json({
@@ -631,7 +632,7 @@ class IndependentLivingController {
         return res.status(400).json({
           success: false,
           message: 'خطأ في بيانات البرنامج',
-          error: error.message,
+          error: safeError(error),
         });
       }
       res.status(500).json({

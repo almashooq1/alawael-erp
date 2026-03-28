@@ -5,6 +5,7 @@
 const fleetRoutePlanService = require('../services/fleetRoutePlanService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetRoutePlanController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إنشاء خطة المسار', error: error.message });
+        .json({ success: false, message: 'خطأ في إنشاء خطة المسار', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب خطط المسارات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب خطط المسارات', error: safeError(error) });
     }
   }
 
@@ -44,7 +45,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan getById error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب خطة المسار', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب خطة المسار', error: safeError(error) });
     }
   }
 
@@ -61,7 +62,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث خطة المسار', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث خطة المسار', error: safeError(error) });
     }
   }
 
@@ -75,7 +76,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan delete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في حذف خطة المسار', error: error.message });
+        .json({ success: false, message: 'خطأ في حذف خطة المسار', error: safeError(error) });
     }
   }
 
@@ -87,7 +88,7 @@ class FleetRoutePlanController {
       res.json({ success: true, message: 'تمت الموافقة على خطة المسار', data: record });
     } catch (error) {
       logger.error('FleetRoutePlan approve error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: safeError(error) });
     }
   }
 
@@ -99,7 +100,7 @@ class FleetRoutePlanController {
       res.json({ success: true, message: 'تم بدء المسار', data: record });
     } catch (error) {
       logger.error('FleetRoutePlan start error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في بدء المسار', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في بدء المسار', error: safeError(error) });
     }
   }
 
@@ -113,7 +114,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan complete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إكمال المسار', error: error.message });
+        .json({ success: false, message: 'خطأ في إكمال المسار', error: safeError(error) });
     }
   }
 
@@ -129,7 +130,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan completeWaypoint error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تسجيل نقطة التوقف', error: error.message });
+        .json({ success: false, message: 'خطأ في تسجيل نقطة التوقف', error: safeError(error) });
     }
   }
 
@@ -145,7 +146,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan skipWaypoint error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تخطي نقطة التوقف', error: error.message });
+        .json({ success: false, message: 'خطأ في تخطي نقطة التوقف', error: safeError(error) });
     }
   }
 
@@ -160,7 +161,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan getActive error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب المسارات النشطة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب المسارات النشطة', error: safeError(error) });
     }
   }
 
@@ -175,7 +176,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan getUpcoming error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب المسارات القادمة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب المسارات القادمة', error: safeError(error) });
     }
   }
 
@@ -187,7 +188,7 @@ class FleetRoutePlanController {
       logger.error('FleetRoutePlan statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

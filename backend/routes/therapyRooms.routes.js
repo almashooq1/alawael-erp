@@ -61,7 +61,7 @@ router.post('/', requireAuth, requireRole(['admin', 'supervisor']), async (req, 
     res.status(201).json({ success: true, data: room });
   } catch (err) {
     logger.error('therapyRoom create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -76,7 +76,7 @@ router.put('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (req
     res.json({ success: true, data: room });
   } catch (err) {
     logger.error('therapyRoom update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

@@ -10,6 +10,7 @@
 const formTemplateService = require('../services/formTemplate.service');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 // ═══════════════════════════════════════════════════════════════
 // 📋 TEMPLATE CRUD
 // ═══════════════════════════════════════════════════════════════
@@ -82,7 +83,7 @@ const getTemplate = async (req, res) => {
     logger.error('[FormTemplates] getTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في جلب النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في جلب النموذج' });
   }
 };
 
@@ -99,7 +100,7 @@ const createTemplate = async (req, res) => {
     logger.error('[FormTemplates] createTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في إنشاء النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في إنشاء النموذج' });
   }
 };
 
@@ -116,7 +117,7 @@ const updateTemplate = async (req, res) => {
     logger.error('[FormTemplates] updateTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث النموذج' });
   }
 };
 
@@ -132,7 +133,7 @@ const deleteTemplate = async (req, res) => {
     logger.error('[FormTemplates] deleteTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في حذف النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في حذف النموذج' });
   }
 };
 
@@ -149,7 +150,7 @@ const cloneTemplate = async (req, res) => {
     logger.error('[FormTemplates] cloneTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في نسخ النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في نسخ النموذج' });
   }
 };
 
@@ -170,7 +171,7 @@ const updateDesign = async (req, res) => {
     logger.error('[FormTemplates] updateDesign error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث التصميم' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث التصميم' });
   }
 };
 
@@ -187,7 +188,7 @@ const setLogo = async (req, res) => {
     logger.error('[FormTemplates] setLogo error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث الشعار' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث الشعار' });
   }
 };
 
@@ -204,7 +205,7 @@ const setSecondaryLogo = async (req, res) => {
     logger.error('[FormTemplates] setSecondaryLogo error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث الشعار الثانوي' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث الشعار الثانوي' });
   }
 };
 
@@ -221,7 +222,7 @@ const updateHeader = async (req, res) => {
     logger.error('[FormTemplates] updateHeader error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث رأس النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث رأس النموذج' });
   }
 };
 
@@ -238,7 +239,7 @@ const updateFooter = async (req, res) => {
     logger.error('[FormTemplates] updateFooter error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في تحديث تذييل النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في تحديث تذييل النموذج' });
   }
 };
 
@@ -258,7 +259,7 @@ const getVersionHistory = async (req, res) => {
     logger.error('[FormTemplates] getVersionHistory error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في جلب سجل الإصدارات' });
+      .json({ success: false, message: safeError(error) || 'خطأ في جلب سجل الإصدارات' });
   }
 };
 
@@ -283,7 +284,7 @@ const restoreVersion = async (req, res) => {
     logger.error('[FormTemplates] restoreVersion error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في استعادة الإصدار' });
+      .json({ success: false, message: safeError(error) || 'خطأ في استعادة الإصدار' });
   }
 };
 
@@ -338,7 +339,7 @@ const submitForm = async (req, res) => {
     });
   } catch (error) {
     logger.error('[FormTemplates] submitForm error:', error);
-    const response = { success: false, message: error.message || 'خطأ في إرسال النموذج' };
+    const response = { success: false, message: safeError(error) || 'خطأ في إرسال النموذج' };
     if (error.validationErrors) response.errors = error.validationErrors;
     res.status(error.status || 500).json(response);
   }
@@ -388,7 +389,7 @@ const getSubmission = async (req, res) => {
     logger.error('[FormTemplates] getSubmission error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في جلب الطلب' });
+      .json({ success: false, message: safeError(error) || 'خطأ في جلب الطلب' });
   }
 };
 
@@ -409,7 +410,7 @@ const approveSubmission = async (req, res) => {
     logger.error('[FormTemplates] approveSubmission error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في اعتماد الطلب' });
+      .json({ success: false, message: safeError(error) || 'خطأ في اعتماد الطلب' });
   }
 };
 
@@ -430,7 +431,7 @@ const rejectSubmission = async (req, res) => {
     logger.error('[FormTemplates] rejectSubmission error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في رفض الطلب' });
+      .json({ success: false, message: safeError(error) || 'خطأ في رفض الطلب' });
   }
 };
 
@@ -451,7 +452,7 @@ const returnSubmission = async (req, res) => {
     logger.error('[FormTemplates] returnSubmission error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في إرجاع الطلب' });
+      .json({ success: false, message: safeError(error) || 'خطأ في إرجاع الطلب' });
   }
 };
 
@@ -473,7 +474,7 @@ const resubmitForm = async (req, res) => {
     logger.error('[FormTemplates] resubmitForm error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في إعادة الإرسال' });
+      .json({ success: false, message: safeError(error) || 'خطأ في إعادة الإرسال' });
   }
 };
 
@@ -496,7 +497,7 @@ const addComment = async (req, res) => {
     logger.error('[FormTemplates] addComment error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في إضافة التعليق' });
+      .json({ success: false, message: safeError(error) || 'خطأ في إضافة التعليق' });
   }
 };
 
@@ -554,7 +555,7 @@ const previewTemplate = async (req, res) => {
     logger.error('[FormTemplates] previewTemplate error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في معاينة النموذج' });
+      .json({ success: false, message: safeError(error) || 'خطأ في معاينة النموذج' });
   }
 };
 
@@ -581,7 +582,7 @@ const renderSubmission = async (req, res) => {
     logger.error('[FormTemplates] renderSubmission error:', error);
     res
       .status(error.status || 500)
-      .json({ success: false, message: error.message || 'خطأ في عرض الطلب' });
+      .json({ success: false, message: safeError(error) || 'خطأ في عرض الطلب' });
   }
 };
 

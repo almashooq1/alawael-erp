@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import api from '../services/api';
+import { getToken, setToken, setRefreshToken, clearAuthData } from '../utils/tokenStorage';
 
 const AuthContext = createContext();
 
@@ -15,17 +16,14 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     // Call backend to blacklist the token (best-effort)
     try {
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+      const token = getToken();
       if (token) {
         await api.post('/auth/logout').catch(() => {});
       }
     } catch {
       // Ignore — clearing local state is enough
     }
-    localStorage.removeItem('token');
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('refreshToken');
-    localStorage.removeItem('user');
+    clearAuthData();
     setCurrentUser(null);
   }, []);
 
@@ -54,7 +52,7 @@ export function AuthProvider({ children }) {
   }, [logout]);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = getToken();
     if (token) {
       fetchUser();
     } else {
@@ -79,9 +77,9 @@ export function AuthProvider({ children }) {
         throw new Error('Missing access token from login response');
       }
 
-      localStorage.setItem('authToken', accessToken);
+      setToken(accessToken);
       if (refreshToken) {
-        localStorage.setItem('refreshToken', refreshToken);
+        setRefreshToken(refreshToken);
       }
 
       setCurrentUser(user || null);

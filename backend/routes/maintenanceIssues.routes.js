@@ -104,7 +104,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: issue });
   } catch (err) {
     logger.error('maintenanceIssue create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -119,7 +119,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: issue });
   } catch (err) {
     logger.error('maintenanceIssue update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -163,7 +163,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
     res.json({ success: true, data: issue });
   } catch (err) {
     logger.error('maintenanceIssue status error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -185,7 +185,7 @@ router.post('/:id/diagnosis', requireAuth, async (req, res) => {
     res.json({ success: true, data: issue });
   } catch (err) {
     logger.error('maintenanceIssue diagnosis error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -209,7 +209,7 @@ router.post('/:id/comments', requireAuth, async (req, res) => {
     res.json({ success: true, data: issue.comments[issue.comments.length - 1] });
   } catch (err) {
     logger.error('maintenanceIssue comment error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

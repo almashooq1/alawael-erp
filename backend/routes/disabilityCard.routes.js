@@ -53,6 +53,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -616,7 +617,7 @@ router.use((err, req, res, _next) => {
   const status = err.message?.includes('غير موجود') ? 404 : 500;
   res.status(status).json({
     success: false,
-    message: err.message || 'حدث خطأ في نظام بطاقات الإعاقة',
+    message: safeError(err) || 'حدث خطأ في نظام بطاقات الإعاقة',
   });
 });
 

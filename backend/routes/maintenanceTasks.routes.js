@@ -129,7 +129,7 @@ router.post(
       res.status(201).json({ success: true, data: task });
     } catch (err) {
       logger.error('maintenanceTask create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -145,7 +145,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: task });
   } catch (err) {
     logger.error('maintenanceTask update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -189,7 +189,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
     res.json({ success: true, data: task });
   } catch (err) {
     logger.error('maintenanceTask status error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -206,7 +206,7 @@ router.post('/:id/quality-check', requireAuth, async (req, res) => {
     res.json({ success: true, data: task });
   } catch (err) {
     logger.error('maintenanceTask qualityCheck error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

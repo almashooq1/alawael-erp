@@ -5,6 +5,7 @@
 const FleetFuelCardService = require('../services/fleetFuelCardService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetFuelCardController {
   /** إنشاء بطاقة */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetFuelCardController {
       res.status(201).json({ success: true, message: 'تم إنشاء بطاقة الوقود', data: card });
     } catch (error) {
       logger.error('Fuel card create error:', error.message);
-      res.status(400).json({ success: false, message: 'فشل إنشاء البطاقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء البطاقة', error: safeError(error) });
     }
   }
 
@@ -29,7 +30,7 @@ class FleetFuelCardController {
       );
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل الجلب', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل الجلب', error: safeError(error) });
     }
   }
 
@@ -40,7 +41,7 @@ class FleetFuelCardController {
       if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, data: card });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -51,7 +52,7 @@ class FleetFuelCardController {
       if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, message: 'تم التحديث', data: card });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -62,7 +63,7 @@ class FleetFuelCardController {
       if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, message: 'تم تفعيل البطاقة', data: card });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التفعيل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التفعيل', error: safeError(error) });
     }
   }
 
@@ -74,7 +75,7 @@ class FleetFuelCardController {
       if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, message: 'تم تعليق البطاقة', data: card });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التعليق', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التعليق', error: safeError(error) });
     }
   }
 
@@ -86,7 +87,7 @@ class FleetFuelCardController {
       if (!card) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, message: 'تم التعيين', data: card });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التعيين', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التعيين', error: safeError(error) });
     }
   }
 
@@ -99,7 +100,7 @@ class FleetFuelCardController {
       if (result.alerts.length > 0) response.warnings = result.alerts;
       res.json(response);
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 
@@ -111,7 +112,7 @@ class FleetFuelCardController {
       if (!result) return res.status(404).json({ success: false, message: 'البطاقة غير موجودة' });
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -128,7 +129,7 @@ class FleetFuelCardController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم حل التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل', error: safeError(error) });
     }
   }
 
@@ -139,7 +140,7 @@ class FleetFuelCardController {
       const cards = await FleetFuelCardService.getExpiringCards(parseInt(daysAhead), organization);
       res.json({ success: true, data: cards });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -149,7 +150,7 @@ class FleetFuelCardController {
       const alerts = await FleetFuelCardService.getUnresolvedFraudAlerts(req.query.organization);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -159,7 +160,7 @@ class FleetFuelCardController {
       const report = await FleetFuelCardService.getConsumptionReport(req.query);
       res.json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -169,7 +170,7 @@ class FleetFuelCardController {
       const stats = await FleetFuelCardService.getStatistics(req.query.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: safeError(error) });
     }
   }
 }

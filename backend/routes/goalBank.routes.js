@@ -104,7 +104,7 @@ router.post(
       res.status(201).json({ success: true, data: goal });
     } catch (err) {
       logger.error('goalBank create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -124,7 +124,7 @@ router.put(
       res.json({ success: true, data: goal });
     } catch (err) {
       logger.error('goalBank update error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -152,7 +152,7 @@ router.post('/bulk', requireAuth, requireRole(['admin']), async (req, res) => {
     res.status(201).json({ success: true, inserted: result.length });
   } catch (err) {
     logger.error('goalBank bulk error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

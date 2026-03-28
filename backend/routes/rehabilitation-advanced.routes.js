@@ -97,7 +97,7 @@ function buildCrud(Model, modelName, opts = {}) {
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       logger.error(`${modelName} POST / error:`, err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   });
 
@@ -112,7 +112,7 @@ function buildCrud(Model, modelName, opts = {}) {
       res.json({ success: true, data: doc });
     } catch (err) {
       logger.error(`${modelName} PUT /:id error:`, err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   });
 

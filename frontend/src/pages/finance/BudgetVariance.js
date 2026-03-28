@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -35,7 +36,7 @@ const BudgetVariance = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/budget-vs-actual?fiscalYear=${fiscalYear}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setData(json.data);

@@ -11,6 +11,7 @@
  */
 
 import axios from 'axios';
+import { getToken, setToken, setRefreshToken, clearAuthData, getRefreshToken } from '../utils/tokenStorage';
 
 // تكوين قاعدة الـ API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -35,10 +36,7 @@ const processQueue = (error, token = null) => {
  * Force full logout — clear tokens, redirect to login.
  */
 const forceLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('authToken');
-  localStorage.removeItem('refreshToken');
-  localStorage.removeItem('user');
+  clearAuthData();
   if (window.location.pathname !== '/login') {
     window.location.replace('/login');
   }
@@ -92,7 +90,7 @@ apiClient.interceptors.request.use(
     }
 
     // إضافة Token من LocalStorage
-    const token = localStorage.getItem('authToken');
+    const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -194,7 +192,7 @@ apiClient.interceptors.response.use(
 
       if (!isAuthRequest) {
         // ─── Try refreshing the token before forcing logout ──────────
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = getRefreshToken();
 
         if (refreshToken && !config._isRetryAfterRefresh) {
           if (isRefreshing) {
@@ -226,10 +224,9 @@ apiClient.interceptors.response.use(
 
             if (newAccessToken) {
               // Save new tokens
-              localStorage.setItem('authToken', newAccessToken);
-              localStorage.setItem('token', newAccessToken);
+              setToken(newAccessToken);
               if (newRefreshToken) {
-                localStorage.setItem('refreshToken', newRefreshToken);
+                setRefreshToken(newRefreshToken);
               }
 
               // Process queued requests with new token

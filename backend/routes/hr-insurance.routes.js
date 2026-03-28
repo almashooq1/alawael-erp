@@ -618,7 +618,7 @@ router.post(
           await newPolicy.save();
           results.success.push({ employeeId: emp.employeeId, policyNumber: policyNum });
         } catch (err) {
-          results.failed.push({ employeeId: emp.employeeId, error: err.message });
+          results.failed.push({ employeeId: emp.employeeId, error: safeError(err) });
         }
       }
 

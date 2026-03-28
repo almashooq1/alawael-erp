@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -27,7 +28,7 @@ const BalanceSheet = () => {
   const [loading, setLoading] = useState(true);
   const [asOfDate, setAsOfDate] = useState(new Date().toISOString().slice(0, 10));
 
-  const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  const headers = { Authorization: `Bearer ${getToken()}` };
 
   const fetchData = useCallback(async () => {
     setLoading(true);

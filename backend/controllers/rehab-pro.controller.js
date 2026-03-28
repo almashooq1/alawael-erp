@@ -20,6 +20,7 @@ const {
 } = require('../models/rehab-pro.model');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
 function ok(res, data, msg = 'Success') {
@@ -27,7 +28,7 @@ function ok(res, data, msg = 'Success') {
 }
 function fail(res, err, code = 500) {
   logger.error('[rehab-pro]', { error: err.message || err });
-  return res.status(code).json({ success: false, message: err.message || err });
+  return res.status(code).json({ success: false, message: safeError(err) || err });
 }
 
 /**

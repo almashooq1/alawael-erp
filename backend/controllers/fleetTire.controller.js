@@ -5,6 +5,7 @@
 const FleetTireService = require('../services/fleetTireService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetTireController {
   /** إضافة إطار */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetTireController {
       res.status(201).json({ success: true, message: 'تم إضافة الإطار', data: tire });
     } catch (error) {
       logger.error('Tire create error:', error.message);
-      res.status(400).json({ success: false, message: 'فشل إضافة الإطار', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إضافة الإطار', error: safeError(error) });
     }
   }
 
@@ -25,7 +26,7 @@ class FleetTireController {
       const result = await FleetTireService.getAll({ status, brand, vehicle, type }, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل الجلب', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل الجلب', error: safeError(error) });
     }
   }
 
@@ -36,7 +37,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, data: tire });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -47,7 +48,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم التحديث', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -59,7 +60,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم التركيب', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التركيب', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التركيب', error: safeError(error) });
     }
   }
 
@@ -70,7 +71,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم إزالة الإطار', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإزالة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإزالة', error: safeError(error) });
     }
   }
 
@@ -80,7 +81,7 @@ class FleetTireController {
       const result = await FleetTireService.rotateTires(req.body.rotations);
       res.json({ success: true, message: `تم تبديل ${result.length} إطارات`, data: result });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التبديل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التبديل', error: safeError(error) });
     }
   }
 
@@ -97,7 +98,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم تسجيل القراءة', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التسجيل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التسجيل', error: safeError(error) });
     }
   }
 
@@ -109,7 +110,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم تسجيل الضغط', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التسجيل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التسجيل', error: safeError(error) });
     }
   }
 
@@ -120,7 +121,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم إضافة الإصلاح', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإضافة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإضافة', error: safeError(error) });
     }
   }
 
@@ -131,7 +132,7 @@ class FleetTireController {
       if (!tire) return res.status(404).json({ success: false, message: 'الإطار غير موجود' });
       res.json({ success: true, message: 'تم التخلص من الإطار', data: tire });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل', error: safeError(error) });
     }
   }
 
@@ -141,7 +142,7 @@ class FleetTireController {
       const tires = await FleetTireService.getTiresNeedingReplacement(req.query.organization);
       res.json({ success: true, data: tires });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -151,7 +152,7 @@ class FleetTireController {
       const tires = await FleetTireService.getTiresNeedingRotation(req.query.organization);
       res.json({ success: true, data: tires });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -161,7 +162,7 @@ class FleetTireController {
       const tires = await FleetTireService.getVehicleTires(req.params.vehicleId);
       res.json({ success: true, data: tires });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -171,7 +172,7 @@ class FleetTireController {
       const stats = await FleetTireService.getStatistics(req.query.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: safeError(error) });
     }
   }
 }

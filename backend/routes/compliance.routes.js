@@ -131,7 +131,7 @@ router.post('/controls', async (req, res) => {
     const control = await InternalControl.create(req.body);
     res.status(201).json({ success: true, data: control });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -146,7 +146,7 @@ router.put('/controls/:id', async (req, res) => {
     if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
     res.json({ success: true, data: control });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -164,7 +164,7 @@ router.post('/controls/:id/test-result', async (req, res) => {
 
     res.json({ success: true, data: control, message: 'تم إضافة نتيجة الاختبار' });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -215,7 +215,7 @@ router.post('/items', async (req, res) => {
     const item = await ComplianceItem.create(req.body);
     res.status(201).json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -230,7 +230,7 @@ router.put('/items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'البند غير موجود' });
     res.json({ success: true, data: item });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -246,7 +246,7 @@ router.post('/items/:id/evidence', async (req, res) => {
 
     res.json({ success: true, data: item, message: 'تم إضافة الإثبات' });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -297,7 +297,7 @@ router.post('/logs', async (req, res) => {
     const log = await ComplianceLog.create(req.body);
     res.status(201).json({ success: true, data: log });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -363,7 +363,7 @@ router.post('/metrics', async (req, res) => {
     const metric = await ComplianceMetric.create(req.body);
     res.status(201).json({ success: true, data: metric });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -378,7 +378,7 @@ router.put('/metrics/:id', async (req, res) => {
     if (!metric) return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
     res.json({ success: true, data: metric });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 

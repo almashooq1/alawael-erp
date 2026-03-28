@@ -5,6 +5,7 @@
 const TrafficFineService = require('../services/trafficFineService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class TrafficFineController {
   // ─── Traffic Fines ────────────────────────────────────────────────
 
@@ -16,7 +17,7 @@ class TrafficFineController {
       res.status(201).json({ success: true, message: 'تم تسجيل المخالفة', data: fine });
     } catch (error) {
       logger.error('خطأ في تسجيل المخالفة:', error);
-      res.status(400).json({ success: false, message: 'فشل تسجيل المخالفة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل المخالفة', error: safeError(error) });
     }
   }
 
@@ -45,7 +46,7 @@ class TrafficFineController {
       const result = await TrafficFineService.getAllFines(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المخالفات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المخالفات', error: safeError(error) });
     }
   }
 
@@ -56,7 +57,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, data: fine });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المخالفة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المخالفة', error: safeError(error) });
     }
   }
 
@@ -67,7 +68,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث المخالفة', data: fine });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث المخالفة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث المخالفة', error: safeError(error) });
     }
   }
 
@@ -78,7 +79,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم دفع المخالفة', data: fine });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل دفع المخالفة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل دفع المخالفة', error: safeError(error) });
     }
   }
 
@@ -92,7 +93,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم تقديم الاعتراض', data: fine });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تقديم الاعتراض', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تقديم الاعتراض', error: safeError(error) });
     }
   }
 
@@ -107,7 +108,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم حل الاعتراض', data: fine });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل حل الاعتراض', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل حل الاعتراض', error: safeError(error) });
     }
   }
 
@@ -118,7 +119,7 @@ class TrafficFineController {
       if (!fine) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم تعيين المخالفة', data: fine });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التعيين', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التعيين', error: safeError(error) });
     }
   }
 
@@ -130,7 +131,7 @@ class TrafficFineController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب مخالفات السائق', error: error.message });
+        .json({ success: false, message: 'فشل جلب مخالفات السائق', error: safeError(error) });
     }
   }
 
@@ -142,7 +143,7 @@ class TrafficFineController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب مخالفات المركبة', error: error.message });
+        .json({ success: false, message: 'فشل جلب مخالفات المركبة', error: safeError(error) });
     }
   }
 
@@ -154,7 +155,7 @@ class TrafficFineController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب المخالفات المتأخرة', error: error.message });
+        .json({ success: false, message: 'فشل جلب المخالفات المتأخرة', error: safeError(error) });
     }
   }
 
@@ -164,7 +165,7 @@ class TrafficFineController {
       const stats = await TrafficFineService.getFineStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -177,7 +178,7 @@ class TrafficFineController {
       const toll = await TrafficFineService.createToll(data);
       res.status(201).json({ success: true, message: 'تم تسجيل معاملة العبور', data: toll });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل المعاملة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل المعاملة', error: safeError(error) });
     }
   }
 
@@ -193,7 +194,7 @@ class TrafficFineController {
       const result = await TrafficFineService.getAllTolls(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المعاملات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المعاملات', error: safeError(error) });
     }
   }
 
@@ -203,7 +204,7 @@ class TrafficFineController {
       const stats = await TrafficFineService.getTollStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -213,7 +214,7 @@ class TrafficFineController {
       const tolls = await TrafficFineService.getVehicleTolls(req.params.vehicleId);
       res.json({ success: true, data: tolls });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المعاملات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المعاملات', error: safeError(error) });
     }
   }
 }

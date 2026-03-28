@@ -5,6 +5,7 @@
 const fleetAccidentService = require('../services/fleetAccidentService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetAccidentController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetAccidentController {
       logger.error('FleetAccident create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تسجيل الحادث', error: error.message });
+        .json({ success: false, message: 'خطأ في تسجيل الحادث', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetAccidentController {
       logger.error('FleetAccident getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب تقارير الحوادث', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب تقارير الحوادث', error: safeError(error) });
     }
   }
 
@@ -44,7 +45,7 @@ class FleetAccidentController {
       logger.error('FleetAccident getById error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب تقرير الحادث', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب تقرير الحادث', error: safeError(error) });
     }
   }
 
@@ -61,7 +62,7 @@ class FleetAccidentController {
       logger.error('FleetAccident update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث التقرير', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث التقرير', error: safeError(error) });
     }
   }
 
@@ -73,7 +74,7 @@ class FleetAccidentController {
       res.json({ success: true, message: 'تم حذف تقرير الحادث' });
     } catch (error) {
       logger.error('FleetAccident delete error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في حذف التقرير', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف التقرير', error: safeError(error) });
     }
   }
 
@@ -91,7 +92,7 @@ class FleetAccidentController {
       logger.error('FleetAccident updateStatus error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث الحالة', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث الحالة', error: safeError(error) });
     }
   }
 
@@ -105,7 +106,7 @@ class FleetAccidentController {
       logger.error('FleetAccident insurance error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث مطالبة التأمين', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث مطالبة التأمين', error: safeError(error) });
     }
   }
 
@@ -117,7 +118,7 @@ class FleetAccidentController {
       logger.error('FleetAccident getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب حوادث المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب حوادث المركبة', error: safeError(error) });
     }
   }
 
@@ -129,7 +130,7 @@ class FleetAccidentController {
       logger.error('FleetAccident getByDriver error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب حوادث السائق', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب حوادث السائق', error: safeError(error) });
     }
   }
 
@@ -144,7 +145,7 @@ class FleetAccidentController {
       logger.error('FleetAccident pendingClaims error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب المطالبات المعلقة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب المطالبات المعلقة', error: safeError(error) });
     }
   }
 
@@ -156,7 +157,7 @@ class FleetAccidentController {
       logger.error('FleetAccident addWitness error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إضافة الشاهد', error: error.message });
+        .json({ success: false, message: 'خطأ في إضافة الشاهد', error: safeError(error) });
     }
   }
 
@@ -168,7 +169,7 @@ class FleetAccidentController {
       logger.error('FleetAccident statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

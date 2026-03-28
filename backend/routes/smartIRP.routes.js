@@ -61,7 +61,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -76,7 +76,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -105,7 +105,7 @@ router.post('/:id/goals', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp add-goal error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -121,7 +121,7 @@ router.put('/:id/goals/:goalId/progress', requireAuth, async (req, res) => {
     res.json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp goal-progress error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -132,7 +132,7 @@ router.post('/:id/goals/validate', requireAuth, (req, res) => {
     res.json({ success: true, data: result });
   } catch (err) {
     logger.error('smart-irp validate-goal error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -145,7 +145,7 @@ router.post('/:id/assess', requireAuth, async (req, res) => {
     res.json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp assess error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

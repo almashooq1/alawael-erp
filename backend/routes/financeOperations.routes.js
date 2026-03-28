@@ -13,6 +13,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const financeOpsService = require('../services/financeOperations.service');
@@ -29,7 +30,7 @@ const wrap = fn => async (req, res) => {
   } catch (err) {
     logger.error('Finance Operations route error:', err.message);
     const status = err.status || 500;
-    res.status(status).json({ success: false, message: err.message });
+    res.status(status).json({ success: false, message: safeError(err) });
   }
 };
 

@@ -5,6 +5,7 @@
 const fleetTollService = require('../services/fleetTollService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetTollController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetTollController {
       logger.error('FleetToll create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تسجيل رسم المرور', error: error.message });
+        .json({ success: false, message: 'خطأ في تسجيل رسم المرور', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetTollController {
       logger.error('FleetToll getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجلات الرسوم', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجلات الرسوم', error: safeError(error) });
     }
   }
 
@@ -43,7 +44,7 @@ class FleetTollController {
       logger.error('FleetToll getById error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجل الرسم', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجل الرسم', error: safeError(error) });
     }
   }
 
@@ -59,7 +60,7 @@ class FleetTollController {
       logger.error('FleetToll update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث سجل الرسم', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث سجل الرسم', error: safeError(error) });
     }
   }
 
@@ -72,7 +73,7 @@ class FleetTollController {
       logger.error('FleetToll delete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في حذف سجل الرسم', error: error.message });
+        .json({ success: false, message: 'خطأ في حذف سجل الرسم', error: safeError(error) });
     }
   }
 
@@ -84,7 +85,7 @@ class FleetTollController {
       logger.error('FleetToll getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب رسوم المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب رسوم المركبة', error: safeError(error) });
     }
   }
 
@@ -95,7 +96,7 @@ class FleetTollController {
       res.json({ success: true, message: 'تمت المطابقة بنجاح', data: record });
     } catch (error) {
       logger.error('FleetToll reconcile error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في المطابقة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في المطابقة', error: safeError(error) });
     }
   }
 
@@ -106,7 +107,7 @@ class FleetTollController {
       res.json({ success: true, message: 'تم دفع الرسم بنجاح', data: record });
     } catch (error) {
       logger.error('FleetToll pay error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في دفع الرسم', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في دفع الرسم', error: safeError(error) });
     }
   }
 
@@ -121,7 +122,7 @@ class FleetTollController {
       logger.error('FleetToll getUnpaid error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الرسوم غير المدفوعة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الرسوم غير المدفوعة', error: safeError(error) });
     }
   }
 
@@ -133,7 +134,7 @@ class FleetTollController {
       logger.error('FleetToll tagSummary error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب ملخص البطاقة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب ملخص البطاقة', error: safeError(error) });
     }
   }
 
@@ -145,7 +146,7 @@ class FleetTollController {
       logger.error('FleetToll statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

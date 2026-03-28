@@ -12,6 +12,7 @@ const ImportExportJob = require('../models/ImportExportJob');
 const ImportExportTemplate = require('../models/ImportExportTemplate');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 // ─────────────────────────────────────────────────
 // EXPORT ENDPOINTS
 // ─────────────────────────────────────────────────
@@ -53,7 +54,7 @@ const createExport = async (req, res) => {
     return res.send(result.buffer);
   } catch (error) {
     logger.error('[ImportExport] Export error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -90,7 +91,7 @@ const previewExport = async (req, res) => {
     });
   } catch (error) {
     logger.error('[ImportExport] Preview error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -119,7 +120,7 @@ const bulkExport = async (req, res) => {
     return res.send(result.buffer);
   } catch (error) {
     logger.error('[ImportExport] Bulk export error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -162,7 +163,7 @@ const parseImportFile = async (req, res) => {
     });
   } catch (error) {
     logger.error('[ImportExport] Parse error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -202,7 +203,7 @@ const executeImport = async (req, res) => {
     });
   } catch (error) {
     logger.error('[ImportExport] Execute import error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -240,7 +241,7 @@ const validateImport = async (req, res) => {
     });
   } catch (error) {
     logger.error('[ImportExport] Validation error:', { message: error.message });
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -267,7 +268,7 @@ const listTemplates = async (req, res) => {
 
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -288,7 +289,7 @@ const getTemplate = async (req, res) => {
 
     return res.json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -303,7 +304,7 @@ const createTemplate = async (req, res) => {
 
     return res.status(201).json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -326,7 +327,7 @@ const updateTemplate = async (req, res) => {
 
     return res.json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -349,7 +350,7 @@ const deleteTemplate = async (req, res) => {
 
     return res.json({ success: true, message: 'تم حذف القالب بنجاح' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -379,7 +380,7 @@ const downloadTemplate = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -409,7 +410,7 @@ const listJobs = async (req, res) => {
 
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -422,7 +423,7 @@ const getJob = async (req, res) => {
     const job = await importExportService.getJob(req.params.id);
     return res.json({ success: true, data: job });
   } catch (error) {
-    return res.status(404).json({ success: false, message: error.message });
+    return res.status(404).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -436,7 +437,7 @@ const cancelJob = async (req, res) => {
     const job = await importExportService.cancelJob(req.params.id, userId);
     return res.json({ success: true, data: job, message: 'تم إلغاء المهمة' });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -450,7 +451,7 @@ const retryJob = async (req, res) => {
     const job = await importExportService.retryJob(req.params.id, userId);
     return res.json({ success: true, data: job, message: 'تم إنشاء مهمة إعادة المحاولة' });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -464,7 +465,7 @@ const deleteJob = async (req, res) => {
     await importExportService.deleteJob(req.params.id, userId);
     return res.json({ success: true, message: 'تم حذف المهمة' });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -481,7 +482,7 @@ const listModules = async (req, res) => {
     const modules = importExportService.getAvailableModules();
     return res.json({ success: true, data: modules, count: modules.length });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -494,7 +495,7 @@ const getModuleFields = async (req, res) => {
     const fields = await importExportService.getModuleFields(req.params.module);
     return res.json({ success: true, data: fields, count: fields.length });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -518,7 +519,7 @@ const getStatistics = async (req, res) => {
 
     return res.json({ success: true, data: stats });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -557,7 +558,7 @@ const downloadFile = async (req, res) => {
 
     return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -644,7 +645,7 @@ const createScheduledExport = async (req, res) => {
       .status(201)
       .json({ success: true, data: result, message: 'تم إنشاء التصدير المجدول' });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -658,7 +659,7 @@ const listScheduledExports = async (req, res) => {
     const result = await importExportService.listScheduledExports({ userId, ...req.query });
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -675,7 +676,7 @@ const executeScheduledExports = async (req, res) => {
       message: `تم تنفيذ ${result.executed} مهمة مجدولة`,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -694,7 +695,7 @@ const toggleScheduledExport = async (req, res) => {
       message: enabled ? 'تم تفعيل الجدول' : 'تم إيقاف الجدول',
     });
   } catch (error) {
-    return res.status(400).json({ success: false, message: error.message });
+    return res.status(400).json({ success: false, message: safeError(error) });
   }
 };
 
@@ -759,7 +760,7 @@ const generateQualityReport = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: safeError(error) });
   }
 };
 

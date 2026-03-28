@@ -153,7 +153,7 @@ router.get('/calibrations', async (req, res) => {
     logger.error('[MedEquip] List calibrations error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب سجلات المعايرة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب سجلات المعايرة', error: safeError(error) });
   }
 });
 
@@ -177,7 +177,7 @@ router.post('/calibrations', async (req, res) => {
     logger.error('[MedEquip] Create calibration error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تسجيل المعايرة', error: error.message });
+      .json({ success: false, message: 'خطأ في تسجيل المعايرة', error: safeError(error) });
   }
 });
 
@@ -208,7 +208,7 @@ router.get('/maintenance', async (req, res) => {
     logger.error('[MedEquip] List maintenance error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب سجلات الصيانة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب سجلات الصيانة', error: safeError(error) });
   }
 });
 
@@ -228,7 +228,7 @@ router.post('/maintenance', async (req, res) => {
     logger.error('[MedEquip] Create maintenance error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء أمر الصيانة', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء أمر الصيانة', error: safeError(error) });
   }
 });
 

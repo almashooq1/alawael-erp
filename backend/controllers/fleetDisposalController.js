@@ -5,6 +5,7 @@
 const fleetDisposalService = require('../services/fleetDisposalService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetDisposalController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في بدء عملية التخلص', error: error.message });
+        .json({ success: false, message: 'خطأ في بدء عملية التخلص', error: safeError(error) });
     }
   }
 
@@ -28,7 +29,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم جلب سجلات التخلص', ...result });
     } catch (error) {
       logger.error('FleetDisposal getAll error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب السجلات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب السجلات', error: safeError(error) });
     }
   }
 
@@ -39,7 +40,7 @@ class FleetDisposalController {
       res.json({ success: true, data: record });
     } catch (error) {
       logger.error('FleetDisposal getById error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب السجل', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم تحديث السجل', data: record });
     } catch (error) {
       logger.error('FleetDisposal update error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في تحديث السجل', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم حذف السجل' });
     } catch (error) {
       logger.error('FleetDisposal delete error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في حذف السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف السجل', error: safeError(error) });
     }
   }
 
@@ -78,7 +79,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تمت الموافقة على التخلص', data: record });
     } catch (error) {
       logger.error('FleetDisposal approve error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: safeError(error) });
     }
   }
 
@@ -92,7 +93,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم رفض التخلص', data: record });
     } catch (error) {
       logger.error('FleetDisposal reject error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في الرفض', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الرفض', error: safeError(error) });
     }
   }
 
@@ -105,7 +106,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal listForAuction error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في الإدراج للمزاد', error: error.message });
+        .json({ success: false, message: 'خطأ في الإدراج للمزاد', error: safeError(error) });
     }
   }
 
@@ -115,7 +116,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم إضافة العرض', data: record });
     } catch (error) {
       logger.error('FleetDisposal addBid error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة العرض', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في إضافة العرض', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal awardBid error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في ترسية المزاد', error: error.message });
+        .json({ success: false, message: 'خطأ في ترسية المزاد', error: safeError(error) });
     }
   }
 
@@ -138,7 +139,7 @@ class FleetDisposalController {
       res.json({ success: true, message: 'تم تسجيل البيع', data: record });
     } catch (error) {
       logger.error('FleetDisposal recordSale error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تسجيل البيع', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في تسجيل البيع', error: safeError(error) });
     }
   }
 
@@ -151,7 +152,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal complete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إكمال العملية', error: error.message });
+        .json({ success: false, message: 'خطأ في إكمال العملية', error: safeError(error) });
     }
   }
 
@@ -163,7 +164,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجلات المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجلات المركبة', error: safeError(error) });
     }
   }
 
@@ -175,7 +176,7 @@ class FleetDisposalController {
       logger.error('FleetDisposal statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

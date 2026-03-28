@@ -60,7 +60,7 @@ router.get('/buses/:id', authenticate, [param('id').isNumeric()], async (req, re
     const students = busTracking.getStudentsByBus(req.params.id);
     res.json({ success: true, data: { ...bus, students } });
   } catch (err) {
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -76,7 +76,7 @@ router.post(
       const bus = busTracking.createBus(req.body);
       res.status(201).json({ success: true, data: bus, message: 'تم إضافة الحافلة بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -93,7 +93,7 @@ router.put(
       const bus = busTracking.updateBus(req.params.id, req.body);
       res.json({ success: true, data: bus, message: 'تم تحديث الحافلة' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -110,7 +110,7 @@ router.delete(
       busTracking.deleteBus(req.params.id);
       res.json({ success: true, message: 'تم حذف الحافلة' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -136,7 +136,7 @@ router.get('/routes/:id', authenticate, [param('id').isNumeric()], async (req, r
     const route = busTracking.getRouteById(req.params.id);
     res.json({ success: true, data: route });
   } catch (err) {
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -152,7 +152,7 @@ router.post(
       const route = busTracking.createRoute(req.body);
       res.status(201).json({ success: true, data: route, message: 'تم إنشاء المسار' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -169,7 +169,7 @@ router.put(
       const route = busTracking.updateRoute(req.params.id, req.body);
       res.json({ success: true, data: route, message: 'تم تحديث المسار' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -186,7 +186,7 @@ router.delete(
       busTracking.deleteRoute(req.params.id);
       res.json({ success: true, message: 'تم حذف المسار' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -209,7 +209,7 @@ router.post(
         .status(201)
         .json({ success: true, data: student, message: 'تم تسجيل الطالب على الحافلة' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -221,7 +221,7 @@ router.get('/students/bus/:busId', authenticate, [param('busId').isNumeric()], a
     const students = busTracking.getStudentsByBus(req.params.busId);
     res.json({ success: true, data: students, total: students.length });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -232,7 +232,7 @@ router.get('/students/:id', authenticate, [param('id').isNumeric()], async (req,
     const student = busTracking.getStudentById(req.params.id);
     res.json({ success: true, data: student });
   } catch (err) {
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -252,7 +252,7 @@ router.post(
       const trip = busTracking.startTrip(req.body);
       res.status(201).json({ success: true, data: trip, message: 'بدأت الرحلة' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -269,7 +269,7 @@ router.post(
       const trip = busTracking.endTrip(req.params.id);
       res.json({ success: true, data: trip, message: 'انتهت الرحلة' });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -286,7 +286,7 @@ router.post(
       const result = busTracking.arriveAtStop(req.params.id, req.body);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -318,7 +318,7 @@ router.get('/trips/:id', authenticate, [param('id').isNumeric()], async (req, re
     const trip = busTracking.getTripById(req.params.id);
     res.json({ success: true, data: trip });
   } catch (err) {
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -338,7 +338,7 @@ router.post(
       const location = busTracking.updateBusLocation(req.params.busId, req.body);
       res.json({ success: true, data: location });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -350,7 +350,7 @@ router.get('/tracking/:busId', authenticate, [param('busId').isNumeric()], async
     const location = busTracking.getBusLocation(req.params.busId);
     res.json({ success: true, data: location });
   } catch (err) {
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -380,7 +380,7 @@ router.post(
       const event = busTracking.recordBoarding(req.body);
       res.status(201).json({ success: true, data: event });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -406,7 +406,7 @@ router.get('/parent/dashboard', authenticate, [query('phone').notEmpty()], async
     const dashboard = busTracking.getParentDashboard(req.query.phone);
     res.json({ success: true, data: dashboard });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -421,7 +421,7 @@ router.get(
       const data = busTracking.trackBusForParent(req.params.busId, req.query.phone);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(403).json({ success: false, error: err.message });
+      res.status(403).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -437,7 +437,7 @@ router.get(
       const eta = busTracking.getETAForStudent(req.params.studentId);
       res.json({ success: true, data: eta });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -471,7 +471,7 @@ router.patch(
       const notif = busTracking.markNotificationRead(req.params.id);
       res.json({ success: true, data: notif });
     } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
+      res.status(404).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -487,7 +487,7 @@ router.post(
       const result = busTracking.markAllNotificationsRead(req.body.phone);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -513,7 +513,7 @@ router.post('/safety/sos/:busId', authenticate, [param('busId').isNumeric()], as
     const alert = busTracking.raiseSOS(req.params.busId, req.body);
     res.status(201).json({ success: true, data: alert, message: 'تم إرسال إشارة الطوارئ' });
   } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -529,7 +529,7 @@ router.patch(
       const alert = busTracking.acknowledgeAlert(req.params.id);
       res.json({ success: true, data: alert });
     } catch (err) {
-      res.status(404).json({ success: false, error: err.message });
+      res.status(404).json({ success: false, error: safeError(err) });
     }
   }
 );

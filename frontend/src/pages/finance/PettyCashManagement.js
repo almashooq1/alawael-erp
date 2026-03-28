@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -95,7 +96,7 @@ const PettyCashManagement = () => {
   });
 
   const headers = {
-    Authorization: `Bearer ${localStorage.getItem('token')}`,
+    Authorization: `Bearer ${getToken()}`,
     'Content-Type': 'application/json',
   };
 

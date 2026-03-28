@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -64,7 +65,7 @@ const FinancialDashboardBuilder = () => {
     description: '',
   });
 
-  const token = localStorage.getItem('token');
+  const token = getToken();
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchDashboards = useCallback(async () => {

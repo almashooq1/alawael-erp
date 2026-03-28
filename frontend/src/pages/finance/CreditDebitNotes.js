@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -52,7 +53,7 @@ const CreditDebitNotes = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/credit-notes`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setNotes(json.data);
@@ -70,7 +71,7 @@ const CreditDebitNotes = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ ...form, items }),
       });
@@ -88,7 +89,7 @@ const CreditDebitNotes = () => {
     try {
       await fetch(`${API}/finance/advanced/credit-notes/${id}/approve`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchNotes();
     } catch (err) {

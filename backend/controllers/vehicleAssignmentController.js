@@ -5,6 +5,7 @@
 const VehicleAssignmentService = require('../services/vehicleAssignmentService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class VehicleAssignmentController {
   /** إنشاء تعيين جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class VehicleAssignmentController {
       res.status(201).json({ success: true, message: 'تم إنشاء التعيين بنجاح', data: assignment });
     } catch (error) {
       logger.error('خطأ في إنشاء التعيين:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء التعيين', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء التعيين', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class VehicleAssignmentController {
       const result = await VehicleAssignmentService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التعيينات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التعيينات', error: safeError(error) });
     }
   }
 
@@ -43,7 +44,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, data: assignment });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: safeError(error) });
     }
   }
 
@@ -55,7 +56,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, message: 'تم تحديث التعيين', data: assignment });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث التعيين', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث التعيين', error: safeError(error) });
     }
   }
 
@@ -67,7 +68,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, message: 'تم حذف التعيين' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف التعيين', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف التعيين', error: safeError(error) });
     }
   }
 
@@ -79,7 +80,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, message: 'تم تسجيل التسليم', data: assignment });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل التسليم', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل التسليم', error: safeError(error) });
     }
   }
 
@@ -91,7 +92,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, message: 'تم تسجيل الإرجاع', data: assignment });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل الإرجاع', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الإرجاع', error: safeError(error) });
     }
   }
 
@@ -107,7 +108,7 @@ class VehicleAssignmentController {
         return res.status(404).json({ success: false, message: 'التعيين غير موجود' });
       res.json({ success: true, message: 'تم نقل المركبة', data: assignment });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل نقل المركبة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل نقل المركبة', error: safeError(error) });
     }
   }
 
@@ -117,7 +118,7 @@ class VehicleAssignmentController {
       const assignment = await VehicleAssignmentService.getActiveByVehicle(req.params.vehicleId);
       res.json({ success: true, data: assignment });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class VehicleAssignmentController {
       const assignment = await VehicleAssignmentService.getActiveByDriver(req.params.driverId);
       res.json({ success: true, data: assignment });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التعيين', error: safeError(error) });
     }
   }
 
@@ -137,7 +138,7 @@ class VehicleAssignmentController {
       const history = await VehicleAssignmentService.getHistory(req.params.vehicleId);
       res.json({ success: true, data: history });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: safeError(error) });
     }
   }
 
@@ -147,7 +148,7 @@ class VehicleAssignmentController {
       const history = await VehicleAssignmentService.getDriverHistory(req.params.driverId);
       res.json({ success: true, data: history });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: safeError(error) });
     }
   }
 
@@ -157,7 +158,7 @@ class VehicleAssignmentController {
       const stats = await VehicleAssignmentService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

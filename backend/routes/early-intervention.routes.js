@@ -11,6 +11,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
@@ -94,7 +95,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error creating child:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -153,7 +154,7 @@ router.get(
       res.json({ success: true, data: child });
     } catch (error) {
       logger.error('[EIS] Error fetching child:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -173,7 +174,7 @@ router.get(
       res.json({ success: true, message: 'تم جلب الملف الكامل بنجاح', data: profile });
     } catch (error) {
       logger.error('[EIS] Error fetching full profile:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -197,7 +198,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث ملف الطفل بنجاح', data: child });
     } catch (error) {
       logger.error('[EIS] Error updating child:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -217,7 +218,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف ملف الطفل بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting child:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -244,7 +245,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error initializing milestones:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -272,7 +273,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error creating screening:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -329,7 +330,7 @@ router.get(
       res.json({ success: true, data: screening });
     } catch (error) {
       logger.error('[EIS] Error fetching screening:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -376,7 +377,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث الفحص بنجاح', data: screening });
     } catch (error) {
       logger.error('[EIS] Error updating screening:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -396,7 +397,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف الفحص بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting screening:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -424,7 +425,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error creating milestone:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -478,7 +479,7 @@ router.get(
       res.json({ success: true, data: milestone });
     } catch (error) {
       logger.error('[EIS] Error fetching milestone:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -542,7 +543,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث المعلم التنموي بنجاح', data: milestone });
     } catch (error) {
       logger.error('[EIS] Error updating milestone:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -562,7 +563,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف المعلم التنموي بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting milestone:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -590,7 +591,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error creating IFSP:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -646,7 +647,7 @@ router.get(
       res.json({ success: true, data: ifsp });
     } catch (error) {
       logger.error('[EIS] Error fetching IFSP:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -686,7 +687,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث خطة IFSP بنجاح', data: ifsp });
     } catch (error) {
       logger.error('[EIS] Error updating IFSP:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -706,7 +707,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف خطة IFSP بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting IFSP:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -734,7 +735,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error adding IFSP review:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -759,7 +760,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث تقدم الهدف بنجاح', data: ifsp });
     } catch (error) {
       logger.error('[EIS] Error updating goal progress:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -787,7 +788,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error creating referral:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -845,7 +846,7 @@ router.get(
       res.json({ success: true, data: referral });
     } catch (error) {
       logger.error('[EIS] Error fetching referral:', error);
-      res.status(404).json({ success: false, message: error.message });
+      res.status(404).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -889,7 +890,7 @@ router.put(
       res.json({ success: true, message: 'تم تحديث الإحالة بنجاح', data: referral });
     } catch (error) {
       logger.error('[EIS] Error updating referral:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -909,7 +910,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف الإحالة بنجاح' });
     } catch (error) {
       logger.error('[EIS] Error deleting referral:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -933,7 +934,7 @@ router.patch(
       res.json({ success: true, message: 'تم تحديث حالة الإحالة بنجاح', data: referral });
     } catch (error) {
       logger.error('[EIS] Error updating referral status:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );
@@ -961,7 +962,7 @@ router.post(
       });
     } catch (error) {
       logger.error('[EIS] Error adding communication:', error);
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 );

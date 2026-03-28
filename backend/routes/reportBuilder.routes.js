@@ -70,7 +70,7 @@ router.get('/data-sources/:id/fields', authenticate, [param('id').notEmpty()], a
     res.json({ success: true, data: fields });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -96,7 +96,7 @@ router.get('/reports/:id', authenticate, [param('id').notEmpty()], async (req, r
     res.json({ success: true, data: { ...report, versions, shares } });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -115,7 +115,7 @@ router.post(
       res.status(201).json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -135,7 +135,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -152,7 +152,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف التقرير' });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -169,7 +169,7 @@ router.post(
       res.status(201).json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -191,7 +191,7 @@ router.post(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -207,7 +207,7 @@ router.delete(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -225,7 +225,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -247,7 +247,7 @@ router.post(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -259,7 +259,7 @@ router.delete('/reports/:id/filters/:filterId', authenticate, async (req, res) =
     res.json({ success: true, data: report });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -274,7 +274,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -292,7 +292,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -310,7 +310,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -332,7 +332,7 @@ router.post(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -344,7 +344,7 @@ router.delete('/reports/:id/calculated-fields/:fieldId', authenticate, async (re
     res.json({ success: true, data: report });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -361,7 +361,7 @@ router.put(
       res.json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -381,7 +381,7 @@ router.post('/reports/:id/execute', authenticate, [param('id').notEmpty()], asyn
     res.json({ success: true, data: result });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -415,7 +415,7 @@ router.get('/templates/:id', authenticate, [param('id').notEmpty()], async (req,
     res.json({ success: true, data: tmpl });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -431,7 +431,7 @@ router.post(
       res.status(201).json({ success: true, data: report });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -451,7 +451,7 @@ router.post(
       res.status(201).json({ success: true, data: tmpl });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -474,7 +474,7 @@ router.post(
       res.json({ success: true, data: result });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -509,7 +509,7 @@ router.post(
       res.status(201).json({ success: true, data: schedule });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -526,7 +526,7 @@ router.put(
       res.json({ success: true, data: schedule });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -543,7 +543,7 @@ router.delete(
       res.json({ success: true, message: 'تم حذف الجدولة' });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -567,7 +567,7 @@ router.post(
       res.status(201).json({ success: true, data: share });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, error: err.message });
+      res.status(status).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -593,7 +593,7 @@ router.post('/reports/:id/favorite', authenticate, [param('id').notEmpty()], asy
     res.json({ success: true, data: result });
   } catch (err) {
     const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: err.message });
+    res.status(status).json({ success: false, error: safeError(err) });
   }
 });
 

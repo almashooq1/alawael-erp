@@ -129,7 +129,7 @@ router.post('/', async (req, res) => {
     const entry = await Waitlist.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: entry });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -142,7 +142,7 @@ router.put('/:id', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 

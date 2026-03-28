@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -76,7 +77,7 @@ const CostAllocation = () => {
     'period.fiscalYear': new Date().getFullYear(),
   });
 
-  const token = localStorage.getItem('token');
+  const token = getToken();
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchAllocations = useCallback(async () => {

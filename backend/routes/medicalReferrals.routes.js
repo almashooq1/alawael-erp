@@ -155,7 +155,7 @@ router.patch('/:id/approve', async (req, res) => {
     logger.error('[Referrals] Approve referral error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في الموافقة على الإحالة', error: error.message });
+      .json({ success: false, message: 'خطأ في الموافقة على الإحالة', error: safeError(error) });
   }
 });
 
@@ -240,7 +240,7 @@ router.get('/follow-ups/pending', async (req, res) => {
     logger.error('[Referrals] Pending follow-ups error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب المتابعات المعلقة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب المتابعات المعلقة', error: safeError(error) });
   }
 });
 
@@ -271,7 +271,7 @@ router.post('/follow-ups', async (req, res) => {
     logger.error('[Referrals] Create follow-up error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء المتابعة', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء المتابعة', error: safeError(error) });
   }
 });
 

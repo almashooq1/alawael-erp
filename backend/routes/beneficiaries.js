@@ -9,6 +9,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const Beneficiary = require('../models/Beneficiary');
 const BeneficiaryProgress = require('../models/BeneficiaryProgress');
@@ -146,7 +147,7 @@ router.get('/', async (req, res) => {
     logger.error('Beneficiaries list error:', error);
     res
       .status(500)
-      .json({ success: false, message: 'فشل في تحميل المستفيدين', error: error.message });
+      .json({ success: false, message: 'فشل في تحميل المستفيدين', error: safeError(error) });
   }
 });
 
@@ -256,7 +257,7 @@ router.get('/statistics', async (req, res) => {
     logger.error('Beneficiaries statistics error:', error);
     res
       .status(500)
-      .json({ success: false, message: 'فشل في تحميل الإحصائيات', error: error.message });
+      .json({ success: false, message: 'فشل في تحميل الإحصائيات', error: safeError(error) });
   }
 });
 
@@ -524,7 +525,7 @@ router.post('/', async (req, res) => {
     logger.error('Beneficiary create error:', error);
     res
       .status(500)
-      .json({ success: false, message: 'فشل في إنشاء المستفيد', error: error.message });
+      .json({ success: false, message: 'فشل في إنشاء المستفيد', error: safeError(error) });
   }
 });
 
@@ -578,7 +579,7 @@ router.put('/:id', validateObjectId('id'), async (req, res) => {
     logger.error('Beneficiary update error:', error);
     res
       .status(500)
-      .json({ success: false, message: 'فشل في تحديث بيانات المستفيد', error: error.message });
+      .json({ success: false, message: 'فشل في تحديث بيانات المستفيد', error: safeError(error) });
   }
 });
 

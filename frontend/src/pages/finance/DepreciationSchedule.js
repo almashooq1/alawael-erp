@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -35,7 +36,7 @@ const DepreciationSchedule = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/depreciation/schedule`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setData(json.data);
@@ -54,7 +55,7 @@ const DepreciationSchedule = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ month: new Date().getMonth() + 1, year: new Date().getFullYear() }),
       });

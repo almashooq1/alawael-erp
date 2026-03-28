@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -52,7 +53,7 @@ const MultiCurrency = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/exchange-rates`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setRates(json.data);
@@ -69,7 +70,7 @@ const MultiCurrency = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify(form),
       });
@@ -89,7 +90,7 @@ const MultiCurrency = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify(convertForm),
       });
@@ -104,7 +105,7 @@ const MultiCurrency = () => {
     try {
       await fetch(`${API}/finance/advanced/exchange-rates/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchRates();
     } catch (err) {

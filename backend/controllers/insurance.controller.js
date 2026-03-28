@@ -10,6 +10,7 @@
  */
 
 const InsurancePolicy = require('../models/InsurancePolicy');
+const { safeError } = require('../utils/safeError');
 const {
   SAUDI_INSURANCE_COMPANIES,
   INSURANCE_VIOLATION_CODES,
@@ -43,7 +44,7 @@ class InsuranceController {
       }
       res
         .status(400)
-        .json({ success: false, message: 'فشل إنشاء وثيقة التأمين', error: error.message });
+        .json({ success: false, message: 'فشل إنشاء وثيقة التأمين', error: safeError(error) });
     }
   }
 
@@ -141,7 +142,7 @@ class InsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث الوثيقة بنجاح', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الوثيقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الوثيقة', error: safeError(error) });
     }
   }
 
@@ -209,7 +210,7 @@ class InsuranceController {
       });
     } catch (error) {
       logger.error(`خطأ في تقديم المطالبة: ${error.message}`);
-      res.status(400).json({ success: false, message: 'فشل تقديم المطالبة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تقديم المطالبة', error: safeError(error) });
     }
   }
 
@@ -260,7 +261,7 @@ class InsuranceController {
         data: claim,
       });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث المطالبة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث المطالبة', error: safeError(error) });
     }
   }
 
@@ -493,7 +494,7 @@ class InsuranceController {
       });
     } catch (error) {
       logger.error(`خطأ في تجديد الوثيقة: ${error.message}`);
-      res.status(400).json({ success: false, message: 'فشل تجديد الوثيقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تجديد الوثيقة', error: safeError(error) });
     }
   }
 

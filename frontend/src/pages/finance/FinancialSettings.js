@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -41,7 +42,7 @@ const FinancialSettings = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [numberingPreview, setNumberingPreview] = useState(null);
 
-  const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  const headers = { Authorization: `Bearer ${getToken()}` };
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);

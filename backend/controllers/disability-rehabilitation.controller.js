@@ -12,6 +12,7 @@
 const rehabilitationService = require('../services/disability-rehabilitation.service');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class DisabilityRehabilitationController {
   /**
    * @route   POST /api/v1/disability-rehabilitation/programs
@@ -1464,7 +1465,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateTelehealth:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({
@@ -1486,7 +1487,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in addConnectivityIssue:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({
@@ -1508,7 +1509,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateFinancialInfo:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({
@@ -1530,7 +1531,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in addInvoice:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء إضافة الفاتورة', error: 'حدث خطأ داخلي' });
@@ -1548,7 +1549,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateInsuranceInfo:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({
@@ -1570,7 +1571,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in addNote:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء إضافة الملاحظة', error: 'حدث خطأ داخلي' });
@@ -1592,7 +1593,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateNote:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء تحديث الملاحظة', error: 'حدث خطأ داخلي' });
@@ -1610,7 +1611,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in deleteNote:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء حذف الملاحظة', error: 'حدث خطأ داخلي' });
@@ -1628,7 +1629,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in addReferral:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء إضافة الإحالة', error: 'حدث خطأ داخلي' });
@@ -1650,7 +1651,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateReferral:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({ success: false, message: 'حدث خطأ أثناء تحديث الإحالة', error: 'حدث خطأ داخلي' });
@@ -1668,7 +1669,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateTransportation:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({
@@ -1690,7 +1691,7 @@ class DisabilityRehabilitationController {
     } catch (error) {
       logger.error('Error in updateTreatmentTeam:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
-        return res.status(404).json({ success: false, message: error.message });
+        return res.status(404).json({ success: false, message: safeError(error) });
       return res
         .status(500)
         .json({

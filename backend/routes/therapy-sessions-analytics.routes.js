@@ -294,7 +294,7 @@ router.patch(
       const status = error.statusCode || 500;
       return res.status(status).json({
         success: false,
-        message: error.message || 'خطأ في تحديث الفوترة',
+        message: safeError(error) || 'خطأ في تحديث الفوترة',
         error: safeError(error),
       });
     }

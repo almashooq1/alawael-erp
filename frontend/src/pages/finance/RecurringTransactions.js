@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -51,7 +52,7 @@ const RecurringTransactions = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/recurring-transactions`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setTransactions(json.data);
@@ -68,7 +69,7 @@ const RecurringTransactions = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ ...form, amount: Number(form.amount) }),
       });
@@ -87,7 +88,7 @@ const RecurringTransactions = () => {
     try {
       await fetch(`${API}/finance/advanced/recurring-transactions/${id}/${action}`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchData();
     } catch (err) {
@@ -100,7 +101,7 @@ const RecurringTransactions = () => {
     try {
       await fetch(`${API}/finance/advanced/recurring-transactions/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       setTransactions(prev => prev.filter(t => t._id !== id));
     } catch (err) {
@@ -112,7 +113,7 @@ const RecurringTransactions = () => {
     try {
       const res = await fetch(`${API}/finance/advanced/recurring-transactions/${id}/execute`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) alert('تم تنفيذ المعاملة بنجاح');

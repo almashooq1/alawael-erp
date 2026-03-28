@@ -5,6 +5,7 @@
 const FleetComplianceService = require('../services/fleetComplianceService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetComplianceController {
   /** إنشاء عنصر امتثال */
   static async create(req, res) {
@@ -16,7 +17,7 @@ class FleetComplianceController {
       logger.error('خطأ في إنشاء عنصر الامتثال:', error);
       res
         .status(400)
-        .json({ success: false, message: 'فشل إنشاء عنصر الامتثال', error: error.message });
+        .json({ success: false, message: 'فشل إنشاء عنصر الامتثال', error: safeError(error) });
     }
   }
 
@@ -34,7 +35,7 @@ class FleetComplianceController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب عناصر الامتثال', error: error.message });
+        .json({ success: false, message: 'فشل جلب عناصر الامتثال', error: safeError(error) });
     }
   }
 
@@ -45,7 +46,7 @@ class FleetComplianceController {
       if (!item) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, data: item });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب العنصر', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب العنصر', error: safeError(error) });
     }
   }
 
@@ -56,7 +57,7 @@ class FleetComplianceController {
       if (!item) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, message: 'تم تحديث العنصر', data: item });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث العنصر', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث العنصر', error: safeError(error) });
     }
   }
 
@@ -71,7 +72,7 @@ class FleetComplianceController {
       if (!item) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, message: 'تم تعيين الامتثال', data: item });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تعيين الامتثال', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تعيين الامتثال', error: safeError(error) });
     }
   }
 
@@ -86,7 +87,7 @@ class FleetComplianceController {
       if (!item) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, message: 'تم تسجيل عدم الامتثال', data: item });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التسجيل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التسجيل', error: safeError(error) });
     }
   }
 
@@ -97,7 +98,7 @@ class FleetComplianceController {
       if (!item) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, message: 'تم إضافة المستند', data: item });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إضافة المستند', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إضافة المستند', error: safeError(error) });
     }
   }
 
@@ -108,7 +109,7 @@ class FleetComplianceController {
       const items = await FleetComplianceService.getExpiring(days, req.user?.organization);
       res.json({ success: true, data: items });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب العناصر', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب العناصر', error: safeError(error) });
     }
   }
 
@@ -118,7 +119,7 @@ class FleetComplianceController {
       const items = await FleetComplianceService.getNonCompliant(req.user?.organization);
       res.json({ success: true, data: items });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب العناصر', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب العناصر', error: safeError(error) });
     }
   }
 
@@ -130,7 +131,7 @@ class FleetComplianceController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب بيانات الامتثال', error: error.message });
+        .json({ success: false, message: 'فشل جلب بيانات الامتثال', error: safeError(error) });
     }
   }
 
@@ -142,7 +143,7 @@ class FleetComplianceController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب بيانات الامتثال', error: error.message });
+        .json({ success: false, message: 'فشل جلب بيانات الامتثال', error: safeError(error) });
     }
   }
 
@@ -152,7 +153,7 @@ class FleetComplianceController {
       const score = await FleetComplianceService.getComplianceScore(req.params.vehicleId);
       res.json({ success: true, data: score });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حساب النقاط', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حساب النقاط', error: safeError(error) });
     }
   }
 
@@ -162,7 +163,7 @@ class FleetComplianceController {
       const stats = await FleetComplianceService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

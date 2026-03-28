@@ -5,6 +5,7 @@
 const GeofenceService = require('../services/geofenceService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class GeofenceController {
   /** إنشاء سياج جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class GeofenceController {
       res.status(201).json({ success: true, message: 'تم إنشاء السياج الجغرافي', data: geofence });
     } catch (error) {
       logger.error('Geofence create error:', error.message);
-      res.status(400).json({ success: false, message: 'فشل إنشاء السياج', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء السياج', error: safeError(error) });
     }
   }
 
@@ -25,7 +26,7 @@ class GeofenceController {
       const result = await GeofenceService.getAll({ status, category }, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السياجات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السياجات', error: safeError(error) });
     }
   }
 
@@ -36,7 +37,7 @@ class GeofenceController {
       if (!geofence) return res.status(404).json({ success: false, message: 'السياج غير موجود' });
       res.json({ success: true, data: geofence });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في جلب السياج', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب السياج', error: safeError(error) });
     }
   }
 
@@ -48,7 +49,7 @@ class GeofenceController {
       if (!geofence) return res.status(404).json({ success: false, message: 'السياج غير موجود' });
       res.json({ success: true, message: 'تم تحديث السياج', data: geofence });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -59,7 +60,7 @@ class GeofenceController {
       if (!geofence) return res.status(404).json({ success: false, message: 'السياج غير موجود' });
       res.json({ success: true, message: 'تم حذف السياج' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل الحذف', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل الحذف', error: safeError(error) });
     }
   }
 
@@ -73,7 +74,7 @@ class GeofenceController {
       );
       res.json({ success: true, data: { isInside: result } });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في التحقق', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في التحقق', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class GeofenceController {
       if (!geofence) return res.status(404).json({ success: false, message: 'السياج غير موجود' });
       res.json({ success: true, message: 'تم تسجيل الدخول', data: geofence });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل الدخول', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الدخول', error: safeError(error) });
     }
   }
 
@@ -97,7 +98,7 @@ class GeofenceController {
       if (!geofence) return res.status(404).json({ success: false, message: 'السياج غير موجود' });
       res.json({ success: true, message: 'تم تسجيل الخروج', data: geofence });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل الخروج', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الخروج', error: safeError(error) });
     }
   }
 
@@ -107,7 +108,7 @@ class GeofenceController {
       const alerts = await GeofenceService.getUnacknowledgedAlerts(req.params.id);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -122,7 +123,7 @@ class GeofenceController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم تأكيد التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التأكيد', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التأكيد', error: safeError(error) });
     }
   }
 
@@ -132,7 +133,7 @@ class GeofenceController {
       const stats = await GeofenceService.getStatistics(req.query.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -147,7 +148,7 @@ class GeofenceController {
       );
       res.json({ success: true, data: geofences });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في البحث', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في البحث', error: safeError(error) });
     }
   }
 }

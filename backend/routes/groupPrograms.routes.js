@@ -63,7 +63,7 @@ router.post(
       res.status(201).json({ success: true, data: program });
     } catch (err) {
       logger.error('groupProgram create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -83,7 +83,7 @@ router.put(
       res.json({ success: true, data: program });
     } catch (err) {
       logger.error('groupProgram update error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -121,7 +121,7 @@ router.post(
       res.json({ success: true, data: program });
     } catch (err) {
       logger.error('groupProgram addStudents error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -161,7 +161,7 @@ router.post('/:id/sessions', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: program.sessions[program.sessions.length - 1] });
   } catch (err) {
     logger.error('groupProgram addSession error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

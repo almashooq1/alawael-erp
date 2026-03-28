@@ -11,6 +11,7 @@
 
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 // ─── Route Health Tracker ─────────────────────────────────────────────────────
 const routeHealth = {
   mounted: [],
@@ -286,7 +287,7 @@ const safeMount = (app, paths, modulePath) => {
     routeHealth.mounted.push({ path: pathLabel, module: modulePath });
     return true;
   } catch (err) {
-    routeHealth.failed.push({ path: pathLabel, module: modulePath, error: err.message });
+    routeHealth.failed.push({ path: pathLabel, module: modulePath, error: safeError(err) });
     logger.error(`[ROUTE FAIL] ${pathLabel} (${modulePath}): ${err.message}`);
     return false;
   }

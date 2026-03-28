@@ -5,6 +5,7 @@
 const FleetSafetyService = require('../services/fleetSafetyService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetSafetyController {
   /** تسجيل حادث */
   static async reportIncident(req, res) {
@@ -14,7 +15,7 @@ class FleetSafetyController {
       res.status(201).json({ success: true, message: 'تم تسجيل الحادث', data: incident });
     } catch (error) {
       logger.error('Safety incident report error:', error.message);
-      res.status(400).json({ success: false, message: 'فشل تسجيل الحادث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الحادث', error: safeError(error) });
     }
   }
 
@@ -39,7 +40,7 @@ class FleetSafetyController {
       );
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل الجلب', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل الجلب', error: safeError(error) });
     }
   }
 
@@ -50,7 +51,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, data: incident });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -61,7 +62,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'تم التحديث', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -72,7 +73,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'بدأ التحقيق', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل بدء التحقيق', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل بدء التحقيق', error: safeError(error) });
     }
   }
 
@@ -87,7 +88,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'اكتمل التحقيق', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل', error: safeError(error) });
     }
   }
 
@@ -102,7 +103,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'تم إضافة الإجراء', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإضافة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإضافة', error: safeError(error) });
     }
   }
 
@@ -119,7 +120,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, message: 'تم التحديث', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -130,7 +131,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'تم إغلاق الحادث', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإغلاق', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإغلاق', error: safeError(error) });
     }
   }
 
@@ -145,7 +146,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'تم تقديم المطالبة', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التقديم', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التقديم', error: safeError(error) });
     }
   }
 
@@ -156,7 +157,7 @@ class FleetSafetyController {
       if (!incident) return res.status(404).json({ success: false, message: 'الحادث غير موجود' });
       res.json({ success: true, message: 'تم رفع الوثيقة', data: incident });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الرفع', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الرفع', error: safeError(error) });
     }
   }
 
@@ -166,7 +167,7 @@ class FleetSafetyController {
       const incidents = await FleetSafetyService.getDriverIncidents(req.params.driverId);
       res.json({ success: true, data: incidents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -176,7 +177,7 @@ class FleetSafetyController {
       const incidents = await FleetSafetyService.getVehicleIncidents(req.params.vehicleId);
       res.json({ success: true, data: incidents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -186,7 +187,7 @@ class FleetSafetyController {
       const score = await FleetSafetyService.getDriverSafetyScore(req.params.driverId);
       res.json({ success: true, data: score });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -196,7 +197,7 @@ class FleetSafetyController {
       const stats = await FleetSafetyService.getStatistics(req.query);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -209,7 +210,7 @@ class FleetSafetyController {
       );
       res.json({ success: true, data: drivers });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 }

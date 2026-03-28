@@ -7,6 +7,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const RateLimitWafService = require('../services/rate-limit-waf.service');
@@ -315,7 +316,7 @@ router.put(
 
 /* ── Error Handler ── */
 router.use((err, _req, res, _next) => {
-  res.status(400).json({ success: false, error: err.message || 'خطأ في خدمة WAF' });
+  res.status(400).json({ success: false, error: safeError(err) || 'خطأ في خدمة WAF' });
 });
 
 module.exports = router;

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -61,7 +62,7 @@ const BankReconciliation = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/bank-reconciliation`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setReconciliations(json.data);
@@ -78,7 +79,7 @@ const BankReconciliation = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({
           ...form,
@@ -100,7 +101,7 @@ const BankReconciliation = () => {
     try {
       const res = await fetch(`${API}/finance/advanced/bank-reconciliation/${id}/auto-match`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success)

@@ -5,6 +5,7 @@
 const FleetParkingService = require('../services/fleetParkingService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetParkingController {
   /** إنشاء سجل جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetParkingController {
       res.status(201).json({ success: true, message: 'تم الإنشاء بنجاح', data: record });
     } catch (error) {
       logger.error('خطأ في إنشاء سجل الموقف:', error);
-      res.status(400).json({ success: false, message: 'فشل الإنشاء', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإنشاء', error: safeError(error) });
     }
   }
 
@@ -28,7 +29,7 @@ class FleetParkingController {
       const result = await FleetParkingService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السجلات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السجلات', error: safeError(error) });
     }
   }
 
@@ -39,7 +40,7 @@ class FleetParkingController {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: safeError(error) });
     }
   }
 
@@ -50,7 +51,7 @@ class FleetParkingController {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم التحديث', data: record });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -61,7 +62,7 @@ class FleetParkingController {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل الحذف', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل الحذف', error: safeError(error) });
     }
   }
 
@@ -71,7 +72,7 @@ class FleetParkingController {
       const zones = await FleetParkingService.getZones(req.user?.organization);
       res.json({ success: true, data: zones });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المناطق', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المناطق', error: safeError(error) });
     }
   }
 
@@ -83,7 +84,7 @@ class FleetParkingController {
         return res.status(404).json({ success: false, message: 'المنطقة غير موجودة' });
       res.json({ success: true, data: occupancy });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإشغال', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإشغال', error: safeError(error) });
     }
   }
 
@@ -94,7 +95,7 @@ class FleetParkingController {
       const record = await FleetParkingService.logEntry(data);
       res.status(201).json({ success: true, message: 'تم تسجيل الدخول', data: record });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل الدخول', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الدخول', error: safeError(error) });
     }
   }
 
@@ -105,7 +106,7 @@ class FleetParkingController {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم تسجيل الخروج', data: record });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل الخروج', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل الخروج', error: safeError(error) });
     }
   }
 
@@ -116,7 +117,7 @@ class FleetParkingController {
       const record = await FleetParkingService.createViolation(data);
       res.status(201).json({ success: true, message: 'تم تسجيل المخالفة', data: record });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تسجيل المخالفة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تسجيل المخالفة', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class FleetParkingController {
       if (!record) return res.status(404).json({ success: false, message: 'المخالفة غير موجودة' });
       res.json({ success: true, message: 'تم دفع المخالفة', data: record });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الدفع', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الدفع', error: safeError(error) });
     }
   }
 
@@ -137,7 +138,7 @@ class FleetParkingController {
       const violations = await FleetParkingService.getVehicleViolations(req.params.vehicleId);
       res.json({ success: true, data: violations });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المخالفات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المخالفات', error: safeError(error) });
     }
   }
 
@@ -147,7 +148,7 @@ class FleetParkingController {
       const stats = await FleetParkingService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

@@ -74,7 +74,7 @@ router.post('/', async (req, res) => {
     const vol = await Volunteer.create(req.body);
     res.status(201).json({ success: true, data: vol });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -87,7 +87,7 @@ router.put('/:id', async (req, res) => {
     if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
     res.json({ success: true, data: vol });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -161,7 +161,7 @@ router.post('/programs', async (req, res) => {
     const program = await VolunteerProgram.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: program });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -174,7 +174,7 @@ router.put('/programs/:id', async (req, res) => {
     if (!program) return res.status(404).json({ success: false, error: 'البرنامج غير موجود' });
     res.json({ success: true, data: program });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -257,7 +257,7 @@ router.post('/shifts', async (req, res) => {
     const shift = await VolunteerShift.create(req.body);
     res.status(201).json({ success: true, data: shift });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 

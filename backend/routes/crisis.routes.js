@@ -145,7 +145,7 @@ router.post('/plans', async (req, res) => {
     });
     res.status(201).json({ success: true, data: plan });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -158,7 +158,7 @@ router.put('/plans/:id', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, data: plan });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -255,7 +255,7 @@ router.post('/incidents', async (req, res) => {
     });
     res.status(201).json({ success: true, data: incident });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -272,7 +272,7 @@ router.put('/incidents/:id', async (req, res) => {
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -310,7 +310,7 @@ router.post('/incidents/:id/timeline', async (req, res) => {
     await incident.save();
     res.json({ success: true, data: incident });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -329,7 +329,7 @@ router.post('/incidents/:id/corrective-action', async (req, res) => {
     await incident.save();
     res.json({ success: true, data: incident, message: 'تم إضافة الإجراء التصحيحي' });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -380,7 +380,7 @@ router.post('/drills', async (req, res) => {
     });
     res.status(201).json({ success: true, data: drill });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -397,7 +397,7 @@ router.put('/drills/:id', async (req, res) => {
     if (!drill) return res.status(404).json({ success: false, error: 'التمرين غير موجود' });
     res.json({ success: true, data: drill });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -449,7 +449,7 @@ router.post('/contacts', async (req, res) => {
     const contact = await EmergencyContact.create(pick(req.body, CONTACT_FIELDS));
     res.status(201).json({ success: true, data: contact });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -466,7 +466,7 @@ router.put('/contacts/:id', async (req, res) => {
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, data: contact });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 

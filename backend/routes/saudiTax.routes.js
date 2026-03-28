@@ -10,6 +10,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const saudiTaxService = require('../services/saudiTax.service');
@@ -26,7 +27,7 @@ const wrap = fn => async (req, res) => {
   } catch (err) {
     logger.error('Saudi Tax route error:', err.message);
     const status = err.status || 500;
-    res.status(status).json({ success: false, message: err.message });
+    res.status(status).json({ success: false, message: safeError(err) });
   }
 };
 

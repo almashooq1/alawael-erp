@@ -5,6 +5,7 @@
 const FleetDocumentService = require('../services/fleetDocumentService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetDocumentController {
   /** إنشاء مستند جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetDocumentController {
       res.status(201).json({ success: true, message: 'تم إنشاء المستند بنجاح', data: document });
     } catch (error) {
       logger.error('خطأ في إنشاء المستند:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء المستند', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء المستند', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class FleetDocumentController {
       const result = await FleetDocumentService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class FleetDocumentController {
       if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, data: document });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستند', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستند', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class FleetDocumentController {
       if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, message: 'تم تحديث المستند', data: document });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث المستند', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث المستند', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class FleetDocumentController {
       if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, message: 'تم حذف المستند' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف المستند', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف المستند', error: safeError(error) });
     }
   }
 
@@ -75,7 +76,7 @@ class FleetDocumentController {
       const documents = await FleetDocumentService.getExpiring(req.user?.organization, days);
       res.json({ success: true, data: documents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class FleetDocumentController {
       const documents = await FleetDocumentService.getExpired(req.user?.organization);
       res.json({ success: true, data: documents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: safeError(error) });
     }
   }
 
@@ -95,7 +96,7 @@ class FleetDocumentController {
       const documents = await FleetDocumentService.getByVehicle(req.params.vehicleId);
       res.json({ success: true, data: documents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: safeError(error) });
     }
   }
 
@@ -105,7 +106,7 @@ class FleetDocumentController {
       const documents = await FleetDocumentService.getByDriver(req.params.driverId);
       res.json({ success: true, data: documents });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب المستندات', error: safeError(error) });
     }
   }
 
@@ -116,7 +117,7 @@ class FleetDocumentController {
       if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, message: 'تم التحقق من المستند', data: document });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحقق', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحقق', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class FleetDocumentController {
       if (!document) return res.status(404).json({ success: false, message: 'المستند غير موجود' });
       res.json({ success: true, message: 'تم تجديد المستند', data: document });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تجديد المستند', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تجديد المستند', error: safeError(error) });
     }
   }
 
@@ -137,7 +138,7 @@ class FleetDocumentController {
       const stats = await FleetDocumentService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -50,7 +51,7 @@ const AuditTrail = () => {
       if (filters.module) params.append('module', filters.module);
       if (filters.action) params.append('action', filters.action);
       const res = await fetch(`${API}/finance/advanced/audit-trail?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setLogs(json.data);

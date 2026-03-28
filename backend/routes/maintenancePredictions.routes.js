@@ -92,7 +92,7 @@ router.post(
       res.status(201).json({ success: true, data: prediction });
     } catch (err) {
       logger.error('maintenancePrediction create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -109,7 +109,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: prediction });
   } catch (err) {
     logger.error('maintenancePrediction update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -143,7 +143,7 @@ router.patch('/:id/acknowledge', requireAuth, async (req, res) => {
     res.json({ success: true, data: prediction });
   } catch (err) {
     logger.error('maintenancePrediction acknowledge error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -161,7 +161,7 @@ router.patch('/:id/resolve', requireAuth, async (req, res) => {
     res.json({ success: true, data: prediction });
   } catch (err) {
     logger.error('maintenancePrediction resolve error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

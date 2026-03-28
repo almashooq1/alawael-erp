@@ -164,7 +164,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     logger.error('Activities POST / error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -179,7 +179,7 @@ router.put('/:id', requireAuth, async (req, res) => {
     res.json({ success: true, data: doc });
   } catch (err) {
     logger.error('Activities PUT /:id error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

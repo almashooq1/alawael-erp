@@ -263,7 +263,7 @@ router.get('/forms/stats', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إحصائيات النماذج', error: err.message });
+      .json({ success: false, message: 'خطأ في إحصائيات النماذج', error: safeError(err) });
   }
 });
 
@@ -301,7 +301,7 @@ router.get('/escalations/rules', async (req, res) => {
     logger.error('GET /escalations/rules error: %s', err.message);
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب قواعد التصعيد', error: err.message });
+      .json({ success: false, message: 'خطأ في جلب قواعد التصعيد', error: safeError(err) });
   }
 });
 
@@ -370,7 +370,7 @@ router.post('/escalations/rules/:id/toggle', async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تبديل حالة القاعدة', error: err.message });
+      .json({ success: false, message: 'خطأ في تبديل حالة القاعدة', error: safeError(err) });
   }
 });
 
@@ -486,7 +486,7 @@ router.post('/escalations/process', async (req, res) => {
     logger.error('POST /escalations/process error: %s', err.message);
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في معالجة التصعيدات', error: err.message });
+      .json({ success: false, message: 'خطأ في معالجة التصعيدات', error: safeError(err) });
   }
 });
 
@@ -524,7 +524,7 @@ router.get('/escalations/stats', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إحصائيات التصعيد', error: err.message });
+      .json({ success: false, message: 'خطأ في إحصائيات التصعيد', error: safeError(err) });
   }
 });
 
@@ -662,7 +662,7 @@ router.post('/sla-policies/:id/toggle', async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تبديل حالة السياسة', error: err.message });
+      .json({ success: false, message: 'خطأ في تبديل حالة السياسة', error: safeError(err) });
   }
 });
 
@@ -1037,7 +1037,7 @@ router.get('/kpi/bottlenecks', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحليل الاختناقات', error: err.message });
+      .json({ success: false, message: 'خطأ في تحليل الاختناقات', error: safeError(err) });
   }
 });
 
@@ -1205,7 +1205,7 @@ router.get('/approval-chains', async (req, res) => {
     logger.error('GET /approval-chains error: %s', err.message);
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب سلاسل الموافقات', error: err.message });
+      .json({ success: false, message: 'خطأ في جلب سلاسل الموافقات', error: safeError(err) });
   }
 });
 
@@ -1336,7 +1336,7 @@ router.get('/approval-chains/instances', async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب مثيلات الموافقات', error: err.message });
+      .json({ success: false, message: 'خطأ في جلب مثيلات الموافقات', error: safeError(err) });
   }
 });
 
@@ -1475,7 +1475,7 @@ router.get('/approval-chains/stats', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إحصائيات الموافقات', error: err.message });
+      .json({ success: false, message: 'خطأ في إحصائيات الموافقات', error: safeError(err) });
   }
 });
 
@@ -1509,7 +1509,7 @@ router.get('/approval-chains/my-pending', async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب الموافقات المعلقة', error: err.message });
+      .json({ success: false, message: 'خطأ في جلب الموافقات المعلقة', error: safeError(err) });
   }
 });
 
@@ -1546,7 +1546,7 @@ router.get('/automations', async (req, res) => {
     logger.error('GET /automations error: %s', err.message);
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب قواعد الأتمتة', error: err.message });
+      .json({ success: false, message: 'خطأ في جلب قواعد الأتمتة', error: safeError(err) });
   }
 });
 
@@ -1614,7 +1614,7 @@ router.post('/automations/:id/toggle', async (req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تبديل حالة القاعدة', error: err.message });
+      .json({ success: false, message: 'خطأ في تبديل حالة القاعدة', error: safeError(err) });
   }
 });
 
@@ -1759,7 +1759,7 @@ router.get('/automations/stats', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إحصائيات الأتمتة', error: err.message });
+      .json({ success: false, message: 'خطأ في إحصائيات الأتمتة', error: safeError(err) });
   }
 });
 

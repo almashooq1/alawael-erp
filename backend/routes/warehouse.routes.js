@@ -67,7 +67,7 @@ router.get('/dashboard', async (_req, res) => {
   } catch (err) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحميل لوحة المستودعات', error: err.message });
+      .json({ success: false, message: 'خطأ في تحميل لوحة المستودعات', error: safeError(err) });
   }
 });
 

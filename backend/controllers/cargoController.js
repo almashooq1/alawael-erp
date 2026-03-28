@@ -5,6 +5,7 @@
 const CargoService = require('../services/cargoService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class CargoController {
   /** إنشاء شحنة جديدة */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class CargoController {
       res.status(201).json({ success: true, message: 'تم إنشاء الشحنة بنجاح', data: cargo });
     } catch (error) {
       logger.error('خطأ في إنشاء الشحنة:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء الشحنة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء الشحنة', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class CargoController {
       const result = await CargoService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class CargoController {
       if (!cargo) return res.status(404).json({ success: false, message: 'الشحنة غير موجودة' });
       res.json({ success: true, data: cargo });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنة', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class CargoController {
       if (!cargo) return res.status(404).json({ success: false, message: 'الشحنة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث الشحنة', data: cargo });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الشحنة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الشحنة', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class CargoController {
       if (!cargo) return res.status(404).json({ success: false, message: 'الشحنة غير موجودة' });
       res.json({ success: true, message: 'تم حذف الشحنة' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف الشحنة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف الشحنة', error: safeError(error) });
     }
   }
 
@@ -76,7 +77,7 @@ class CargoController {
       if (!cargo) return res.status(404).json({ success: false, message: 'الشحنة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث حالة الشحنة', data: cargo });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الحالة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الحالة', error: safeError(error) });
     }
   }
 
@@ -87,7 +88,7 @@ class CargoController {
       if (!cargo) return res.status(404).json({ success: false, message: 'الشحنة غير موجودة' });
       res.json({ success: true, message: 'تم تأكيد التسليم', data: cargo });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تأكيد التسليم', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تأكيد التسليم', error: safeError(error) });
     }
   }
 
@@ -97,7 +98,7 @@ class CargoController {
       const shipments = await CargoService.getByVehicle(req.params.vehicleId, req.query.status);
       res.json({ success: true, data: shipments });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: safeError(error) });
     }
   }
 
@@ -107,7 +108,7 @@ class CargoController {
       const shipments = await CargoService.getByDriver(req.params.driverId);
       res.json({ success: true, data: shipments });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: safeError(error) });
     }
   }
 
@@ -117,7 +118,7 @@ class CargoController {
       const shipments = await CargoService.getInTransit(req.user?.organization);
       res.json({ success: true, data: shipments });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class CargoController {
       const shipments = await CargoService.getDelayed(req.user?.organization);
       res.json({ success: true, data: shipments });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشحنات', error: safeError(error) });
     }
   }
 
@@ -137,7 +138,7 @@ class CargoController {
       const stats = await CargoService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

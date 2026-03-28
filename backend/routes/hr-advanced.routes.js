@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const authorizeRole = authorize; // Alias for compatibility
@@ -174,7 +175,7 @@ router.delete(
         data: employee,
       });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message || 'خطأ في حذف الموظف' });
+      res.status(400).json({ success: false, message: safeError(error) || 'خطأ في حذف الموظف' });
     }
   }
 );

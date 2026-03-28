@@ -5,6 +5,7 @@
 const fleetPenaltyService = require('../services/fleetPenaltyService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetPenaltyController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تسجيل المخالفة', error: error.message });
+        .json({ success: false, message: 'خطأ في تسجيل المخالفة', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب المخالفات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب المخالفات', error: safeError(error) });
     }
   }
 
@@ -43,7 +44,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty getById error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب المخالفة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب المخالفة', error: safeError(error) });
     }
   }
 
@@ -59,7 +60,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث المخالفة', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث المخالفة', error: safeError(error) });
     }
   }
 
@@ -72,7 +73,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty delete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في حذف المخالفة', error: error.message });
+        .json({ success: false, message: 'خطأ في حذف المخالفة', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty pay error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في دفع المخالفة', error: error.message });
+        .json({ success: false, message: 'خطأ في دفع المخالفة', error: safeError(error) });
     }
   }
 
@@ -98,7 +99,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty fileAppeal error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تقديم الاعتراض', error: error.message });
+        .json({ success: false, message: 'خطأ في تقديم الاعتراض', error: safeError(error) });
     }
   }
 
@@ -109,7 +110,7 @@ class FleetPenaltyController {
       res.json({ success: true, message: 'تم حل الاعتراض', data: record });
     } catch (error) {
       logger.error('FleetPenalty resolveAppeal error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في حل الاعتراض', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حل الاعتراض', error: safeError(error) });
     }
   }
 
@@ -121,7 +122,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب مخالفات المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب مخالفات المركبة', error: safeError(error) });
     }
   }
 
@@ -133,7 +134,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty getByDriver error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب مخالفات السائق', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب مخالفات السائق', error: safeError(error) });
     }
   }
 
@@ -145,7 +146,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty demeritPoints error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب نقاط المخالفات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب نقاط المخالفات', error: safeError(error) });
     }
   }
 
@@ -163,7 +164,7 @@ class FleetPenaltyController {
         .json({
           success: false,
           message: 'خطأ في جلب المخالفات غير المدفوعة',
-          error: error.message,
+          error: safeError(error),
         });
     }
   }
@@ -176,7 +177,7 @@ class FleetPenaltyController {
       logger.error('FleetPenalty statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

@@ -91,7 +91,7 @@ router.get(
       const data = library.getCategoryById(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -110,7 +110,7 @@ router.post(
       const data = library.createCategory(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -126,7 +126,7 @@ router.put(
       const data = library.updateCategory(req.params.id, req.body);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -142,7 +142,7 @@ router.delete(
       const data = library.deleteCategory(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -170,7 +170,7 @@ router.get(
       const data = library.searchResources(req.query.q);
       res.json({ success: true, data, total: data.length });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -185,7 +185,7 @@ router.get(
       const data = library.findByBarcode(req.params.barcode);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -200,7 +200,7 @@ router.get(
       const data = library.getResourceById(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -220,7 +220,7 @@ router.post(
       const data = library.createResource(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -236,7 +236,7 @@ router.put(
       const data = library.updateResource(req.params.id, req.body);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -252,7 +252,7 @@ router.delete(
       const data = library.deleteResource(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -268,7 +268,7 @@ router.post(
       const data = library.bulkImport(req.body.items);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -305,7 +305,7 @@ router.get(
       const data = library.getLoanById(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -324,7 +324,7 @@ router.post(
       const data = library.createLoan(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -340,7 +340,7 @@ router.post(
       const data = library.returnLoan(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -356,7 +356,7 @@ router.post(
       const data = library.renewLoan(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -388,7 +388,7 @@ router.post(
       const data = library.createReservation(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -404,7 +404,7 @@ router.post(
       const data = library.cancelReservation(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -432,7 +432,7 @@ router.get(
       const data = library.getMemberById(req.params.id);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -451,7 +451,7 @@ router.post(
       const data = library.createMember(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -467,7 +467,7 @@ router.put(
       const data = library.updateMember(req.params.id, req.body);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -486,7 +486,7 @@ router.get(
       const data = library.getResourceReviews(req.params.id);
       res.json({ success: true, data, total: data.length });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -508,7 +508,7 @@ router.post(
       });
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -537,7 +537,7 @@ router.post(
       const data = library.createSupplier(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -569,7 +569,7 @@ router.post(
       const data = library.createMaintenanceRecord(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(err.statusCode || 500).json({ success: false, error: err.message });
+      res.status(err.statusCode || 500).json({ success: false, error: safeError(err) });
     }
   }
 );

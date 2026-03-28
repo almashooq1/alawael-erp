@@ -10,6 +10,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -180,7 +181,7 @@ router.post('/leaves', async (req, res) => {
   } catch (error) {
     logger.error('Error requesting leave:', error);
     if (error.name === 'ValidationError') {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, message: safeError(error) });
     }
     res.status(500).json({ success: false, message: 'خطأ في تقديم طلب الإجازة' });
   }
@@ -312,7 +313,7 @@ router.post('/requests', async (req, res) => {
   } catch (error) {
     logger.error('Error submitting request:', error);
     if (error.name === 'ValidationError') {
-      return res.status(400).json({ success: false, message: error.message });
+      return res.status(400).json({ success: false, message: safeError(error) });
     }
     res.status(500).json({ success: false, message: 'خطأ في تقديم الطلب' });
   }

@@ -35,7 +35,7 @@ router.post('/', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('Create learning program error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -61,7 +61,7 @@ router.get('/programs/:programId', authenticate, async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Get program error:', err.message);
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -74,7 +74,7 @@ router.put('/programs/:programId', authenticate, async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Update program error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -87,7 +87,7 @@ router.patch('/programs/:programId/archive', authenticate, async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Archive program error:', err.message);
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -104,7 +104,7 @@ router.post('/enrollments', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('Enroll employee error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -118,7 +118,7 @@ router.patch('/enrollments/:enrollmentId/status', authenticate, async (req, res)
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Update enrollment status error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -131,7 +131,7 @@ router.get('/enrollments/:enrollmentId', authenticate, async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Get enrollment error:', err.message);
-    res.status(404).json({ success: false, error: err.message });
+    res.status(404).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -230,7 +230,7 @@ router.post('/certifications', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('Define certification error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -244,7 +244,7 @@ router.post('/certifications/:certificationId/exams', authenticate, async (req, 
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('Track exam error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -258,7 +258,7 @@ router.post('/certifications/:certificationId/renewal', authenticate, async (req
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('License renewal error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -275,7 +275,7 @@ router.post('/integrations', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data });
   } catch (err) {
     logger.error('Integration connect error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -288,7 +288,7 @@ router.post('/integrations/:integrationId/sync', authenticate, async (req, res) 
     res.json({ success: true, data });
   } catch (err) {
     logger.error('Content sync error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 

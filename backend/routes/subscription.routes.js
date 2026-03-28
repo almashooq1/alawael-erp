@@ -47,7 +47,7 @@ router.post('/plans', requireAuth, requireRole(['admin']), async (req, res) => {
     res.status(201).json({ success: true, data: plan });
   } catch (err) {
     logger.error('subscription plan create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -62,7 +62,7 @@ router.put('/plans/:id', requireAuth, requireRole(['admin']), async (req, res) =
     res.json({ success: true, data: plan });
   } catch (err) {
     logger.error('subscription plan update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -164,7 +164,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.status(201).json({ success: true, data: sub });
   } catch (err) {
     logger.error('subscription create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -181,7 +181,7 @@ router.put('/:id/upgrade', requireAuth, async (req, res) => {
     res.json({ success: true, data: sub });
   } catch (err) {
     logger.error('subscription upgrade error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -194,7 +194,7 @@ router.put('/:id/cancel', requireAuth, async (req, res) => {
     res.json({ success: true, data: sub });
   } catch (err) {
     logger.error('subscription cancel error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

@@ -55,7 +55,7 @@ router.get('/records', async (req, res) => {
     logger.error('[EMR] List records error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجلات الطبية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب السجلات الطبية', error: safeError(error) });
   }
 });
 
@@ -72,7 +72,7 @@ router.get('/records/:id', async (req, res) => {
     logger.error('[EMR] Get record error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: safeError(error) });
   }
 });
 
@@ -103,7 +103,7 @@ router.get('/records/beneficiary/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Get by beneficiary error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب السجل الطبي', error: safeError(error) });
   }
 });
 
@@ -117,7 +117,7 @@ router.post('/records', async (req, res) => {
     logger.error('[EMR] Create record error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء السجل الطبي', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء السجل الطبي', error: safeError(error) });
   }
 });
 
@@ -133,7 +133,7 @@ router.put('/records/:id', async (req, res) => {
     logger.error('[EMR] Update record error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحديث السجل الطبي', error: error.message });
+      .json({ success: false, message: 'خطأ في تحديث السجل الطبي', error: safeError(error) });
   }
 });
 
@@ -165,7 +165,7 @@ router.get('/vitals', async (req, res) => {
     logger.error('[EMR] List vitals error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب العلامات الحيوية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب العلامات الحيوية', error: safeError(error) });
   }
 });
 
@@ -182,7 +182,7 @@ router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Latest vitals error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب آخر العلامات الحيوية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب آخر العلامات الحيوية', error: safeError(error) });
   }
 });
 
@@ -201,7 +201,7 @@ router.post('/vitals', async (req, res) => {
     logger.error('[EMR] Create vital error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تسجيل العلامات الحيوية', error: error.message });
+      .json({ success: false, message: 'خطأ في تسجيل العلامات الحيوية', error: safeError(error) });
   }
 });
 
@@ -222,7 +222,7 @@ router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Vitals trend error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب اتجاه العلامات الحيوية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب اتجاه العلامات الحيوية', error: safeError(error) });
   }
 });
 
@@ -259,7 +259,7 @@ router.get('/lab-results', async (req, res) => {
     logger.error('[EMR] List lab results error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب نتائج المختبر', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب نتائج المختبر', error: safeError(error) });
   }
 });
 
@@ -287,7 +287,7 @@ router.post('/lab-results', async (req, res) => {
     logger.error('[EMR] Create lab result error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء نتيجة المختبر', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء نتيجة المختبر', error: safeError(error) });
   }
 });
 
@@ -321,7 +321,7 @@ router.get('/lab-results-critical', async (req, res) => {
     logger.error('[EMR] Critical results error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب النتائج الحرجة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب النتائج الحرجة', error: safeError(error) });
   }
 });
 
@@ -352,7 +352,7 @@ router.get('/clinical-notes', async (req, res) => {
     logger.error('[EMR] List clinical notes error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب الملاحظات السريرية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب الملاحظات السريرية', error: safeError(error) });
   }
 });
 
@@ -388,7 +388,7 @@ router.post('/clinical-notes', async (req, res) => {
     logger.error('[EMR] Create clinical note error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء الملاحظة السريرية', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء الملاحظة السريرية', error: safeError(error) });
   }
 });
 
@@ -408,7 +408,7 @@ router.put('/clinical-notes/:id', async (req, res) => {
     logger.error('[EMR] Update clinical note error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحديث الملاحظة', error: error.message });
+      .json({ success: false, message: 'خطأ في تحديث الملاحظة', error: safeError(error) });
   }
 });
 
@@ -426,7 +426,7 @@ router.patch('/clinical-notes/:id/finalize', async (req, res) => {
     logger.error('[EMR] Finalize note error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في اعتماد الملاحظة', error: error.message });
+      .json({ success: false, message: 'خطأ في اعتماد الملاحظة', error: safeError(error) });
   }
 });
 
@@ -447,7 +447,7 @@ router.patch('/clinical-notes/:id/amend', async (req, res) => {
     logger.error('[EMR] Amend note error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تعديل الملاحظة', error: error.message });
+      .json({ success: false, message: 'خطأ في تعديل الملاحظة', error: safeError(error) });
   }
 });
 
@@ -491,7 +491,7 @@ router.get('/allergies/patient/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Patient allergies error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب حساسية المريض', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب حساسية المريض', error: safeError(error) });
   }
 });
 
@@ -505,7 +505,7 @@ router.post('/allergies', async (req, res) => {
     logger.error('[EMR] Create allergy error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تسجيل الحساسية', error: error.message });
+      .json({ success: false, message: 'خطأ في تسجيل الحساسية', error: safeError(error) });
   }
 });
 
@@ -522,7 +522,7 @@ router.put('/allergies/:id', async (req, res) => {
     logger.error('[EMR] Update allergy error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحديث الحساسية', error: error.message });
+      .json({ success: false, message: 'خطأ في تحديث الحساسية', error: safeError(error) });
   }
 });
 
@@ -571,7 +571,7 @@ router.get('/patient-summary/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Patient summary error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب ملخص المريض', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب ملخص المريض', error: safeError(error) });
   }
 });
 

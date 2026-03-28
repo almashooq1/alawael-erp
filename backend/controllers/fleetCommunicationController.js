@@ -5,6 +5,7 @@
 const fleetCommunicationService = require('../services/fleetCommunicationService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetCommunicationController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetCommunicationController {
       logger.error('FleetComm create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إنشاء الرسالة', error: error.message });
+        .json({ success: false, message: 'خطأ في إنشاء الرسالة', error: safeError(error) });
     }
   }
 
@@ -28,7 +29,7 @@ class FleetCommunicationController {
       res.json({ success: true, message: 'تم جلب الرسائل', ...result });
     } catch (error) {
       logger.error('FleetComm getAll error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب الرسائل', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب الرسائل', error: safeError(error) });
     }
   }
 
@@ -39,7 +40,7 @@ class FleetCommunicationController {
       res.json({ success: true, data: record });
     } catch (error) {
       logger.error('FleetComm getById error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب الرسالة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب الرسالة', error: safeError(error) });
     }
   }
 
@@ -55,7 +56,7 @@ class FleetCommunicationController {
       logger.error('FleetComm update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث الرسالة', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث الرسالة', error: safeError(error) });
     }
   }
 
@@ -66,7 +67,7 @@ class FleetCommunicationController {
       res.json({ success: true, message: 'تم حذف الرسالة' });
     } catch (error) {
       logger.error('FleetComm delete error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في حذف الرسالة', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف الرسالة', error: safeError(error) });
     }
   }
 
@@ -78,7 +79,7 @@ class FleetCommunicationController {
       logger.error('FleetComm send error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إرسال الرسالة', error: error.message });
+        .json({ success: false, message: 'خطأ في إرسال الرسالة', error: safeError(error) });
     }
   }
 
@@ -90,7 +91,7 @@ class FleetCommunicationController {
       logger.error('FleetComm markRead error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديد كمقروء', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديد كمقروء', error: safeError(error) });
     }
   }
 
@@ -102,7 +103,7 @@ class FleetCommunicationController {
       logger.error('FleetComm acknowledge error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تأكيد الاستلام', error: error.message });
+        .json({ success: false, message: 'خطأ في تأكيد الاستلام', error: safeError(error) });
     }
   }
 
@@ -117,7 +118,7 @@ class FleetCommunicationController {
       logger.error('FleetComm sendSOS error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إرسال تنبيه الطوارئ', error: error.message });
+        .json({ success: false, message: 'خطأ في إرسال تنبيه الطوارئ', error: safeError(error) });
     }
   }
 
@@ -130,7 +131,7 @@ class FleetCommunicationController {
       logger.error('FleetComm resolveSOS error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في حل تنبيه الطوارئ', error: error.message });
+        .json({ success: false, message: 'خطأ في حل تنبيه الطوارئ', error: safeError(error) });
     }
   }
 
@@ -142,7 +143,7 @@ class FleetCommunicationController {
       logger.error('FleetComm escalateSOS error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تصعيد التنبيه', error: error.message });
+        .json({ success: false, message: 'خطأ في تصعيد التنبيه', error: safeError(error) });
     }
   }
 
@@ -157,7 +158,7 @@ class FleetCommunicationController {
       logger.error('FleetComm getActiveSOS error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب تنبيهات الطوارئ', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب تنبيهات الطوارئ', error: safeError(error) });
     }
   }
 
@@ -169,7 +170,7 @@ class FleetCommunicationController {
       logger.error('FleetComm getThread error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سلسلة الرسائل', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سلسلة الرسائل', error: safeError(error) });
     }
   }
 
@@ -181,7 +182,7 @@ class FleetCommunicationController {
       logger.error('FleetComm getDriverInbox error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب صندوق الوارد', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب صندوق الوارد', error: safeError(error) });
     }
   }
 
@@ -196,7 +197,7 @@ class FleetCommunicationController {
       logger.error('FleetComm getBroadcasts error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإعلانات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإعلانات', error: safeError(error) });
     }
   }
 
@@ -208,7 +209,7 @@ class FleetCommunicationController {
       logger.error('FleetComm statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

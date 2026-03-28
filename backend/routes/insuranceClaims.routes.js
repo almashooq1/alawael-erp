@@ -118,7 +118,7 @@ router.get('/contracts-expiring', async (req, res) => {
     logger.error('[InsuranceClaims] Expiring contracts error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب العقود المنتهية', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب العقود المنتهية', error: safeError(error) });
   }
 });
 
@@ -149,7 +149,7 @@ router.get('/pre-auth', async (req, res) => {
     logger.error('[InsuranceClaims] List pre-auth error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب الموافقات المسبقة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب الموافقات المسبقة', error: safeError(error) });
   }
 });
 
@@ -165,7 +165,7 @@ router.get('/pre-auth/:id', async (req, res) => {
     logger.error('[InsuranceClaims] Get pre-auth error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب الموافقة المسبقة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب الموافقة المسبقة', error: safeError(error) });
   }
 });
 
@@ -179,7 +179,7 @@ router.post('/pre-auth', async (req, res) => {
     logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء الموافقة المسبقة', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء الموافقة المسبقة', error: safeError(error) });
   }
 });
 
@@ -313,7 +313,7 @@ router.post('/claims', async (req, res) => {
     logger.error('[InsuranceClaims] Create claim error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إنشاء المطالبة', error: error.message });
+      .json({ success: false, message: 'خطأ في إنشاء المطالبة', error: safeError(error) });
   }
 });
 
@@ -329,7 +329,7 @@ router.put('/claims/:id', async (req, res) => {
     logger.error('[InsuranceClaims] Update claim error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في تحديث المطالبة', error: error.message });
+      .json({ success: false, message: 'خطأ في تحديث المطالبة', error: safeError(error) });
   }
 });
 
@@ -362,7 +362,7 @@ router.patch('/claims/:id/submit', async (req, res) => {
     logger.error('[InsuranceClaims] Submit claim error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في إرسال المطالبة', error: error.message });
+      .json({ success: false, message: 'خطأ في إرسال المطالبة', error: safeError(error) });
   }
 });
 
@@ -398,7 +398,7 @@ router.patch('/claims/:id/adjudicate', async (req, res) => {
     logger.error('[InsuranceClaims] Adjudicate claim error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في معالجة المطالبة', error: error.message });
+      .json({ success: false, message: 'خطأ في معالجة المطالبة', error: safeError(error) });
   }
 });
 
@@ -417,7 +417,7 @@ router.get('/claim-items/:claimId', async (req, res) => {
     logger.error('[InsuranceClaims] List claim items error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب بنود المطالبة', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب بنود المطالبة', error: safeError(error) });
   }
 });
 

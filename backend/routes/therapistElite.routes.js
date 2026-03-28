@@ -2,6 +2,7 @@
  * Therapist Portal Elite Routes – Batch 5
  */
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 
 let authenticateToken;
@@ -23,7 +24,7 @@ function wrap(fn) {
       const result = await fn(req, res);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(err.status || 400).json({ success: false, message: err.message });
+      res.status(err.status || 400).json({ success: false, message: safeError(err) });
     }
   };
 }

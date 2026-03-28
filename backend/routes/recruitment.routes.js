@@ -85,7 +85,7 @@ router.post('/jobs', async (req, res) => {
     const job = await JobPosting.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: job });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -98,7 +98,7 @@ router.put('/jobs/:id', async (req, res) => {
     if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
     res.json({ success: true, data: job });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -239,7 +239,7 @@ router.post('/applications', async (req, res) => {
 
     res.status(201).json({ success: true, data: application });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -355,7 +355,7 @@ router.post('/interviews', async (req, res) => {
     const interview = await Interview.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: interview });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -368,7 +368,7 @@ router.put('/interviews/:id', async (req, res) => {
     if (!interview) return res.status(404).json({ success: false, error: 'المقابلة غير موجودة' });
     res.json({ success: true, data: interview });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 

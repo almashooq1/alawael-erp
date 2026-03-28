@@ -19,6 +19,7 @@
  *   /:id/logs          — Visitor audit logs
  */
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { visitorAdvancedService } = require('../services/visitor-advanced.service');
@@ -40,7 +41,7 @@ const wrap = fn => async (req, res) => {
       : err.message.includes('محظور')
         ? 403
         : 500;
-    res.status(status).json({ success: false, message: err.message });
+    res.status(status).json({ success: false, message: safeError(err) });
   }
 };
 

@@ -16,6 +16,7 @@ const {
 } = require('../services/services.singleton');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 /**
  * Role-based authorization
  * User must have one of the specified roles
@@ -50,7 +51,7 @@ const authorize = (...allowedRoles) => {
         success: false,
         message: 'Authorization error',
         code: 'AUTHZ_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -92,7 +93,7 @@ const checkPermission = permission => {
         success: false,
         message: 'Permission check error',
         code: 'PERMISSION_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -151,7 +152,7 @@ const checkOwnership = (paramName, resourceType = 'resource') => {
         success: false,
         message: 'Ownership check error',
         code: 'OWNERSHIP_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -199,7 +200,7 @@ const requireMFA = (req, res, next) => {
       success: false,
       message: 'MFA check error',
       code: 'MFA_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };
@@ -236,7 +237,7 @@ const requireVerified = (req, res, next) => {
       success: false,
       message: 'Verification check error',
       code: 'VERIFICATION_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };
@@ -277,7 +278,7 @@ const checkActiveUser = async (req, res, next) => {
       success: false,
       message: 'Account activation check error',
       code: 'ACTIVATION_CHECK_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };
@@ -348,7 +349,7 @@ const requirePasswordChange = (req, res, next) => {
       success: false,
       message: 'Password check error',
       code: 'PASSWORD_CHECK_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };
@@ -399,7 +400,7 @@ const checkBranch = (paramName = 'branchId') => {
         success: false,
         message: 'Branch access check error',
         code: 'BRANCH_CHECK_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };

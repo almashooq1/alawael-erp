@@ -10,6 +10,7 @@
  */
 
 const jwt = require('jsonwebtoken');
+const { safeError } = require('../utils/safeError');
 const {
   getAuthenticationService,
   getSecurityService,
@@ -61,7 +62,7 @@ const authenticate = async (req, res, next) => {
       success: false,
       message: 'Authentication error',
       code: 'AUTH_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };
@@ -183,7 +184,7 @@ const requirePermission = permission => {
         success: false,
         message: 'Permission check error',
         code: 'PERMISSION_CHECK_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -227,7 +228,7 @@ const requirePermissions = (...permissions) => {
         success: false,
         message: 'Permission check error',
         code: 'PERMISSION_CHECK_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -279,7 +280,7 @@ const checkOwnership = paramName => {
         success: false,
         message: 'Ownership check error',
         code: 'OWNERSHIP_CHECK_ERROR',
-        details: error.message,
+        details: safeError(error),
       });
     }
   };
@@ -338,7 +339,7 @@ const refreshToken = async (req, res, _next) => {
           success: false,
           message: 'Token generation error',
           code: 'TOKEN_GENERATION_ERROR',
-          details: error.message,
+          details: safeError(error),
         });
       }
     });
@@ -347,7 +348,7 @@ const refreshToken = async (req, res, _next) => {
       success: false,
       message: 'Token refresh error',
       code: 'TOKEN_REFRESH_ERROR',
-      details: error.message,
+      details: safeError(error),
     });
   }
 };

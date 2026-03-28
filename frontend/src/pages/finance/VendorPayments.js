@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -32,7 +33,7 @@ const VendorPayments = () => {
   const [loading, setLoading] = useState(true);
   const [overdueOnly, setOverdueOnly] = useState(false);
 
-  const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  const headers = { Authorization: `Bearer ${getToken()}` };
 
   const fetchAll = useCallback(async () => {
     setLoading(true);

@@ -5,6 +5,7 @@
 const FleetKPIService = require('../services/fleetKPIService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetKPIController {
   /** إنشاء تقرير KPI يدوي */
   static async create(req, res) {
@@ -18,7 +19,7 @@ class FleetKPIController {
       res.status(201).json({ success: true, message: 'تم إنشاء تقرير الأداء', data: report });
     } catch (error) {
       logger.error('خطأ في إنشاء تقرير الأداء:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء التقرير', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء التقرير', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class FleetKPIController {
       const result = await FleetKPIService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التقارير', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التقارير', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class FleetKPIController {
       if (!report) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التقرير', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التقرير', error: safeError(error) });
     }
   }
 
@@ -54,7 +55,7 @@ class FleetKPIController {
       if (!report) return res.status(404).json({ success: false, message: 'لا يوجد تقرير' });
       res.json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التقرير', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التقرير', error: safeError(error) });
     }
   }
 
@@ -76,7 +77,7 @@ class FleetKPIController {
       res.status(201).json({ success: true, message: 'تم توليد تقرير الأداء', data: report });
     } catch (error) {
       logger.error('خطأ في توليد تقرير الأداء:', error);
-      res.status(400).json({ success: false, message: 'فشل توليد التقرير', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل توليد التقرير', error: safeError(error) });
     }
   }
 
@@ -94,7 +95,7 @@ class FleetKPIController {
         return res.status(404).json({ success: false, message: 'لا توجد بيانات للمقارنة' });
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل المقارنة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل المقارنة', error: safeError(error) });
     }
   }
 
@@ -109,7 +110,7 @@ class FleetKPIController {
       );
       res.json({ success: true, data: trend });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الاتجاه', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الاتجاه', error: safeError(error) });
     }
   }
 
@@ -121,7 +122,7 @@ class FleetKPIController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب ملخص لوحة القيادة', error: error.message });
+        .json({ success: false, message: 'فشل جلب ملخص لوحة القيادة', error: safeError(error) });
     }
   }
 }

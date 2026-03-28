@@ -72,7 +72,7 @@ router.post(
       res.status(201).json({ success: true, data: plan });
     } catch (err) {
       logger.error('Create headcount plan error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -101,7 +101,7 @@ router.put(
       res.json({ success: true, data: plan });
     } catch (err) {
       logger.error('Approve headcount plan error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -123,7 +123,7 @@ router.post(
       res.status(201).json({ success: true, data: forecast });
     } catch (err) {
       logger.error('Create forecast error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -148,7 +148,7 @@ router.put('/forecasts/:forecastId/accuracy', authenticate, async (req, res) => 
     res.json({ success: true, data: forecast });
   } catch (err) {
     logger.error('Update forecast accuracy error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -169,7 +169,7 @@ router.post(
       res.status(201).json({ success: true, data: plan });
     } catch (err) {
       logger.error('Create succession plan error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -198,7 +198,7 @@ router.post(
       res.status(201).json({ success: true, data: successor });
     } catch (err) {
       logger.error('Add successor error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -216,7 +216,7 @@ router.post('/skills', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data: mapping });
   } catch (err) {
     logger.error('Create skill mapping error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -229,7 +229,7 @@ router.put('/skills/:skillMappingId', authenticate, async (req, res) => {
     res.json({ success: true, data: mapping });
   } catch (err) {
     logger.error('Update skill proficiency error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -246,7 +246,7 @@ router.post('/retention/analyze', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data: analysis });
   } catch (err) {
     logger.error('Analyze retention error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -259,7 +259,7 @@ router.post('/attrition-risk', authenticate, async (req, res) => {
     res.json({ success: true, data: risk });
   } catch (err) {
     logger.error('Predict attrition risk error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -280,7 +280,7 @@ router.post(
       res.status(201).json({ success: true, data: band });
     } catch (err) {
       logger.error('Create salary band error:', err.message);
-      res.status(400).json({ success: false, error: err.message });
+      res.status(400).json({ success: false, error: safeError(err) });
     }
   }
 );
@@ -305,7 +305,7 @@ router.post('/compensation/analyze', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data: analysis });
   } catch (err) {
     logger.error('Analyze compensation error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -318,7 +318,7 @@ router.post('/compensation/adjustments', authenticate, async (req, res) => {
     res.json({ success: true, data: adjustment });
   } catch (err) {
     logger.error('Compensation adjustments error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 
@@ -335,7 +335,7 @@ router.post('/reports', authenticate, async (req, res) => {
     res.status(201).json({ success: true, data: report });
   } catch (err) {
     logger.error('Generate workforce report error:', err.message);
-    res.status(400).json({ success: false, error: err.message });
+    res.status(400).json({ success: false, error: safeError(err) });
   }
 });
 

@@ -158,7 +158,6 @@ const LeaveManagement = () => {
         </Box>
       </Box>
 
-
       {/* Stats Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {[

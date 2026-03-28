@@ -5,6 +5,7 @@
 const FleetAlertService = require('../services/fleetAlertService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetAlertController {
   /** إنشاء تنبيه جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetAlertController {
       res.status(201).json({ success: true, message: 'تم إنشاء التنبيه بنجاح', data: alert });
     } catch (error) {
       logger.error('خطأ في إنشاء التنبيه:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء التنبيه', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء التنبيه', error: safeError(error) });
     }
   }
 
@@ -41,7 +42,7 @@ class FleetAlertController {
       const result = await FleetAlertService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: safeError(error) });
     }
   }
 
@@ -52,7 +53,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, data: alert });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيه', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيه', error: safeError(error) });
     }
   }
 
@@ -63,7 +64,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم تحديث التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث التنبيه', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث التنبيه', error: safeError(error) });
     }
   }
 
@@ -74,7 +75,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم حذف التنبيه' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف التنبيه', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف التنبيه', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم تأكيد استلام التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تأكيد الاستلام', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تأكيد الاستلام', error: safeError(error) });
     }
   }
 
@@ -100,7 +101,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم حل التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل حل التنبيه', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل حل التنبيه', error: safeError(error) });
     }
   }
 
@@ -111,7 +112,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم تجاهل التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تجاهل التنبيه', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تجاهل التنبيه', error: safeError(error) });
     }
   }
 
@@ -122,7 +123,7 @@ class FleetAlertController {
       if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
       res.json({ success: true, message: 'تم تصعيد التنبيه', data: alert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تصعيد التنبيه', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تصعيد التنبيه', error: safeError(error) });
     }
   }
 
@@ -132,7 +133,7 @@ class FleetAlertController {
       const alerts = await FleetAlertService.getActive(req.user?.organization);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: safeError(error) });
     }
   }
 
@@ -142,7 +143,7 @@ class FleetAlertController {
       const alerts = await FleetAlertService.getCritical(req.user?.organization);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: safeError(error) });
     }
   }
 
@@ -152,7 +153,7 @@ class FleetAlertController {
       const alerts = await FleetAlertService.getByVehicle(req.params.vehicleId);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: safeError(error) });
     }
   }
 
@@ -162,7 +163,7 @@ class FleetAlertController {
       const alerts = await FleetAlertService.getByDriver(req.params.driverId);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التنبيهات', error: safeError(error) });
     }
   }
 
@@ -172,7 +173,7 @@ class FleetAlertController {
       const result = await FleetAlertService.bulkAcknowledge(req.body.ids, req.user?._id);
       res.json({ success: true, message: 'تم تأكيد استلام التنبيهات', data: result });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تأكيد الاستلام', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تأكيد الاستلام', error: safeError(error) });
     }
   }
 
@@ -182,7 +183,7 @@ class FleetAlertController {
       const stats = await FleetAlertService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

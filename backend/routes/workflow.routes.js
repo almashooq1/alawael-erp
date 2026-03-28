@@ -8,6 +8,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 
 const {
@@ -194,7 +195,7 @@ router.post('/definitions', authMiddleware, async (req, res) => {
     const def = await engine.createWorkflow(req.body);
     res.status(201).json({ success: true, data: def, message: 'تم إنشاء سير العمل بنجاح' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ في الإنشاء' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ في الإنشاء' });
   }
 });
 
@@ -208,7 +209,7 @@ router.put('/definitions/:id', authMiddleware, async (req, res) => {
     if (!def) return res.status(404).json({ success: false, message: 'سير العمل غير موجود' });
     res.json({ success: true, data: def, message: 'تم تحديث سير العمل' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ في التحديث' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ في التحديث' });
   }
 });
 
@@ -217,7 +218,7 @@ router.post('/definitions/:id/publish', authMiddleware, async (req, res) => {
     const def = await engine.publishWorkflow(req.params.id, uid(req));
     res.json({ success: true, data: def, message: 'تم نشر سير العمل وتفعيله' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ في النشر' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ في النشر' });
   }
 });
 
@@ -851,7 +852,7 @@ router.post('/instances/start', authMiddleware, async (req, res) => {
     }
     res.status(201).json({ success: true, data: instance, message: 'تم بدء سير العمل' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ' });
   }
 });
 
@@ -927,7 +928,7 @@ router.post('/instances/:id/cancel', authMiddleware, async (req, res) => {
     const instance = await engine.cancelWorkflow(req.params.id, uid(req), req.body.reason || '');
     res.json({ success: true, data: instance, message: 'تم إلغاء سير العمل' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ' });
   }
 });
 
@@ -1070,7 +1071,7 @@ router.post('/tasks/:id/complete', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, data: task, message: 'تم إتمام المهمة بنجاح' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ' });
   }
 });
 
@@ -1080,7 +1081,7 @@ router.post('/tasks/:id/reassign', authMiddleware, async (req, res) => {
     const task = await engine.reassignTask(req.params.id, assigneeId, uid(req), reason || '');
     res.json({ success: true, data: task, message: 'تم إعادة التعيين' });
   } catch (error) {
-    res.status(400).json({ success: false, message: error.message || 'حدث خطأ' });
+    res.status(400).json({ success: false, message: safeError(error) || 'حدث خطأ' });
   }
 });
 
@@ -1094,7 +1095,7 @@ router.post('/tasks/bulk/complete', authMiddleware, async (req, res) => {
         const _task = await engine.completeTask(taskId, action, uid(req), comment || '');
         results.push({ taskId, success: true });
       } catch (err) {
-        results.push({ taskId, success: false, error: err.message });
+        results.push({ taskId, success: false, error: safeError(err) });
       }
     }
     res.json({ success: true, data: results, message: `تم معالجة ${results.length} مهمة` });

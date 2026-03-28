@@ -5,6 +5,7 @@
 const FleetCostService = require('../services/fleetCostService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetCostController {
   /** إنشاء ميزانية */
   static async createBudget(req, res) {
@@ -16,7 +17,7 @@ class FleetCostController {
       logger.error('Budget create error:', error.message);
       res
         .status(400)
-        .json({ success: false, message: 'فشل إنشاء الميزانية', error: error.message });
+        .json({ success: false, message: 'فشل إنشاء الميزانية', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class FleetCostController {
       );
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الميزانيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الميزانيات', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class FleetCostController {
       if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
       res.json({ success: true, data: budget });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class FleetCostController {
       if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
       res.json({ success: true, message: 'تم التحديث', data: budget });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل التحديث', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل التحديث', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class FleetCostController {
       if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
       res.json({ success: true, message: 'تم إضافة التكلفة', data: budget });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الإضافة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الإضافة', error: safeError(error) });
     }
   }
 
@@ -75,7 +76,7 @@ class FleetCostController {
       if (!budget) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, message: 'تم الحذف', data: budget });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الحذف', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الحذف', error: safeError(error) });
     }
   }
 
@@ -86,7 +87,7 @@ class FleetCostController {
       if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
       res.json({ success: true, message: 'تمت الموافقة', data: budget });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الموافقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الموافقة', error: safeError(error) });
     }
   }
 
@@ -99,7 +100,7 @@ class FleetCostController {
       if (!result) return res.status(404).json({ success: false, message: 'المركبة غير موجودة' });
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -110,7 +111,7 @@ class FleetCostController {
       const result = await FleetCostService.getVehicleCostComparison(vehicleIds, parseInt(months));
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -120,7 +121,7 @@ class FleetCostController {
       const alerts = await FleetCostService.getBudgetAlerts(req.query.organization);
       res.json({ success: true, data: alerts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 
@@ -134,7 +135,7 @@ class FleetCostController {
       );
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -148,7 +149,7 @@ class FleetCostController {
       );
       res.json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'خطأ', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
     }
   }
 }

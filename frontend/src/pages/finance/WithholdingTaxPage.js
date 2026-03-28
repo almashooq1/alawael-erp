@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -49,7 +50,7 @@ const WithholdingTaxPage = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+      const headers = { Authorization: `Bearer ${getToken()}` };
       const [recRes, sumRes] = await Promise.all([
         fetch(`${API}/finance/advanced/withholding-tax`, { headers }),
         fetch(`${API}/finance/advanced/withholding-tax/summary`, { headers }),
@@ -71,7 +72,7 @@ const WithholdingTaxPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify(form),
       });
@@ -90,7 +91,7 @@ const WithholdingTaxPage = () => {
     try {
       await fetch(`${API}/finance/advanced/withholding-tax/${id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchData();
     } catch (err) {

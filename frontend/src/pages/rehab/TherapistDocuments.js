@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -172,7 +173,7 @@ const TherapistDocuments = () => {
     }
     try {
       const url = documentService.getPreviewUrl(docId);
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
       if (!resp.ok) throw new Error('Preview fetch failed');
       const blob = await resp.blob();

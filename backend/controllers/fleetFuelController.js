@@ -5,6 +5,7 @@
 const fleetFuelService = require('../services/fleetFuelService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetFuelController {
   static async create(req, res) {
     try {
@@ -17,7 +18,7 @@ class FleetFuelController {
       logger.error('FleetFuel create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تسجيل معاملة الوقود', error: error.message });
+        .json({ success: false, message: 'خطأ في تسجيل معاملة الوقود', error: safeError(error) });
     }
   }
 
@@ -32,7 +33,7 @@ class FleetFuelController {
       logger.error('FleetFuel getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجلات الوقود', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجلات الوقود', error: safeError(error) });
     }
   }
 
@@ -45,7 +46,7 @@ class FleetFuelController {
       logger.error('FleetFuel getById error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجل الوقود', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجل الوقود', error: safeError(error) });
     }
   }
 
@@ -61,7 +62,7 @@ class FleetFuelController {
       logger.error('FleetFuel update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث سجل الوقود', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث سجل الوقود', error: safeError(error) });
     }
   }
 
@@ -74,7 +75,7 @@ class FleetFuelController {
       logger.error('FleetFuel delete error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في حذف سجل الوقود', error: error.message });
+        .json({ success: false, message: 'خطأ في حذف سجل الوقود', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class FleetFuelController {
       res.json({ success: true, message: 'تم التحقق من سجل الوقود', data: record });
     } catch (error) {
       logger.error('FleetFuel verify error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في التحقق', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في التحقق', error: safeError(error) });
     }
   }
 
@@ -97,7 +98,7 @@ class FleetFuelController {
       logger.error('FleetFuel getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجلات وقود المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجلات وقود المركبة', error: safeError(error) });
     }
   }
 
@@ -109,7 +110,7 @@ class FleetFuelController {
       logger.error('FleetFuel getByDriver error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب سجلات وقود السائق', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب سجلات وقود السائق', error: safeError(error) });
     }
   }
 
@@ -124,7 +125,7 @@ class FleetFuelController {
       logger.error('FleetFuel getAnomalies error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب حالات الشذوذ', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب حالات الشذوذ', error: safeError(error) });
     }
   }
 
@@ -136,7 +137,7 @@ class FleetFuelController {
       logger.error('FleetFuel efficiency error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تقرير الكفاءة', error: error.message });
+        .json({ success: false, message: 'خطأ في تقرير الكفاءة', error: safeError(error) });
     }
   }
 
@@ -148,7 +149,7 @@ class FleetFuelController {
       logger.error('FleetFuel statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

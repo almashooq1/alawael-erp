@@ -47,7 +47,7 @@ router.post('/sessions', (req, res) => {
     res.status(201).json({ success: true, data: session });
   } catch (error) {
     logger.error('[AR-Rehab] Create session error:', error.message);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -56,7 +56,7 @@ router.get('/sessions/:sessionId', (req, res) => {
     const view = mrEngine.getSessionView(req.params.sessionId, req.user?._id || 'anonymous');
     res.json({ success: true, data: view });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -71,7 +71,7 @@ router.post('/sessions/:sessionId/objects', (req, res) => {
     );
     res.status(201).json({ success: true, data: { object: vrObject, placement } });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -80,7 +80,7 @@ router.post('/sessions/:sessionId/track', (req, res) => {
     const result = mrEngine.trackRealWorldObject(req.params.sessionId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -89,7 +89,7 @@ router.patch('/sessions/:sessionId/end', (req, res) => {
     const result = mrEngine.endMRSession(req.params.sessionId);
     res.json({ success: true, data: result, message: 'تم إنهاء الجلسة' });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -103,7 +103,7 @@ router.post('/holograms', (req, res) => {
     const hologram = holoViz.createHologram(hologramId, req.body.dataSource, req.body);
     res.status(201).json({ success: true, data: hologram });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -112,7 +112,7 @@ router.get('/holograms/:hologramId', (req, res) => {
     const rendering = holoViz.renderHologram(req.params.hologramId, req.query);
     res.json({ success: true, data: rendering });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -121,7 +121,7 @@ router.put('/holograms/:hologramId/data', (req, res) => {
     const result = holoViz.updateHologramData(req.params.hologramId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -130,7 +130,7 @@ router.post('/holograms/:hologramId/interactive', (req, res) => {
     const element = holoViz.addInteractiveElement(req.params.hologramId, req.body);
     res.status(201).json({ success: true, data: element });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -139,7 +139,7 @@ router.get('/holograms/:hologramId/metrics', (req, res) => {
     const metrics = holoViz.getHologramMetrics(req.params.hologramId);
     res.json({ success: true, data: metrics });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -153,7 +153,7 @@ router.post('/bci/devices', (req, res) => {
     const device = bciReady.registerBCIDevice(deviceId, req.body);
     res.status(201).json({ success: true, data: device });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -162,7 +162,7 @@ router.post('/bci/devices/:deviceId/calibrate', (req, res) => {
     const result = bciReady.calibrateBCIDevice(req.params.deviceId);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -183,7 +183,7 @@ router.post('/bci/devices/:deviceId/capture', (req, res) => {
       },
     });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -225,7 +225,7 @@ router.post('/collaboration/sessions', (req, res) => {
     const session = crossReality.createCrossRealitySession(sessionId, req.body);
     res.status(201).json({ success: true, data: session });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -235,7 +235,7 @@ router.post('/collaboration/sessions/:sessionId/join', (req, res) => {
     const participant = crossReality.addParticipant(req.params.sessionId, userId, req.body);
     res.json({ success: true, data: participant });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -244,7 +244,7 @@ router.put('/collaboration/sessions/:sessionId/sync', (req, res) => {
     const result = crossReality.syncSharedSpace(req.params.sessionId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -258,7 +258,7 @@ router.post('/collaboration/sessions/:sessionId/broadcast', (req, res) => {
     );
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -267,7 +267,7 @@ router.get('/collaboration/sessions/:sessionId/metrics', (req, res) => {
     const metrics = crossReality.recordCollaborationMetrics(req.params.sessionId);
     res.json({ success: true, data: metrics });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -281,7 +281,7 @@ router.post('/analytics/dashboards', (req, res) => {
     const dashboard = immersiveAnalytics.createImmersiveDashboard(dashboardId, req.body);
     res.status(201).json({ success: true, data: dashboard });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -290,7 +290,7 @@ router.post('/analytics/dashboards/:dashboardId/widgets', (req, res) => {
     const widget = immersiveAnalytics.addImmersiveWidget(req.params.dashboardId, req.body);
     res.status(201).json({ success: true, data: widget });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -303,7 +303,7 @@ router.post('/analytics/dashboards/:dashboardId/widgets/:widgetId/interact', (re
     );
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -312,7 +312,7 @@ router.get('/analytics/dashboards/:dashboardId', (req, res) => {
     const view = immersiveAnalytics.getDashboardView(req.params.dashboardId, req.query);
     res.json({ success: true, data: view });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 

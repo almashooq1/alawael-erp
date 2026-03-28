@@ -5,6 +5,7 @@
 const FleetInspectionService = require('../services/fleetInspectionService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetInspectionController {
   /** إنشاء فحص جديد */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetInspectionController {
       res.status(201).json({ success: true, message: 'تم إنشاء الفحص بنجاح', data: inspection });
     } catch (error) {
       logger.error('خطأ في إنشاء الفحص:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء الفحص', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء الفحص', error: safeError(error) });
     }
   }
 
@@ -31,7 +32,7 @@ class FleetInspectionController {
       const result = await FleetInspectionService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الفحوصات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الفحوصات', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'الفحص غير موجود' });
       res.json({ success: true, data: inspection });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الفحص', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الفحص', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'الفحص غير موجود' });
       res.json({ success: true, message: 'تم تحديث الفحص', data: inspection });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الفحص', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الفحص', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'الفحص غير موجود' });
       res.json({ success: true, message: 'تم بدء الفحص', data: inspection });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل بدء الفحص', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل بدء الفحص', error: safeError(error) });
     }
   }
 
@@ -79,7 +80,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'العنصر غير موجود' });
       res.json({ success: true, message: 'تم تحديث العنصر', data: inspection });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث العنصر', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث العنصر', error: safeError(error) });
     }
   }
 
@@ -90,7 +91,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'الفحص غير موجود' });
       res.json({ success: true, message: 'تم إكمال الفحص بنجاح', data: inspection });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إكمال الفحص', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إكمال الفحص', error: safeError(error) });
     }
   }
 
@@ -106,7 +107,7 @@ class FleetInspectionController {
       if (!inspection) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, message: 'تم حل الخلل', data: inspection });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل حل الخلل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل حل الخلل', error: safeError(error) });
     }
   }
 
@@ -119,7 +120,7 @@ class FleetInspectionController {
       );
       res.json({ success: true, data: history });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب السجل', error: safeError(error) });
     }
   }
 
@@ -129,7 +130,7 @@ class FleetInspectionController {
       const stats = await FleetInspectionService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -142,7 +143,7 @@ class FleetInspectionController {
       const template = await FleetInspectionService.createTemplate(data);
       res.status(201).json({ success: true, message: 'تم إنشاء القالب', data: template });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إنشاء القالب', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء القالب', error: safeError(error) });
     }
   }
 
@@ -152,7 +153,7 @@ class FleetInspectionController {
       const templates = await FleetInspectionService.getTemplates(req.user?.organization);
       res.json({ success: true, data: templates });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القوالب', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القوالب', error: safeError(error) });
     }
   }
 
@@ -163,7 +164,7 @@ class FleetInspectionController {
       if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
       res.json({ success: true, data: template });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القالب', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القالب', error: safeError(error) });
     }
   }
 
@@ -174,7 +175,7 @@ class FleetInspectionController {
       if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
       res.json({ success: true, message: 'تم تحديث القالب', data: template });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث القالب', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث القالب', error: safeError(error) });
     }
   }
 }

@@ -5,6 +5,7 @@
 const FleetReservationService = require('../services/fleetReservationService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetReservationController {
   /** إنشاء حجز جديد */
   static async create(req, res) {
@@ -19,7 +20,7 @@ class FleetReservationController {
       res.status(201).json({ success: true, message: 'تم إنشاء الحجز بنجاح', data: reservation });
     } catch (error) {
       logger.error('خطأ في إنشاء الحجز:', error);
-      res.status(400).json({ success: false, message: error.message || 'فشل إنشاء الحجز' });
+      res.status(400).json({ success: false, message: safeError(error) || 'فشل إنشاء الحجز' });
     }
   }
 
@@ -36,7 +37,7 @@ class FleetReservationController {
       const result = await FleetReservationService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الحجوزات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الحجوزات', error: safeError(error) });
     }
   }
 
@@ -47,7 +48,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, data: reservation });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الحجز', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الحجز', error: safeError(error) });
     }
   }
 
@@ -58,7 +59,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم تحديث الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الحجز', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الحجز', error: safeError(error) });
     }
   }
 
@@ -69,7 +70,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم حذف الحجز' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف الحجز', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف الحجز', error: safeError(error) });
     }
   }
 
@@ -80,7 +81,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم الموافقة على الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الموافقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الموافقة', error: safeError(error) });
     }
   }
 
@@ -95,7 +96,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم رفض الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل رفض الحجز', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل رفض الحجز', error: safeError(error) });
     }
   }
 
@@ -109,7 +110,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم تفعيل الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تفعيل الحجز', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تفعيل الحجز', error: safeError(error) });
     }
   }
 
@@ -120,7 +121,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم إكمال الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إكمال الحجز', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إكمال الحجز', error: safeError(error) });
     }
   }
 
@@ -131,7 +132,7 @@ class FleetReservationController {
       if (!reservation) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, message: 'تم إلغاء الحجز', data: reservation });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إلغاء الحجز', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إلغاء الحجز', error: safeError(error) });
     }
   }
 
@@ -147,7 +148,7 @@ class FleetReservationController {
       );
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل التحقق', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل التحقق', error: safeError(error) });
     }
   }
 
@@ -158,7 +159,7 @@ class FleetReservationController {
       const reservations = await FleetReservationService.getUpcoming(req.user?.organization, days);
       res.json({ success: true, data: reservations });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الحجوزات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الحجوزات', error: safeError(error) });
     }
   }
 
@@ -168,7 +169,7 @@ class FleetReservationController {
       const stats = await FleetReservationService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

@@ -31,7 +31,7 @@ router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => 
     res.status(201).json({ success: true, data: badge });
   } catch (err) {
     logger.error('gamification badge create error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -46,7 +46,7 @@ router.put('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) 
     res.json({ success: true, data: badge });
   } catch (err) {
     logger.error('gamification badge update error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

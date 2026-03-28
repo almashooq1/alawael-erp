@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -41,7 +42,7 @@ const CustomerStatements = () => {
   );
   const [dateTo, setDateTo] = useState(new Date().toISOString().slice(0, 10));
 
-  const headers = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  const headers = { Authorization: `Bearer ${getToken()}` };
 
   // Fetch parties
   useEffect(() => {

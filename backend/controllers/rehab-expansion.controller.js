@@ -1,3 +1,4 @@
+const { safeError } = require('../utils/safeError');
 /**
  * Rehabilitation Expansion Controller — متحكمات التوسعة في خدمات تأهيل ذوي الإعاقة
  *
@@ -55,7 +56,7 @@ const assistiveDevices = {
         .status(201)
         .json({ success: true, data: device, message: 'تم إضافة الجهاز التعويضي بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -77,7 +78,7 @@ const assistiveDevices = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -90,7 +91,7 @@ const assistiveDevices = {
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       res.json({ success: true, data: device });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -103,7 +104,7 @@ const assistiveDevices = {
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       res.json({ success: true, data: device, message: 'تم تحديث الجهاز بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -113,7 +114,7 @@ const assistiveDevices = {
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       res.json({ success: true, message: 'تم حذف الجهاز بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -125,7 +126,7 @@ const assistiveDevices = {
       });
       res.json({ success: true, data: devices });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -138,7 +139,7 @@ const assistiveDevices = {
       await device.save();
       res.json({ success: true, data: device, message: 'تم إضافة سجل الصيانة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -150,7 +151,7 @@ const assistiveDevices = {
       await device.save();
       res.json({ success: true, data: device, message: 'تم إضافة جلسة التدريب' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -165,7 +166,7 @@ const assistiveDevices = {
       }).sort({ 'warranty.endDate': 1 });
       res.json({ success: true, data: devices, count: devices.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -180,7 +181,7 @@ const assistiveDevices = {
       }).sort({ 'maintenance.nextServiceDate': 1 });
       res.json({ success: true, data: devices, count: devices.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -213,7 +214,7 @@ const assistiveDevices = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -231,7 +232,7 @@ const vocationalRehab = {
         .status(201)
         .json({ success: true, data: record, message: 'تم إنشاء سجل التأهيل المهني بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -254,7 +255,7 @@ const vocationalRehab = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -267,7 +268,7 @@ const vocationalRehab = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -280,7 +281,7 @@ const vocationalRehab = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -290,7 +291,7 @@ const vocationalRehab = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -302,7 +303,7 @@ const vocationalRehab = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة برنامج التدريب' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -314,7 +315,7 @@ const vocationalRehab = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة طلب التوظيف' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -327,7 +328,7 @@ const vocationalRehab = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث بيانات التوظيف' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -339,7 +340,7 @@ const vocationalRehab = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة التسهيلات المطلوبة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -351,7 +352,7 @@ const vocationalRehab = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة المتابعة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -364,7 +365,7 @@ const vocationalRehab = {
         .sort({ updatedAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -406,7 +407,7 @@ const vocationalRehab = {
         data: { total, byPlacement, byTraining, employmentRate: employmentRate[0] || { rate: 0 } },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -427,7 +428,7 @@ const disabilityRights = {
       await record.save();
       res.status(201).json({ success: true, data: record, message: 'تم تسجيل القضية بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -455,7 +456,7 @@ const disabilityRights = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -465,7 +466,7 @@ const disabilityRights = {
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -478,7 +479,7 @@ const disabilityRights = {
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, data: record, message: 'تم تحديث القضية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -488,7 +489,7 @@ const disabilityRights = {
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, message: 'تم حذف القضية' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -500,7 +501,7 @@ const disabilityRights = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة إجراء للقضية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -512,7 +513,7 @@ const disabilityRights = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة الدليل' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -525,7 +526,7 @@ const disabilityRights = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم حل القضية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -543,7 +544,7 @@ const disabilityRights = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تصعيد القضية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -577,7 +578,7 @@ const disabilityRights = {
         data: { total, byStatus, byType, byPriority, resolutionRate: resolutionRate[0]?.rate || 0 },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -593,7 +594,7 @@ const integrativeHealthcare = {
       await record.save();
       res.status(201).json({ success: true, data: record, message: 'تم إنشاء سجل الرعاية الصحية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -615,7 +616,7 @@ const integrativeHealthcare = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -628,7 +629,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -641,7 +642,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -651,7 +652,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -663,7 +664,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -675,7 +676,7 @@ const integrativeHealthcare = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة زيارة الأسنان' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -687,7 +688,7 @@ const integrativeHealthcare = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث خطة التغذية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -699,7 +700,7 @@ const integrativeHealthcare = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة سجل التطعيم' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -711,7 +712,7 @@ const integrativeHealthcare = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة الدواء' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -723,7 +724,7 @@ const integrativeHealthcare = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة زيارة المتخصص' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -736,7 +737,7 @@ const integrativeHealthcare = {
       }).populate('beneficiary', 'name email');
       res.json({ success: true, data: records, count: records.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -757,7 +758,7 @@ const integrativeHealthcare = {
         data: { total, mentalHealthStatus, medications: medications[0] || { avg: 0, total: 0 } },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -773,7 +774,7 @@ const communityIntegration = {
       await record.save();
       res.status(201).json({ success: true, data: record, message: 'تم إنشاء سجل الدمج المجتمعي' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -795,7 +796,7 @@ const communityIntegration = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -808,7 +809,7 @@ const communityIntegration = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -821,7 +822,7 @@ const communityIntegration = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -831,7 +832,7 @@ const communityIntegration = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -843,7 +844,7 @@ const communityIntegration = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة مهارة حياتية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -855,7 +856,7 @@ const communityIntegration = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة النشاط المجتمعي' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -867,7 +868,7 @@ const communityIntegration = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث الشبكة الاجتماعية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -879,7 +880,7 @@ const communityIntegration = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة تدريب التنقل' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -905,7 +906,7 @@ const communityIntegration = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -923,7 +924,7 @@ const caregiverSupport = {
         .status(201)
         .json({ success: true, data: record, message: 'تم إنشاء سجل دعم مقدم الرعاية' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -946,7 +947,7 @@ const caregiverSupport = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -959,7 +960,7 @@ const caregiverSupport = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -972,7 +973,7 @@ const caregiverSupport = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -982,7 +983,7 @@ const caregiverSupport = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -994,7 +995,7 @@ const caregiverSupport = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة برنامج التدريب' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1006,7 +1007,7 @@ const caregiverSupport = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة خدمة الراحة المؤقتة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1018,7 +1019,7 @@ const caregiverSupport = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة جلسة الإرشاد' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1031,7 +1032,7 @@ const caregiverSupport = {
         .sort({ 'caregiverAssessment.burdenScale.score': -1 });
       res.json({ success: true, data: records, count: records.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1060,7 +1061,7 @@ const caregiverSupport = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -1096,7 +1097,7 @@ const accessibilityAudit = {
         .status(201)
         .json({ success: true, data: record, message: 'تم إنشاء تقرير التدقيق بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1123,7 +1124,7 @@ const accessibilityAudit = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1133,7 +1134,7 @@ const accessibilityAudit = {
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1146,7 +1147,7 @@ const accessibilityAudit = {
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, data: record, message: 'تم تحديث التقرير' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1156,7 +1157,7 @@ const accessibilityAudit = {
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, message: 'تم حذف التقرير' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1168,7 +1169,7 @@ const accessibilityAudit = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة الملاحظة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1182,7 +1183,7 @@ const accessibilityAudit = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث حالة الملاحظة' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1193,7 +1194,7 @@ const accessibilityAudit = {
       }).sort({ overallScore: 1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1223,7 +1224,7 @@ const accessibilityAudit = {
         data: { total, byFacilityType, byGrade, avgScore: avgScore[0]?.avg || 0, certifications },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -1239,7 +1240,7 @@ const earlyDetection = {
       await record.save();
       res.status(201).json({ success: true, data: record, message: 'تم إنشاء سجل الكشف المبكر' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1266,7 +1267,7 @@ const earlyDetection = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1276,7 +1277,7 @@ const earlyDetection = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1289,7 +1290,7 @@ const earlyDetection = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1299,7 +1300,7 @@ const earlyDetection = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1311,7 +1312,7 @@ const earlyDetection = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة نتيجة الفحص' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1323,7 +1324,7 @@ const earlyDetection = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تسجيل المعلم التطوري' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1335,7 +1336,7 @@ const earlyDetection = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة التشخيص' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1347,7 +1348,7 @@ const earlyDetection = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث خطة التدخل المبكر' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1359,7 +1360,7 @@ const earlyDetection = {
       }).sort({ createdAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1371,7 +1372,7 @@ const earlyDetection = {
       }).sort({ 'developmentalScreening.nextScreeningDate': 1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1398,7 +1399,7 @@ const earlyDetection = {
         data: { total, byStatus, byRisk, byReferralSource, screeningTools },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -1414,7 +1415,7 @@ const outcomeMeasurement = {
       await record.save();
       res.status(201).json({ success: true, data: record, message: 'تم إنشاء سجل قياس النتائج' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1438,7 +1439,7 @@ const outcomeMeasurement = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1451,7 +1452,7 @@ const outcomeMeasurement = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1464,7 +1465,7 @@ const outcomeMeasurement = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1474,7 +1475,7 @@ const outcomeMeasurement = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1485,7 +1486,7 @@ const outcomeMeasurement = {
         .populate('beneficiary', 'name email').lean();
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1498,7 +1499,7 @@ const outcomeMeasurement = {
         .sort({ 'period.startDate': 1 });
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1519,7 +1520,7 @@ const outcomeMeasurement = {
       ]);
       res.json({ success: true, data: data[0] || {} });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1559,7 +1560,7 @@ const outcomeMeasurement = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -1577,7 +1578,7 @@ const adaptiveHousing = {
         .status(201)
         .json({ success: true, data: record, message: 'تم إنشاء سجل الإسكان التكيفي' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1599,7 +1600,7 @@ const adaptiveHousing = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1612,7 +1613,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1625,7 +1626,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record, message: 'تم التحديث بنجاح' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1635,7 +1636,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1647,7 +1648,7 @@ const adaptiveHousing = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة التعديل المطلوب' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1661,7 +1662,7 @@ const adaptiveHousing = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث حالة التعديل' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1673,7 +1674,7 @@ const adaptiveHousing = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم تحديث بيانات المنزل الذكي' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1690,7 +1691,7 @@ const adaptiveHousing = {
       await record.save();
       res.json({ success: true, data: record, message: 'تم إضافة مصدر التمويل' });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1703,7 +1704,7 @@ const adaptiveHousing = {
         .sort({ updatedAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1717,7 +1718,7 @@ const adaptiveHousing = {
         .populate('beneficiary', 'name email');
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1763,7 +1764,7 @@ const adaptiveHousing = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };
@@ -1826,7 +1827,7 @@ const dashboard = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 
@@ -1886,7 +1887,7 @@ const dashboard = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   },
 };

@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const DateConverterService = require('../services/DateConverterService');
 
@@ -228,7 +229,7 @@ router.post('/batch', (req, res) => {
         }
         return { success: false, input: date, error: 'نوع التحويل غير صحيح' };
       } catch (err) {
-        return { success: false, input: date, error: err.message };
+        return { success: false, input: date, error: safeError(err) };
       }
     });
 

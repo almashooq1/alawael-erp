@@ -118,7 +118,6 @@ const HRAdvancedDashboard = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-
           <Tooltip title="تحديث البيانات">
             <IconButton onClick={loadDashboard}>
               <RefreshIcon />
@@ -126,8 +125,6 @@ const HRAdvancedDashboard = () => {
           </Tooltip>
         </Box>
       </Box>
-
-
 
       {/* KPI Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>

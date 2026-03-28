@@ -104,7 +104,7 @@ router.get('/comments/instance/:instanceId', authMiddleware, async (req, res) =>
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في جلب التعليقات', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في جلب التعليقات', error: safeError(error) });
   }
 });
 
@@ -162,7 +162,7 @@ router.post('/comments', authMiddleware, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في إضافة التعليق', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في إضافة التعليق', error: safeError(error) });
   }
 });
 
@@ -429,7 +429,7 @@ router.post('/delegations', authMiddleware, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في إنشاء التفويض', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في إنشاء التفويض', error: safeError(error) });
   }
 });
 
@@ -721,7 +721,7 @@ router.post('/webhooks/:id/test', authMiddleware, async (req, res) => {
 
       res.json({ success: true, message: 'تم إرسال الاختبار بنجاح' });
     } catch (err) {
-      res.json({ success: false, message: 'فشل الاختبار', error: err.message });
+      res.json({ success: false, message: 'فشل الاختبار', error: safeError(err) });
     }
   } catch (error) {
     res.status(500).json({ success: false, message: 'حدث خطأ' });
@@ -1019,7 +1019,7 @@ router.post('/reports/:id/generate', authMiddleware, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في توليد التقرير', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في توليد التقرير', error: safeError(error) });
   }
 });
 
@@ -1420,7 +1420,7 @@ router.get('/calendar', authMiddleware, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في جلب التقويم', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في جلب التقويم', error: safeError(error) });
   }
 });
 
@@ -2925,7 +2925,7 @@ router.get('/stats/comprehensive', authMiddleware, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'حدث خطأ في الإحصائيات', error: error.message });
+      .json({ success: false, message: 'حدث خطأ في الإحصائيات', error: safeError(error) });
   }
 });
 

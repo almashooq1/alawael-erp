@@ -5,6 +5,7 @@
 const DriverLeaveService = require('../services/driverLeaveService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class DriverLeaveController {
   /** إنشاء طلب إجازة */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class DriverLeaveController {
       res.status(201).json({ success: true, message: 'تم إنشاء طلب الإجازة بنجاح', data: leave });
     } catch (error) {
       logger.error('خطأ في إنشاء الإجازة:', error);
-      res.status(400).json({ success: false, message: error.message || 'فشل إنشاء الإجازة' });
+      res.status(400).json({ success: false, message: safeError(error) || 'فشل إنشاء الإجازة' });
     }
   }
 
@@ -31,7 +32,7 @@ class DriverLeaveController {
       const result = await DriverLeaveService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: safeError(error) });
     }
   }
 
@@ -42,7 +43,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, data: leave });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإجازة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإجازة', error: safeError(error) });
     }
   }
 
@@ -53,7 +54,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث الإجازة', data: leave });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الإجازة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الإجازة', error: safeError(error) });
     }
   }
 
@@ -64,7 +65,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم حذف الإجازة' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف الإجازة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف الإجازة', error: safeError(error) });
     }
   }
 
@@ -75,7 +76,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم الموافقة على الإجازة', data: leave });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل الموافقة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل الموافقة', error: safeError(error) });
     }
   }
 
@@ -90,7 +91,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم رفض الإجازة', data: leave });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل رفض الإجازة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل رفض الإجازة', error: safeError(error) });
     }
   }
 
@@ -101,7 +102,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم إلغاء الإجازة', data: leave });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إلغاء الإجازة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إلغاء الإجازة', error: safeError(error) });
     }
   }
 
@@ -117,7 +118,7 @@ class DriverLeaveController {
       if (!leave) return res.status(404).json({ success: false, message: 'الإجازة غير موجودة' });
       res.json({ success: true, message: 'تم تعيين السائق البديل', data: leave });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تعيين البديل', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تعيين البديل', error: safeError(error) });
     }
   }
 
@@ -127,7 +128,7 @@ class DriverLeaveController {
       const leaves = await DriverLeaveService.getActiveLeaves(req.user?.organization);
       res.json({ success: true, data: leaves });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: safeError(error) });
     }
   }
 
@@ -138,7 +139,7 @@ class DriverLeaveController {
       const leaves = await DriverLeaveService.getUpcomingLeaves(req.user?.organization, days);
       res.json({ success: true, data: leaves });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإجازات', error: safeError(error) });
     }
   }
 
@@ -148,7 +149,7 @@ class DriverLeaveController {
       const leaves = await DriverLeaveService.getPendingApprovals(req.user?.organization);
       res.json({ success: true, data: leaves });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الطلبات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الطلبات', error: safeError(error) });
     }
   }
 
@@ -159,7 +160,7 @@ class DriverLeaveController {
       const balance = await DriverLeaveService.getDriverBalance(req.params.driverId, year);
       res.json({ success: true, data: balance });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الرصيد', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الرصيد', error: safeError(error) });
     }
   }
 
@@ -169,7 +170,7 @@ class DriverLeaveController {
       const stats = await DriverLeaveService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

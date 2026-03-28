@@ -68,7 +68,7 @@ router.get('/devices/:id', async (req, res) => {
   } catch (error) {
     res.status(404).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -88,7 +88,7 @@ router.post('/devices', roleMiddleware('admin', 'hr_manager'), async (req, res) 
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -108,7 +108,7 @@ router.put('/devices/:id', roleMiddleware('admin', 'hr_manager'), async (req, re
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -127,7 +127,7 @@ router.delete('/devices/:id', roleMiddleware('admin'), async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -151,7 +151,7 @@ router.post('/devices/:id/connect', roleMiddleware('admin', 'hr_manager'), async
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -170,7 +170,7 @@ router.post('/devices/:id/disconnect', roleMiddleware('admin', 'hr_manager'), as
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -206,7 +206,7 @@ router.get('/devices/:id/time', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -235,7 +235,7 @@ router.post('/devices/:id/sync', roleMiddleware('admin', 'hr_manager'), async (r
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -273,7 +273,7 @@ router.get('/devices/:id/sync-history', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -294,7 +294,7 @@ router.post('/devices/:id/auto-sync', roleMiddleware('admin', 'hr_manager'), asy
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -318,7 +318,7 @@ router.get('/devices/:id/users', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });
@@ -345,7 +345,7 @@ router.post(
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: safeError(error),
       });
     }
   }
@@ -372,7 +372,7 @@ router.delete(
     } catch (error) {
       res.status(400).json({
         success: false,
-        message: error.message,
+        message: safeError(error),
       });
     }
   }
@@ -390,7 +390,7 @@ router.get('/devices/:id/raw-logs', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
-      message: error.message,
+      message: safeError(error),
     });
   }
 });

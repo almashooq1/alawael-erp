@@ -57,7 +57,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: safeError(error) });
   }
 });
 
@@ -90,7 +90,7 @@ router.post('/incidents', authenticate, validate(schemas.hse.reportIncident), as
     await doc.save();
     res.status(201).json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في إنشاء الحادثة', error: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في إنشاء الحادثة', error: safeError(error) });
   }
 });
 
@@ -103,7 +103,7 @@ router.put('/incidents/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في تحديث الحادثة', error: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في تحديث الحادثة', error: safeError(error) });
   }
 });
 
@@ -150,7 +150,7 @@ router.post('/inspections', authenticate, async (req, res) => {
     await doc.save();
     res.status(201).json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في إنشاء التفتيش', error: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في إنشاء التفتيش', error: safeError(error) });
   }
 });
 
@@ -163,7 +163,7 @@ router.put('/inspections/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
     res.json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في تحديث التفتيش', error: error.message });
+    res.status(400).json({ success: false, message: 'خطأ في تحديث التفتيش', error: safeError(error) });
   }
 });
 

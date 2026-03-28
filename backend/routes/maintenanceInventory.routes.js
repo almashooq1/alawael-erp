@@ -112,7 +112,7 @@ router.post(
       res.status(201).json({ success: true, data: item });
     } catch (err) {
       logger.error('maintenanceInventory create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -133,7 +133,7 @@ router.put(
       res.json({ success: true, data: item });
     } catch (err) {
       logger.error('maintenanceInventory update error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -182,7 +182,7 @@ router.post('/:id/stock-movement', requireAuth, async (req, res) => {
     res.json({ success: true, data: item });
   } catch (err) {
     logger.error('maintenanceInventory stockMovement error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

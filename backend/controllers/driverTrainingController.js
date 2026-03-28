@@ -5,6 +5,7 @@
 const DriverTrainingService = require('../services/driverTrainingService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class DriverTrainingController {
   // ─── Training Programs ────────────────────────────────────────────
 
@@ -20,7 +21,7 @@ class DriverTrainingController {
       logger.error('خطأ في إنشاء البرنامج التدريبي:', error);
       res
         .status(400)
-        .json({ success: false, message: 'فشل إنشاء البرنامج التدريبي', error: error.message });
+        .json({ success: false, message: 'فشل إنشاء البرنامج التدريبي', error: safeError(error) });
     }
   }
 
@@ -38,7 +39,7 @@ class DriverTrainingController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب البرامج التدريبية', error: error.message });
+        .json({ success: false, message: 'فشل جلب البرامج التدريبية', error: safeError(error) });
     }
   }
 
@@ -49,7 +50,7 @@ class DriverTrainingController {
       if (!training) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       res.json({ success: true, data: training });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب البرنامج', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب البرنامج', error: safeError(error) });
     }
   }
 
@@ -60,7 +61,7 @@ class DriverTrainingController {
       if (!training) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       res.json({ success: true, message: 'تم تحديث البرنامج', data: training });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث البرنامج', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث البرنامج', error: safeError(error) });
     }
   }
 
@@ -71,7 +72,7 @@ class DriverTrainingController {
       if (!training) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
       res.json({ success: true, message: 'تم تسجيل السائق بنجاح', data: training });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 
@@ -86,7 +87,7 @@ class DriverTrainingController {
       if (!training) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, message: 'تم تحديث النتيجة', data: training });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث النتيجة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث النتيجة', error: safeError(error) });
     }
   }
 
@@ -96,7 +97,7 @@ class DriverTrainingController {
       const cert = await DriverTrainingService.issueCertificate(req.params.id, req.body.driverId);
       res.status(201).json({ success: true, message: 'تم إصدار الشهادة', data: cert });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 
@@ -108,7 +109,7 @@ class DriverTrainingController {
     } catch (error) {
       res
         .status(500)
-        .json({ success: false, message: 'فشل جلب تدريبات السائق', error: error.message });
+        .json({ success: false, message: 'فشل جلب تدريبات السائق', error: safeError(error) });
     }
   }
 
@@ -118,7 +119,7 @@ class DriverTrainingController {
       const stats = await DriverTrainingService.getTrainingStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 
@@ -131,7 +132,7 @@ class DriverTrainingController {
       const cert = await DriverTrainingService.createCertification(data);
       res.status(201).json({ success: true, message: 'تم إنشاء الشهادة', data: cert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إنشاء الشهادة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء الشهادة', error: safeError(error) });
     }
   }
 
@@ -141,7 +142,7 @@ class DriverTrainingController {
       const certs = await DriverTrainingService.getDriverCertifications(req.params.driverId);
       res.json({ success: true, data: certs });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: safeError(error) });
     }
   }
 
@@ -152,7 +153,7 @@ class DriverTrainingController {
       if (!cert) return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث الشهادة', data: cert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث الشهادة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث الشهادة', error: safeError(error) });
     }
   }
 
@@ -166,7 +167,7 @@ class DriverTrainingController {
       );
       res.json({ success: true, data: certs });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: safeError(error) });
     }
   }
 
@@ -176,7 +177,7 @@ class DriverTrainingController {
       const certs = await DriverTrainingService.getExpiredCertifications(req.user?.organization);
       res.json({ success: true, data: certs });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الشهادات', error: safeError(error) });
     }
   }
 
@@ -190,7 +191,7 @@ class DriverTrainingController {
       if (!cert) return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
       res.json({ success: true, message: 'تم تجديد الشهادة', data: cert });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تجديد الشهادة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تجديد الشهادة', error: safeError(error) });
     }
   }
 }

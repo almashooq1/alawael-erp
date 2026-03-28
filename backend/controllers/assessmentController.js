@@ -7,6 +7,7 @@
 
 const AssessmentService = require('../services/assessmentService');
 
+const { safeError } = require('../utils/safeError');
 class AssessmentController {
   /**
    * إنشاء تقييم جديد
@@ -26,7 +27,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في إنشاء التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -63,7 +64,7 @@ class AssessmentController {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب التقييمات',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -84,7 +85,7 @@ class AssessmentController {
       res.status(404).json({
         success: false,
         message: 'التقييم غير موجود',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -107,7 +108,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في تحديث التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -134,7 +135,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في الموافقة على التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -161,7 +162,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في رفض التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -183,7 +184,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في أرشفة التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -204,7 +205,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في حذف التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -229,7 +230,7 @@ class AssessmentController {
       res.status(500).json({
         success: false,
         message: 'خطأ في حساب الإحصائيات',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -250,7 +251,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في البحث',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -271,7 +272,7 @@ class AssessmentController {
       res.status(500).json({
         success: false,
         message: 'خطأ في جلب التقييمات المعلقة',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -292,7 +293,7 @@ class AssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في جلب التقييمات',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }

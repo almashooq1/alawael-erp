@@ -69,7 +69,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: error.message });
+      .json({ success: false, message: 'خطأ في جلب بيانات لوحة التحكم', error: safeError(error) });
   }
 });
 

@@ -5,6 +5,7 @@
 const FleetPartService = require('../services/fleetPartService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetPartController {
   /** إنشاء قطعة جديدة */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class FleetPartController {
       res.status(201).json({ success: true, message: 'تم إضافة القطعة بنجاح', data: part });
     } catch (error) {
       logger.error('خطأ في إضافة القطعة:', error);
-      res.status(400).json({ success: false, message: 'فشل إضافة القطعة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إضافة القطعة', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetPartController {
       const result = await FleetPartService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: safeError(error) });
     }
   }
 
@@ -41,7 +42,7 @@ class FleetPartController {
       if (!part) return res.status(404).json({ success: false, message: 'القطعة غير موجودة' });
       res.json({ success: true, data: part });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطعة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطعة', error: safeError(error) });
     }
   }
 
@@ -52,7 +53,7 @@ class FleetPartController {
       if (!part) return res.status(404).json({ success: false, message: 'القطعة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث القطعة', data: part });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث القطعة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث القطعة', error: safeError(error) });
     }
   }
 
@@ -63,7 +64,7 @@ class FleetPartController {
       if (!part) return res.status(404).json({ success: false, message: 'القطعة غير موجودة' });
       res.json({ success: true, message: 'تم حذف القطعة' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل حذف القطعة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل حذف القطعة', error: safeError(error) });
     }
   }
 
@@ -75,7 +76,7 @@ class FleetPartController {
       if (!part) return res.status(404).json({ success: false, message: 'القطعة غير موجودة' });
       res.json({ success: true, message: 'تم تعديل المخزون', data: part });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message || 'فشل تعديل المخزون' });
+      res.status(400).json({ success: false, message: safeError(error) || 'فشل تعديل المخزون' });
     }
   }
 
@@ -85,7 +86,7 @@ class FleetPartController {
       const parts = await FleetPartService.getLowStock(req.user?.organization);
       res.json({ success: true, data: parts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: safeError(error) });
     }
   }
 
@@ -95,7 +96,7 @@ class FleetPartController {
       const parts = await FleetPartService.getOutOfStock(req.user?.organization);
       res.json({ success: true, data: parts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: safeError(error) });
     }
   }
 
@@ -108,7 +109,7 @@ class FleetPartController {
       );
       res.json({ success: true, data: parts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: safeError(error) });
     }
   }
 
@@ -119,7 +120,7 @@ class FleetPartController {
       const parts = await FleetPartService.getCompatibleParts(make, model, parseInt(year));
       res.json({ success: true, data: parts });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب القطع', error: safeError(error) });
     }
   }
 
@@ -129,7 +130,7 @@ class FleetPartController {
       const stats = await FleetPartService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

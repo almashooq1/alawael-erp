@@ -215,7 +215,6 @@ export default function KnowledgeCenterPage() {
 
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
-
       {/* Header */}
       <Card
         sx={{

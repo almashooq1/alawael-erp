@@ -5,6 +5,7 @@
 const fleetWarrantyService = require('../services/fleetWarrantyService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class FleetWarrantyController {
   static async create(req, res) {
     try {
@@ -15,7 +16,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty create error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إنشاء الضمان', error: error.message });
+        .json({ success: false, message: 'خطأ في إنشاء الضمان', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty getAll error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الضمانات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الضمانات', error: safeError(error) });
     }
   }
 
@@ -41,7 +42,7 @@ class FleetWarrantyController {
       res.json({ success: true, data: record });
     } catch (error) {
       logger.error('FleetWarranty getById error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب الضمان', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب الضمان', error: safeError(error) });
     }
   }
 
@@ -57,7 +58,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty update error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث الضمان', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث الضمان', error: safeError(error) });
     }
   }
 
@@ -68,7 +69,7 @@ class FleetWarrantyController {
       res.json({ success: true, message: 'تم حذف الضمان' });
     } catch (error) {
       logger.error('FleetWarranty delete error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في حذف الضمان', error: error.message });
+      res.status(500).json({ success: false, message: 'خطأ في حذف الضمان', error: safeError(error) });
     }
   }
 
@@ -83,7 +84,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty getExpiring error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الضمانات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الضمانات', error: safeError(error) });
     }
   }
 
@@ -98,7 +99,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty getExpired error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الضمانات المنتهية', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الضمانات المنتهية', error: safeError(error) });
     }
   }
 
@@ -110,7 +111,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty getByVehicle error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب ضمانات المركبة', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب ضمانات المركبة', error: safeError(error) });
     }
   }
 
@@ -122,7 +123,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty addClaim error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في إضافة المطالبة', error: error.message });
+        .json({ success: false, message: 'خطأ في إضافة المطالبة', error: safeError(error) });
     }
   }
 
@@ -138,7 +139,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty updateClaim error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في تحديث المطالبة', error: error.message });
+        .json({ success: false, message: 'خطأ في تحديث المطالبة', error: safeError(error) });
     }
   }
 
@@ -150,7 +151,7 @@ class FleetWarrantyController {
       logger.error('FleetWarranty statistics error:', error);
       res
         .status(500)
-        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: error.message });
+        .json({ success: false, message: 'خطأ في جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

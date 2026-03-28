@@ -96,11 +96,7 @@ class HRService {
       const safeLimit = Math.min(Number(limit) || 100, 200);
 
       const [employees, total] = await Promise.all([
-        Employee.find(query)
-          .sort({ createdAt: -1 })
-          .skip(skip)
-          .limit(safeLimit)
-          .lean(),
+        Employee.find(query).sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
         Employee.countDocuments(query),
       ]);
 

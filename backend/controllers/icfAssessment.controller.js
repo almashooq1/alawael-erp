@@ -8,6 +8,7 @@ const ICFAssessmentService = require('../services/icfAssessment.service');
 const ICFReportService = require('../services/icfReport.service');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class ICFAssessmentController {
   /* ═══════════════════════════════════════════════════════════════════════ *
    *  CRUD — العمليات الأساسية
@@ -31,7 +32,7 @@ class ICFAssessmentController {
       res.status(400).json({
         success: false,
         message: 'خطأ في إنشاء التقييم',
-        error: err.message,
+        error: safeError(err),
       });
     }
   }
@@ -83,7 +84,7 @@ class ICFAssessmentController {
       res.json({ success: true, ...result });
     } catch (err) {
       logger.error('ICF list error:', err.message);
-      res.status(500).json({ success: false, message: 'خطأ في جلب التقييمات', error: err.message });
+      res.status(500).json({ success: false, message: 'خطأ في جلب التقييمات', error: safeError(err) });
     }
   }
 
@@ -97,7 +98,7 @@ class ICFAssessmentController {
       res.json({ success: true, data: assessment });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, message: err.message });
+      res.status(status).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -116,7 +117,7 @@ class ICFAssessmentController {
       });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 400;
-      res.status(status).json({ success: false, message: err.message });
+      res.status(status).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -131,7 +132,7 @@ class ICFAssessmentController {
       res.json({ success: true, message: 'تم حذف التقييم بنجاح' });
     } catch (err) {
       const status = err.message.includes('غير موجود') ? 404 : 500;
-      res.status(status).json({ success: false, message: err.message });
+      res.status(status).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -155,7 +156,7 @@ class ICFAssessmentController {
         data: { status: assessment.status },
       });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -172,7 +173,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.compareWithPrevious(req.params.id);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -185,7 +186,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.getBeneficiaryTimeline(req.params.beneficiaryId);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -203,7 +204,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.benchmarkAssessment(req.params.id, population);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -225,7 +226,7 @@ class ICFAssessmentController {
       });
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -238,7 +239,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.getDomainDistribution(req.query);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -255,7 +256,7 @@ class ICFAssessmentController {
       const codes = await ICFAssessmentService.searchCodes(req.query);
       res.json({ success: true, data: codes });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -268,7 +269,7 @@ class ICFAssessmentController {
       const tree = await ICFAssessmentService.getCodeTree(req.params.component);
       res.json({ success: true, data: tree });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -285,7 +286,7 @@ class ICFAssessmentController {
       const data = await ICFAssessmentService.listBenchmarks(req.query);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -298,7 +299,7 @@ class ICFAssessmentController {
       const data = await ICFAssessmentService.createBenchmark(req.body);
       res.status(201).json({ success: true, data });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -315,7 +316,7 @@ class ICFAssessmentController {
         data: result,
       });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -339,7 +340,7 @@ class ICFAssessmentController {
         res.json({ success: true, data: report });
       }
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -355,7 +356,7 @@ class ICFAssessmentController {
       );
       res.json({ success: true, data: report });
     } catch (err) {
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 
@@ -368,7 +369,7 @@ class ICFAssessmentController {
       const report = await ICFReportService.generateOrganizationReport(req.query);
       res.json({ success: true, data: report });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ success: false, message: safeError(err) });
     }
   }
 }

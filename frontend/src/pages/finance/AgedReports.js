@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -37,10 +38,10 @@ const AgedReports = () => {
     try {
       const [recRes, payRes] = await Promise.all([
         fetch(`${API}/finance/advanced/aged-receivables`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         }),
         fetch(`${API}/finance/advanced/aged-payables`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          headers: { Authorization: `Bearer ${getToken()}` },
         }),
       ]);
       const recJson = await recRes.json();

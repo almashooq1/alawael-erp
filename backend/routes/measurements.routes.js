@@ -1,5 +1,6 @@
 // Route - Measurements
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { paginate } = require('../utils/paginate');
@@ -737,7 +738,7 @@ router.post('/batch-assessment', async (req, res) => {
         const result = await measurementService.recordMeasurementResult(beneficiaryId, assessment);
         results.push(result);
       } catch (err) {
-        errors.push({ assessment: assessment.measurementId, error: err.message });
+        errors.push({ assessment: assessment.measurementId, error: safeError(err) });
       }
     }
 

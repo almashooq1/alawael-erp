@@ -19,6 +19,7 @@
  *   /seed                 — Demo data
  */
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
@@ -43,7 +44,7 @@ const wrap = fn => async (req, res) => {
         : err.message.includes('لا يمكن')
           ? 400
           : 500;
-    res.status(status).json({ success: false, message: err.message });
+    res.status(status).json({ success: false, message: safeError(err) });
   }
 };
 

@@ -17,7 +17,8 @@ async function safeCall(fn, fallback = null) {
     return { data: data?.data || data, success: data?.success ?? true, isDemo: false };
   } catch (err) {
     logger.error(`ZKTeco API error: ${err?.message}`);
-    if (fallback !== null) return { data: fallback, success: false, isDemo: false, error: err?.message };
+    if (fallback !== null)
+      return { data: fallback, success: false, isDemo: false, error: err?.message };
     throw err;
   }
 }

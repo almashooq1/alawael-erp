@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -42,7 +43,7 @@ const FiscalPeriods = () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/finance/advanced/fiscal-periods?fiscalYear=${fiscalYear}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       const json = await res.json();
       if (json.success) setPeriods(json.data);
@@ -59,7 +60,7 @@ const FiscalPeriods = () => {
     try {
       await fetch(`${API}/finance/advanced/fiscal-periods/${id}/close`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        headers: { Authorization: `Bearer ${getToken()}` },
       });
       fetchPeriods();
     } catch (err) {
@@ -77,7 +78,7 @@ const FiscalPeriods = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${getToken()}`,
         },
         body: JSON.stringify({ fiscalYear }),
       });

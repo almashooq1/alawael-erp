@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -77,7 +78,7 @@ const RevenueRecognition = () => {
     totalContractValue: '',
   });
 
-  const token = localStorage.getItem('token');
+  const token = getToken();
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
 
   const fetchData = useCallback(async () => {

@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
@@ -217,7 +218,7 @@ const DocumentsMgmt = () => {
     const fetchPreview = async () => {
       try {
         const url = documentService.getPreviewUrl(previewDialog.doc._id);
-        const token = localStorage.getItem('token');
+        const token = getToken();
         const resp = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` },
         });

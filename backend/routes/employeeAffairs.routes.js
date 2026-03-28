@@ -7,6 +7,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
 const service = require('../services/employeeAffairs.service');
@@ -425,7 +426,7 @@ router.use((err, req, res, _next) => {
         : err.message.includes('لا يمكن') || err.message.includes('يجب')
           ? 422
           : 500;
-  res.status(statusCode).json({ success: false, message: err.message });
+  res.status(statusCode).json({ success: false, message: safeError(err) });
 });
 
 module.exports = router;

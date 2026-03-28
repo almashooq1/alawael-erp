@@ -12,6 +12,7 @@
  */
 
 const express = require('express');
+const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -1158,7 +1159,7 @@ router.use((err, _req, res, _next) => {
     return res.status(400).json({ success: false, message: `خطأ في التحميل: ${err.message}` });
   }
   if (err) {
-    return res.status(400).json({ success: false, message: err.message || 'خطأ غير متوقع' });
+    return res.status(400).json({ success: false, message: safeError(err) || 'خطأ غير متوقع' });
   }
 });
 

@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const { safeError } = require('../utils/safeError');
 // ── Magic-byte signatures for common file types ──────────────────────────────
 const MAGIC_BYTES = {
   'application/pdf': [Buffer.from([0x25, 0x50, 0x44, 0x46])], // %PDF
@@ -233,7 +234,7 @@ const handleUploadError = (err, _req, res, next) => {
     }
     return res.status(400).json({ message: `خطأ في تحميل الملف: ${err.message}` });
   } else if (err) {
-    return res.status(400).json({ message: err.message || 'حدث خطأ أثناء تحميل الملف' });
+    return res.status(400).json({ message: safeError(err) || 'حدث خطأ أثناء تحميل الملف' });
   }
   next();
 };

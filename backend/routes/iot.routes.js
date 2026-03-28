@@ -47,7 +47,7 @@ router.post('/devices', (req, res) => {
     res.status(201).json({ success: true, data: result });
   } catch (error) {
     logger.error('[IoT] Register device error:', error.message);
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -56,7 +56,7 @@ router.get('/devices/:deviceId/status', (req, res) => {
     const status = deviceManager.getDeviceStatus(req.params.deviceId);
     res.json({ success: true, data: status });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -65,7 +65,7 @@ router.patch('/devices/:deviceId/status', (req, res) => {
     const result = deviceManager.updateDeviceStatus(req.params.deviceId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -75,7 +75,7 @@ router.post('/devices/groups', (req, res) => {
     const result = deviceManager.createDeviceGroup(req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -84,7 +84,7 @@ router.post('/devices/groups/:groupId/devices/:deviceId', (req, res) => {
     const result = deviceManager.addDeviceToGroup(req.params.groupId, req.params.deviceId);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -97,7 +97,7 @@ router.post('/sensors/streams', (req, res) => {
     const result = sensorIngestion.createDataStream(req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -106,7 +106,7 @@ router.post('/sensors/streams/:streamId/ingest', (req, res) => {
     const result = sensorIngestion.ingestSensorData(req.params.streamId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -142,7 +142,7 @@ router.post('/edge/nodes', (req, res) => {
     const result = edgeController.registerEdgeNode(req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -151,7 +151,7 @@ router.post('/edge/nodes/:nodeId/deploy', (req, res) => {
     const result = edgeController.deployEdgeApplication(req.params.nodeId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -160,7 +160,7 @@ router.post('/edge/nodes/:nodeId/process', (req, res) => {
     const result = edgeController.processAtEdge(req.params.nodeId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -192,7 +192,7 @@ router.post('/maintenance/:deviceId/plans', (req, res) => {
     const result = maintenanceEngine.createMaintenancePlan(req.params.deviceId, req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -214,7 +214,7 @@ router.post('/assets', (req, res) => {
     const result = assetTracker.registerAsset(req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -224,7 +224,7 @@ router.post('/assets/:assetId/track', (req, res) => {
     const result = assetTracker.trackAssetMovement(req.params.assetId, location);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -233,7 +233,7 @@ router.get('/assets/:assetId/location', (req, res) => {
     const result = assetTracker.getAssetLocation(req.params.assetId);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -246,7 +246,7 @@ router.post('/protocols/modbus', (req, res) => {
     const result = protocolSupport.createModbusConnection(req.body);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    res.status(400).json({ success: false, error: error.message });
+    res.status(400).json({ success: false, error: safeError(error) });
   }
 });
 
@@ -256,7 +256,7 @@ router.get('/protocols/modbus/:connId/read', (req, res) => {
     const result = protocolSupport.readModbusRegister(req.params.connId, parseInt(address, 10));
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(404).json({ success: false, error: error.message });
+    res.status(404).json({ success: false, error: safeError(error) });
   }
 });
 

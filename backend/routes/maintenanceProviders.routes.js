@@ -89,7 +89,7 @@ router.post(
       res.status(201).json({ success: true, data: provider });
     } catch (err) {
       logger.error('maintenanceProvider create error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -110,7 +110,7 @@ router.put(
       res.json({ success: true, data: provider });
     } catch (err) {
       logger.error('maintenanceProvider update error:', err);
-      res.status(400).json({ success: false, message: err.message });
+      res.status(400).json({ success: false, message: safeError(err) });
     }
   }
 );
@@ -151,7 +151,7 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
     res.json({ success: true, data: provider.performance });
   } catch (err) {
     logger.error('maintenanceProvider review error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -167,7 +167,7 @@ router.patch('/:id/verify', requireAuth, requireRole(['admin']), async (req, res
     res.json({ success: true, data: provider });
   } catch (err) {
     logger.error('maintenanceProvider verify error:', err);
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

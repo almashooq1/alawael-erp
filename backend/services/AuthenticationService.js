@@ -39,7 +39,7 @@ const BCRYPT_ROUNDS = 12;
 
 // Demo credentials - ONLY available in non-production environments
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const DEMO_PASSWORD = IS_PRODUCTION ? null : 'TestPassword123!';
+const DEMO_PASSWORD = IS_PRODUCTION ? null : (process.env.DEMO_PASSWORD || null);
 const DEMO_USER = IS_PRODUCTION
   ? null
   : {
@@ -50,9 +50,9 @@ const DEMO_USER = IS_PRODUCTION
       idNumber: '1234567890',
       roles: ['user'],
     };
-const DEMO_HASHED_PASSWORD = IS_PRODUCTION
+const DEMO_HASHED_PASSWORD = (IS_PRODUCTION || !DEMO_PASSWORD)
   ? null
-  : bcrypt.hashSync(DEMO_PASSWORD || 'disabled', BCRYPT_ROUNDS);
+  : bcrypt.hashSync(DEMO_PASSWORD, BCRYPT_ROUNDS);
 
 class AuthenticationService {
   /**

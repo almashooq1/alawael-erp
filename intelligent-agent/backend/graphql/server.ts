@@ -211,7 +211,7 @@ mutation Register {
   register(input: {
     email: "test@example.com"
     username: "testuser"
-    password: "password123"
+    password: "<YOUR_PASSWORD>"
     role: USER
   }) {
     token
@@ -227,7 +227,7 @@ mutation Register {
 mutation Login {
   login(
     email: "test@example.com"
-    password: "password123"
+    password: "<YOUR_PASSWORD>"
   ) {
     token
     user {

@@ -84,7 +84,7 @@ router.post('/talent/jobs', authenticateToken, async (req, res) => {
     const job = await JobPosting.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: job });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -109,7 +109,7 @@ router.put('/talent/jobs/:id', authenticateToken, async (req, res) => {
     if (!job) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: job });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -173,7 +173,7 @@ router.post('/talent/candidates', authenticateToken, async (req, res) => {
     const candidate = await Candidate.create(req.body);
     res.status(201).json({ success: true, data: candidate });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -183,7 +183,7 @@ router.put('/talent/candidates/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -217,7 +217,7 @@ router.post('/talent/applications', authenticateToken, async (req, res) => {
     const app = await JobApplication.create({ ...req.body, appliedAt: new Date() });
     res.status(201).json({ success: true, data: app });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -231,7 +231,7 @@ router.put('/talent/applications/:id/stage', authenticateToken, async (req, res)
     await doc.save();
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -266,7 +266,7 @@ router.post('/talent/interviews', authenticateToken, async (req, res) => {
     const interview = await InterviewSchedule.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: interview });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -276,7 +276,7 @@ router.put('/talent/interviews/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -303,7 +303,7 @@ router.post('/facilities', authenticateToken, async (req, res) => {
     const doc = await Facility.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -323,7 +323,7 @@ router.put('/facilities/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -388,7 +388,7 @@ router.post('/facilities/bookings', authenticateToken, async (req, res) => {
     const booking = await SpaceBooking.create({ ...req.body, bookedBy: req.user?.id });
     res.status(201).json({ success: true, data: booking });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -398,7 +398,7 @@ router.put('/facilities/bookings/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -432,7 +432,7 @@ router.post('/facilities/leases', authenticateToken, async (req, res) => {
     const doc = await LeaseContract.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -442,7 +442,7 @@ router.put('/facilities/leases/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -469,7 +469,7 @@ router.post('/facilities/utilities', authenticateToken, async (req, res) => {
     const doc = await UtilityReading.create({ ...req.body, recordedBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -510,7 +510,7 @@ router.post('/vendors', authenticateToken, async (req, res) => {
     const doc = await Vendor.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -533,7 +533,7 @@ router.put('/vendors/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -596,7 +596,7 @@ router.post('/vendors/rfqs', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -606,7 +606,7 @@ router.put('/vendors/rfqs/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -621,7 +621,7 @@ router.put('/vendors/rfqs/:id/award', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -657,7 +657,7 @@ router.post('/vendors/evaluations', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -702,7 +702,7 @@ router.post('/itsm/incidents', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -726,7 +726,7 @@ router.put('/itsm/incidents/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -742,7 +742,7 @@ router.post('/itsm/incidents/:id/comments', authenticateToken, async (req, res) 
     await doc.save();
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -763,7 +763,7 @@ router.put('/itsm/incidents/:id/resolve', authenticateToken, async (req, res) =>
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -812,7 +812,7 @@ router.post('/itsm/assets', authenticateToken, async (req, res) => {
     const doc = await ITAsset.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -822,7 +822,7 @@ router.put('/itsm/assets/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -850,7 +850,7 @@ router.post('/itsm/catalog', authenticateToken, async (req, res) => {
     const doc = await ServiceCatalogItem.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -860,7 +860,7 @@ router.put('/itsm/catalog/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -892,7 +892,7 @@ router.post('/itsm/changes', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -902,7 +902,7 @@ router.put('/itsm/changes/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -920,7 +920,7 @@ router.put('/itsm/changes/:id/approve', authenticateToken, async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -964,7 +964,7 @@ router.post('/ehs/incidents', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -987,7 +987,7 @@ router.put('/ehs/incidents/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1040,7 +1040,7 @@ router.post('/ehs/inspections', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1050,7 +1050,7 @@ router.put('/ehs/inspections/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1081,7 +1081,7 @@ router.post('/ehs/hazards', authenticateToken, async (req, res) => {
     });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1091,7 +1091,7 @@ router.put('/ehs/hazards/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1118,7 +1118,7 @@ router.post('/ehs/ppe', authenticateToken, async (req, res) => {
     const doc = await PPERecord.create({ ...req.body, issuedBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1128,7 +1128,7 @@ router.put('/ehs/ppe/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1167,7 +1167,7 @@ router.post('/strategy/objectives', authenticateToken, async (req, res) => {
     const doc = await StrategicObjective.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1190,7 +1190,7 @@ router.put('/strategy/objectives/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1229,7 +1229,7 @@ router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, a
     await doc.save();
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1289,7 +1289,7 @@ router.post('/strategy/initiatives', authenticateToken, async (req, res) => {
     const doc = await StrategicInitiative.create(req.body);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1299,7 +1299,7 @@ router.put('/strategy/initiatives/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1330,7 +1330,7 @@ router.post('/strategy/swot', authenticateToken, async (req, res) => {
     const doc = await SWOTAnalysis.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 
@@ -1340,7 +1340,7 @@ router.put('/strategy/swot/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: safeError(err) });
   }
 });
 

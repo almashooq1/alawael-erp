@@ -5,6 +5,7 @@
 const VehicleInsuranceService = require('../services/vehicleInsuranceService');
 const logger = require('../utils/logger');
 
+const { safeError } = require('../utils/safeError');
 class VehicleInsuranceController {
   /** إنشاء بوليصة تأمين */
   static async create(req, res) {
@@ -14,7 +15,7 @@ class VehicleInsuranceController {
       res.status(201).json({ success: true, message: 'تم إنشاء بوليصة التأمين', data: policy });
     } catch (error) {
       logger.error('خطأ في إنشاء بوليصة التأمين:', error);
-      res.status(400).json({ success: false, message: 'فشل إنشاء البوليصة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إنشاء البوليصة', error: safeError(error) });
     }
   }
 
@@ -30,7 +31,7 @@ class VehicleInsuranceController {
       const result = await VehicleInsuranceService.getAll(filter, page, limit);
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب البوالص', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب البوالص', error: safeError(error) });
     }
   }
 
@@ -41,7 +42,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.json({ success: true, data: policy });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب البوليصة', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب البوليصة', error: safeError(error) });
     }
   }
 
@@ -52,7 +53,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث البوليصة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث البوليصة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث البوليصة', error: safeError(error) });
     }
   }
 
@@ -63,7 +64,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.json({ success: true, message: 'تم تفعيل البوليصة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تفعيل البوليصة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تفعيل البوليصة', error: safeError(error) });
     }
   }
 
@@ -74,7 +75,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.json({ success: true, message: 'تم إلغاء البوليصة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إلغاء البوليصة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إلغاء البوليصة', error: safeError(error) });
     }
   }
 
@@ -85,7 +86,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.json({ success: true, message: 'تم إضافة الدفعة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل إضافة الدفعة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل إضافة الدفعة', error: safeError(error) });
     }
   }
 
@@ -96,7 +97,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.status(201).json({ success: true, message: 'تم تقديم المطالبة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: error.message });
+      res.status(400).json({ success: false, message: safeError(error) });
     }
   }
 
@@ -111,7 +112,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'غير موجود' });
       res.json({ success: true, message: 'تم تحديث المطالبة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تحديث المطالبة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تحديث المطالبة', error: safeError(error) });
     }
   }
 
@@ -125,7 +126,7 @@ class VehicleInsuranceController {
       );
       res.json({ success: true, data: policies });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب البوالص', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب البوالص', error: safeError(error) });
     }
   }
 
@@ -135,7 +136,7 @@ class VehicleInsuranceController {
       const policies = await VehicleInsuranceService.getVehicleInsurance(req.params.vehicleId);
       res.json({ success: true, data: policies });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب التأمينات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب التأمينات', error: safeError(error) });
     }
   }
 
@@ -146,7 +147,7 @@ class VehicleInsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'البوليصة غير موجودة' });
       res.status(201).json({ success: true, message: 'تم تجديد البوليصة', data: policy });
     } catch (error) {
-      res.status(400).json({ success: false, message: 'فشل تجديد البوليصة', error: error.message });
+      res.status(400).json({ success: false, message: 'فشل تجديد البوليصة', error: safeError(error) });
     }
   }
 
@@ -156,7 +157,7 @@ class VehicleInsuranceController {
       const stats = await VehicleInsuranceService.getStatistics(req.user?.organization);
       res.json({ success: true, data: stats });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: error.message });
+      res.status(500).json({ success: false, message: 'فشل جلب الإحصائيات', error: safeError(error) });
     }
   }
 }

@@ -9,6 +9,7 @@ const Program = require('../models/Program');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ── GET / — list programs (filter by category, status, tags) ───────────
 router.get('/', requireAuth, async (req, res) => {
@@ -21,8 +22,8 @@ router.get('/', requireAuth, async (req, res) => {
     if (tag) filter.tags = tag;
     if (search) {
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { description: { $regex: escapeRegex(String(search)), $options: 'i' } },
       ];
     }
 

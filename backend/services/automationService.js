@@ -97,7 +97,7 @@ class AutomationService {
         automationId,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -152,7 +152,7 @@ class AutomationService {
         results,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -286,7 +286,7 @@ class AutomationService {
         taskId,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -313,7 +313,7 @@ class AutomationService {
         automation,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -336,7 +336,7 @@ class AutomationService {
         total: automations.size,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -366,7 +366,7 @@ class AutomationService {
         message: `Automation ${enabled ? 'enabled' : 'disabled'}`,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -386,7 +386,7 @@ class AutomationService {
         message: 'Automation deleted',
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -409,7 +409,7 @@ class AutomationService {
         total: workflows.size,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -444,7 +444,7 @@ class AutomationService {
         results,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -473,7 +473,7 @@ class AutomationService {
         stats,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -496,7 +496,7 @@ class AutomationService {
         total: scheduledTasks.size,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -533,7 +533,7 @@ class AutomationService {
         total: automation.executionCount,
       };
     } catch (error) {
-      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
+      logger.error('[AutomationService] Error:', { message: error.message });
       return {
         success: false,
         error: 'حدث خطأ داخلي',

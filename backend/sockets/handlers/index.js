@@ -56,7 +56,7 @@ function initializeHandlers(io) {
     // Error handler
     socket.on('error', error => {
       const safeError =
-        error instanceof Error ? { message: error.message, stack: error.stack } : String(error);
+        error instanceof Error ? { message: error.message } : String(error);
       logger.error(`[Socket.IO] Socket error (${socket.id}):`, safeError);
       socket.emit('error', {
         message: 'حدث خطأ في الاتصال',

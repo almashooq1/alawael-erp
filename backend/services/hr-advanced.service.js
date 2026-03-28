@@ -102,7 +102,7 @@ class HRService {
 
       return { employees, total, page: Number(page), limit: safeLimit };
     } catch (error) {
-      logger.error('[HRService.getAllEmployees]', { message: error.message, stack: error.stack });
+      logger.error('[HRService.getAllEmployees]', { message: error.message });
       throw error;
     }
   }

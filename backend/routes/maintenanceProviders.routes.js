@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceProvider = require('../models/MaintenanceProvider');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 /** GET /api/maintenance-providers — list providers */
 router.get('/', requireAuth, async (req, res) => {
@@ -20,8 +21,8 @@ router.get('/', requireAuth, async (req, res) => {
     if (preferredProvider !== undefined) filter.preferredProvider = preferredProvider === 'true';
     if (search)
       filter.$or = [
-        { providerName: { $regex: search, $options: 'i' } },
-        { providerId: { $regex: search, $options: 'i' } },
+        { providerName: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { providerId: { $regex: escapeRegex(String(search)), $options: 'i' } },
       ];
 
     const skip = (Number(page) - 1) * Number(limit);

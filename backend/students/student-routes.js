@@ -11,7 +11,7 @@ const { studentService, studentConfig } = require('./student-service');
 // Centralized error handler for route catch blocks
 const handleRouteError = (res, error, context = '') => {
   const msg = context ? `[StudentRoutes:${context}]` : '[StudentRoutes]';
-  console.error(`${msg} ${error.message || error}`, error.stack ? `\n${error.stack}` : '');
+  console.error(`${msg} ${error.message || error}`);
 
   if (error.message === 'Student not found') {
     return res.status(404).json({ success: false, error: 'الطالب غير موجود' });

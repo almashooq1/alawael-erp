@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceInventory = require('../models/MaintenanceInventory');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 /** GET /api/maintenance-inventory — list inventory items */
 router.get('/', requireAuth, async (req, res) => {
@@ -19,9 +20,9 @@ router.get('/', requireAuth, async (req, res) => {
     if (status) filter.status = status;
     if (search)
       filter.$or = [
-        { partName: { $regex: search, $options: 'i' } },
-        { partNumber: { $regex: search, $options: 'i' } },
-        { inventoryId: { $regex: search, $options: 'i' } },
+        { partName: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { partNumber: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { inventoryId: { $regex: escapeRegex(String(search)), $options: 'i' } },
       ];
     if (lowStock === 'true') filter.$expr = { $lt: ['$currentStock', '$minimumStock'] };
     if (needsReorder === 'true') filter.$expr = { $lte: ['$currentStock', '$reorderLevel'] };

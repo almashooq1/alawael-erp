@@ -9,6 +9,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 const {
   Transportation,
   InsuranceClaim,
@@ -40,7 +41,7 @@ function buildCrud(Model, modelName, opts = {}) {
         if (rest[f]) filter[f] = rest[f];
       });
       if (search && searchFields.length) {
-        filter.$or = searchFields.map(sf => ({ [sf]: { $regex: search, $options: 'i' } }));
+        filter.$or = searchFields.map(sf => ({ [sf]: { $regex: escapeRegex(String(search)), $options: 'i' } }));
       }
       const skip = (Number(page) - 1) * Number(limit);
       const [data, total] = await Promise.all([

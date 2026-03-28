@@ -193,9 +193,13 @@ const assistiveDevices = {
         AssistiveDevice.countDocuments(),
         AssistiveDevice.aggregate([
           { $group: { _id: '$category', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
-        AssistiveDevice.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        AssistiveDevice.aggregate([
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         AssistiveDevice.aggregate([
           {
             $group: {
@@ -203,7 +207,8 @@ const assistiveDevices = {
               avgCost: { $avg: '$cost.purchasePrice' },
               totalCost: { $sum: '$cost.purchasePrice' },
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -376,12 +381,14 @@ const vocationalRehab = {
       const [total, byPlacement, byTraining, employmentRate] = await Promise.all([
         VocationalRehab.countDocuments(),
         VocationalRehab.aggregate([
-          { $group: { _id: '$jobPlacement.status', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$jobPlacement.status', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         VocationalRehab.aggregate([
           { $unwind: '$skillsTraining' },
           { $group: { _id: '$skillsTraining.type', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
         VocationalRehab.aggregate([
           {
@@ -401,7 +408,8 @@ const vocationalRehab = {
               total: 1,
               employed: 1,
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -555,12 +563,19 @@ const disabilityRights = {
     try {
       const [total, byStatus, byType, byPriority, resolutionRate] = await Promise.all([
         DisabilityRights.countDocuments(),
-        DisabilityRights.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        DisabilityRights.aggregate([
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         DisabilityRights.aggregate([
           { $group: { _id: '$caseType', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
-        DisabilityRights.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        DisabilityRights.aggregate([
+          { $group: { _id: '$priority', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         DisabilityRights.aggregate([
           {
             $group: {
@@ -573,7 +588,8 @@ const disabilityRights = {
             $project: {
               rate: { $multiply: [{ $divide: ['$resolved', { $max: ['$total', 1] }] }, 100] },
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -749,11 +765,13 @@ const integrativeHealthcare = {
       const [total, mentalHealthStatus, medications] = await Promise.all([
         IntegrativeHealthcare.countDocuments(),
         IntegrativeHealthcare.aggregate([
-          { $group: { _id: '$mentalHealth.currentStatus', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$mentalHealth.currentStatus', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         IntegrativeHealthcare.aggregate([
           { $project: { medCount: { $size: { $ifNull: ['$medications', []] } } } },
-          { $group: { _id: null, avg: { $avg: '$medCount' }, total: { $sum: '$medCount' } } }, { $limit: 1000 }
+          { $group: { _id: null, avg: { $avg: '$medCount' }, total: { $sum: '$medCount' } } },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -894,10 +912,12 @@ const communityIntegration = {
         CommunityIntegration.aggregate([
           { $unwind: '$communityActivities' },
           { $group: { _id: '$communityActivities.category', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
         CommunityIntegration.aggregate([
-          { $group: { _id: null, avg: { $avg: '$socialNetwork.socialSatisfaction' } } }, { $limit: 1000 }
+          { $group: { _id: null, avg: { $avg: '$socialNetwork.socialSatisfaction' } } },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -1043,15 +1063,20 @@ const caregiverSupport = {
     try {
       const [total, byRelationship, burdenLevels, respiteUsage] = await Promise.all([
         CaregiverSupport.countDocuments(),
-        CaregiverSupport.aggregate([{ $group: { _id: '$relationship', count: { $sum: 1 } } }, { $limit: 1000 }]),
         CaregiverSupport.aggregate([
-          { $group: { _id: '$caregiverAssessment.burdenScale.level', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$relationship', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
+        CaregiverSupport.aggregate([
+          { $group: { _id: '$caregiverAssessment.burdenScale.level', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         CaregiverSupport.aggregate([
           { $project: { respiteCount: { $size: { $ifNull: ['$respiteCare', []] } } } },
           {
             $group: { _id: null, total: { $sum: '$respiteCount' }, avg: { $avg: '$respiteCount' } },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -1214,13 +1239,21 @@ const accessibilityAudit = {
               avgScore: { $avg: '$overallScore' },
             },
           },
-          { $sort: { avgScore: -1 } }, { $limit: 1000 }
+          { $sort: { avgScore: -1 } },
+          { $limit: 1000 },
         ]),
-        AccessibilityAudit.aggregate([{ $group: { _id: '$grade', count: { $sum: 1 } } }, { $limit: 1000 }]),
-        AccessibilityAudit.aggregate([{ $group: { _id: null, avg: { $avg: '$overallScore' } } }, { $limit: 1000 }]),
+        AccessibilityAudit.aggregate([
+          { $group: { _id: '$grade', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
+        AccessibilityAudit.aggregate([
+          { $group: { _id: null, avg: { $avg: '$overallScore' } } },
+          { $limit: 1000 },
+        ]),
         AccessibilityAudit.aggregate([
           { $match: { 'certification.eligible': true } },
-          { $group: { _id: '$certification.certificationLevel', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$certification.certificationLevel', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -1385,18 +1418,24 @@ const earlyDetection = {
     try {
       const [total, byStatus, byRisk, byReferralSource, screeningTools] = await Promise.all([
         EarlyDetection.countDocuments(),
-        EarlyDetection.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
         EarlyDetection.aggregate([
-          { $group: { _id: '$riskFactors.overallRiskLevel', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
+        EarlyDetection.aggregate([
+          { $group: { _id: '$riskFactors.overallRiskLevel', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         EarlyDetection.aggregate([
           { $group: { _id: '$referral.source', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
         EarlyDetection.aggregate([
           { $unwind: '$developmentalScreening' },
           { $group: { _id: '$developmentalScreening.tool', count: { $sum: 1 } } },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -1488,7 +1527,8 @@ const outcomeMeasurement = {
     try {
       const data = await OutcomeMeasurement.find({ beneficiary: req.params.beneficiaryId })
         .sort({ 'period.startDate': -1 })
-        .populate('beneficiary', 'name email').lean();
+        .populate('beneficiary', 'name email')
+        .lean();
       res.json({ success: true, data });
     } catch (err) {
       res.status(500).json({ success: false, message: safeError(err) });
@@ -1521,7 +1561,8 @@ const outcomeMeasurement = {
             avgROI: { $avg: '$costEffectiveness.returnOnInvestment' },
             count: { $sum: 1 },
           },
-        }, { $limit: 1000 }
+        },
+        { $limit: 1000 },
       ]);
       res.json({ success: true, data: data[0] || {} });
     } catch (err) {
@@ -1533,7 +1574,10 @@ const outcomeMeasurement = {
     try {
       const [total, byProgress, avgScores, satisfactionOverview] = await Promise.all([
         OutcomeMeasurement.countDocuments(),
-        OutcomeMeasurement.aggregate([{ $group: { _id: '$overallProgress', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        OutcomeMeasurement.aggregate([
+          { $group: { _id: '$overallProgress', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         OutcomeMeasurement.aggregate([
           {
             $group: {
@@ -1542,7 +1586,8 @@ const outcomeMeasurement = {
               avgFIM: { $avg: '$functionalIndependence.totalScore' },
               avgGAS: { $avg: '$gasScore' },
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
         OutcomeMeasurement.aggregate([
           {
@@ -1552,7 +1597,8 @@ const outcomeMeasurement = {
               wouldRecommend: { $sum: { $cond: ['$satisfaction.wouldRecommend', 1, 0] } },
               total: { $sum: 1 },
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({
@@ -1731,7 +1777,10 @@ const adaptiveHousing = {
     try {
       const [total, byStatus, modificationStats, fundingStats, smartHomeStats] = await Promise.all([
         AdaptiveHousing.countDocuments(),
-        AdaptiveHousing.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        AdaptiveHousing.aggregate([
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
+        ]),
         AdaptiveHousing.aggregate([
           { $unwind: '$modifications' },
           {
@@ -1741,7 +1790,8 @@ const adaptiveHousing = {
               avgCost: { $avg: '$modifications.estimatedCost' },
             },
           },
-          { $sort: { count: -1 } }, { $limit: 1000 }
+          { $sort: { count: -1 } },
+          { $limit: 1000 },
         ]),
         AdaptiveHousing.aggregate([
           {
@@ -1751,11 +1801,13 @@ const adaptiveHousing = {
               totalFunded: { $sum: '$funding.totalFunded' },
               totalGap: { $sum: '$funding.gap' },
             },
-          }, { $limit: 1000 }
+          },
+          { $limit: 1000 },
         ]),
         AdaptiveHousing.aggregate([
           { $match: { 'smartHome.enabled': true } },
-          { $count: 'smartHomeCount' }, { $limit: 1000 }
+          { $count: 'smartHomeCount' },
+          { $limit: 1000 },
         ]),
       ]);
       res.json({

@@ -9,19 +9,20 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const TherapyProgram = require('../models/TherapyProgram');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 
 /** GET /api/therapy-programs — list programs */
 router.get('/', requireAuth, async (req, res) => {
   try {
     const { department, isActive, search, page = 1, limit = 25 } = req.query;
     const filter = {};
-    if (department) filter.department = { $regex: department, $options: 'i' };
+    if (department) filter.department = { $regex: escapeRegex(String(department)), $options: 'i' };
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (search)
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { code: { $regex: escapeRegex(String(search)), $options: 'i' } },
+        { description: { $regex: escapeRegex(String(search)), $options: 'i' } },
       ];
 
     const skip = (Number(page) - 1) * Number(limit);

@@ -103,7 +103,7 @@ router.get(
   '/legal/cases/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await LegalCase.findById(req.params.id);
+    const item = await LegalCase.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -160,7 +160,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const items = await CourtHearing.find({ organization: req.user.organization })
       .populate('case', 'caseNumber title')
-      .sort({ hearingDate: 1 });
+      .sort({ hearingDate: 1 }).lean();
     res.json({ success: true, data: items });
   })
 );
@@ -369,7 +369,7 @@ router.get(
   '/governance/meetings/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await BoardMeeting.findById(req.params.id);
+    const item = await BoardMeeting.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -629,7 +629,7 @@ router.get(
   '/bcp/plans/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await BCPPlan.findById(req.params.id);
+    const item = await BCPPlan.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -721,7 +721,7 @@ router.get(
   '/bcp/crises/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await CrisisIncident.findById(req.params.id);
+    const item = await CrisisIncident.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -909,7 +909,7 @@ router.get(
   '/cx/surveys/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await CXSurvey.findById(req.params.id);
+    const item = await CXSurvey.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -977,7 +977,7 @@ router.get(
   authenticateToken,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
-    const feedbacks = await CXFeedback.find({ organization: org });
+    const feedbacks = await CXFeedback.find({ organization: org }).lean();
     const total = feedbacks.length;
     const sentimentCounts = {
       very_positive: 0,
@@ -1215,7 +1215,7 @@ router.get(
   '/sustainability/energy/summary',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const readings = await EnergyReading.find({ organization: req.user.organization });
+    const readings = await EnergyReading.find({ organization: req.user.organization }).lean();
     const byType = {};
     let totalCost = 0;
     readings.forEach(r => {
@@ -1305,7 +1305,7 @@ router.get(
   '/sustainability/waste/summary',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const records = await WasteRecord.find({ organization: req.user.organization });
+    const records = await WasteRecord.find({ organization: req.user.organization }).lean();
     let totalQuantity = 0;
     let recycledQuantity = 0;
     const byType = {};
@@ -1473,7 +1473,7 @@ router.get(
   '/dt/assessments/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await MaturityAssessment.findById(req.params.id);
+    const item = await MaturityAssessment.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -1581,7 +1581,7 @@ router.get(
   '/dt/projects/:id',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const item = await InnovationProject.findById(req.params.id);
+    const item = await InnovationProject.findById(req.params.id).lean();
     res.json({ success: true, data: item });
   })
 );
@@ -1651,7 +1651,7 @@ router.patch(
   '/dt/radar/:id/move',
   authenticateToken,
   asyncHandler(async (req, res) => {
-    const entry = await TechRadarEntry.findById(req.params.id);
+    const entry = await TechRadarEntry.findById(req.params.id).lean();
     const item = await TechRadarEntry.findByIdAndUpdate(
       req.params.id,
       {

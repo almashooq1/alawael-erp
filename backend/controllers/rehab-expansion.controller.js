@@ -131,7 +131,7 @@ const assistiveDevices = {
 
   async addMaintenance(req, res) {
     try {
-      const device = await AssistiveDevice.findById(req.params.id);
+      const device = await AssistiveDevice.findById(req.params.id).lean();
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       device.maintenance.history.push(req.body);
       device.maintenance.lastServiceDate = new Date();
@@ -144,7 +144,7 @@ const assistiveDevices = {
 
   async addTrainingSession(req, res) {
     try {
-      const device = await AssistiveDevice.findById(req.params.id);
+      const device = await AssistiveDevice.findById(req.params.id).lean();
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       device.training.sessions.push(req.body);
       await device.save();
@@ -190,9 +190,9 @@ const assistiveDevices = {
         AssistiveDevice.countDocuments(),
         AssistiveDevice.aggregate([
           { $group: { _id: '$category', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
-        AssistiveDevice.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        AssistiveDevice.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
         AssistiveDevice.aggregate([
           {
             $group: {
@@ -200,7 +200,7 @@ const assistiveDevices = {
               avgCost: { $avg: '$cost.purchasePrice' },
               totalCost: { $sum: '$cost.purchasePrice' },
             },
-          },
+          }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -296,7 +296,7 @@ const vocationalRehab = {
 
   async addSkillTraining(req, res) {
     try {
-      const record = await VocationalRehab.findById(req.params.id);
+      const record = await VocationalRehab.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.skillsTraining.push(req.body);
       await record.save();
@@ -308,7 +308,7 @@ const vocationalRehab = {
 
   async addJobApplication(req, res) {
     try {
-      const record = await VocationalRehab.findById(req.params.id);
+      const record = await VocationalRehab.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.jobPlacement.applications.push(req.body);
       await record.save();
@@ -320,7 +320,7 @@ const vocationalRehab = {
 
   async updateEmployment(req, res) {
     try {
-      const record = await VocationalRehab.findById(req.params.id);
+      const record = await VocationalRehab.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.jobPlacement.currentEmployment = req.body;
       record.jobPlacement.status = 'employed';
@@ -333,7 +333,7 @@ const vocationalRehab = {
 
   async addWorkplaceAccommodation(req, res) {
     try {
-      const record = await VocationalRehab.findById(req.params.id);
+      const record = await VocationalRehab.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.workplaceAccommodations.push(req.body);
       await record.save();
@@ -345,7 +345,7 @@ const vocationalRehab = {
 
   async addFollowUp(req, res) {
     try {
-      const record = await VocationalRehab.findById(req.params.id);
+      const record = await VocationalRehab.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.followUps.push({ ...req.body, conductedBy: getUserId(req), date: new Date() });
       await record.save();
@@ -373,12 +373,12 @@ const vocationalRehab = {
       const [total, byPlacement, byTraining, employmentRate] = await Promise.all([
         VocationalRehab.countDocuments(),
         VocationalRehab.aggregate([
-          { $group: { _id: '$jobPlacement.status', count: { $sum: 1 } } },
+          { $group: { _id: '$jobPlacement.status', count: { $sum: 1 } } }, { $limit: 1000 }
         ]),
         VocationalRehab.aggregate([
           { $unwind: '$skillsTraining' },
           { $group: { _id: '$skillsTraining.type', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
         VocationalRehab.aggregate([
           {
@@ -398,7 +398,7 @@ const vocationalRehab = {
               total: 1,
               employed: 1,
             },
-          },
+          }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -461,7 +461,7 @@ const disabilityRights = {
 
   async getById(req, res) {
     try {
-      const record = await DisabilityRights.findById(req.params.id);
+      const record = await DisabilityRights.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, data: record });
     } catch (err) {
@@ -494,7 +494,7 @@ const disabilityRights = {
 
   async addTimelineEntry(req, res) {
     try {
-      const record = await DisabilityRights.findById(req.params.id);
+      const record = await DisabilityRights.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       record.timeline.push({ ...req.body, performedBy: getUserId(req), date: new Date() });
       await record.save();
@@ -506,7 +506,7 @@ const disabilityRights = {
 
   async addEvidence(req, res) {
     try {
-      const record = await DisabilityRights.findById(req.params.id);
+      const record = await DisabilityRights.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       record.evidence.push(req.body);
       await record.save();
@@ -518,7 +518,7 @@ const disabilityRights = {
 
   async resolveCase(req, res) {
     try {
-      const record = await DisabilityRights.findById(req.params.id);
+      const record = await DisabilityRights.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       record.resolution = { ...req.body, date: new Date() };
       record.status = 'resolved';
@@ -531,7 +531,7 @@ const disabilityRights = {
 
   async escalateCase(req, res) {
     try {
-      const record = await DisabilityRights.findById(req.params.id);
+      const record = await DisabilityRights.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       record.status = 'escalated';
       record.timeline.push({
@@ -551,12 +551,12 @@ const disabilityRights = {
     try {
       const [total, byStatus, byType, byPriority, resolutionRate] = await Promise.all([
         DisabilityRights.countDocuments(),
-        DisabilityRights.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        DisabilityRights.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
         DisabilityRights.aggregate([
           { $group: { _id: '$caseType', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
-        DisabilityRights.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
+        DisabilityRights.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }, { $limit: 1000 }]),
         DisabilityRights.aggregate([
           {
             $group: {
@@ -569,7 +569,7 @@ const disabilityRights = {
             $project: {
               rate: { $multiply: [{ $divide: ['$resolved', { $max: ['$total', 1] }] }, 100] },
             },
-          },
+          }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -669,7 +669,7 @@ const integrativeHealthcare = {
 
   async addDentalVisit(req, res) {
     try {
-      const record = await IntegrativeHealthcare.findById(req.params.id);
+      const record = await IntegrativeHealthcare.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.dentalCare.push(req.body);
       await record.save();
@@ -681,7 +681,7 @@ const integrativeHealthcare = {
 
   async updateNutritionPlan(req, res) {
     try {
-      const record = await IntegrativeHealthcare.findById(req.params.id);
+      const record = await IntegrativeHealthcare.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.nutritionPlan = { ...record.nutritionPlan?.toObject(), ...req.body };
       await record.save();
@@ -693,7 +693,7 @@ const integrativeHealthcare = {
 
   async addImmunization(req, res) {
     try {
-      const record = await IntegrativeHealthcare.findById(req.params.id);
+      const record = await IntegrativeHealthcare.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.preventiveCare.immunizations.push(req.body);
       await record.save();
@@ -705,7 +705,7 @@ const integrativeHealthcare = {
 
   async addMedication(req, res) {
     try {
-      const record = await IntegrativeHealthcare.findById(req.params.id);
+      const record = await IntegrativeHealthcare.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.medications.push(req.body);
       await record.save();
@@ -717,7 +717,7 @@ const integrativeHealthcare = {
 
   async addSpecialistVisit(req, res) {
     try {
-      const record = await IntegrativeHealthcare.findById(req.params.id);
+      const record = await IntegrativeHealthcare.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.specialistVisits.push(req.body);
       await record.save();
@@ -745,11 +745,11 @@ const integrativeHealthcare = {
       const [total, mentalHealthStatus, medications] = await Promise.all([
         IntegrativeHealthcare.countDocuments(),
         IntegrativeHealthcare.aggregate([
-          { $group: { _id: '$mentalHealth.currentStatus', count: { $sum: 1 } } },
+          { $group: { _id: '$mentalHealth.currentStatus', count: { $sum: 1 } } }, { $limit: 1000 }
         ]),
         IntegrativeHealthcare.aggregate([
           { $project: { medCount: { $size: { $ifNull: ['$medications', []] } } } },
-          { $group: { _id: null, avg: { $avg: '$medCount' }, total: { $sum: '$medCount' } } },
+          { $group: { _id: null, avg: { $avg: '$medCount' }, total: { $sum: '$medCount' } } }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -837,7 +837,7 @@ const communityIntegration = {
 
   async addLifeSkill(req, res) {
     try {
-      const record = await CommunityIntegration.findById(req.params.id);
+      const record = await CommunityIntegration.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.lifeSkillsTraining.push(req.body);
       await record.save();
@@ -849,7 +849,7 @@ const communityIntegration = {
 
   async addActivity(req, res) {
     try {
-      const record = await CommunityIntegration.findById(req.params.id);
+      const record = await CommunityIntegration.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.communityActivities.push(req.body);
       await record.save();
@@ -861,7 +861,7 @@ const communityIntegration = {
 
   async updateSocialNetwork(req, res) {
     try {
-      const record = await CommunityIntegration.findById(req.params.id);
+      const record = await CommunityIntegration.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.socialNetwork = { ...record.socialNetwork?.toObject(), ...req.body };
       await record.save();
@@ -873,7 +873,7 @@ const communityIntegration = {
 
   async addTravelTraining(req, res) {
     try {
-      const record = await CommunityIntegration.findById(req.params.id);
+      const record = await CommunityIntegration.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.transportationIndependence.travelTraining.push(req.body);
       await record.save();
@@ -890,10 +890,10 @@ const communityIntegration = {
         CommunityIntegration.aggregate([
           { $unwind: '$communityActivities' },
           { $group: { _id: '$communityActivities.category', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
         CommunityIntegration.aggregate([
-          { $group: { _id: null, avg: { $avg: '$socialNetwork.socialSatisfaction' } } },
+          { $group: { _id: null, avg: { $avg: '$socialNetwork.socialSatisfaction' } } }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -988,7 +988,7 @@ const caregiverSupport = {
 
   async addTraining(req, res) {
     try {
-      const record = await CaregiverSupport.findById(req.params.id);
+      const record = await CaregiverSupport.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.trainingPrograms.push(req.body);
       await record.save();
@@ -1000,7 +1000,7 @@ const caregiverSupport = {
 
   async addRespiteCare(req, res) {
     try {
-      const record = await CaregiverSupport.findById(req.params.id);
+      const record = await CaregiverSupport.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.respiteCare.push(req.body);
       await record.save();
@@ -1012,7 +1012,7 @@ const caregiverSupport = {
 
   async addCounseling(req, res) {
     try {
-      const record = await CaregiverSupport.findById(req.params.id);
+      const record = await CaregiverSupport.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.counseling.push(req.body);
       await record.save();
@@ -1039,15 +1039,15 @@ const caregiverSupport = {
     try {
       const [total, byRelationship, burdenLevels, respiteUsage] = await Promise.all([
         CaregiverSupport.countDocuments(),
-        CaregiverSupport.aggregate([{ $group: { _id: '$relationship', count: { $sum: 1 } } }]),
+        CaregiverSupport.aggregate([{ $group: { _id: '$relationship', count: { $sum: 1 } } }, { $limit: 1000 }]),
         CaregiverSupport.aggregate([
-          { $group: { _id: '$caregiverAssessment.burdenScale.level', count: { $sum: 1 } } },
+          { $group: { _id: '$caregiverAssessment.burdenScale.level', count: { $sum: 1 } } }, { $limit: 1000 }
         ]),
         CaregiverSupport.aggregate([
           { $project: { respiteCount: { $size: { $ifNull: ['$respiteCare', []] } } } },
           {
             $group: { _id: null, total: { $sum: '$respiteCount' }, avg: { $avg: '$respiteCount' } },
-          },
+          }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -1129,7 +1129,7 @@ const accessibilityAudit = {
 
   async getById(req, res) {
     try {
-      const record = await AccessibilityAudit.findById(req.params.id);
+      const record = await AccessibilityAudit.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
@@ -1162,7 +1162,7 @@ const accessibilityAudit = {
 
   async addFinding(req, res) {
     try {
-      const record = await AccessibilityAudit.findById(req.params.id);
+      const record = await AccessibilityAudit.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       record.findings.push(req.body);
       await record.save();
@@ -1174,7 +1174,7 @@ const accessibilityAudit = {
 
   async updateFindingStatus(req, res) {
     try {
-      const record = await AccessibilityAudit.findById(req.params.id);
+      const record = await AccessibilityAudit.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       const finding = record.findings.id(req.params.findingId);
       if (!finding) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
@@ -1209,13 +1209,13 @@ const accessibilityAudit = {
               avgScore: { $avg: '$overallScore' },
             },
           },
-          { $sort: { avgScore: -1 } },
+          { $sort: { avgScore: -1 } }, { $limit: 1000 }
         ]),
-        AccessibilityAudit.aggregate([{ $group: { _id: '$grade', count: { $sum: 1 } } }]),
-        AccessibilityAudit.aggregate([{ $group: { _id: null, avg: { $avg: '$overallScore' } } }]),
+        AccessibilityAudit.aggregate([{ $group: { _id: '$grade', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        AccessibilityAudit.aggregate([{ $group: { _id: null, avg: { $avg: '$overallScore' } } }, { $limit: 1000 }]),
         AccessibilityAudit.aggregate([
           { $match: { 'certification.eligible': true } },
-          { $group: { _id: '$certification.certificationLevel', count: { $sum: 1 } } },
+          { $group: { _id: '$certification.certificationLevel', count: { $sum: 1 } } }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -1272,7 +1272,7 @@ const earlyDetection = {
 
   async getById(req, res) {
     try {
-      const record = await EarlyDetection.findById(req.params.id);
+      const record = await EarlyDetection.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
@@ -1305,7 +1305,7 @@ const earlyDetection = {
 
   async addScreening(req, res) {
     try {
-      const record = await EarlyDetection.findById(req.params.id);
+      const record = await EarlyDetection.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.developmentalScreening.push(req.body);
       await record.save();
@@ -1317,7 +1317,7 @@ const earlyDetection = {
 
   async addMilestone(req, res) {
     try {
-      const record = await EarlyDetection.findById(req.params.id);
+      const record = await EarlyDetection.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.milestones.push({ ...req.body, dateRecorded: new Date() });
       await record.save();
@@ -1329,7 +1329,7 @@ const earlyDetection = {
 
   async addDiagnosis(req, res) {
     try {
-      const record = await EarlyDetection.findById(req.params.id);
+      const record = await EarlyDetection.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.diagnosticEvaluation.diagnosis.push(req.body);
       await record.save();
@@ -1341,7 +1341,7 @@ const earlyDetection = {
 
   async updateInterventionPlan(req, res) {
     try {
-      const record = await EarlyDetection.findById(req.params.id);
+      const record = await EarlyDetection.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.earlyInterventionPlan = { ...record.earlyInterventionPlan?.toObject(), ...req.body };
       await record.save();
@@ -1379,18 +1379,18 @@ const earlyDetection = {
     try {
       const [total, byStatus, byRisk, byReferralSource, screeningTools] = await Promise.all([
         EarlyDetection.countDocuments(),
-        EarlyDetection.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        EarlyDetection.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
         EarlyDetection.aggregate([
-          { $group: { _id: '$riskFactors.overallRiskLevel', count: { $sum: 1 } } },
+          { $group: { _id: '$riskFactors.overallRiskLevel', count: { $sum: 1 } } }, { $limit: 1000 }
         ]),
         EarlyDetection.aggregate([
           { $group: { _id: '$referral.source', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
         EarlyDetection.aggregate([
           { $unwind: '$developmentalScreening' },
           { $group: { _id: '$developmentalScreening.tool', count: { $sum: 1 } } },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -1482,7 +1482,7 @@ const outcomeMeasurement = {
     try {
       const data = await OutcomeMeasurement.find({ beneficiary: req.params.beneficiaryId })
         .sort({ 'period.startDate': -1 })
-        .populate('beneficiary', 'name email');
+        .populate('beneficiary', 'name email').lean();
       res.json({ success: true, data });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
@@ -1515,7 +1515,7 @@ const outcomeMeasurement = {
             avgROI: { $avg: '$costEffectiveness.returnOnInvestment' },
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]);
       res.json({ success: true, data: data[0] || {} });
     } catch (err) {
@@ -1527,7 +1527,7 @@ const outcomeMeasurement = {
     try {
       const [total, byProgress, avgScores, satisfactionOverview] = await Promise.all([
         OutcomeMeasurement.countDocuments(),
-        OutcomeMeasurement.aggregate([{ $group: { _id: '$overallProgress', count: { $sum: 1 } } }]),
+        OutcomeMeasurement.aggregate([{ $group: { _id: '$overallProgress', count: { $sum: 1 } } }, { $limit: 1000 }]),
         OutcomeMeasurement.aggregate([
           {
             $group: {
@@ -1536,7 +1536,7 @@ const outcomeMeasurement = {
               avgFIM: { $avg: '$functionalIndependence.totalScore' },
               avgGAS: { $avg: '$gasScore' },
             },
-          },
+          }, { $limit: 1000 }
         ]),
         OutcomeMeasurement.aggregate([
           {
@@ -1546,7 +1546,7 @@ const outcomeMeasurement = {
               wouldRecommend: { $sum: { $cond: ['$satisfaction.wouldRecommend', 1, 0] } },
               total: { $sum: 1 },
             },
-          },
+          }, { $limit: 1000 }
         ]),
       ]);
       res.json({
@@ -1641,7 +1641,7 @@ const adaptiveHousing = {
 
   async addModification(req, res) {
     try {
-      const record = await AdaptiveHousing.findById(req.params.id);
+      const record = await AdaptiveHousing.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.modifications.push(req.body);
       await record.save();
@@ -1653,7 +1653,7 @@ const adaptiveHousing = {
 
   async updateModificationStatus(req, res) {
     try {
-      const record = await AdaptiveHousing.findById(req.params.id);
+      const record = await AdaptiveHousing.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       const mod = record.modifications.id(req.params.modId);
       if (!mod) return res.status(404).json({ success: false, message: 'التعديل غير موجود' });
@@ -1667,7 +1667,7 @@ const adaptiveHousing = {
 
   async updateSmartHome(req, res) {
     try {
-      const record = await AdaptiveHousing.findById(req.params.id);
+      const record = await AdaptiveHousing.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.smartHome = { ...record.smartHome?.toObject(), ...req.body };
       await record.save();
@@ -1679,7 +1679,7 @@ const adaptiveHousing = {
 
   async addFunding(req, res) {
     try {
-      const record = await AdaptiveHousing.findById(req.params.id);
+      const record = await AdaptiveHousing.findById(req.params.id).lean();
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       record.funding.sources.push(req.body);
       // Recalculate totals
@@ -1725,7 +1725,7 @@ const adaptiveHousing = {
     try {
       const [total, byStatus, modificationStats, fundingStats, smartHomeStats] = await Promise.all([
         AdaptiveHousing.countDocuments(),
-        AdaptiveHousing.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        AdaptiveHousing.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
         AdaptiveHousing.aggregate([
           { $unwind: '$modifications' },
           {
@@ -1735,7 +1735,7 @@ const adaptiveHousing = {
               avgCost: { $avg: '$modifications.estimatedCost' },
             },
           },
-          { $sort: { count: -1 } },
+          { $sort: { count: -1 } }, { $limit: 1000 }
         ]),
         AdaptiveHousing.aggregate([
           {
@@ -1745,11 +1745,11 @@ const adaptiveHousing = {
               totalFunded: { $sum: '$funding.totalFunded' },
               totalGap: { $sum: '$funding.gap' },
             },
-          },
+          }, { $limit: 1000 }
         ]),
         AdaptiveHousing.aggregate([
           { $match: { 'smartHome.enabled': true } },
-          { $count: 'smartHomeCount' },
+          { $count: 'smartHomeCount' }, { $limit: 1000 }
         ]),
       ]);
       res.json({

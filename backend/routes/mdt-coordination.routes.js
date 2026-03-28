@@ -157,7 +157,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.attendees.push(req.body);
@@ -176,7 +176,7 @@ router.patch(
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const attendee = meeting.attendees.id(req.params.attendeeId);
@@ -200,7 +200,7 @@ router.post(
   validate([body('beneficiary').notEmpty().withMessage('المستفيد مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.cases.push({
@@ -222,7 +222,7 @@ router.patch(
   authorize(['admin', 'manager', 'therapist', 'doctor']),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const caseItem = meeting.cases.id(req.params.caseId);
@@ -245,7 +245,7 @@ router.post(
   validate([body('title').trim().notEmpty().withMessage('عنوان القرار مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const caseItem = meeting.cases.id(req.params.caseId);
@@ -271,7 +271,7 @@ router.post(
   validate([body('topic').trim().notEmpty().withMessage('موضوع جدول الأعمال مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const order = meeting.agenda.length + 1;
@@ -302,18 +302,18 @@ router.get('/meetings-stats', async (req, res) => {
       MDTMeeting.countDocuments(dateFilter),
       MDTMeeting.aggregate([
         { $match: dateFilter },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       MDTMeeting.aggregate([
         { $match: dateFilter },
-        { $group: { _id: '$type', count: { $sum: 1 } } },
+        { $group: { _id: '$type', count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       MDTMeeting.aggregate([
         { $match: dateFilter },
         {
           $project: { attendeeCount: { $size: { $ifNull: ['$attendees', []] } } },
         },
-        { $group: { _id: null, avg: { $avg: '$attendeeCount' } } },
+        { $group: { _id: null, avg: { $avg: '$attendeeCount' } } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -463,7 +463,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const exists = plan.teamMembers.some(m => m.therapist?.toString() === req.body.therapist);
@@ -487,7 +487,7 @@ router.delete(
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.teamMembers.pull({ _id: req.params.memberId });
@@ -510,7 +510,7 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.goals.push({
@@ -535,7 +535,7 @@ router.patch(
   ]),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const goal = plan.goals.id(req.params.goalId);
@@ -568,7 +568,7 @@ router.put(
   authorize(['admin', 'manager', 'therapist']),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       const goal = plan.goals.id(req.params.goalId);
@@ -591,7 +591,7 @@ router.post(
   validate([body('summary').trim().notEmpty().withMessage('ملخص المراجعة مطلوب')]),
   async (req, res) => {
     try {
-      const plan = await UnifiedRehabPlan.findById(req.params.id);
+      const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
       if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
       plan.reviews.push({
@@ -615,7 +615,7 @@ router.post(
 // ─── Approve Plan ────────────────────────────────────────────────────────────
 router.post('/plans/:id/approve', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const plan = await UnifiedRehabPlan.findById(req.params.id);
+    const plan = await UnifiedRehabPlan.findById(req.params.id).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
 
     plan.approvals.push({
@@ -637,14 +637,14 @@ router.get('/plans-stats', async (req, res) => {
   try {
     const [total, statusCounts, avgProgress, avgGoals, overdueReviews] = await Promise.all([
       UnifiedRehabPlan.countDocuments(),
-      UnifiedRehabPlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      UnifiedRehabPlan.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
       UnifiedRehabPlan.aggregate([
         { $match: { status: 'ACTIVE' } },
-        { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
+        { $group: { _id: null, avg: { $avg: '$overallProgress' } } }, { $limit: 1000 }
       ]),
       UnifiedRehabPlan.aggregate([
         { $project: { goalCount: { $size: { $ifNull: ['$goals', []] } } } },
-        { $group: { _id: null, avg: { $avg: '$goalCount' } } },
+        { $group: { _id: null, avg: { $avg: '$goalCount' } } }, { $limit: 1000 }
       ]),
       UnifiedRehabPlan.countDocuments({
         reviewDate: { $lte: new Date() },
@@ -800,7 +800,7 @@ router.post(
   authorize(['admin', 'manager', 'therapist', 'doctor']),
   async (req, res) => {
     try {
-      const ticket = await ReferralTicket.findById(req.params.id);
+      const ticket = await ReferralTicket.findById(req.params.id).lean();
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -835,7 +835,7 @@ router.post(
   validate([body('rejectionReason').trim().notEmpty().withMessage('سبب الرفض مطلوب')]),
   async (req, res) => {
     try {
-      const ticket = await ReferralTicket.findById(req.params.id);
+      const ticket = await ReferralTicket.findById(req.params.id).lean();
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -870,7 +870,7 @@ router.post(
   validate([body('summary').trim().notEmpty().withMessage('ملخص النتائج مطلوب')]),
   async (req, res) => {
     try {
-      const ticket = await ReferralTicket.findById(req.params.id);
+      const ticket = await ReferralTicket.findById(req.params.id).lean();
       if (!ticket)
         return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
 
@@ -920,8 +920,8 @@ router.get('/referrals-stats', async (req, res) => {
     const [total, statusCounts, priorityCounts, departmentStats, avgResponseTime] =
       await Promise.all([
         ReferralTicket.countDocuments(),
-        ReferralTicket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-        ReferralTicket.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]),
+        ReferralTicket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+        ReferralTicket.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }, { $limit: 1000 }]),
         ReferralTicket.aggregate([
           { $group: { _id: '$toDepartment', count: { $sum: 1 } } },
           { $sort: { count: -1 } },
@@ -936,7 +936,7 @@ router.get('/referrals-stats', async (req, res) => {
               },
             },
           },
-          { $group: { _id: null, avg: { $avg: '$responseTime' } } },
+          { $group: { _id: null, avg: { $avg: '$responseTime' } } }, { $limit: 1000 }
         ]),
       ]);
 
@@ -1002,11 +1002,11 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
               $sum: { $cond: [{ $eq: ['$goals.status', 'ACHIEVED'] }, 1, 0] },
             },
           },
-        },
+        }, { $limit: 1000 }
       ]),
     ]);
 
-    const activePlan = plans.find(p => p.status === 'ACTIVE');
+    const activePlan = plans.find(p => p.status === 'ACTIVE').lean();
     const pendingReferrals = referrals.filter(r =>
       ['PENDING', 'ACCEPTED', 'IN_PROGRESS'].includes(r.status)
     );
@@ -1053,7 +1053,7 @@ router.get('/dashboard/team-workload', authorize(['admin', 'manager']), async (r
             caseCount: { $sum: 1 },
           },
         },
-        { $sort: { caseCount: -1 } },
+        { $sort: { caseCount: -1 } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -1157,7 +1157,7 @@ router.get('/dashboard/overdue', authorize(['admin', 'manager']), async (req, re
             meetingNumber: 1,
             actionItem: '$generalActionItems',
           },
-        },
+        }, { $limit: 1000 }
       ]),
     ]);
 
@@ -1192,7 +1192,7 @@ router.post(
   validate([body('content').trim().notEmpty().withMessage('محتوى المحضر مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.minutes = {
@@ -1214,7 +1214,7 @@ router.post(
 // ─── Approve Meeting Minutes ─────────────────────────────────────────────────
 router.post('/meetings/:id/minutes/approve', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findById(req.params.id);
+    const meeting = await MDTMeeting.findById(req.params.id).lean();
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
     if (!meeting.minutes?.content) {
@@ -1240,7 +1240,7 @@ router.post(
   validate([body('title').trim().notEmpty().withMessage('عنوان القرار مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.generalDecisions.push({
@@ -1267,7 +1267,7 @@ router.patch(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const decision = meeting.generalDecisions.id(req.params.decisionId);
@@ -1292,7 +1292,7 @@ router.post(
   validate([body('description').trim().notEmpty().withMessage('وصف المهمة مطلوب')]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       meeting.generalActionItems.push({
@@ -1319,7 +1319,7 @@ router.patch(
   ]),
   async (req, res) => {
     try {
-      const meeting = await MDTMeeting.findById(req.params.id);
+      const meeting = await MDTMeeting.findById(req.params.id).lean();
       if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
 
       const item = meeting.generalActionItems.id(req.params.itemId);
@@ -1446,7 +1446,7 @@ router.get('/dashboard/overview', async (req, res) => {
       UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
       UnifiedRehabPlan.aggregate([
         { $match: { status: 'ACTIVE' } },
-        { $group: { _id: null, avg: { $avg: '$overallProgress' } } },
+        { $group: { _id: null, avg: { $avg: '$overallProgress' } } }, { $limit: 1000 }
       ]),
       ReferralTicket.countDocuments(),
       ReferralTicket.countDocuments({ status: 'PENDING' }),
@@ -1509,7 +1509,7 @@ router.get('/stats', authorize(['admin', 'manager']), async (req, res) => {
       UnifiedRehabPlan.countDocuments({ status: 'ACTIVE' }),
       ReferralTicket.countDocuments({ status: 'PENDING' }),
       MDTMeeting.countDocuments({ status: 'COMPLETED' }),
-      MDTMeeting.aggregate([{ $unwind: '$generalDecisions' }, { $count: 'total' }]),
+      MDTMeeting.aggregate([{ $unwind: '$generalDecisions' }, { $count: 'total' }, { $limit: 1000 }]),
     ]);
 
     res.json({

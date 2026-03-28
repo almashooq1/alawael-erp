@@ -7,7 +7,6 @@
 const logger = require('../utils/logger');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
-const { createObjectCsvWriter } = require('csv-writer');
 
 class DashboardExportService {
   constructor() {

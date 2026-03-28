@@ -170,8 +170,8 @@ class EmployeeAffairsPhase2Service {
     if (filters.department) match.department = filters.department;
 
     const [byStatus, byPriority, total, overdue] = await Promise.all([
-      Model.aggregate([{ $match: match }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Model.aggregate([{ $match: match }, { $group: { _id: '$priority', count: { $sum: 1 } } }]),
+      Model.aggregate([{ $match: match }, { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Model.aggregate([{ $match: match }, { $group: { _id: '$priority', count: { $sum: 1 } } }, { $limit: 1000 }]),
       Model.countDocuments(match),
       Model.countDocuments({
         ...match,
@@ -389,9 +389,9 @@ class EmployeeAffairsPhase2Service {
             count: { $sum: 1 },
             totalValue: { $sum: '$currentValue' },
           },
-        },
+        }, { $limit: 1000 }
       ]),
-      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
     ]);
     return { total, byCategory, byStatus };
   }
@@ -489,9 +489,9 @@ class EmployeeAffairsPhase2Service {
       Model.countDocuments(),
       Model.countDocuments({ expiryDate: { $lt: now }, status: { $ne: 'ملغي' } }),
       Model.countDocuments({ expiryDate: { $gte: now, $lte: in30 }, status: { $ne: 'ملغي' } }),
-      Model.aggregate([{ $group: { _id: '$documentType', count: { $sum: 1 } } }]),
-      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Model.aggregate([{ $group: { _id: null, total: { $sum: '$fees.totalCost' } } }]),
+      Model.aggregate([{ $group: { _id: '$documentType', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Model.aggregate([{ $group: { _id: null, total: { $sum: '$fees.totalCost' } } }, { $limit: 1000 }]),
     ]);
     return { total, expired, expiringSoon, byType, byStatus, totalCost: totalCost[0]?.total || 0 };
   }
@@ -577,7 +577,7 @@ class EmployeeAffairsPhase2Service {
           status: 'تم الصرف',
         },
       },
-      { $group: { _id: null, totalPoints: { $sum: '$points' } } },
+      { $group: { _id: null, totalPoints: { $sum: '$points' } } }, { $limit: 1000 }
     ]);
     return { totalPoints: result[0]?.totalPoints || 0 };
   }
@@ -589,17 +589,17 @@ class EmployeeAffairsPhase2Service {
       Model.countDocuments({ 'period.year': year }),
       Model.aggregate([
         { $match: { 'period.year': year } },
-        { $group: { _id: '$type', count: { $sum: 1 }, total: { $sum: '$amount' } } },
+        { $group: { _id: '$type', count: { $sum: 1 }, total: { $sum: '$amount' } } }, { $limit: 1000 }
       ]),
-      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Model.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
       Model.aggregate([
         { $match: { status: 'تم الصرف', 'period.year': year } },
-        { $group: { _id: null, total: { $sum: '$amount' } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
       ]),
       Model.aggregate([
         { $match: { status: 'تم الصرف', 'period.year': year } },
         { $group: { _id: '$period.month', total: { $sum: '$amount' }, count: { $sum: 1 } } },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
     ]);
     return { total, byType, byStatus, totalDisbursed: totalAmount[0]?.total || 0, monthlySpend };
@@ -748,7 +748,7 @@ class EmployeeAffairsPhase2Service {
     const [todayStats, shiftTypes, totalDefinitions] = await Promise.all([
       ShiftAssignment.aggregate([
         { $match: match },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       ShiftAssignment.aggregate([
         { $match: match },
@@ -761,7 +761,7 @@ class EmployeeAffairsPhase2Service {
           },
         },
         { $unwind: '$shift' },
-        { $group: { _id: '$shift.type', count: { $sum: 1 } } },
+        { $group: { _id: '$shift.type', count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       ShiftDefinition.countDocuments({ isActive: true }),
     ]);

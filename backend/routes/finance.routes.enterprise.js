@@ -77,7 +77,7 @@ router.get(
     const filter = { organization: org };
     if (status) filter.status = status;
     if (periodType) filter.periodType = periodType;
-    const checklists = await ClosingChecklist.find(filter).sort({ createdAt: -1 }).limit(50);
+    const checklists = await ClosingChecklist.find(filter).sort({ createdAt: -1 }).limit(50).lean();
     res.json({ success: true, data: checklists });
   })
 );
@@ -154,7 +154,7 @@ router.patch(
   '/period-closing/:id/task/:taskId',
   asyncHandler(async (req, res) => {
     if (!ClosingChecklist) throw new AppError('Model not available', 500);
-    const checklist = await ClosingChecklist.findById(req.params.id);
+    const checklist = await ClosingChecklist.findById(req.params.id).lean();
     if (!checklist) throw new AppError('Checklist not found', 404);
     const task = checklist.tasks.id(req.params.taskId);
     if (!task) throw new AppError('Task not found', 404);
@@ -173,7 +173,7 @@ router.post(
   '/period-closing/:id/close',
   asyncHandler(async (req, res) => {
     if (!ClosingChecklist) throw new AppError('Model not available', 500);
-    const checklist = await ClosingChecklist.findById(req.params.id);
+    const checklist = await ClosingChecklist.findById(req.params.id).lean();
     if (!checklist) throw new AppError('Checklist not found', 404);
     const required = checklist.tasks.filter(t => t.isRequired);
     const incomplete = required.filter(t => t.status !== 'completed' && t.status !== 'skipped');
@@ -193,7 +193,7 @@ router.post(
   '/period-closing/:id/reopen',
   asyncHandler(async (req, res) => {
     if (!ClosingChecklist) throw new AppError('Model not available', 500);
-    const checklist = await ClosingChecklist.findById(req.params.id);
+    const checklist = await ClosingChecklist.findById(req.params.id).lean();
     if (!checklist) throw new AppError('Checklist not found', 404);
     checklist.status = 'reopened';
     checklist.lockStatus = 'open';
@@ -212,7 +212,7 @@ router.get(
     if (!ClosingChecklist)
       return res.json({ success: true, data: { total: 0, closed: 0, open: 0, inProgress: 0 } });
     const org = req.user.organization;
-    const all = await ClosingChecklist.find({ organization: org });
+    const all = await ClosingChecklist.find({ organization: org }).lean();
     const data = {
       total: all.length,
       closed: all.filter(c => c.status === 'completed').length,
@@ -234,7 +234,7 @@ router.get(
     const org = req.user.organization;
     const filter = { organization: org };
     if (req.query.status) filter.status = req.query.status;
-    const recons = await AccountReconciliation.find(filter).sort({ createdAt: -1 }).limit(50);
+    const recons = await AccountReconciliation.find(filter).sort({ createdAt: -1 }).limit(50).lean();
     res.json({ success: true, data: recons });
   })
 );
@@ -256,7 +256,7 @@ router.post(
   '/reconciliation/:id/match',
   asyncHandler(async (req, res) => {
     if (!AccountReconciliation) throw new AppError('Model not available', 500);
-    const recon = await AccountReconciliation.findById(req.params.id);
+    const recon = await AccountReconciliation.findById(req.params.id).lean();
     if (!recon) throw new AppError('Reconciliation not found', 404);
     const { debitTransactionId, creditTransactionId, amount } = req.body;
     recon.matchedPairs.push({
@@ -278,7 +278,7 @@ router.get(
   asyncHandler(async (req, res) => {
     if (!AccountReconciliation) return res.json({ success: true, data: { total: 0 } });
     const org = req.user.organization;
-    const all = await AccountReconciliation.find({ organization: org });
+    const all = await AccountReconciliation.find({ organization: org }).lean();
     const data = {
       total: all.length,
       completed: all.filter(r => r.status === 'completed').length,
@@ -297,7 +297,7 @@ router.get(
     if (!IntercompanyTransaction) return res.json({ success: true, data: [] });
     const txns = await IntercompanyTransaction.find({ organization: req.user.organization })
       .sort({ createdAt: -1 })
-      .limit(100);
+      .limit(100).lean();
     res.json({ success: true, data: txns });
   })
 );
@@ -402,7 +402,7 @@ router.patch(
   '/dunning/:id/promise',
   asyncHandler(async (req, res) => {
     if (!DunningHistory) throw new AppError('Model not available', 500);
-    const record = await DunningHistory.findById(req.params.id);
+    const record = await DunningHistory.findById(req.params.id).lean();
     if (!record) throw new AppError('Record not found', 404);
     record.response = 'promised';
     record.promiseDate = req.body.promiseDate;
@@ -420,7 +420,7 @@ router.get(
     if (!DunningHistory) return res.json({ success: true, data: [] });
     const history = await DunningHistory.find({ organization: req.user.organization })
       .sort({ sentAt: -1 })
-      .limit(100);
+      .limit(100).lean();
     res.json({ success: true, data: history });
   })
 );
@@ -432,7 +432,7 @@ router.get(
     if (!DunningHistory)
       return res.json({ success: true, data: { totalSent: 0, promises: 0, collections: 0 } });
     const org = req.user.organization;
-    const history = await DunningHistory.find({ organization: org });
+    const history = await DunningHistory.find({ organization: org }).lean();
     const data = {
       totalSent: history.length,
       promises: history.filter(h => h.response === 'promised').length,
@@ -457,7 +457,7 @@ router.get(
     const filter = { organization: req.user.organization };
     if (req.query.status) filter.status = req.query.status;
     if (req.query.type) filter.type = req.query.type;
-    const guarantees = await BankGuarantee.find(filter).sort({ createdAt: -1 });
+    const guarantees = await BankGuarantee.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: guarantees });
   })
 );
@@ -543,7 +543,7 @@ router.get(
     if (!LetterOfCredit) return res.json({ success: true, data: [] });
     const filter = { organization: req.user.organization };
     if (req.query.status) filter.status = req.query.status;
-    const lcs = await LetterOfCredit.find(filter).sort({ createdAt: -1 });
+    const lcs = await LetterOfCredit.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: lcs });
   })
 );
@@ -565,7 +565,7 @@ router.patch(
   '/lc/:id/stage',
   asyncHandler(async (req, res) => {
     if (!LetterOfCredit) throw new AppError('Model not available', 500);
-    const lc = await LetterOfCredit.findById(req.params.id);
+    const lc = await LetterOfCredit.findById(req.params.id).lean();
     if (!lc) throw new AppError('LC not found', 404);
     lc.stages.push({ stage: req.body.stage, amount: req.body.amount, notes: req.body.notes });
     lc.currentStage = req.body.stage;
@@ -585,7 +585,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const bankAccounts = BankAccount
       ? await BankAccount.find({ organization: req.user.organization, status: 'active' })
-      : [];
+      : [].lean();
     const forecasts = CashForecast
       ? await CashForecast.find({ organization: req.user.organization, status: 'active' }).sort({
           periodStart: 1,
@@ -615,7 +615,7 @@ router.get(
     const filter = { organization: req.user.organization };
     if (req.query.scenarioType) filter.scenarioType = req.query.scenarioType;
     if (req.query.status) filter.status = req.query.status;
-    const forecasts = await CashForecast.find(filter).sort({ periodStart: 1 });
+    const forecasts = await CashForecast.find(filter).sort({ periodStart: 1 }).lean();
     res.json({ success: true, data: forecasts });
   })
 );
@@ -640,7 +640,7 @@ router.get(
     if (!TreasuryTransfer) return res.json({ success: true, data: [] });
     const transfers = await TreasuryTransfer.find({ organization: req.user.organization })
       .sort({ transferDate: -1 })
-      .limit(50);
+      .limit(50).lean();
     res.json({ success: true, data: transfers });
   })
 );
@@ -662,7 +662,7 @@ router.patch(
   '/treasury/transfers/:id/execute',
   asyncHandler(async (req, res) => {
     if (!TreasuryTransfer) throw new AppError('Model not available', 500);
-    const transfer = await TreasuryTransfer.findById(req.params.id);
+    const transfer = await TreasuryTransfer.findById(req.params.id).lean();
     if (!transfer) throw new AppError('Transfer not found', 404);
     transfer.status = 'executed';
     transfer.executedBy = req.user.id;
@@ -691,7 +691,7 @@ router.get(
     const filter = { organization: req.user.organization };
     if (req.query.type) filter.type = req.query.type;
     if (req.query.status) filter.status = req.query.status;
-    const filings = await TaxFiling.find(filter).sort({ dueDate: -1 });
+    const filings = await TaxFiling.find(filter).sort({ dueDate: -1 }).lean();
     res.json({ success: true, data: filings });
   })
 );
@@ -713,7 +713,7 @@ router.patch(
   '/tax-filing/:id/status',
   asyncHandler(async (req, res) => {
     if (!TaxFiling) throw new AppError('Model not available', 500);
-    const filing = await TaxFiling.findById(req.params.id);
+    const filing = await TaxFiling.findById(req.params.id).lean();
     if (!filing) throw new AppError('Filing not found', 404);
     filing.status = req.body.status;
     if (req.body.status === 'prepared') {
@@ -739,7 +739,7 @@ router.post(
   '/tax-filing/:id/correction',
   asyncHandler(async (req, res) => {
     if (!TaxFiling) throw new AppError('Model not available', 500);
-    const original = await TaxFiling.findById(req.params.id);
+    const original = await TaxFiling.findById(req.params.id).lean();
     if (!original) throw new AppError('Original filing not found', 404);
     const correction = await TaxFiling.create({
       ...req.body,
@@ -789,8 +789,8 @@ router.get(
   asyncHandler(async (req, res) => {
     if (!TaxFiling) return res.json({ success: true, data: { total: 0 } });
     const org = req.user.organization;
-    const filings = await TaxFiling.find({ organization: org });
-    const penalties = TaxPenalty ? await TaxPenalty.find({ organization: org }) : [];
+    const filings = await TaxFiling.find({ organization: org }).lean();
+    const penalties = TaxPenalty ? await TaxPenalty.find({ organization: org }) : [].lean();
     const now = new Date();
     const data = {
       total: filings.length,
@@ -866,7 +866,7 @@ router.get(
     if (!FinancialApproval) return res.json({ success: true, data: [] });
     const all = await FinancialApproval.find({ organization: req.user.organization })
       .sort({ createdAt: -1 })
-      .limit(100);
+      .limit(100).lean();
     res.json({ success: true, data: all });
   })
 );
@@ -889,7 +889,7 @@ router.patch(
   '/approvals/:id/decide',
   asyncHandler(async (req, res) => {
     if (!FinancialApproval) throw new AppError('Model not available', 500);
-    const approval = await FinancialApproval.findById(req.params.id);
+    const approval = await FinancialApproval.findById(req.params.id).lean();
     if (!approval) throw new AppError('Approval not found', 404);
     const step = approval.steps.find(
       s => s.approver?.toString() === req.user.id && s.status === 'pending'
@@ -922,7 +922,7 @@ router.patch(
   '/approvals/:id/delegate',
   asyncHandler(async (req, res) => {
     if (!FinancialApproval) throw new AppError('Model not available', 500);
-    const approval = await FinancialApproval.findById(req.params.id);
+    const approval = await FinancialApproval.findById(req.params.id).lean();
     if (!approval) throw new AppError('Approval not found', 404);
     const step = approval.steps.find(
       s => s.approver?.toString() === req.user.id && s.status === 'pending'
@@ -949,7 +949,7 @@ router.get(
   '/approvals/sla-report',
   asyncHandler(async (req, res) => {
     if (!FinancialApproval) return res.json({ success: true, data: { total: 0 } });
-    const all = await FinancialApproval.find({ organization: req.user.organization });
+    const all = await FinancialApproval.find({ organization: req.user.organization }).lean();
     const data = {
       total: all.length,
       pending: all.filter(a => a.overallStatus === 'pending' || a.overallStatus === 'in_progress')
@@ -982,7 +982,7 @@ router.get(
     const filter = { organization: req.user.organization };
     if (req.query.status) filter.status = req.query.status;
     if (req.query.facilityType) filter.facilityType = req.query.facilityType;
-    const loans = await CompanyLoan.find(filter).sort({ createdAt: -1 });
+    const loans = await CompanyLoan.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: loans });
   })
 );
@@ -1004,7 +1004,7 @@ router.get(
   '/company-loans/:id',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan) throw new AppError('Model not available', 500);
-    const loan = await CompanyLoan.findById(req.params.id);
+    const loan = await CompanyLoan.findById(req.params.id).lean();
     if (!loan) throw new AppError('Loan not found', 404);
     res.json({ success: true, data: loan });
   })
@@ -1015,7 +1015,7 @@ router.post(
   '/company-loans/:id/drawdown',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan || !LoanDrawdown) throw new AppError('Model not available', 500);
-    const loan = await CompanyLoan.findById(req.params.id);
+    const loan = await CompanyLoan.findById(req.params.id).lean();
     if (!loan) throw new AppError('Loan not found', 404);
     const { amount } = req.body;
     if (loan.drawnAmount + amount > loan.principalAmount)
@@ -1041,7 +1041,7 @@ router.post(
   '/company-loans/:id/repayment',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan) throw new AppError('Model not available', 500);
-    const loan = await CompanyLoan.findById(req.params.id);
+    const loan = await CompanyLoan.findById(req.params.id).lean();
     if (!loan) throw new AppError('Loan not found', 404);
     const { amount, principalPortion, _profitPortion } = req.body;
     loan.outstandingBalance = Math.max(0, loan.outstandingBalance - (principalPortion || amount));
@@ -1066,7 +1066,7 @@ router.get(
   '/company-loans/covenants/check',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan) return res.json({ success: true, data: [] });
-    const loans = await CompanyLoan.find({ organization: req.user.organization, status: 'active' });
+    const loans = await CompanyLoan.find({ organization: req.user.organization, status: 'active' }).lean();
     const allCovenants = [];
     loans.forEach(l => {
       (l.covenants || []).forEach(c => {
@@ -1082,7 +1082,7 @@ router.get(
   '/company-loans/summary',
   asyncHandler(async (req, res) => {
     if (!CompanyLoan) return res.json({ success: true, data: { totalLoans: 0 } });
-    const loans = await CompanyLoan.find({ organization: req.user.organization });
+    const loans = await CompanyLoan.find({ organization: req.user.organization }).lean();
     const active = loans.filter(l => l.status === 'active');
     const data = {
       totalLoans: loans.length,

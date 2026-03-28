@@ -151,7 +151,7 @@ exports.getDashboardOverview = catchAsync(async (req, res) => {
 
   const guardian = await Guardian.findById(guardianId)
     .select('beneficiaries')
-    .populate('beneficiaries');
+    .populate('beneficiaries').lean();
 
   const overview = {
     beneficiaryCount: guardian.beneficiaries.length,
@@ -312,8 +312,8 @@ exports.updateProfilePhoto = catchAsync(async (req, res) => {
 exports.downloadProfileData = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries');
-  const payments = await PortalPayment.find({ guardianId }).limit(100);
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries').lean();
+  const payments = await PortalPayment.find({ guardianId }).limit(100).lean();
 
   const data = {
     guardian: guardian.toObject(),
@@ -368,7 +368,7 @@ exports.getBeneficiaryDetail = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
 
   // Verify guardian has access to this beneficiary
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({
       success: false,
@@ -376,7 +376,7 @@ exports.getBeneficiaryDetail = catchAsync(async (req, res) => {
     });
   }
 
-  const beneficiary = await Beneficiary.findById(beneficiaryId);
+  const beneficiary = await Beneficiary.findById(beneficiaryId).lean();
 
   res.status(200).json({
     success: true,
@@ -399,8 +399,8 @@ exports.linkBeneficiary = catchAsync(async (req, res) => {
     });
   }
 
-  const guardian = await Guardian.findById(guardianId);
-  const beneficiary = await Beneficiary.findById(beneficiaryId);
+  const guardian = await Guardian.findById(guardianId).lean();
+  const beneficiary = await Beneficiary.findById(beneficiaryId).lean();
 
   if (!beneficiary) {
     return res.status(404).json({
@@ -432,7 +432,7 @@ exports.unlinkBeneficiary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   await guardian.unlinkBeneficiary(beneficiaryId);
 
   res.status(200).json({
@@ -452,12 +452,12 @@ exports.getBeneficiaryProgress = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
 
   // Verify access
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
-  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 });
+  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 }).lean();
 
   res.status(200).json({
     success: true,
@@ -472,7 +472,7 @@ exports.getBeneficiaryProgress = catchAsync(async (req, res) => {
 exports.getBeneficiaryMonthlyProgress = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
 
-  const progress = await BeneficiaryProgress.find({ beneficiaryId }).sort({ month: -1 }).limit(12);
+  const progress = await BeneficiaryProgress.find({ beneficiaryId }).sort({ month: -1 }).limit(12).lean();
 
   res.status(200).json({
     success: true,
@@ -514,7 +514,7 @@ exports.getBeneficiaryGrades = catchAsync(async (req, res) => {
 
   const grades = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month academicScore previousMonthScore scoreImprovement');
+    .select('month academicScore previousMonthScore scoreImprovement').lean();
 
   res.status(200).json({
     success: true,
@@ -553,7 +553,7 @@ exports.getGradesComparison = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const allGrades = await BeneficiaryProgress.find({
@@ -586,7 +586,7 @@ exports.getBeneficiaryAttendance = catchAsync(async (req, res) => {
 
   const records = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month attendanceRate absenceDays lateDays');
+    .select('month attendanceRate absenceDays lateDays').lean();
 
   res.status(200).json({
     success: true,
@@ -627,7 +627,7 @@ exports.getBeneficiaryAttendanceReport = catchAsync(async (req, res) => {
   const report = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
     .limit(12)
-    .select('month attendanceRate absenceDays lateDays');
+    .select('month attendanceRate absenceDays lateDays').lean();
 
   res.status(200).json({
     success: true,
@@ -646,7 +646,7 @@ exports.getBehavior = catchAsync(async (req, res) => {
 
   const records = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month behaviorRating challenges');
+    .select('month behaviorRating challenges').lean();
 
   res.status(200).json({
     success: true,
@@ -680,7 +680,7 @@ exports.getBehaviorSummary = catchAsync(async (req, res) => {
 exports.getReports = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const reports = await BeneficiaryProgress.find({
@@ -703,7 +703,7 @@ exports.getReports = catchAsync(async (req, res) => {
 exports.getMonthlyReports = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -733,7 +733,7 @@ exports.generateReport = catchAsync(async (req, res) => {
     });
   }
 
-  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 });
+  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 }).lean();
 
   if (progress) {
     progress.reportGenerated = true;
@@ -776,7 +776,7 @@ exports.getPayments = catchAsync(async (req, res) => {
   const payments = await PortalPayment.find({ guardianId })
     .sort({ dueDate: -1 })
     .skip(skip)
-    .limit(limit);
+    .limit(limit).lean();
 
   const total = await PortalPayment.countDocuments({ guardianId });
 
@@ -857,7 +857,7 @@ exports.makePayment = catchAsync(async (req, res) => {
     });
   }
 
-  const payment = await PortalPayment.findById(paymentId);
+  const payment = await PortalPayment.findById(paymentId).lean();
 
   if (payment.guardianId.toString() !== guardianId.toString()) {
     return res.status(403).json({
@@ -904,7 +904,7 @@ exports.makePayment = catchAsync(async (req, res) => {
 exports.requestInvoice = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
 
-  const payment = await PortalPayment.findById(paymentId);
+  const payment = await PortalPayment.findById(paymentId).lean();
   payment.invoiceSentAt = new Date();
   await payment.save();
 
@@ -921,7 +921,7 @@ exports.requestInvoice = catchAsync(async (req, res) => {
 exports.getReceipt = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
 
-  const payment = await PortalPayment.findById(paymentId);
+  const payment = await PortalPayment.findById(paymentId).lean();
 
   if (!payment.receiptGenerated) {
     await payment.generateReceipt();
@@ -941,7 +941,7 @@ exports.requestRefund = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
   const { reason } = req.body;
 
-  const payment = await PortalPayment.findById(paymentId);
+  const payment = await PortalPayment.findById(paymentId).lean();
   await payment.requestRefund(reason || 'No reason provided');
 
   res.status(200).json({
@@ -959,7 +959,7 @@ exports.requestRefund = catchAsync(async (req, res) => {
 exports.getFinancialSummary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
 
   res.status(200).json({
     success: true,
@@ -979,7 +979,7 @@ exports.getFinancialSummary = catchAsync(async (req, res) => {
 exports.getBalance = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const payments = await PortalPayment.find({ guardianId });
+  const payments = await PortalPayment.find({ guardianId }).lean();
 
   const paidAmount = payments
     .filter(p => p.status === 'paid')
@@ -1001,7 +1001,7 @@ exports.getBalance = catchAsync(async (req, res) => {
 exports.getFinancialHistory = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const history = await PortalPayment.find({ guardianId }).sort({ createdAt: -1 }).limit(50);
+  const history = await PortalPayment.find({ guardianId }).sort({ createdAt: -1 }).limit(50).lean();
 
   res.status(200).json({
     success: true,
@@ -1016,7 +1016,7 @@ exports.getFinancialHistory = catchAsync(async (req, res) => {
 exports.getFinancialForecast = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const payments = await PortalPayment.find({ guardianId });
+  const payments = await PortalPayment.find({ guardianId }).lean();
   const pendingAmount = payments
     .filter(p => ['pending', 'partially_paid'].includes(p.status))
     .reduce((sum, p) => sum + (p.amount - p.amountPaid), 0);
@@ -1171,7 +1171,7 @@ exports.getNotifications = catchAsync(async (req, res) => {
   const notifications = await PortalNotification.find({ guardianId })
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit);
+    .limit(limit).lean();
 
   const total = await PortalNotification.countDocuments({ guardianId });
 
@@ -1239,7 +1239,7 @@ exports.markAllNotificationsRead = catchAsync(async (req, res) => {
 exports.getNotificationPreferences = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).select('notificationPreference language');
+  const guardian = await Guardian.findById(guardianId).select('notificationPreference language').lean();
 
   res.status(200).json({
     success: true,
@@ -1308,7 +1308,7 @@ exports.changePassword = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { currentPassword, newPassword } = req.body;
 
-  const user = await require('../models/User').findById(guardianId);
+  const user = await require('../models/User').findById(guardianId).lean();
   const isCorrect = await user.comparePassword(currentPassword);
 
   if (!isCorrect) {
@@ -1343,7 +1343,7 @@ exports.changeLanguage = catchAsync(async (req, res) => {
 exports.getAnalyticsDashboard = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const progressData = await BeneficiaryProgress.find({
@@ -1373,7 +1373,7 @@ exports.getAnalyticsDashboard = catchAsync(async (req, res) => {
 exports.getPerformanceAnalytics = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const aggregate = await BeneficiaryProgress.aggregate([
@@ -1401,7 +1401,7 @@ exports.getPerformanceAnalytics = catchAsync(async (req, res) => {
 exports.getFinancialAnalytics = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const payments = await PortalPayment.find({ guardianId });
+  const payments = await PortalPayment.find({ guardianId }).lean();
 
   const stats = {
     totalPaid: payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amountPaid, 0),
@@ -1424,7 +1424,7 @@ exports.getFinancialAnalytics = catchAsync(async (req, res) => {
 exports.getAttendanceAnalytics = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', '_id').lean();
   const beneficiaryIds = guardian.beneficiaries.map(b => b._id);
 
   const aggregate = await BeneficiaryProgress.aggregate([
@@ -1507,7 +1507,7 @@ exports.bookAppointment = catchAsync(async (req, res) => {
   }
 
   // Verify guardian access
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized for this beneficiary' });
   }
@@ -1648,7 +1648,7 @@ exports.getBeneficiarySchedule = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
   const { date } = req.query;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1683,7 +1683,7 @@ exports.getBeneficiaryWeeklySchedule = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1699,7 +1699,7 @@ exports.getBeneficiaryWeeklySchedule = catchAsync(async (req, res) => {
   const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
   const formattedWeek = dayNames.map((name, idx) => {
-    const daySchedule = weeklySchedule.find(s => s.dayOfWeek === idx);
+    const daySchedule = weeklySchedule.find(s => s.dayOfWeek === idx).lean();
     return {
       dayOfWeek: idx,
       dayName: name,
@@ -1721,7 +1721,7 @@ exports.getBeneficiaryExams = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1751,7 +1751,7 @@ exports.getBeneficiaryIEP = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1776,7 +1776,7 @@ exports.getBeneficiaryIEPGoals = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1806,7 +1806,7 @@ exports.getBeneficiaryIEPProgress = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -1858,13 +1858,13 @@ exports.submitIEPFeedback = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
   const { goalId, feedback, rating, suggestions } = req.body;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
   const GuardianIEP = _getModel('GuardianIEP');
-  const iep = await GuardianIEP.findOne({ beneficiaryId, status: 'active' });
+  const iep = await GuardianIEP.findOne({ beneficiaryId, status: 'active' }).lean();
 
   if (!iep) {
     return res.status(404).json({ success: false, message: 'No active IEP found' });
@@ -1961,7 +1961,7 @@ exports.submitSurvey = catchAsync(async (req, res) => {
   }
 
   const GuardianSurvey = _getModel('GuardianSurvey');
-  const survey = await GuardianSurvey.findById(surveyId);
+  const survey = await GuardianSurvey.findById(surveyId).lean();
 
   if (!survey) {
     return res.status(404).json({ success: false, message: 'Survey not found' });
@@ -2102,7 +2102,7 @@ exports.bookmarkResource = catchAsync(async (req, res) => {
   const { resourceId } = req.params;
 
   const GuardianResource = _getModel('GuardianResource');
-  const resource = await GuardianResource.findById(resourceId);
+  const resource = await GuardianResource.findById(resourceId).lean();
 
   if (!resource) {
     return res.status(404).json({ success: false, message: 'Resource not found' });
@@ -2238,7 +2238,7 @@ exports.replySupportTicket = catchAsync(async (req, res) => {
   }
 
   const GuardianSupportTicket = _getModel('GuardianSupportTicket');
-  const ticket = await GuardianSupportTicket.findById(ticketId);
+  const ticket = await GuardianSupportTicket.findById(ticketId).lean();
 
   if (!ticket) {
     return res.status(404).json({ success: false, message: 'Ticket not found' });
@@ -2358,7 +2358,7 @@ exports.rsvpEvent = catchAsync(async (req, res) => {
   const { attending, attendeeCount } = req.body;
 
   const GuardianEvent = _getModel('GuardianEvent');
-  const event = await GuardianEvent.findById(eventId);
+  const event = await GuardianEvent.findById(eventId).lean();
 
   if (!event) {
     return res.status(404).json({ success: false, message: 'Event not found' });
@@ -2750,7 +2750,7 @@ exports.reportTransportationAbsence = catchAsync(async (req, res) => {
     return res.status(400).json({ success: false, message: 'beneficiaryId and date are required' });
   }
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -2841,13 +2841,13 @@ exports.enrollActivity = catchAsync(async (req, res) => {
     return res.status(400).json({ success: false, message: 'beneficiaryId is required' });
   }
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized for this beneficiary' });
   }
 
   const GuardianActivity = _getModel('GuardianActivity');
-  const activity = await GuardianActivity.findById(activityId);
+  const activity = await GuardianActivity.findById(activityId).lean();
 
   if (!activity) {
     return res.status(404).json({ success: false, message: 'Activity not found' });
@@ -2893,7 +2893,7 @@ exports.withdrawActivity = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.body;
 
   const GuardianActivity = _getModel('GuardianActivity');
-  const activity = await GuardianActivity.findById(activityId);
+  const activity = await GuardianActivity.findById(activityId).lean();
 
   if (!activity) {
     return res.status(404).json({ success: false, message: 'Activity not found' });
@@ -2974,7 +2974,7 @@ exports.createPermissionRequest = catchAsync(async (req, res) => {
     });
   }
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized for this beneficiary' });
   }
@@ -3024,7 +3024,7 @@ exports.cancelPermissionRequest = catchAsync(async (req, res) => {
   const { requestId } = req.params;
 
   const GuardianPermissionRequest = _getModel('GuardianPermissionRequest');
-  const request = await GuardianPermissionRequest.findById(requestId);
+  const request = await GuardianPermissionRequest.findById(requestId).lean();
 
   if (!request) {
     return res.status(404).json({ success: false, message: 'Permission request not found' });
@@ -3219,7 +3219,7 @@ exports.getRewardHistory = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian.beneficiaries.map(b => b.toString()).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
@@ -3323,12 +3323,12 @@ exports.sendEmergencyAlert = catchAsync(async (req, res) => {
 exports.getBeneficiaryHealthRecords = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const HealthRecord = _getModel('GuardianHealthRecord');
-  const records = await HealthRecord.find({ beneficiaryId }).sort({ recordDate: -1 }).limit(50);
+  const records = await HealthRecord.find({ beneficiaryId }).sort({ recordDate: -1 }).limit(50).lean();
   res.json({ success: true, data: records });
 });
 
@@ -3339,12 +3339,12 @@ exports.getBeneficiaryHealthRecords = catchAsync(async (req, res) => {
 exports.getBeneficiaryMedications = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const HealthRecord = _getModel('GuardianHealthRecord');
-  const meds = await HealthRecord.find({ beneficiaryId, recordType: 'medication', isActive: true });
+  const meds = await HealthRecord.find({ beneficiaryId, recordType: 'medication', isActive: true }).lean();
   res.json({ success: true, data: meds });
 });
 
@@ -3355,12 +3355,12 @@ exports.getBeneficiaryMedications = catchAsync(async (req, res) => {
 exports.getBeneficiaryAllergies = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const HealthRecord = _getModel('GuardianHealthRecord');
-  const allergies = await HealthRecord.find({ beneficiaryId, recordType: 'allergy' });
+  const allergies = await HealthRecord.find({ beneficiaryId, recordType: 'allergy' }).lean();
   res.json({ success: true, data: allergies });
 });
 
@@ -3371,7 +3371,7 @@ exports.getBeneficiaryAllergies = catchAsync(async (req, res) => {
 exports.getBeneficiaryVaccinations = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3390,7 +3390,7 @@ exports.reportHealthIncident = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
   const { incidentType, description, severity, date } = req.body;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3421,7 +3421,7 @@ exports.reportHealthIncident = catchAsync(async (req, res) => {
 exports.getHealthSummary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3453,7 +3453,7 @@ exports.getHealthSummary = catchAsync(async (req, res) => {
 exports.getBeneficiaryTherapySessions = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3481,12 +3481,12 @@ exports.getBeneficiaryTherapySessions = catchAsync(async (req, res) => {
 exports.getTherapySessionDetail = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId, sessionId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const TherapySession = _getModel('GuardianTherapySession');
-  const session = await TherapySession.findOne({ _id: sessionId, beneficiaryId });
+  const session = await TherapySession.findOne({ _id: sessionId, beneficiaryId }).lean();
   if (!session) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
   res.json({ success: true, data: session });
 });
@@ -3499,7 +3499,7 @@ exports.rateTherapySession = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId, sessionId } = req.params;
   const { rating, comment } = req.body;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3523,7 +3523,7 @@ exports.rateTherapySession = catchAsync(async (req, res) => {
 exports.getUpcomingTherapySessions = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3545,14 +3545,14 @@ exports.getUpcomingTherapySessions = catchAsync(async (req, res) => {
 exports.getTherapyProgress = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const TherapySession = _getModel('GuardianTherapySession');
   const sessions = await TherapySession.find({ beneficiaryId, status: 'completed' })
     .sort({ sessionDate: -1 })
-    .limit(30);
+    .limit(30).lean();
   const totalSessions = await TherapySession.countDocuments({ beneficiaryId });
   const completedSessions = sessions.length;
   const avgRating =
@@ -3578,7 +3578,7 @@ exports.getTherapyProgress = catchAsync(async (req, res) => {
 exports.getBeneficiaryMealPlan = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3600,12 +3600,12 @@ exports.getBeneficiaryMealPlan = catchAsync(async (req, res) => {
 exports.getBeneficiaryDietary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const MealPlan = _getModel('GuardianMealPlan');
-  const dietary = await MealPlan.findOne({ beneficiaryId, recordType: 'dietary_profile' });
+  const dietary = await MealPlan.findOne({ beneficiaryId, recordType: 'dietary_profile' }).lean();
   res.json({
     success: true,
     data: dietary || { restrictions: [], allergies: [], preferences: [], specialDiet: null },
@@ -3620,7 +3620,7 @@ exports.updateBeneficiaryDietary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
   const { restrictions, allergies, preferences, specialDiet } = req.body;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3650,7 +3650,7 @@ exports.requestSpecialMeal = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
   const { date, mealType, description, reason } = req.body;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3679,7 +3679,7 @@ exports.requestSpecialMeal = catchAsync(async (req, res) => {
 exports.getNutritionReport = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3709,7 +3709,7 @@ exports.getNutritionReport = catchAsync(async (req, res) => {
  */
 exports.getGallery = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian) return res.status(404).json({ success: false, message: 'ولي الأمر غير موجود' });
   const Gallery = _getModel('GuardianGallery');
   const page = parseInt(req.query.page) || 1;
@@ -3738,7 +3738,7 @@ exports.getGallery = catchAsync(async (req, res) => {
  */
 exports.getGalleryAlbums = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian) return res.status(404).json({ success: false, message: 'غير موجود' });
   const Gallery = _getModel('GuardianGallery');
   const albums = await Gallery.aggregate([
@@ -3766,10 +3766,10 @@ exports.getGalleryAlbums = catchAsync(async (req, res) => {
  */
 exports.getGalleryItem = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian) return res.status(404).json({ success: false, message: 'غير موجود' });
   const Gallery = _getModel('GuardianGallery');
-  const item = await Gallery.findById(req.params.mediaId);
+  const item = await Gallery.findById(req.params.mediaId).lean();
   if (!item) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
   res.json({ success: true, data: item });
 });
@@ -3780,7 +3780,7 @@ exports.getGalleryItem = catchAsync(async (req, res) => {
  */
 exports.downloadGalleryItem = catchAsync(async (req, res) => {
   const Gallery = _getModel('GuardianGallery');
-  const item = await Gallery.findById(req.params.mediaId);
+  const item = await Gallery.findById(req.params.mediaId).lean();
   if (!item) return res.status(404).json({ success: false, message: 'الملف غير موجود' });
   await Gallery.findByIdAndUpdate(req.params.mediaId, { $inc: { downloadCount: 1 } });
   res.json({ success: true, data: { url: item.fileUrl, filename: item.filename } });
@@ -3795,7 +3795,7 @@ exports.downloadGalleryItem = catchAsync(async (req, res) => {
 exports.getBeneficiaryHomework = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3825,12 +3825,12 @@ exports.getBeneficiaryHomework = catchAsync(async (req, res) => {
 exports.getHomeworkDetail = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId, homeworkId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const Homework = _getModel('GuardianHomework');
-  const homework = await Homework.findOne({ _id: homeworkId, beneficiaryId });
+  const homework = await Homework.findOne({ _id: homeworkId, beneficiaryId }).lean();
   if (!homework) return res.status(404).json({ success: false, message: 'الواجب غير موجود' });
   res.json({ success: true, data: homework });
 });
@@ -3842,7 +3842,7 @@ exports.getHomeworkDetail = catchAsync(async (req, res) => {
 exports.getPendingHomework = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3862,7 +3862,7 @@ exports.getPendingHomework = catchAsync(async (req, res) => {
 exports.acknowledgeHomework = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId, homeworkId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3883,7 +3883,7 @@ exports.acknowledgeHomework = catchAsync(async (req, res) => {
 exports.getHomeworkStats = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3919,12 +3919,12 @@ exports.getHomeworkStats = catchAsync(async (req, res) => {
 exports.getBeneficiaryCertificates = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const Certificate = _getModel('GuardianCertificate');
-  const certs = await Certificate.find({ beneficiaryId }).sort({ issuedDate: -1 });
+  const certs = await Certificate.find({ beneficiaryId }).sort({ issuedDate: -1 }).lean();
   res.json({ success: true, data: certs });
 });
 
@@ -3935,12 +3935,12 @@ exports.getBeneficiaryCertificates = catchAsync(async (req, res) => {
 exports.getCertificateDetail = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId, certId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const Certificate = _getModel('GuardianCertificate');
-  const cert = await Certificate.findOne({ _id: certId, beneficiaryId });
+  const cert = await Certificate.findOne({ _id: certId, beneficiaryId }).lean();
   if (!cert) return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
   res.json({ success: true, data: cert });
 });
@@ -3952,12 +3952,12 @@ exports.getCertificateDetail = catchAsync(async (req, res) => {
 exports.downloadCertificate = catchAsync(async (req, res) => {
   const { beneficiaryId, certId } = req.params;
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const Certificate = _getModel('GuardianCertificate');
-  const cert = await Certificate.findOne({ _id: certId, beneficiaryId });
+  const cert = await Certificate.findOne({ _id: certId, beneficiaryId }).lean();
   if (!cert) return res.status(404).json({ success: false, message: 'الشهادة غير موجودة' });
   await Certificate.findByIdAndUpdate(certId, { $inc: { downloadCount: 1 } });
   res.json({
@@ -3973,7 +3973,7 @@ exports.downloadCertificate = catchAsync(async (req, res) => {
 exports.getBeneficiaryAchievements = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian || !guardian.beneficiaries.map(String).includes(beneficiaryId)) {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
@@ -3993,7 +3993,7 @@ exports.getBeneficiaryAchievements = catchAsync(async (req, res) => {
 exports.getVisitorPasses = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const VisitorPass = _getModel('GuardianVisitorPass');
-  const passes = await VisitorPass.find({ guardianId }).sort({ visitDate: -1 }).limit(30);
+  const passes = await VisitorPass.find({ guardianId }).sort({ visitDate: -1 }).limit(30).lean();
   res.json({ success: true, data: passes });
 });
 
@@ -4031,7 +4031,7 @@ exports.requestVisitorPass = catchAsync(async (req, res) => {
 exports.getVisitorPassDetail = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const VisitorPass = _getModel('GuardianVisitorPass');
-  const pass = await VisitorPass.findOne({ _id: req.params.passId, guardianId });
+  const pass = await VisitorPass.findOne({ _id: req.params.passId, guardianId }).lean();
   if (!pass) return res.status(404).json({ success: false, message: 'التصريح غير موجود' });
   res.json({ success: true, data: pass });
 });
@@ -4125,7 +4125,7 @@ exports.bookFacility = catchAsync(async (req, res) => {
 exports.getMyFacilityBookings = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const FacilityBooking = _getModel('GuardianFacilityBooking');
-  const bookings = await FacilityBooking.find({ guardianId }).sort({ date: -1 }).limit(30);
+  const bookings = await FacilityBooking.find({ guardianId }).sort({ date: -1 }).limit(30).lean();
   res.json({ success: true, data: bookings });
 });
 
@@ -4185,7 +4185,7 @@ exports.checkFacilityAvailability = catchAsync(async (req, res) => {
 exports.getSatisfactionRatings = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const Satisfaction = _getModel('GuardianSatisfaction');
-  const ratings = await Satisfaction.find({ guardianId }).sort({ createdAt: -1 }).limit(20);
+  const ratings = await Satisfaction.find({ guardianId }).sort({ createdAt: -1 }).limit(20).lean();
   res.json({ success: true, data: ratings });
 });
 
@@ -4231,7 +4231,7 @@ exports.submitSatisfaction = catchAsync(async (req, res) => {
 exports.getPendingSatisfaction = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const Satisfaction = _getModel('GuardianSatisfaction');
-  const completed = await Satisfaction.find({ guardianId }).select('serviceType');
+  const completed = await Satisfaction.find({ guardianId }).select('serviceType').lean();
   const allServices = [
     'therapy',
     'education',
@@ -4253,7 +4253,7 @@ exports.getPendingSatisfaction = catchAsync(async (req, res) => {
 exports.getSatisfactionSummary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const Satisfaction = _getModel('GuardianSatisfaction');
-  const ratings = await Satisfaction.find({ guardianId });
+  const ratings = await Satisfaction.find({ guardianId }).lean();
   const totalRatings = ratings.length;
   const avgOverall = ratings.reduce((a, r) => a + (r.overallRating || 0), 0) / (totalRatings || 1);
   const byService = {};
@@ -4292,7 +4292,7 @@ exports.getAcademicCalendar = catchAsync(async (req, res) => {
     endDate.setMonth(endDate.getMonth() + (month ? 1 : 12));
     query.date = { $gte: startDate, $lt: endDate };
   }
-  const events = await AcademicCalendar.find(query).sort({ date: 1 });
+  const events = await AcademicCalendar.find(query).sort({ date: 1 }).lean();
   res.json({ success: true, data: events });
 });
 
@@ -4302,7 +4302,7 @@ exports.getAcademicCalendar = catchAsync(async (req, res) => {
  */
 exports.getHolidays = catchAsync(async (req, res) => {
   const AcademicCalendar = _getModel('GuardianAcademicCalendar');
-  const holidays = await AcademicCalendar.find({ eventType: 'holiday' }).sort({ date: 1 });
+  const holidays = await AcademicCalendar.find({ eventType: 'holiday' }).sort({ date: 1 }).lean();
   res.json({ success: true, data: holidays });
 });
 
@@ -4344,7 +4344,7 @@ exports.getFamilyEngagement = catchAsync(async (req, res) => {
  */
 exports.getFamilyEngagementDetail = catchAsync(async (req, res) => {
   const FamilyEngagement = _getModel('GuardianFamilyEngagement');
-  const program = await FamilyEngagement.findById(req.params.programId);
+  const program = await FamilyEngagement.findById(req.params.programId).lean();
   if (!program) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
   res.json({ success: true, data: program });
 });
@@ -4356,7 +4356,7 @@ exports.getFamilyEngagementDetail = catchAsync(async (req, res) => {
 exports.enrollFamilyProgram = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const FamilyEngagement = _getModel('GuardianFamilyEngagement');
-  const program = await FamilyEngagement.findById(req.params.programId);
+  const program = await FamilyEngagement.findById(req.params.programId).lean();
   if (!program) return res.status(404).json({ success: false, message: 'البرنامج غير موجود' });
   const alreadyEnrolled =
     program.enrolledGuardians &&
@@ -4377,7 +4377,7 @@ exports.enrollFamilyProgram = catchAsync(async (req, res) => {
  */
 exports.getHomeActivities = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId);
+  const guardian = await Guardian.findById(guardianId).lean();
   if (!guardian) return res.status(404).json({ success: false, message: 'غير موجود' });
   const FamilyEngagement = _getModel('GuardianFamilyEngagement');
   const activities = await FamilyEngagement.find({
@@ -4397,7 +4397,7 @@ exports.getHomeActivities = catchAsync(async (req, res) => {
  */
 exports.getSiblingsComparison = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name status');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name status').lean();
   if (!guardian || !guardian.beneficiaries.length) {
     return res.status(404).json({ success: false, message: 'لا يوجد مستفيدين' });
   }
@@ -4434,7 +4434,7 @@ exports.getSiblingsComparison = catchAsync(async (req, res) => {
  */
 exports.getSiblingsAttendanceComparison = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name').lean();
   if (!guardian || !guardian.beneficiaries.length) {
     return res.status(404).json({ success: false, message: 'لا يوجد مستفيدين' });
   }
@@ -4467,7 +4467,7 @@ exports.getSiblingsAttendanceComparison = catchAsync(async (req, res) => {
  */
 exports.getSiblingsAcademicComparison = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name');
+  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name').lean();
   if (!guardian || !guardian.beneficiaries.length) {
     return res.status(404).json({ success: false, message: 'لا يوجد مستفيدين' });
   }
@@ -4525,7 +4525,7 @@ exports.getVolunteerProgramDetail = catchAsync(async (req, res) => {
 
 exports.enrollVolunteer = catchAsync(async (req, res) => {
   const Model = _getModel('GuardianVolunteerProgram');
-  const program = await Model.findById(req.params.programId);
+  const program = await Model.findById(req.params.programId).lean();
   if (!program) throw new AppError('البرنامج غير موجود', 404);
   if (program.maxVolunteers && program.enrolledVolunteers.length >= program.maxVolunteers) {
     throw new AppError('البرنامج مكتمل', 400);
@@ -4781,7 +4781,7 @@ exports.getParentTrainingDetail = catchAsync(async (req, res) => {
 
 exports.enrollParentTraining = catchAsync(async (req, res) => {
   const Model = _getModel('GuardianParentTraining');
-  const training = await Model.findById(req.params.trainingId);
+  const training = await Model.findById(req.params.trainingId).lean();
   if (!training) throw new AppError('الدورة غير موجودة', 404);
   if (training.maxParticipants && training.enrolledParents.length >= training.maxParticipants) {
     throw new AppError('الدورة مكتملة', 400);
@@ -5008,7 +5008,7 @@ exports.getGiftedProgramDetail = catchAsync(async (req, res) => {
 exports.nominateBeneficiary = catchAsync(async (req, res) => {
   const Model = _getModel('GuardianGiftedProgram');
   const { beneficiaryId, reason, skills } = req.body;
-  const program = await Model.findById(req.params.programId);
+  const program = await Model.findById(req.params.programId).lean();
   if (!program) throw new AppError('البرنامج غير موجود', 404);
   program.nominations = program.nominations || [];
   program.nominations.push({
@@ -5240,7 +5240,7 @@ exports.getExpenseForecast = catchAsync(async (req, res) => {
 exports.getBudgetAnalytics = catchAsync(async (req, res) => {
   const Model = _getModel('GuardianBudgetPlan');
   const plans = await Model.find({ guardianId: req.user._id }).sort({ createdAt: -1 }).lean();
-  const activePlan = plans.find(p => p.status === 'active');
+  const activePlan = plans.find(p => p.status === 'active').lean();
   const totalSpent = activePlan
     ? (activePlan.categories || []).reduce((s, c) => s + (c.spent || 0), 0)
     : 0;

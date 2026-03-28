@@ -115,7 +115,7 @@ class RehabCenterLicenseService {
 
   /** تحديث ترخيص */
   async update(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const oldData = license.toObject();
@@ -133,7 +133,7 @@ class RehabCenterLicenseService {
 
   /** حذف (soft delete) */
   async delete(id, userId, reason) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.isDeleted = true;
@@ -151,7 +151,7 @@ class RehabCenterLicenseService {
 
   /** تجديد ترخيص */
   async renew(id, renewalData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!renewalData.newExpiryDate) {
@@ -193,7 +193,7 @@ class RehabCenterLicenseService {
     if (days === null) return;
 
     const alertDays = license.renewalSettings?.alertBeforeDays || [90, 60, 30, 15, 7, 3, 1];
-    const matchingAlert = alertDays.find(d => days <= d);
+    const matchingAlert = alertDays.find(d => days <= d).lean();
 
     if (matchingAlert !== undefined) {
       let type, priority, title;
@@ -228,7 +228,7 @@ class RehabCenterLicenseService {
       }
 
       // تجنب التكرار
-      const existing = license.alerts.find(a => a.type === type && !a.isDismissed);
+      const existing = license.alerts.find(a => a.type === type && !a.isDismissed).lean();
       if (!existing) {
         license.alerts.push({
           type,
@@ -316,7 +316,7 @@ class RehabCenterLicenseService {
 
   /** تجاهل تنبيه */
   async dismissAlert(licenseId, alertId, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: licenseId, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: licenseId, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const alert = license.alerts.id(alertId);
@@ -331,7 +331,7 @@ class RehabCenterLicenseService {
 
   /** تعليم تنبيه كمقروء */
   async markAlertRead(licenseId, alertId) {
-    const license = await RehabCenterLicense.findOne({ _id: licenseId, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: licenseId, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const alert = license.alerts.id(alertId);
@@ -464,7 +464,7 @@ class RehabCenterLicenseService {
   // ==================== إضافة ملاحظة ====================
 
   async addNote(id, content, category, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.notes.push({ content, category: category || 'general', createdBy: userId });
@@ -477,7 +477,7 @@ class RehabCenterLicenseService {
   // ==================== رفع مستند ====================
 
   async addAttachment(id, fileData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.attachments.push({
@@ -512,7 +512,7 @@ class RehabCenterLicenseService {
     const results = [];
     for (const id of licenseIds) {
       try {
-        const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+        const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
         if (!license) {
           results.push({ id, success: false, error: 'غير موجود' });
           continue;
@@ -532,7 +532,7 @@ class RehabCenterLicenseService {
 
   /** تسجيل نتيجة تفتيش */
   async recordInspection(id, inspectionData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.compliance.lastInspectionDate = new Date();
@@ -560,7 +560,7 @@ class RehabCenterLicenseService {
 
   /** تسجيل مخالفة */
   async recordViolation(id, violationData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.compliance.violations.push({
@@ -591,7 +591,7 @@ class RehabCenterLicenseService {
 
   /** إضافة/تحديث تفويض */
   async setDelegation(id, delegationData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.delegation = { ...delegationData, hasDelegation: true, isActive: true };
@@ -604,7 +604,7 @@ class RehabCenterLicenseService {
 
   /** إلغاء تفويض */
   async revokeDelegation(id, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.delegation.isActive = false;
@@ -634,7 +634,7 @@ class RehabCenterLicenseService {
     const [license, target] = await Promise.all([
       RehabCenterLicense.findOne({ _id: id, isDeleted: false }),
       RehabCenterLicense.findOne({ _id: targetId, isDeleted: false }),
-    ]);
+    ]).lean();
     if (!license || !target) throw new AppError('أحد التراخيص غير موجود', 404);
 
     // إضافة الرابط في الاتجاهين
@@ -677,7 +677,7 @@ class RehabCenterLicenseService {
 
   /** إضافة متطلب */
   async addRequirement(id, requirementData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.requirementsChecklist.push(requirementData);
@@ -689,7 +689,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة متطلب */
   async updateRequirement(id, requirementId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const req = license.requirementsChecklist.id(requirementId);
@@ -707,7 +707,7 @@ class RehabCenterLicenseService {
 
   /** الحصول على حالة المتطلبات */
   async getRequirementsStatus(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     return {
@@ -720,7 +720,7 @@ class RehabCenterLicenseService {
 
   /** إضافة شرط */
   async addCondition(id, conditionData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.conditions.push(conditionData);
@@ -732,7 +732,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة شرط */
   async updateCondition(id, conditionId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const cond = license.conditions.id(conditionId);
@@ -752,7 +752,7 @@ class RehabCenterLicenseService {
 
   /** إضافة غرامة */
   async addPenalty(id, penaltyData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.penalties.push({ ...penaltyData, status: 'pending' });
@@ -765,7 +765,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة غرامة */
   async updatePenalty(id, penaltyId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const penalty = license.penalties.id(penaltyId);
@@ -817,7 +817,7 @@ class RehabCenterLicenseService {
 
   /** حساب المخاطرة لترخيص */
   async calculateRisk(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const riskScore = license.calculateRiskScore();
@@ -828,7 +828,7 @@ class RehabCenterLicenseService {
 
   /** حساب المخاطرة لجميع التراخيص */
   async calculateAllRisks() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
     let updated = 0;
     for (const lic of licenses) {
       lic.calculateRiskScore();
@@ -849,7 +849,7 @@ class RehabCenterLicenseService {
 
   /** إعداد سير عمل موافقة */
   async setupApprovalWorkflow(id, steps, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.approvalWorkflow = {
@@ -871,10 +871,10 @@ class RehabCenterLicenseService {
 
   /** معالجة خطوة موافقة */
   async processApprovalStep(id, stepNumber, action, comments, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
-    const step = license.approvalWorkflow.steps.find(s => s.stepNumber === stepNumber);
+    const step = license.approvalWorkflow.steps.find(s => s.stepNumber === stepNumber).lean();
     if (!step) throw new AppError('خطوة الموافقة غير موجودة', 404);
 
     step.status = action; // 'approved' or 'rejected'
@@ -883,7 +883,7 @@ class RehabCenterLicenseService {
     step.comments = comments;
 
     if (action === 'approved') {
-      const nextStep = license.approvalWorkflow.steps.find(s => s.status === 'pending');
+      const nextStep = license.approvalWorkflow.steps.find(s => s.status === 'pending').lean();
       if (nextStep) {
         license.approvalWorkflow.currentStep = nextStep.stepNumber;
       } else {
@@ -903,7 +903,7 @@ class RehabCenterLicenseService {
 
   /** أرشفة ترخيص */
   async archive(id, reason, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.isArchived = true;
@@ -918,7 +918,7 @@ class RehabCenterLicenseService {
 
   /** استعادة من الأرشيف */
   async unarchive(id, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.isArchived = false;
@@ -1041,7 +1041,7 @@ class RehabCenterLicenseService {
 
   /** تقييم الترخيص من قبل الجهة المانحة */
   async setAuthorityRating(id, ratingData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.authorityRating = {
@@ -1060,7 +1060,7 @@ class RehabCenterLicenseService {
 
   /** تحديث تفضيلات الإشعارات */
   async updateNotificationPreferences(id, preferences, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.notificationPreferences = {
@@ -1077,7 +1077,7 @@ class RehabCenterLicenseService {
 
   /** إضافة فرع */
   async addBranch(id, branchData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.branches.push(branchData);
@@ -1089,7 +1089,7 @@ class RehabCenterLicenseService {
 
   /** حذف فرع */
   async removeBranch(id, branchId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.branches.pull(branchId);
@@ -1245,7 +1245,7 @@ class RehabCenterLicenseService {
 
   /** إضافة مهمة */
   async addTask(id, taskData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.tasks.push({ ...taskData, createdBy: userId });
@@ -1258,7 +1258,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة مهمة */
   async updateTask(id, taskId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const task = license.tasks.id(taskId);
@@ -1281,7 +1281,7 @@ class RehabCenterLicenseService {
 
   /** حذف مهمة */
   async removeTask(id, taskId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.tasks.pull(taskId);
@@ -1305,7 +1305,7 @@ class RehabCenterLicenseService {
 
   /** إضافة مراسلة */
   async addCommunication(id, commData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.communications.push({ ...commData, createdBy: userId });
@@ -1318,7 +1318,7 @@ class RehabCenterLicenseService {
 
   /** تحديث مراسلة (مثلاً تسجيل الرد) */
   async updateCommunication(id, commId, data, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const comm = license.communications.id(commId);
@@ -1415,7 +1415,7 @@ class RehabCenterLicenseService {
 
   /** حساب تقدير الرسوم لترخيص */
   async calculateFees(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const costs = license.costs || {};
@@ -1490,7 +1490,7 @@ class RehabCenterLicenseService {
 
   /** إضافة حدث للتقويم */
   async addCalendarEvent(id, eventData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.calendarEvents.push({ ...eventData, createdBy: userId });
@@ -1502,7 +1502,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حدث */
   async updateCalendarEvent(id, eventId, data, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const event = license.calendarEvents.id(eventId);
@@ -1515,7 +1515,7 @@ class RehabCenterLicenseService {
 
   /** حذف حدث */
   async removeCalendarEvent(id, eventId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.calendarEvents.pull(eventId);
@@ -1533,7 +1533,7 @@ class RehabCenterLicenseService {
 
   /** إضافة جهة اتصال */
   async addAuthorityContact(id, contactData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.authorityContacts.push(contactData);
@@ -1545,7 +1545,7 @@ class RehabCenterLicenseService {
 
   /** تحديث جهة اتصال */
   async updateAuthorityContact(id, contactId, data, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const contact = license.authorityContacts.id(contactId);
@@ -1558,7 +1558,7 @@ class RehabCenterLicenseService {
 
   /** حذف جهة اتصال */
   async removeAuthorityContact(id, contactId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.authorityContacts.pull(contactId);
@@ -1571,7 +1571,7 @@ class RehabCenterLicenseService {
 
   /** إضافة وثيقة للقائمة */
   async addDocumentChecklistItem(id, docData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.documentChecklist.push(docData);
@@ -1583,7 +1583,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة وثيقة */
   async updateDocumentChecklistItem(id, docId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const doc = license.documentChecklist.id(docId);
@@ -1605,7 +1605,7 @@ class RehabCenterLicenseService {
 
   /** حالة قائمة الوثائق */
   async getDocumentChecklistStatus(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const checklist = license.documentChecklist || [];
@@ -1635,7 +1635,7 @@ class RehabCenterLicenseService {
 
   /** إضافة تعليق */
   async addComment(id, commentData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.comments.push({ ...commentData, createdBy: userId });
@@ -1646,7 +1646,7 @@ class RehabCenterLicenseService {
 
   /** تحديث تعليق */
   async updateComment(id, commentId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const comment = license.comments.id(commentId);
@@ -1663,7 +1663,7 @@ class RehabCenterLicenseService {
 
   /** حذف تعليق (soft) */
   async deleteComment(id, commentId, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const comment = license.comments.id(commentId);
@@ -1676,7 +1676,7 @@ class RehabCenterLicenseService {
 
   /** تثبيت/إلغاء تثبيت تعليق */
   async togglePinComment(id, commentId, _userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const comment = license.comments.id(commentId);
@@ -1694,7 +1694,7 @@ class RehabCenterLicenseService {
 
   /** تحديث بيانات الميزانية */
   async updateBudget(id, budgetData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const existing = license.budget?.toObject?.() || license.budget || {};
@@ -1707,7 +1707,7 @@ class RehabCenterLicenseService {
 
   /** إضافة مصروف */
   async addExpense(id, expenseData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.budget) license.budget = { expenses: [] };
@@ -1737,7 +1737,7 @@ class RehabCenterLicenseService {
 
   /** حساب صحة ترخيص */
   async calculateHealth(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const health = license.calculateHealthScore();
@@ -1747,7 +1747,7 @@ class RehabCenterLicenseService {
 
   /** حساب صحة جميع التراخيص */
   async calculateAllHealth() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
     let updated = 0;
     for (const lic of licenses) {
       lic.calculateHealthScore();
@@ -1798,7 +1798,7 @@ class RehabCenterLicenseService {
 
   /** حساب KPI لترخيص */
   async calculateKPIs(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const kpi = license.calculateKPIs();
@@ -1808,7 +1808,7 @@ class RehabCenterLicenseService {
 
   /** لوحة مؤشرات الأداء الشاملة */
   async getKPIDashboard() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
 
     let totalRenewalOnTime = 0;
     let totalCompliance = 0;
@@ -1863,7 +1863,7 @@ class RehabCenterLicenseService {
 
   /** حفظ ترخيص كقالب */
   async saveAsTemplate(id, templateInfo, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.templateData = {
@@ -1948,7 +1948,7 @@ class RehabCenterLicenseService {
 
   /** إضافة إلى المفضلة */
   async toggleFavorite(id, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.favorites) license.favorites = [];
@@ -1972,7 +1972,7 @@ class RehabCenterLicenseService {
 
   /** إضافة/إزالة متابعة */
   async toggleWatch(id, userId, watchType = 'all') {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.watchers) license.watchers = [];
@@ -2060,7 +2060,7 @@ class RehabCenterLicenseService {
 
   /** تحديث إعدادات SLA */
   async updateSLASettings(id, slaSettings, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const existing = license.sla || {};
@@ -2073,7 +2073,7 @@ class RehabCenterLicenseService {
 
   /** إضافة قاعدة تصعيد */
   async addEscalationRule(id, ruleData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.sla) license.sla = {};
@@ -2086,7 +2086,7 @@ class RehabCenterLicenseService {
 
   /** حذف قاعدة تصعيد */
   async removeEscalationRule(id, ruleId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const idx = (license.sla?.escalationRules || []).findIndex(r => r._id?.toString() === ruleId);
@@ -2099,7 +2099,7 @@ class RehabCenterLicenseService {
 
   /** تقييم SLA لترخيص */
   async evaluateSLA(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const sla = license.evaluateSLA();
@@ -2109,7 +2109,7 @@ class RehabCenterLicenseService {
 
   /** تقييم SLA لجميع التراخيص */
   async evaluateAllSLA() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
     let updated = 0;
     for (const lic of licenses) {
       lic.evaluateSLA();
@@ -2144,7 +2144,7 @@ class RehabCenterLicenseService {
 
   /** إنشاء تذكرة */
   async createTicket(id, ticketData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.tickets) license.tickets = [];
@@ -2158,7 +2158,7 @@ class RehabCenterLicenseService {
 
   /** تحديث تذكرة */
   async updateTicket(id, ticketId, updateData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const ticket = (license.tickets || []).id(ticketId);
@@ -2178,7 +2178,7 @@ class RehabCenterLicenseService {
 
   /** إضافة رد على تذكرة */
   async addTicketResponse(id, ticketId, responseData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const ticket = (license.tickets || []).id(ticketId);
@@ -2206,7 +2206,7 @@ class RehabCenterLicenseService {
 
   /** إضافة قاعدة أتمتة */
   async addAutomationRule(id, ruleData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.automationRules) license.automationRules = [];
@@ -2218,7 +2218,7 @@ class RehabCenterLicenseService {
 
   /** تحديث قاعدة أتمتة */
   async updateAutomationRule(id, ruleId, updateData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const rule = (license.automationRules || []).id(ruleId);
@@ -2232,7 +2232,7 @@ class RehabCenterLicenseService {
 
   /** حذف قاعدة أتمتة */
   async removeAutomationRule(id, ruleId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const idx = (license.automationRules || []).findIndex(r => r._id?.toString() === ruleId);
@@ -2245,7 +2245,7 @@ class RehabCenterLicenseService {
 
   /** تنفيذ قواعد الأتمتة لترخيص */
   async runAutomationRules(id, event) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) return { triggered: 0 };
 
     const rules = (license.automationRules || []).filter(
@@ -2291,7 +2291,7 @@ class RehabCenterLicenseService {
 
   /** توليد التقرير التنفيذي لترخيص */
   async generateExecutiveSummary(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const summary = license.generateExecutiveSummary();
@@ -2306,7 +2306,7 @@ class RehabCenterLicenseService {
 
   /** توليد التقارير التنفيذية لجميع التراخيص */
   async generateAllExecutiveSummaries() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
     let updated = 0;
     for (const lic of licenses) {
       lic.generateExecutiveSummary();
@@ -2320,7 +2320,7 @@ class RehabCenterLicenseService {
 
   /** حساب التحليلات التنبؤية لترخيص */
   async calculatePredictions(id) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const predictions = license.calculatePredictions();
@@ -2330,7 +2330,7 @@ class RehabCenterLicenseService {
 
   /** التحليلات التنبؤية الشاملة */
   async getPredictiveAnalytics() {
-    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isActive: true, isDeleted: false }).lean();
     let totalRenewalCost = 0,
       highRiskCount = 0,
       decliningCompliance = 0,
@@ -2393,7 +2393,7 @@ class RehabCenterLicenseService {
 
   /** إضافة سجل تغيير يدوي */
   async addChangeLogEntry(id, entryData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.addChangeLogEntry(
@@ -2414,7 +2414,7 @@ class RehabCenterLicenseService {
 
   /** إضافة وثيقة مع إصدار */
   async addDocumentVersion(id, docData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     if (!license.documentVersions) license.documentVersions = [];
@@ -2447,7 +2447,7 @@ class RehabCenterLicenseService {
 
   /** إضافة إصدار جديد لوثيقة موجودة */
   async addNewVersion(id, docId, versionData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const doc = (license.documentVersions || []).id(docId);
@@ -2489,7 +2489,7 @@ class RehabCenterLicenseService {
       .lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
-    const doc = (license.documentVersions || []).find(d => d._id?.toString() === docId);
+    const doc = (license.documentVersions || []).find(d => d._id?.toString() === docId).lean();
     if (!doc) throw new AppError('الوثيقة غير موجودة', 404);
     return doc;
   }
@@ -2501,7 +2501,7 @@ class RehabCenterLicenseService {
 
   /** حذف وثيقة */
   async removeDocumentVersion(id, docId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const doc = (license.documentVersions || []).id(docId);
@@ -2519,7 +2519,7 @@ class RehabCenterLicenseService {
 
   /** إضافة إشعار مجدول */
   async addScheduledNotification(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const notification = { ...data, createdBy: userId, createdAt: new Date() };
@@ -2542,7 +2542,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة إشعار */
   async updateNotificationStatus(id, notifId, status, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const notif = (license.scheduledNotifications || []).id(notifId);
@@ -2557,7 +2557,7 @@ class RehabCenterLicenseService {
 
   /** حذف إشعار مجدول */
   async removeScheduledNotification(id, notifId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const notif = (license.scheduledNotifications || []).id(notifId);
@@ -2578,7 +2578,7 @@ class RehabCenterLicenseService {
     if (filters.status) query.status = filters.status;
     if (filters.category) query.category = filters.category;
     if (filters.priority) query.priority = filters.priority;
-    const licenses = await RehabCenterLicense.find(query);
+    const licenses = await RehabCenterLicense.find(query).lean();
 
     const results = [];
     for (const license of licenses) {
@@ -2597,7 +2597,7 @@ class RehabCenterLicenseService {
 
   /** إضافة تقييم رضا */
   async addSatisfactionSurvey(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const survey = { ...data, submittedAt: new Date() };
@@ -2694,7 +2694,7 @@ class RehabCenterLicenseService {
 
   /** إضافة توقيع رقمي */
   async addDigitalSignature(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const sig = { ...data, signedAt: new Date() };
@@ -2719,7 +2719,7 @@ class RehabCenterLicenseService {
 
   /** التحقق من توقيع */
   async verifyDigitalSignature(id, sigId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const sig = (license.digitalSignatures || []).id(sigId);
@@ -2761,7 +2761,7 @@ class RehabCenterLicenseService {
 
   /** إضافة اجتماع */
   async addMeeting(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const meeting = { ...data, createdBy: userId, createdAt: new Date() };
@@ -2784,7 +2784,7 @@ class RehabCenterLicenseService {
 
   /** تحديث اجتماع */
   async updateMeeting(id, meetingId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const meeting = (license.meetings || []).id(meetingId);
@@ -2798,7 +2798,7 @@ class RehabCenterLicenseService {
 
   /** تحديث قرار اجتماع */
   async updateMeetingDecision(id, meetingId, decisionIndex, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const meeting = (license.meetings || []).id(meetingId);
@@ -2819,7 +2819,7 @@ class RehabCenterLicenseService {
       if (filters.startDate) query['meetings.date'].$gte = new Date(filters.startDate);
       if (filters.endDate) query['meetings.date'].$lte = new Date(filters.endDate);
     }
-    const licenses = await RehabCenterLicense.find(query).select('meetings center');
+    const licenses = await RehabCenterLicense.find(query).select('meetings center').lean();
     const cal = [];
     for (const lic of licenses) {
       for (const m of lic.meetings || []) {
@@ -2835,7 +2835,7 @@ class RehabCenterLicenseService {
 
   /** إضافة ربط خارجي */
   async addExternalIntegration(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.externalIntegrations.push({ ...data, createdAt: new Date() });
@@ -2855,7 +2855,7 @@ class RehabCenterLicenseService {
 
   /** تحديث حالة المزامنة */
   async updateIntegrationSync(id, integId, syncData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const integ = (license.externalIntegrations || []).id(integId);
@@ -2871,7 +2871,7 @@ class RehabCenterLicenseService {
 
   /** حذف ربط خارجي */
   async removeExternalIntegration(id, integId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const integ = (license.externalIntegrations || []).id(integId);
@@ -2889,7 +2889,7 @@ class RehabCenterLicenseService {
 
   /** إضافة سجل تدريب */
   async addTrainingRecord(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.trainingRecords.push({ ...data, createdAt: new Date() });
@@ -2909,7 +2909,7 @@ class RehabCenterLicenseService {
 
   /** تحديث سجل تدريب */
   async updateTrainingRecord(id, recordId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const rec = (license.trainingRecords || []).id(recordId);
@@ -2991,7 +2991,7 @@ class RehabCenterLicenseService {
 
   /** تحديث ويدجت لوحة المعلومات */
   async updateDashboardWidgets(id, widgetsData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.dashboardWidgets = {
@@ -3019,7 +3019,7 @@ class RehabCenterLicenseService {
 
   /** إضافة إجراء إصلاحي */
   async addRemediationAction(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.remediationActions.push({ ...data, createdBy: userId, createdAt: new Date() });
@@ -3039,7 +3039,7 @@ class RehabCenterLicenseService {
 
   /** تنفيذ إجراء إصلاحي */
   async executeRemediation(id, actionId, result, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const action = (license.remediationActions || []).id(actionId);
@@ -3055,7 +3055,7 @@ class RehabCenterLicenseService {
 
   /** تشغيل المسح التلقائي وإنشاء إجراءات */
   async runAutoRemediation(userId) {
-    const licenses = await RehabCenterLicense.find({ isDeleted: false });
+    const licenses = await RehabCenterLicense.find({ isDeleted: false }).lean();
     const actions = [];
     const now = new Date();
 
@@ -3113,7 +3113,7 @@ class RehabCenterLicenseService {
 
   /** إضافة مورد */
   async addVendor(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     license.vendors.push({ ...data, createdAt: new Date() });
@@ -3133,7 +3133,7 @@ class RehabCenterLicenseService {
 
   /** تحديث مورد */
   async updateVendor(id, vendorId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const vendor = (license.vendors || []).id(vendorId);
@@ -3147,7 +3147,7 @@ class RehabCenterLicenseService {
 
   /** حذف مورد */
   async removeVendor(id, vendorId, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const vendor = (license.vendors || []).id(vendorId);
@@ -3161,7 +3161,7 @@ class RehabCenterLicenseService {
 
   /** تقييم الموردين عبر جميع التراخيص */
   async getGlobalVendorRatings() {
-    const licenses = await RehabCenterLicense.find({ isDeleted: false }).select('vendors');
+    const licenses = await RehabCenterLicense.find({ isDeleted: false }).select('vendors').lean();
     const vendorMap = {};
     for (const lic of licenses) {
       for (const v of lic.vendors || []) {
@@ -3196,7 +3196,7 @@ class RehabCenterLicenseService {
 
   /** إضافة شكوى أو مقترح */
   async addComplaint(id, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const complaint = {
@@ -3225,7 +3225,7 @@ class RehabCenterLicenseService {
 
   /** تحديث شكوى */
   async updateComplaint(id, complaintId, data, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const complaint = (license.complaints || []).id(complaintId);
@@ -3240,7 +3240,7 @@ class RehabCenterLicenseService {
 
   /** إضافة رد على شكوى */
   async addComplaintResponse(id, complaintId, responseData, userId) {
-    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false });
+    const license = await RehabCenterLicense.findOne({ _id: id, isDeleted: false }).lean();
     if (!license) throw new AppError('الترخيص غير موجود', 404);
 
     const complaint = (license.complaints || []).id(complaintId);

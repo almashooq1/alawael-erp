@@ -142,7 +142,7 @@ class DisabilityRehabilitationService {
   async getProgramById(programId) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -287,7 +287,7 @@ class DisabilityRehabilitationService {
   async updateProgram(programId, updateData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -366,7 +366,7 @@ class DisabilityRehabilitationService {
   async addSession(programId, sessionData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -437,7 +437,7 @@ class DisabilityRehabilitationService {
   async updateGoalStatus(programId, goalId, status, progress, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -446,7 +446,7 @@ class DisabilityRehabilitationService {
           };
         }
 
-        const goal = program.rehabilitation_goals.find(g => g.goal_id === goalId);
+        const goal = program.rehabilitation_goals.find(g => g.goal_id === goalId).lean();
         if (!goal) {
           return {
             success: false,
@@ -510,7 +510,7 @@ class DisabilityRehabilitationService {
   async addAssessment(programId, assessmentData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -582,7 +582,7 @@ class DisabilityRehabilitationService {
   async completeProgram(programId, completionNotes, completedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
 
         if (!program || program.is_active === false) {
           return {
@@ -900,7 +900,7 @@ class DisabilityRehabilitationService {
   async suspendProgram(programId, reason, expectedResumeDate, suspendedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program || program.is_active === false) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -950,7 +950,7 @@ class DisabilityRehabilitationService {
   async resumeProgram(programId, resumedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -996,7 +996,7 @@ class DisabilityRehabilitationService {
   async transferProgram(programId, targetProgramId, reason, notes, transferredBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1057,7 +1057,7 @@ class DisabilityRehabilitationService {
   async updateRiskAssessment(programId, riskData, assessedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1098,7 +1098,7 @@ class DisabilityRehabilitationService {
   async updateQualityOfLife(programId, qolData, assessedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1171,7 +1171,7 @@ class DisabilityRehabilitationService {
   async updateTransitionPlan(programId, transitionData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1211,7 +1211,7 @@ class DisabilityRehabilitationService {
   async manageMedications(programId, medicationData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1253,7 +1253,7 @@ class DisabilityRehabilitationService {
   async addTeamCommunication(programId, messageData, sentBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1297,7 +1297,7 @@ class DisabilityRehabilitationService {
   async addSatisfactionSurvey(programId, surveyData) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1332,7 +1332,7 @@ class DisabilityRehabilitationService {
   async updateDischargePlan(programId, dischargeData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1372,7 +1372,7 @@ class DisabilityRehabilitationService {
   async updateHomeProgram(programId, homeProgramData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1416,7 +1416,7 @@ class DisabilityRehabilitationService {
   async addVitals(programId, vitalsData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1457,7 +1457,7 @@ class DisabilityRehabilitationService {
   async updateIEP(programId, iepData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1497,7 +1497,7 @@ class DisabilityRehabilitationService {
   async getProgressSummary(programId) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1793,7 +1793,7 @@ class DisabilityRehabilitationService {
   async addBehavioralPlan(programId, planData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1846,11 +1846,11 @@ class DisabilityRehabilitationService {
   async updateBehavioralPlan(programId, planId, planData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
-        const plan = program.behavioral_intervention_plans?.find(p => p.bip_id === planId);
+        const plan = program.behavioral_intervention_plans?.find(p => p.bip_id === planId).lean();
         if (!plan) {
           return { success: false, message: 'الخطة غير موجودة' };
         }
@@ -1870,7 +1870,7 @@ class DisabilityRehabilitationService {
         return { success: false, message: 'البرنامج غير موجود' };
       }
 
-      const plan = program.behavioral_intervention_plans.find(p => p.bip_id === planId);
+      const plan = program.behavioral_intervention_plans.find(p => p.bip_id === planId).lean();
       if (!plan) {
         return { success: false, message: 'الخطة غير موجودة' };
       }
@@ -1899,7 +1899,7 @@ class DisabilityRehabilitationService {
   async addIncidentReport(programId, incidentData, reportedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -1951,11 +1951,11 @@ class DisabilityRehabilitationService {
   async updateIncidentReport(programId, incidentId, incidentData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
-        const incident = program.incident_reports?.find(i => i.incident_id === incidentId);
+        const incident = program.incident_reports?.find(i => i.incident_id === incidentId).lean();
         if (!incident) {
           return { success: false, message: 'الحادثة غير موجودة' };
         }
@@ -1975,7 +1975,7 @@ class DisabilityRehabilitationService {
         return { success: false, message: 'البرنامج غير موجود' };
       }
 
-      const incident = program.incident_reports.find(i => i.incident_id === incidentId);
+      const incident = program.incident_reports.find(i => i.incident_id === incidentId).lean();
       if (!incident) {
         return { success: false, message: 'الحادثة غير موجودة' };
       }
@@ -2003,7 +2003,7 @@ class DisabilityRehabilitationService {
   async addAppointment(programId, appointmentData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2053,11 +2053,11 @@ class DisabilityRehabilitationService {
   async updateAppointment(programId, appointmentId, appointmentData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
-        const apt = program.appointments?.find(a => a.appointment_id === appointmentId);
+        const apt = program.appointments?.find(a => a.appointment_id === appointmentId).lean();
         if (!apt) {
           return { success: false, message: 'الموعد غير موجود' };
         }
@@ -2077,7 +2077,7 @@ class DisabilityRehabilitationService {
         return { success: false, message: 'البرنامج غير موجود' };
       }
 
-      const apt = program.appointments.find(a => a.appointment_id === appointmentId);
+      const apt = program.appointments.find(a => a.appointment_id === appointmentId).lean();
       if (!apt) {
         return { success: false, message: 'الموعد غير موجود' };
       }
@@ -2106,7 +2106,7 @@ class DisabilityRehabilitationService {
   async addDocument(programId, documentData, uploadedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2160,7 +2160,7 @@ class DisabilityRehabilitationService {
   async deleteDocument(programId, documentId, deletedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2185,7 +2185,7 @@ class DisabilityRehabilitationService {
         return { success: false, message: 'البرنامج غير موجود' };
       }
 
-      const doc = program.documents.find(d => d.document_id === documentId);
+      const doc = program.documents.find(d => d.document_id === documentId).lean();
       if (doc) {
         doc.status = 'archived';
       }
@@ -2209,7 +2209,7 @@ class DisabilityRehabilitationService {
   async addGroupActivity(programId, activityData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2260,7 +2260,7 @@ class DisabilityRehabilitationService {
   async updateEmergencyContacts(programId, contactsData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2300,7 +2300,7 @@ class DisabilityRehabilitationService {
   async updateCulturalPreferences(programId, prefData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2340,7 +2340,7 @@ class DisabilityRehabilitationService {
   async updateAttendanceSummary(programId, attendanceData, updatedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2388,7 +2388,7 @@ class DisabilityRehabilitationService {
   async addAlert(programId, alertData, addedBy) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
@@ -2436,11 +2436,11 @@ class DisabilityRehabilitationService {
   async dismissAlert(programId, alertId) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) {
           return { success: false, message: 'البرنامج غير موجود' };
         }
-        const alert = program.alerts?.find(a => a.alert_id === alertId);
+        const alert = program.alerts?.find(a => a.alert_id === alertId).lean();
         if (alert) {
           alert.is_dismissed = true;
           alert.is_read = true;
@@ -2460,7 +2460,7 @@ class DisabilityRehabilitationService {
         return { success: false, message: 'البرنامج غير موجود' };
       }
 
-      const alert = program.alerts.find(a => a.alert_id === alertId);
+      const alert = program.alerts.find(a => a.alert_id === alertId).lean();
       if (alert) {
         alert.is_dismissed = true;
         alert.is_read = true;
@@ -2711,7 +2711,7 @@ class DisabilityRehabilitationService {
   async updateTelehealth(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.telehealth_info = { ...program.telehealth_info, ...data };
         return {
@@ -2747,7 +2747,7 @@ class DisabilityRehabilitationService {
   async addConnectivityIssue(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         if (!program.telehealth_info) program.telehealth_info = { connectivity_issues: [] };
         if (!program.telehealth_info.connectivity_issues)
@@ -2780,7 +2780,7 @@ class DisabilityRehabilitationService {
   async updateFinancialInfo(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.financial_info = { ...program.financial_info, ...data };
         if (program.financial_info.total_cost && program.financial_info.amount_paid) {
@@ -2828,7 +2828,7 @@ class DisabilityRehabilitationService {
   async addInvoice(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         if (!program.financial_info) program.financial_info = { invoices: [] };
         if (!program.financial_info.invoices) program.financial_info.invoices = [];
@@ -2871,7 +2871,7 @@ class DisabilityRehabilitationService {
   async updateInsuranceInfo(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.insurance_info = { ...program.insurance_info, ...data };
         if (program.insurance_info.annual_limit && program.insurance_info.amount_used != null) {
@@ -2911,7 +2911,7 @@ class DisabilityRehabilitationService {
   async addNote(programId, data, user) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         if (!program.notes) program.notes = [];
         const note = {
@@ -2968,9 +2968,9 @@ class DisabilityRehabilitationService {
   async updateNote(programId, noteId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
-        const note = (program.notes || []).find(n => n._id === noteId);
+        const note = (program.notes || []).find(n => n._id === noteId).lean();
         if (!note) throw new Error('الملاحظة غير موجودة');
         Object.assign(note, data);
         return { success: true, message: 'تم تحديث الملاحظة', data: note };
@@ -2994,7 +2994,7 @@ class DisabilityRehabilitationService {
   async deleteNote(programId, noteId) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.notes = (program.notes || []).filter(n => n._id !== noteId);
         return { success: true, message: 'تم حذف الملاحظة' };
@@ -3017,7 +3017,7 @@ class DisabilityRehabilitationService {
   async addReferral(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         if (!program.referrals) program.referrals = [];
         const referral = {
@@ -3057,9 +3057,9 @@ class DisabilityRehabilitationService {
   async updateReferral(programId, referralId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
-        const referral = (program.referrals || []).find(r => r._id === referralId);
+        const referral = (program.referrals || []).find(r => r._id === referralId).lean();
         if (!referral) throw new Error('الإحالة غير موجودة');
         Object.assign(referral, data);
         return { success: true, message: 'تم تحديث الإحالة', data: referral };
@@ -3086,7 +3086,7 @@ class DisabilityRehabilitationService {
   async updateTransportation(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.transportation = { ...program.transportation, ...data };
         return { success: true, message: 'تم تحديث بيانات النقل', data: program.transportation };
@@ -3118,7 +3118,7 @@ class DisabilityRehabilitationService {
   async updateTreatmentTeam(programId, data) {
     try {
       if (isTestMode) {
-        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId);
+        const program = mockPrograms.find(p => p._id === programId || p.program_id === programId).lean();
         if (!program) throw new Error('البرنامج غير موجود');
         program.treatment_team = data.team || data;
         return { success: true, message: 'تم تحديث فريق العلاج', data: program.treatment_team };

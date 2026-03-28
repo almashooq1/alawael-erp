@@ -78,11 +78,11 @@ class EmployeeAffairsPhase3Service {
     return getContract()
       .findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department')
-      .populate('createdBy', 'firstName lastName');
+      .populate('createdBy', 'firstName lastName').lean();
   }
 
   async renewContract(id, data) {
-    const contract = await getContract().findById(id);
+    const contract = await getContract().findById(id).lean();
     if (!contract) throw new Error('العقد غير موجود');
     contract.renewalHistory.push({
       previousEndDate: contract.endDate,
@@ -96,7 +96,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async addContractAmendment(id, amendment) {
-    const contract = await getContract().findById(id);
+    const contract = await getContract().findById(id).lean();
     if (!contract) throw new Error('العقد غير موجود');
     amendment.amendmentNumber = `AMD-${Date.now()}`;
     contract.amendments.push(amendment);
@@ -104,7 +104,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async terminateContract(id, data) {
-    const contract = await getContract().findById(id);
+    const contract = await getContract().findById(id).lean();
     if (!contract) throw new Error('العقد غير موجود');
     contract.terminationDetails = {
       terminated: true,
@@ -135,8 +135,8 @@ class EmployeeAffairsPhase3Service {
     const Contract = getContract();
     const [total, byStatus, byType, expiringSoon] = await Promise.all([
       Contract.countDocuments(),
-      Contract.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Contract.aggregate([{ $group: { _id: '$contractType', count: { $sum: 1 } } }]),
+      Contract.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Contract.aggregate([{ $group: { _id: '$contractType', count: { $sum: 1 } } }, { $limit: 1000 }]),
       Contract.countDocuments({
         endDate: { $lte: new Date(Date.now() + 60 * 86400000), $gte: new Date() },
         status: 'ساري',
@@ -178,11 +178,11 @@ class EmployeeAffairsPhase3Service {
       .findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department')
       .populate('approvals.managerApproval.approvedBy', 'firstName lastName')
-      .populate('approvals.financeApproval.approvedBy', 'firstName lastName');
+      .populate('approvals.financeApproval.approvedBy', 'firstName lastName').lean();
   }
 
   async approveSettlement(id, data) {
-    const settlement = await getSettlement().findById(id);
+    const settlement = await getSettlement().findById(id).lean();
     if (!settlement) throw new Error('التسوية غير موجودة');
 
     if (data.role === 'manager') {
@@ -206,7 +206,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async disburseSettlement(id, paymentData) {
-    const settlement = await getSettlement().findById(id);
+    const settlement = await getSettlement().findById(id).lean();
     if (!settlement) throw new Error('التسوية غير موجودة');
     settlement.payment = {
       method: paymentData.method,
@@ -222,11 +222,11 @@ class EmployeeAffairsPhase3Service {
     const Settlement = getSettlement();
     const [total, byStatus, byType, totalAmount] = await Promise.all([
       Settlement.countDocuments(),
-      Settlement.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Settlement.aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }]),
+      Settlement.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Settlement.aggregate([{ $group: { _id: '$type', count: { $sum: 1 } } }, { $limit: 1000 }]),
       Settlement.aggregate([
         { $match: { status: 'صرفت' } },
-        { $group: { _id: null, total: { $sum: '$calculation.netAmount' } } },
+        { $group: { _id: null, total: { $sum: '$calculation.netAmount' } } }, { $limit: 1000 }
       ]),
     ]);
     return { total, byStatus, byType, totalDisbursed: totalAmount[0]?.total || 0 };
@@ -273,18 +273,18 @@ class EmployeeAffairsPhase3Service {
       .findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department')
       .populate('issuedBy', 'firstName lastName')
-      .populate('approvedBy', 'firstName lastName');
+      .populate('approvedBy', 'firstName lastName').lean();
   }
 
   async issueWarning(id) {
-    const warning = await getWarning().findById(id);
+    const warning = await getWarning().findById(id).lean();
     if (!warning) throw new Error('الإنذار غير موجود');
     warning.status = 'صدر';
     return warning.save();
   }
 
   async acknowledgeWarning(id, data) {
-    const warning = await getWarning().findById(id);
+    const warning = await getWarning().findById(id).lean();
     if (!warning) throw new Error('الإنذار غير موجود');
     warning.employeeAcknowledged = true;
     warning.acknowledgedDate = new Date();
@@ -297,7 +297,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async appealWarning(id, appealData) {
-    const warning = await getWarning().findById(id);
+    const warning = await getWarning().findById(id).lean();
     if (!warning) throw new Error('الإنذار غير موجود');
     warning.appeal = {
       appealText: appealData.text,
@@ -312,16 +312,16 @@ class EmployeeAffairsPhase3Service {
     return getWarning()
       .find({ employeeId })
       .sort({ violationDate: -1 })
-      .populate('issuedBy', 'firstName lastName');
+      .populate('issuedBy', 'firstName lastName').lean();
   }
 
   async getWarningStats() {
     const Warning = getWarning();
     const [total, byLevel, byType, byStatus] = await Promise.all([
       Warning.countDocuments(),
-      Warning.aggregate([{ $group: { _id: '$warningLevel', count: { $sum: 1 } } }]),
-      Warning.aggregate([{ $group: { _id: '$violationType', count: { $sum: 1 } } }]),
-      Warning.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Warning.aggregate([{ $group: { _id: '$warningLevel', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Warning.aggregate([{ $group: { _id: '$violationType', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Warning.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
     ]);
     return { total, byLevel, byType, byStatus };
   }
@@ -368,11 +368,11 @@ class EmployeeAffairsPhase3Service {
       .findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department')
       .populate('items.clearedBy', 'firstName lastName')
-      .populate('initiatedBy', 'firstName lastName');
+      .populate('initiatedBy', 'firstName lastName').lean();
   }
 
   async updateClearanceItem(clearanceId, itemId, data) {
-    const clearance = await getClearance().findById(clearanceId);
+    const clearance = await getClearance().findById(clearanceId).lean();
     if (!clearance) throw new Error('إخلاء الطرف غير موجود');
     const item = clearance.items.id(itemId);
     if (!item) throw new Error('البند غير موجود');
@@ -385,7 +385,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async calculateFinalSettlement(clearanceId, data) {
-    const clearance = await getClearance().findById(clearanceId);
+    const clearance = await getClearance().findById(clearanceId).lean();
     if (!clearance) throw new Error('إخلاء الطرف غير موجود');
     clearance.finalSettlement = {
       ...data,
@@ -396,7 +396,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async conductExitInterview(clearanceId, data) {
-    const clearance = await getClearance().findById(clearanceId);
+    const clearance = await getClearance().findById(clearanceId).lean();
     if (!clearance) throw new Error('إخلاء الطرف غير موجود');
     clearance.exitInterview = { ...data, conducted: true, date: new Date() };
     return clearance.save();
@@ -406,9 +406,9 @@ class EmployeeAffairsPhase3Service {
     const Clearance = getClearance();
     const [total, byStatus, byType, avgProgress] = await Promise.all([
       Clearance.countDocuments(),
-      Clearance.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Clearance.aggregate([{ $group: { _id: '$departureType', count: { $sum: 1 } } }]),
-      Clearance.aggregate([{ $group: { _id: null, avg: { $avg: '$overallProgress' } } }]),
+      Clearance.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Clearance.aggregate([{ $group: { _id: '$departureType', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Clearance.aggregate([{ $group: { _id: null, avg: { $avg: '$overallProgress' } } }, { $limit: 1000 }]),
     ]);
     return { total, byStatus, byType, avgProgress: Math.round(avgProgress[0]?.avg || 0) };
   }
@@ -443,11 +443,11 @@ class EmployeeAffairsPhase3Service {
     return getVisa()
       .findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department nationality')
-      .populate('requestedBy', 'firstName lastName');
+      .populate('requestedBy', 'firstName lastName').lean();
   }
 
   async approveVisaRequest(id, data) {
-    const visa = await getVisa().findById(id);
+    const visa = await getVisa().findById(id).lean();
     if (!visa) throw new Error('الطلب غير موجود');
 
     if (data.level === 'manager') {
@@ -478,7 +478,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async issueVisa(id, visaDetails) {
-    const visa = await getVisa().findById(id);
+    const visa = await getVisa().findById(id).lean();
     if (!visa) throw new Error('الطلب غير موجود');
     visa.visaNumber = visaDetails.visaNumber;
     visa.issueDate = visaDetails.issueDate || new Date();
@@ -489,7 +489,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async recordTravel(id, travelData) {
-    const visa = await getVisa().findById(id);
+    const visa = await getVisa().findById(id).lean();
     if (!visa) throw new Error('الطلب غير موجود');
     visa.travelRecords.push(travelData);
     visa.status = 'مستخدم';
@@ -501,7 +501,7 @@ class EmployeeAffairsPhase3Service {
   }
 
   async recordReturn(id) {
-    const visa = await getVisa().findById(id);
+    const visa = await getVisa().findById(id).lean();
     if (!visa) throw new Error('الطلب غير موجود');
     const lastTravel = visa.travelRecords[visa.travelRecords.length - 1];
     if (lastTravel) {
@@ -529,9 +529,9 @@ class EmployeeAffairsPhase3Service {
     const Visa = getVisa();
     const [total, byStatus, byType, totalFees] = await Promise.all([
       Visa.countDocuments(),
-      Visa.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Visa.aggregate([{ $group: { _id: '$visaType', count: { $sum: 1 } } }]),
-      Visa.aggregate([{ $group: { _id: null, total: { $sum: '$fees.totalFee' } } }]),
+      Visa.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Visa.aggregate([{ $group: { _id: '$visaType', count: { $sum: 1 } } }, { $limit: 1000 }]),
+      Visa.aggregate([{ $group: { _id: null, total: { $sum: '$fees.totalFee' } } }, { $limit: 1000 }]),
     ]);
     return { total, byStatus, byType, totalFees: totalFees[0]?.total || 0 };
   }
@@ -546,7 +546,7 @@ class EmployeeAffairsPhase3Service {
 
   async listBenefitPackages() {
     const { BenefitPackage: BP } = getBenefitModels();
-    return BP.find({ isActive: true }).sort({ grade: 1 });
+    return BP.find({ isActive: true }).sort({ grade: 1 }).lean();
   }
 
   async assignBenefit(data) {
@@ -578,12 +578,12 @@ class EmployeeAffairsPhase3Service {
     const { EmployeeBenefit: EB } = getBenefitModels();
     return EB.findById(id)
       .populate('employeeId', 'firstName lastName employeeNumber department')
-      .populate('packageId');
+      .populate('packageId').lean();
   }
 
   async adjustBenefitAllowance(id, adjustment) {
     const { EmployeeBenefit: EB } = getBenefitModels();
-    const benefit = await EB.findById(id);
+    const benefit = await EB.findById(id).lean();
     if (!benefit) throw new Error('المزايا غير موجودة');
     benefit.adjustmentHistory.push({
       type: 'تعديل',
@@ -601,10 +601,10 @@ class EmployeeAffairsPhase3Service {
 
   async claimAirTicket(benefitId, claimData) {
     const { EmployeeBenefit: EB } = getBenefitModels();
-    const benefit = await EB.findById(benefitId);
+    const benefit = await EB.findById(benefitId).lean();
     if (!benefit) throw new Error('المزايا غير موجودة');
     const year = new Date().getFullYear();
-    let yearRecord = benefit.airTicketUsage.find(u => u.year === year);
+    let yearRecord = benefit.airTicketUsage.find(u => u.year === year).lean();
     if (!yearRecord) {
       benefit.airTicketUsage.push({ year, usedTickets: 0, remainingTickets: 1, claims: [] });
       yearRecord = benefit.airTicketUsage[benefit.airTicketUsage.length - 1];
@@ -618,10 +618,10 @@ class EmployeeAffairsPhase3Service {
     const [totalBenefits, totalPackages, byStatus, totalAllowances] = await Promise.all([
       EB.countDocuments(),
       BP.countDocuments({ isActive: true }),
-      EB.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      EB.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
       EB.aggregate([
         { $match: { status: 'نشط' } },
-        { $group: { _id: null, total: { $sum: '$allowances.totalMonthlyAllowances' } } },
+        { $group: { _id: null, total: { $sum: '$allowances.totalMonthlyAllowances' } } }, { $limit: 1000 }
       ]),
     ]);
     return {

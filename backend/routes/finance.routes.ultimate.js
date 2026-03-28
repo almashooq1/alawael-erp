@@ -157,7 +157,7 @@ router.get(
   '/consolidation/summary/dashboard',
   asyncHandler(async (req, res) => {
     if (!FinancialConsolidation) throw new AppError('Model not available', 501);
-    const all = await FinancialConsolidation.find({ organization: req.user.organization });
+    const all = await FinancialConsolidation.find({ organization: req.user.organization }).lean();
     const total = all.length;
     const published = all.filter(c => c.status === 'published').length;
     const inProgress = all.filter(c => c.status === 'in_progress').length;
@@ -284,7 +284,7 @@ router.get(
   '/revenue-recognition/summary/dashboard',
   asyncHandler(async (req, res) => {
     if (!RevenueContract) throw new AppError('Model not available', 501);
-    const all = await RevenueContract.find({ organization: req.user.organization });
+    const all = await RevenueContract.find({ organization: req.user.organization }).lean();
     const totalContracts = all.length;
     const totalValue = all.reduce((s, c) => s + (c.totalContractValue || 0), 0);
     const totalRecognized = all.reduce((s, c) => s + (c.totalRecognized || 0), 0);
@@ -401,7 +401,7 @@ router.get(
   '/leases/summary/dashboard',
   asyncHandler(async (req, res) => {
     if (!LeaseContract) throw new AppError('Model not available', 501);
-    const all = await LeaseContract.find({ organization: req.user.organization });
+    const all = await LeaseContract.find({ organization: req.user.organization }).lean();
     const totalLeases = all.length;
     const active = all.filter(l => l.status === 'active').length;
     const totalRouAsset = all.reduce((s, l) => s + (l.rouAssetCurrent || 0), 0);
@@ -514,7 +514,7 @@ router.get(
   '/investments/portfolio/summary',
   asyncHandler(async (req, res) => {
     if (!Investment) throw new AppError('Model not available', 501);
-    const all = await Investment.find({ organization: req.user.organization, status: 'active' });
+    const all = await Investment.find({ organization: req.user.organization, status: 'active' }).lean();
     const totalCost = all.reduce((s, i) => s + (i.acquisitionCost || 0), 0);
     const totalCurrent = all.reduce((s, i) => s + (i.currentValue || i.acquisitionCost || 0), 0);
     const totalUnrealized = all.reduce((s, i) => s + (i.unrealizedGainLoss || 0), 0);
@@ -689,7 +689,7 @@ router.get(
   '/credit/dashboard',
   asyncHandler(async (req, res) => {
     if (!CreditProfile) throw new AppError('Model not available', 501);
-    const all = await CreditProfile.find({ organization: req.user.organization });
+    const all = await CreditProfile.find({ organization: req.user.organization }).lean();
     const totalProfiles = all.length;
     const totalCreditLimit = all.reduce((s, p) => s + (p.creditLimit || 0), 0);
     const totalUsed = all.reduce((s, p) => s + (p.usedCredit || 0), 0);
@@ -947,10 +947,10 @@ router.get(
   '/compliance/dashboard',
   asyncHandler(async (req, res) => {
     if (!InternalControl) throw new AppError('Model not available', 501);
-    const controls = await InternalControl.find({ organization: req.user.organization });
+    const controls = await InternalControl.find({ organization: req.user.organization }).lean();
     const items = ComplianceItem
       ? await ComplianceItem.find({ organization: req.user.organization })
-      : [];
+      : [].lean();
     const totalControls = controls.length;
     const effective = controls.filter(c => c.lastTestResult === 'effective').length;
     const ineffective = controls.filter(c => c.lastTestResult === 'ineffective').length;
@@ -1088,10 +1088,10 @@ router.get(
   '/intercompany/dashboard',
   asyncHandler(async (req, res) => {
     if (!IntercompanyInvoice) throw new AppError('Model not available', 501);
-    const invoices = await IntercompanyInvoice.find({ organization: req.user.organization });
+    const invoices = await IntercompanyInvoice.find({ organization: req.user.organization }).lean();
     const runs = SettlementRun
       ? await SettlementRun.find({ organization: req.user.organization })
-      : [];
+      : [].lean();
     const totalInvoices = invoices.length;
     const unsettled = invoices.filter(i => !i.settled).length;
     const totalAmount = invoices.reduce((s, i) => s + (i.totalAmount || 0), 0);

@@ -130,7 +130,7 @@ class TherapySessionAnalyticsService {
             _id: '$status',
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       // جلسات الأسبوع
       Session.countDocuments({ date: { $gte: weekStart, $lte: weekEnd } }),
@@ -143,16 +143,16 @@ class TherapySessionAnalyticsService {
             count: { $sum: 1 },
             totalDuration: { $sum: { $ifNull: ['$duration', 45] } },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       // جلسات الشهر الماضي (للمقارنة)
       Session.countDocuments({ date: { $gte: lastMonthStart, $lte: lastMonthEnd } }),
       // توزيع الحالات
-      Session.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Session.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
       // توزيع الأنواع
       Session.aggregate([
         { $group: { _id: '$sessionType', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
+        { $sort: { count: -1 } }, { $limit: 1000 }
       ]),
       // متوسط التقييم
       Session.aggregate([
@@ -163,7 +163,7 @@ class TherapySessionAnalyticsService {
             avgRating: { $avg: '$rating' },
             totalRatings: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       // عدد المستفيدين الفريدين
       Session.distinct('beneficiary', {
@@ -177,7 +177,7 @@ class TherapySessionAnalyticsService {
       // متوسط المدة
       Session.aggregate([
         { $match: { duration: { $exists: true, $gt: 0 } } },
-        { $group: { _id: null, avg: { $avg: '$duration' } } },
+        { $group: { _id: null, avg: { $avg: '$duration' } } }, { $limit: 1000 }
       ]),
       // أفضل المعالجين (هذا الشهر)
       Session.aggregate([
@@ -454,7 +454,7 @@ class TherapySessionAnalyticsService {
           billed: { $sum: { $cond: [{ $eq: ['$isBilled', true] }, 1, 0] } },
         },
       },
-      { $sort: { completed: -1 } },
+      { $sort: { completed: -1 } }, { $limit: 1000 }
     ]);
 
     // Enrich with therapist names
@@ -560,7 +560,7 @@ class TherapySessionAnalyticsService {
             completed: { $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] } },
           },
         },
-        { $sort: { totalSessions: -1 } },
+        { $sort: { totalSessions: -1 } }, { $limit: 1000 }
       ]),
       Room.find()
         .lean()
@@ -665,7 +665,7 @@ class TherapySessionAnalyticsService {
             },
             avgLateMinutes: { $avg: '$attendance.lateMinutes' },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       // حسب اليوم
       Session.aggregate([
@@ -678,7 +678,7 @@ class TherapySessionAnalyticsService {
             noShow: { $sum: { $cond: [{ $eq: ['$status', 'NO_SHOW'] }, 1, 0] } },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
       // حسب الساعة
       Session.aggregate([
@@ -697,7 +697,7 @@ class TherapySessionAnalyticsService {
             completed: { $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] } },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
       // التأخيرات
       Session.aggregate([
@@ -714,7 +714,7 @@ class TherapySessionAnalyticsService {
             maxLate: { $max: '$attendance.lateMinutes' },
             totalLate: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
     ]);
 
@@ -782,7 +782,7 @@ class TherapySessionAnalyticsService {
             billed: { $sum: { $cond: [{ $eq: ['$isBilled', true] }, 1, 0] } },
             unbilled: { $sum: { $cond: [{ $ne: ['$isBilled', true] }, 1, 0] } },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       Session.aggregate([
         { $match: match },
@@ -794,7 +794,7 @@ class TherapySessionAnalyticsService {
             unbilled: { $sum: { $cond: [{ $ne: ['$isBilled', true] }, 1, 0] } },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
       Session.aggregate([
         { $match: match },
@@ -805,7 +805,7 @@ class TherapySessionAnalyticsService {
             billed: { $sum: { $cond: [{ $eq: ['$isBilled', true] }, 1, 0] } },
           },
         },
-        { $sort: { total: -1 } },
+        { $sort: { total: -1 } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -964,7 +964,7 @@ class TherapySessionAnalyticsService {
             _id: '$status',
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       // حسب نوع الجلسة
       Session.aggregate([
@@ -975,7 +975,7 @@ class TherapySessionAnalyticsService {
             count: { $sum: 1 },
           },
         },
-        { $sort: { count: -1 } },
+        { $sort: { count: -1 } }, { $limit: 1000 }
       ]),
       // حسب المعالج
       Session.aggregate([
@@ -1019,7 +1019,7 @@ class TherapySessionAnalyticsService {
             },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
     ]);
 

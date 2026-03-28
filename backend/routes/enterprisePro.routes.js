@@ -305,7 +305,7 @@ router.get('/audit-hub/checklists', authenticateToken, async (req, res) => {
     if (isActive !== undefined) q.isActive = isActive === 'true';
     const lists = await ComplianceChecklist.find(q)
       .sort({ updatedAt: -1 })
-      .populate('createdBy', 'name');
+      .populate('createdBy', 'name').lean();
     res.json(lists);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -318,7 +318,7 @@ router.get('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
     const cl = await ComplianceChecklist.findById(req.params.id)
       .populate('createdBy', 'name')
       .populate('items.assignedTo', 'name')
-      .populate('items.checkedBy', 'name');
+      .populate('items.checkedBy', 'name').lean();
     if (!cl) return res.status(404).json({ error: 'Not found' });
     res.json(cl);
   } catch (e) {
@@ -369,7 +369,7 @@ router.delete('/audit-hub/checklists/:id', authenticateToken, async (req, res) =
 
 router.get('/audit-hub/compliance-dashboard', authenticateToken, async (_req, res) => {
   try {
-    const checklists = await ComplianceChecklist.find({ isActive: true });
+    const checklists = await ComplianceChecklist.find({ isActive: true }).lean();
     const totalItems = checklists.reduce((s, c) => s + c.items.length, 0);
     const compliantItems = checklists.reduce(
       (s, c) => s + c.items.filter(i => i.status === 'compliant').length,
@@ -419,7 +419,7 @@ router.get('/audit-hub/alerts', authenticateToken, async (req, res) => {
     if (isResolved !== undefined) q.isResolved = isResolved === 'true';
     const alerts = await ComplianceAlert.find(q)
       .sort({ createdAt: -1 })
-      .populate('checklist', 'name nameAr');
+      .populate('checklist', 'name nameAr').lean();
     res.json(alerts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -454,7 +454,7 @@ router.get('/report-builder/templates', authenticateToken, async (req, res) => {
     if (isPublic !== undefined) q.isPublic = isPublic === 'true';
     const templates = await ReportTemplate.find(q)
       .sort({ updatedAt: -1 })
-      .populate('createdBy', 'name');
+      .populate('createdBy', 'name').lean();
     res.json(templates);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -466,7 +466,7 @@ router.get('/report-builder/templates/:id', authenticateToken, async (req, res) 
   try {
     const t = await ReportTemplate.findById(req.params.id)
       .populate('createdBy', 'name')
-      .populate('schedule.recipients', 'name email');
+      .populate('schedule.recipients', 'name email').lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
@@ -530,7 +530,7 @@ router.post('/report-builder/templates/:id/clone', authenticateToken, async (req
 
 router.post('/report-builder/execute/:id', authenticateToken, async (req, res) => {
   try {
-    const template = await ReportTemplate.findById(req.params.id);
+    const template = await ReportTemplate.findById(req.params.id).lean();
     if (!template) return res.status(404).json({ error: 'Not found' });
     const execution = await ReportExecution.create({
       template: template._id,
@@ -622,7 +622,7 @@ router.get('/calendar-hub/events', authenticateToken, async (req, res) => {
     const events = await CalendarEvent.find(q)
       .sort({ start: 1 })
       .populate('createdBy', 'name')
-      .populate('attendees.user', 'name email');
+      .populate('attendees.user', 'name email').lean();
     res.json(events);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -634,7 +634,7 @@ router.get('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
   try {
     const ev = await CalendarEvent.findById(req.params.id)
       .populate('createdBy', 'name')
-      .populate('attendees.user', 'name email');
+      .populate('attendees.user', 'name email').lean();
     if (!ev) return res.status(404).json({ error: 'Not found' });
     res.json(ev);
   } catch (e) {
@@ -677,9 +677,9 @@ router.delete('/calendar-hub/events/:id', authenticateToken, async (req, res) =>
 
 router.post('/calendar-hub/events/:id/rsvp', authenticateToken, async (req, res) => {
   try {
-    const ev = await CalendarEvent.findById(req.params.id);
+    const ev = await CalendarEvent.findById(req.params.id).lean();
     if (!ev) return res.status(404).json({ error: 'Not found' });
-    const att = ev.attendees.find(a => String(a.user) === String(uid(req)));
+    const att = ev.attendees.find(a => String(a.user) === String(uid(req))).lean();
     if (att) att.status = req.body.status || 'accepted';
     else ev.attendees.push({ user: uid(req), status: req.body.status || 'accepted' });
     await ev.save();
@@ -713,7 +713,7 @@ router.get('/calendar-hub/today', authenticateToken, async (_req, res) => {
     end.setHours(23, 59, 59, 999);
     const events = await CalendarEvent.find({ start: { $gte: start, $lte: end } })
       .sort({ start: 1 })
-      .populate('createdBy', 'name');
+      .populate('createdBy', 'name').lean();
     res.json(events);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -739,7 +739,7 @@ router.get('/calendar-hub/room-bookings', authenticateToken, async (req, res) =>
     if (room) q.room = room;
     if (start) q.start = { $gte: new Date(start) };
     if (end) q.end = { ...(q.end || {}), $lte: new Date(end) };
-    const bookings = await RoomBooking.find(q).sort({ start: 1 }).populate('bookedBy', 'name');
+    const bookings = await RoomBooking.find(q).sort({ start: 1 }).populate('bookedBy', 'name').lean();
     res.json(bookings);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -839,7 +839,7 @@ router.get('/crm-pro/contacts', authenticateToken, async (req, res) => {
 
 router.get('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
   try {
-    const c = await CRMContact.findById(req.params.id).populate('assignedTo', 'name email');
+    const c = await CRMContact.findById(req.params.id).populate('assignedTo', 'name email').lean();
     if (!c) return res.status(404).json({ error: 'Not found' });
     res.json(c);
   } catch (e) {
@@ -883,7 +883,7 @@ router.delete('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
 // ── Pipelines ───────────────────────────────────────────────────────────────
 router.get('/crm-pro/pipelines', authenticateToken, async (_req, res) => {
   try {
-    const pipes = await CRMPipeline.find({ isActive: true }).sort({ updatedAt: -1 });
+    const pipes = await CRMPipeline.find({ isActive: true }).sort({ updatedAt: -1 }).lean();
     res.json(pipes);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -893,7 +893,7 @@ router.get('/crm-pro/pipelines', authenticateToken, async (_req, res) => {
 
 router.get('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
   try {
-    const p = await CRMPipeline.findById(req.params.id);
+    const p = await CRMPipeline.findById(req.params.id).lean();
     if (!p) return res.status(404).json({ error: 'Not found' });
     res.json(p);
   } catch (e) {
@@ -964,7 +964,7 @@ router.get('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
     const d = await CRMDeal.findById(req.params.id)
       .populate('contact')
       .populate('pipeline')
-      .populate('assignedTo', 'name email');
+      .populate('assignedTo', 'name email').lean();
     if (!d) return res.status(404).json({ error: 'Not found' });
     res.json(d);
   } catch (e) {
@@ -1021,11 +1021,11 @@ router.put('/crm-pro/deals/:id/move', authenticateToken, async (req, res) => {
 
 router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, async (req, res) => {
   try {
-    const pipeline = await CRMPipeline.findById(req.params.pipelineId);
+    const pipeline = await CRMPipeline.findById(req.params.pipelineId).lean();
     if (!pipeline) return res.status(404).json({ error: 'Not found' });
     const deals = await CRMDeal.find({ pipeline: req.params.pipelineId, status: 'open' })
       .populate('contact', 'firstName lastName company')
-      .populate('assignedTo', 'name');
+      .populate('assignedTo', 'name').lean();
     const board = pipeline.stages.map(s => ({
       stage: s,
       deals: deals.filter(d => String(d.stage) === String(s._id)),
@@ -1050,7 +1050,7 @@ router.get('/crm-pro/activities', authenticateToken, async (req, res) => {
       .sort({ updatedAt: -1 })
       .limit(100)
       .populate('contact', 'firstName lastName')
-      .populate('performedBy', 'name');
+      .populate('performedBy', 'name').lean();
     res.json(acts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1123,7 +1123,7 @@ router.get('/warehouse-intel/warehouses', authenticateToken, async (req, res) =>
     const q = {};
     if (type) q.type = type;
     if (isActive !== undefined) q.isActive = isActive === 'true';
-    const whs = await Warehouse.find(q).sort({ name: 1 }).populate('manager', 'name');
+    const whs = await Warehouse.find(q).sort({ name: 1 }).populate('manager', 'name').lean();
     res.json(whs);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1133,7 +1133,7 @@ router.get('/warehouse-intel/warehouses', authenticateToken, async (req, res) =>
 
 router.get('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res) => {
   try {
-    const wh = await Warehouse.findById(req.params.id).populate('manager', 'name email');
+    const wh = await Warehouse.findById(req.params.id).populate('manager', 'name email').lean();
     if (!wh) return res.status(404).json({ error: 'Not found' });
     res.json(wh);
   } catch (e) {
@@ -1180,7 +1180,7 @@ router.get('/warehouse-intel/bins', authenticateToken, async (req, res) => {
     const { warehouse } = req.query;
     const q = {};
     if (warehouse) q.warehouse = warehouse;
-    const bins = await WarehouseBin.find(q).sort({ fullPath: 1 });
+    const bins = await WarehouseBin.find(q).sort({ fullPath: 1 }).lean();
     res.json(bins);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1263,7 +1263,7 @@ router.get('/warehouse-intel/alerts', authenticateToken, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(200)
       .populate('warehouse', 'name code')
-      .populate('item', 'name code');
+      .populate('item', 'name code').lean();
     res.json(alerts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1445,7 +1445,7 @@ router.get('/project-pro/projects/:id', authenticateToken, async (req, res) => {
   try {
     const p = await ProjectPro.findById(req.params.id)
       .populate('manager', 'name email')
-      .populate('team.user', 'name email');
+      .populate('team.user', 'name email').lean();
     if (!p) return res.status(404).json({ error: 'Not found' });
     res.json(p);
   } catch (e) {
@@ -1542,7 +1542,7 @@ router.get('/project-pro/tasks', authenticateToken, async (req, res) => {
       .sort({ order: 1, updatedAt: -1 })
       .populate('assignee', 'name')
       .populate('reporter', 'name')
-      .populate('parentTask', 'title');
+      .populate('parentTask', 'title').lean();
     res.json(tasks);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1556,7 +1556,7 @@ router.get('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
       .populate('assignee', 'name email')
       .populate('reporter', 'name')
       .populate('parentTask', 'title')
-      .populate('dependencies', 'title status');
+      .populate('dependencies', 'title status').lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
@@ -1582,7 +1582,7 @@ router.put('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
     });
     // Update project progress if task status changes
     if (req.body.status && t) {
-      const tasks = await ProjectTask.find({ project: t.project });
+      const tasks = await ProjectTask.find({ project: t.project }).lean();
       const done = tasks.filter(tk => tk.status === 'done').length;
       const progress = tasks.length > 0 ? Math.round((done / tasks.length) * 100) : 0;
       await ProjectPro.findByIdAndUpdate(t.project, { progress });
@@ -1606,7 +1606,7 @@ router.delete('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
 
 router.post('/project-pro/tasks/:id/comment', authenticateToken, async (req, res) => {
   try {
-    const t = await ProjectTask.findById(req.params.id);
+    const t = await ProjectTask.findById(req.params.id).lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
     t.comments.push({ user: uid(req), text: req.body.text });
     await t.save();
@@ -1637,7 +1637,7 @@ router.get('/project-pro/kanban/:projectId', authenticateToken, async (req, res)
   try {
     const tasks = await ProjectTask.find({ project: req.params.projectId })
       .sort({ order: 1 })
-      .populate('assignee', 'name');
+      .populate('assignee', 'name').lean();
     const columns = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked'];
     const board = {};
     columns.forEach(c => {
@@ -1667,7 +1667,7 @@ router.get('/project-pro/timelogs', authenticateToken, async (req, res) => {
       .sort({ date: -1 })
       .populate('project', 'name code')
       .populate('task', 'title')
-      .populate('user', 'name');
+      .populate('user', 'name').lean();
     res.json(logs);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1734,7 +1734,7 @@ router.get('/project-pro/my-tasks', authenticateToken, async (req, res) => {
   try {
     const tasks = await ProjectTask.find({ assignee: uid(req), status: { $ne: 'done' } })
       .sort({ dueDate: 1 })
-      .populate('project', 'name code');
+      .populate('project', 'name code').lean();
     res.json(tasks);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });

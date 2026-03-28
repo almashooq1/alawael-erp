@@ -4,6 +4,8 @@
  * Workflow automation, task scheduling, and event-based actions
  */
 
+const logger = require('../utils/logger');
+
 // In-memory storage
 const automations = new Map();
 const workflows = new Map();
@@ -95,7 +97,7 @@ class AutomationService {
         automationId,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -150,7 +152,7 @@ class AutomationService {
         results,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -284,7 +286,7 @@ class AutomationService {
         taskId,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -311,7 +313,7 @@ class AutomationService {
         automation,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -334,7 +336,7 @@ class AutomationService {
         total: automations.size,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -364,7 +366,7 @@ class AutomationService {
         message: `Automation ${enabled ? 'enabled' : 'disabled'}`,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -384,7 +386,7 @@ class AutomationService {
         message: 'Automation deleted',
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -407,7 +409,7 @@ class AutomationService {
         total: workflows.size,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -442,7 +444,7 @@ class AutomationService {
         results,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -471,7 +473,7 @@ class AutomationService {
         stats,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -494,7 +496,7 @@ class AutomationService {
         total: scheduledTasks.size,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',
@@ -531,7 +533,7 @@ class AutomationService {
         total: automation.executionCount,
       };
     } catch (error) {
-      console.error('[AutomationService] Error:', error.message, error.stack);
+      logger.error('[AutomationService] Error:', { message: error.message, stack: error.stack });
       return {
         success: false,
         error: 'حدث خطأ داخلي',

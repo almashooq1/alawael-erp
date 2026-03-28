@@ -9,7 +9,7 @@ class HRAnalyticsService {
   static async workforceReport({ Employee, Department: _Department }) {
     const [byStatus, byDepartment, byType, byNationality, genderDist] = await Promise.all([
       Employee.aggregate([
-        { $group: { _id: { $ifNull: ['$status', '$jobInfo.status'] }, count: { $sum: 1 } } },
+        { $group: { _id: { $ifNull: ['$status', '$jobInfo.status'] }, count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       Employee.aggregate([
         {
@@ -24,7 +24,7 @@ class HRAnalyticsService {
             _id: { $ifNull: ['$employmentType', '$jobInfo.employmentType'] },
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       Employee.aggregate([
         {
@@ -37,7 +37,7 @@ class HRAnalyticsService {
         { $limit: 10 },
       ]),
       Employee.aggregate([
-        { $group: { _id: { $ifNull: ['$gender', '$personalInfo.gender'] }, count: { $sum: 1 } } },
+        { $group: { _id: { $ifNull: ['$gender', '$personalInfo.gender'] }, count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -70,11 +70,11 @@ class HRAnalyticsService {
       LeaveRequest.aggregate([
         { $match: match },
         { $group: { _id: '$leaveType', count: { $sum: 1 }, totalDays: { $sum: '$duration' } } },
-        { $sort: { count: -1 } },
+        { $sort: { count: -1 } }, { $limit: 1000 }
       ]),
       LeaveRequest.aggregate([
         { $match: match },
-        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
       ]),
       LeaveRequest.aggregate([
         { $match: match },
@@ -85,7 +85,7 @@ class HRAnalyticsService {
             totalDays: { $sum: '$duration' },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -115,7 +115,7 @@ class HRAnalyticsService {
     if (endDate) match.date = { ...(match.date || {}), $lte: new Date(endDate) };
 
     const [byStatus, byMonth, overtime] = await Promise.all([
-      Attendance.aggregate([{ $match: match }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
+      Attendance.aggregate([{ $match: match }, { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]),
       Attendance.aggregate([
         { $match: match },
         {
@@ -127,7 +127,7 @@ class HRAnalyticsService {
             late: { $sum: { $cond: [{ $in: ['$status', ['late', 'متأخر']] }, 1, 0] } },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
       Attendance.aggregate([
         { $match: { ...match, $or: [{ overtime: { $gt: 0 } }, { overtimeHours: { $gt: 0 } }] } },
@@ -137,7 +137,7 @@ class HRAnalyticsService {
             totalOvertimeHours: { $sum: { $ifNull: ['$overtimeHours', '$overtime'] } },
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
     ]);
 
@@ -186,7 +186,7 @@ class HRAnalyticsService {
             maxSalary: { $max: { $ifNull: ['$totalGross', '$baseSalary'] } },
             minSalary: { $min: { $ifNull: ['$totalGross', '$baseSalary'] } },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       Payroll.aggregate([
         { $match: match },
@@ -198,7 +198,7 @@ class HRAnalyticsService {
             avgSalary: { $avg: { $ifNull: ['$totalGross', '$baseSalary'] } },
           },
         },
-        { $sort: { totalGross: -1 } },
+        { $sort: { totalGross: -1 } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -259,7 +259,7 @@ class HRAnalyticsService {
             count: { $sum: 1 },
           },
         },
-        { $sort: { count: -1 } },
+        { $sort: { count: -1 } }, { $limit: 1000 }
       ]),
       PerformanceEvaluation.aggregate([
         {
@@ -269,7 +269,7 @@ class HRAnalyticsService {
             count: { $sum: 1 },
           },
         },
-        { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } }, { $limit: 1000 }
       ]),
     ]);
 
@@ -306,7 +306,7 @@ class HRAnalyticsService {
             },
             count: { $sum: 1 },
           },
-        },
+        }, { $limit: 1000 }
       ]),
       Employee.aggregate([
         { $match: { status: { $in: ['active', 'نشط'] } } },
@@ -330,7 +330,7 @@ class HRAnalyticsService {
             },
           },
         },
-        { $sort: { total: -1 } },
+        { $sort: { total: -1 } }, { $limit: 1000 }
       ]),
     ]);
 

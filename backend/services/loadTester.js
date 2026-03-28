@@ -8,6 +8,7 @@
 
 const axios = require('axios');
 const EventEmitter = require('events');
+const logger = require('../utils/logger');
 
 class LoadTester extends EventEmitter {
   constructor(baseURL = 'http://localhost:3001', options = {}) {
@@ -89,8 +90,8 @@ class LoadTester extends EventEmitter {
     endpoint = '/api/dashboard/health',
     method = 'GET'
   ) {
-    console.log(`\n🔥 Starting Load Test: ${userCount} users, ${requestsPerUser} requests each`);
-    console.log(`📍 Endpoint: ${endpoint}\n`);
+    logger.info(`\n🔥 Starting Load Test: ${userCount} users, ${requestsPerUser} requests each`);
+    logger.info(`📍 Endpoint: ${endpoint}\n`);
 
     this.metrics.startTime = Date.now();
     this.isRunning = true;
@@ -128,7 +129,7 @@ class LoadTester extends EventEmitter {
 
       return this.getMetrics();
     } catch (error) {
-      console.error('❌ Load test error:', error);
+      logger.error('❌ Load test error:', error);
       this.emit('error', error);
       throw error;
     }
@@ -138,14 +139,14 @@ class LoadTester extends EventEmitter {
    * Stress Test - Gradually increase load
    */
   async stressTest(maxUsers = 100, endpoint = '/api/dashboard/health', requestsPerUser = 5) {
-    console.log(`\n📈 Starting Stress Test: Max ${maxUsers} users\n`);
+    logger.info(`\n📈 Starting Stress Test: Max ${maxUsers} users\n`);
 
     const results = [];
     const steps = [10, 25, 50, 75, 100];
     const targetSteps = steps.filter(s => s <= maxUsers);
 
     for (const userCount of targetSteps) {
-      console.log(`\n--- Step: ${userCount} users ---`);
+      logger.info(`\n--- Step: ${userCount} users ---`);
 
       this.resetMetrics();
       const metrics = await this.simulateConcurrentUsers(userCount, requestsPerUser, endpoint);
@@ -176,14 +177,14 @@ class LoadTester extends EventEmitter {
     endpoint = '/api/dashboard/health',
     requestsPerUser = 10
   ) {
-    console.log(`\n⏱️  Starting Soak Test: ${userCount} users for ${durationMinutes} minutes\n`);
+    logger.info(`\n⏱️  Starting Soak Test: ${userCount} users for ${durationMinutes} minutes\n`);
 
     this.resetMetrics();
     this.metrics.startTime = Date.now();
     const endTime = Date.now() + durationMinutes * 60 * 1000;
     const interval = setInterval(() => {
       const elapsed = Math.floor((Date.now() - this.metrics.startTime) / 1000 / 60);
-      console.log(`⏳ Elapsed: ${elapsed} minutes | Requests: ${this.metrics.totalRequests}`);
+      logger.info(`⏳ Elapsed: ${elapsed} minutes | Requests: ${this.metrics.totalRequests}`);
     }, 30000); // Update every 30 seconds
 
     try {
@@ -205,14 +206,14 @@ class LoadTester extends EventEmitter {
    * Test Specific Endpoints
    */
   async testEndpoints(endpoints = []) {
-    console.log(`\n🧪 Testing ${endpoints.length} endpoints\n`);
+    logger.info(`\n🧪 Testing ${endpoints.length} endpoints\n`);
 
     const results = [];
 
     for (const endpoint of endpoints) {
       this.resetMetrics();
 
-      console.log(`Testing: ${endpoint.path} (${endpoint.method || 'GET'})`);
+      logger.info(`Testing: ${endpoint.path} (${endpoint.method || 'GET'})`);
 
       const metrics = await this.simulateConcurrentUsers(
         endpoint.users || 5,
@@ -282,38 +283,38 @@ class LoadTester extends EventEmitter {
   displayMetrics(metrics = null) {
     const data = metrics || this.getMetrics();
 
-    console.log('\n' + '='.repeat(60));
-    console.log('📊 PERFORMANCE METRICS');
-    console.log('='.repeat(60));
+    logger.info('\n' + '='.repeat(60));
+    logger.info('📊 PERFORMANCE METRICS');
+    logger.info('='.repeat(60));
 
     if (data.summary) {
-      console.log('\n📈 Summary:');
-      console.log(`  ✅ Total Requests: ${data.summary.totalRequests}`);
-      console.log(`  ✔️  Successful: ${data.summary.successful}`);
-      console.log(`  ❌ Failed: ${data.summary.failed}`);
-      console.log(`  📊 Success Rate: ${data.summary.successRate}`);
-      console.log(`  ⏱️  Duration: ${data.summary.duration}`);
-      console.log(`  🚀 Throughput: ${data.summary.throughput}`);
+      logger.info('\n📈 Summary:');
+      logger.info(`  ✅ Total Requests: ${data.summary.totalRequests}`);
+      logger.info(`  ✔️  Successful: ${data.summary.successful}`);
+      logger.info(`  ❌ Failed: ${data.summary.failed}`);
+      logger.info(`  📊 Success Rate: ${data.summary.successRate}`);
+      logger.info(`  ⏱️  Duration: ${data.summary.duration}`);
+      logger.info(`  🚀 Throughput: ${data.summary.throughput}`);
     }
 
     if (data.responseTimes) {
-      console.log('\n⏰ Response Times (ms):');
-      console.log(`  🔹 Min: ${data.responseTimes.min}`);
-      console.log(`  🔹 Max: ${data.responseTimes.max}`);
-      console.log(`  🔹 Avg: ${data.responseTimes.avg}`);
-      console.log(`  🔹 P50: ${data.responseTimes.p50}`);
-      console.log(`  🔹 P95: ${data.responseTimes.p95}`);
-      console.log(`  🔹 P99: ${data.responseTimes.p99}`);
+      logger.info('\n⏰ Response Times (ms):');
+      logger.info(`  🔹 Min: ${data.responseTimes.min}`);
+      logger.info(`  🔹 Max: ${data.responseTimes.max}`);
+      logger.info(`  🔹 Avg: ${data.responseTimes.avg}`);
+      logger.info(`  🔹 P50: ${data.responseTimes.p50}`);
+      logger.info(`  🔹 P95: ${data.responseTimes.p95}`);
+      logger.info(`  🔹 P99: ${data.responseTimes.p99}`);
     }
 
     if (data.errors && data.errors.length > 0) {
-      console.log('\n⚠️  Recent Errors:');
+      logger.info('\n⚠️  Recent Errors:');
       data.errors.forEach(err => {
-        console.log(`  - ${err.endpoint}: ${err.error}`);
+        logger.info(`  - ${err.endpoint}: ${err.error}`);
       });
     }
 
-    console.log('\n' + '='.repeat(60) + '\n');
+    logger.info('\n' + '='.repeat(60) + '\n');
   }
 
   /**

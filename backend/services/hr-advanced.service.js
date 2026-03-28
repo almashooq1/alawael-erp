@@ -105,7 +105,8 @@ class HRService {
 
       return { employees, total, page: Number(page), limit: safeLimit };
     } catch (error) {
-      throw new Error('حدث خطأ داخلي');
+      console.error('[HRService.getAllEmployees] real error:', error.message, error.stack);
+      throw error;
     }
   }
 

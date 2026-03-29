@@ -79,6 +79,11 @@ class CacheManager {
 
   // Initialize Redis connection
   initializeRedis() {
+    if (process.env.DISABLE_REDIS === 'true') {
+      logger.info('Redis disabled via DISABLE_REDIS=true (cache.advanced)');
+      this.redisConnected = false;
+      return;
+    }
     try {
       this.redisCache = new Redis(CACHE_CONFIG.redis);
 
@@ -215,7 +220,9 @@ class CacheManager {
           }
         });
 
-        await new Promise(resolve => { stream.on('end', resolve); })
+        await new Promise(resolve => {
+          stream.on('end', resolve);
+        });
       }
 
       // console.log(`🗑️ Invalidated ${deletedCount} keys matching pattern: ${pattern}`);

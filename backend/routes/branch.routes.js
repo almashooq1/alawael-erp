@@ -14,7 +14,7 @@ const {
 } = require('../middleware/branchAuth.middleware');
 
 // Auth middleware (use existing JWT middleware)
-const auth = require('../middleware/auth');
+const { authenticateToken: auth } = require('../middleware/auth');
 
 // ─── Public ───────────────────────────────────────────────────────────────────
 // [25] Permission Matrix (authenticated, any role)

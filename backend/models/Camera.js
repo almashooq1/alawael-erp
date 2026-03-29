@@ -92,13 +92,34 @@ const cameraSchema = new mongoose.Schema(
       },
       schedule: {
         // جدول التسجيل (من-إلى)
-        monday: { from: '00:00', to: '23:59' },
-        tuesday: { from: '00:00', to: '23:59' },
-        wednesday: { from: '00:00', to: '23:59' },
-        thursday: { from: '00:00', to: '23:59' },
-        friday: { from: '00:00', to: '23:59' },
-        saturday: { from: '00:00', to: '23:59' },
-        sunday: { from: '00:00', to: '23:59' },
+        monday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        tuesday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        wednesday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        thursday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        friday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        saturday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
+        sunday: {
+          from: { type: String, default: '00:00' },
+          to: { type: String, default: '23:59' },
+        },
       },
       quality: {
         type: String,
@@ -266,7 +287,7 @@ const cameraSchema = new mongoose.Schema(
 
 // الفهارس
 cameraSchema.index({ branchId: 1 });
-cameraSchema.index({ 'hikvision.ipAddress': 1 });
+// NOTE: hikvision.ipAddress index is already created by unique:true in field definition
 cameraSchema.index({ status: 1 });
 cameraSchema.index({ createdAt: -1 });
 cameraSchema.index({ 'statistics.motionEvents': -1 });

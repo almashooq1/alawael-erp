@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نموذج خطة التأهيل الشخصية - 12 أسبوعًا</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:    #1a6b8a;
+      --secondary:  #27ae8f;
+      --accent:     #e67e22;
+      --danger:     #e74c3c;
+      --success:    #2ecc71;
+      --warning:    #f39c12;
+      --bg:         #f0f4f8;
+      --card:       #ffffff;
+      --text:       #2c3e50;
+      --muted:      #7f8c8d;
+      --border:     #dde3ea;
+      --radius:     14px;
+      --shadow:     0 4px 20px rgba(0,0,0,.08);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #0d4f6b 100%);
+      color: #fff;
+      padding: 2.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 300px; height: 300px;
+      background: rgba(255,255,255,.06);
+      border-radius: 50%;
+    }
+    header h1 { font-size: 2.1rem; margin-bottom: .4rem; }
+    header p  { opacity: .85; font-size: 1rem; }
+    .header-badge {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      padding: .25rem .9rem;
+      border-radius: 20px;
+      font-size: .8rem;
+      margin-top: .7rem;
+      font-weight: 600;
+    }
+
+    /* ===== CONTAINER ===== */
+    .container { max-width: 1180px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: .7rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      padding-bottom: .6rem;
+      border-bottom: 3px solid var(--secondary);
+    }
+    .section-title .icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ===== CARD ===== */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    /* ===== GRID ===== */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    @media(max-width: 900px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width: 600px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ===== FORM FIELDS ===== */
+    .field { margin-bottom: 1.1rem; }
+    .field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: .35rem;
+      font-size: .88rem;
+      color: var(--text);
+    }
+    .field label span.req { color: var(--danger); margin-right: 2px; }
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: .6rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .92rem;
+      font-family: inherit;
+      color: var(--text);
+      background: #fafdff;
+      transition: border-color .2s;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #fff;
+    }
+    .field textarea { min-height: 80px; resize: vertical; }
+
+    /* ===== SMART GOALS TABLE ===== */
+    .smart-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .smart-table th {
+      background: linear-gradient(135deg, var(--primary), #1e8fa8);
+      color: #fff;
+      padding: .75rem 1rem;
+      text-align: right;
+      font-weight: 600;
+    }
+    .smart-table td {
+      padding: .65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .smart-table tr:nth-child(even) td { background: #f7fbff; }
+    .smart-table tr:hover td { background: #edf6fb; }
+
+    /* ===== WEEK GRID ===== */
+    .phase-block {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1.5px solid var(--border);
+      margin-bottom: 1.5rem;
+    }
+    .phase-header {
+      padding: .85rem 1.3rem;
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+    .phase-1 .phase-header { background: linear-gradient(90deg,#1a6b8a,#27ae8f); }
+    .phase-2 .phase-header { background: linear-gradient(90deg,#e67e22,#f39c12); }
+    .phase-3 .phase-header { background: linear-gradient(90deg,#8e44ad,#9b59b6); }
+
+    .week-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+    .week-cell {
+      padding: 1rem;
+      border-left: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .week-cell:nth-child(4n+1) { border-right: 1px solid var(--border); }
+    .week-cell h4 {
+      font-size: .82rem;
+      font-weight: 700;
+      margin-bottom: .5rem;
+      color: var(--primary);
+    }
+    .week-cell ul { padding-right: 1.1rem; font-size: .82rem; }
+    .week-cell ul li { margin-bottom: .3rem; }
+    @media(max-width:700px) {
+      .week-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ===== PROGRESS TRACKER ===== */
+    .tracker-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: .75rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tracker-label { min-width: 160px; font-weight: 600; font-size: .88rem; }
+    .progress-bar-wrap {
+      flex: 1;
+      background: var(--border);
+      border-radius: 20px;
+      height: 14px;
+      position: relative;
+    }
+    .progress-bar {
+      height: 100%;
+      border-radius: 20px;
+      background: linear-gradient(90deg, var(--secondary), var(--primary));
+      transition: width .4s;
+    }
+    .tracker-pct { min-width: 45px; font-weight: 700; color: var(--primary); font-size: .9rem; }
+
+    /* ===== AI PANEL ===== */
+    .ai-panel {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a3a5c 100%);
+      border-radius: var(--radius);
+      padding: 2rem;
+      color: #e8f4fd;
+      margin-bottom: 2rem;
+    }
+    .ai-panel h3 { color: #5bc8f5; font-size: 1.2rem; margin-bottom: 1.2rem; }
+    .ai-feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    @media(max-width:700px){ .ai-feature-grid { grid-template-columns: 1fr; } }
+    .ai-feature {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(91,200,245,.2);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .ai-feature h4 { color: #5bc8f5; font-size: .95rem; margin-bottom: .5rem; }
+    .ai-feature p  { font-size: .82rem; opacity: .85; line-height: 1.6; }
+    .ai-badge {
+      display: inline-block;
+      background: #5bc8f5;
+      color: #0d1b2a;
+      border-radius: 12px;
+      padding: .15rem .65rem;
+      font-size: .72rem;
+      font-weight: 700;
+      margin-bottom: .5rem;
+    }
+
+    /* ===== EXAMPLE CARDS ===== */
+    .example-card {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      margin-bottom: 2.5rem;
+    }
+    .example-header {
+      padding: 1.2rem 1.8rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .ex-physical .example-header { background: linear-gradient(135deg,#1a6b8a,#27ae8f); }
+    .ex-sensory  .example-header { background: linear-gradient(135deg,#8e44ad,#c0392b); }
+    .ex-cognitive.example-header { background: linear-gradient(135deg,#e67e22,#d35400); }
+    .example-header .avatar {
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,.2);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .example-header h3 { font-size: 1.1rem; }
+    .example-header p  { font-size: .85rem; opacity: .9; margin-top: .2rem; }
+    .example-body { background: var(--card); padding: 1.8rem; }
+
+    /* ===== CHIPS ===== */
+    .chip {
+      display: inline-block;
+      padding: .25rem .8rem;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 600;
+      margin: .15rem;
+    }
+    .chip-blue   { background:#dbeeff; color:#1a6b8a; }
+    .chip-green  { background:#d5f5e3; color:#1e8449; }
+    .chip-orange { background:#fdebd0; color:#ba6608; }
+    .chip-purple { background:#ede0f5; color:#6c3483; }
+    .chip-red    { background:#fde8e8; color:#922b21; }
+
+    /* ===== METRIC CARDS ===== */
+    .metric {
+      text-align: center;
+      padding: 1.2rem;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+    }
+    .metric .val { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .metric .lbl { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ===== PRINT ===== */
+    .print-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: .7rem 2rem;
+      border-radius: 8px;
+      font-size: .95rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      transition: background .2s;
+    }
+    .print-btn:hover { background: #0d4f6b; }
+
+    @media print {
+      header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-btn { display: none; }
+      body { font-size: 12px; }
+    }
+
+    /* ===== MISC ===== */
+    .divider { height: 1px; background: var(--border); margin: 2rem 0; }
+    .note-box {
+      background: #fff8e1;
+      border-right: 4px solid var(--warning);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-size: .88rem;
+      color: #7d5a00;
+      margin-top: 1rem;
+    }
+    .success-box {
+      background: #e9f7ef;
+      border-right: 4px solid var(--success);
+      border-radius: 8px;
+      padding: 1rem 1.2rem;
+      font-size: .88rem;
+      color: #1a5c34;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header>
+  <h1>🏥 نموذج خطة التأهيل الشخصية</h1>
+  <p>إعداد: معالج التأهيل المتخصص · العلاج الطبيعي والمهني</p>
+  <span class="header-badge">برنامج 12 أسبوعًا · بدعم تقنيات الذكاء الاصطناعي</span>
+</header>
+
+<div class="container">
+
+  <!-- ===== PRINT BUTTON ===== -->
+  <div style="text-align:left; margin-bottom:1.5rem;">
+    <button class="print-btn" onclick="window.print()">🖨️ طباعة / PDF</button>
+  </div>
+
+  <!-- ========================================================
+       SECTION 1 – PATIENT INFO
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">👤</span> معلومات المريض</div>
+    <div class="grid-2">
+      <div>
+        <div class="field">
+          <label>الاسم الكامل <span class="req">*</span></label>
+          <input type="text" placeholder="أدخل اسم المريض" />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>العمر</label>
+            <input type="number" placeholder="سنة" />
+          </div>
+          <div class="field">
+            <label>الجنس</label>
+            <select>
+              <option>ذكر</option>
+              <option>أنثى</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>رقم الملف الطبي</label>
+          <input type="text" placeholder="MRN-XXXXXX" />
+        </div>
+        <div class="field">
+          <label>رقم الهاتف / ولي الأمر</label>
+          <input type="tel" placeholder="+966 5X XXX XXXX" />
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label>التشخيص الأساسي <span class="req">*</span></label>
+          <textarea placeholder="مثال: شلل نصفي ناجم عن إصابة نخاع شوكي على مستوى C5..."></textarea>
+        </div>
+        <div class="field">
+          <label>فئة الإعاقة</label>
+          <select>
+            <option>جسمية / حركية</option>
+            <option>حسية (بصرية / سمعية)</option>
+            <option>ذهنية / معرفية</option>
+            <option>مركبة / متعددة</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>المعالج المسؤول</label>
+          <input type="text" placeholder="اسم المعالج + التخصص" />
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label>تاريخ البدء</label>
+            <input type="date" />
+          </div>
+          <div class="field">
+            <label>تاريخ الانتهاء</label>
+            <input type="date" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 2 – INITIAL ASSESSMENT
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">📋</span> التقييم الأولي الشامل</div>
+    <div class="grid-2">
+      <div>
+        <div class="field">
+          <label>مستوى الأداء الوظيفي الحالي (FIM 1-7)</label>
+          <input type="range" min="1" max="7" value="3"
+                 oninput="document.getElementById('fim-val').textContent=this.value" />
+          <small>المستوى الحالي: <strong id="fim-val">3</strong> / 7</small>
+        </div>
+        <div class="field">
+          <label>مستوى الألم (NRS 0-10)</label>
+          <input type="range" min="0" max="10" value="5"
+                 oninput="document.getElementById('pain-val').textContent=this.value" />
+          <small>الألم: <strong id="pain-val">5</strong> / 10</small>
+        </div>
+        <div class="field">
+          <label>نطاق الحركة (ROM) الموثق</label>
+          <textarea placeholder="مثال: ثني الكتف 90°، فرد الركبة ناقص 15°..."></textarea>
+        </div>
+      </div>
+      <div>
+        <div class="field">
+          <label>القوة العضلية (Muscle Grading 0-5)</label>
+          <textarea placeholder="مثال: طرف علوي أيمن 3/5، طرف سفلي أيسر 2/5..."></textarea>
+        </div>
+        <div class="field">
+          <label>التوازن والتنسيق</label>
+          <select>
+            <option>ممتاز – مستقل تمامًا</option>
+            <option>جيد – يحتاج إشراف</option>
+            <option>متوسط – يحتاج مساعدة جزئية</option>
+            <option>ضعيف – يحتاج مساعدة كاملة</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>الاحتياجات الخاصة / الاعتبارات الطبية</label>
+          <textarea placeholder="حساسيات، أمراض مزمنة، أدوية تؤثر على التأهيل..."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 3 – SMART GOALS
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">🎯</span> أهداف SMART للبرنامج</div>
+    <p style="font-size:.88rem; color:var(--muted); margin-bottom:1.2rem;">
+      كل هدف يجب أن يكون: <strong>محدد</strong> · <strong>قابل للقياس</strong> ·
+      <strong>قابل للتحقيق</strong> · <strong>ذو صلة</strong> · <strong>محدد بوقت</strong>
+    </p>
+    <div style="overflow-x:auto;">
+      <table class="smart-table">
+        <thead>
+          <tr>
+            <th>الهدف</th>
+            <th>المعيار القابل للقياس</th>
+            <th>الأداة</th>
+            <th>الإطار الزمني</th>
+            <th>الأولوية</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>تحسين المشي المستقل بدون مساعدة</td>
+            <td>قطع 50 مترًا دون مساعدة بمنتصف البرنامج</td>
+            <td>10MWT · FIM</td>
+            <td>الأسبوع 6</td>
+            <td><span class="chip chip-red">عالية جدًا</span></td>
+          </tr>
+          <tr>
+            <td>تقليل مستوى الألم</td>
+            <td>انخفاض NRS من 7 إلى ≤ 3</td>
+            <td>مقياس NRS</td>
+            <td>الأسبوع 4</td>
+            <td><span class="chip chip-orange">عالية</span></td>
+          </tr>
+          <tr>
+            <td>تحسين نطاق حركة الطرف العلوي</td>
+            <td>ثني الكتف ≥ 150° · مد المرفق كامل</td>
+            <td>Goniometer</td>
+            <td>الأسبوع 8</td>
+            <td><span class="chip chip-blue">متوسطة</span></td>
+          </tr>
+          <tr>
+            <td>استئناف النشاط المهني / الحياتي</td>
+            <td>أداء 5 أنشطة يومية بالحد الأدنى من المساعدة</td>
+            <td>ADL Checklist</td>
+            <td>الأسبوع 12</td>
+            <td><span class="chip chip-green">طويلة المدى</span></td>
+          </tr>
+          <tr>
+            <td>تقوية العضلات الداعمة</td>
+            <td>تحسين القوة بمقياس 0-5 بمعدل درجة واحدة</td>
+            <td>Manual Muscle Test</td>
+            <td>الأسبوع 10</td>
+            <td><span class="chip chip-purple">مهمة</span></td>
+          </tr>
+          <tr>
+            <td>[هدف مخصص — أضف هنا]</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 4 – 12-WEEK PROGRAM
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">📅</span> البرنامج التفصيلي — 12 أسبوعًا (3 مراحل)</div>
+
+    <!-- PHASE 1 -->
+    <div class="phase-block phase-1">
+      <div class="phase-header">
+        🟢 المرحلة الأولى — التحضير والتكييف (الأسابيع 1–4)
+      </div>
+      <div class="week-grid">
+        <div class="week-cell">
+          <h4>الأسبوع 1</h4>
+          <ul>
+            <li>تقييم شامل + تحديد خط الأساس</li>
+            <li>تمارين تنفسية (دياغراماتية)</li>
+            <li>تمدد خفيف وسلبي (30 د × 3)</li>
+            <li>تعليم طبيعة الألم والوقاية</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 2</h4>
+          <ul>
+            <li>تمارين نطاق الحركة السلبية والمُساعدة</li>
+            <li>تحفيز عصبي عضلي (NMES 20 د)</li>
+            <li>تمارين المائية (هيدروثيرابي إذا متاحة)</li>
+            <li>بداية تمارين التوازن على السطح الثابت</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 3</h4>
+          <ul>
+            <li>تمارين النطاق الفعال المُساعَد (AAROM)</li>
+            <li>تقوية العضلات الأساسية (Core) × 15 تكرار</li>
+            <li>مشي مُدعم: موازٍ أو مشاية</li>
+            <li>إدارة الألم: TENS + تدليك علاجي</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 4</h4>
+          <ul>
+            <li>تقييم منتصف المرحلة + مراجعة الأهداف</li>
+            <li>تمارين نطاق الحركة الكاملة النشطة</li>
+            <li>تدريب التوازن: سطح غير مستقر</li>
+            <li>أنشطة يومية مُكيَّفة (ADL مُكيَّف)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-block phase-2">
+      <div class="phase-header">
+        🟡 المرحلة الثانية — البناء والتطوير (الأسابيع 5–8)
+      </div>
+      <div class="week-grid">
+        <div class="week-cell">
+          <h4>الأسبوع 5</h4>
+          <ul>
+            <li>بداية تمارين المقاومة (مطاطات/أوزان خفيفة)</li>
+            <li>تدريب التحمل: دراجة ثابتة 15 د</li>
+            <li>مشي مستقل: مسار 20 م</li>
+            <li>تمارين التناسق الحركي</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 6</h4>
+          <ul>
+            <li>تقييم منتصف البرنامج (Midpoint Review)</li>
+            <li>زيادة كثافة تمارين القوة 20%</li>
+            <li>مشي مستقل: 50 م (هدف SMART)</li>
+            <li>تمارين مهارية: قبض وإفلات، تناول أشياء</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 7</h4>
+          <ul>
+            <li>تمارين وظيفية مركبة (PNF)</li>
+            <li>تدريب على الدرج والأسطح غير المستوية</li>
+            <li>مشي تحدي: تضمين عقبات بسيطة</li>
+            <li>تمارين البلع والتخاطب (حسب الحالة)</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 8</h4>
+          <ul>
+            <li>تقييم ROM + المقارنة بخط الأساس</li>
+            <li>تمارين قوة متقدمة (Closed Chain)</li>
+            <li>تدريب الاندماج المجتمعي: محاكاة بيئية</li>
+            <li>ضبط الجلسات بناءً على تحليل AI</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-block phase-3">
+      <div class="phase-header">
+        🟣 المرحلة الثالثة — التعزيز والاستقلالية (الأسابيع 9–12)
+      </div>
+      <div class="week-grid">
+        <div class="week-cell">
+          <h4>الأسبوع 9</h4>
+          <ul>
+            <li>تمارين وظيفية متقدمة في السياق الحقيقي</li>
+            <li>تدريب على استخدام الأجهزة المساعدة</li>
+            <li>تحسين الأداء المهني / المدرسي</li>
+            <li>تعزيز ثقة المريض وتقبّل الذات</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 10</h4>
+          <ul>
+            <li>تقييم القوة العضلية (هدف SMART)</li>
+            <li>تمارين أنشطة الحياة اليومية المتقدمة</li>
+            <li>تدريب الأسرة على دعم التأهيل المنزلي</li>
+            <li>محاكاة بيئة العمل / المدرسة</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 11</h4>
+          <ul>
+            <li>دمج التمارين في الروتين اليومي</li>
+            <li>تمارين طاقة واسترخاء ذهني</li>
+            <li>مراجعة تمارين المنزل (HEP)</li>
+            <li>تدريب على الحالات الطارئة</li>
+          </ul>
+        </div>
+        <div class="week-cell">
+          <h4>الأسبوع 12</h4>
+          <ul>
+            <li>تقييم نهائي شامل + مقارنة كاملة</li>
+            <li>توثيق النتائج وكتابة التقرير الختامي</li>
+            <li>خطة المتابعة طويلة المدى</li>
+            <li>جلسة تشاورية مع الأسرة والفريق</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 5 – PROGRESS TRACKER
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">📊</span> متابعة التقدم الأسبوعي</div>
+    <div class="grid-4" style="margin-bottom:1.5rem;">
+      <div class="metric"><div class="val">12</div><div class="lbl">أسبوع البرنامج</div></div>
+      <div class="metric"><div class="val">36</div><div class="lbl">جلسة إجمالية</div></div>
+      <div class="metric"><div class="val">5</div><div class="lbl">أهداف SMART</div></div>
+      <div class="metric"><div class="val">3</div><div class="lbl">تقييمات رسمية</div></div>
+    </div>
+
+    <div class="tracker-row">
+      <div class="tracker-label">🦵 التحرك والمشي</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:65%"></div></div>
+      <div class="tracker-pct">65%</div>
+    </div>
+    <div class="tracker-row">
+      <div class="tracker-label">💪 القوة العضلية</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:50%"></div></div>
+      <div class="tracker-pct">50%</div>
+    </div>
+    <div class="tracker-row">
+      <div class="tracker-label">🎯 نطاق الحركة (ROM)</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:75%"></div></div>
+      <div class="tracker-pct">75%</div>
+    </div>
+    <div class="tracker-row">
+      <div class="tracker-label">😌 مستوى الألم (انخفاض)</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:80%"></div></div>
+      <div class="tracker-pct">80%</div>
+    </div>
+    <div class="tracker-row">
+      <div class="tracker-label">🏠 أنشطة الحياة اليومية</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:55%"></div></div>
+      <div class="tracker-pct">55%</div>
+    </div>
+    <div class="tracker-row">
+      <div class="tracker-label">🧠 التوازن والتنسيق</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" style="width:70%"></div></div>
+      <div class="tracker-pct">70%</div>
+    </div>
+
+    <div class="success-box">
+      ✅ <strong>كيفية الاستخدام:</strong> تُحدَّث نسب التقدم أسبوعيًا بناءً على قياسات موضوعية.
+      يُوثَّق كل تغيير مع التاريخ ورقم الجلسة لضمان الشفافية والمتابعة الدقيقة.
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 6 – AI INTEGRATION
+  ======================================================== -->
+  <div class="ai-panel">
+    <h3>🤖 تكامل الذكاء الاصطناعي للتصحيح الحركي</h3>
+    <div class="ai-feature-grid">
+      <div class="ai-feature">
+        <div class="ai-badge">تحليل الحركة</div>
+        <h4>📹 AI Motion Capture</h4>
+        <p>
+          كاميرات ثلاثية الأبعاد (مثل Kinect / OpenPose) تحلل أنماط المشي والحركة
+          في الزمن الحقيقي. تُقارن مع النموذج المعياري وتُصدر تقرير انحرافات فوري.
+        </p>
+      </div>
+      <div class="ai-feature">
+        <div class="ai-badge">تصحيح آني</div>
+        <h4>🔊 Real-Time Feedback</h4>
+        <p>
+          ارتداء أجهزة استشعار IMU (مثل Xsens) على المفاصل الرئيسية.
+          يُنبّه المريض صوتيًا أو بالاهتزاز عند الخطأ الحركي مباشرةً.
+        </p>
+      </div>
+      <div class="ai-feature">
+        <div class="ai-badge">تعلم آلي</div>
+        <h4>📈 Adaptive Algorithms</h4>
+        <p>
+          خوارزميات ML تتعلم من أداء المريض الفعلي عبر الجلسات وتُعدّل صعوبة
+          التمارين وتواترها تلقائيًا لتحقيق أقصى كفاءة علاجية.
+        </p>
+      </div>
+      <div class="ai-feature">
+        <div class="ai-badge">واقع افتراضي</div>
+        <h4>🥽 VR Rehabilitation</h4>
+        <p>
+          بيئات VR تفاعلية لمحاكاة سيناريوهات حقيقية (الطبخ، التسوق، المشي في الحديقة)
+          مع رصد دقيق للأداء وإشراك المريض عاطفيًا في العلاج.
+        </p>
+      </div>
+      <div class="ai-feature">
+        <div class="ai-badge">تنبؤي</div>
+        <h4>🔮 Predictive Analytics</h4>
+        <p>
+          نماذج AI تتنبأ بتوقيت الوصول إلى الأهداف بناءً على معدل التحسن الحالي،
+          وتُنبّه المعالج مبكرًا لأي انحراف عن المسار المخطط.
+        </p>
+      </div>
+      <div class="ai-feature">
+        <div class="ai-badge">دعم أسري</div>
+        <h4>📱 Telerehab AI App</h4>
+        <p>
+          تطبيق ذكي يُرشد المريض وأسرته أثناء التمارين المنزلية، يستخدم كاميرا
+          الهاتف للتحقق من صحة الوضعية وإرسال التغذية الراجعة الفورية.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 7 – EXAMPLE 1: PHYSICAL DISABILITY
+  ======================================================== -->
+  <div class="section-title"><span class="icon">📖</span> أمثلة تطبيقية — 3 فئات مختلفة</div>
+
+  <!-- EXAMPLE 1 -->
+  <div class="example-card ex-physical">
+    <div class="example-header">
+      <div class="avatar">🦽</div>
+      <div>
+        <h3>المثال الأول: إعاقة جسمية / حركية</h3>
+        <p>إصابة نخاع شوكي غير كاملة — المستوى T10</p>
+      </div>
+    </div>
+    <div class="example-body">
+      <div class="grid-2" style="gap:2rem;">
+        <div>
+          <h4 style="color:var(--primary); margin-bottom:.8rem;">👤 ملف المريض</h4>
+          <table style="width:100%; font-size:.88rem; border-collapse:collapse;">
+            <tr><td style="padding:.4rem; font-weight:600; width:45%;">الاسم:</td><td>أحمد عبدالله (42 سنة)</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">التشخيص:</td><td>إصابة نخاع شوكي جزئية T10 — ASIA B</td></tr>
+            <tr><td style="padding:.4rem; font-weight:600;">مدة الإصابة:</td><td>8 أشهر (ما بعد حادث سيارة)</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">الحالة الراهنة:</td><td>يمشي بمساعدة مشاية — يشعر بألم مزمن</td></tr>
+          </table>
+
+          <h4 style="color:var(--primary); margin:.9rem 0 .6rem;">🎯 أهداف SMART (12 أسبوع)</h4>
+          <ul style="font-size:.87rem; padding-right:1.2rem;">
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 6:</strong> المشي 50 مترًا بعصا واحدة فقط</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 8:</strong> تقليل NRS من 7 إلى ≤ 3</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 10:</strong> صعود درج 10 درجات باستقلالية</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 12:</strong> العودة لقيادة السيارة (مُكيَّفة)</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:var(--primary); margin-bottom:.8rem;">🏋️ بروتوكول التمارين</h4>
+          <div style="margin-bottom:.7rem;">
+            <strong>المرحلة 1 (أسبوع 1-4):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تمارين تنفسية + تقوية عضلات الجذع</li>
+              <li>FES (تحفيز كهربائي وظيفي) للأطراف السفلية 20 د/يوم</li>
+              <li>تمارين حوض Lokomat (مشي مُساعد روبوتيًا) 3×/أسبوع</li>
+            </ul>
+          </div>
+          <div style="margin-bottom:.7rem;">
+            <strong>المرحلة 2 (أسبوع 5-8):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>مشي بالموازي → مشاية → عصا واحدة</li>
+              <li>تمارين القوة للأطراف العلوية (دعم الحركة)</li>
+              <li>TENS لإدارة الألم + علاج في الماء</li>
+            </ul>
+          </div>
+          <div>
+            <strong>المرحلة 3 (أسبوع 9-12):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>محاكاة بيئة العمل والمنزل</li>
+              <li>تدريب على قيادة السيارة المُكيَّفة</li>
+              <li>برنامج تمارين منزلية مستقل (HEP)</li>
+            </ul>
+          </div>
+
+          <h4 style="color:var(--primary); margin:.9rem 0 .6rem;">🤖 دور AI</h4>
+          <div style="font-size:.85rem;">
+            استخدام نظام <strong>Ekso Bionics</strong> الذكي المدعوم بـ AI لتحليل نمط المشي
+            وضبط درجة الدعم تلقائيًا. كاميرات حركة لتتبع الانحراف في الحوض والركبتين.
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <strong>التمارين اليومية المقترحة:</strong>
+        <div style="display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem;">
+          <span class="chip chip-blue">ضغط على الحائط × 15</span>
+          <span class="chip chip-green">تمدد وتر أخيل 30 ث × 3</span>
+          <span class="chip chip-orange">تمارين الجسر (Bridge) × 20</span>
+          <span class="chip chip-purple">رفع الساق جانبيًا × 15 (كل جهة)</span>
+          <span class="chip chip-blue">تقلص عضلات البطن × 30 ث × 5</span>
+          <span class="chip chip-green">مشي مُوجَّه 30 د (مرتين يوميًا)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE 2 -->
+  <div class="example-card ex-sensory">
+    <div class="example-header">
+      <div class="avatar">👁️</div>
+      <div>
+        <h3>المثال الثاني: إعاقة حسية — ضعف بصري شديد</h3>
+        <p>إعاقة بصرية مكتسبة + ضعف التوازن الناجم عنها</p>
+      </div>
+    </div>
+    <div class="example-body">
+      <div class="grid-2" style="gap:2rem;">
+        <div>
+          <h4 style="color:#8e44ad; margin-bottom:.8rem;">👤 ملف المريضة</h4>
+          <table style="width:100%; font-size:.88rem; border-collapse:collapse;">
+            <tr><td style="padding:.4rem; font-weight:600; width:45%;">الاسم:</td><td>سارة محمد (29 سنة)</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">التشخيص:</td><td>انفصال شبكية + فقدان بصر 95%</td></tr>
+            <tr><td style="padding:.4rem; font-weight:600;">مشكلة التوازن:</td><td>اضطراب دهليزي ثانوي</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">الهدف الرئيسي:</td><td>الاستقلالية الحركية في البيئة المنزلية</td></tr>
+          </table>
+
+          <h4 style="color:#8e44ad; margin:.9rem 0 .6rem;">🎯 أهداف SMART</h4>
+          <ul style="font-size:.87rem; padding-right:1.2rem;">
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 4:</strong> تحسين التوازن على سطح ثابت 2 د بدون مساعدة</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 7:</strong> التنقل داخل المنزل بالعصا البيضاء بشكل مستقل</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 10:</strong> استخدام التطبيقات المساعدة للذكاء الاصطناعي</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 12:</strong> التنقل خارج المنزل بمسار مألوف مستقل</li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#8e44ad; margin-bottom:.8rem;">🏃 بروتوكول التأهيل الحسي</h4>
+          <div style="margin-bottom:.7rem;">
+            <strong>التأهيل الدهليزي:</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تمارين Cawthorne-Cooksey للتأهيل الدهليزي</li>
+              <li>تمارين ثبات البصرة (VOR Rehab) × 10 د/يوم</li>
+              <li>تدريب التوازن على أجهزة Biodex Balance</li>
+            </ul>
+          </div>
+          <div style="margin-bottom:.7rem;">
+            <strong>مهارات التوجه والتنقل:</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تدريب على العصا البيضاء (تقنية القصبة)</li>
+              <li>استخدام حواس التعويض: سمع، لمس، شم</li>
+              <li>رسم الخرائط الذهنية للبيئة</li>
+            </ul>
+          </div>
+          <div>
+            <strong>التكيف المهني:</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تدريب على قارئ الشاشة وبرامج Braille</li>
+              <li>تنظيم المطبخ والمنزل وفق نظام لمسي</li>
+              <li>دمج اجتماعي ومهني تدريجي</li>
+            </ul>
+          </div>
+
+          <h4 style="color:#8e44ad; margin:.9rem 0 .6rem;">🤖 دور AI</h4>
+          <div style="font-size:.85rem;">
+            نظارات <strong>OrCam MyEye</strong> المدعومة بـ AI لقراءة النصوص والتعرف على الوجوه.
+            تطبيقات ذكاء اصطناعي لوصف المحيط صوتيًا (<em>Seeing AI</em> من Microsoft).
+            أجهزة استشعار تنبيه ذكي للعقبات.
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <strong>تمارين التوازن والتنسيق اليومية:</strong>
+        <div style="display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem;">
+          <span class="chip chip-purple">وقوف أحادي القدم 30 ث × 4</span>
+          <span class="chip chip-red">تمارين Tandem Walk بالسياج</span>
+          <span class="chip chip-blue">تتبع صوتي بالرأس 3 د</span>
+          <span class="chip chip-green">مشي على حصيرة اهتزازية</span>
+          <span class="chip chip-orange">تمارين اليوغا المُكيَّفة × 20 د</span>
+          <span class="chip chip-purple">محاكاة مسارات منزلية يوميًا</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE 3 -->
+  <div class="example-card">
+    <div class="example-header" style="background: linear-gradient(135deg,#e67e22,#d35400);">
+      <div class="avatar">🧠</div>
+      <div>
+        <h3>المثال الثالث: إعاقة ذهنية / معرفية — متلازمة داون مع تأخر حركي</h3>
+        <p>طفل — 8 سنوات · برنامج تأهيل متكامل جسمي-معرفي</p>
+      </div>
+    </div>
+    <div class="example-body">
+      <div class="grid-2" style="gap:2rem;">
+        <div>
+          <h4 style="color:var(--accent); margin-bottom:.8rem;">👤 ملف المريض</h4>
+          <table style="width:100%; font-size:.88rem; border-collapse:collapse;">
+            <tr><td style="padding:.4rem; font-weight:600; width:45%;">الاسم:</td><td>يوسف عمر (8 سنوات)</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">التشخيص:</td><td>متلازمة داون (Trisomy 21)</td></tr>
+            <tr><td style="padding:.4rem; font-weight:600;">التأخر:</td><td>حركي إجمالي + دقيق + لغوي</td></tr>
+            <tr style="background:#f7fbff;"><td style="padding:.4rem; font-weight:600;">نقطة القوة:</td><td>تقليد بصري ممتاز · يحب الموسيقى</td></tr>
+          </table>
+
+          <h4 style="color:var(--accent); margin:.9rem 0 .6rem;">🎯 أهداف SMART</h4>
+          <ul style="font-size:.87rem; padding-right:1.2rem;">
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 4:</strong> الركض 20 مترًا دون سقوط</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 6:</strong> قطع المقص وتلوين داخل الخطوط (Motor Dexterity)</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 9:</strong> ركوب دراجة ثلاثية العجلات باستقلالية</li>
+            <li style="margin-bottom:.4rem;"><strong>الأسبوع 12:</strong> أداء سلسلة تمارين 5 حركات متتالية</li>
+          </ul>
+
+          <div class="note-box" style="margin-top:1rem;">
+            ⚠️ <strong>اعتبارات خاصة:</strong> مراعاة القصور في الانتباه (مدة الجلسة ≤ 30 د).
+            استخدام تعزيز إيجابي فوري. إشراك الأسرة في كل جلسة.
+          </div>
+        </div>
+        <div>
+          <h4 style="color:var(--accent); margin-bottom:.8rem;">🎮 بروتوكول التأهيل</h4>
+          <div style="margin-bottom:.7rem;">
+            <strong>العلاج الحركي الإجمالي (Gross Motor):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تمارين NDT (Neurodevelopmental Treatment)</li>
+              <li>ألعاب كرة مُكيَّفة × 15 د</li>
+              <li>تدريب التوازن الديناميكي بالمتعة</li>
+            </ul>
+          </div>
+          <div style="margin-bottom:.7rem;">
+            <strong>العلاج الحركي الدقيق (Fine Motor):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>تمارين العجين الحسي + الخرز + القص</li>
+              <li>ألواح LEGO مُكيَّفة للتناسق البصري-الحركي</li>
+              <li>تطبيقات تلوين على اللوح الذكي</li>
+            </ul>
+          </div>
+          <div>
+            <strong>التكامل الحسي (Sensory Integration):</strong>
+            <ul style="font-size:.85rem; padding-right:1.2rem; margin-top:.3rem;">
+              <li>غرفة سنوزيلن للتنظيم الحسي 20 د/يوم</li>
+              <li>تمارين برنامج DIR/Floortime</li>
+              <li>موسيقى إيقاعية لتحسين التنسيق الحركي</li>
+            </ul>
+          </div>
+
+          <h4 style="color:var(--accent); margin:.9rem 0 .6rem;">🤖 دور AI والتقنيات</h4>
+          <div style="font-size:.85rem;">
+            ألعاب تفاعلية تعتمد <strong>الواقع المعزز (AR)</strong> لتعزيز الحركة الدقيقة.
+            روبوت <strong>NAO</strong> لمحاكاة التفاعل الاجتماعي والتمارين بأسلوب اللعب.
+            تطبيقات AI للتعزيز المؤجل للمهارات المكتسبة.
+            تتبع آني للأداء الحركي عبر ساعة ذكية (نبضات + حركة).
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <strong>أنشطة تكاملية يومية (تجمع الحركة والتعلم):</strong>
+        <div style="display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.5rem;">
+          <span class="chip chip-orange">رقص إيقاعي × 20 د</span>
+          <span class="chip chip-blue">سباحة مُكيَّفة × 3/أسبوع</span>
+          <span class="chip chip-green">تسلق الجدار المنخفض الآمن</span>
+          <span class="chip chip-purple">ألعاب طابة مُكيَّفة × 15 د</span>
+          <span class="chip chip-orange">مسار حواجز بسيط × يومي</span>
+          <span class="chip chip-red">ألعاب ألوان بالأيدي</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 8 – DISCHARGE CRITERIA
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">✅</span> معايير الإنهاء والمتابعة</div>
+    <div class="grid-2">
+      <div>
+        <h4 style="margin-bottom:.7rem; color:var(--secondary);">معايير إنهاء البرنامج المُنظَّم</h4>
+        <ul style="padding-right:1.4rem; font-size:.9rem; line-height:2;">
+          <li>تحقيق ≥ 80% من الأهداف SMART المحددة</li>
+          <li>انخفاض مستوى الألم إلى NRS ≤ 3</li>
+          <li>استقلالية في الأنشطة اليومية الأساسية (FIM ≥ 6)</li>
+          <li>قدرة المريض وأسرته على تنفيذ HEP بشكل صحيح</li>
+          <li>استقرار الحالة الطبية العامة</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="margin-bottom:.7rem; color:var(--secondary);">خطة المتابعة طويلة المدى</h4>
+        <ul style="padding-right:1.4rem; font-size:.9rem; line-height:2;">
+          <li>جلسة مراجعة شهرية لمدة 3 أشهر بعد الإنهاء</li>
+          <li>تقييم ربع سنوي بالأدوات المعيارية</li>
+          <li>برنامج تمارين منزلي محدَّث كل 6 أسابيع</li>
+          <li>استشارات تيلي-ريهاب عن بُعد (Tele-Rehab)</li>
+          <li>تنسيق مع الفريق متعدد التخصصات والأسرة</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       SECTION 9 – SIGNATURES
+  ======================================================== -->
+  <div class="card">
+    <div class="section-title"><span class="icon">✍️</span> التوقيعات والموافقة</div>
+    <div class="grid-3">
+      <div class="field">
+        <label>توقيع المعالج الرئيسي</label>
+        <input type="text" placeholder="الاسم والتوقيع" />
+        <small style="color:var(--muted);">التاريخ: _______________</small>
+      </div>
+      <div class="field">
+        <label>توقيع المريض / ولي الأمر</label>
+        <input type="text" placeholder="الاسم والتوقيع" />
+        <small style="color:var(--muted);">التاريخ: _______________</small>
+      </div>
+      <div class="field">
+        <label>اعتماد رئيس قسم التأهيل</label>
+        <input type="text" placeholder="الاسم والختم الرسمي" />
+        <small style="color:var(--muted);">التاريخ: _______________</small>
+      </div>
+    </div>
+    <div class="note-box">
+      📌 <strong>ملاحظة قانونية:</strong> هذه الخطة وثيقة طبية رسمية. يُحفظ نسخة في ملف المريض الإلكتروني
+      ونسخة ورقية موقعة من جميع الأطراف. تُراجع وتُحدَّث عند كل تقييم رسمي.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align:center; padding:2rem 0; color:var(--muted); font-size:.82rem; border-top:1px solid var(--border);">
+    نموذج خطة التأهيل الشخصية — الإصدار 2.0 · مُعدّ بواسطة قسم التأهيل ·
+    جميع الحقوق محفوظة © 2025<br/>
+    استُخدمت المعايير الدولية: WHO-ICF · APTA · ICD-11 · SMART Framework
+  </div>
+
+</div><!-- /container -->
+</body>
+</html>

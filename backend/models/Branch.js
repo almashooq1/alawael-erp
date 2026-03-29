@@ -114,7 +114,7 @@ const branchSchema = new mongoose.Schema(
 );
 
 // ─── Indexes ─────────────────────────────────────────────────────────────────
-branchSchema.index({ code: 1 }, { unique: true });
+// NOTE: code index is already created by unique:true in field definition
 branchSchema.index({ status: 1 });
 branchSchema.index({ 'location.region': 1 });
 branchSchema.index({ type: 1 });

@@ -13,6 +13,7 @@ const therapySessionSchema = new mongoose.Schema(
 
     // معلومات الجلسة
     sessionType: {
+      type: String,
       enum: ['physical', 'occupational', 'speech', 'behavioral', 'psychological', 'group'],
       required: true,
     },
@@ -31,6 +32,7 @@ const therapySessionSchema = new mongoose.Schema(
 
     // الحالة
     status: {
+      type: String,
       enum: ['scheduled', 'completed', 'canceled', 'rescheduled', 'no-show'],
       default: 'scheduled',
     },
@@ -64,6 +66,7 @@ const progressTrackingSchema = new mongoose.Schema(
         domain: String, // cognitive, behavioral, physical, etc.
         targetDate: Date,
         status: {
+          type: String,
           enum: ['not_started', 'in_progress', 'achieved', 'modified'],
           default: 'in_progress',
         },
@@ -127,7 +130,7 @@ const familyCommunicationSchema = new mongoose.Schema(
         attachments: [String],
         sentDate: { type: Date, default: Date.now },
         readDate: Date,
-        type: { enum: ['general', 'progress', 'alert', 'appointment', 'urgent'] },
+        type: { type: String, enum: ['general', 'progress', 'alert', 'appointment', 'urgent'] },
       },
     ],
 
@@ -156,9 +159,12 @@ const familyCommunicationSchema = new mongoose.Schema(
     ],
 
     // معلومات الاتصال
-    preferredContactMethod: { enum: ['email', 'phone', 'sms', 'whatsapp', 'in-person'] },
+    preferredContactMethod: {
+      type: String,
+      enum: ['email', 'phone', 'sms', 'whatsapp', 'in-person'],
+    },
     lastContactDate: Date,
-    contactFrequency: { enum: ['weekly', 'bi-weekly', 'monthly', 'quarterly'] },
+    contactFrequency: { type: String, enum: ['weekly', 'bi-weekly', 'monthly', 'quarterly'] },
 
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
@@ -234,7 +240,7 @@ const medicalRecordsSchema = new mongoose.Schema(
       {
         substance: String,
         reaction: String,
-        severity: { enum: ['mild', 'moderate', 'severe'] },
+        severity: { type: String, enum: ['mild', 'moderate', 'severe'] },
       },
     ],
 
@@ -273,6 +279,7 @@ const attendanceSchema = new mongoose.Schema(
       {
         date: { type: Date, required: true },
         status: {
+          type: String,
           enum: ['present', 'absent', 'late', 'early_leave', 'medical_leave'],
           required: true,
         },
@@ -306,7 +313,7 @@ const attendanceSchema = new mongoose.Schema(
         endDate: Date,
         reason: String,
         approvedBy: String,
-        type: { enum: ['medical', 'personal', 'vacation', 'other'] },
+        type: { type: String, enum: ['medical', 'personal', 'vacation', 'other'] },
       },
     ],
 
@@ -331,9 +338,14 @@ attendanceSchema.index({ beneficiaryId: 1, 'dailyRecords.date': -1 });
 attendanceSchema.index({ 'dailyRecords.status': 1 });
 
 module.exports = {
-  TherapySession: mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
-  ProgressTracking: mongoose.models.ProgressTracking || mongoose.model('ProgressTracking', progressTrackingSchema),
-  FamilyCommunication: mongoose.models.FamilyCommunication || mongoose.model('FamilyCommunication', familyCommunicationSchema),
-  MedicalRecords: mongoose.models.MedicalRecords || mongoose.model('MedicalRecords', medicalRecordsSchema),
+  TherapySession:
+    mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
+  ProgressTracking:
+    mongoose.models.ProgressTracking || mongoose.model('ProgressTracking', progressTrackingSchema),
+  FamilyCommunication:
+    mongoose.models.FamilyCommunication ||
+    mongoose.model('FamilyCommunication', familyCommunicationSchema),
+  MedicalRecords:
+    mongoose.models.MedicalRecords || mongoose.model('MedicalRecords', medicalRecordsSchema),
   Attendance: mongoose.models.Attendance || mongoose.model('Attendance', attendanceSchema),
 };

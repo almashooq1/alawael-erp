@@ -294,7 +294,6 @@ const zakatCalculationSchema = new mongoose.Schema(
     },
     approvalDate: Date,
 
-    timestamps: true,
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
@@ -365,7 +364,6 @@ const zakatPaymentSchema = new mongoose.Schema(
     },
     verificationDate: Date,
 
-    timestamps: true,
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },
@@ -418,7 +416,6 @@ const zakatReminderSchema = new mongoose.Schema(
       default: ['IN_APP'],
     },
 
-    timestamps: true,
     createdAt: { type: Date, default: Date.now },
   },
   { collection: 'zakat_reminders', timestamps: true }
@@ -485,9 +482,11 @@ zakatReminderSchema.index({ user_id: 1, sentDate: 1 });
 
 module.exports = {
   // Models
-  ZakatCalculation: mongoose.models.ZakatCalculation || mongoose.model('ZakatCalculation', zakatCalculationSchema),
+  ZakatCalculation:
+    mongoose.models.ZakatCalculation || mongoose.model('ZakatCalculation', zakatCalculationSchema),
   ZakatPayment: mongoose.models.ZakatPayment || mongoose.model('ZakatPayment', zakatPaymentSchema),
-  ZakatReminder: mongoose.models.ZakatReminder || mongoose.model('ZakatReminder', zakatReminderSchema),
+  ZakatReminder:
+    mongoose.models.ZakatReminder || mongoose.model('ZakatReminder', zakatReminderSchema),
   ZakatReport: mongoose.models.ZakatReport || mongoose.model('ZakatReport', zakatReportSchema),
 
   // Configuration

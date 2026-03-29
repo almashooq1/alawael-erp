@@ -129,6 +129,12 @@ const cacheConfig = {
 
 // إنشاء عميل Redis
 const createRedisClient = async () => {
+  // Skip if Redis is disabled
+  if (process.env.DISABLE_REDIS === 'true') {
+    logger.info('Redis disabled via DISABLE_REDIS=true (cache.config)');
+    return null;
+  }
+
   // Always use standalone mode — cluster nodes (redis-1/2/3) don't exist on VPS
   const client = new Redis({
     host: cacheConfig.redis.host,
@@ -153,7 +159,9 @@ const createRedisClient = async () => {
     await Promise.race([
       client.connect(),
       new Promise((_, reject) =>
-        setTimeout(() => { reject(new Error('Redis connect timeout')); }, 4000)
+        setTimeout(() => {
+          reject(new Error('Redis connect timeout'));
+        }, 4000)
       ),
     ]);
   } catch (err) {

@@ -9,6 +9,11 @@ const logger = require('../utils/logger');
 let redis = null;
 
 const connectRedis = async () => {
+  if (process.env.DISABLE_REDIS === 'true') {
+    logger.info('Redis disabled via DISABLE_REDIS=true (redis.config)');
+    return null;
+  }
+
   if (redis) return redis;
 
   redis = new Redis({

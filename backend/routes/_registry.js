@@ -617,11 +617,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Phase 21-28
   safeMount(app, ['/api/phases-21-28', '/api/v1/phases-21-28'], '../routes/phases-21-28.routes');
 
-  // Disability Rehabilitation (/api/ only; /api/v1/ already mounted above)
+  // Disability Rehabilitation (/api/ only; /api/v1/ already mounted above via disabilityRehabilitationRoutes)
+  // NOTE: /api/rehabilitation alias removed — frontend uses /api/rehab-plans (rehabilitationPlan.routes)
+  //       and /api/disability-rehabilitation for the older disability-rehabilitation module.
   safeMount(app, '/api/disability-rehabilitation', '../routes/disability-rehabilitation.routes');
-
-  // Frontend alias: /api/rehabilitation → same routes (frontend uses this shorter path)
-  safeMount(app, '/api/rehabilitation', '../routes/disability-rehabilitation.routes');
 
   // Rehabilitation Services (Phase 5–9: 61 specialized therapy & support services)
   safeMount(app, '/api/disability-rehab', '../rehabilitation-services/rehabilitation-routes');
@@ -1240,6 +1239,16 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
   logger.info(
     'Phase 33 mounted (10 sub-modules: transportation, insurance-claims, billing-records, volunteers, donations, residential-units, activities, documents, events, clinical-notes)'
+  );
+
+  // ── Rehabilitation Plans — خطط التأهيل الفردية (12 أسبوع + AI + Tele-Rehab) ──
+  safeMount(
+    app,
+    ['/api/rehab-plans', '/api/v1/rehab-plans'],
+    '../routes/rehabilitationPlan.routes'
+  );
+  logger.info(
+    'Rehab Plans routes mounted (16 endpoints: CRUD plans, SMART goals, AI assessment, outcome prediction, tele-sessions, progress reports, quality metrics, goal bank, templates)'
   );
 
   // ── Phase 34: Smart Attendance — الحضور الذكي ────────────────────────────

@@ -18,7 +18,11 @@ const financialSchema = new mongoose.Schema(
         date: Date,
         amount: Number,
         services: [String],
-        status: { enum: ['pending', 'paid', 'partial', 'overdue'], default: 'pending' },
+        status: {
+          type: String,
+          enum: ['pending', 'paid', 'partial', 'overdue'],
+          default: 'pending',
+        },
         dueDate: Date,
         paidDate: Date,
         paymentMethod: String,
@@ -30,7 +34,10 @@ const financialSchema = new mongoose.Schema(
       {
         description: String,
         amount: Number,
-        category: { enum: ['tuition', 'therapy', 'supplies', 'transport', 'meals', 'other'] },
+        category: {
+          type: String,
+          enum: ['tuition', 'therapy', 'supplies', 'transport', 'meals', 'other'],
+        },
         date: Date,
       },
     ],
@@ -51,7 +58,7 @@ const financialSchema = new mongoose.Schema(
       {
         date: Date,
         amount: Number,
-        method: { enum: ['cash', 'check', 'card', 'transfer', 'other'] },
+        method: { type: String, enum: ['cash', 'check', 'card', 'transfer', 'other'] },
         reference: String,
         verifiedBy: String,
       },
@@ -90,13 +97,14 @@ const reportsSchema = new mongoose.Schema(
       {
         title: String,
         type: {
+          type: String,
           enum: ['progress', 'financial', 'attendance', 'medical', 'behavioral', 'comprehensive'],
         },
         period: String,
         generatedDate: Date,
         generatedBy: String,
         content: String,
-        format: { enum: ['pdf', 'excel', 'word', 'html'] },
+        format: { type: String, enum: ['pdf', 'excel', 'word', 'html'] },
         fileUrl: String,
       },
     ],
@@ -113,7 +121,7 @@ const reportsSchema = new mongoose.Schema(
     // البيانات المرئية
     charts: [
       {
-        type: { enum: ['line', 'bar', 'pie', 'area'] },
+        type: { type: String, enum: ['line', 'bar', 'pie', 'area'] },
         title: String,
         data: mongoose.Schema.Types.Mixed,
       },
@@ -173,7 +181,7 @@ const settingsSchema = new mongoose.Schema(
 
     // الإعدادات النظام
     systemSettings: {
-      language: { enum: ['ar', 'en'], default: 'ar' },
+      language: { type: String, enum: ['ar', 'en'], default: 'ar' },
       dateFormat: String,
       currencySymbol: String,
       mailingEnabled: Boolean,
@@ -199,7 +207,7 @@ const settingsSchema = new mongoose.Schema(
         date: Date,
         size: String,
         location: String,
-        status: { enum: ['success', 'failed', 'in-progress'] },
+        status: { type: String, enum: ['success', 'failed', 'in-progress'] },
       },
     ],
 

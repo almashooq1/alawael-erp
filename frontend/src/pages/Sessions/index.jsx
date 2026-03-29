@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import {
-  Container, Typography, Box, Grid, Button, IconButton, Stack, Alert,
+  Container, Typography, Box, Grid, Button, IconButton, Stack, Alert, Paper,
 } from '@mui/material';
-import { Add as AddIcon, Event as EventIcon, Refresh } from '@mui/icons-material';
+import { Add as AddIcon, Event as EventIcon, Refresh, ErrorOutline } from '@mui/icons-material';
 
 import useSessionsManagement from './useSessionsManagement';
 import StatCards from './StatCards';
@@ -16,7 +16,42 @@ import SessionsTable from './SessionsTable';
 import SessionFormDialog from './SessionFormDialog';
 import DeleteConfirmDialog from './DeleteConfirmDialog';
 
-const SessionsManagement = () => {
+// ── Error Boundary ────────────────────────────────────────────────────────
+class SessionsErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, info) {
+    console.error('[SessionsManagement] خطأ غير متوقع:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Container maxWidth="md" sx={{ py: 8, textAlign: 'center' }}>
+          <Paper sx={{ p: 4, borderRadius: 3 }}>
+            <ErrorOutline sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
+              حدث خطأ غير متوقع
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              {this.state.error?.message || 'يرجى إعادة تحميل الصفحة'}
+            </Typography>
+            <Button variant="contained" onClick={() => window.location.reload()}>
+              إعادة التحميل
+            </Button>
+          </Paper>
+        </Container>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+const SessionsManagementInner = () => {
   const ctx = useSessionsManagement();
 
   return (
@@ -102,5 +137,11 @@ const SessionsManagement = () => {
     </Container>
   );
 };
+
+const SessionsManagement = () => (
+  <SessionsErrorBoundary>
+    <SessionsManagementInner />
+  </SessionsErrorBoundary>
+);
 
 export default SessionsManagement;

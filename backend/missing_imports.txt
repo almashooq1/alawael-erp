@@ -1,32 +1,10 @@
-emr.routes.js
-enterpriseProPlus.routes.js
-finance.routes.extended.js
-insuranceClaims.routes.js
-kitchen.routes.js
-medicalEquipment.routes.js
-medicalReferrals.routes.js
-pharmacy.routes.js
-recruitment.routes.js
-studentElearning.routes.js
-studentRewardsStore.routes.js
-vendors.real.routes.js
-volunteer.routes.js
-waitlist.routes.js
-warehouse.routes.js
-appointment.service.js
-cargoService.js
-communityIntegration.service.js
-crm-advanced.service.js
-disabilityCard.service.js
-fleetPartService.js
-formTemplate.service.js
-importExportPro.service.js
-knowledge-center.service.js
-rehabCenterLicense.service.js
-research.service.js
-securityService.js
-taqat.service.js
-therapistPortal.service.js
-therapistPortalExtended.service.js
-vehicleInsuranceService.js
-visitor-advanced.service.js
+# missing_imports.txt
+# Last updated: 2026-03-29
+# Status: All previously listed route and service files have been verified to EXIST.
+# This file is kept for historical reference only.
+#
+# Previous report (now OUTDATED):
+# - 15 route files were listed as missing → ALL VERIFIED TO EXIST in backend/routes/
+# - 17 service files were listed as missing → ALL VERIFIED TO EXIST in backend/services/
+#
+# No missing imports found as of last verification.

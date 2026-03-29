@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>لوحة تحكم التأهيل الذكية — Alawael ERP</title>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════════════════ */
+:root{
+  --p1:#0d3b52; --p2:#1a6b8a; --p3:#27b4a0;
+  --a1:#e67e22; --a2:#f39c12;
+  --s1:#8e44ad; --s2:#9b59b6;
+  --g1:#27ae60; --g2:#2ecc71;
+  --r1:#c0392b; --r2:#e74c3c;
+  --bg:#eef2f7; --card:#fff;
+  --txt:#1e2d3d; --muted:#6b7c93;
+  --border:#dde6ef;
+  --radius:14px; --shadow:0 4px 24px rgba(0,0,0,.08);
+  --nav-w:260px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--txt);display:flex;min-height:100vh;overflow-x:hidden}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════ */
+.sidebar{
+  width:var(--nav-w);flex-shrink:0;
+  background:linear-gradient(180deg,var(--p1) 0%,#0a2d40 100%);
+  color:#fff;display:flex;flex-direction:column;
+  position:fixed;right:0;top:0;bottom:0;z-index:100;
+  transition:width .25s;
+}
+.sidebar-logo{
+  padding:1.4rem 1.2rem;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  display:flex;align-items:center;gap:.8rem;
+}
+.sidebar-logo .logo-icon{
+  width:42px;height:42px;background:var(--p3);border-radius:10px;
+  display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;
+}
+.sidebar-logo .logo-text h2{font-size:.95rem;font-weight:700}
+.sidebar-logo .logo-text p{font-size:.72rem;opacity:.7;margin-top:.1rem}
+
+.nav-section{padding:.8rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-section-title{
+  font-size:.68rem;font-weight:600;opacity:.5;
+  padding:.3rem 1.4rem;letter-spacing:.06em;text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.4rem;cursor:pointer;
+  font-size:.88rem;border-right:3px solid transparent;
+  transition:all .2s;
+}
+.nav-item:hover{background:rgba(255,255,255,.07);border-right-color:var(--p3)}
+.nav-item.active{background:rgba(39,180,160,.15);border-right-color:var(--p3);color:var(--p3)}
+.nav-item .nav-icon{font-size:1.1rem;width:22px;text-align:center;flex-shrink:0}
+.nav-badge{
+  margin-right:auto;background:var(--r2);color:#fff;
+  border-radius:10px;padding:.08rem .5rem;font-size:.7rem;font-weight:700;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN
+═══════════════════════════════════════════════════════════ */
+.main{margin-right:var(--nav-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOP BAR */
+.topbar{
+  background:var(--card);border-bottom:1px solid var(--border);
+  padding:.85rem 2rem;display:flex;align-items:center;gap:1rem;
+  position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:1.1rem;font-weight:700;flex:1}
+.topbar-actions{display:flex;align-items:center;gap:.7rem}
+.btn{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.5rem 1.1rem;border-radius:8px;font-size:.85rem;
+  font-family:inherit;font-weight:600;cursor:pointer;border:none;
+  transition:all .2s;
+}
+.btn-primary{background:var(--p2);color:#fff}
+.btn-primary:hover{background:var(--p1)}
+.btn-success{background:var(--g1);color:#fff}
+.btn-success:hover{background:#1e8449}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--txt)}
+.btn-outline:hover{background:var(--bg)}
+.btn-ai{background:linear-gradient(90deg,#0d1b2a,#1a3a5c);color:#5bc8f5}
+.btn-danger{background:var(--r2);color:#fff}
+.avatar{
+  width:38px;height:38px;background:var(--p3);border-radius:50%;
+  display:grid;place-items:center;font-weight:700;color:#fff;font-size:.9rem;cursor:pointer;
+}
+.notification-bell{
+  position:relative;cursor:pointer;font-size:1.3rem;color:var(--muted);
+}
+.notification-bell .badge{
+  position:absolute;top:-4px;right:-4px;background:var(--r2);color:#fff;
+  border-radius:50%;width:17px;height:17px;font-size:.65rem;
+  display:grid;place-items:center;font-weight:700;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONTENT AREA
+═══════════════════════════════════════════════════════════ */
+.content{padding:1.8rem 2rem;flex:1}
+.page{display:none}
+.page.active{display:block}
+
+/* ═══════════════════════════════════════════════════════════
+   KPI STRIP
+═══════════════════════════════════════════════════════════ */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.8rem}
+.kpi-card{
+  background:var(--card);border-radius:var(--radius);
+  padding:1.2rem 1.4rem;box-shadow:var(--shadow);
+  display:flex;align-items:center;gap:1rem;
+  border-right:4px solid transparent;
+  transition:transform .2s;cursor:default;
+}
+.kpi-card:hover{transform:translateY(-2px)}
+.kpi-card.blue{border-right-color:var(--p2)}
+.kpi-card.green{border-right-color:var(--g1)}
+.kpi-card.orange{border-right-color:var(--a1)}
+.kpi-card.purple{border-right-color:var(--s1)}
+.kpi-card.red{border-right-color:var(--r2)}
+.kpi-icon{
+  width:46px;height:46px;border-radius:12px;
+  display:grid;place-items:center;font-size:1.3rem;flex-shrink:0;
+}
+.kpi-icon.blue{background:#dbeeff;color:var(--p2)}
+.kpi-icon.green{background:#d5f5e3;color:var(--g1)}
+.kpi-icon.orange{background:#fdebd0;color:var(--a1)}
+.kpi-icon.purple{background:#ede0f5;color:var(--s1)}
+.kpi-icon.red{background:#fde8e8;color:var(--r2)}
+.kpi-val{font-size:1.8rem;font-weight:800;line-height:1}
+.kpi-lbl{font-size:.75rem;color:var(--muted);margin-top:.3rem}
+.kpi-delta{font-size:.72rem;font-weight:600;margin-top:.2rem}
+.delta-up{color:var(--g1)}
+.delta-down{color:var(--r2)}
+
+/* ═══════════════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════════════ */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.6rem;margin-bottom:1.5rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.card-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.5rem}
+.card-title .icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--p2),var(--p3));
+  display:grid;place-items:center;font-size:.9rem;color:#fff;flex-shrink:0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════════════════════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.g32{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr)}.g2,.g3,.g32{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLES
+═══════════════════════════════════════════════════════════ */
+.data-table{width:100%;border-collapse:collapse;font-size:.87rem}
+.data-table th{
+  background:linear-gradient(135deg,var(--p2),var(--p3));
+  color:#fff;padding:.7rem 1rem;text-align:right;font-weight:600;
+}
+.data-table td{padding:.65rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:#f0f8ff}
+.data-table tr:nth-child(even) td{background:#fafcff}
+.data-table tr:nth-child(even):hover td{background:#edf6fb}
+
+/* ═══════════════════════════════════════════════════════════
+   PROGRESS BARS
+═══════════════════════════════════════════════════════════ */
+.prog-wrap{background:var(--border);border-radius:20px;height:10px;overflow:hidden}
+.prog-fill{height:100%;border-radius:20px;transition:width .6s}
+.prog-blue{background:linear-gradient(90deg,var(--p3),var(--p2))}
+.prog-green{background:linear-gradient(90deg,var(--g2),var(--g1))}
+.prog-orange{background:linear-gradient(90deg,var(--a2),var(--a1))}
+.prog-purple{background:linear-gradient(90deg,var(--s2),var(--s1))}
+.prog-red{background:linear-gradient(90deg,var(--r2),var(--r1))}
+
+/* ═══════════════════════════════════════════════════════════
+   CHIPS / BADGES
+═══════════════════════════════════════════════════════════ */
+.chip{display:inline-block;padding:.2rem .75rem;border-radius:20px;font-size:.75rem;font-weight:600}
+.chip-blue{background:#dbeeff;color:var(--p2)}
+.chip-green{background:#d5f5e3;color:#1e8449}
+.chip-orange{background:#fdebd0;color:#ba6608}
+.chip-purple{background:#ede0f5;color:#6c3483}
+.chip-red{background:#fde8e8;color:#922b21}
+.chip-gray{background:#eaecef;color:var(--muted)}
+.chip-teal{background:#d1f5f0;color:#0e8574}
+
+/* ═══════════════════════════════════════════════════════════
+   AI PANEL
+═══════════════════════════════════════════════════════════ */
+.ai-panel{
+  background:linear-gradient(135deg,#0d1b2a 0%,#1a3a5c 100%);
+  border-radius:var(--radius);padding:1.6rem;color:#e8f4fd;margin-bottom:1.5rem;
+}
+.ai-panel .ai-title{color:#5bc8f5;font-size:1rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.ai-insight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+@media(max-width:900px){.ai-insight-grid{grid-template-columns:1fr}}
+.ai-insight-card{
+  background:rgba(255,255,255,.06);border:1px solid rgba(91,200,245,.2);
+  border-radius:10px;padding:1rem;
+}
+.ai-insight-card h4{color:#5bc8f5;font-size:.88rem;margin-bottom:.5rem}
+.ai-insight-card p{font-size:.8rem;opacity:.85;line-height:1.6}
+.ai-badge{
+  display:inline-block;background:#5bc8f5;color:#0d1b2a;
+  border-radius:10px;padding:.12rem .6rem;font-size:.7rem;font-weight:700;margin-bottom:.4rem;
+}
+.risk-meter{margin-top:.8rem}
+.risk-bar-wrap{background:rgba(255,255,255,.1);border-radius:20px;height:8px;margin-top:.4rem}
+.risk-bar{height:8px;border-radius:20px;transition:width .6s}
+.risk-low{background:var(--g2)}
+.risk-med{background:var(--a2)}
+.risk-high{background:var(--r2)}
+
+/* ═══════════════════════════════════════════════════════════
+   TIMELINE WEEKS
+═══════════════════════════════════════════════════════════ */
+.phase-wrap{border-radius:10px;overflow:hidden;border:1.5px solid var(--border);margin-bottom:1.2rem}
+.phase-hdr{padding:.7rem 1.2rem;color:#fff;font-weight:700;font-size:.9rem}
+.ph1{background:linear-gradient(90deg,var(--p2),var(--p3))}
+.ph2{background:linear-gradient(90deg,var(--a1),var(--a2))}
+.ph3{background:linear-gradient(90deg,var(--s1),var(--s2))}
+.week-row{display:grid;grid-template-columns:repeat(4,1fr)}
+.week-cell{padding:.8rem;border-left:1px solid var(--border);border-bottom:1px solid var(--border)}
+.week-cell:first-child{border-right:1px solid var(--border)}
+.week-cell h4{font-size:.78rem;font-weight:700;color:var(--p2);margin-bottom:.4rem}
+.week-cell ul{padding-right:1rem;font-size:.78rem;line-height:1.8}
+@media(max-width:700px){.week-row{grid-template-columns:1fr 1fr}}
+
+/* ═══════════════════════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════════════════════ */
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-weight:600;font-size:.83rem;margin-bottom:.3rem;color:var(--txt)}
+.form-group label .req{color:var(--r2)}
+.form-control{
+  width:100%;padding:.55rem .9rem;border:1.5px solid var(--border);
+  border-radius:8px;font-size:.88rem;font-family:inherit;color:var(--txt);
+  background:#fafdff;transition:border-color .2s;
+}
+.form-control:focus{outline:none;border-color:var(--p2);background:#fff}
+textarea.form-control{min-height:80px;resize:vertical}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:600px){.form-row{grid-template-columns:1fr}}
+
+/* ═══════════════════════════════════════════════════════════
+   GOAL TRACKER
+═══════════════════════════════════════════════════════════ */
+.goal-row{
+  display:flex;align-items:center;gap:1rem;
+  padding:.8rem;border-radius:10px;border:1.5px solid var(--border);
+  margin-bottom:.7rem;transition:border-color .2s;
+}
+.goal-row:hover{border-color:var(--p3)}
+.goal-row.achieved{border-color:var(--g1);background:#f0fff8}
+.goal-row.needs_attention{border-color:var(--r2);background:#fff8f8}
+.goal-num{
+  width:34px;height:34px;border-radius:50%;background:var(--bg);
+  display:grid;place-items:center;font-weight:700;font-size:.85rem;flex-shrink:0;
+}
+.goal-info{flex:1;min-width:0}
+.goal-info h4{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.goal-info p{font-size:.78rem;color:var(--muted);margin-top:.15rem}
+.goal-pct{font-size:1.1rem;font-weight:800;min-width:48px;text-align:center;color:var(--p2)}
+
+/* ═══════════════════════════════════════════════════════════
+   ALERT BOX
+═══════════════════════════════════════════════════════════ */
+.alert{border-radius:8px;padding:.85rem 1rem;font-size:.85rem;margin-bottom:.8rem;display:flex;align-items:flex-start;gap:.6rem}
+.alert-warning{background:#fff8e1;border-right:4px solid var(--a2);color:#7d5a00}
+.alert-success{background:#e9f7ef;border-right:4px solid var(--g1);color:#1a5c34}
+.alert-danger{background:#fde8e8;border-right:4px solid var(--r2);color:#7b241c}
+.alert-info{background:#eaf4fd;border-right:4px solid var(--p2);color:#1a4a6e}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:1rem;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--card);border-radius:var(--radius);
+  width:100%;max-width:680px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-header{
+  padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(90deg,var(--p1),var(--p2));color:#fff;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{
+  background:rgba(255,255,255,.2);border:none;color:#fff;
+  width:30px;height:30px;border-radius:50%;cursor:pointer;
+  font-size:1.1rem;display:grid;place-items:center;
+}
+.modal-body{padding:1.5rem}
+.modal-footer{
+  padding:1rem 1.5rem;border-top:1px solid var(--border);
+  display:flex;justify-content:flex-end;gap:.7rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+.toast-container{position:fixed;bottom:1.5rem;left:1.5rem;z-index:300;display:flex;flex-direction:column;gap:.5rem}
+.toast{
+  background:var(--p1);color:#fff;padding:.8rem 1.2rem;border-radius:10px;
+  font-size:.85rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.3);
+  animation:slideIn .3s ease;display:flex;align-items:center;gap:.6rem;
+  max-width:340px;
+}
+.toast.success{background:var(--g1)}
+.toast.warning{background:var(--a1)}
+.toast.error{background:var(--r1)}
+.toast.ai{background:linear-gradient(90deg,#0d1b2a,#1a3a5c);border:1px solid rgba(91,200,245,.3)}
+@keyframes slideIn{from{transform:translateX(-100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ═══════════════════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════════════════ */
+.divider{height:1px;background:var(--border);margin:1.2rem 0}
+.text-muted{color:var(--muted);font-size:.82rem}
+.flex-center{display:flex;align-items:center;justify-content:center}
+.gap-1{gap:.5rem}.gap-2{gap:1rem}
+.flex{display:flex;align-items:center}
+.ml-auto{margin-right:auto}
+.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chart-wrap{position:relative;height:240px}
+.chart-wrap-lg{position:relative;height:300px}
+.section-badge{
+  display:inline-block;background:linear-gradient(90deg,var(--p2),var(--p3));
+  color:#fff;padding:.2rem .9rem;border-radius:20px;font-size:.75rem;font-weight:700;margin-bottom:1rem;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🏥</div>
+    <div class="logo-text">
+      <h2>Alawael ERP</h2>
+      <p>نظام التأهيل الذكي</p>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">الرئيسية</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <span class="nav-icon">📊</span> لوحة التحكم
+    </div>
+    <div class="nav-item" onclick="showPage('new-plan',this)">
+      <span class="nav-icon">➕</span> خطة جديدة
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">إدارة الخطط</div>
+    <div class="nav-item" onclick="showPage('goals',this)">
+      <span class="nav-icon">🎯</span> أهداف SMART
+    </div>
+    <div class="nav-item" onclick="showPage('program',this)">
+      <span class="nav-icon">📅</span> برنامج 12 أسبوع
+    </div>
+    <div class="nav-item" onclick="showPage('sessions',this)">
+      <span class="nav-icon">📝</span> تسجيل الجلسات
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item" onclick="showPage('progress',this)">
+      <span class="nav-icon">📈</span> متابعة التقدم
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">الذكاء الاصطناعي</div>
+    <div class="nav-item" onclick="showPage('ai-assessment',this)">
+      <span class="nav-icon">🤖</span> تقييم AI
+    </div>
+    <div class="nav-item" onclick="showPage('predictions',this)">
+      <span class="nav-icon">🔮</span> التوقعات الذكية
+    </div>
+    <div class="nav-item" onclick="showPage('risk',this)">
+      <span class="nav-icon">⚠️</span> تقييم المخاطر
+      <span class="nav-badge" style="background:var(--a1)">1</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">التقارير والجودة</div>
+    <div class="nav-item" onclick="showPage('reports',this)">
+      <span class="nav-icon">📋</span> التقارير
+    </div>
+    <div class="nav-item" onclick="showPage('examples',this)">
+      <span class="nav-icon">👥</span> أمثلة تطبيقية
+    </div>
+    <div class="nav-item" onclick="showPage('quality',this)">
+      <span class="nav-icon">✅</span> ضمان الجودة
+    </div>
+    <div class="nav-item" onclick="window.print()">
+      <span class="nav-icon">🖨️</span> طباعة
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════════════════ -->
+<div class="main">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="page-title">📊 لوحة التحكم الرئيسية</div>
+    <div class="topbar-actions">
+      <button class="btn btn-ai" onclick="runAIAnalysis()">🤖 تحليل AI الآن</button>
+      <button class="btn btn-primary" onclick="showPage('new-plan',null);openModal('modalNewPlan')">➕ خطة جديدة</button>
+      <div class="notification-bell" onclick="showToast('لديك 3 إشعارات جديدة','warning')">
+        🔔<span class="badge">3</span>
+      </div>
+      <div class="avatar" title="المعالج الرئيسي">م.أ</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════ PAGE: DASHBOARD ═══════════ -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- KPI Strip -->
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-icon blue">📋</div>
+          <div><div class="kpi-val" id="kpi-plans">24</div><div class="kpi-lbl">خطة نشطة</div><div class="kpi-delta delta-up">▲ 3 هذا الشهر</div></div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-icon green">🎯</div>
+          <div><div class="kpi-val" id="kpi-goals">78<span style="font-size:1rem">%</span></div><div class="kpi-lbl">معدل تحقيق الأهداف</div><div class="kpi-delta delta-up">▲ 5% مقارنة بالربع السابق</div></div>
+        </div>
+        <div class="kpi-card orange">
+          <div class="kpi-icon orange">🏃</div>
+          <div><div class="kpi-val" id="kpi-sessions">156</div><div class="kpi-lbl">جلسة هذا الشهر</div><div class="kpi-delta delta-up">▲ 12 عن الشهر الماضي</div></div>
+        </div>
+        <div class="kpi-card purple">
+          <div class="kpi-icon purple">🤖</div>
+          <div><div class="kpi-val" id="kpi-ai">94<span style="font-size:1rem">%</span></div><div class="kpi-lbl">دقة توقعات AI</div><div class="kpi-delta delta-up">▲ 2% تحسن</div></div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-icon red">⚠️</div>
+          <div><div class="kpi-val" id="kpi-risk">2</div><div class="kpi-lbl">حالات خطر مرتفع</div><div class="kpi-delta delta-down">▼ تحتاج تدخل فوري</div></div>
+        </div>
+      </div>
+
+      <!-- AI PANEL -->
+      <div class="ai-panel">
+        <div class="ai-title">🤖 مركز الذكاء الاصطناعي — التحليل الفوري</div>
+        <div class="ai-insight-grid">
+          <div class="ai-insight-card">
+            <div class="ai-badge">تحليل الأداء</div>
+            <h4>📈 اتجاه التحسن العام</h4>
+            <p>78% من الخطط النشطة تسير وفق الجدول الزمني المحدد. 3 حالات تحتاج تعديل في بروتوكول التمارين.</p>
+            <div class="risk-meter">
+              <small style="opacity:.7">مستوى الأداء الكلي</small>
+              <div class="risk-bar-wrap"><div class="risk-bar risk-low" id="perf-bar" style="width:78%"></div></div>
+            </div>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">توصية ذكية</div>
+            <h4>💡 توصية AI للأسبوع</h4>
+            <p>زيادة تكثيف جلسات العلاج الطبيعي بنسبة 15% للحالات التي تراجع تقدمها خلال الأسبوعين الماضيين.</p>
+            <div class="risk-meter">
+              <small style="opacity:.7">ثقة التوصية</small>
+              <div class="risk-bar-wrap"><div class="risk-bar risk-low" style="width:91%"></div></div>
+            </div>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">تنبيه مبكر</div>
+            <h4>⚠️ تنبيهات الخطر المبكر</h4>
+            <p>مستفيد واحد (أحمد — خطة PT-2024) يُظهر نمط تراجع في الحضور. يُوصى بتواصل الأسرة خلال 48 ساعة.</p>
+            <div class="risk-meter">
+              <small style="opacity:.7">مستوى الخطر</small>
+              <div class="risk-bar-wrap"><div class="risk-bar risk-med" style="width:62%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="g2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📊</span> تقدم الأهداف بالمجالات</div>
+            <span class="chip chip-blue">الربع الحالي</span>
+          </div>
+          <div class="chart-wrap"><canvas id="chartGoals"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📅</span> معدل الحضور الشهري</div>
+            <span class="chip chip-green">آخر 6 أشهر</span>
+          </div>
+          <div class="chart-wrap"><canvas id="chartAttendance"></canvas></div>
+        </div>
+      </div>
+
+      <div class="g32">
+        <!-- Active Plans Table -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">👥</span> الخطط النشطة</div>
+            <button class="btn btn-outline" onclick="showPage('new-plan',null)">+ إضافة</button>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr>
+              <th>المستفيد</th><th>نوع الإعاقة</th><th>المرحلة</th><th>التقدم</th><th>الخطر</th><th>إجراء</th>
+            </tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>أحمد عبدالله</strong><br><small class="text-muted">42 سنة — PT-2024</small></td>
+                <td><span class="chip chip-blue">حركية</span></td>
+                <td><span class="chip chip-orange">المرحلة 2</span></td>
+                <td>
+                  <div style="min-width:100px">
+                    <div class="prog-wrap"><div class="prog-fill prog-orange" style="width:62%"></div></div>
+                    <small class="text-muted">62% — الأسبوع 7</small>
+                  </div>
+                </td>
+                <td><span class="chip chip-orange">متوسط</span></td>
+                <td><button class="btn btn-primary" style="padding:.3rem .7rem;font-size:.78rem" onclick="loadPlanDetail('PT-2024')">عرض</button></td>
+              </tr>
+              <tr>
+                <td><strong>سارة محمد</strong><br><small class="text-muted">29 سنة — SN-2024</small></td>
+                <td><span class="chip chip-purple">حسية</span></td>
+                <td><span class="chip chip-blue">المرحلة 1</span></td>
+                <td>
+                  <div style="min-width:100px">
+                    <div class="prog-wrap"><div class="prog-fill prog-blue" style="width:35%"></div></div>
+                    <small class="text-muted">35% — الأسبوع 4</small>
+                  </div>
+                </td>
+                <td><span class="chip chip-green">منخفض</span></td>
+                <td><button class="btn btn-primary" style="padding:.3rem .7rem;font-size:.78rem" onclick="loadPlanDetail('SN-2024')">عرض</button></td>
+              </tr>
+              <tr>
+                <td><strong>يوسف عمر</strong><br><small class="text-muted">8 سنوات — ID-2024</small></td>
+                <td><span class="chip chip-orange">ذهنية</span></td>
+                <td><span class="chip chip-green">المرحلة 3</span></td>
+                <td>
+                  <div style="min-width:100px">
+                    <div class="prog-wrap"><div class="prog-fill prog-green" style="width:88%"></div></div>
+                    <small class="text-muted">88% — الأسبوع 11</small>
+                  </div>
+                </td>
+                <td><span class="chip chip-green">منخفض</span></td>
+                <td><button class="btn btn-primary" style="padding:.3rem .7rem;font-size:.78rem" onclick="loadPlanDetail('ID-2024')">عرض</button></td>
+              </tr>
+              <tr>
+                <td><strong>نور أحمد</strong><br><small class="text-muted">15 سنة — CP-2024</small></td>
+                <td><span class="chip chip-blue">حركية</span></td>
+                <td><span class="chip chip-orange">المرحلة 2</span></td>
+                <td>
+                  <div style="min-width:100px">
+                    <div class="prog-wrap"><div class="prog-fill prog-purple" style="width:55%"></div></div>
+                    <small class="text-muted">55% — الأسبوع 6</small>
+                  </div>
+                </td>
+                <td><span class="chip chip-red">مرتفع</span></td>
+                <td><button class="btn btn-danger" style="padding:.3rem .7rem;font-size:.78rem" onclick="loadPlanDetail('CP-2024')">⚠️ مراجعة</button></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+
+        <!-- Side Panel -->
+        <div>
+          <!-- Services Donut -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🏋️</span> توزيع الخدمات</div>
+            </div>
+            <div class="chart-wrap"><canvas id="chartServices"></canvas></div>
+          </div>
+
+          <!-- Alerts -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🔔</span> تنبيهات النظام</div>
+              <span class="chip chip-red">3</span>
+            </div>
+            <div class="alert alert-danger">⚠️ نور أحمد: تراجع ملحوظ في التقدم — مراجعة عاجلة</div>
+            <div class="alert alert-warning">⏰ أحمد عبدالله: موعد المراجعة الدورية غداً</div>
+            <div class="alert alert-info">📱 جلسة تيلي-ريهاب مجدولة — سارة محمد 3:00 م</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+    <!-- ═══════════ PAGE: NEW PLAN ═══════════ -->
+    <div class="page" id="page-new-plan">
+      <div class="section-badge">إنشاء خطة تأهيل جديدة</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">👤</span> بيانات المستفيد</div></div>
+          <div class="form-row">
+            <div class="form-group"><label>الاسم الكامل <span class="req">*</span></label><input class="form-control" id="np-name" placeholder="اسم المستفيد"/></div>
+            <div class="form-group"><label>رقم الملف <span class="req">*</span></label><input class="form-control" id="np-id" placeholder="MRN-XXXXX"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>العمر</label><input class="form-control" id="np-age" type="number" placeholder="سنة"/></div>
+            <div class="form-group"><label>الجنس</label><select class="form-control" id="np-gender"><option>ذكر</option><option>أنثى</option></select></div>
+          </div>
+          <div class="form-group"><label>التشخيص <span class="req">*</span></label><textarea class="form-control" id="np-diagnosis" placeholder="أدخل التشخيص التفصيلي..."></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>فئة الإعاقة <span class="req">*</span></label>
+              <select class="form-control" id="np-type">
+                <option value="physical">جسمية / حركية</option>
+                <option value="sensory">حسية (بصرية / سمعية)</option>
+                <option value="cognitive">ذهنية / معرفية</option>
+                <option value="combined">مركبة / متعددة</option>
+              </select>
+            </div>
+            <div class="form-group"><label>نوع القالب</label>
+              <select class="form-control" id="np-template">
+                <option value="comprehensive">خطة شاملة</option>
+                <option value="vocational">تأهيل مهني</option>
+                <option value="educational">تربية خاصة (IEP)</option>
+                <option value="earlyIntervention">تدخل مبكر (IFSP)</option>
+                <option value="independentLiving">حياة مستقلة</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">📋</span> التقييم الأولي</div></div>
+          <div class="form-group">
+            <label>مستوى الأداء الوظيفي (FIM: <span id="fim-v">3</span>/7)</label>
+            <input type="range" class="form-control" min="1" max="7" value="3" oninput="document.getElementById('fim-v').textContent=this.value" style="padding:.3rem 0;background:transparent;border:none"/>
+          </div>
+          <div class="form-group">
+            <label>مستوى الألم (NRS: <span id="nrs-v">5</span>/10)</label>
+            <input type="range" class="form-control" min="0" max="10" value="5" oninput="document.getElementById('nrs-v').textContent=this.value" style="padding:.3rem 0;background:transparent;border:none"/>
+          </div>
+          <div class="form-group"><label>القوة العضلية</label><textarea class="form-control" placeholder="مثال: طرف علوي أيمن 3/5..."></textarea></div>
+          <div class="form-group"><label>التوازن والتنسيق</label>
+            <select class="form-control">
+              <option>ممتاز — مستقل</option><option>جيد — يحتاج إشراف</option>
+              <option>متوسط — مساعدة جزئية</option><option>ضعيف — مساعدة كاملة</option>
+            </select>
+          </div>
+          <div class="form-group"><label>المعالج المسؤول</label><input class="form-control" placeholder="اسم المعالج + التخصص"/></div>
+          <div class="form-row">
+            <div class="form-group"><label>تاريخ البدء</label><input class="form-control" type="date"/></div>
+            <div class="form-group"><label>تاريخ الانتهاء</label><input class="form-control" type="date"/></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Clinical Assessment -->
+      <div class="ai-panel">
+        <div class="ai-title">🤖 التقييم السريري بالذكاء الاصطناعي</div>
+        <div class="ai-insight-grid">
+          <div class="ai-insight-card">
+            <div class="ai-badge">أعلى أولوية</div>
+            <h4>الوظيفة الحركية</h4>
+            <input type="range" min="1" max="10" value="4" style="width:100%;margin:.5rem 0" oninput="updateAISlider('motor',this.value)"/>
+            <small>المستوى: <strong id="motor-val">4</strong>/10 — <span id="motor-lbl">مرتفع الأولوية</span></small>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">تواصل</div>
+            <h4>القدرة التواصلية</h4>
+            <input type="range" min="1" max="10" value="6" style="width:100%;margin:.5rem 0" oninput="updateAISlider('comm',this.value)"/>
+            <small>المستوى: <strong id="comm-val">6</strong>/10 — <span id="comm-lbl">متوسط</span></small>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">دعم أسري</div>
+            <h4>الدعم البيئي</h4>
+            <input type="range" min="1" max="10" value="7" style="width:100%;margin:.5rem 0" oninput="updateAISlider('env',this.value)"/>
+            <small>المستوى: <strong id="env-val">7</strong>/10 — <span id="env-lbl">جيد</span></small>
+          </div>
+        </div>
+        <div style="margin-top:1rem;display:flex;gap:.8rem;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="generateAIPlan()">🤖 توليد خطة بالذكاء الاصطناعي</button>
+          <div id="ai-recommendation" style="background:rgba(91,200,245,.1);border-radius:8px;padding:.6rem 1rem;font-size:.83rem;flex:1;display:none"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:.8rem;justify-content:flex-end;margin-top:1rem">
+        <button class="btn btn-outline" onclick="showPage('dashboard',null)">إلغاء</button>
+        <button class="btn btn-success" onclick="savePlan()">💾 حفظ الخطة</button>
+      </div>
+    </div><!-- /new-plan -->
+
+    <!-- ═══════════ PAGE: GOALS ═══════════ -->
+    <div class="page" id="page-goals">
+      <div class="section-badge">إدارة أهداف SMART</div>
+      <div class="g32">
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🎯</span> الأهداف النشطة</div>
+              <button class="btn btn-primary" onclick="openModal('modalAddGoal')">+ هدف جديد</button>
+            </div>
+            <div id="goals-list">
+              <!-- goals rendered by JS -->
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><span class="icon">📊</span> تحليل الأهداف</div></div>
+            <div class="chart-wrap-lg"><canvas id="chartGoalsRadar"></canvas></div>
+          </div>
+          <div class="card" style="margin-top:0">
+            <div class="card-header"><div class="card-title"><span class="icon">🏆</span> ملخص الإنجاز</div></div>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+              <div class="flex gap-2"><span class="chip chip-green">✅ محققة</span><strong>4</strong><span class="text-muted">أهداف</span></div>
+              <div class="flex gap-2"><span class="chip chip-blue">🔄 جارية</span><strong>8</strong><span class="text-muted">أهداف</span></div>
+              <div class="flex gap-2"><span class="chip chip-orange">⏳ قيد البدء</span><strong>3</strong><span class="text-muted">أهداف</span></div>
+              <div class="flex gap-2"><span class="chip chip-red">⚠️ تحتاج انتباه</span><strong>2</strong><span class="text-muted">أهداف</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /goals -->
+
+    <!-- ═══════════ PAGE: PROGRAM ═══════════ -->
+    <div class="page" id="page-program">
+      <div class="section-badge">البرنامج التفصيلي — 12 أسبوعًا</div>
+
+      <div class="phase-wrap">
+        <div class="phase-hdr ph1">🟢 المرحلة الأولى — التحضير والتكييف (الأسابيع 1–4)</div>
+        <div class="week-row">
+          <div class="week-cell"><h4>الأسبوع 1</h4><ul><li>تقييم شامل + خط الأساس</li><li>تمارين تنفسية دياغراماتية</li><li>تمدد سلبي 30 د × 3</li><li>تثقيف المريض والأسرة</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 2</h4><ul><li>ROM سلبية + مُساعدة</li><li>NMES 20 د/يوم</li><li>هيدروثيرابي (إن توفرت)</li><li>توازن — سطح ثابت</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 3</h4><ul><li>AAROM + Core × 15</li><li>مشي مُدعم: موازٍ</li><li>TENS + تدليك علاجي</li><li>تمارين ADL مُكيَّفة</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 4 ✅</h4><ul><li>تقييم منتصف المرحلة</li><li>نطاق حركة نشط كامل</li><li>توازن — سطح غير مستقر</li><li>مراجعة الأهداف</li></ul></div>
+        </div>
+      </div>
+
+      <div class="phase-wrap">
+        <div class="phase-hdr ph2">🟡 المرحلة الثانية — البناء والتطوير (الأسابيع 5–8)</div>
+        <div class="week-row">
+          <div class="week-cell"><h4>الأسبوع 5</h4><ul><li>مقاومة خفيفة + تحمّل</li><li>دراجة ثابتة 15 د</li><li>مشي مستقل 20 م</li><li>تناسق حركي</li></ul></div>
+          <div class="week-cell" style="border-right:2px solid var(--p2)"><h4>الأسبوع 6 🎯 هدف</h4><ul><li>تقييم منتصف البرنامج</li><li>زيادة كثافة القوة 20%</li><li>مشي 50 م مستقل ✅</li><li>مهارات يدوية دقيقة</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 7</h4><ul><li>PNF وظيفي مركّب</li><li>تدريب الدرج + عقبات</li><li>تمارين التخاطب</li><li>FES 30 د/يوم</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 8</h4><ul><li>تقييم ROM كامل</li><li>Closed Chain متقدم</li><li>محاكاة مجتمعية</li><li>ضبط AI للجلسات</li></ul></div>
+        </div>
+      </div>
+
+      <div class="phase-wrap">
+        <div class="phase-hdr ph3">🟣 المرحلة الثالثة — التعزيز والاستقلالية (الأسابيع 9–12)</div>
+        <div class="week-row">
+          <div class="week-cell"><h4>الأسبوع 9</h4><ul><li>وظيفي متقدم في السياق</li><li>تدريب الأجهزة المساعدة</li><li>دمج مهني / مدرسي</li><li>تعزيز الثقة بالنفس</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 10 🎯</h4><ul><li>تقييم القوة العضلية</li><li>ADL متقدمة مستقلة</li><li>تدريب الأسرة (HEP)</li><li>محاكاة بيئة العمل</li></ul></div>
+          <div class="week-cell"><h4>الأسبوع 11</h4><ul><li>دمج في الروتين اليومي</li><li>استرخاء ذهني + طاقة</li><li>مراجعة HEP الكامل</li><li>تدريب طوارئ</li></ul></div>
+          <div class="week-cell" style="background:#f0fff8"><h4>الأسبوع 12 🏁</h4><ul><li>تقييم نهائي شامل</li><li>تقرير ختامي رسمي</li><li>خطة متابعة طويلة</li><li>جلسة أسرة + فريق</li></ul></div>
+        </div>
+      </div>
+
+      <!-- Mini charts row -->
+      <div class="g3">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">📈</span> توقع التقدم AI</div></div>
+          <div class="chart-wrap"><canvas id="chartPrediction"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">⏱️</span> توزيع الجلسات</div></div>
+          <div class="chart-wrap"><canvas id="chartSessionsDist"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🏆</span> المعالم الرئيسية</div></div>
+          <div style="font-size:.83rem;line-height:2">
+            <div class="flex gap-2"><span class="chip chip-green">✅</span> الأسبوع 2: بدء الحركة المستقلة</div>
+            <div class="flex gap-2"><span class="chip chip-green">✅</span> الأسبوع 4: تقليل الألم إلى NRS 4</div>
+            <div class="flex gap-2"><span class="chip chip-green">✅</span> الأسبوع 6: مشي 50م مستقل</div>
+            <div class="flex gap-2"><span class="chip chip-orange">⏳</span> الأسبوع 8: ROM كامل</div>
+            <div class="flex gap-2"><span class="chip chip-gray">🔜</span> الأسبوع 10: قوة عضلية +1</div>
+            <div class="flex gap-2"><span class="chip chip-gray">🔜</span> الأسبوع 12: استقلالية ADL</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /program -->
+
+    <!-- ═══════════ PAGE: SESSIONS ═══════════ -->
+    <div class="page" id="page-sessions">
+      <div class="section-badge">تسجيل الجلسات العلاجية</div>
+      <div class="g32">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">📝</span> سجل الجلسات</div>
+            <button class="btn btn-success" onclick="openModal('modalAddSession')">+ تسجيل جلسة</button>
+          </div>
+          <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead><tr><th>التاريخ</th><th>المستفيد</th><th>الخدمة</th><th>المعالج</th><th>المدة</th><th>الحضور</th><th>التقييم</th></tr></thead>
+            <tbody>
+              <tr><td>2026-03-27</td><td>أحمد عبدالله</td><td><span class="chip chip-blue">علاج طبيعي</span></td><td>د. سعد</td><td>45 د</td><td><span class="chip chip-green">حاضر</span></td><td><span class="chip chip-orange">جيد</span></td></tr>
+              <tr><td>2026-03-27</td><td>سارة محمد</td><td><span class="chip chip-purple">تأهيل دهليزي</span></td><td>د. منى</td><td>30 د</td><td><span class="chip chip-green">حاضر</span></td><td><span class="chip chip-green">ممتاز</span></td></tr>
+              <tr><td>2026-03-26</td><td>يوسف عمر</td><td><span class="chip chip-orange">تكامل حسي</span></td><td>د. أمل</td><td>45 د</td><td><span class="chip chip-green">حاضر</span></td><td><span class="chip chip-green">ممتاز</span></td></tr>
+              <tr><td>2026-03-26</td><td>نور أحمد</td><td><span class="chip chip-blue">علاج وظيفي</span></td><td>د. سعد</td><td>60 د</td><td><span class="chip chip-red">غائب</span></td><td><span class="chip chip-red">—</span></td></tr>
+              <tr><td>2026-03-25</td><td>أحمد عبدالله</td><td><span class="chip chip-teal">تيلي-ريهاب</span></td><td>د. سعد</td><td>30 د</td><td><span class="chip chip-green">حاضر</span></td><td><span class="chip chip-blue">جيد</span></td></tr>
+            </tbody>
+          </table>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><span class="icon">📊</span> إحصائيات الجلسات</div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+              <div style="text-align:center;padding:.8rem;border-radius:10px;border:1.5px solid var(--border)">
+                <div style="font-size:1.6rem;font-weight:800;color:var(--g1)">156</div>
+                <div class="text-muted">هذا الشهر</div>
+              </div>
+              <div style="text-align:center;padding:.8rem;border-radius:10px;border:1.5px solid var(--border)">
+                <div style="font-size:1.6rem;font-weight:800;color:var(--p2)">89%</div>
+                <div class="text-muted">نسبة الحضور</div>
+              </div>
+              <div style="text-align:center;padding:.8rem;border-radius:10px;border:1.5px solid var(--border)">
+                <div style="font-size:1.6rem;font-weight:800;color:var(--a1)">44 د</div>
+                <div class="text-muted">متوسط المدة</div>
+              </div>
+              <div style="text-align:center;padding:.8rem;border-radius:10px;border:1.5px solid var(--border)">
+                <div style="font-size:1.6rem;font-weight:800;color:var(--s1)">12</div>
+                <div class="text-muted">جلسة عن بُعد</div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><span class="icon">📅</span> الجدول القادم</div></div>
+            <div style="font-size:.83rem;line-height:2.2">
+              <div class="flex gap-2">🕘 <strong>09:00</strong> أحمد — علاج طبيعي <span class="chip chip-blue" style="font-size:.7rem">غرفة 1</span></div>
+              <div class="flex gap-2">🕙 <strong>10:30</strong> سارة — تأهيل دهليزي <span class="chip chip-purple" style="font-size:.7rem">غرفة 2</span></div>
+              <div class="flex gap-2">🕛 <strong>12:00</strong> يوسف — تكامل حسي <span class="chip chip-orange" style="font-size:.7rem">غرفة 3</span></div>
+              <div class="flex gap-2">🕒 <strong>03:00</strong> سارة — تيلي-ريهاب <span class="chip chip-teal" style="font-size:.7rem">أونلاين</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /sessions -->
+
+    <!-- ═══════════ PAGE: PROGRESS ═══════════ -->
+    <div class="page" id="page-progress">
+      <div class="section-badge">متابعة التقدم الشامل</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi-card blue"><div class="kpi-icon blue">🦵</div><div><div class="kpi-val">65%</div><div class="kpi-lbl">الحركة والمشي</div><div class="kpi-delta delta-up">▲ 8%</div></div></div>
+        <div class="kpi-card green"><div class="kpi-icon green">💪</div><div><div class="kpi-val">50%</div><div class="kpi-lbl">القوة العضلية</div><div class="kpi-delta delta-up">▲ 5%</div></div></div>
+        <div class="kpi-card orange"><div class="kpi-icon orange">🎯</div><div><div class="kpi-val">75%</div><div class="kpi-lbl">نطاق الحركة</div><div class="kpi-delta delta-up">▲ 12%</div></div></div>
+        <div class="kpi-card purple"><div class="kpi-icon purple">🧠</div><div><div class="kpi-val">70%</div><div class="kpi-lbl">التوازن والتنسيق</div><div class="kpi-delta delta-up">▲ 7%</div></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">📈</span> منحنى التقدم عبر الزمن</div></div>
+          <div class="chart-wrap-lg"><canvas id="chartProgressLine"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🎯</span> مقارنة الأداء بالهدف</div></div>
+          <div class="chart-wrap-lg"><canvas id="chartProgressBar"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><span class="icon">📋</span> تفصيل التقدم بالمحاور</div></div>
+        <div id="progress-details">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div><!-- /progress -->
+
+    <!-- ═══════════ PAGE: AI ASSESSMENT ═══════════ -->
+    <div class="page" id="page-ai-assessment">
+      <div class="section-badge">التقييم بالذكاء الاصطناعي</div>
+      <div class="ai-panel">
+        <div class="ai-title">🤖 محرك التقييم الذكي — AI Assessment Engine v6.0</div>
+        <div class="ai-insight-grid">
+          <div class="ai-insight-card">
+            <div class="ai-badge">Motion Analysis</div>
+            <h4>📹 تحليل الحركة الآني</h4>
+            <p>كاميرات OpenPose تحلل نمط المشي والحركة في الزمن الحقيقي. تقارن مع النموذج المعياري وتُصدر تقرير الانحرافات فوراً.</p>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">IMU Sensors</div>
+            <h4>🔊 التصحيح الحركي الآني</h4>
+            <p>أجهزة IMU (Xsens) على المفاصل الرئيسية. تنبيه صوتي/اهتزازي فور حدوث خطأ حركي. دقة 94%.</p>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">ML Algorithms</div>
+            <h4>📈 الخوارزميات التكيفية</h4>
+            <p>نماذج ML تتعلم من أداء المريض الفعلي عبر الجلسات وتُعدّل صعوبة التمارين تلقائياً.</p>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">VR Rehab</div>
+            <h4>🥽 بيئات الواقع الافتراضي</h4>
+            <p>بيئات VR تفاعلية لمحاكاة سيناريوهات حقيقية. رصد دقيق للأداء وإشراك عاطفي عالٍ.</p>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">Predictive</div>
+            <h4>🔮 التحليل التنبؤي</h4>
+            <p>نماذج AI تتنبأ بتوقيت الوصول للأهداف. تنبيه مبكر للمعالج عند أي انحراف عن المسار.</p>
+          </div>
+          <div class="ai-insight-card">
+            <div class="ai-badge">Telerehab</div>
+            <h4>📱 التأهيل عن بُعد الذكي</h4>
+            <p>تطبيق يستخدم كاميرا الهاتف للتحقق من صحة الوضعية خلال التمارين المنزلية مع تغذية راجعة فورية.</p>
+          </div>
+        </div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🧬</span> التقييم السريري الذكي</div>
+            <button class="btn btn-ai" onclick="runAIAnalysis()">▶ تشغيل التقييم</button>
+          </div>
+          <div id="ai-assessment-result">
+            <div class="alert alert-info">اضغط "تشغيل التقييم" لتوليد تحليل AI كامل للحالة الحالية</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">📊</span> نتائج AI المرئية</div></div>
+          <div class="chart-wrap-lg"><canvas id="chartAIRadar"></canvas></div>
+        </div>
+      </div>
+    </div><!-- /ai-assessment -->
+
+    <!-- ═══════════ PAGE: PREDICTIONS ═══════════ -->
+    <div class="page" id="page-predictions">
+      <div class="section-badge">التوقعات الذكية — AI Predictions</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🔮</span> توقع النتائج</div></div>
+          <div class="alert alert-info">🤖 بناءً على بيانات 24 خطة نشطة و 1,200+ جلسة مسجلة</div>
+          <div style="margin-top:1rem">
+            <div class="form-group"><label>نوع الخدمة</label>
+              <select class="form-control" id="pred-service">
+                <option value="physicalTherapy">العلاج الطبيعي</option>
+                <option value="occupationalTherapy">العلاج الوظيفي</option>
+                <option value="speechTherapy">علاج التخاطب</option>
+              </select>
+            </div>
+            <div class="form-group"><label>مدة البرنامج (أسبوع)</label>
+              <input class="form-control" type="number" id="pred-weeks" value="12" min="4" max="52"/>
+            </div>
+            <button class="btn btn-ai" onclick="generatePrediction()">🔮 توليد التوقع</button>
+          </div>
+          <div id="prediction-output" style="margin-top:1rem;display:none">
+            <div class="divider"></div>
+            <h4 style="color:var(--p2);margin-bottom:.8rem">📊 نتائج التوقع</h4>
+            <div id="pred-milestones"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">📈</span> منحنى التوقع</div></div>
+          <div class="chart-wrap-lg"><canvas id="chartPredLine"></canvas></div>
+        </div>
+      </div>
+    </div><!-- /predictions -->
+
+    <!-- ═══════════ PAGE: RISK ═══════════ -->
+    <div class="page" id="page-risk">
+      <div class="section-badge">تقييم وإدارة المخاطر</div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">⚠️</span> مستويات الخطر</div></div>
+          <div class="chart-wrap"><canvas id="chartRisk"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🛡️</span> عوامل الحماية والخطر</div></div>
+          <h4 style="color:var(--g1);margin-bottom:.7rem">✅ عوامل الحماية</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem">
+            <span class="chip chip-green">دعم أسري قوي</span>
+            <span class="chip chip-green">التزام عالٍ بالحضور</span>
+            <span class="chip chip-green">دعم مدرسي فعّال</span>
+            <span class="chip chip-green">موارد مالية كافية</span>
+          </div>
+          <h4 style="color:var(--r2);margin-bottom:.7rem">⚠️ عوامل الخطر</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem">
+            <span class="chip chip-red">ضعف الانتظام (نور أحمد)</span>
+            <span class="chip chip-orange">تحديات سلوكية متوسطة</span>
+            <span class="chip chip-orange">ضعف الدعم المجتمعي</span>
+          </div>
+          <div class="alert alert-danger">⚠️ حالة واحدة (نور أحمد) تحتاج تدخلاً عاجلاً — اتصل بالأسرة اليوم</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><span class="icon">📋</span> خطة المراقبة والتدخل</div></div>
+        <table class="data-table">
+          <thead><tr><th>المستفيد</th><th>مستوى الخطر</th><th>نوع الخطر</th><th>التدخل المقترح</th><th>التكرار</th><th>الإجراء</th></tr></thead>
+          <tbody>
+            <tr><td><strong>نور أحمد</strong></td><td><span class="chip chip-red">مرتفع (72%)</span></td><td>انقطاع الحضور</td><td>اتصال أسري + حوافز</td><td>أسبوعي</td><td><button class="btn btn-danger" style="padding:.3rem .7rem;font-size:.78rem" onclick="showToast('تم إرسال إشعار للأسرة 📱','success')">إشعار</button></td></tr>
+            <tr><td><strong>أحمد عبدالله</strong></td><td><span class="chip chip-orange">متوسط (45%)</span></td><td>تراجع التقدم</td><td>مراجعة بروتوكول التمارين</td><td>أسبوعين</td><td><button class="btn btn-primary" style="padding:.3rem .7rem;font-size:.78rem" onclick="showToast('تمت إضافة للمراجعة ✅','success')">جدولة</button></td></tr>
+            <tr><td><strong>سارة محمد</strong></td><td><span class="chip chip-green">منخفض (18%)</span></td><td>—</td><td>متابعة منتظمة</td><td>شهري</td><td><button class="btn btn-outline" style="padding:.3rem .7rem;font-size:.78rem">متابعة</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div><!-- /risk -->
+
+    <!-- ═══════════ PAGE: REPORTS ═══════════ -->
+    <div class="page" id="page-reports">
+      <div class="section-badge">التقارير والتحليلات</div>
+      <div class="g3">
+        <div class="card" style="text-align:center;cursor:pointer" onclick="showToast('جارٍ توليد تقرير ربعي...','ai')">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">📊</div>
+          <h3 style="font-size:.95rem">التقرير الربعي</h3>
+          <p class="text-muted" style="margin-top:.3rem">ملخص شامل لكل الخطط</p>
+          <button class="btn btn-primary mt-2" style="width:100%">توليد</button>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="showToast('جارٍ توليد تقرير AI...','ai')">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">🤖</div>
+          <h3 style="font-size:.95rem">تقرير الذكاء الاصطناعي</h3>
+          <p class="text-muted" style="margin-top:.3rem">رؤى وتوصيات AI</p>
+          <button class="btn btn-ai mt-2" style="width:100%">توليد</button>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="showToast('جارٍ توليد تقرير الجودة...','success')">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">✅</div>
+          <h3 style="font-size:.95rem">تقرير ضمان الجودة</h3>
+          <p class="text-muted" style="margin-top:.3rem">مؤشرات الجودة والاعتماد</p>
+          <button class="btn btn-success mt-2" style="width:100%">توليد</button>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="window.print()">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">🖨️</div>
+          <h3 style="font-size:.95rem">طباعة PDF</h3>
+          <p class="text-muted" style="margin-top:.3rem">نسخة مطبوعة رسمية</p>
+          <button class="btn btn-outline mt-2" style="width:100%">طباعة</button>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="showToast('جارٍ تصدير Excel...','success')">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">📑</div>
+          <h3 style="font-size:.95rem">تصدير Excel</h3>
+          <p class="text-muted" style="margin-top:.3rem">بيانات جاهزة للتحليل</p>
+          <button class="btn btn-success mt-2" style="width:100%">تصدير</button>
+        </div>
+        <div class="card" style="text-align:center;cursor:pointer" onclick="showToast('جارٍ إرسال التقرير...','success')">
+          <div style="font-size:2.5rem;margin-bottom:.7rem">📧</div>
+          <h3 style="font-size:.95rem">إرسال بالبريد</h3>
+          <p class="text-muted" style="margin-top:.3rem">إرسال للفريق والأسرة</p>
+          <button class="btn btn-outline mt-2" style="width:100%">إرسال</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title"><span class="icon">📊</span> مؤشرات الأداء الشاملة</div></div>
+        <div class="chart-wrap-lg"><canvas id="chartKPI"></canvas></div>
+      </div>
+    </div><!-- /reports -->
+
+    <!-- ═══════════ PAGE: EXAMPLES ═══════════ -->
+    <div class="page" id="page-examples">
+      <div class="section-badge">أمثلة تطبيقية — 3 فئات</div>
+      <!-- Example 1 -->
+      <div class="card" style="border-right:4px solid var(--p2);margin-bottom:1.5rem">
+        <div class="card-header" style="background:linear-gradient(90deg,var(--p1),var(--p2));border-radius:10px;padding:1rem 1.2rem;color:#fff;margin:-1.6rem -1.6rem 1.2rem">
+          <div><h3 style="font-size:1rem">🦽 المثال الأول: إعاقة جسمية / حركية</h3><p style="font-size:.82rem;opacity:.85;margin-top:.2rem">إصابة نخاع شوكي غير كاملة T10 — أحمد عبدالله (42 سنة)</p></div>
+          <span class="chip chip-blue" style="background:rgba(255,255,255,.2);color:#fff">ASIA B</span>
+        </div>
+        <div class="g2">
+          <div>
+            <h4 style="color:var(--p2);margin-bottom:.7rem">🎯 أهداف SMART</h4>
+            <ul style="padding-right:1.2rem;font-size:.87rem;line-height:2">
+              <li><strong>الأسبوع 6:</strong> المشي 50م بعصا واحدة <span class="chip chip-green">✅ محقق</span></li>
+              <li><strong>الأسبوع 8:</strong> NRS من 7 إلى ≤ 3 <span class="chip chip-orange">⏳ جارٍ</span></li>
+              <li><strong>الأسبوع 10:</strong> صعود درج 10 درجات <span class="chip chip-gray">🔜 قادم</span></li>
+              <li><strong>الأسبوع 12:</strong> العودة لقيادة السيارة <span class="chip chip-gray">🔜 قادم</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:var(--p2);margin-bottom:.7rem">🤖 تقنيات AI المستخدمة</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+              <span class="chip chip-blue">Ekso Bionics AI</span>
+              <span class="chip chip-teal">Lokomat Robot</span>
+              <span class="chip chip-orange">FES Therapy</span>
+              <span class="chip chip-purple">Motion Capture</span>
+              <span class="chip chip-green">VR Gait Training</span>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">تقدم عام:</small>
+              <div class="prog-wrap mt-1"><div class="prog-fill prog-blue" style="width:62%"></div></div>
+              <small class="text-muted">62% — الأسبوع 7 من 12</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 2 -->
+      <div class="card" style="border-right:4px solid var(--s1);margin-bottom:1.5rem">
+        <div class="card-header" style="background:linear-gradient(90deg,var(--s1),var(--s2));border-radius:10px;padding:1rem 1.2rem;color:#fff;margin:-1.6rem -1.6rem 1.2rem">
+          <div><h3 style="font-size:1rem">👁️ المثال الثاني: إعاقة حسية — ضعف بصري شديد</h3><p style="font-size:.82rem;opacity:.85;margin-top:.2rem">انفصال شبكية + اضطراب دهليزي — سارة محمد (29 سنة)</p></div>
+          <span class="chip" style="background:rgba(255,255,255,.2);color:#fff">فقدان بصر 95%</span>
+        </div>
+        <div class="g2">
+          <div>
+            <h4 style="color:var(--s1);margin-bottom:.7rem">🎯 أهداف SMART</h4>
+            <ul style="padding-right:1.2rem;font-size:.87rem;line-height:2">
+              <li><strong>الأسبوع 4:</strong> توازن ثابت 2 دقيقة <span class="chip chip-green">✅ محقق</span></li>
+              <li><strong>الأسبوع 7:</strong> تنقل منزلي مستقل <span class="chip chip-orange">⏳ جارٍ</span></li>
+              <li><strong>الأسبوع 10:</strong> استخدام تطبيقات AI <span class="chip chip-gray">🔜 قادم</span></li>
+              <li><strong>الأسبوع 12:</strong> تنقل خارجي مستقل <span class="chip chip-gray">🔜 قادم</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:var(--s1);margin-bottom:.7rem">🤖 تقنيات AI المستخدمة</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+              <span class="chip chip-purple">OrCam MyEye AI</span>
+              <span class="chip chip-blue">Seeing AI (Microsoft)</span>
+              <span class="chip chip-teal">Biodex Balance</span>
+              <span class="chip chip-orange">Smart Obstacle Sensor</span>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">تقدم عام:</small>
+              <div class="prog-wrap mt-1"><div class="prog-fill prog-purple" style="width:35%"></div></div>
+              <small class="text-muted">35% — الأسبوع 4 من 12</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Example 3 -->
+      <div class="card" style="border-right:4px solid var(--a1)">
+        <div class="card-header" style="background:linear-gradient(90deg,var(--a1),var(--a2));border-radius:10px;padding:1rem 1.2rem;color:#fff;margin:-1.6rem -1.6rem 1.2rem">
+          <div><h3 style="font-size:1rem">🧠 المثال الثالث: إعاقة ذهنية — متلازمة داون</h3><p style="font-size:.82rem;opacity:.85;margin-top:.2rem">تأخر حركي إجمالي + دقيق + لغوي — يوسف عمر (8 سنوات)</p></div>
+          <span class="chip" style="background:rgba(255,255,255,.2);color:#fff">Trisomy 21</span>
+        </div>
+        <div class="g2">
+          <div>
+            <h4 style="color:var(--a1);margin-bottom:.7rem">🎯 أهداف SMART</h4>
+            <ul style="padding-right:1.2rem;font-size:.87rem;line-height:2">
+              <li><strong>الأسبوع 4:</strong> ركض 20م دون سقوط <span class="chip chip-green">✅ محقق</span></li>
+              <li><strong>الأسبوع 6:</strong> قص وتلوين داخل الخطوط <span class="chip chip-green">✅ محقق</span></li>
+              <li><strong>الأسبوع 9:</strong> دراجة 3 عجلات مستقل <span class="chip chip-green">✅ محقق</span></li>
+              <li><strong>الأسبوع 12:</strong> سلسلة 5 حركات متتالية <span class="chip chip-orange">⏳ جارٍ</span></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color:var(--a1);margin-bottom:.7rem">🤖 تقنيات AI المستخدمة</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:.4rem">
+              <span class="chip chip-orange">NAO Robot</span>
+              <span class="chip chip-blue">AR Games</span>
+              <span class="chip chip-teal">Smart Watch Tracker</span>
+              <span class="chip chip-purple">Snoezelen Room</span>
+              <span class="chip chip-green">AI Reinforcement App</span>
+            </div>
+            <div class="mt-2">
+              <small class="text-muted">تقدم عام:</small>
+              <div class="prog-wrap mt-1"><div class="prog-fill prog-green" style="width:88%"></div></div>
+              <small class="text-muted">88% — الأسبوع 11 من 12 🏆</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /examples -->
+
+    <!-- ═══════════ PAGE: QUALITY ═══════════ -->
+    <div class="page" id="page-quality">
+      <div class="section-badge">ضمان الجودة والاعتماد</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="kpi-card green"><div class="kpi-icon green">✅</div><div><div class="kpi-val">94%</div><div class="kpi-lbl">امتثال للمعايير</div></div></div>
+        <div class="kpi-card blue"><div class="kpi-icon blue">📋</div><div><div class="kpi-val">4.7</div><div class="kpi-lbl">رضا المستفيدين (5)</div></div></div>
+        <div class="kpi-card orange"><div class="kpi-icon orange">⏰</div><div><div class="kpi-val">98%</div><div class="kpi-lbl">التوثيق في الوقت</div></div></div>
+        <div class="kpi-card purple"><div class="kpi-icon purple">🏆</div><div><div class="kpi-val">ISO</div><div class="kpi-lbl">9001:2015 معتمد</div></div></div>
+      </div>
+      <div class="g2">
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">✅</span> معايير الإنهاء</div></div>
+          <ul style="padding-right:1.2rem;font-size:.9rem;line-height:2.4">
+            <li>تحقيق ≥ 80% من الأهداف SMART</li>
+            <li>انخفاض مستوى الألم إلى NRS ≤ 3</li>
+            <li>استقلالية أنشطة يومية (FIM ≥ 6)</li>
+            <li>قدرة المريض على HEP بشكل صحيح</li>
+            <li>استقرار الحالة الطبية العامة</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title"><span class="icon">🔄</span> خطة المتابعة</div></div>
+          <ul style="padding-right:1.2rem;font-size:.9rem;line-height:2.4">
+            <li>مراجعة شهرية × 3 أشهر بعد الإنهاء</li>
+            <li>تقييم ربع سنوي بالأدوات المعيارية</li>
+            <li>تحديث HEP كل 6 أسابيع</li>
+            <li>استشارات تيلي-ريهاب عن بُعد</li>
+            <li>تنسيق مع الفريق متعدد التخصصات</li>
+          </ul>
+        </div>
+      </div>
+      <div class="alert alert-success">✅ <strong>الأنظمة المرتبطة النشطة:</strong> IndividualizedRehabPlanService · AIAssessmentService · AlertsNotifications · RehabReports · TeleRehabilitation · TherapistDashboard · QualityAssurance · SmartScheduling</div>
+    </div><!-- /quality -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     MODALS
+═══════════════════════════════════════════════════════════ -->
+<!-- Add Goal Modal -->
+<div class="modal-overlay" id="modalAddGoal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🎯 إضافة هدف SMART جديد</h3>
+      <button class="modal-close" onclick="closeModal('modalAddGoal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>نوع الهدف <span class="req">*</span></label>
+          <select class="form-control"><option>قصير المدى</option><option>طويل المدى</option><option>تفصيلي</option></select>
+        </div>
+        <div class="form-group"><label>المجال <span class="req">*</span></label>
+          <select class="form-control" id="goal-domain" onchange="loadGoalBank()">
+            <option value="motorSkills">المهارات الحركية</option>
+            <option value="communication">التواصل</option>
+            <option value="dailyLiving">الحياة اليومية</option>
+            <option value="adaptiveBehavior">السلوك التكيفي</option>
+            <option value="academic">التعليم</option>
+            <option value="vocational">التأهيل المهني</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>الهدف من البنك (اختياري)</label>
+        <select class="form-control" id="goal-bank-select" onchange="fillGoalFromBank()">
+          <option value="">-- اختر من بنك الأهداف --</option>
+        </select>
+      </div>
+      <div class="form-group"><label>وصف الهدف <span class="req">*</span></label>
+        <textarea class="form-control" id="goal-desc" placeholder="وصف الهدف بشكل محدد وقابل للقياس..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>معيار الأداء</label><input class="form-control" id="goal-criteria" placeholder="مثال: 80% من المحاولات"/></div>
+        <div class="form-group"><label>الأولوية</label>
+          <select class="form-control"><option>عالية</option><option>متوسطة</option><option>منخفضة</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>تاريخ البدء</label><input class="form-control" type="date"/></div>
+        <div class="form-group"><label>تاريخ الهدف</label><input class="form-control" type="date"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddGoal')">إلغاء</button>
+      <button class="btn btn-ai" onclick="suggestGoalWithAI()">🤖 اقتراح AI</button>
+      <button class="btn btn-success" onclick="saveGoal()">💾 حفظ الهدف</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Session Modal -->
+<div class="modal-overlay" id="modalAddSession">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📝 تسجيل جلسة علاجية</h3>
+      <button class="modal-close" onclick="closeModal('modalAddSession')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>المستفيد <span class="req">*</span></label>
+          <select class="form-control"><option>أحمد عبدالله</option><option>سارة محمد</option><option>يوسف عمر</option><option>نور أحمد</option></select>
+        </div>
+        <div class="form-group"><label>نوع الخدمة <span class="req">*</span></label>
+          <select class="form-control"><option>علاج طبيعي</option><option>علاج وظيفي</option><option>علاج تخاطب</option><option>تكامل حسي</option><option>تيلي-ريهاب</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>التاريخ</label><input class="form-control" type="date"/></div>
+        <div class="form-group"><label>المدة (دقيقة)</label><input class="form-control" type="number" value="45"/></div>
+      </div>
+      <div class="form-group"><label>الحضور</label>
+        <select class="form-control"><option>حاضر</option><option>متأخر</option><option>غائب — عذر</option><option>غائب — بدون عذر</option></select>
+      </div>
+      <div class="form-group"><label>ملاحظات الجلسة</label>
+        <textarea class="form-control" placeholder="أنشطة الجلسة، استجابة المريض، الملاحظات السريرية..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>مستوى التفاعل</label>
+          <select class="form-control"><option>مرتفع</option><option>متوسط</option><option>منخفض</option></select>
+        </div>
+        <div class="form-group"><label>التقييم العام للجلسة</label>
+          <select class="form-control"><option>ممتاز</option><option>جيد جداً</option><option>جيد</option><option>مقبول</option><option>ضعيف</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modalAddSession')">إلغاء</button>
+      <button class="btn btn-success" onclick="saveSession()">💾 حفظ الجلسة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════════════════ -->
+<script>
+// ── State ────────────────────────────────────────────────────────────────
+const API_BASE = '/api/rehab-plans';
+const state = {
+  activePage: 'dashboard',
+  charts: {},
+  goals: [
+    { id:1, desc:'المشي 50م دون مساعدة', domain:'motorSkills', pct:100, status:'achieved', week:'6', priority:'high' },
+    { id:2, desc:'تقليل الألم إلى NRS ≤ 3', domain:'pain', pct:60, status:'on_track', week:'4', priority:'high' },
+    { id:3, desc:'نطاق حركة الكتف ≥ 150°', domain:'motorSkills', pct:75, status:'on_track', week:'8', priority:'medium' },
+    { id:4, desc:'استقلالية 5 أنشطة يومية', domain:'dailyLiving', pct:40, status:'making_progress', week:'12', priority:'medium' },
+    { id:5, desc:'تقوية العضلات +1 درجة', domain:'motorSkills', pct:50, status:'on_track', week:'10', priority:'high' },
+    { id:6, desc:'التوازن الديناميكي 2 دقيقة', domain:'balance', pct:80, status:'on_track', week:'7', priority:'medium' },
+    { id:7, desc:'صعود الدرج 10 درجات', domain:'motorSkills', pct:20, status:'making_progress', week:'10', priority:'low' },
+    { id:8, desc:'العودة لقيادة السيارة', domain:'community', pct:0, status:'not_started', week:'12', priority:'low' },
+  ],
+  progressData: {
+    weeks: ['أ1','أ2','أ3','أ4','أ5','أ6','أ7'],
+    motor:   [10,20,30,42,50,62,68],
+    rom:     [15,25,38,50,60,72,75],
+    pain:    [10,20,35,45,55,65,80],   // انخفاض الألم
+    balance: [12,22,35,48,58,68,70],
+    adl:     [8, 15,22,30,38,44,50],
+  }
+};
+
+// ── Navigation ───────────────────────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if(pg) pg.classList.add('active');
+  if(el) el.classList.add('active');
+  state.activePage = id;
+  const titles = {
+    'dashboard':'📊 لوحة التحكم الرئيسية','new-plan':'➕ خطة تأهيل جديدة',
+    'goals':'🎯 أهداف SMART','program':'📅 برنامج 12 أسبوع',
+    'sessions':'📝 تسجيل الجلسات','progress':'📈 متابعة التقدم',
+    'ai-assessment':'🤖 تقييم الذكاء الاصطناعي','predictions':'🔮 التوقعات الذكية',
+    'risk':'⚠️ تقييم المخاطر','reports':'📋 التقارير','examples':'👥 أمثلة تطبيقية',
+    'quality':'✅ ضمان الجودة'
+  };
+  document.getElementById('page-title').textContent = titles[id] || '';
+  setTimeout(()=>{ initCharts(id); renderGoals(); renderProgress(); }, 50);
+}
+
+// ── Charts ───────────────────────────────────────────────────────────────
+const palette = ['#1a6b8a','#27b4a0','#e67e22','#8e44ad','#27ae60','#e74c3c','#f39c12','#3498db'];
+
+function initCharts(page) {
+  if(page==='dashboard'){
+    mkBar('chartGoals',
+      ['حركي','تواصل','ADL','سلوكي','معرفي'],
+      [{label:'محقق',data:[80,65,55,70,60],backgroundColor:'rgba(39,180,160,.75)',borderRadius:6},
+       {label:'المستهدف',data:[100,100,100,100,100],backgroundColor:'rgba(221,230,239,.5)',borderRadius:6}],
+      {indexAxis:'y',plugins:{legend:{position:'bottom'}}}
+    );
+    mkLine('chartAttendance',
+      ['أكتوبر','نوفمبر','ديسمبر','يناير','فبراير','مارس'],
+      [{label:'نسبة الحضور %',data:[82,85,88,84,90,89],borderColor:'#27b4a0',backgroundColor:'rgba(39,180,160,.1)',fill:true,tension:.4}],
+      {}
+    );
+    mkDoughnut('chartServices',
+      ['علاج طبيعي','وظيفي','تخاطب','تكامل حسي','تيلي-ريهاب','أخرى'],
+      [35,22,18,12,8,5]
+    );
+  }
+  if(page==='goals'){
+    mkRadar('chartGoalsRadar',
+      ['حركي إجمالي','حركي دقيق','تواصل','ADL','سلوكي','معرفي'],
+      [{label:'الأداء الحالي',data:[68,55,72,45,60,50],backgroundColor:'rgba(26,107,138,.2)',borderColor:'#1a6b8a',pointBackgroundColor:'#1a6b8a'},
+       {label:'الهدف',data:[100,100,100,100,100,100],backgroundColor:'rgba(39,180,160,.05)',borderColor:'rgba(39,180,160,.4)',borderDash:[5,5]}]
+    );
+  }
+  if(page==='program'){
+    mkLine('chartPrediction',
+      ['أ1','أ2','أ3','أ4','أ5','أ6','أ7','أ8','أ9','أ10','أ11','أ12'],
+      [{label:'الفعلي',data:[10,18,28,40,50,62,68,null,null,null,null,null],borderColor:'#27b4a0',tension:.4,spanGaps:false},
+       {label:'توقع AI',data:[null,null,null,null,null,null,68,74,80,86,92,98],borderColor:'#5bc8f5',borderDash:[6,3],tension:.4,spanGaps:false},
+       {label:'الهدف',data:[100,100,100,100,100,100,100,100,100,100,100,100],borderColor:'rgba(39,174,96,.4)',borderDash:[3,3]}]
+    );
+    mkPie('chartSessionsDist',['علاج طبيعي','وظيفي','تخاطب','تكامل حسي'],[36,24,18,22]);
+  }
+  if(page==='progress'){
+    mkLine('chartProgressLine',
+      state.progressData.weeks,
+      [{label:'حركي',data:state.progressData.motor,borderColor:palette[0],tension:.4},
+       {label:'ROM',data:state.progressData.rom,borderColor:palette[1],tension:.4},
+       {label:'تخفيف الألم',data:state.progressData.pain,borderColor:palette[2],tension:.4},
+       {label:'ADL',data:state.progressData.adl,borderColor:palette[3],tension:.4}]
+    );
+    mkBar('chartProgressBar',
+      ['حركي','ROM','ألم','توازن','ADL'],
+      [{label:'الأداء الحالي',data:[68,75,80,70,50],backgroundColor:palette.map(c=>c+'cc'),borderRadius:8},
+       {label:'الهدف',data:[100,100,100,100,100],backgroundColor:'rgba(221,230,239,.5)',borderRadius:8}],
+      {}
+    );
+  }
+  if(page==='ai-assessment'){
+    mkRadar('chartAIRadar',
+      ['وظيفة حركية','معرفية','تواصل','مهارات اجتماعية','ADL','صحة سلوكية','حسي','انفعالي'],
+      [{label:'التقييم الحالي',data:[4,6,6,5,5,7,4,6],backgroundColor:'rgba(91,200,245,.2)',borderColor:'#5bc8f5',pointBackgroundColor:'#5bc8f5'},
+       {label:'الهدف',data:[8,8,8,8,8,8,8,8],backgroundColor:'rgba(39,174,96,.05)',borderColor:'rgba(39,174,96,.3)',borderDash:[5,5]}]
+    );
+  }
+  if(page==='predictions'){
+    mkLine('chartPredLine',
+      Array.from({length:13},(_,i)=>'أ'+i),
+      [{label:'توقع التحسن %',data:[0,8,16,25,34,44,54,63,72,80,87,93,98],borderColor:'#5bc8f5',backgroundColor:'rgba(91,200,245,.1)',fill:true,tension:.4},
+       {label:'الحد الأدنى (80% ثقة)',data:[0,5,12,20,28,37,46,54,62,70,76,82,88],borderColor:'rgba(91,200,245,.4)',borderDash:[4,3],tension:.4}]
+    );
+  }
+  if(page==='risk'){
+    mkBar('chartRisk',
+      ['أحمد','سارة','يوسف','نور'],
+      [{label:'مستوى الخطر',data:[45,18,15,72],backgroundColor:['#f39c12aa','#27ae60aa','#27ae60aa','#e74c3caa'],borderRadius:8}],
+      {scales:{y:{max:100}}}
+    );
+  }
+  if(page==='reports'){
+    mkLine('chartKPI',
+      ['يناير','فبراير','مارس','أبريل','مايو'],
+      [{label:'تحقيق الأهداف %',data:[65,70,72,76,78],borderColor:palette[1],tension:.4},
+       {label:'نسبة الحضور %',data:[80,83,86,88,89],borderColor:palette[0],tension:.4},
+       {label:'رضا المستفيدين (×20)',data:[82,84,86,88,94],borderColor:palette[2],tension:.4}]
+    );
+  }
+}
+
+// ── Chart Factories ──────────────────────────────────────────────────────
+function mkLine(id,labels,datasets,opts={}){
+  const el=document.getElementById(id); if(!el)return;
+  if(state.charts[id]) state.charts[id].destroy();
+  state.charts[id]=new Chart(el,{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}},scales:{y:{beginAtZero:true}}, ...opts}});
+}
+function mkBar(id,labels,datasets,opts={}){
+  const el=document.getElementById(id); if(!el)return;
+  if(state.charts[id]) state.charts[id].destroy();
+  state.charts[id]=new Chart(el,{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}, ...opts}});
+}
+function mkDoughnut(id,labels,data){
+  const el=document.getElementById(id); if(!el)return;
+  if(state.charts[id]) state.charts[id].destroy();
+  state.charts[id]=new Chart(el,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:palette}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}});
+}
+function mkPie(id,labels,data){
+  const el=document.getElementById(id); if(!el)return;
+  if(state.charts[id]) state.charts[id].destroy();
+  state.charts[id]=new Chart(el,{type:'pie',data:{labels,datasets:[{data,backgroundColor:palette}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}});
+}
+function mkRadar(id,labels,datasets){
+  const el=document.getElementById(id); if(!el)return;
+  if(state.charts[id]) state.charts[id].destroy();
+  state.charts[id]=new Chart(el,{type:'radar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:10,ticks:{stepSize:2,font:{size:9}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}}}}});
+}
+
+// ── Goals ────────────────────────────────────────────────────────────────
+function renderGoals() {
+  const el = document.getElementById('goals-list'); if(!el) return;
+  const statusMap = { achieved:'achieved', on_track:'', making_progress:'', needs_attention:'needs_attention', not_started:'' };
+  const chipMap   = { achieved:'<span class="chip chip-green">✅ محقق</span>', on_track:'<span class="chip chip-blue">🔄 في المسار</span>', making_progress:'<span class="chip chip-orange">📈 يتقدم</span>', needs_attention:'<span class="chip chip-red">⚠️ يحتاج انتباه</span>', not_started:'<span class="chip chip-gray">🔜 لم يبدأ</span>' };
+  el.innerHTML = state.goals.map(g=>`
+    <div class="goal-row ${statusMap[g.status]||''}">
+      <div class="goal-num">${g.id}</div>
+      <div class="goal-info">
+        <h4>${g.desc}</h4>
+        <p>الأسبوع ${g.week} · ${chipMap[g.status]||''}</p>
+      </div>
+      <div style="width:120px">
+        <div class="prog-wrap"><div class="prog-fill ${g.pct>=80?'prog-green':g.pct>=50?'prog-blue':'prog-orange'}" style="width:${g.pct}%"></div></div>
+        <small class="text-muted">${g.pct}%</small>
+      </div>
+      <div class="goal-pct">${g.pct}%</div>
+      <button class="btn btn-outline" style="padding:.25rem .6rem;font-size:.75rem" onclick="updateGoalProgress(${g.id})">تحديث</button>
+    </div>
+  `).join('');
+}
+
+function updateGoalProgress(id) {
+  const g = state.goals.find(x=>x.id===id);
+  if(!g) return;
+  const newPct = Math.min(100, g.pct + Math.floor(Math.random()*15)+5);
+  g.pct = newPct;
+  if(newPct>=100){ g.status='achieved'; showToast('🎉 تم تحقيق الهدف: '+g.desc,'success'); }
+  else if(newPct>=75) g.status='on_track';
+  else g.status='making_progress';
+  renderGoals();
+  showToast('تم تحديث تقدم الهدف: '+(newPct)+'%','success');
+  // Simulate API call
+  apiCall('PUT',`${API_BASE}/PLAN-001/goals/${id}/progress`,{value:newPct,method:'Manual Update',observer:'المعالج'});
+}
+
+// ── Progress ─────────────────────────────────────────────────────────────
+function renderProgress() {
+  const el = document.getElementById('progress-details'); if(!el) return;
+  const metrics = [
+    {label:'🦵 التحرك والمشي',pct:68,color:'prog-blue',detail:'مشي 50م ✅ · صعود درج ⏳'},
+    {label:'💪 القوة العضلية',pct:50,color:'prog-orange',detail:'طرف علوي 3/5 · سفلي 2/5 → 3/5'},
+    {label:'🎯 نطاق الحركة (ROM)',pct:75,color:'prog-green',detail:'كتف 140° (هدف 150°) · مرفق كامل ✅'},
+    {label:'😌 تخفيف الألم',pct:80,color:'prog-green',detail:'NRS من 7 → 4 (هدف ≤3)'},
+    {label:'🏠 الأنشطة اليومية',pct:50,color:'prog-purple',detail:'3 من 5 أنشطة بشكل مستقل'},
+    {label:'🧠 التوازن والتنسيق',pct:70,color:'prog-blue',detail:'Biodex Score تحسن 42%'},
+  ];
+  el.innerHTML = metrics.map(m=>`
+    <div class="flex gap-2" style="margin-bottom:.9rem;align-items:center">
+      <div style="min-width:200px;font-weight:600;font-size:.87rem">${m.label}</div>
+      <div style="flex:1"><div class="prog-wrap"><div class="prog-fill ${m.color}" style="width:${m.pct}%"></div></div></div>
+      <div style="min-width:40px;font-weight:700;color:var(--p2);font-size:.9rem">${m.pct}%</div>
+      <div class="text-muted" style="font-size:.78rem;min-width:200px">${m.detail}</div>
+    </div>
+  `).join('');
+}
+
+// ── AI Functions ──────────────────────────────────────────────────────────
+function updateAISlider(field,val){
+  document.getElementById(field+'-val').textContent=val;
+  const lbl = document.getElementById(field+'-lbl');
+  if(val<=3) lbl.textContent='عاجل الأولوية',lbl.style.color='#e74c3c';
+  else if(val<=5) lbl.textContent='مرتفع الأولوية',lbl.style.color='#e67e22';
+  else if(val<=7) lbl.textContent='متوسط',lbl.style.color='#f39c12';
+  else lbl.textContent='جيد',lbl.style.color='#27ae60';
+}
+
+async function generateAIPlan() {
+  const btn = event.target;
+  btn.innerHTML='<span class="spinner"></span> جارٍ التحليل...';
+  btn.disabled=true;
+  await sleep(1800);
+  const motor = parseInt(document.getElementById('motor-val').textContent);
+  const comm  = parseInt(document.getElementById('comm-val').textContent);
+  const env   = parseInt(document.getElementById('env-val').textContent);
+  const avgScore = (motor+comm+env)/3;
+  const path = avgScore>=7?'مسار مكثف (5 جلسات/أسبوع)': avgScore>=4?'مسار معتدل (3 جلسات/أسبوع)':'مسار تأسيسي (2 جلسة/أسبوع)';
+  const duration = avgScore>=7?'12-16 أسبوع': avgScore>=4?'20-28 أسبوع':'30-40 أسبوع';
+  const services = [];
+  if(motor<5) services.push('العلاج الطبيعي');
+  if(comm<5)  services.push('علاج التخاطب');
+  services.push('العلاج الوظيفي');
+  if(env<5)   services.push('الإرشاد الأسري');
+  const el = document.getElementById('ai-recommendation');
+  el.style.display='block';
+  el.innerHTML=`<strong style="color:#5bc8f5">🤖 توصية AI:</strong> ${path} · المدة المتوقعة: ${duration} · الخدمات المقترحة: <strong>${services.join('، ')}</strong>`;
+  btn.innerHTML='🤖 توليد خطة بالذكاء الاصطناعي';
+  btn.disabled=false;
+  showToast('تم توليد التوصية بالذكاء الاصطناعي!','ai');
+}
+
+async function runAIAnalysis() {
+  showToast('🤖 جارٍ تشغيل محرك AI...','ai');
+  await sleep(1500);
+  const el = document.getElementById('ai-assessment-result');
+  if(el) {
+    el.innerHTML=`
+      <div class="alert alert-success">✅ اكتمل التحليل بنجاح — ${new Date().toLocaleTimeString('ar')}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.8rem">
+        <div style="padding:.8rem;background:var(--bg);border-radius:8px"><strong>المسار المقترح:</strong><br><span class="chip chip-blue">مسار معتدل — 3 جلسات/أسبوع</span></div>
+        <div style="padding:.8rem;background:var(--bg);border-radius:8px"><strong>المدة المتوقعة:</strong><br><span class="chip chip-orange">20-24 أسبوع</span></div>
+        <div style="padding:.8rem;background:var(--bg);border-radius:8px"><strong>درجة الخطر:</strong><br><span class="chip chip-orange">متوسط (45%)</span></div>
+        <div style="padding:.8rem;background:var(--bg);border-radius:8px"><strong>الثقة بالتوقع:</strong><br><span class="chip chip-green">80% ثقة عالية</span></div>
+      </div>
+      <div style="margin-top:.8rem;padding:.8rem;background:#eaf4fd;border-radius:8px;font-size:.83rem">
+        <strong>الخدمات المقترحة:</strong> العلاج الطبيعي · العلاج الوظيفي · التكامل الحسي · الإرشاد الأسري
+      </div>
+    `;
+  }
+  showToast('✅ تحليل AI اكتمل بنجاح!','success');
+}
+
+async function generatePrediction() {
+  const service = document.getElementById('pred-service')?.value||'physicalTherapy';
+  const weeks = parseInt(document.getElementById('pred-weeks')?.value||12);
+  showToast('🔮 جارٍ توليد التوقعات...','ai');
+  await sleep(1200);
+  const milestones = [
+    {w:Math.round(weeks*.1), m:'تكيّف مع البرنامج وبداية الاستجابة'},
+    {w:Math.round(weeks*.25), m:'تحسن ملحوظ في المهارات الأساسية'},
+    {w:Math.round(weeks*.5), m:`بلوغ 50% من الأهداف المحددة`},
+    {w:Math.round(weeks*.75), m:'تعميم المهارات في البيئة الطبيعية'},
+    {w:weeks, m:'تقييم شامل وتحديد الخطوات التالية'},
+  ];
+  const el = document.getElementById('prediction-output');
+  const ms = document.getElementById('pred-milestones');
+  if(el && ms) {
+    el.style.display='block';
+    ms.innerHTML=milestones.map(m=>`
+      <div class="flex gap-2" style="margin-bottom:.6rem;align-items:center">
+        <span class="chip chip-blue">الأسبوع ${m.w}</span>
+        <span style="font-size:.87rem">${m.m}</span>
+      </div>
+    `).join('');
+    // Update prediction chart
+    const labels = Array.from({length:weeks+1},(_,i)=>'أ'+i);
+    const data   = labels.map((_,i)=>Math.round(Math.min(100,i/weeks*100*1.05)));
+    mkLine('chartPredLine', labels.filter((_,i)=>i%Math.max(1,Math.floor(weeks/12))===0 || i===0 || i===weeks),
+      [{label:'توقع التحسن %',data:data.filter((_,i)=>i%Math.max(1,Math.floor(weeks/12))===0 || i===0 || i===data.length-1),borderColor:'#5bc8f5',backgroundColor:'rgba(91,200,245,.1)',fill:true,tension:.4}]
+    );
+  }
+  showToast(`✅ تم توليد التوقع لـ ${weeks} أسبوع!`,'success');
+}
+
+// ── Goal Bank ─────────────────────────────────────────────────────────────
+const goalBankData = {
+  motorSkills:{ grossMotor:[
+    {code:'GM-01',description:'يحافظ على وضعية الجلوس 5 دقائق',criteria:'80% المحاولات'},
+    {code:'GM-02',description:'يمشي 10 أمتار دون مساعدة',criteria:'3 من 4'},
+    {code:'GM-03',description:'يصعد وينزل الدرج بالتناوب',criteria:'بإشراف'},
+  ]},
+  communication:{ expressive:[
+    {code:'CE-01',description:'يعبر عن احتياجاته الأساسية',criteria:'بوضوح'},
+    {code:'CE-02',description:'يكون جمل من 4-5 كلمات',criteria:'باستمرار'},
+  ]},
+  dailyLiving:{ selfCare:[
+    {code:'SC-01',description:'يستحم بشكل مستقل',criteria:'بأمان'},
+    {code:'SC-02',description:'يرتدي ملابسه بشكل صحيح',criteria:'خلال 10 د'},
+  ]},
+};
+
+function loadGoalBank() {
+  const domain = document.getElementById('goal-domain')?.value;
+  const sel    = document.getElementById('goal-bank-select');
+  if(!sel) return;
+  sel.innerHTML='<option value="">-- اختر من بنك الأهداف --</option>';
+  const domainData = goalBankData[domain];
+  if(!domainData) return;
+  Object.values(domainData).flat().forEach(g=>{
+    const opt = document.createElement('option');
+    opt.value = g.code;
+    opt.textContent = `[${g.code}] ${g.description}`;
+    opt.dataset.desc = g.description;
+    opt.dataset.criteria = g.criteria;
+    sel.appendChild(opt);
+  });
+}
+
+function fillGoalFromBank() {
+  const sel  = document.getElementById('goal-bank-select');
+  const desc = document.getElementById('goal-desc');
+  const crit = document.getElementById('goal-criteria');
+  if(!sel||!desc) return;
+  const opt = sel.options[sel.selectedIndex];
+  if(opt.dataset.desc){ desc.value=opt.dataset.desc; if(crit) crit.value=opt.dataset.criteria||''; }
+}
+
+async function suggestGoalWithAI() {
+  const desc = document.getElementById('goal-desc')?.value;
+  if(!desc){ showToast('أدخل وصف الهدف أولاً','warning'); return; }
+  showToast('🤖 جارٍ اقتراح تحسينات...','ai');
+  await sleep(1000);
+  showToast('تم تحسين صياغة الهدف بواسطة AI ✅','success');
+}
+
+// ── Save Functions ────────────────────────────────────────────────────────
+async function savePlan() {
+  const name = document.getElementById('np-name')?.value;
+  const id   = document.getElementById('np-id')?.value;
+  if(!name||!id){ showToast('يرجى ملء الحقول المطلوبة','warning'); return; }
+  showToast('💾 جارٍ حفظ الخطة...','ai');
+  await sleep(800);
+  await apiCall('POST', API_BASE, { beneficiaryName:name, beneficiaryId:id, disabilityType: document.getElementById('np-type')?.value||'physical' });
+  showToast(`✅ تم إنشاء خطة جديدة للمستفيد: ${name}`,'success');
+  showPage('dashboard', document.querySelector('.nav-item'));
+}
+
+async function saveGoal() {
+  const desc = document.getElementById('goal-desc')?.value;
+  if(!desc){ showToast('أدخل وصف الهدف','warning'); return; }
+  showToast('💾 جارٍ حفظ الهدف...','ai');
+  await sleep(600);
+  state.goals.push({ id:state.goals.length+1, desc, domain:'motorSkills', pct:0, status:'not_started', week:'8', priority:'medium' });
+  closeModal('modalAddGoal');
+  renderGoals();
+  showToast('✅ تم إضافة الهدف بنجاح','success');
+}
+
+async function saveSession() {
+  showToast('💾 جارٍ تسجيل الجلسة...','ai');
+  await sleep(600);
+  closeModal('modalAddSession');
+  showToast('✅ تم تسجيل الجلسة بنجاح','success');
+}
+
+// ── Plan Detail ─────────────────────────────────────────────────────────
+function loadPlanDetail(planId) {
+  showToast(`📋 جارٍ تحميل خطة ${planId}...`,'ai');
+  setTimeout(()=>{
+    showPage('progress', document.querySelectorAll('.nav-item')[6]);
+  }, 800);
+}
+
+// ── API Helper ────────────────────────────────────────────────────────────
+async function apiCall(method, url, data=null) {
+  try {
+    const opts = { method, headers:{'Content-Type':'application/json'} };
+    if(data) opts.body = JSON.stringify(data);
+    const res = await fetch(url, opts);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+  } catch(e) {
+    // نعمل في وضع demo بدون backend
+    console.log(`[API ${method}] ${url}`, data||'');
+    return { success:true, demo:true };
+  }
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id)?.classList.add('open'); }
+function closeModal(id){ document.getElementById(id)?.classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+
+// ── Toast ─────────────────────────────────────────────────────────────────
+function showToast(msg, type='info') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `${type==='ai'?'🤖':type==='success'?'✅':type==='warning'?'⚠️':'ℹ️'} ${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(), 3800);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{
+  initCharts('dashboard');
+  loadGoalBank();
+  renderGoals();
+  renderProgress();
+  // Animate KPIs
+  setTimeout(()=>showToast('🤖 نظام الذكاء الاصطناعي نشط وجاهز','ai'), 800);
+});
+</script>
+</body>
+</html>

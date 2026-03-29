@@ -262,6 +262,9 @@ const systemSettingsRoutes = require('../routes/systemSettings.routes');
 const saudiTaxRoutes = require('../routes/saudiTax.routes');
 const financeOperationsRoutes = require('../routes/financeOperations.routes');
 
+// Branch Management System — نظام إدارة الفروع مع RBAC متقدم (12 فرع + HQ)
+const branchManagementRoutes = require('../routes/branch.routes');
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -1276,6 +1279,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'finance-operations', financeOperationsRoutes);
   logger.info(
     'New gap-fix routes mounted (4 modules: care-plans, system-settings, saudi-tax, finance-operations)'
+  );
+
+  // ── Branch Management System — نظام إدارة الفروع (12 فرع + HQ الرياض) ──
+  // RBAC granular: hq_super_admin / hq_admin / branch_manager / therapist / driver / receptionist
+  // Endpoints: /api/branch-management/hq/dashboard, /api/branch-management/:code/dashboard ...
+  dualMount(app, 'branch-management', branchManagementRoutes);
+  logger.info(
+    'Branch Management System mounted (25 endpoints — HQ dashboard, cross-branch comparison, financials, staff optimizer, emergency override, branch dashboards, patients, schedule, staff, finance, transport, reports, KPIs, settings, audit logs, RBAC matrix — 12 branches + HQ Riyadh)'
   );
 
   // ── Route Mount Summary ─────────────────────────────────────────────────

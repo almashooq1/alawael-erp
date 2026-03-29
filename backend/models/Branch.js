@@ -1,175 +1,137 @@
-/* eslint-disable no-unused-vars */
 /**
- * Branch Model - نموذج الفروع
- * إدارة معلومات الفروع المختلفة
+ * Branch Model - نموذج الفرع
+ * Al-Awael Rehabilitation Centers Network
+ * 12 Branches + HQ Riyadh
  */
-
 const mongoose = require('mongoose');
+
+const locationSchema = new mongoose.Schema(
+  {
+    city_ar: { type: String },
+    city_en: { type: String },
+    address_ar: { type: String },
+    address_en: { type: String },
+    coordinates: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
+    region: {
+      type: String,
+      enum: ['riyadh', 'makkah', 'eastern', 'madinah', 'qassim', 'hail', 'aseer', 'tabuk'],
+    },
+  },
+  { _id: false }
+);
+
+const operatingHoursSchema = new mongoose.Schema(
+  {
+    day: { type: String, enum: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] },
+    open: { type: String }, // '07:30'
+    close: { type: String }, // '22:00'
+    closed: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
 
 const branchSchema = new mongoose.Schema(
   {
-    // معلومات الفرع الأساسية
-    name: {
-      type: String,
-      required: [true, 'اسم الفرع مطلوب'],
-      trim: true,
-      maxlength: [100, 'اسم الفرع يجب ألا يتجاوز 100 حرف'],
-    },
+    // ─── Identity ──────────────────────────────────────────────────────────
     code: {
       type: String,
-      required: true,
       unique: true,
       uppercase: true,
       trim: true,
+      required: true,
+      // e.g. RY-MAIN, RY-NORTH, JD-MAIN, JD-SOUTH, DM, KH, TF, TB, MD, QS, HL, AB
     },
-    description: {
+    name_ar: { type: String, required: true },
+    name_en: { type: String, required: true },
+    short_name: { type: String }, // For display in charts
+
+    // ─── Type & Status ─────────────────────────────────────────────────────
+    type: {
       type: String,
-      maxlength: 500,
+      enum: ['hq', 'main', 'branch', 'satellite'],
+      default: 'branch',
     },
-
-    // الموقع
-    location: {
-      address: String,
-      city: String,
-      region: String,
-      country: { type: String, default: 'Saudi Arabia' },
-      coordinates: {
-        latitude: Number,
-        longitude: Number,
-      },
-    },
-
-    // معلومات الاتصال
-    contact: {
-      phone: String,
-      email: String,
-      manager: String,
-      managerPhone: String,
-    },
-
-    // الحالة
     status: {
       type: String,
-      enum: ['active', 'inactive', 'maintenance'],
+      enum: ['active', 'inactive', 'maintenance', 'opening_soon'],
       default: 'active',
     },
+    is_hq: { type: Boolean, default: false },
 
-    // الإعدادات
+    // ─── Location ──────────────────────────────────────────────────────────
+    location: { type: locationSchema },
+
+    // ─── Capacity & Staffing ───────────────────────────────────────────────
+    capacity: {
+      total_rooms: { type: Number, default: 0 },
+      therapy_rooms: { type: Number, default: 0 },
+      consultation_rooms: { type: Number, default: 0 },
+      max_daily_sessions: { type: Number, default: 0 },
+      max_patients: { type: Number, default: 0 },
+    },
+
+    // ─── Staff ─────────────────────────────────────────────────────────────
+    staff_count: { type: Number, default: 0 },
+    manager_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    manager_name: { type: String },
+
+    // ─── Contact ───────────────────────────────────────────────────────────
+    phone: { type: String },
+    mobile: { type: String },
+    email: { type: String },
+    whatsapp: { type: String },
+
+    // ─── Operating Hours ───────────────────────────────────────────────────
+    operating_hours: [operatingHoursSchema],
+
+    // ─── Financial ─────────────────────────────────────────────────────────
+    cost_center: { type: String },
+    monthly_target: { type: Number, default: 0 },
+
+    // ─── Settings ──────────────────────────────────────────────────────────
     settings: {
-      recordingStorageLimit: {
-        type: Number, // بـ GB
-        default: 500,
-      },
-      retentionDays: {
-        type: Number, // عدد أيام الحفظ
-        default: 30,
-      },
-      timezone: {
-        type: String,
-        default: 'Asia/Riyadh',
-      },
-      motionDetectionEnabled: {
-        type: Boolean,
-        default: true,
-      },
+      allow_online_booking: { type: Boolean, default: true },
+      allow_home_visits: { type: Boolean, default: false },
+      has_transport: { type: Boolean, default: true },
+      language: { type: String, default: 'ar' },
+      timezone: { type: String, default: 'Asia/Riyadh' },
+      notification_emails: [{ type: String }],
     },
 
-    // إحصائيات
-    statistics: {
-      totalCameras: {
-        type: Number,
-        default: 0,
-      },
-      activeCameras: {
-        type: Number,
-        default: 0,
-      },
-      recordingSpace: {
-        used: { type: Number, default: 0 }, // بـ GB
-        available: { type: Number, default: 500 },
-      },
-      lastUpdate: Date,
-    },
-
-    // الملفات والوثائق
-    images: {
-      logo: String,
-      thumbnail: String,
-    },
-
-    // الأذونات والمستخدمون
-    assignedUsers: [
-      {
-        userId: mongoose.Schema.Types.ObjectId,
-        role: {
-          type: String,
-          enum: ['admin', 'supervisor', 'viewer'],
-          default: 'viewer',
-        },
-        addedAt: { type: Date, default: Date.now },
-      },
-    ],
-
-    // التدقيق
-    createdBy: mongoose.Schema.Types.ObjectId,
-    updatedBy: mongoose.Schema.Types.ObjectId,
-    deletedAt: Date,
+    // ─── Metadata ──────────────────────────────────────────────────────────
+    established_date: { type: Date },
+    logo_url: { type: String },
+    notes: { type: String },
   },
   {
     timestamps: true,
-    collection: 'branches',
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
 
-// الفهارس
-// Note: code already has unique:true (creates automatic index)
+// ─── Indexes ─────────────────────────────────────────────────────────────────
+branchSchema.index({ code: 1 }, { unique: true });
 branchSchema.index({ status: 1 });
-branchSchema.index({ 'location.city': 1 });
-branchSchema.index({ createdAt: -1 });
+branchSchema.index({ 'location.region': 1 });
+branchSchema.index({ type: 1 });
 
-// الوسائط (Middleware)
-branchSchema.pre('save', function (next) {
-  if (!this.code && this.name) {
-    this.code = this.name.substring(0, 3).toUpperCase();
-  }
-  next();
+// ─── Virtuals ────────────────────────────────────────────────────────────────
+branchSchema.virtual('display_name').get(function () {
+  return `${this.name_ar} (${this.code})`;
 });
 
-// الطرق المخصصة
-branchSchema.methods.toJSON = function () {
-  const { __v, deletedAt, ...branch } = this.toObject();
-  return branch;
+// ─── Statics ─────────────────────────────────────────────────────────────────
+branchSchema.statics.getAllActiveCodes = async function () {
+  const branches = await this.find({ status: 'active' }).select('code name_ar name_en');
+  return branches;
 };
 
-branchSchema.methods.updateStatistics = async function () {
-  const Camera = require('./Camera');
-  const cameras = await Camera.find({ branchId: this._id });
-  this.statistics.totalCameras = cameras.length;
-  this.statistics.activeCameras = cameras.filter(c => c.status === 'online').length;
-  this.statistics.lastUpdate = new Date();
-  return this.save();
+branchSchema.statics.findByCode = async function (code) {
+  return this.findOne({ code: code.toUpperCase() });
 };
 
-branchSchema.methods.addUser = function (userId, role = 'viewer') {
-  const exists = this.assignedUsers.some(u => u.userId.toString() === userId.toString());
-  if (!exists) {
-    this.assignedUsers.push({ userId, role });
-  }
-  return this.save();
-};
-
-branchSchema.methods.removeUser = function (userId) {
-  this.assignedUsers = this.assignedUsers.filter(u => u.userId.toString() !== userId.toString());
-  return this.save();
-};
-
-// الاستعلامات الثابتة
-branchSchema.statics.findActive = function () {
-  return this.find({ status: 'active', deletedAt: null });
-};
-
-branchSchema.statics.findByCode = function (code) {
-  return this.findOne({ code: code.toUpperCase(), deletedAt: null });
-};
-
-module.exports = mongoose.models.Branch || mongoose.model('Branch', branchSchema);
+module.exports = mongoose.model('Branch', branchSchema);

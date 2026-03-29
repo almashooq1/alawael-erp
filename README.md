@@ -24,6 +24,7 @@
 
 | Document | Description |
 |----------|-------------|
+| [MODULES.md](docs/MODULES.md) | 🗺️ **خريطة الوحدات** — 127 backend module + 80+ frontend page |
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, design decisions, module breakdown |
 | [DEVELOPMENT.md](docs/DEVELOPMENT.md) | Developer setup guide, code standards, git workflow |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines and PR process |

@@ -38,6 +38,16 @@ router.post('/hq/emergency-override', auth, requireHQAccess, ctrl.executeEmergen
 // [24] HQ audit log
 router.get('/hq/audit-log', auth, requireHQAccess, ctrl.getHQAuditLog);
 
+// ─── HQ Analytics & Intelligence ─────────────────────────────────────────────
+// [26] HQ network analytics
+router.get('/hq/analytics', auth, requireHQAccess, ctrl.getHQAnalytics);
+// [27] Branch rankings
+router.get('/hq/rankings', auth, requireHQAccess, ctrl.getBranchRankings);
+// [28] HQ forecast
+router.get('/hq/forecast', auth, requireHQAccess, ctrl.getHQForecast);
+// [29] Network daily digest
+router.get('/hq/network-digest', auth, requireHQAccess, ctrl.getNetworkDigest);
+
 // ─── Branch CRUD (HQ only for create/delete) ─────────────────────────────────
 // [1]  List branches
 router.get('/', auth, ctrl.listBranches);
@@ -143,6 +153,57 @@ router.get(
   auth,
   requireBranchPermission('audit', 'read'),
   ctrl.getBranchAuditLog
+);
+
+// ─── Branch Analytics & Intelligence ─────────────────────────────────────────
+// [30] Branch analytics
+router.get(
+  '/:branch_code/analytics',
+  auth,
+  requireBranchPermission('branches', 'read'),
+  ctrl.getBranchAnalytics
+);
+// [31] Branch trends
+router.get(
+  '/:branch_code/trends',
+  auth,
+  requireBranchPermission('branches', 'read'),
+  ctrl.getBranchTrends
+);
+// [32] Branch forecast
+router.get(
+  '/:branch_code/forecast',
+  auth,
+  requireBranchPermission('branches', 'read'),
+  ctrl.getBranchForecast
+);
+// [33] Branch AI recommendations
+router.get(
+  '/:branch_code/recommendations',
+  auth,
+  requireBranchPermission('branches', 'read'),
+  ctrl.getBranchRecommendations
+);
+// [34] Get branch targets
+router.get(
+  '/:branch_code/targets',
+  auth,
+  requireBranchPermission('branches', 'read'),
+  ctrl.getBranchTargets
+);
+// [35] Set branch targets
+router.post(
+  '/:branch_code/targets',
+  auth,
+  requireBranchPermission('branches', 'write'),
+  ctrl.setBranchTargets
+);
+// [36] Trigger daily snapshot (HQ or branch manager)
+router.post(
+  '/:branch_code/snapshot',
+  auth,
+  requireBranchPermission('branches', 'write'),
+  ctrl.triggerSnapshot
 );
 
 module.exports = router;

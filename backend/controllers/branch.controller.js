@@ -699,6 +699,202 @@ exports.getPermissionMatrix = async (req, res) => {
   }
 };
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// ANALYTICS & INTELLIGENCE — Phase 2
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const analyticsService = require('../services/branchAnalytics.service');
+const notificationService = require('../services/branchNotification.service');
+const BranchTarget = require('../models/BranchTarget');
+const BranchPerformanceLog = require('../models/BranchPerformanceLog');
+
+// [26] GET /hq/analytics?days=N — Network intelligence
+exports.getHQAnalytics = async (req, res) => {
+  try {
+    const days = parseInt(req.query.days) || 30;
+    const intelligence = await analyticsService.getNetworkIntelligence(days);
+    ok(res, intelligence);
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [27] GET /hq/rankings?date=X — Branch performance rankings
+exports.getBranchRankings = async (req, res) => {
+  try {
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const rankings = await analyticsService.getBranchRankings(date);
+    ok(res, { date, rankings });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [28] GET /hq/forecast?metric=X&days=N — Network-level forecast (top 3 branches)
+exports.getHQForecast = async (req, res) => {
+  try {
+    const { metric = 'sessions_count', days = 7 } = req.query;
+    const branches = await Branch.find({ status: 'active' }).select('code name_ar').lean();
+    const forecasts = await Promise.all(
+      branches.slice(0, 5).map(async b => {
+        try {
+          const f = await analyticsService.forecastMetric(b.code, metric, parseInt(days));
+          return { branch_code: b.code, name_ar: b.name_ar, forecast: f };
+        } catch {
+          return { branch_code: b.code, name_ar: b.name_ar, forecast: null };
+        }
+      })
+    );
+    ok(res, { metric, forecast_days: parseInt(days), forecasts });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [29] GET /hq/network-digest — Daily network digest with alerts
+exports.getNetworkDigest = async (req, res) => {
+  try {
+    const digest = await notificationService.generateDailyDigest();
+    ok(res, digest);
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [30] GET /:branch_code/analytics?days=N — Branch analytics with anomalies
+exports.getBranchAnalytics = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const days = parseInt(req.query.days) || 30;
+    const [trends, anomalies] = await Promise.all([
+      analyticsService.analyzeTrends(branchCode, days),
+      analyticsService.detectAnomalies(branchCode, 14),
+    ]);
+    ok(res, { branch_code: branchCode, days, trends, anomalies });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [31] GET /:branch_code/trends?days=N — Branch metric trends
+exports.getBranchTrends = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const days = parseInt(req.query.days) || 30;
+    const trends = await analyticsService.analyzeTrends(branchCode, days);
+    ok(res, { branch_code: branchCode, days, trends });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [32] GET /:branch_code/forecast?metric=X&days=N — Branch metric forecast
+exports.getBranchForecast = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const { metric = 'sessions_count', days = 7 } = req.query;
+    const forecast = await analyticsService.forecastMetric(branchCode, metric, parseInt(days));
+    ok(res, { branch_code: branchCode, metric, forecast_days: parseInt(days), forecast });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [33] GET /:branch_code/recommendations — AI-driven recommendations
+exports.getBranchRecommendations = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const days = parseInt(req.query.days) || 14;
+    const recommendations = await analyticsService.generateRecommendations(branchCode, days);
+    ok(res, { branch_code: branchCode, recommendations });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [34] GET /:branch_code/targets — Get branch KPI targets
+exports.getBranchTargets = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const year = parseInt(req.query.year) || new Date().getFullYear();
+    const month = parseInt(req.query.month) || new Date().getMonth() + 1;
+    const targets = await BranchTarget.getMonthlyTargets(branchCode, year, month);
+    ok(res, { branch_code: branchCode, year, month, targets });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
+// [35] POST /:branch_code/targets — Set/update branch KPI targets
+exports.setBranchTargets = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const { year, month, kpis } = req.body;
+
+    if (!year || !month || !kpis) return fail(res, 'year, month and kpis are required', 400);
+
+    const existing = await BranchTarget.findOne({
+      branch_code: branchCode,
+      year: parseInt(year),
+      month: parseInt(month),
+    });
+
+    let targets;
+    if (existing) {
+      // Merge kpi values
+      Object.keys(kpis).forEach(k => {
+        if (existing.kpis.has ? existing.kpis.has(k) : existing.kpis[k] !== undefined) {
+          if (existing.kpis[k]) Object.assign(existing.kpis[k], kpis[k]);
+        }
+      });
+      existing.updated_by = req.user._id;
+      targets = await existing.save();
+    } else {
+      targets = await BranchTarget.create({
+        branch_code: branchCode,
+        year: parseInt(year),
+        month: parseInt(month),
+        kpis,
+        created_by: req.user._id,
+        updated_by: req.user._id,
+      });
+    }
+
+    ok(res, { branch_code: branchCode, targets }, 'Targets saved successfully');
+  } catch (err) {
+    fail(res, err.message, 400);
+  }
+};
+
+// [36] POST /:branch_code/snapshot — Trigger daily performance snapshot
+exports.triggerSnapshot = async (req, res) => {
+  try {
+    const branchCode = req.params.branch_code.toUpperCase();
+    const data = req.body; // caller supplies today's metrics
+
+    const snapshot = await analyticsService.buildDailySnapshot(branchCode, data);
+
+    // Run alert scan on new snapshot
+    const alerts = await notificationService.runAlertScan(branchCode, snapshot);
+
+    ok(
+      res,
+      {
+        branch_code: branchCode,
+        snapshot_date: snapshot.snapshot_date_str,
+        performance_score: snapshot.performance_score,
+        performance_grade: snapshot.performance_grade,
+        alerts_triggered: alerts.length,
+        alerts,
+      },
+      'Snapshot created successfully',
+      201
+    );
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+};
+
 // ─── Data Generators (Replace with real DB queries) ──────────────────────────
 function generateBranchKPIs(branch, index) {
   const base = 60 + (index % 5) * 8;

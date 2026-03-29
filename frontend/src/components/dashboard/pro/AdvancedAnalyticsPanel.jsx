@@ -5,7 +5,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box, Paper, Typography, Grid, Chip, ToggleButton, ToggleButtonGroup,
-  IconButton, Tooltip, useTheme, Divider, LinearProgress, Select, MenuItem,
+  IconButton, Tooltip, useTheme, Divider, Select, MenuItem,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -15,13 +15,10 @@ import {
 } from 'recharts';
 import ShowChartIcon from '@mui/icons-material/ShowChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import PieChartIcon from '@mui/icons-material/PieChart';
-import RadarIcon from '@mui/icons-material/Radar';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-import FullscreenIcon from '@mui/icons-material/Fullscreen';
 import { gradients, statusColors, brandColors, chartColors } from 'theme/palette';
 
 const PERIOD_OPTIONS = [
@@ -39,7 +36,7 @@ const generateAnalyticsData = (period) => {
                  period === 'month' ? weeks :
                  period === 'quarter' ? months.slice(0, 3) : months;
 
-  return labels.map((name, i) => ({
+  return labels.map((name, _i) => ({
     name,
     revenue: Math.floor(Math.random() * 50000 + 20000),
     expenses: Math.floor(Math.random() * 30000 + 10000),
@@ -121,7 +118,7 @@ const MetricCard = ({ title, value, change, positive, icon, gradient }) => {
   );
 };
 
-const AdvancedAnalyticsPanel = ({ finance = {}, charts = {} }) => {
+const AdvancedAnalyticsPanel = ({ _finance = {}, _charts = {} }) => {
   const theme = useTheme();
   const [period, setPeriod] = useState('month');
   const [chartView, setChartView] = useState('area');
@@ -326,17 +323,17 @@ const AdvancedAnalyticsPanel = ({ finance = {}, charts = {} }) => {
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie data={departmentData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                      {departmentData.map((entry, i) => (
-                        <Cell key={i} fill={entry.color} />
+                      {departmentData.map((entry, _i) => (
+                        <Cell key={_i} fill={entry.color} />
                       ))}
                     </Pie>
                     <ChartTooltip contentStyle={{ borderRadius: 8, fontSize: 11 }} />
                   </PieChart>
                 </ResponsiveContainer>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, justifyContent: 'center', mt: 1 }}>
-                  {departmentData.map((d, i) => (
+                  {departmentData.map((d, _i) => (
                     <Chip
-                      key={i}
+                      key={_i}
                       size="small"
                       label={`${d.name} ${d.value}%`}
                       sx={{

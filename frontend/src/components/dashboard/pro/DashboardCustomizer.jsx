@@ -4,12 +4,12 @@
  */
 import React, { useState, useCallback } from 'react';
 import {
-  Box, Paper, Typography, Grid, Switch, FormControlLabel, Chip,
-  IconButton, Tooltip, useTheme, Divider, Button, Drawer,
+  Box, Typography, Grid, Switch, FormControlLabel,
+  IconButton, useTheme, Divider, Button, Drawer,
   List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
-  Slider, Select, MenuItem, ToggleButton, ToggleButtonGroup, Avatar,
+  Slider, ToggleButton, ToggleButtonGroup, Avatar,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import SettingsIcon from '@mui/icons-material/Settings';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
@@ -18,9 +18,6 @@ import ViewCompactIcon from '@mui/icons-material/ViewCompact';
 import GridViewIcon from '@mui/icons-material/GridView';
 import PaletteIcon from '@mui/icons-material/Palette';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import RestoreIcon from '@mui/icons-material/Restore';
 import SaveIcon from '@mui/icons-material/Save';
 import CloseIcon from '@mui/icons-material/Close';
@@ -32,7 +29,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import SpeedIcon from '@mui/icons-material/Speed';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SecurityIcon from '@mui/icons-material/Security';
-import { gradients, statusColors, brandColors } from 'theme/palette';
+import { gradients, brandColors } from 'theme/palette';
 
 const WIDGETS = [
   { id: 'kpi', label: 'بطاقات KPI', icon: <SpeedIcon />, defaultVisible: true, description: 'مؤشرات الأداء الرئيسية' },

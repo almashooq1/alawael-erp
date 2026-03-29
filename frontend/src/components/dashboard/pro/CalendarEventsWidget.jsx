@@ -5,9 +5,8 @@
 import React, { useState, useMemo } from 'react';
 import {
   Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
-  useTheme, Divider, Button, Avatar, Badge, List, ListItem,
-  ListItemAvatar, ListItemText, ListItemSecondaryAction,
-} from '@mui/material';
+  useTheme, Divider, Avatar, List, ListItem,
+  ListItemAvatar, ListItemText, } from '@mui/material';
 import { motion } from 'framer-motion';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import EventIcon from '@mui/icons-material/Event';
@@ -17,10 +16,9 @@ import GroupIcon from '@mui/icons-material/Group';
 import VideoCallIcon from '@mui/icons-material/VideoCall';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import TodayIcon from '@mui/icons-material/Today';
 import AddIcon from '@mui/icons-material/Add';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { gradients, statusColors, brandColors, chartColors } from 'theme/palette';
+import { gradients, statusColors, brandColors } from 'theme/palette';
 
 const DAYS_AR = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 const MONTHS_AR = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
@@ -66,7 +64,8 @@ const MiniCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  const calendarDays = useMemo(() => {
+  const calendarDays = // eslint-disable-next-line react-hooks/exhaustive-deps
+ useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const days = [];
@@ -170,12 +169,14 @@ const CalendarEventsWidget = () => {
   const isDark = theme.palette.mode === 'dark';
   const today = new Date();
 
-  const todayEvents = useMemo(() => {
+  const todayEvents = // eslint-disable-next-line react-hooks/exhaustive-deps
+ useMemo(() => {
     const todayStr = today.toISOString().split('T')[0];
     return UPCOMING_EVENTS.filter(e => e.date === todayStr);
   }, []);
 
-  const upcomingEvents = useMemo(() => {
+  const upcomingEvents = // eslint-disable-next-line react-hooks/exhaustive-deps
+ useMemo(() => {
     const todayStr = today.toISOString().split('T')[0];
     return UPCOMING_EVENTS.filter(e => e.date > todayStr).slice(0, 4);
   }, []);

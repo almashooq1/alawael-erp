@@ -9,7 +9,7 @@
  * - تعديل تذييل الصفحة
  * - معاينة التغييرات في الوقت الفعلي
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import {
   Box,
   Container,
@@ -29,7 +29,6 @@ import {
   Tabs,
   Tab,
   IconButton,
-  Tooltip,
   Paper,
   Select,
   MenuItem,
@@ -74,7 +73,7 @@ import {
   Gradient as GradientIcon,
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
-import { gradients, brandColors } from 'theme/palette';
+import { gradients } from 'theme/palette';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
@@ -158,7 +157,7 @@ const BORDER_RADIUS_OPTIONS = [
 // =================== المكون الرئيسي ===================
 const BrandingSettings = () => {
   const showSnackbar = useSnackbar();
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const logoInputRef = useRef(null);
   const faviconInputRef = useRef(null);
   const loginBgInputRef = useRef(null);

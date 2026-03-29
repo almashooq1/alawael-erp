@@ -7,8 +7,6 @@ import {
   Paper,
   Button,
   Grid,
-  Card,
-  CardContent,
   Chip,
   IconButton,
   TextField,

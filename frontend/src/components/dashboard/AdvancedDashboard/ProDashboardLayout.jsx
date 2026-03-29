@@ -2,17 +2,16 @@
  * 🚀 ProDashboardLayout — لوحة التحكم الاحترافية المتكاملة
  * Integrates all pro widgets into a unified professional dashboard experience
  */
-import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   Box, Grid, Typography, Fab, Tooltip, useTheme, Chip, Stack,
-  IconButton, Collapse, Paper, Zoom,
-} from '@mui/material';
+  IconButton, Collapse, } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import { gradients, brandColors, statusColors } from 'theme/palette';
+import { gradients, brandColors } from 'theme/palette';
 import {
   NotificationCenter,
   AdvancedAnalyticsPanel,
@@ -25,7 +24,7 @@ import {
 import DashboardErrorBoundary from '../shared/DashboardErrorBoundary';
 
 /* ─── Section Wrapper ─── */
-const ProSection = ({ id, title, icon, children, collapsed, onToggle, delay = 0 }) => (
+const ProSection = ({ _id, title, icon, children, collapsed, onToggle, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -71,7 +70,7 @@ const ProSection = ({ id, title, icon, children, collapsed, onToggle, delay = 0 
 /* ─── Main Component ─── */
 const ProDashboardLayout = () => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const _isDark = theme.palette.mode === 'dark';
 
   // Load preferences
   const [preferences, setPreferences] = useState(() => {

@@ -105,7 +105,7 @@ const useDocumentListLocal = ({
   const filteredAndSortedDocs = useMemo(() => {
     if (!documents) return [];
 
-    let filtered = documents.filter(doc => {
+    const filtered = documents.filter(doc => {
       const q = filters.debouncedQuery.toLowerCase();
       const matchesSearch =
         doc.title?.toLowerCase().includes(q) ||

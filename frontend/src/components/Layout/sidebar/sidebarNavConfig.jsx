@@ -36,7 +36,6 @@ import {
   Gavel as ContractsIcon,
   NotificationsActive as SmartNotifIcon,
   ConfirmationNumber as TicketIcon,
-  Receipt as InvoiceIcon,
   EventNote as MeetingIcon,
   Badge as VisitorIcon,
   DriveFileRenameOutline as SignatureIcon,

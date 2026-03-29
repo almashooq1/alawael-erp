@@ -7,8 +7,6 @@ import {
   Paper,
   Button,
   Grid,
-  Card,
-  CardContent,
   Chip,
   IconButton,
   TextField,
@@ -38,7 +36,6 @@ import {
   FormControlLabel,
   Switch,
   Autocomplete,
-  Alert,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -46,7 +43,6 @@ import {
   Refresh,
   SwapHoriz,
   MoreVert,
-  Visibility,
   CheckCircle,
   PauseCircle,
   Block,
@@ -441,7 +437,7 @@ export default function AdminDelegations() {
                     const days = daysRemaining(d.endDate);
                     const nearExpiry =
                       d.status === 'active' && days !== null && days <= 7 && days > 0;
-                    const isExpired = days !== null && days <= 0;
+                    const _isExpired = days !== null && days <= 0;
                     return (
                       <TableRow
                         key={d._id}

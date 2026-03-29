@@ -9,13 +9,11 @@ import {
   Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, IconButton, Tooltip, MenuItem, Divider, LinearProgress, Badge,
+  Tabs, Tab, MenuItem, Divider, LinearProgress,
 } from '@mui/material';
 import {
-  Business as QiwaIcon, PersonSearch as VerifyIcon, Description as ContractIcon,
-  AccountBalance as WPSIcon, TrendingUp as NitaqatIcon, Refresh as RefreshIcon,
-  Add as AddIcon, Search as SearchIcon, Send as SubmitIcon, Group as BatchIcon,
-  CheckCircle as ActiveIcon, Cancel as TerminatedIcon,
+  Business as QiwaIcon, PersonSearch as VerifyIcon, Description as ContractIcon, TrendingUp as NitaqatIcon, Refresh as RefreshIcon,
+  Add as AddIcon, Search as SearchIcon,
 } from '@mui/icons-material';
 import qiwaApi from '../../services/qiwa.service';
 
@@ -122,7 +120,7 @@ export default function QiwaDashboard() {
         <Grid item xs={6} md={3}><KPI title="الموظفون" value={employees.length} icon={<VerifyIcon />} /></Grid>
         <Grid item xs={6} md={3}><KPI title="العقود النشطة" value={contracts.filter(c => c.status === 'active').length} icon={<ContractIcon />} color="success.main" /></Grid>
         <Grid item xs={6} md={3}><KPI title="نطاقات" value={nitaqat?.band || nitaqat?.zone || '—'} icon={<NitaqatIcon />} color={nitaqat?.band === 'green' || nitaqat?.band === 'platinum' ? 'success.main' : 'warning.main'} /></Grid>
-        <Grid item xs={6} md={3}><KPI title="نسبة السعودة" value={nitaqat?.saudizationRate != null ? `${nitaqat.saudizationRate}%` : '—'} icon={<NitaqatIcon />} color="info.main" /></Grid>
+        <Grid item xs={6} md={3}><KPI title="نسبة السعودة" value={nitaqat?.saudizationRate !== null ? `${nitaqat.saudizationRate}%` : '—'} icon={<NitaqatIcon />} color="info.main" /></Grid>
       </Grid>
 
       {/* Tabs */}

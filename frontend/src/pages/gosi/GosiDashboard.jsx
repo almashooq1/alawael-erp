@@ -9,12 +9,10 @@ import {
   Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, IconButton, Tooltip,
 } from '@mui/material';
 import {
-  Security as GosiIcon, PersonAdd as RegisterIcon, Calculate as CalcIcon,
-  Assessment as ReportIcon, Refresh as RefreshIcon, Add as AddIcon,
-  Description as CertIcon, CheckCircle as CheckIcon, Warning as WarnIcon,
+  Security as GosiIcon, Calculate as CalcIcon,
+  Assessment as ReportIcon, Refresh as RefreshIcon, CheckCircle as CheckIcon, Warning as WarnIcon,
 } from '@mui/icons-material';
 import gosiApi from '../../services/gosi.service';
 
@@ -112,10 +110,10 @@ export default function GosiDashboard() {
           <StatCard title="الموظفون المسجلون" value={compliance?.registeredEmployees || '—'} icon={<CheckIcon />} color="success.main" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="نسبة الامتثال" value={compliance?.complianceRate != null ? `${compliance.complianceRate}%` : '—'} icon={<ReportIcon />} color="primary.main" />
+          <StatCard title="نسبة الامتثال" value={compliance?.complianceRate !== null ? `${compliance.complianceRate}%` : '—'} icon={<ReportIcon />} color="primary.main" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard title="إجمالي الاشتراكات الشهرية" value={compliance?.monthlyContributions != null ? `${compliance.monthlyContributions.toLocaleString()} ر.س` : '—'} icon={<CalcIcon />} color="info.main" />
+          <StatCard title="إجمالي الاشتراكات الشهرية" value={compliance?.monthlyContributions !== null ? `${compliance.monthlyContributions.toLocaleString()} ر.س` : '—'} icon={<CalcIcon />} color="info.main" />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard title="المخالفات" value={compliance?.violations || 0} icon={<WarnIcon />} color={compliance?.violations > 0 ? 'error.main' : 'success.main'} />

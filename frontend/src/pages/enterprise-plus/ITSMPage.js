@@ -595,7 +595,7 @@ export default function ITSMPage() {
                         <Chip size="small" color="warning" label="يحتاج موافقة" />
                       )}
                     </Stack>
-                    {item.cost?.amount != null && (
+                    {item.cost?.amount !== null && (
                       <Typography variant="body2" sx={{ mt: 1 }}>
                         التكلفة: {item.cost.amount.toLocaleString()} {item.cost.currency}
                       </Typography>

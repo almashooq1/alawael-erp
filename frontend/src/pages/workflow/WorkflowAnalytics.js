@@ -164,7 +164,7 @@ export default function WorkflowAnalytics() {
         <Grid item xs={12} sm={6} md={3}>
           <KPICard
             title="متوسط وقت الإتمام"
-            value={overview?.avgCompletionTime != null ? `${overview.avgCompletionTime} ساعة` : '—'}
+            value={overview?.avgCompletionTime !== null ? `${overview.avgCompletionTime} ساعة` : '—'}
             subtitle="من البداية للنهاية"
             color="#8B5CF6"
             icon={<TimerIcon />}

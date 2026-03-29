@@ -131,7 +131,7 @@ export default function MeetingsManagement() {
     if (data?.meetingId) {
       setMeetings(prev =>
         prev.map(m => {
-          if (m._id === data.meetingId && data.attendeesCount != null) {
+          if (m._id === data.meetingId && data.attendeesCount !== null) {
             return { ...m, attendeesCount: data.attendeesCount };
           }
           return m;

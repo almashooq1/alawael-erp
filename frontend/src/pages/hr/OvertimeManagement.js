@@ -36,7 +36,6 @@ import {
   Add as AddIcon,
   Visibility as ViewIcon,
   AccessTime as ClockIcon,
-  AttachMoney as MoneyIcon,
   ThumbUp as ApproveIcon,
   NightsStay as NightIcon,
   Weekend as WeekendIcon,
@@ -48,7 +47,6 @@ import {
   getOvertimeRequestById,
   approveOvertimeStep,
   getOvertimeStats,
-  getOvertimeMonthlyReport,
 } from '../../services/hr/employeeAffairsExpandedService';
 
 const OVERTIME_TYPES = [
@@ -80,7 +78,7 @@ const statusColor = {
   'تم الصرف': 'success',
 };
 
-const fmtCurrency = v => (v != null ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
+const fmtCurrency = v => (v !== null ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
 
 export default function OvertimeManagement() {
   const [requests, setRequests] = useState([]);

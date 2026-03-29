@@ -648,7 +648,7 @@ export default function EHSSafetyPage() {
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
                       المشاركون: {t.attendees?.length || 0}
-                      {t.completionRate != null && ` | نسبة الإتمام: ${t.completionRate}%`}
+                      {t.completionRate !== null && ` | نسبة الإتمام: ${t.completionRate}%`}
                     </Typography>
                     {t.scheduledDate && (
                       <Typography variant="body2">

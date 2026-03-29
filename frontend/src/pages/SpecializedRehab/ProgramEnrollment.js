@@ -429,7 +429,7 @@ export default function ProgramEnrollment() {
                           />
                         </Stack>
                         {/* Progress bar */}
-                        {enr.overallProgress?.completionPercentage != null && (
+                        {enr.overallProgress?.completionPercentage !== null && (
                           <Box>
                             <Stack direction="row" justifyContent="space-between">
                               <Typography variant="caption">التقدم</Typography>

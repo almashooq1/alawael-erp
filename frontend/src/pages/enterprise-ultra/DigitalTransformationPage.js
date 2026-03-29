@@ -159,7 +159,7 @@ export default function DigitalTransformationPage() {
                         <Chip size="small" color={maturityLevels[d.level]?.color || 'default'} label={`${d.level}/5 - ${maturityLevels[d.level]?.label || ''}`} />
                       </Stack>
                     ))}
-                    {a.overallScore != null && (
+                    {a.overallScore !== null && (
                       <Box mt={1}>
                         <Typography variant="caption" fontWeight="bold">الدرجة الكلية: </Typography>
                         <Chip size="small" color={maturityLevels[Math.round(a.overallScore)]?.color || 'info'} label={`${a.overallScore}/5`} />
@@ -290,8 +290,8 @@ export default function DigitalTransformationPage() {
                   <TableRow key={k._id} hover>
                     <TableCell><Typography fontWeight="bold" variant="body2">{k.kpiName}</Typography></TableCell>
                     <TableCell><Chip size="small" label={k.category?.replace(/_/g, ' ')} /></TableCell>
-                    <TableCell>{k.currentValue != null ? k.currentValue : '—'}{k.unit || ''}</TableCell>
-                    <TableCell>{k.targetValue != null ? k.targetValue : '—'}{k.unit || ''}</TableCell>
+                    <TableCell>{k.currentValue !== null ? k.currentValue : '—'}{k.unit || ''}</TableCell>
+                    <TableCell>{k.targetValue !== null ? k.targetValue : '—'}{k.unit || ''}</TableCell>
                     <TableCell>
                       <Chip size="small" color={statusColors[k.status] || 'default'} label={k.status?.replace(/_/g, ' ')} />
                     </TableCell>

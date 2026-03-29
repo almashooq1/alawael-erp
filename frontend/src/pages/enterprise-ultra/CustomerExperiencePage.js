@@ -107,7 +107,7 @@ export default function CustomerExperiencePage() {
       {/* Stats */}
       <Grid container spacing={2} mb={3}>
         {[
-          { label: 'معدل الرضا (NPS)', value: stats.nps != null ? stats.nps : '—', color: '#2e7d32', icon: <ThumbUpIcon /> },
+          { label: 'معدل الرضا (NPS)', value: stats.nps !== null ? stats.nps : '—', color: '#2e7d32', icon: <ThumbUpIcon /> },
           { label: 'الاستبيانات النشطة', value: stats.activeSurveys || 0, color: '#1976d2', icon: <SurveyIcon /> },
           { label: 'شكاوى مفتوحة', value: stats.openComplaints || 0, color: '#d32f2f', icon: <ComplaintIcon /> },
           { label: 'معدل الحل', value: `${stats.resolutionRate || 0}%`, color: '#9c27b0', icon: <TrendUpIcon /> },
@@ -155,7 +155,7 @@ export default function CustomerExperiencePage() {
                     <Typography variant="caption">النوع: {s.surveyType?.replace(/_/g, ' ')}</Typography><br />
                     <Typography variant="caption">الأسئلة: {s.questions?.length || 0}</Typography><br />
                     <Typography variant="caption">الردود: {s.responseCount || 0}</Typography>
-                    {s.averageScore != null && (
+                    {s.averageScore !== null && (
                       <Box mt={1}>
                         <Rating value={s.averageScore / 20} readOnly size="small" precision={0.5} />
                         <Typography variant="caption" sx={{ ml: 1 }}>{s.averageScore}%</Typography>
@@ -253,7 +253,7 @@ export default function CustomerExperiencePage() {
                     <Typography variant="caption">شريحة العملاء: {j.customerSegment || '—'}</Typography><br />
                     <Typography variant="caption">نقاط التماس: {j.touchpoints?.length || 0}</Typography><br />
                     <Typography variant="caption">نقاط الألم: {j.painPoints?.length || 0}</Typography>
-                    {j.satisfactionScore != null && (
+                    {j.satisfactionScore !== null && (
                       <Box mt={1}><Rating value={j.satisfactionScore / 20} readOnly size="small" precision={0.5} /></Box>
                     )}
                   </CardContent>
@@ -280,9 +280,9 @@ export default function CustomerExperiencePage() {
                   <TableRow key={b._id} hover>
                     <TableCell><Typography fontWeight="bold" variant="body2">{b.metricName}</Typography></TableCell>
                     <TableCell><Chip size="small" label={b.category?.replace(/_/g, ' ')} /></TableCell>
-                    <TableCell>{b.currentValue != null ? b.currentValue : '—'}{b.unit || ''}</TableCell>
-                    <TableCell>{b.targetValue != null ? b.targetValue : '—'}{b.unit || ''}</TableCell>
-                    <TableCell>{b.industryAverage != null ? b.industryAverage : '—'}{b.unit || ''}</TableCell>
+                    <TableCell>{b.currentValue !== null ? b.currentValue : '—'}{b.unit || ''}</TableCell>
+                    <TableCell>{b.targetValue !== null ? b.targetValue : '—'}{b.unit || ''}</TableCell>
+                    <TableCell>{b.industryAverage !== null ? b.industryAverage : '—'}{b.unit || ''}</TableCell>
                     <TableCell>
                       {b.trend === 'up' && <Chip size="small" color="success" label="↑ تحسن" />}
                       {b.trend === 'down' && <Chip size="small" color="error" label="↓ تراجع" />}

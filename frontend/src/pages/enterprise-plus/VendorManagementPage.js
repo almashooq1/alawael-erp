@@ -300,7 +300,7 @@ export default function VendorManagementPage() {
                         <Chip key={idx} size="small" variant="outlined" label={c} />
                       ))}
                     </Stack>
-                    {v.rating?.overall != null && (
+                    {v.rating?.overall !== null && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
                         <Rating value={v.rating.overall} precision={0.5} size="small" readOnly />
                         <Typography variant="caption">({v.rating.overall.toFixed(1)})</Typography>

@@ -11,13 +11,11 @@ import {
   CardContent,
   Chip,
   Avatar,
-  CircularProgress,
   Alert,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Button,
   Paper,
   LinearProgress,
   Divider,
@@ -296,7 +294,7 @@ const AnalyticsTab = ({ tabValue, scales, beneficiaries }) => {
                       maxScore={item.maxScore || scaleDef?.maxScore || 100}
                       color={scaleDef?.color}
                     />
-                    {item.previousScore != null && (
+                    {item.previousScore !== null && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
                         {item.latestScore > item.previousScore ? (
                           <TrendingUpIcon color="success" fontSize="small" />
@@ -340,7 +338,7 @@ const AnalyticsTab = ({ tabValue, scales, beneficiaries }) => {
                     <Box component="ul" sx={{ pl: 2, mt: 1 }}>
                       {profile.strengths.map((s, i) => (
                         <li key={i}>
-                          <Typography variant="body2">{s.domain || s}: {s.score != null ? `${s.score}%` : ''}</Typography>
+                          <Typography variant="body2">{s.domain || s}: {s.score !== null ? `${s.score}%` : ''}</Typography>
                         </li>
                       ))}
                     </Box>
@@ -363,7 +361,7 @@ const AnalyticsTab = ({ tabValue, scales, beneficiaries }) => {
                     <Box component="ul" sx={{ pl: 2, mt: 1 }}>
                       {profile.weaknesses.map((w, i) => (
                         <li key={i}>
-                          <Typography variant="body2">{w.domain || w}: {w.score != null ? `${w.score}%` : ''}</Typography>
+                          <Typography variant="body2">{w.domain || w}: {w.score !== null ? `${w.score}%` : ''}</Typography>
                         </li>
                       ))}
                     </Box>

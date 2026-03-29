@@ -8,14 +8,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Tabs,
-  Tab, Alert, CircularProgress, LinearProgress, Avatar, List, ListItem,
-  ListItemAvatar, ListItemText, Divider, IconButton, Tooltip, Badge,
+  Tab, Alert, CircularProgress, Avatar, List, ListItem,
+  ListItemAvatar, ListItemText, Divider, IconButton, Badge,
 } from '@mui/material';
 import {
-  Person as PersonIcon, School as SchoolIcon, TrendingUp as ProgressIcon,
+  Person as PersonIcon, TrendingUp as ProgressIcon,
   EventNote as AttendanceIcon, Payment as PaymentIcon, Message as MessageIcon,
-  Notifications as NotifIcon, CalendarMonth as CalendarIcon,
-  Assessment as ReportIcon, Refresh as RefreshIcon, Description as IEPIcon,
+  Notifications as NotifIcon, CalendarMonth as CalendarIcon, Refresh as RefreshIcon,
   ChildCare as ChildIcon, Star as StarIcon,
 } from '@mui/icons-material';
 import guardianApi from '../../services/guardianPortal.service';
@@ -150,14 +149,14 @@ export default function GuardianPortalDashboard() {
                       <Box textAlign="center" p={1} bgcolor="grey.50" borderRadius={1}>
                         <ProgressIcon color="primary" fontSize="small" />
                         <Typography variant="caption" display="block">التقدم</Typography>
-                        <Typography variant="body2" fontWeight="bold">{b.progressPercent != null ? `${b.progressPercent}%` : '—'}</Typography>
+                        <Typography variant="body2" fontWeight="bold">{b.progressPercent !== null ? `${b.progressPercent}%` : '—'}</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={4}>
                       <Box textAlign="center" p={1} bgcolor="grey.50" borderRadius={1}>
                         <AttendanceIcon color="success" fontSize="small" />
                         <Typography variant="caption" display="block">الحضور</Typography>
-                        <Typography variant="body2" fontWeight="bold">{b.attendanceRate != null ? `${b.attendanceRate}%` : '—'}</Typography>
+                        <Typography variant="body2" fontWeight="bold">{b.attendanceRate !== null ? `${b.attendanceRate}%` : '—'}</Typography>
                       </Box>
                     </Grid>
                     <Grid item xs={4}>
@@ -196,7 +195,7 @@ export default function GuardianPortalDashboard() {
                   ) : payments.map((p, i) => (
                     <TableRow key={p._id || i}>
                       <TableCell>{p.description || p.type || '—'}</TableCell>
-                      <TableCell>{p.amount != null ? `${p.amount.toLocaleString()} ر.س` : '—'}</TableCell>
+                      <TableCell>{p.amount !== null ? `${p.amount.toLocaleString()} ر.س` : '—'}</TableCell>
                       <TableCell>{p.dueDate ? new Date(p.dueDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
                       <TableCell>
                         <Chip

@@ -29,19 +29,12 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  Timeline,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineConnector,
-  TimelineDot,
-  TimelineContent,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
   AssignmentReturn as ReturnIcon,
   ReportProblem as IssueIcon,
-  Inventory as InventoryIcon,
 } from '@mui/icons-material';
 import {
   getCustodies,
@@ -87,7 +80,7 @@ const categoryIcon = {
   'بطاقة دخول': '🪪',
 };
 
-const fmtCurrency = v => (v != null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
+const fmtCurrency = v => (v !== null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
 
 export default function CustodyManagement() {
   const [custodies, setCustodies] = useState([]);

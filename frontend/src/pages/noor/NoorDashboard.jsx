@@ -46,7 +46,6 @@ import {
   Refresh as RefreshIcon,
   CloudUpload as SubmitIcon,
   Person as StudentIcon,
-  TrendingUp as ProgressIcon,
 } from '@mui/icons-material';
 import noorService from '../../services/noor.service';
 
@@ -626,7 +625,7 @@ export default function NoorDashboard() {
                           />
                         </TableCell>
                         <TableCell>
-                          {r.attendance?.attendanceRate != null ? (
+                          {r.attendance?.attendanceRate !== null ? (
                             <Box display="flex" alignItems="center" gap={1}>
                               <LinearProgress
                                 variant="determinate"

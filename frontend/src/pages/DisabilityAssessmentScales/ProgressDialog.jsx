@@ -21,7 +21,6 @@ import {
   Paper,
   Chip,
   Grid,
-  Avatar,
   Divider,
 } from '@mui/material';
 import {
@@ -30,11 +29,9 @@ import {
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   TrendingFlat as TrendingFlatIcon,
-  Assessment as AssessmentIcon,
 } from '@mui/icons-material';
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
-import { SCALE_ICONS } from './constants';
 
 const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
   const [selectedBeneficiary, setSelectedBeneficiary] = useState('');
@@ -197,7 +194,7 @@ const ProgressDialog = ({ open, onClose, scales, beneficiaries }) => {
                               sx={{ bgcolor: interp.color, color: 'white', mb: 0.5 }}
                             />
                           )}
-                          {diff != null && diff !== 0 && (
+                          {diff !== null && diff !== 0 && (
                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 0.5 }}>
                               {diff > 0 ? (
                                 <TrendingUpIcon color="success" fontSize="small" />

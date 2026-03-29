@@ -37,23 +37,20 @@ import {
   TrackChanges as GoalIcon,
   FileDownload as ExportIcon,
   Refresh as RefreshIcon,
-  CalendarMonth as CalendarIcon,
   EventBusy as CancelAnalysisIcon,
   BarChart as BarChartIcon,
-  PieChart as PieChartIcon,
 } from '@mui/icons-material';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area,
+  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   ResponsiveContainer, Legend, RadarChart, Radar,
   PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from 'recharts';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import { therapistService } from '../../services/therapistService';
-import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
@@ -179,7 +176,7 @@ const KPICard = ({ title, value, subtitle, icon, gradient, delay = 0, trend, loa
               {subtitle && (
                 <Typography variant="caption" sx={{ opacity: 0.85 }}>
                   {subtitle}
-                  {trend != null && (
+                  {trend !== null && (
                     <>
                       {' '}
                       {trend >= 0 ? (

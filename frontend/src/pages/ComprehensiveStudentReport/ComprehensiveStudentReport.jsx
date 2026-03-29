@@ -1047,7 +1047,7 @@ const ComprehensiveStudentReport = () => {
               <Grid container spacing={3}>
                 <Grid item xs={12} md={4}>
                   <InfoRow label="أسلوب التعلم" value={aiInsights.learningStyle} />
-                  <InfoRow label="التقدم المتوقع" value={aiInsights.predictedProgress != null ? `${aiInsights.predictedProgress}%` : '—'} />
+                  <InfoRow label="التقدم المتوقع" value={aiInsights.predictedProgress !== null ? `${aiInsights.predictedProgress}%` : '—'} />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>

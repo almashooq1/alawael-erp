@@ -21,8 +21,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  IconButton,
-  Tooltip,
   Card,
   CardContent,
   Alert,
@@ -34,10 +32,8 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Visibility as ViewIcon,
   Home as HomeIcon,
   DirectionsBus as BusIcon,
-  Person as PersonIcon,
 } from '@mui/icons-material';
 import {
   getHousingUnits,
@@ -52,7 +48,7 @@ const UNIT_STATUSES = ['متاح', 'مشغول', 'صيانة', 'محجوز'];
 const ROUTE_TYPES = ['باص', 'ميكروباص', 'سيارة خاصة', 'خدمة نقل'];
 const unitStatusColor = { متاح: 'success', مشغول: 'primary', صيانة: 'warning', محجوز: 'info' };
 
-const fmtCurrency = v => (v != null ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
+const fmtCurrency = v => (v !== null ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
 
 export default function HousingTransportationManagement() {
   const [tab, setTab] = useState(0);

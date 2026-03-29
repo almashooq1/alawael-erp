@@ -9,13 +9,12 @@ import {
   Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
   TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
+  Tabs, Tab, MenuItem,
 } from '@mui/material';
 import {
-  FollowTheSigns as FollowIcon, EventNote as VisitIcon, TrendingUp as ImpactIcon,
-  Quiz as SurveyIcon, ReplayCircleFilled as ReEnrollIcon, Dashboard as DashIcon,
-  Refresh as RefreshIcon, Add as AddIcon, CheckCircle as CompleteIcon,
-  Warning as OverdueIcon, Visibility as ViewIcon, EventBusy as MissedIcon,
+  FollowTheSigns as FollowIcon, EventNote as VisitIcon, TrendingUp as ImpactIcon, ReplayCircleFilled as ReEnrollIcon,
+  Refresh as RefreshIcon, Add as AddIcon,
+  Warning as OverdueIcon,
 } from '@mui/icons-material';
 import postRehabApi from '../../services/postRehab.service';
 
@@ -245,7 +244,7 @@ export default function PostRehabFollowupDashboard() {
                   <TableCell>{m.assessmentDate ? new Date(m.assessmentDate).toLocaleDateString('ar-SA') : '—'}</TableCell>
                   <TableCell>{m.overallScore ?? '—'}</TableCell>
                   <TableCell>
-                    {m.improvement != null ? (
+                    {m.improvement !== null ? (
                       <Chip label={`${m.improvement > 0 ? '+' : ''}${m.improvement}%`} color={m.improvement > 0 ? 'success' : 'error'} size="small" />
                     ) : '—'}
                   </TableCell>

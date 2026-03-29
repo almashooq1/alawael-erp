@@ -375,7 +375,7 @@ export default function SustainabilityPage() {
                     <TableCell>{w.quantity?.toLocaleString() || '—'}</TableCell>
                     <TableCell>{w.disposalMethod?.replace(/_/g, ' ')}</TableCell>
                     <TableCell>
-                      {w.recycledPercentage != null ? (
+                      {w.recycledPercentage !== null ? (
                         <Chip
                           size="small"
                           color={w.recycledPercentage >= 50 ? 'success' : 'warning'}
@@ -524,7 +524,7 @@ export default function SustainabilityPage() {
                     <Typography variant="caption">
                       الحالي: {g.currentValue || 0} {g.unit || ''}
                     </Typography>
-                    {g.targetValue && g.currentValue != null && (
+                    {g.targetValue && g.currentValue !== null && (
                       <Box mt={1}>
                         <LinearProgress
                           variant="determinate"

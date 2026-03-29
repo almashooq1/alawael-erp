@@ -67,7 +67,7 @@ const statusColor = {
   ملغي: 'default',
   'قيد المعالجة': 'info',
 };
-const fmtCurrency = v => (v != null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
+const fmtCurrency = v => (v !== null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
 const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '-');
 
 const daysUntilExpiry = d => {

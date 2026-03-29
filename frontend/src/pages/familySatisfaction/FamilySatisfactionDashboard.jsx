@@ -6,12 +6,11 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
   TableBody, TableCell, TableContainer, TableHead, TableRow,
-  CircularProgress, Alert, IconButton, Tabs, Tab, LinearProgress,
-  Avatar, Divider,
+  CircularProgress, Alert, IconButton, Tabs, Tab, Divider,
 } from '@mui/material';
 import {
   Refresh, Add, SentimentVerySatisfied, SentimentSatisfied,
-  SentimentDissatisfied, ThumbUp, ThumbDown, Assessment,
+  SentimentDissatisfied, Assessment,
   QuestionAnswer, TrendingUp, Star,
 } from '@mui/icons-material';
 import familySatisfactionService from '../../services/familySatisfaction.service';
@@ -157,7 +156,7 @@ export default function FamilySatisfactionDashboard() {
       </Grid>
 
       {/* توزيع NPS */}
-      {(nps.promoters != null || nps.passives != null || nps.detractors != null) && (
+      {(nps.promoters !== null || nps.passives !== null || nps.detractors !== null) && (
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" fontWeight="bold" gutterBottom>توزيع صافي الترويج (NPS)</Typography>

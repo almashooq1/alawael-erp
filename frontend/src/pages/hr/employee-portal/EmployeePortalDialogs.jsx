@@ -79,7 +79,7 @@ export function LeaveDialog({
                 ))}
               </Select>
             </FormControl>
-            {selectedBal.remaining != null && (
+            {selectedBal.remaining !== null && (
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                 الرصيد المتبقي: {selectedBal.remaining} يوم من {selectedBal.total}
               </Typography>

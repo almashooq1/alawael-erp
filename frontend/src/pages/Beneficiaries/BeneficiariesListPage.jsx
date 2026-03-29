@@ -25,7 +25,7 @@
  * @date 2026-03-23
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import {
   Box, Container, Grid, Card, CardContent, Typography, Button, TextField,
   InputAdornment, IconButton, Chip, Avatar, MenuItem, Select, FormControl,
@@ -33,18 +33,17 @@ import {
   ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, TableSortLabel, Checkbox, LinearProgress, Collapse,
   Paper, Menu, ListItemIcon, ListItemText, Divider, Badge, Dialog,
-  DialogTitle, DialogContent, DialogActions, Slider,
+  DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
 import {
   Search, Download, PersonAdd, CheckCircle, Pending, TrendingUp as TrendingUpIcon,
-  GridView, ViewList, Refresh, Groups, MoreVert, KeyboardArrowDown, KeyboardArrowUp,
-  Star, StarBorder, Edit, Visibility, Delete, Archive, Unarchive, Phone,
+  GridView, ViewList, Refresh, Groups, MoreVert, KeyboardArrowDown, KeyboardArrowUp, Edit, Visibility, Archive, Phone,
   WhatsApp, Email as EmailIcon, FilterList, Print, Warning, Close, Clear,
   Description, Send, CalendarMonth, LocalHospital, FamilyRestroom,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, brandColors, surfaceColors, statusColors, neutralColors } from 'theme/palette';
+import { gradients, surfaceColors, statusColors, neutralColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
 import { styled } from '@mui/material/styles';
 import { visuallyHidden } from '@mui/utils';
@@ -153,8 +152,8 @@ const normalize = (b) => ({
   therapist: b.therapist || '',
   address: b.address?.city || b.address?.street || b.address || '',
   notes: b.generalNotes || b.notes || '',
-  isAtRisk: (b.attendanceRate != null && b.attendanceRate < 75) || (b.progress != null && b.progress < 30)
-    || (b.academicScore != null && b.academicScore < 50),
+  isAtRisk: (b.attendanceRate !== null && b.attendanceRate < 75) || (b.progress !== null && b.progress < 30)
+    || (b.academicScore !== null && b.academicScore < 50),
 });
 
 // ═════════════════════════════════════════════════════════════════

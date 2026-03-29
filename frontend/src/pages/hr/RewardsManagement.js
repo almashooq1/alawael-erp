@@ -29,7 +29,6 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  Avatar,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -37,7 +36,6 @@ import {
   CheckCircle as ApproveIcon,
   Payment as PayIcon,
   EmojiEvents as TrophyIcon,
-  Star as StarIcon,
 } from '@mui/icons-material';
 import {
   getRewards,
@@ -74,7 +72,7 @@ const statusColor = {
   ملغية: 'default',
 };
 const categoryIcon = { مالية: '💰', نقاط: '⭐', تقديرية: '🏆', عينية: '🎁' };
-const fmtCurrency = v => (v != null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
+const fmtCurrency = v => (v !== null && v > 0 ? `${Number(v).toLocaleString('ar-SA')} ر.س` : '-');
 
 export default function RewardsManagement() {
   const [rewards, setRewards] = useState([]);

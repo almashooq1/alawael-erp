@@ -21,11 +21,9 @@ import {
   TableRow,
   Chip,
   Button,
-  IconButton,
   CircularProgress,
   Alert,
   LinearProgress,
-  Tooltip,
   Divider,
 } from '@mui/material';
 import {
@@ -40,7 +38,6 @@ import {
   Error as ErrorIcon,
   Schedule as ScheduleIcon,
   Refresh as RefreshIcon,
-  Download as DownloadIcon,
   Assignment as AssignmentIcon,
   LocalHospital as LocalHospitalIcon,
 } from '@mui/icons-material';
@@ -200,7 +197,7 @@ export default function QualityManagement() {
                   <CardContent sx={{ textAlign: 'center' }}>
                     <Typography variant="subtitle2" color="text.secondary">{cs.nameAr}</Typography>
                     <Typography variant="h3" fontWeight="bold" color={cs.averageCompliance >= 80 ? 'success.main' : cs.averageCompliance >= 60 ? 'warning.main' : 'error.main'}>
-                      {cs.averageCompliance != null ? `${cs.averageCompliance}%` : '—'}
+                      {cs.averageCompliance !== null ? `${cs.averageCompliance}%` : '—'}
                     </Typography>
                     <Typography variant="caption">{cs.auditCount} تدقيق</Typography>
                   </CardContent>
@@ -251,7 +248,7 @@ export default function QualityManagement() {
                       <TableCell><Chip label={a.status} size="small" color={statusColor(a.status)} /></TableCell>
                       <TableCell>{a.scheduledDate}</TableCell>
                       <TableCell>{a.leadAuditor}</TableCell>
-                      <TableCell>{a.complianceScore != null ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><LinearProgress variant="determinate" value={a.complianceScore} sx={{ width: 60, height: 8, borderRadius: 4 }} color={a.complianceScore >= 80 ? 'success' : a.complianceScore >= 60 ? 'warning' : 'error'} /><Typography variant="caption">{a.complianceScore}%</Typography></Box> : '—'}</TableCell>
+                      <TableCell>{a.complianceScore !== null ? <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}><LinearProgress variant="determinate" value={a.complianceScore} sx={{ width: 60, height: 8, borderRadius: 4 }} color={a.complianceScore >= 80 ? 'success' : a.complianceScore >= 60 ? 'warning' : 'error'} /><Typography variant="caption">{a.complianceScore}%</Typography></Box> : '—'}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

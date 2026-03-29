@@ -248,7 +248,7 @@ export default function BusinessContinuityPage() {
                     <TableCell><Chip size="small" label={d.drillType?.replace(/_/g, ' ')} /></TableCell>
                     <TableCell>{new Date(d.scheduledDate).toLocaleDateString('ar-SA')}</TableCell>
                     <TableCell><Chip size="small" color={statusColors[d.status] || 'default'} label={d.status?.replace(/_/g, ' ')} /></TableCell>
-                    <TableCell>{d.score != null ? `${d.score}%` : '—'}</TableCell>
+                    <TableCell>{d.score !== null ? `${d.score}%` : '—'}</TableCell>
                     <TableCell>{d.participants?.length || 0}</TableCell>
                   </TableRow>
                 ))}

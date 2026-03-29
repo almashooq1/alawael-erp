@@ -37,12 +37,9 @@ import {
   Search as SearchIcon,
   Assignment as PlanIcon,
   ReportProblem as NCRIcon,
-  BugReport as CAPAIcon,
   Visibility as ViewIcon,
-  CalendarMonth as CalIcon,
 } from '@mui/icons-material';
 import { auditService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
@@ -299,7 +296,7 @@ const InternalAuditPage = () => {
                               : plan.frequency}
                       </TableCell>
                       <TableCell align="center">
-                        {plan.score != null && (
+                        {plan.score !== null && (
                           <Chip
                             label={`${plan.score}%`}
                             size="small"

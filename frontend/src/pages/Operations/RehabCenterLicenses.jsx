@@ -9,50 +9,43 @@ import {
   MenuItem, Select, FormControl, InputLabel, InputAdornment, Badge,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   TablePagination, Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, Divider, AvatarGroup, Avatar, Stack, CircularProgress,
+  Snackbar, Divider, Avatar, Stack, CircularProgress,
 } from '@mui/material';
 import {
   Add as AddIcon, Refresh as RefreshIcon, Search as SearchIcon,
   Notifications as AlertIcon, Warning as WarningIcon, CheckCircle,
-  Cancel as CancelIcon, Edit as EditIcon, Delete as DeleteIcon,
+  Cancel as CancelIcon, Delete as DeleteIcon,
   Visibility as ViewIcon, AutorenewOutlined as RenewIcon,
-  Assessment as StatsIcon, FileDownload as ExportIcon,
-  FilterList as FilterIcon, CalendarMonth as CalendarIcon,
-  Business as BusinessIcon, LocalPolice as GovIcon,
+  Assessment as StatsIcon, FileDownload as ExportIcon, CalendarMonth as CalendarIcon, LocalPolice as GovIcon,
   LocationCity as MunicipalIcon, Receipt as CommercialIcon,
   People as EmploymentIcon, School as ProfessionalIcon,
   Shield as InsuranceIcon, Star as QualityIcon,
-  Computer as TechIcon, ExpandMore as ExpandIcon,
+  Computer as TechIcon,
   NotificationsActive as AlertActiveIcon, Description as DocIcon,
-  TrendingUp as TrendIcon, AccessTime as TimeIcon,
-  ErrorOutline as ErrorIcon, Info as InfoIcon,
+  ErrorOutline as ErrorIcon,
   Gavel as PenaltyIcon, Security as RiskIcon,
   Archive as ArchiveIcon, Checklist as ChecklistIcon,
   AccountTree as WorkflowIcon, PersonOutline as DelegateIcon,
-  LocationOn as BranchIcon, BarChart as ChartIcon,
-  AssignmentTurnedIn as ComplianceIcon, FolderSpecial as AnnualIcon,
-  ContentCopy as DuplicateIcon, DateRange as ForecastIcon,
-  NotificationsNone as NotifPrefIcon, Unarchive as UnarchiveIcon,
-  Link as LinkIcon, GppBad as ViolationIcon,
-  TaskAlt as TaskIcon, Comment as CommentIcon,
-  AccountBalance as BudgetIcon, HealthAndSafety as HealthIcon,
+  LocationOn as BranchIcon,
+  AssignmentTurnedIn as ComplianceIcon, Unarchive as UnarchiveIcon,
+  TaskAlt as TaskIcon, Comment as CommentIcon, HealthAndSafety as HealthIcon,
   Speed as KpiIcon, EventNote as EventIcon,
-  ContactPhone as ContactIcon, Upload as ImportIcon,
+  ContactPhone as ContactIcon,
   FileCopy as CloneIcon, Favorite as HeartIcon,
   PlaylistAddCheck as ChecklistDoneIcon, MonetizationOn as ExpenseIcon,
   // Round 4 icons
-  CompareArrows as CompareIcon, Bookmark as BookmarkIcon,
+  CompareArrows as CompareIcon,
   ConfirmationNumber as TicketIcon, AutoFixHigh as AutomationIcon,
   Summarize as SummaryIcon, Analytics as AnalyticsIcon,
   History as HistoryIcon, Inventory as TemplateIcon,
-  Visibility as WatchIcon, SupportAgent as SupportIcon,
-  Timer as SlaIcon, TrendingDown as PredictIcon,
-  FactCheck as VersionIcon, Verified as VerifiedIcon,
+  Visibility as WatchIcon,
+  Timer as SlaIcon,
+  FactCheck as VersionIcon,
   // Round 5 icons
   NotificationsActive as ScheduleNotifIcon,
   ThumbUp as SurveyIcon, Draw as SignatureIcon,
   Groups as MeetingIcon, IntegrationInstructions as IntegrationIcon,
-  School as TrainingIcon, Dashboard as WidgetIcon,
+  School as TrainingIcon,
   BuildCircle as RemediationIcon, Store as VendorIcon,
   Feedback as ComplaintIcon,
 } from '@mui/icons-material';
@@ -2837,7 +2830,7 @@ const RehabCenterLicenses = () => {
                       <TableCell>
                         <Typography variant="body2" sx={{ color: getDaysColor(doc.daysUntilExpiry) }}>
                           {doc.expiryDate ? new Date(doc.expiryDate).toLocaleDateString('ar-SA') : '-'}
-                          {doc.daysUntilExpiry != null && ` (${doc.daysUntilExpiry} يوم)`}
+                          {doc.daysUntilExpiry !== null && ` (${doc.daysUntilExpiry} يوم)`}
                         </Typography>
                       </TableCell>
                       <TableCell>{doc.licenseNumber || '-'}</TableCell>

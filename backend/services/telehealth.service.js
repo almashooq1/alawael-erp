@@ -27,10 +27,21 @@ class TelehealthService extends EventEmitter {
   async initializeVideoProvider() {
     try {
       if (this.videoProvider === 'agora') {
-        const { RtcTokenBuilder } = require('agora-token');
-        this.RtcTokenBuilder = RtcTokenBuilder;
+        try {
+          const { RtcTokenBuilder } = require('agora-token');
+          this.RtcTokenBuilder = RtcTokenBuilder;
+          logger.info('✅ Agora Telehealth provider initialized');
+        } catch (_agoraErr) {
+          // agora-token is an optional peer dependency — fall back to mock tokens
+          logger.warn(
+            'ℹ️  agora-token package not installed — Telehealth running in mock/demo mode. ' +
+              'Install with: npm install agora-token  (or set VIDEO_PROVIDER=jitsi)'
+          );
+          this.RtcTokenBuilder = null;
+          this.videoProvider = 'mock';
+        }
       } else if (this.videoProvider === 'jitsi') {
-        // Jitsi Meet uses room-based approach
+        // Jitsi Meet uses room-based approach — no extra package needed
         logger.info('✅ Jitsi Telehealth provider initialized');
       }
       logger.info(`✅ Telehealth service initialized with ${this.videoProvider}`);
@@ -380,7 +391,13 @@ class TelehealthService extends EventEmitter {
 
   generateAccessToken(userId, roomId, isTherapist) {
     try {
-      if (this.videoProvider === 'agora') {
+      if (this.videoProvider === 'mock') {
+        // Mock token for demo / dev environments where agora-token is not installed
+        return `mock-token-${userId}-${roomId}-${Date.now()}`;
+      } else if (this.videoProvider === 'agora') {
+        if (!this.RtcTokenBuilder) {
+          return `mock-token-${userId}-${roomId}-${Date.now()}`;
+        }
         // Generate Agora token
         const uid = parseInt(userId.substring(0, 8), 16) % 2147483647;
         const expirationTimeInSeconds = 3600;
@@ -427,7 +444,10 @@ class TelehealthService extends EventEmitter {
 
   generateJoinUrl(roomId) {
     if (this.videoProvider === 'jitsi') {
-      return `https://${process.env.JITSI_DOMAIN}/${roomId}`;
+      return `https://${process.env.JITSI_DOMAIN || 'meet.jit.si'}/${roomId}`;
+    }
+    if (this.videoProvider === 'mock') {
+      return `http://localhost:3001/api/telehealth/mock-room/${roomId}`;
     }
     return `agora://room/${roomId}`;
   }

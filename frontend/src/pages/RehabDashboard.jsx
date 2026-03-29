@@ -7,19 +7,17 @@
  * @module RehabDashboard
  */
 
-import React, { useState, useEffect, useCallback, useRef, Component } from 'react';
+import React, { useState, useEffect, useCallback, Component } from 'react';
 import {
   Box, Grid, Card, CardContent, CardHeader, Typography, Button, Chip,
   IconButton, Avatar, LinearProgress, CircularProgress, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Dialog, DialogTitle, DialogContent, DialogActions,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, Select, MenuItem, FormControl, InputLabel, Alert,
-  Tabs, Tab, Badge, Divider, List, ListItem, ListItemText,
+  Tabs, Tab, Divider, List, ListItem, ListItemText,
   ListItemAvatar, Fab, Snackbar, useTheme, alpha,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
-  PersonAdd as PersonAddIcon,
   Psychology as PsychologyIcon,
   TrendingUp as TrendingUpIcon,
   VideoCall as VideoCallIcon,
@@ -119,7 +117,7 @@ const StatCard = ({ title, value, subtitle, icon, color = 'primary', trend }) =>
             {icon}
           </Avatar>
         </Box>
-        {trend != null && (
+        {trend !== null && (
           <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <TrendingUpIcon sx={{ fontSize: 16, opacity: 0.8 }} />
             <Typography variant="caption" sx={{ opacity: 0.8 }}>
@@ -799,7 +797,7 @@ function RehabDashboardInner() {
                   {plan.latestRiskLevel && (
                     <Alert severity={riskColor[plan.latestRiskLevel] || 'info'} sx={{ mb: 1 }}>
                       مستوى الخطر: <strong>{plan.latestRiskLevel}</strong>
-                      {plan.latestPredictedOutcome != null && ` · التحسن المتوقع: ${plan.latestPredictedOutcome}%`}
+                      {plan.latestPredictedOutcome !== null && ` · التحسن المتوقع: ${plan.latestPredictedOutcome}%`}
                     </Alert>
                   )}
                   {plan.aiAssessments?.slice(-1).map((a, i) => (

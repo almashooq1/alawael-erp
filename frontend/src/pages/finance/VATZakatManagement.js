@@ -15,9 +15,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,
-  TextField,
-  IconButton,
+  LinearProgress,  IconButton,
   Tooltip,
   Dialog,
   DialogTitle,
@@ -29,11 +27,8 @@ import {
 } from '@mui/material';
 import {
   Receipt as VATIcon,
-  Search as SearchIcon,
-  Add as AddIcon,
   Visibility as ViewIcon,
   Send as FileIcon,
-  Print as PrintIcon,
   AccountBalance as ZakatIcon,
 } from '@mui/icons-material';
 import accountingService from 'services/accountingService';

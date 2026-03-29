@@ -44,11 +44,8 @@ import {
   Close as CloseIcon,
   Visibility as ViewIcon,
   CheckCircle as CompleteIcon,
-  Warning as UrgentIcon,
   Schedule as ScheduleIcon,
-  LocationOn as LocationIcon,
-  Engineering as TechIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   BarChart,
   Bar,

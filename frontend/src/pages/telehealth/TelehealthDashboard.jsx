@@ -13,7 +13,6 @@ import {
   VideoCall as VideoCallIcon,
   Schedule as ScheduleIcon,
   CheckCircle as CheckCircleIcon,
-  Cancel as CancelIcon,
   PlayArrow as PlayIcon,
   People as PeopleIcon,
   Star as StarIcon,

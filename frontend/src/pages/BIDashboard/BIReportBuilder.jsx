@@ -6,9 +6,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Grid,
-  Paper,
+  Box,  Paper,
   Typography,
   CircularProgress,
   Button,
@@ -37,9 +35,7 @@ import {
   Add,
   Refresh,
   Edit,
-  Delete,
-  Visibility,
-  Description,
+  Delete,  Description,
   FilterList,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';

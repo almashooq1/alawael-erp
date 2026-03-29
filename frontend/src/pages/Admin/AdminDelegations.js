@@ -50,7 +50,6 @@ import {
   PlayArrow,
   ArrowBack,
   Person,
-  CalendarMonth,
   WarningAmber,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';

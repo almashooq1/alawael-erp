@@ -19,18 +19,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
+  TextField,  IconButton,
   Tooltip,
   Grid,
   Tabs,
   Tab,
   Stepper,
   Step,
-  StepLabel,
-  Avatar,
-  Badge,
+  StepLabel,  Badge,
 } from '@mui/material';
 import {
   Approval,
@@ -40,13 +36,11 @@ import {
   Send,
   HourglassEmpty,
   Forward,
-  Speed,
-  Person,
-  AssignmentTurnedIn,
+  Speed,  AssignmentTurnedIn,
   History,
   Warning,
 } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { surfaceColors, neutralColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

@@ -3,8 +3,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Grid, Paper, Typography, Card, CardContent, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress,
 } from '@mui/material';
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,

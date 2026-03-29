@@ -51,7 +51,6 @@ import {
   Archive as ArchiveIcon,
   Description as DocIcon,
   Search as SearchIcon,
-  Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Refresh as RefreshIcon,
@@ -61,7 +60,6 @@ import {
   CloudUpload as UploadIcon,
   CloudDownload as DownloadIcon,
   Folder as FolderIcon,
-  FolderOpen as FolderOpenIcon,
   History as HistoryIcon,
   Lock as LockIcon,
   LockOpen as LockOpenIcon,
@@ -71,18 +69,13 @@ import {
   Storage as StorageIcon,
   Category as CategoryIcon,
   FilterList as FilterIcon,
-  Schedule as ScheduleIcon,
   Person as PersonIcon,
-  Business as DeptIcon,
   Label as TagIcon,
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
-  Cancel as CancelIcon,
   RestoreFromTrash as RestoreIcon,
-  ContentCopy as CopyIcon,
   Share as ShareIcon,
   Print as PrintIcon,
-  BarChart as ChartIcon,
   InsertDriveFile as FileIcon,
   PictureAsPdf as PdfIcon,
   Image as ImageIcon,
@@ -94,7 +87,6 @@ import {
   Security as SecurityIcon,
   GppGood as ShieldIcon,
   Gavel as LegalIcon,
-  DataUsage as UsageIcon,
 } from '@mui/icons-material';
 import {
   PieChart,
@@ -1198,7 +1190,7 @@ const ElectronicArchiving = () => {
               />
             </Box>
 
-            {activityLog.map((log, i) => {
+            {activityLog.map(log => {
               const actionColors = {
                 'رفع مستند': '#43A047',
                 'تحديث بيانات': '#1E88E5',

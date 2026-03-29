@@ -32,7 +32,6 @@ import {
   Close as CloseIcon,
   Edit as EditIcon,
   Phone as PhoneIcon,
-  Person as PatientIcon,
   CalendarToday as DateIcon,
   ArrowUpward as HighIcon,
   ArrowDownward as LowIcon,
@@ -44,7 +43,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const SERVICE_TYPES = [
   { value: 'speech-therapy', label: 'علاج نطق', icon: '🗣️' },

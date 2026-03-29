@@ -17,18 +17,14 @@ import {
   Chip,
   IconButton,
   Switch,
-  FormControlLabel,
-  Divider,
-  Alert,
+  FormControlLabel,  Alert,
   Avatar,
   Autocomplete,
   Tooltip,
 } from '@mui/material';
 import {
   ArrowBack,
-  ArrowForward,
-  Save,
-  Send,
+  ArrowForward,  Send,
   Add as AddIcon,
   Delete,
   Draw as SignIcon,
@@ -36,9 +32,7 @@ import {
   Description,
   Settings,
   Preview,
-  DragIndicator,
-  PriorityHigh,
-} from '@mui/icons-material';
+  DragIndicator,} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

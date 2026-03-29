@@ -18,8 +18,8 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
-import { BarChart, TrendingUp, TrendingDown, RemoveCircle } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+import {  TrendingUp, TrendingDown } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

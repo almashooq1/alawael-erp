@@ -32,9 +32,7 @@ import {
   InputAdornment,
   Tabs,
   Tab,
-  Rating,
-  useTheme,
-} from '@mui/material';
+  Rating,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -46,8 +44,7 @@ import {
   CheckCircle as ResolveIcon,
   ReportProblem as ComplaintIcon,
   Lightbulb as SuggestionIcon,
-  ThumbUp as AcceptIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   BarChart,
   Bar,

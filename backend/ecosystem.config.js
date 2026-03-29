@@ -109,7 +109,7 @@ module.exports = {
       repo: 'git@github.com:almashooq1/alawael-erp.git',
       path: process.env.DEPLOY_PATH || '/home/alawael/app',
       'post-deploy':
-        'cd backend && npm ci --only=production && pm2 reload ecosystem.config.js --env production',
+        'cd backend && npm ci --only=production && npm run db:setup:prod && pm2 reload ecosystem.config.js --env production',
       'pre-deploy-local': 'echo "Deploying to production..."',
       env: {
         NODE_ENV: 'production',

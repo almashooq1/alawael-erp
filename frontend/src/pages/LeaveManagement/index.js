@@ -35,7 +35,6 @@ import {
   Download as DownloadIcon,
   Refresh as RefreshIcon,
   Print as PrintIcon,
-  Warning as WarningIcon,
   FilterList as FilterListIcon,
   BeachAccess as VacationIcon,
   AccountBalance as BalanceIcon,

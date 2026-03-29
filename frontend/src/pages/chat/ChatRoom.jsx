@@ -1,16 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent, Paper, Button, IconButton,
-  TextField, Chip, Alert, CircularProgress, Tooltip, Divider, Avatar,
+  Box, Typography, Paper, Button, IconButton,
+  TextField, Chip, Alert, CircularProgress, Tooltip, Avatar,
   Stack, Snackbar, List, ListItem, ListItemAvatar, ListItemText,
-  Dialog, DialogTitle, DialogContent, DialogActions, Badge,
-  InputAdornment, Menu, MenuItem,
+  Dialog, DialogTitle, DialogContent, DialogActions, Badge, Menu, MenuItem,
 } from '@mui/material';
 import {
-  Chat, Group, Person, Send, ArrowBack, AttachFile, PushPin,
-  EmojiEmotions, Delete, Edit, MoreVert, InsertDriveFile,
-  Image, Circle, Search, Reply, GroupAdd, PersonRemove,
-  AdminPanelSettings, Campaign, Settings,
+   Group, Person, Send, ArrowBack, AttachFile, PushPin, Delete, Edit, MoreVert, InsertDriveFile, Reply, GroupAdd, PersonRemove,
+  AdminPanelSettings, Campaign,
 } from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';

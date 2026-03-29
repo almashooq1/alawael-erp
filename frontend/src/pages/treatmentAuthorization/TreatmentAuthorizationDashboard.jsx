@@ -7,12 +7,11 @@ import {
   Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
   TableBody, TableCell, TableContainer, TableHead, TableRow,
   CircularProgress, Alert, IconButton, Tooltip, Stepper, Step,
-  StepLabel, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, MenuItem, Divider, LinearProgress,
+  StepLabel, Dialog, DialogTitle, DialogContent, DialogActions, Divider, LinearProgress,
 } from '@mui/material';
 import {
-  LocalHospital, Refresh, Add, CheckCircle, Cancel,
-  HourglassEmpty, Send, Gavel, AttachMoney, AccessTime,
+  LocalHospital, Refresh, CheckCircle, Cancel,
+  HourglassEmpty, Send, Gavel, AttachMoney,
   WarningAmber,
 } from '@mui/icons-material';
 import treatmentAuthorizationService from '../../services/treatmentAuthorization.service';

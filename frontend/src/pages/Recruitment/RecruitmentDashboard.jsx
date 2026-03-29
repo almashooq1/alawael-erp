@@ -14,8 +14,7 @@ import {
   Work as JobIcon,
   PersonAdd as ApplicantIcon,
   EventAvailable as InterviewIcon,
-  LocalOffer as OfferIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { getDashboard } from '../../services/recruitment.service';
 
 const stageLabels = {

@@ -22,9 +22,7 @@ import {
   Tooltip,
   TextField,
   InputAdornment,
-  LinearProgress,
-  CircularProgress,
-  Menu,
+  LinearProgress,  Menu,
   MenuItem,
   Avatar,
   Divider,
@@ -50,7 +48,7 @@ import {
   FilterList,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors } from '../../theme/palette';
+import { gradients } from '../../theme/palette';
 
 /* ═══ Status & Type Mappings ═══════════════════════════════════════════════ */
 const statusMap = {

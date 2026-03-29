@@ -30,22 +30,16 @@ import {
   Select,
   MenuItem,
   Rating,
-  Tooltip,
-  Divider,
-} from '@mui/material';
+  Tooltip,} from '@mui/material';
 import {
   ShoppingCart as PurIcon,
   Add as AddIcon,
   Search as SearchIcon,
   Store as VendorIcon,
   Description as POIcon,
-  Assignment as PRIcon,
-  Edit as EditIcon,
   Visibility as ViewIcon,
   Check as ApproveIcon,
-  LocalShipping as ShipIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

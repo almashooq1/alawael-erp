@@ -16,8 +16,8 @@ import {
   Avatar, Chip, IconButton, Button, LinearProgress, Tabs, Tab,
   TextField, InputAdornment, Menu, MenuItem, Tooltip, Divider,
   Pagination, Dialog, DialogTitle, DialogContent, DialogActions,
-  Select, FormControl, InputLabel, CircularProgress, Badge,
-  ToggleButtonGroup, ToggleButton, Skeleton,
+  Select, FormControl, InputLabel,
+  ToggleButtonGroup, ToggleButton,
 } from '@mui/material';
 import {
   PhotoLibrary as MediaIcon,
@@ -29,7 +29,6 @@ import {
   Archive as ArchiveIcon,
   InsertDriveFile as FileIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
   ViewModule as GridViewIcon,
   ViewList as ListViewIcon,
   Star as StarIcon,
@@ -43,16 +42,13 @@ import {
   Close as CloseIcon,
   Storage as StorageIcon,
   TrendingUp as TrendUpIcon,
-  Visibility as ViewIcon,
-  DeleteSweep as TrashIcon,
   Refresh as RefreshIcon,
-  PushPin as PinIcon,
   Check as CheckIcon,
   Fullscreen as PreviewIcon,
   CloudDone as CloudIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, brandColors, statusColors, surfaceColors, neutralColors, chartColors } from '../../theme/palette';
+import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import mediaService from '../../services/mediaService';
 import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';

@@ -34,10 +34,7 @@ import {
   TrendingUp,
   TrendingDown,
   SwapHoriz,
-  ShowChart,
-  Speed,
-  Assessment,
-} from '@mui/icons-material';
+  ShowChart,} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

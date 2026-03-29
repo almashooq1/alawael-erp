@@ -27,9 +27,7 @@ import {
   Tabs,
   Tab,
   Alert,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
+  Switch,} from '@mui/material';
 import {
   CreditScore,
   Refresh,

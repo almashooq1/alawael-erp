@@ -11,7 +11,7 @@
  *  6. Target vs Actual comparison
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   useBranchAnalytics,
   useBranchKPIs,
@@ -194,7 +194,7 @@ function ScoreGauge({ score = 0, grade = 'N/A', size = 120 }) {
 }
 
 // ─── Recommendation Card ──────────────────────────────────────────────────────
-function RecommendationCard({ rec, index }) {
+function RecommendationCard({ rec }) {
   const priorityStyle = {
     critical: { bg: '#FEF2F2', border: '#FCA5A5', badge: '#EF4444', text: 'عاجل جداً' },
     high:     { bg: '#FFF7ED', border: '#FED7AA', badge: '#F97316', text: 'عاجل' },
@@ -389,7 +389,7 @@ const METRIC_OPTIONS = [
 // MAIN PAGE COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export default function BranchAnalytics({ branchCode, userRole }) {
+export default function BranchAnalytics({ branchCode }) {
   const [selectedMetric, setSelectedMetric] = useState('sessions_count');
   const [analyticsDays, setAnalyticsDays] = useState(30);
   const [forecastDays] = useState(7);

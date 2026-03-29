@@ -27,11 +27,8 @@ import {
 import {
   MenuBook as LedgerIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
   Print as PrintIcon,
-  Download as DownloadIcon,
-  AccountBalance as BalanceIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

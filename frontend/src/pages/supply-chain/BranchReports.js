@@ -10,16 +10,9 @@ import {
   CardContent,
   Grid,
   Tabs,
-  Tab,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,
+  Tab,  LinearProgress,
   Avatar,
-  Divider,
-  Stack,
-  Chip,
+  Divider,  Chip,
   Table,
   TableBody,
   TableCell,
@@ -27,27 +20,21 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
-  Alert,
-} from '@mui/material';
+  Button,} from '@mui/material';
 import {
   Assessment as ReportIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
   Store as BranchIcon,
   Inventory as InventoryIcon,
   ShoppingCart as PurchaseIcon,
   SwapHoriz as TransferIcon,
   Warehouse as WarehouseIcon,
-  Speed as KpiIcon,
   Refresh as RefreshIcon,
   EmojiEvents as TopIcon,
   Warning as WarningIcon,
-  LocalShipping as ShippingIcon,
   CompareArrows as CompareIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, brandColors, surfaceColors, statusColors } from 'theme/palette';
+import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import {
   branchService,
   warehouseService,

@@ -15,11 +15,9 @@ import {
   Chip,
   Button,
   CircularProgress,
-  LinearProgress,
-  Alert,
-} from '@mui/material';
-import { Business, PlayArrow, TrendingDown } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+  LinearProgress,} from '@mui/material';
+import {  PlayArrow } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

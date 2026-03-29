@@ -8,14 +8,13 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, TablePagination,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
   CircularProgress, Alert, Tabs, Tab, Divider, Card, CardContent,
-  List, ListItem, ListItemText, ListItemSecondaryAction, FormControlLabel, Switch,
+  List, ListItem, ListItemText, FormControlLabel, Switch,
 } from '@mui/material';
 import {
   Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon,
   Groups as MeetingIcon, ArrowBack as BackIcon, PersonAdd as PersonAddIcon,
-  PlayArrow as StartIcon, CheckCircle as CompleteIcon, EventNote as AgendaIcon,
-  Description as MinutesIcon, Gavel as DecisionIcon, Assignment as ActionIcon,
-} from '@mui/icons-material';
+  EventNote as AgendaIcon,
+  Description as MinutesIcon, Gavel as DecisionIcon, } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { meetingsService, minutesService } from '../../services/mdtCoordinationService';
 

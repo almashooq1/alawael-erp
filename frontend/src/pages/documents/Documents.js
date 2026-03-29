@@ -77,17 +77,13 @@ import {
   CreateNewFolder as NewFolderIcon,
   FilePresent as FilePresentIcon,
   Category as CategoryIcon,
-  DragIndicator as DragIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   PieChart,
   Pie,
   Cell,
   BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
+  Bar,  XAxis,
   YAxis,
   CartesianGrid,
   Tooltip as RTooltip,
@@ -183,7 +179,7 @@ const formatFileSize = bytes => {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k)).toFixed(1)) + ' ' + sizes[i];
 };
 
 /* ──── Sub-Components ──── */
@@ -1457,7 +1453,7 @@ const Documents = () => {
                       </Box>
                     </Box>
                     <Box component="tbody">
-                      {categoryStats.map((cat, i) => {
+                      {categoryStats.map((cat) => {
                         const c = CATEGORY_COLORS[cat.name] || '#607D8B';
                         const pct = totalDocs > 0 ? ((cat.count / totalDocs) * 100).toFixed(1) : 0;
                         return (

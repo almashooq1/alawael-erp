@@ -26,11 +26,7 @@ import {
   ReportProblem,
   Build,
   DirectionsCar,
-  Refresh,
-  CheckCircle,
-  Pending,
-  Cancel,
-} from '@mui/icons-material';
+  Refresh,} from '@mui/icons-material';
 import {
   BarChart,
   Bar,

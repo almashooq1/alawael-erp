@@ -15,12 +15,8 @@ import {
   Chip,
   Card,
   CardContent,
-  Skeleton,
-  Divider,
-  alpha,
-  Avatar,
-  Badge,
-  TextField,
+  Skeleton,  alpha,
+  Avatar,  TextField,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -43,16 +39,9 @@ import {
   Refresh,
   Add,
   PersonOff,
-  SwapHoriz,
-  Delete,
-  Check,
+  SwapHoriz,  Check,
   Cancel,
-  AccessTime,
-  Person,
-  Category,
-  EventNote,
-  Autorenew,
-} from '@mui/icons-material';
+  AccessTime,  EventNote,} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

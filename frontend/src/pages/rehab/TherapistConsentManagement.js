@@ -43,7 +43,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const CONSENT_TYPES = [
   { value: 'treatment', label: 'علاج', icon: '💊', color: '#3b82f6' },

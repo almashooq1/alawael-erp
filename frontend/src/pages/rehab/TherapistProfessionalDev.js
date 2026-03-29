@@ -7,9 +7,7 @@ import {
   Typography,
   Grid,
   Button,
-  Chip,
-  IconButton,
-  Dialog,
+  Chip,  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -18,11 +16,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Paper,
-  Tooltip,
-  LinearProgress,
-  Divider,
-  Avatar,
+  Paper,  LinearProgress,  Avatar,
   List,
   ListItem,
   ListItemAvatar,
@@ -37,7 +31,6 @@ import {
   Science as ScienceIcon,
   Build as BuildIcon,
   TrendingUp as TrendingUpIcon,
-  CalendarToday as CalendarIcon,
   Timer as TimerIcon,
   Star as StarIcon,
   CheckCircle as CheckIcon,
@@ -46,7 +39,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {  statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const categoryIcons = {
   courses: <SchoolIcon />,

@@ -8,7 +8,7 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, TablePagination,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
   CircularProgress, Alert, Tabs, Tab, Divider, Card, CardContent,
-  LinearProgress, Slider, List, ListItem, ListItemText,
+  LinearProgress, Slider,
 } from '@mui/material';
 import {
   Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon,

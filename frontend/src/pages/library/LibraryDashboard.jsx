@@ -4,16 +4,14 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Button, IconButton, TextField, Dialog, DialogTitle, DialogContent,
   DialogActions, FormControl, InputLabel, Select, MenuItem, Chip,
-  Alert, CircularProgress, Tooltip, InputAdornment, Badge,
-  LinearProgress, Rating, Divider, Avatar, Stack, Snackbar,
+  Alert, CircularProgress, Tooltip, InputAdornment, Badge, Rating, Divider, Avatar, Stack, Snackbar,
 } from '@mui/material';
 import {
   MenuBook, Healing, School, VideoLibrary, Accessibility,
   SportsEsports, Article, Description, Add, Edit, Delete,
-  Search, QrCode, Assignment, Person, ArrowBack, Refresh,
+  Search, QrCode, Assignment, Person, Refresh,
   Category, LocalLibrary, TrendingUp, Warning,
-  CheckCircle, Schedule, Star, FilterList,
-  CloudUpload, Download, Build, ShoppingCart,
+  CheckCircle, Schedule, Star,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import libraryService from '../../services/libraryService';

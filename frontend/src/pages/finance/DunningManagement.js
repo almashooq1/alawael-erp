@@ -30,9 +30,7 @@ import {
 } from '@mui/material';
 import {
   NotificationsActive,
-  Refresh,
-  Add,
-  Send,
+  Refresh,  Send,
   Warning,
   Schedule,
   PhoneCallback,
@@ -41,7 +39,7 @@ import {
   TrendingUp,
   Gavel,
 } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
+import { surfaceColors, neutralColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

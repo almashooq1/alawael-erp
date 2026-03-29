@@ -33,10 +33,7 @@ import {
   MenuItem,
   LinearProgress,
   Avatar,
-  Divider,
-  Stack,
-  Alert,
-  Tooltip,
+  Divider,  Tooltip,
 } from '@mui/material';
 import {
   Search as SearchIcon,
@@ -54,11 +51,9 @@ import {
   Edit as EditIcon,
   PriorityHigh as UrgentIcon,
   Schedule as PendingIcon,
-  ThumbUp as ThumbUpIcon,
-  LocalShipping as OrderedIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients, statusColors, surfaceColors } from 'theme/palette';
+import { gradients, surfaceColors } from 'theme/palette';
 import {
   purchaseRequestService,
   purchaseReceiptService,

@@ -9,15 +9,12 @@ import {
   Paper,
   Select,
   MenuItem,
-  FormControl,
-  InputLabel,
-  Chip,
+  FormControl,  Chip,
   Divider,
   LinearProgress,
 } from '@mui/material';
 import {
   Analytics as AnalyticsIcon,
-  TrendingUp as TrendingUpIcon,
   BarChart as BarChartIcon,
   PieChart as PieChartIcon,
   Timeline as TimelineIcon,
@@ -34,7 +31,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {  statusColors, neutralColors, surfaceColors } from '../../theme/palette';
 
 const TherapistAnalytics = () => {
   const { currentUser } = useAuth();

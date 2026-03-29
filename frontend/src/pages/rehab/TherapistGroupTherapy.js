@@ -39,7 +39,6 @@ import {
   PersonAdd as PersonAddIcon,
   PersonRemove as PersonRemoveIcon,
   Schedule as ScheduleIcon,
-  EmojiPeople as ActivityIcon,
   Info as InfoIcon,
   PlayArrow as ActiveIcon,
   Pause as PausedIcon,
@@ -48,7 +47,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const GROUP_TYPES = [
   { value: 'social-skills', label: 'مهارات اجتماعية', color: '#8b5cf6', icon: '👥' },

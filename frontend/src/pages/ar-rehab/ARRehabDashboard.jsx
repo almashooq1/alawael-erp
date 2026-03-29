@@ -10,9 +10,8 @@ import {
   ViewInAr as ARIcon,
   Sensors as BCIIcon,
   Groups as CollabIcon,
-  Analytics as AnalyticsIcon,
-} from '@mui/icons-material';
-import { sessionsService, analyticsService, getDashboard } from '../../services/arRehabService';
+  } from '@mui/icons-material';
+import {   getDashboard } from '../../services/arRehabService';
 
 const sessionStatusLabels = { active: 'نشطة', completed: 'مكتملة', paused: 'متوقفة', cancelled: 'ملغاة' };
 const sessionStatusColors = { active: 'success', completed: 'info', paused: 'warning', cancelled: 'error' };

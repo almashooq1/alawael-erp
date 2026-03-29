@@ -18,18 +18,13 @@ import {
   IconButton,
   Tooltip,
   CircularProgress,
-  Alert,
-  Paper,
-} from '@mui/material';
+  Alert,} from '@mui/material';
 import {
-  Balance as BalanceIcon,
   CheckCircle,
   Error as ErrorIcon,
   FileDownload,
-  Print,
-  FilterList,
-} from '@mui/icons-material';
-import { surfaceColors, neutralColors, statusColors, brandColors } from 'theme/palette';
+  Print,} from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

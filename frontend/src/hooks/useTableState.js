@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 
 /**
  * useTableState — Combined table state management (search, sort, filter, pagination).

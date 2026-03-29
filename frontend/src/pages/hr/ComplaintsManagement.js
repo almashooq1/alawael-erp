@@ -33,13 +33,7 @@ import {
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
-  Edit as EditIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Pending as PendingIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   getComplaints,
   createComplaint,

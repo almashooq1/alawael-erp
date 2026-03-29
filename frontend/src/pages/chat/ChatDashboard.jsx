@@ -6,14 +6,13 @@ import {
   DialogActions, FormControl, InputLabel, Select, MenuItem, Chip,
   Alert, CircularProgress, Tooltip, InputAdornment, Badge,
   Divider, Avatar, Stack, Snackbar, List, ListItem, ListItemAvatar,
-  ListItemText, ListItemSecondaryAction, AvatarGroup,
+  ListItemText,
 } from '@mui/material';
 import {
-  Chat, Group, Person, Send, Search, Add, Edit, Delete,
+  Chat, Group, Person, Send, Search, Add, Delete,
   AttachFile, PushPin, EmojiEmotions, MarkChatRead,
-  Circle, Block, ArrowBack, Refresh, Forum, Campaign,
-  InsertDriveFile, Image, Videocam, MicNone, Settings,
-  MoreVert, FileCopy, GroupAdd, PersonRemove, AdminPanelSettings,
+  Circle, Refresh, Forum, Campaign,
+  InsertDriveFile, Image, Videocam, MicNone,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';

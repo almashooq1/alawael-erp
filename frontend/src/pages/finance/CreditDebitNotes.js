@@ -3,9 +3,7 @@ import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
-  Card,
-  CardContent,
-  Typography,
+  Card,  Typography,
   Table,
   TableBody,
   TableCell,
@@ -26,7 +24,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material';
-import { Description, Add, Check, Visibility, NoteAdd } from '@mui/icons-material';
+import {   Check, Visibility, NoteAdd } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

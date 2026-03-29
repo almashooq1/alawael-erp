@@ -40,16 +40,10 @@ import {
   SwapHoriz as SwapHorizIcon,
   School as SchoolIcon,
   AttachMoney as AttachMoneyIcon,
-  Assessment as AssessmentIcon,
   Favorite as FavoriteIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
   Refresh as RefreshIcon,
   Add as AddIcon,
-  ThumbUp as ThumbUpIcon,
-  ThumbDown as ThumbDownIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import workforceAnalyticsService from '../../services/workforceAnalyticsService';
 
 /* ═══ Helper — risk chip color ═══ */

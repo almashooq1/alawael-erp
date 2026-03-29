@@ -28,9 +28,6 @@ import {
   TableRow,
   TableContainer,
   Avatar,
-  Tooltip,
-  Divider,
-  IconButton,
 } from '@mui/material';
 import {
   Print as PrintIcon,
@@ -39,13 +36,11 @@ import {
   EmojiEvents as TrophyIcon,
   PersonAdd as PersonAddIcon,
   Delete as DeleteIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   PolarRadiusAxis, ResponsiveContainer, Legend,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as RechartsTooltip,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
 } from 'recharts';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';

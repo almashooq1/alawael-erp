@@ -22,11 +22,8 @@ import {
   MenuItem,
   CircularProgress,
   IconButton,
-  Tooltip,
-  Switch,
-  FormControlLabel,
-} from '@mui/material';
-import { Repeat, Add, Pause, PlayArrow, Delete, Edit, Schedule } from '@mui/icons-material';
+  Tooltip,} from '@mui/material';
+import {  Add, Pause, PlayArrow, Delete, Schedule } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

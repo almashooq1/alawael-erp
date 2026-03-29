@@ -247,6 +247,29 @@ jobs:
             deploy/hostinger/ecosystem.config.js \
             $SSH_TARGET:${{ env.APP_DIR }}/ecosystem.config.js 2>/dev/null || true
 
+      - name: "🗄️ Database setup (migrations + indexes)"
+        if: needs.preflight.outputs.deploy_backend == 'true'
+        run: |
+          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
+          ssh $SSH_TARGET << 'DBSETUP'
+            set -e
+            cd /home/alawael/app/backend
+            echo "🗄️  Running database setup (plugins → migrate → indexes)..."
+
+            # Run setup with production flag (skips sample seeds)
+            NODE_ENV=production node scripts/setup-database.js \
+              --env production \
+              --skip seeds \
+              2>&1 | tail -30
+
+            EXIT_CODE=${PIPESTATUS[0]}
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "❌ Database setup failed with exit code $EXIT_CODE"
+              exit $EXIT_CODE
+            fi
+            echo "✅ Database setup completed successfully"
+          DBSETUP
+
       - name: Restart application (zero-downtime)
         run: |
           SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"

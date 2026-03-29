@@ -22,12 +22,7 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  LinearProgress,
+  Divider,  LinearProgress,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,14 +38,13 @@ import {
   HourglassTop as InProgressIcon,
   PlayArrow as PlanningIcon,
   Description as AbstractIcon,
-  Label as TagIcon,
   MenuBook as JournalIcon,
 } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const FIELDS = [
   { id: 'physical-rehab', label: 'التأهيل البدني', color: '#3b82f6', icon: '🏃' },

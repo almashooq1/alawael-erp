@@ -17,13 +17,11 @@ import {
   Psychology as BehaviorIcon,
   HealthAndSafety as HealthIcon,
   Star as StarIcon,
-  Build as IEPIcon,
   FileDownload as ExportIcon,
   Speed as SpeedIcon,
 } from '@mui/icons-material';
 import {
   BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
   ResponsiveContainer, Legend,
 } from 'recharts';

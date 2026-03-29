@@ -12,10 +12,8 @@ import {
   Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
 } from '@mui/material';
 import {
-  ChildCare as ChildIcon, Assessment as ScreenIcon, Timeline as MilestoneIcon,
-  Assignment as IFSPIcon, SwapHoriz as ReferralIcon, Dashboard as DashIcon,
-  Refresh as RefreshIcon, Add as AddIcon, Visibility as ViewIcon,
-  CheckCircle as CheckIcon, Warning as WarnIcon, Error as DelayIcon,
+  ChildCare as ChildIcon, Assessment as ScreenIcon, Assignment as IFSPIcon, SwapHoriz as ReferralIcon, Refresh as RefreshIcon, Add as AddIcon, Visibility as ViewIcon,
+  Error as DelayIcon,
 } from '@mui/icons-material';
 import eisApi from '../../services/earlyIntervention.service';
 

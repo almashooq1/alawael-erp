@@ -4,15 +4,13 @@
 import { useState, useEffect } from 'react';
 import {
   Box, Grid, Card, CardContent, Typography, Paper,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Chip, LinearProgress
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, LinearProgress
 } from '@mui/material';
 import {
   Home as HomeIcon,
   School as TrainIcon,
   TrendingUp as ProgressIcon,
-  Assessment as AssessIcon
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/api';
 

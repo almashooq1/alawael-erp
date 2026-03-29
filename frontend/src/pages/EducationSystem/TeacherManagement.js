@@ -9,10 +9,7 @@ import {
   Paper,
   Box,
   Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
+  Button,  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -35,13 +32,7 @@ import {
   Avatar,
   TablePagination,
   InputAdornment,
-  Rating,
-  Tab,
-  Tabs,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
+  Rating,  Divider,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -50,11 +41,9 @@ import {
   Person as TeacherIcon,
   ArrowBack as BackIcon,
   Search as SearchIcon,
-  Star as StarIcon,
   Phone as PhoneIcon,
   Email as EmailIcon,
-  WorkHistory as WorkloadIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

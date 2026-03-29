@@ -23,12 +23,7 @@ import {
   Paper,
   Avatar,
   Divider,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-} from '@mui/material';
+  LinearProgress,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -41,14 +36,12 @@ import {
   Assignment as TaskIcon,
   Person as PersonIcon,
   Business as InstitutionIcon,
-  CheckCircle as CompleteIcon,
-  PlayArrow as ActiveIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const TRAINING_TYPES = [
   { value: 'clinical', label: 'تدريب سريري', color: '#3b82f6' },

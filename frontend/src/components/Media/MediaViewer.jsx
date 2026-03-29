@@ -14,7 +14,7 @@
 import React, { useState } from 'react';
 import {
   Dialog, DialogContent, Box, Typography, IconButton,
-  Avatar, Chip, Button, Divider, Grid, Tooltip,
+  Avatar, Chip, Button, Divider, Tooltip,
   TextField, Select, MenuItem, FormControl, InputLabel,
   Slide,
 } from '@mui/material';
@@ -28,8 +28,6 @@ import {
   Save as SaveIcon,
   Cancel as CancelIcon,
   Fullscreen as FullscreenIcon,
-  PushPin as PinIcon,
-  Share as ShareIcon,
   Image as ImageIcon,
   Videocam as VideoIcon,
   AudioFile as AudioIcon,
@@ -44,7 +42,7 @@ import {
   FolderOpen as FolderIcon,
   Storage as SizeIcon,
 } from '@mui/icons-material';
-import { brandColors, statusColors, surfaceColors, neutralColors, gradients } from '../../theme/palette';
+import {  statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import mediaService from '../../services/mediaService';
 
 const TYPE_CONFIG = {

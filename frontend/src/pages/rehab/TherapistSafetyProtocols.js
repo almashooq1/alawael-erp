@@ -29,9 +29,7 @@ import {
   ListItemText,
   Stepper,
   Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
+  StepLabel,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -43,8 +41,6 @@ import {
   ReportProblem as IncidentIcon,
   CheckCircle as ResolvedIcon,
   Schedule as ReviewIcon,
-  Shield as ShieldIcon,
-  Gavel as RuleIcon,
   ErrorOutline as CriticalIcon,
   Info as InfoIcon,
 } from '@mui/icons-material';
@@ -52,7 +48,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'fall-prevention', label: 'الوقاية من السقوط', color: '#3b82f6', icon: '🛡️' },

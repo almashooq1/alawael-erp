@@ -45,7 +45,6 @@ import {
   Assessment as AssessmentIcon,
   Business as BusinessIcon,
   ArrowForward as ArrowIcon,
-  Visibility as ViewIcon,
   Close as CloseIcon,
   CheckCircle as CheckIcon,
   Cancel as RejectIcon,

@@ -4,7 +4,7 @@
  */
 import apiClient from '../api.client';
 import { safeFetch } from './safeFetch';
-import { DEMO_EMPLOYEES, DEMO_PAYROLL, DEMO_LEAVES, DEMO_REVIEWS } from './demoData';
+import {  DEMO_PAYROLL, DEMO_REVIEWS } from './demoData';
 
 /* ─── Payroll ─── */
 export const getPayroll = (month, year) => {

@@ -9,10 +9,7 @@ import {
   Paper,
   Box,
   Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
+  Button,  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -33,35 +30,20 @@ import {
   InputLabel,
   FormControl,
   Avatar,
-  TablePagination,
-  InputAdornment,
-  Tabs,
-  Tab,
-  Divider,
+  TablePagination,  Divider,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
-  FormControlLabel,
-  Switch,
-  Checkbox,
-  FormGroup,
-} from '@mui/material';
+  ListItemIcon,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Quiz as ExamIcon,
   ArrowBack as BackIcon,
-  Search as SearchIcon,
   Timer as TimerIcon,
-  Assignment as SubmissionIcon,
-  Grade as GradeIcon,
   QuestionAnswer as QuestionIcon,
-  PlayArrow as StartIcon,
-  CheckCircle as GradedIcon,
-  Schedule as PendingIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

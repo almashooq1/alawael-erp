@@ -3,10 +3,10 @@
  * 12 نموذج: فاتورة، سند صرف، سند قبض، قيد يومية، ميزان مراجعة، كشف حساب،
  *           شيك، إيصال تبرع، إشعار دائن، نثرية، أرباح وخسائر، ميزانية عمومية
  */
-import { Box, Typography, Divider, Grid } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import {
   OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
-  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney, today,
+  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney,
   RefDateLine, NotesBox, PrintTable, EmptyTable, ConfidentialBanner,
 } from '../shared/PrintTemplateShared';
 

@@ -23,13 +23,7 @@ import {
   MenuItem,
   IconButton,
   Tooltip,
-  LinearProgress,
-  Stepper,
-  Step,
-  StepLabel,
-  Checkbox,
-  FormControlLabel,
-  Alert,
+  LinearProgress,  Checkbox,  Alert,
   Grid,
 } from '@mui/material';
 import {
@@ -37,12 +31,7 @@ import {
   LockOpen,
   PlayArrow,
   Refresh,
-  Add,
-  CheckCircle,
-  Warning,
-  CalendarToday,
-  AssignmentTurnedIn,
-  Replay,
+  Add,  CalendarToday,  Replay,
 } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 

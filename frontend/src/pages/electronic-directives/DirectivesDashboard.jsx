@@ -11,18 +11,14 @@ import {
   CardContent,
   Paper,
   Button,
-  Chip,
-  LinearProgress,
-  Divider,
+  Chip,  Divider,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
   Avatar,
-  IconButton,
-  Tooltip,
-  Skeleton,
+  IconButton,  Skeleton,
   Alert,
 } from '@mui/material';
 import {
@@ -35,14 +31,11 @@ import {
   Assignment as InstructionIcon,
   Add as AddIcon,
   ArrowForward as ArrowForwardIcon,
-  TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
   AccessTime as AccessTimeIcon,
   Visibility as ViewIcon,
-  Speed as SpeedIcon,
-  FiberNew as NewIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,

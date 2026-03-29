@@ -10,8 +10,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box, Grid, Paper, Typography, Button, TextField, Chip, IconButton,
-  Alert, LinearProgress, Divider, Drawer, List, ListItem, ListItemText,
-  Avatar, Badge, Tooltip, Card, CardContent, Tab, Tabs,
+  Alert, LinearProgress, Tooltip, Card, CardContent, Tab, Tabs,
 } from '@mui/material';
 import {
   VideoCall as VideoCallIcon,

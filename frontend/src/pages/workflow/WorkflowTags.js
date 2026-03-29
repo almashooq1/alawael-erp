@@ -15,9 +15,7 @@ import {
   Chip,
   Card,
   CardContent,
-  Skeleton,
-  Divider,
-  alpha,
+  Skeleton,  alpha,
   Avatar,
   TextField,
   Dialog,
@@ -40,9 +38,7 @@ import {
   Label,
   Edit,
   Delete,
-  LocalOffer,
-  Palette,
-  Tag,
+  LocalOffer,  Tag,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';

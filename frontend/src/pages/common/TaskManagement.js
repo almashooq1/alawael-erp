@@ -31,10 +31,7 @@ import {
   LinearProgress,
   InputAdornment,
   Tabs,
-  Tab,
-  Slider,
-  useTheme,
-} from '@mui/material';
+  Tab,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -46,8 +43,7 @@ import {
   CheckCircle as CompleteIcon,
   PlayArrow as StartIcon,
   Assignment as TaskIcon,
-  Flag as FlagIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   BarChart,
   Bar,

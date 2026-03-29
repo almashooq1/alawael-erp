@@ -6,8 +6,8 @@
 import { Box, Typography, Divider, Grid, Avatar } from '@mui/material';
 import {
   OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
-  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney, today,
-  RefDateLine, NotesBox, PrintTable, EmptyTable, ConfidentialBanner, DeclarationBox,
+  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney,
+  RefDateLine, NotesBox, PrintTable, EmptyTable, ConfidentialBanner,
 } from '../shared/PrintTemplateShared';
 
 export const OPERATIONS_TEMPLATES = [

@@ -15,10 +15,7 @@ import {
   Chip,
   CircularProgress,
   TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  InputAdornment,
+  MenuItem,  InputAdornment,
 } from '@mui/material';
 import {
   History,
@@ -31,7 +28,7 @@ import {
   Visibility,
   Settings,
 } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

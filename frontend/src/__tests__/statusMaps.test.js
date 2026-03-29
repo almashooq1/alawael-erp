@@ -19,7 +19,7 @@ import {
 const STATUS_CONFIG_SHAPE = ['label', 'color', 'icon', 'bg'];
 
 /** Helper: validates that every entry in a map has the correct shape */
-const expectValidMap = (map, mapName) => {
+const expectValidMap = (map) => {
   const entries = Object.entries(map);
   expect(entries.length).toBeGreaterThan(0);
 

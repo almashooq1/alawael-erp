@@ -16,11 +16,7 @@ import {
   Typography,
   Grid,
   Paper,
-  Box,
-  Chip,
-  CircularProgress,
-  Alert,
-  LinearProgress,
+  Box,  CircularProgress,  LinearProgress,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -35,8 +31,7 @@ import {
   Schedule as ClockIcon,
   Cancel as CancelIcon,
   Refresh as RefreshIcon,
-  Warning as WarningIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import useHRDashboard from './useHRDashboard';
 import { KPICard, QuickAction } from './KPICard';

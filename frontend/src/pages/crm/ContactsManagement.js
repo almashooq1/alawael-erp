@@ -44,8 +44,7 @@ import {
   LocationOn as LocationIcon,
   Visibility as ViewIcon,
   Close as CloseIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { contactsService, MOCK_CONTACTS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 

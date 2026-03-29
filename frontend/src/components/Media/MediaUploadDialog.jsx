@@ -29,7 +29,7 @@ import {
   Archive as ArchiveIcon,
   InsertDriveFile as FileIcon,
 } from '@mui/icons-material';
-import { brandColors, statusColors, surfaceColors, neutralColors, gradients } from '../../theme/palette';
+import { brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import mediaService from '../../services/mediaService';
 
 const MAX_FILES = 20;

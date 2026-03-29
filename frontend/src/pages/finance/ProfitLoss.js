@@ -15,13 +15,9 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Chip,
-  Divider,
-} from '@mui/material';
+  Chip,} from '@mui/material';
 import {
-  TrendingUp,
-  TrendingDown,
-  Assessment,
+  TrendingUp,  Assessment,
   CalendarMonth,
   ArrowUpward,
   ArrowDownward,

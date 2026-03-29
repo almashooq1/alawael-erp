@@ -7,13 +7,7 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
+  Grid,  Chip,  Divider,
   IconButton,
   Tooltip,
   Button,
@@ -41,25 +35,18 @@ import {
 import {
   Schedule as ScheduleIcon,
   Add as AddIcon,
-  Edit as EditIcon,
   Search as SearchIcon,
   Visibility as ViewIcon,
   CheckCircle as CompleteIcon,
   PlayCircle as StartIcon,
   Cancel as CancelIcon,
-  Person as PersonIcon,
   CalendarToday as CalendarIcon,
-  MeetingRoom as RoomIcon,
   Timer as TimerIcon,
-  Assessment as AssessIcon,
   Close as CloseIcon,
   Save as SaveIcon,
-  EventAvailable as EventIcon,
-  Groups as GroupIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { therapySessionService, rehabProgramService } from 'services/disabilityRehabService';
+import { therapySessionService } from 'services/disabilityRehabService';
 
 const SESSION_CATEGORIES = [
   'علاج طبيعي',

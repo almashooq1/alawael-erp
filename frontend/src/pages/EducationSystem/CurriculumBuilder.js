@@ -9,16 +9,7 @@ import {
   Paper,
   Box,
   Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
+  Button,  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -27,12 +18,7 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Avatar,
+  Alert,  Avatar,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -41,12 +27,7 @@ import {
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  Divider,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
-} from '@mui/material';
+  Divider,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -57,10 +38,7 @@ import {
   LibraryBooks as UnitIcon,
   MenuBook as LessonIcon,
   CheckCircle as ApproveIcon,
-  Pending as PendingIcon,
-  Speed as ProgressIcon,
-  Search as SearchIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

@@ -7,7 +7,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Grid, Paper, Typography, Button, Chip, IconButton, Alert,
-  LinearProgress, Card, CardContent, CardActions, Avatar, Divider,
+  LinearProgress, Card, CardContent, CardActions, Divider,
   Tooltip, Badge,
 } from '@mui/material';
 import {
@@ -17,8 +17,6 @@ import {
   PlayArrow as PlayIcon,
   Refresh as RefreshIcon,
   AccessTime as TimeIcon,
-  PriorityHigh as UrgentIcon,
-  MedicalServices as MedicalIcon,
   ArrowBack as BackIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';

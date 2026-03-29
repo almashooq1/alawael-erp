@@ -28,12 +28,9 @@ import {
   Tab,
   LinearProgress,
   Stack,
-  Alert,
-  IconButton,
-} from '@mui/material';
+  Alert,} from '@mui/material';
 import {
   AccountBalance as TaxIcon,
-  Add as AddIcon,
   Refresh as RefreshIcon,
   Receipt as VatIcon,
   Description as FilingIcon,

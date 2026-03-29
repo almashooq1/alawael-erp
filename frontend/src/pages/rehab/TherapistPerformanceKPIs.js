@@ -13,9 +13,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
-  Tooltip,
-  Paper,
+  DialogActions,  Paper,
   Avatar,
   Divider,
   LinearProgress,
@@ -28,18 +26,15 @@ import {
   Edit as EditIcon,
   TrendingUp as TrendUpIcon,
   TrendingDown as TrendDownIcon,
-  EmojiEvents as TrophyIcon,
   CheckCircle as OnTargetIcon,
   Warning as BelowTargetIcon,
-  Timeline as TimelineIcon,
-  Star as StarIcon,
   Assessment as AssessmentIcon,
 } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const KPI_LABELS = {
   sessionsCompleted: { label: 'الجلسات المكتملة', icon: '📋', color: '#3b82f6' },

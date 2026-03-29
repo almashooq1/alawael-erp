@@ -34,10 +34,7 @@ import {
   Select,
   FormControl,
   InputLabel,
-  CircularProgress,
-  Tab,
-  Tabs,
-  Divider,
+  CircularProgress,  Divider,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -51,9 +48,7 @@ import {
   People,
   Delete,
   Edit,
-  PlayArrow,
-  Download,
-  Schedule,
+  PlayArrow,  Schedule,
   Category,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';

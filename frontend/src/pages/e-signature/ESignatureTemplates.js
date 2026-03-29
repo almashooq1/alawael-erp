@@ -19,29 +19,16 @@ import {
   MenuItem,
   Avatar,
   Divider,
-  Tooltip,
-  Alert,
-  CircularProgress,
+  Tooltip,  CircularProgress,
   Switch,
-  FormControlLabel,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from '@mui/material';
+  FormControlLabel,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit,
   Delete,
   Description,
   ArrowBack,
-  ContentCopy,
-  Visibility,
-  Settings,
-  Category,
-  Refresh,
+  ContentCopy,  Refresh,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';

@@ -30,12 +30,10 @@ import {
   Assignment as PlanIcon,
   Flag as FlagIcon,
   CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
   TrendingUp as TrendingUpIcon,
   Edit as EditIcon,
   Visibility as ViewIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

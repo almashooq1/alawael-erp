@@ -13,14 +13,11 @@ import {
   Tooltip,
   Collapse,
   Paper,
-  Badge,
-  alpha,
-} from '@mui/material';
+  Badge,} from '@mui/material';
 import {
   Search as SearchIcon,
   FilterList as FilterIcon,
   Clear as ClearIcon,
-  DateRange as DateIcon,
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
 } from '@mui/icons-material';

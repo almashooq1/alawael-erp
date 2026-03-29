@@ -20,10 +20,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  IconButton,
-  Tooltip,
-  Card,
+  TableRow,  Card,
   CardContent,
   Alert,
   Snackbar,
@@ -34,7 +31,6 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Visibility as ViewIcon,
   Schedule as ClockIcon,
   SwapHoriz as SwapIcon,
   Group as GroupIcon,
@@ -44,10 +40,7 @@ import {
 import {
   getShiftDefinitions,
   createShiftDefinition,
-  getShiftStats,
-  createShiftSwapRequest,
-  approveShiftSwap,
-} from '../../services/hr/employeeAffairsPhase2Service';
+  getShiftStats,} from '../../services/hr/employeeAffairsPhase2Service';
 
 const SHIFT_TYPES = ['صباحي', 'مسائي', 'ليلي', 'مرن', 'متقطع', 'مناوبة'];
 const DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];

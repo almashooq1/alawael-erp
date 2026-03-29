@@ -40,11 +40,9 @@ import {
   Assignment,
 } from '@mui/icons-material';
 import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
+    AreaChart,
+    Area,
+    PieChart,
   Pie,
   Cell,
   ResponsiveContainer,

@@ -3,7 +3,7 @@
  * يُستخدم من قبل جميع قوالب الأقسام
  * @version 1.0.0
  */
-import { Box, Typography, Divider, Grid, Avatar, Chip, Stack } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 // ── Shared Styles ──────────────────────────────
 export const headerStyle = {

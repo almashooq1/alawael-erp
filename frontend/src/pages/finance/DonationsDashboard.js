@@ -2,7 +2,7 @@
  * 💝 لوحة إدارة التبرعات والرعاية — Donations & Sponsorship Dashboard
  * AlAwael ERP
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -21,9 +21,7 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  TablePagination,
-  Paper,
+  TableRow,  Paper,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -31,9 +29,7 @@ import {
   LinearProgress,
   InputAdornment,
   Tabs,
-  Tab,
-  useTheme,
-} from '@mui/material';
+  Tab,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -41,12 +37,8 @@ import {
   Search as SearchIcon,
   Refresh as RefreshIcon,
   Close as CloseIcon,
-  Visibility as ViewIcon,
-  VolunteerActivism as DonateIcon,
   Campaign as CampaignIcon,
-  People as DonorsIcon,
-  Receipt as ReceiptIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   BarChart,
   Bar,

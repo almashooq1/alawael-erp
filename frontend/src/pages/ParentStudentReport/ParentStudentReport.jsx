@@ -26,7 +26,6 @@ import {
 import {
   Print as PrintIcon,
   ArrowBack as ArrowBackIcon,
-  Person as PersonIcon,
   School as SchoolIcon,
   EventAvailable as AttendanceIcon,
   TrendingUp as TrendingUpIcon,

@@ -28,9 +28,7 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem,
-  Alert,
-  Tooltip,
+  MenuItem,  Tooltip,
 } from '@mui/material';
 import {
   Inventory as InvIcon,
@@ -42,8 +40,7 @@ import {
   TrendingUp as TrendIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { inventoryService } from 'services/operationsService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

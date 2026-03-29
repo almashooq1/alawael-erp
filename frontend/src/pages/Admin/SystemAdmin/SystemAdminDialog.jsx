@@ -30,7 +30,6 @@ const SystemAdminDialog = ({
   form,
   setForm,
   handleSave,
-  tabs = [],
 }) => {
   const isEdit = dialogType === 'edit';
 

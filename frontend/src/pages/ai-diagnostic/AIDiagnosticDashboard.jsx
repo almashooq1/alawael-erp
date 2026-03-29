@@ -4,10 +4,10 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent, CardActionArea,
-  Chip, LinearProgress, Alert, Snackbar, TextField, InputAdornment,
+  Box, Typography, Grid, Card, CardContent,
+  Chip, Alert, Snackbar, TextField, InputAdornment,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Avatar, Badge, MenuItem, Select,
+  Paper, IconButton, Tooltip, Divider, Avatar, MenuItem, Select,
   FormControl, InputLabel, CircularProgress,
 } from '@mui/material';
 import {
@@ -20,7 +20,6 @@ import {
   Visibility as ViewIcon,
   AutoAwesome as AIIcon,
   MedicalServices as MedicalIcon,
-  CalendarMonth as CalendarIcon,
   Speed as SpeedIcon,
   NotificationsActive as AlertIcon,
   BarChart as ChartIcon,

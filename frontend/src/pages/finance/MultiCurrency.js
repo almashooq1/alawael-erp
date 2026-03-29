@@ -3,9 +3,7 @@ import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
-  Card,
-  CardContent,
-  Typography,
+  Card,  Typography,
   Table,
   TableBody,
   TableCell,
@@ -22,9 +20,7 @@ import {
   TextField,
   MenuItem,
   IconButton,
-  Tooltip,
-  Divider,
-} from '@mui/material';
+  Tooltip,} from '@mui/material';
 import { Add, CurrencyExchange, SwapHoriz, Delete, Refresh } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 

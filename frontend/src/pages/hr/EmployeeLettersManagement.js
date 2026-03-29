@@ -33,10 +33,8 @@ import {
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
-  Description as LetterIcon,
   Print as PrintIcon,
-  Download as DownloadIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   getLetters,
   createLetterRequest,

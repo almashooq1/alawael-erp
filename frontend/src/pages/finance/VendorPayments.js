@@ -17,9 +17,7 @@ import {
   Chip,
   Tooltip,
   Tab,
-  Tabs,
-  TextField,
-} from '@mui/material';
+  Tabs,} from '@mui/material';
 import { LocalShipping, Warning, Refresh, TrendingDown, CalendarMonth } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 

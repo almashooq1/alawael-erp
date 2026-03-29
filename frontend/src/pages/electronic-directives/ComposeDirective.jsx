@@ -15,9 +15,7 @@ import {
   MenuItem,
   Button,
   Chip,
-  IconButton,
-  Divider,
-  Switch,
+  IconButton,  Switch,
   FormControlLabel,
   Alert,
   Snackbar,
@@ -32,16 +30,13 @@ import {
   Add as AddIcon,
   Delete as DeleteIcon,
   AttachFile as AttachIcon,
-  Campaign as CampaignIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   typeOptions,
   priorityOptions,
   issuerOptions,
-  recipientTypeOptions,
-  DIRECTIVE_TYPES,
-} from './constants';
+  recipientTypeOptions,} from './constants';
 
 export default function ComposeDirective() {
   const navigate = useNavigate();

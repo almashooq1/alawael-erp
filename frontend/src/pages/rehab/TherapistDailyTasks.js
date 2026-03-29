@@ -20,17 +20,13 @@ import {
   FormControl,
   InputLabel,
   Tooltip,
-  Paper,
-  Checkbox,
-  Divider,
-} from '@mui/material';
+  Paper,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
   CheckCircle as CheckIcon,
   RadioButtonUnchecked as UncheckedIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   Flag as FlagIcon,
   Schedule as ScheduleIcon,
   Assignment as TaskIcon,
@@ -43,7 +39,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { value: 'session_prep', label: 'تحضير جلسة', color: '#3b82f6' },

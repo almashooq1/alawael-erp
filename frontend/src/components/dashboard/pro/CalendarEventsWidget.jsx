@@ -169,16 +169,16 @@ const CalendarEventsWidget = () => {
   const isDark = theme.palette.mode === 'dark';
   const today = new Date();
 
-  const todayEvents = // eslint-disable-next-line react-hooks/exhaustive-deps
- useMemo(() => {
+  const todayEvents = useMemo(() => {
     const todayStr = today.toISOString().split('T')[0];
     return UPCOMING_EVENTS.filter(e => e.date === todayStr);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const upcomingEvents = // eslint-disable-next-line react-hooks/exhaustive-deps
- useMemo(() => {
+  const upcomingEvents = useMemo(() => {
     const todayStr = today.toISOString().split('T')[0];
     return UPCOMING_EVENTS.filter(e => e.date > todayStr).slice(0, 4);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

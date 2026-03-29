@@ -4,8 +4,8 @@
 import React from 'react';
 import {
   OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, PrintTable, EmptyTable, RefDateLine, ConfidentialBanner,
-  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney, today,
+  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
+  fieldRow, bodyPad, pageWrapper, formatDate, formatMoney,
 } from '../shared/PrintTemplateShared';
 
 export const LEGAL_TEMPLATES = [

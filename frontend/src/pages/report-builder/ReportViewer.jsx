@@ -3,9 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   Box, Grid, Paper, Typography, Card, CardContent, Chip, Button,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, Alert, IconButton, Tooltip, Dialog, DialogTitle,
+  LinearProgress, Alert, IconButton, Dialog, DialogTitle,
   DialogContent, DialogActions, TextField, MenuItem, Divider,
-  FormControl, InputLabel, Select, Pagination, Avatar,
+  FormControl, InputLabel, Select, Pagination,
   List, ListItem, ListItemText, ListItemIcon,
 } from '@mui/material';
 import {
@@ -15,8 +15,7 @@ import {
   PieChart as ChartIcon, TableChart as TableViewIcon,
   FilterList as FilterIcon, Refresh as RefreshIcon,
   History as HistoryIcon, Star as StarIcon, StarBorder as StarBorderIcon,
-  PersonAdd as ShareUserIcon, Email as EmailIcon,
-} from '@mui/icons-material';
+  PersonAdd as ShareUserIcon, } from '@mui/icons-material';
 import reportBuilderService from '../../services/reportBuilderService';
 
 /* ═══════════════════════════════════════════════════════════

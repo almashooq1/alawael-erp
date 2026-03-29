@@ -24,8 +24,8 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import { Add, Receipt, Summarize, Delete } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+import { Add, Summarize, Delete } from '@mui/icons-material';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

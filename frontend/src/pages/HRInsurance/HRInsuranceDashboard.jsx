@@ -42,8 +42,6 @@ import {
   MonetizationOn as MoneyIcon,
   FamilyRestroom as FamilyIcon,
   ExpandMore as ExpandMoreIcon,
-  FileDownload as ExportIcon,
-  FilterList as FilterIcon,
   Visibility as ViewIcon,
   Star as VipIcon,
   MedicalServices as MedicalIcon,

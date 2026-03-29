@@ -24,33 +24,17 @@ import {
   DialogActions,
   TextField,
   Chip,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Alert,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-  Avatar,
-  Tabs,
-  Tab,
-  Divider,
-  InputAdornment,
-} from '@mui/material';
+  IconButton,  LinearProgress,
+  Alert,  Avatar,  Divider,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
   Grade as GradeIcon,
   ArrowBack as BackIcon,
-  Search as SearchIcon,
-  Assessment as ReportIcon,
   Lock as FinalizeIcon,
   Person as StudentIcon,
-  TrendingUp as TrendIcon,
-  Download as ExportIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

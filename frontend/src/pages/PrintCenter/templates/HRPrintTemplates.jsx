@@ -6,7 +6,7 @@
 import { Box, Typography, Divider, Grid, Avatar, Chip } from '@mui/material';
 import {
   OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
-  fieldRow, fieldBox, labelSx, valueSx, bodyPad, pageWrapper, formatDate,
+  fieldRow, labelSx, bodyPad, pageWrapper, formatDate,
   formatMoney, today, RefDateLine, ConfidentialBanner, DeclarationBox,
   NotesBox, PrintTable, EmptyTable,
 } from '../shared/PrintTemplateShared';

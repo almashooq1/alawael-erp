@@ -1,7 +1,7 @@
 /**
  * Directives List — قائمة التوجيهات الإلكترونية
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -40,7 +40,6 @@ import {
   PolicyOutlined as PolicyIcon,
   Rule as ProcedureIcon,
   Assignment as InstructionIcon,
-  FilterList as FilterIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';

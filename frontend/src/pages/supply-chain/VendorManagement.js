@@ -32,9 +32,7 @@ import {
   InputAdornment,
   Tabs,
   Tab,
-  Rating,
-  useTheme,
-} from '@mui/material';
+  Rating,} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -44,12 +42,8 @@ import {
   Close as CloseIcon,
   Visibility as ViewIcon,
   Business as VendorIcon,
-  Star as StarIcon,
   Assessment as EvalIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  LocationOn as LocationIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -60,9 +54,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RTooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+  ResponsiveContainer,} from 'recharts';
 import {
   vendorsService,
   evaluationsService,

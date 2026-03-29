@@ -11,9 +11,7 @@ import {
   Card,
   CardContent,
   Chip,
-  Avatar,
-  LinearProgress,
-  Divider,
+  Avatar,  Divider,
   IconButton,
   Tooltip,
   Button,
@@ -49,13 +47,11 @@ import {
   Build as MaintenanceIcon,
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
-  Inventory as InventoryIcon,
   AttachMoney as CostIcon,
   Close as CloseIcon,
   Save as SaveIcon,
   Category as CategoryIcon,
-  CalendarToday as CalendarIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { assistiveDeviceService } from 'services/disabilityRehabService';
 

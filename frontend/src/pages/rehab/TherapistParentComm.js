@@ -24,11 +24,8 @@ import {
   Avatar,
   Tabs,
   Tab,
-  Badge,
-  Divider,
-} from '@mui/material';
+  Badge,} from '@mui/material';
 import {
-  Add as AddIcon,
   Search as SearchIcon,
   People as PeopleIcon,
   Delete as DeleteIcon,
@@ -38,8 +35,6 @@ import {
   MarkEmailRead as ReadIcon,
   MarkEmailUnread as UnreadIcon,
   Inbox as InboxIcon,
-  Outbox as OutboxIcon,
-  Reply as ReplyIcon,
   FamilyRestroom as FamilyIcon,
   Notifications as NotifIcon,
 } from '@mui/icons-material';
@@ -47,7 +42,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors } from '../../theme/palette';
 
 const MESSAGE_TYPES = [
   { value: 'general', label: 'عام', color: '#3b82f6' },

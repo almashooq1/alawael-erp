@@ -12,18 +12,13 @@ import {
   CardActionArea,
   Paper,
   Button,
-  Chip,
-  LinearProgress,
-  Divider,
+  Chip,  Divider,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  Avatar,
-  IconButton,
-  Tooltip,
-  Skeleton,
+  Avatar,  Skeleton,
 } from '@mui/material';
 import {
   Mail as MailIcon,
@@ -42,9 +37,7 @@ import {
   CallMade,
   Notifications,
   Assignment,
-  Speed,
-  FiberNew,
-} from '@mui/icons-material';
+  Speed,} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 

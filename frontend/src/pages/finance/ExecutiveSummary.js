@@ -6,9 +6,7 @@ import {
   Card,
   CardContent,
   Typography,
-  CircularProgress,
-  Grid,
-  Divider,
+  CircularProgress,  Divider,
   Chip,
   LinearProgress,
   List,
@@ -18,9 +16,7 @@ import {
 } from '@mui/material';
 import {
   Dashboard,
-  TrendingUp,
-  TrendingDown,
-  AccountBalance,
+  TrendingUp,  AccountBalance,
   Warning,
   CheckCircle,
   Info,
@@ -32,7 +28,7 @@ import {
   ArrowDownward,
   RemoveCircle,
 } from '@mui/icons-material';
-import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
+import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
 

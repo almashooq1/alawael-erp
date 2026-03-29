@@ -9,10 +9,7 @@ import {
   Paper,
   Box,
   Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
+  Button,  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -27,10 +24,7 @@ import {
   IconButton,
   Tooltip,
   LinearProgress,
-  Alert,
-  Tab,
-  Tabs,
-  MenuItem,
+  Alert,  MenuItem,
   Select,
   InputLabel,
   FormControl,
@@ -47,10 +41,7 @@ import {
   MenuBook as SubjectIcon,
   ArrowBack as BackIcon,
   Search as SearchIcon,
-  FilterList as FilterIcon,
-  Visibility as ViewIcon,
-  VisibilityOff as HideIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

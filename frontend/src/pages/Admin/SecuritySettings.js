@@ -46,8 +46,6 @@ import {
   VpnKey,
   Delete,
   Refresh,
-  ExpandMore,
-  ExpandLess,
   Warning,
   CheckCircle,
   Error as ErrorIcon,
@@ -63,7 +61,6 @@ import {
   DesktopWindows,
   Logout,
   Add,
-  Remove,
   Save,
 } from '@mui/icons-material';
 import { QRCodeSVG } from 'qrcode.react';

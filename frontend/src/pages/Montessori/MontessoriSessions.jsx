@@ -43,7 +43,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
-import { gradients, statusColors } from '../../theme/palette';
+import { gradients } from '../../theme/palette';
 import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';

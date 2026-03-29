@@ -4,9 +4,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress,
   Dialog, DialogTitle, DialogContent, DialogActions, Divider, Switch,
-  FormControlLabel, MenuItem, LinearProgress, Tabs, Tab, Badge,
-  List, ListItem, ListItemText, ListItemIcon, ListItemSecondaryAction,
-  InputAdornment, Collapse, Accordion, AccordionSummary, AccordionDetails,
+  FormControlLabel, LinearProgress,
+  InputAdornment,
 } from '@mui/material';
 import {
   Fingerprint as FingerprintIcon,
@@ -28,18 +27,14 @@ import {
   History as HistoryIcon,
   Settings as SettingsIcon,
   Refresh as RefreshIcon,
-  Close as CloseIcon,
   Search as SearchIcon,
   Link as LinkIcon,
   LinkOff as UnlinkIcon,
-  ExpandMore as ExpandMoreIcon,
   AccessTime as TimeIcon,
-  CloudSync as CloudSyncIcon,
   DeviceHub as DeviceHubIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import zktecoService from 'services/zktecoService';
-import { gradients, statusColors, surfaceColors } from '../../theme/palette';
+import { gradients } from '../../theme/palette';
 
 /* ═══════════════════════════════════════════════
    Constants

@@ -1,5 +1,5 @@
-import { Card, CardContent, Typography, Box, IconButton, Tooltip, alpha } from '@mui/material';
-import { MoreVert as MoreIcon, Fullscreen as FullscreenIcon } from '@mui/icons-material';
+import { Card, CardContent, Typography, Box } from '@mui/material';
+
 import { ResponsiveContainer } from 'recharts';
 
 /**

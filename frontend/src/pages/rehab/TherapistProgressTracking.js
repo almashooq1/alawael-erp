@@ -25,9 +25,7 @@ import {
   Tabs,
   Tab,
   Avatar,
-  Divider,
-  Rating,
-} from '@mui/material';
+  Divider,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -37,7 +35,6 @@ import {
   Close as CloseIcon,
   Person as PersonIcon,
   Assessment as AssessmentIcon,
-  Star as StarIcon,
   CalendarToday as CalendarIcon,
   BarChart as ChartIcon,
 } from '@mui/icons-material';
@@ -45,7 +42,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors } from '../../theme/palette';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6' },

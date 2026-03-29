@@ -32,7 +32,6 @@ import {
   CheckCircle,
   PendingActions,
   WarningAmber,
-  TrendingUp,
   ArrowForward,
   Gavel,
   MailOutline,

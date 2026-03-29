@@ -23,11 +23,7 @@ import {
   Paper,
   Avatar,
   Divider,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemText,
-} from '@mui/material';
+  LinearProgress,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -35,10 +31,6 @@ import {
   Delete as DeleteIcon,
   Close as CloseIcon,
   Edit as EditIcon,
-  CheckCircle as PassIcon,
-  Warning as WarningIcon,
-  Error as FailIcon,
-  TrendingUp as ScoreIcon,
   Flag as FindingIcon,
   PlaylistAddCheck as AuditIcon,
 } from '@mui/icons-material';
@@ -46,7 +38,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const QUALITY_CATEGORIES = [
   { value: 'clinical', label: 'سريري', icon: '🏥', color: '#3b82f6' },

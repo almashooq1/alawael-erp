@@ -15,9 +15,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Container, Typography, Grid, Paper, Box, Card, CardContent,
-  Chip, Button, IconButton, Tooltip, TextField, MenuItem,
-  LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  Avatar, Stack, Divider, ToggleButton, ToggleButtonGroup,
+  Chip, Button, IconButton, TextField, MenuItem,
+  LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, Stack, Divider, ToggleButton, ToggleButtonGroup,
   Badge,
 } from '@mui/material';
 import {
@@ -28,13 +27,11 @@ import {
   ViewWeek as WeekIcon,
   ViewModule as MonthIcon,
   ViewDay as DayIcon,
-  FilterList as FilterIcon,
   Close as CloseIcon,
   Schedule as ScheduleIcon,
   Person as PersonIcon,
   MeetingRoom as RoomIcon,
   LocalHospital as TypeIcon,
-  Info as InfoIcon,
   CheckCircle,
   Cancel,
   HourglassEmpty,

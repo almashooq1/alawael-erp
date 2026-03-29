@@ -10,7 +10,7 @@
  * - Expiring/expired policy alerts
  * - Saudi SAMA-regulated company integration
  */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -48,12 +48,7 @@ import {
   TablePagination,
   Stepper,
   Step,
-  StepLabel,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-} from '@mui/material';
+  StepLabel,} from '@mui/material';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
@@ -64,24 +59,18 @@ import {
   Close as CloseIcon,
   WarningAmber as WarningIcon,
   CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
   Shield as ShieldIcon,
   Policy as PolicyIcon,
   Assessment as StatsIcon,
   Autorenew as RenewIcon,
   Receipt as ClaimIcon,
   RequestQuote as QuoteIcon,
-  DirectionsCar as CarIcon,
-  CalendarMonth as CalendarIcon,
   MonetizationOn as MoneyIcon,
   Business as CompanyIcon,
-  Gavel as ViolationIcon,
   TimerOff as ExpiredIcon,
   TrendingUp as TrendingUpIcon,
-  PersonOutline as PersonIcon,
   NotificationsActive as AlertIcon,
-  Timer as TimerIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import insuranceService from '../../services/insurance.service';
 
 /* ─── Constants ──────────────────────────────────────────────────────── */

@@ -32,10 +32,6 @@ import {
   Close as CloseIcon,
   Edit as EditIcon,
   CheckCircle as AcceptIcon,
-  HourglassEmpty as PendingIcon,
-  Send as SendIcon,
-  PersonAdd as PersonAddIcon,
-  LocalHospital as HospitalIcon,
   ArrowForward as ArrowIcon,
   Warning as UrgentIcon,
   Description as NoteIcon,
@@ -44,7 +40,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const PRIORITIES = [
   { value: 'low', label: 'منخفضة', color: '#6b7280' },

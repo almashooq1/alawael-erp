@@ -5,7 +5,7 @@
 import React from 'react';
 import {
   OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine,
+  NotesBox, EmptyTable,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

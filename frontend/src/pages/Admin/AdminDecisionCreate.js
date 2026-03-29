@@ -26,16 +26,7 @@ import {
   Select,
   Autocomplete,
 } from '@mui/material';
-import {
-  ArrowBack,
-  ArrowForward,
-  Save,
-  Send,
-  Gavel,
-  Description,
-  Campaign,
-  People,
-} from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Save, Send, Gavel, People } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

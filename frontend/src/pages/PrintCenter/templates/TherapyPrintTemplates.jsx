@@ -3,10 +3,10 @@
  * 8 نماذج: تقرير جلسة، خطة تأهيلية، تقييم، إذن علاج، تقدم علاجي،
  *          ملخص فريق متعدد، إحالة، تقرير خروج
  */
-import { Box, Typography, Divider, Grid } from '@mui/material';
+import { Box, Typography, Grid } from '@mui/material';
 import {
   OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
-  fieldRow, bodyPad, pageWrapper, formatDate, today,
+  fieldRow, bodyPad, pageWrapper, formatDate,
   RefDateLine, NotesBox, PrintTable, EmptyTable, ConfidentialBanner, DeclarationBox,
 } from '../shared/PrintTemplateShared';
 

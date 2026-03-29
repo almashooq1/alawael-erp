@@ -38,14 +38,13 @@ import {
   CheckCircle as AvailableIcon,
   Cancel as UnavailableIcon,
   LocationOn as LocationIcon,
-  CalendarToday as DateIcon,
   QrCode as SerialIcon,
 } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'mobility', nameAr: 'أجهزة التنقل', icon: '🦽', color: '#3b82f6' },

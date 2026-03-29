@@ -33,12 +33,7 @@ import {
   Refresh,
   Add,
   AccountBalance,
-  LocalShipping,
-  Warning,
-  Timer,
-  VerifiedUser,
-  Receipt,
-} from '@mui/icons-material';
+  LocalShipping,  VerifiedUser,} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

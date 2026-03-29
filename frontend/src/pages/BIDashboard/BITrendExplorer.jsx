@@ -42,9 +42,7 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip as RechartTooltip,
-  Legend,
-  ReferenceLine,
+  Tooltip as RechartTooltip,  ReferenceLine,
 } from 'recharts';
 import { motion } from 'framer-motion';
 import { getTrends } from '../../services/biDashboard.service';

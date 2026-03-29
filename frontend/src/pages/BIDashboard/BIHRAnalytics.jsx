@@ -15,7 +15,6 @@ import {
   CardContent,
   CircularProgress,
   LinearProgress,
-  Chip,
   IconButton,
   Tooltip,
   Alert,
@@ -28,8 +27,6 @@ import {
   EventAvailable,
   Star,
   Refresh,
-  TrendingUp,
-  TrendingDown,
 } from '@mui/icons-material';
 import {
   BarChart,

@@ -4,7 +4,7 @@
  * Wired to /api/hr-advanced/employees — falls back to demo data when API unavailable.
  */
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { DEPARTMENTS, STATUS_MAP, normalizeStatus } from './employeeManagement.constants';
+import {  STATUS_MAP, normalizeStatus } from './employeeManagement.constants';
 import {
   getEmployees,
   createEmployee,

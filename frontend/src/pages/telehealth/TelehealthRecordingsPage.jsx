@@ -19,10 +19,8 @@ import {
   Refresh as RefreshIcon,
   Star as StarIcon,
   Timer as TimerIcon,
-  Download as DownloadIcon,
   Psychology as AIIcon,
-  Visibility as ViewIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import telehealthService from '../../services/telehealthService';
 
 export default function TelehealthRecordingsPage() {

@@ -23,9 +23,7 @@ import {
   IconButton,
 } from '@mui/material';
 import {
-  Verified,
-  VerifiedUser,
-  GppBad,
+  Verified,  GppBad,
   Search,
   ArrowBack,
   CheckCircle,
@@ -35,9 +33,7 @@ import {
   Description,
   Shield,
   History,
-  ContentCopy,
-  Print,
-} from '@mui/icons-material';
+  ContentCopy,} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

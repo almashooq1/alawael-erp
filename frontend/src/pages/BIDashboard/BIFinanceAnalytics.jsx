@@ -38,11 +38,9 @@ import {
   AttachMoney,
 } from '@mui/icons-material';
 import {
-  BarChart,
-  Bar,
   AreaChart,
   Area,
-  LineChart,
+  Bar,
   Line,
   ResponsiveContainer,
   XAxis,

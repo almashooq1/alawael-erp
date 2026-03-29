@@ -62,7 +62,6 @@ import {
   AccessTime as TimeIcon,
   Business as BusinessIcon,
   FilterList as FilterIcon,
-  ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
   History as HistoryIcon,
   Warning as WarningIcon,

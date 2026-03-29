@@ -4,12 +4,10 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent, CardActionArea,
-  Chip, LinearProgress, Alert, Snackbar, TextField, InputAdornment,
+  Box, Typography, Grid, Card, CardContent,
+  Chip, LinearProgress, Alert, Snackbar,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Badge, MenuItem, Select,
-  FormControl, InputLabel, CircularProgress, Button, Tab, Tabs,
-  List, ListItem, ListItemIcon, ListItemText, Avatar,
+  Paper, IconButton, Tooltip, Divider, Badge, CircularProgress, Tab, Tabs, Avatar,
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,
@@ -19,7 +17,6 @@ import {
   People as PeopleIcon,
   Accessibility as BeneficiaryIcon,
   Hotel as OccupancyIcon,
-  School as TrainingIcon,
   VerifiedUser as ComplianceIcon,
   SentimentSatisfied as SatisfactionIcon,
   Warning as WarningIcon,
@@ -28,19 +25,13 @@ import {
   Flag as GoalIcon,
   Business as DeptIcon,
   Speed as SpeedIcon,
-  Assessment as ReportIcon,
   Refresh as RefreshIcon,
-  Description as ExportIcon,
   CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
   Timer as TimerIcon,
   AccountBalance as FinanceIcon,
-  LocalHospital as MedicalIcon,
   Analytics as AnalyticsIcon,
   Notifications as AlertIcon,
-  Compare as CompareIcon,
-  FilterList as FilterIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import ceoDashboardService from '../../services/ceoDashboardService';
 
 /* ════════════════════════════════════════════════════════════════════

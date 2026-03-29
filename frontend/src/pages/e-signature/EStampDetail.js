@@ -6,15 +6,10 @@ import {
   Typography,
   Paper,
   Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
+  Grid,  Chip,
   IconButton,
   Avatar,
-  Divider,
-  Tooltip,
-  CircularProgress,
+  Divider,  CircularProgress,
   Tab,
   Tabs,
   Dialog,
@@ -43,14 +38,10 @@ import {
   Refresh,
   Delete,
   Verified,
-  History,
-  Timeline,
-  People,
+  History,  People,
   Send,
   Lock,
-  ContentCopy,
-  Warning,
-} from '@mui/icons-material';
+  ContentCopy,} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

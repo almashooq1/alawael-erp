@@ -19,25 +19,16 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
+  TextField,  IconButton,
   Tooltip,
-  Grid,
-  Alert,
-  Tabs,
+  Grid,  Tabs,
   Tab,
 } from '@mui/material';
 import {
   CompareArrows,
   Refresh,
-  Add,
-  CheckCircle,
-  Search,
-  AccountBalance,
-  SwapHoriz,
-  Warning,
-} from '@mui/icons-material';
+  Add,  AccountBalance,
+  SwapHoriz,} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

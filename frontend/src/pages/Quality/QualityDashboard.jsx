@@ -7,7 +7,7 @@ import {
   Table, TableHead, TableRow, TableCell, TableBody, LinearProgress,
 } from '@mui/material';
 import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  PieChart, Pie, Cell,
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import {

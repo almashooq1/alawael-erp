@@ -26,9 +26,7 @@ import {
   Grid,
   Tabs,
   Tab,
-  Alert,
-  LinearProgress,
-} from '@mui/material';
+  Alert,} from '@mui/material';
 import {
   Shield,
   Refresh,

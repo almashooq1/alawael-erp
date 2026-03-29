@@ -3,7 +3,7 @@ import {
   Box, Grid, Paper, Typography, Card, CardContent, Chip, Button,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, Alert, IconButton, Tooltip, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, MenuItem, Divider, Badge,
+  DialogContent, DialogActions, TextField, MenuItem, Divider,
   List, ListItem, ListItemIcon, ListItemText, Avatar, Tab, Tabs,
   FormControl, InputLabel, Select, Switch, FormControlLabel,
 } from '@mui/material';
@@ -11,13 +11,11 @@ import {
   Assessment as ReportIcon, TableChart as TableIcon, PieChart as ChartIcon,
   Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
   Download as ExportIcon, Schedule as ScheduleIcon,
-  Share as ShareIcon, Star as StarIcon, StarBorder as StarBorderIcon,
+  Star as StarIcon, StarBorder as StarBorderIcon,
   Refresh as RefreshIcon, PlayArrow as RunIcon, ContentCopy as DuplicateIcon,
   DragIndicator as DragIcon, FilterList as FilterIcon,
-  Sort as SortIcon, Functions as CalcIcon, Dashboard as DashboardIcon,
-  Storage as DataSourceIcon, ViewColumn as ColumnIcon, Publish as PublishIcon,
-  Description as TemplateIcon, Visibility as ViewIcon,
-  BarChart as BarChartIcon, ShowChart as LineChartIcon,
+  Sort as SortIcon, Functions as CalcIcon, Storage as DataSourceIcon, ViewColumn as ColumnIcon, Publish as PublishIcon,
+  Description as TemplateIcon, BarChart as BarChartIcon, ShowChart as LineChartIcon,
   DonutLarge as DonutIcon, ScatterPlot as ScatterIcon,
 } from '@mui/icons-material';
 import reportBuilderService from '../../services/reportBuilderService';
@@ -60,7 +58,7 @@ const CHART_TYPES = [
 /* ═══════════════════════════════════════════════════════════
    Report Designer Dialog (Drag-and-Drop)
    ═══════════════════════════════════════════════════════════ */
-function ReportDesigner({ open, onClose, report, dataSources, onSave }) {
+function ReportDesigner({ open, onClose, report, onSave }) {
   const [fields, setFields] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(report?.columns || []);
   const [filters, setFilters] = useState(report?.filters || []);

@@ -34,12 +34,10 @@ import {
 import {
   Print as PrintIcon,
   ArrowBack as ArrowBackIcon,
-  DateRange as DateRangeIcon,
   Group as GroupIcon,
   EventAvailable as EventAvailableIcon,
   TrendingUp as TrendingUpIcon,
   Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
   EmojiEvents as EmojiEventsIcon,
   Assessment as AssessmentIcon,
   Accessible as AccessibleIcon,

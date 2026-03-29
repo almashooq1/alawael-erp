@@ -48,8 +48,7 @@ import {
   Search as SearchIcon,
   Accessible as AccessIcon,
   People as PeopleIcon,
-  Tv as EquipIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

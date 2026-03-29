@@ -3,15 +3,14 @@
  * 880 → ~120 lines | Sub-files: Employee/
  */
 import {
-  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
-  Chip, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent, Avatar, IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
   InputAdornment, MenuItem, Alert, Snackbar, Tooltip,
 } from '@mui/material';
 import {
   Add as AddIcon, Search as SearchIcon, FilterList as FilterIcon,
   PersonOff as InactiveIcon, CheckCircle as ActiveIcon, Download as DownloadIcon,
   Delete as DeleteIcon, CalendarMonth as CalendarIcon,
-  Business as DeptIcon, Warning as WarningIcon, Refresh as RefreshIcon,
+  Business as DeptIcon, Refresh as RefreshIcon,
   Groups as PeopleIcon,
 } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';

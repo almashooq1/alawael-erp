@@ -6,12 +6,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container, Typography, Grid, Paper, Box, Chip, Button,
   LinearProgress, Tabs, Tab, Card, CardContent, CardActions,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Checkbox, FormControlLabel, FormGroup, Alert,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Divider, IconButton, Tooltip, CircularProgress,
   TextField, MenuItem, Select, InputLabel, FormControl, Switch,
-  Collapse, Snackbar,
+  Collapse,
 } from '@mui/material';
 import {
   Description as ReportIcon,
@@ -50,17 +49,15 @@ import {
   ExpandMore as ExpandIcon,
   ExpandLess as CollapseIcon,
   NotificationsActive as NotifIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
-  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, RadarChart,
-  PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend, AreaChart, Area,
+  ResponsiveContainer, Legend,
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients, chartColors, statusColors, brandColors } from '../../theme/palette';
+import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';

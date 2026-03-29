@@ -24,9 +24,7 @@ import {
   Add as AddIcon,
   Refresh as RefreshIcon,
   CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import wafService from '../../services/wafRateLimitService';
 
 /* ── helper ── */

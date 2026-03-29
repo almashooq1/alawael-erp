@@ -38,7 +38,7 @@ const ReadOnly = ({ label, value }) => (
 );
 
 /* ── step 0 content ── */
-function StepPersonal({ form, setField, errors, touched, readOnly }) {
+function StepPersonal({ form, setField, errors, touched = {}, readOnly }) {
   const field = (name, label, props = {}) =>
     readOnly ? (
       <ReadOnly key={name} label={label} value={form[name]} />
@@ -69,7 +69,7 @@ function StepPersonal({ form, setField, errors, touched, readOnly }) {
 }
 
 /* ── step 1 content ── */
-function StepEmployment({ form, setField, errors, touched, readOnly, positionsList }) {
+function StepEmployment({ form, setField, errors, readOnly, positionsList }) {
   if (readOnly) {
     const st = STATUS_MAP[form.status];
     return (
@@ -215,9 +215,8 @@ export default function EmployeeFormDialog({
   dialogOpen, setDialogOpen,
   dialogMode, setDialogMode,
   form, setField, positionsList,
-  activeStep, setActiveStep,
-  errors, setErrors,
-  touched, setTouched,
+  activeStep,
+  errors,
   saving, handleNext, handleBack,
   handleSave, handlePrint,
 }) {
@@ -229,9 +228,9 @@ export default function EmployeeFormDialog({
   const stepContent = () => {
     switch (activeStep) {
       case 0:
-        return <StepPersonal form={form} setField={setField} errors={errors} touched={touched} readOnly={readOnly} />;
+        return <StepPersonal form={form} setField={setField} errors={errors} touched={{}} readOnly={readOnly} />;
       case 1:
-        return <StepEmployment form={form} setField={setField} errors={errors} touched={touched} readOnly={readOnly} positionsList={positionsList} />;
+        return <StepEmployment form={form} setField={setField} errors={errors} readOnly={readOnly} positionsList={positionsList} />;
       case 2:
         return <StepDocuments form={form} setField={setField} readOnly={readOnly} />;
       default:

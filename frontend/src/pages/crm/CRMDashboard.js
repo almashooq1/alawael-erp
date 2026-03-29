@@ -35,7 +35,6 @@ import {
   PersonAdd as PersonAddIcon,
   PhoneCallback as PhoneIcon,
   EmojiEvents as TrophyIcon,
-  Schedule as ScheduleIcon,
   Refresh as RefreshIcon,
   ArrowUpward as ArrowUpIcon,
   ArrowDownward as ArrowDownIcon,

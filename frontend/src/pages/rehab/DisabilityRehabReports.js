@@ -12,9 +12,7 @@ import {
   CardContent,
   Chip,
   Avatar,
-  LinearProgress,
-  Divider,
-  Button,
+  LinearProgress,  Button,
   Tab,
   Tabs,
   Table,
@@ -34,21 +32,15 @@ import {
   TrendingUp as TrendIcon,
   People as PeopleIcon,
   EmojiEvents as GoalIcon,
-  LocalHospital as TherapistIcon,
-  BarChart as ChartIcon,
   Download as DownloadIcon,
   Refresh as RefreshIcon,
   Star as StarIcon,
   CheckCircle as CheckIcon,
-  Speed as SpeedIcon,
-  Timeline as TimelineIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {
   rehabReportService,
-  rehabProgramService,
-  therapySessionService,
-} from 'services/disabilityRehabService';
+  rehabProgramService,} from 'services/disabilityRehabService';
 
 const fmtNum = n => (n ?? 0).toLocaleString('ar-SA');
 const pctColor = v => (v >= 80 ? 'success' : v >= 50 ? 'warning' : 'error');

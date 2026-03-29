@@ -4,15 +4,14 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
   Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress, Divider,
   InputAdornment, MenuItem, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  Tabs, Tab, Badge, Collapse,
+  Tabs, Tab, Badge,
 } from '@mui/material';
 import {
   Login as CheckInIcon, Logout as CheckOutIcon, Search as SearchIcon,
   CalendarMonth as CalendarIcon, AccessTime as TimeIcon,
   PeopleAlt as PeopleIcon, CheckCircle as PresentIcon,
   Cancel as AbsentIcon, EventBusy as LateIcon, Refresh as RefreshIcon,
-  Download as DownloadIcon, Print as PrintIcon, Warning as WarningIcon,
-  Visibility as ViewIcon, Close as CloseIcon, Timer as OvertimeIcon,
+  Download as DownloadIcon, Print as PrintIcon, Visibility as ViewIcon, Close as CloseIcon, Timer as OvertimeIcon,
   FilterList as FilterListIcon, Schedule as ScheduleIcon,
   TrendingUp as TrendUpIcon, Timelapse as TimelapseIcon,
   Fingerprint as FingerprintIcon, Sync as SyncIcon,
@@ -20,11 +19,9 @@ import {
   Assessment as ReportIcon, BeachAccess as LeaveIcon,
   Today as TodayIcon, DateRange as DateRangeIcon,
   CheckCircleOutline as ApproveIcon, HighlightOff as RejectIcon,
-  BarChart as ChartIcon, Person as PersonIcon,
-  ArrowBack as BackIcon, Save as SaveIcon,
+  BarChart as ChartIcon, Save as SaveIcon,
   EventAvailable as EventAvailableIcon, EventBusy as EventBusyIcon,
-  ExpandMore as ExpandMoreIcon, ExpandLess as ExpandLessIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import hrService from 'services/hrService';
 import zktecoService from 'services/zktecoService';
 import attendanceEngineService from '../../services/hr/attendanceEngineService';

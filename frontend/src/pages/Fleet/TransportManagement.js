@@ -30,9 +30,7 @@ import {
   Avatar,
   Divider,
   Tabs,
-  Tab,
-  LinearProgress,
-  Badge,
+  Tab,  Badge,
   Breadcrumbs,
   Link,
   Fade,
@@ -62,24 +60,15 @@ import {
   Home as HomeIcon,
   TrendingUp as TrendIcon,
   Assessment as AnalyticsIcon,
-  Schedule as ScheduleIcon,
   LocationOn as LocationIcon,
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
   Cancel as CancelIcon,
   PlayArrow as PlayIcon,
-  Pause as PauseIcon,
   LocalShipping as VehicleIcon,
   PeopleAlt as PassengerIcon,
-  Map as MapIcon,
-  Timer as TimerIcon,
   Star as StarIcon,
-  CalendarMonth as CalendarIcon,
-  FilterList as FilterIcon,
-  Download as DownloadIcon,
-  BarChart as ChartIcon,
   ReportProblem as AccidentIcon,
-  GpsFixed as GpsIcon,
   EmojiTransportation as TransportIcon,
   Visibility as ViewIcon,
   Close as CloseIcon,
@@ -102,13 +91,11 @@ import {
   CartesianGrid,
   Tooltip as RTooltip,
   ResponsiveContainer,
-  Legend,
-  LineChart,
-  Line,
+  Legend,  Line,
 } from 'recharts';
 import transportService from 'services/transportService';
 import logger from 'utils/logger';
-import { gradients, brandColors } from 'theme/palette';
+import { gradients } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ═══ Constants ═══ */

@@ -14,17 +14,10 @@ import {
   TableRow,
   Chip,
   Button,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+  CircularProgress,  Tooltip,  TextField,
   MenuItem,
 } from '@mui/material';
-import { CalendarMonth, Lock, LockOpen, Add, CheckCircle } from '@mui/icons-material';
+import { CalendarMonth, Lock, LockOpen, CheckCircle } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

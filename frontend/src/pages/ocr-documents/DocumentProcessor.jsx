@@ -4,13 +4,13 @@
  */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent, Tabs, Tab,
+  Box, Typography, Grid, Card, Tabs, Tab,
   Chip, LinearProgress, Alert, Snackbar, TextField, InputAdornment,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, IconButton, Tooltip, Divider, Button, Dialog, DialogTitle,
   DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem,
   Accordion, AccordionSummary, AccordionDetails, List, ListItem,
-  ListItemText, ListItemIcon, CircularProgress,
+  ListItemText, ListItemIcon,
 } from '@mui/material';
 import {
   DocumentScanner as ScanIcon,
@@ -21,18 +21,12 @@ import {
   Cancel as RejectIcon,
   Edit as EditIcon,
   ExpandMore as ExpandIcon,
-  Save as SaveIcon,
   Search as SearchIcon,
-  BarChart as ChartIcon,
   TextSnippet as TextIcon,
-  Science as LabIcon,
   History as HistoryIcon,
-  Download as DownloadIcon,
   Replay as ReplayIcon,
   BatchPrediction as BatchIcon,
-  FolderOpen as FolderIcon,
   ArrowBack as BackIcon,
-  ContentCopy as CopyIcon,
   DataObject as JsonIcon,
   TableChart as CsvIcon,
 } from '@mui/icons-material';

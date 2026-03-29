@@ -21,10 +21,8 @@ import {
   Stepper, Step, StepLabel, StepContent,
   LinearProgress, CircularProgress, Alert, AlertTitle,
   Tooltip, Divider, Badge, Avatar, Switch, FormControlLabel,
-  List, ListItem, ListItemIcon, ListItemText,
   Accordion, AccordionSummary, AccordionDetails,
   Fade, Collapse, InputAdornment, Select, FormControl, InputLabel,
-  Checkbox, Slider, Rating,
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
@@ -46,7 +44,6 @@ import {
   FileCopy as TemplateIcon,
   ViewModule as ModuleIcon,
   GetApp as GetAppIcon,
-  Publish as PublishIcon,
   TableChart as ExcelIcon,
   PictureAsPdf as PdfIcon,
   Code as JsonIcon,
@@ -59,7 +56,6 @@ import {
   Visibility as PreviewIcon,
   Map as MapIcon,
   PlayArrow as RunIcon,
-  Stop as StopIcon,
   DoneAll as DoneAllIcon,
   FolderOpen as FolderIcon,
   SwapHoriz as SwapIcon,
@@ -67,15 +63,11 @@ import {
   ArrowBack as BackIcon,
   Schedule as ScheduleIcon,
   BarChart as BarChartIcon,
-  HighQuality as QualityIcon,
   Timer as TimerIcon,
-  PowerSettingsNew as ToggleOnIcon,
   SelectAll as SelectAllIcon,
-  Transform as TransformIcon,
   CheckBox as CheckBoxIcon,
   CheckBoxOutlineBlank as CheckBoxBlankIcon,
   DonutLarge as DonutIcon,
-  TrendingDown as TrendDownIcon,
   AutoFixHigh as AutoFixIcon,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -636,7 +628,7 @@ export default function ImportExportHub() {
 // ─────────────────────────────────────────────────
 // Dashboard Tab
 // ─────────────────────────────────────────────────
-function DashboardTab({ stats, modules }) {
+function DashboardTab({ stats }) {
   if (!stats) {
     return (
       <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 2 }}>
@@ -748,11 +740,11 @@ function DashboardTab({ stats, modules }) {
           </Typography>
           {(() => {
             const statusData = [
-              { label: 'مكتمل', key: 'completed', color: '#4CAF50', count: stats?.overview?.completed || 0 },
-              { label: 'قيد التنفيذ', key: 'processing', color: '#2196F3', count: stats?.overview?.processing || 0 },
-              { label: 'فشل', key: 'failed', color: '#F44336', count: stats?.overview?.failed || 0 },
-              { label: 'جزئي', key: 'partial', color: '#FF9800', count: stats?.overview?.partial || 0 },
-              { label: 'ملغى', key: 'cancelled', color: '#9E9E9E', count: stats?.overview?.cancelled || 0 },
+            { label: 'مكتمل', status: 'completed', color: '#4CAF50', count: stats?.overview?.completed || 0 },
+              { label: 'قيد التنفيذ', status: 'processing', color: '#2196F3', count: stats?.overview?.processing || 0 },
+              { label: 'فشل', status: 'failed', color: '#F44336', count: stats?.overview?.failed || 0 },
+              { label: 'جزئي', status: 'partial', color: '#FF9800', count: stats?.overview?.partial || 0 },
+              { label: 'ملغى', status: 'cancelled', color: '#9E9E9E', count: stats?.overview?.cancelled || 0 },
             ];
             const maxCount = Math.max(...statusData.map(s => s.count), 1);
             return (

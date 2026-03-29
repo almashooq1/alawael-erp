@@ -39,7 +39,7 @@ describe('API Endpoints', () => {
       'SETTINGS',
     ];
 
-    it.each(expectedGroups)('has %s group', group => {
+    it.each(expectedGroups)('has %s group' => {
       expect(API[group]).toBeDefined();
       expect(typeof API[group]).toBe('object');
     });
@@ -52,13 +52,13 @@ describe('API Endpoints', () => {
     Object.keys(API).forEach(group => {
       Object.entries(API[group]).forEach(([key, val]) => {
         if (typeof val === 'string') {
-          allStatic.push({ group, key, val });
+          allStatic.push({ group, val });
         }
       });
     });
 
     it('all static values are strings starting with /', () => {
-      allStatic.forEach(({ group, key, val }) => {
+      allStatic.forEach(({ group, val }) => {
         expect(val).toBeTruthy();
         expect(val.startsWith('/')).toBe(true);
       });

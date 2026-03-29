@@ -22,9 +22,7 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  Divider,
-  LinearProgress,
-  Rating,
+  Divider,  Rating,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -46,7 +44,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import {   surfaceColors } from '../../theme/palette';
 
 const PLATFORMS = [
   { value: 'zoom', label: 'Zoom', icon: '📹' },

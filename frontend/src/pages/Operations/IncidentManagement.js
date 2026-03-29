@@ -34,7 +34,6 @@ import {
   Add as AddIcon,
   Search as SearchIcon,
   Visibility as ViewIcon,
-  PersonAdd as AssignIcon,
   ArrowUpward as EscalateIcon,
   CheckCircle as ResolveIcon,
   Warning as CritIcon,

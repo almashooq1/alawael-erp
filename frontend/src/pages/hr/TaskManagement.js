@@ -29,31 +29,18 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  LinearProgress,
-  Avatar,
-  Rating,
-  Tabs,
-  Tab,
-} from '@mui/material';
+  LinearProgress,} from '@mui/material';
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
-  Assignment as TaskIcon,
   Flag as FlagIcon,
-  Comment as CommentIcon,
-  PersonAdd as DelegateIcon,
-  CheckCircle as DoneIcon,
-  Schedule as ClockIcon,
-} from '@mui/icons-material';
+  } from '@mui/icons-material';
 import {
   getTasks,
   createTask,
   getTaskById,
   updateTaskStatus,
-  addTaskComment,
-  delegateTask,
-  rateTask,
-  getTaskStats,
+  addTaskComment,  getTaskStats,
 } from '../../services/hr/employeeAffairsPhase2Service';
 
 const TYPES = ['مهمة عادية', 'تكليف رسمي', 'مشروع', 'مهمة عاجلة', 'متابعة', 'تحسين', 'بحث ودراسة'];

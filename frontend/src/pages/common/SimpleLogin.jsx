@@ -21,9 +21,7 @@ import {
   Alert,
   InputAdornment,
   IconButton,
-  CircularProgress,
-  Avatar,
-  Fade,
+  CircularProgress,  Fade,
   Collapse,
 } from '@mui/material';
 import {

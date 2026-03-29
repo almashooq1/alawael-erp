@@ -22,13 +22,7 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  LinearProgress,
-  Checkbox,
-  Divider,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
+  LinearProgress,  Divider,} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -41,7 +35,6 @@ import {
   Flag as FlagIcon,
   EmojiEvents as TrophyIcon,
   Timeline as TimelineIcon,
-  Star as StarIcon,
   TrendingUp as TrendIcon,
   Category as DomainIcon,
 } from '@mui/icons-material';
@@ -49,7 +42,7 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { statusColors, neutralColors, surfaceColors } from '../../theme/palette';
+import { statusColors, neutralColors } from '../../theme/palette';
 
 const DOMAINS = [
   { value: 'motor', label: 'حركي', color: '#3b82f6', icon: '🏃' },

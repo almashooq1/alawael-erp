@@ -38,12 +38,10 @@ import {
 } from '@mui/material';
 import {
   ArrowBack,
-  Edit,
   CheckCircle,
   Cancel,
   Block,
   Refresh,
-  Gavel,
   History,
   People,
   Send,
@@ -56,7 +54,6 @@ import {
   Lock,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const docTypeLabels = {

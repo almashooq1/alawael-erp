@@ -1,38 +1,29 @@
-# Backend Dockerfile - Multi-stage production build
+# Backend Dockerfile - Single-stage build (needed for sqlite3 native compilation)
 
-# Stage 1: Build
-FROM node:22-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY dashboard/server/package*.json ./
-
-# Install dependencies
-RUN npm ci --only=production && \
-    npm cache clean --force
-
-# Copy application code
-COPY dashboard/server/ ./
-
-# Stage 2: Runtime
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install build tools + runtime libs for sqlite3 (single stage = no copy issues)
+# py3-setuptools provides 'distutils' needed by node-gyp (removed in Python 3.12)
+RUN apk add --no-cache dumb-init python3 py3-setuptools make g++ sqlite-dev
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy from builder
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app .
+# Copy package files
+COPY dashboard/server/package*.json ./
+
+# Install dependencies and compile sqlite3 from source
+RUN npm install --only=production --build-from-source=sqlite3 && \
+    npm cache clean --force
+
+# Copy application code
+COPY dashboard/server/ ./
 
 # Create logs directory
-RUN mkdir -p logs && chown -R nodejs:nodejs logs
+RUN mkdir -p logs && chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs

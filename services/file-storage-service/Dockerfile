@@ -6,7 +6,7 @@ RUN apk add --no-cache dumb-init curl \
 
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 COPY . .
 RUN mkdir -p /app/uploads/documents /app/uploads/images /app/uploads/videos /app/uploads/audio /app/uploads/archives /app/uploads/temp /app/uploads/thumbnails \
     && chown -R appuser:appgroup /app

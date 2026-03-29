@@ -25,7 +25,22 @@ const log = winston.createLogger({
 });
 
 /* ── Connections ─────────────────────────────────────────────── */
-const redisOpts = { host: process.env.REDIS_HOST || 'redis', port: 6379, maxRetriesPerRequest: null };
+// Parse Redis URL to extract password for BullMQ connection
+const _redisUrl = process.env.REDIS_URL
+  ? (() => {
+      try {
+        return new URL(process.env.REDIS_URL);
+      } catch (e) {
+        return null;
+      }
+    })()
+  : null;
+const redisOpts = {
+  host: _redisUrl?.hostname || process.env.REDIS_HOST || 'redis',
+  port: parseInt(_redisUrl?.port || '6379'),
+  password: _redisUrl?.password || undefined,
+  maxRetriesPerRequest: null,
+};
 const redis = new Redis(process.env.REDIS_URL || 'redis://redis:6379/6');
 
 mongoose
@@ -180,9 +195,13 @@ worker.on('failed', (job, err) => {
 
 /* ── Health ───────────────────────────────────────────────────── */
 app.get('/health', async (_req, res) => {
-  const waiting = await webhookQueue.getWaitingCount();
-  const active = await webhookQueue.getActiveCount();
-  res.json({ status: 'ok', queue: { waiting, active } });
+  try {
+    const waiting = await webhookQueue.getWaitingCount();
+    const active = await webhookQueue.getActiveCount();
+    res.json({ status: 'ok', queue: { waiting, active } });
+  } catch (e) {
+    res.json({ status: 'ok', queue: { error: e.message } });
+  }
 });
 
 /* ── Register Webhook Endpoint ───────────────────────────────── */

@@ -3,7 +3,7 @@ RUN apk add --no-cache dumb-init curl && \
     addgroup -g 1001 -S appgroup && adduser -S appuser -u 1001 -G appgroup
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 COPY . .
 RUN chown -R appuser:appgroup /app
 USER appuser

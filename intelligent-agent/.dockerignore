@@ -15,7 +15,6 @@ __tests__/
 __mocks__/
 
 # Build outputs
-dist/
 build/
 .next/
 out/
@@ -65,7 +64,6 @@ temp/
 
 # TypeScript
 *.tsbuildinfo
-tsconfig.json
 
 # ESLint & Prettier
 .eslintrc*

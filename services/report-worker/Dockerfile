@@ -4,7 +4,7 @@ RUN apk add --no-cache dumb-init curl fontconfig ttf-freefont && \
     mkdir -p /tmp/reports && chown appuser:appgroup /tmp/reports
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 COPY . .
 RUN chown -R appuser:appgroup /app
 USER appuser

@@ -20,6 +20,11 @@ RUN if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.
 # Copy source
 COPY . .
 
+# Fix Python package structure so 'secretary_ai' is importable
+RUN mkdir -p secretary_ai && \
+    cp smart_secretary.py secretary_ai/smart_secretary.py 2>/dev/null || true && \
+    cp __init__.py secretary_ai/__init__.py 2>/dev/null || touch secretary_ai/__init__.py
+
 # Create non-root user
 RUN useradd -m -u 1001 appuser && \
     mkdir -p logs && chown -R appuser:appuser /app

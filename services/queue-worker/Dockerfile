@@ -3,7 +3,7 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init curl && rm -rf /var/cache/apk/*
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 COPY package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 COPY --chown=nodejs:nodejs . .
 ENV NODE_ENV=production PORT=3080
 EXPOSE 3080

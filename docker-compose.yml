@@ -468,7 +468,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3030/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3030/health"]
       <<: *healthcheck-defaults
     deploy:
       resources:
@@ -555,7 +555,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3006/health || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3006/health > /dev/null 2>&1 || exit 1"]
       <<: *healthcheck-defaults
     deploy:
       resources:
@@ -732,7 +732,7 @@ services:
       SMTP_FROM: ${SMTP_FROM:-noreply@alawael.com}
       FCM_PROJECT_ID: ${FCM_PROJECT_ID:-}
     ports:
-      - "${NOTIFICATION_PORT:-3070}:3070"
+      - "${NOTIFICATION_SVC_PORT:-3070}:3070"
     depends_on:
       mongodb:
         condition: service_healthy
@@ -2406,7 +2406,7 @@ services:
   payment-gateway-service:
     build:
       context: ./services/payment-gateway-service
-    container_name: alawael-payment-gateway
+    container_name: alawael-payment-gateway-v2
     <<: *restart-policy
     environment:
       <<: *common-env
@@ -2925,3 +2925,4 @@ services:
         limits:
           memory: 128M
           cpus: "0.25"
+

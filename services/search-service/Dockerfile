@@ -2,7 +2,7 @@ FROM node:20-alpine
 RUN apk add --no-cache dumb-init curl
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 COPY . .
 RUN addgroup -g 1001 appgroup && adduser -u 1001 -G appgroup -s /bin/sh -D appuser
 USER appuser

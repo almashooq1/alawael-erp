@@ -5,6 +5,7 @@
 
 # Node
 node_modules/
+**/node_modules
 npm-debug.log
 yarn-error.log
 .npm
@@ -60,14 +61,9 @@ archive/
 backups/
 alawael-wiki/
 data/
-dashboard/
-finance-module/
 frontend-finance/
-intelligent-agent/
 mobile/
 postman/
-secretary_ai/
-whatsapp/
 templates/
 scripts/
 monitoring/

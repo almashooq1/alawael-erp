@@ -429,6 +429,15 @@ async function startServer() {
 
   app.use(helmet({ contentSecurityPolicy: false }));
 
+  // Health check endpoints
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', service: 'graphql', timestamp: new Date().toISOString() });
+  });
+
+  app.get('/.well-known/apollo/server-health', (req, res) => {
+    res.json({ status: 'pass' });
+  });
+
   app.use(
     '/graphql',
     cors({

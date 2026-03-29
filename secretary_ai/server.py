@@ -14,7 +14,7 @@ from secretary_ai.smart_secretary import (
     Appointment, Task
 )
 
-PORT = 8080
+PORT = int(os.environ.get('PORT', 3050))
 
 class SecretaryHandler(BaseHTTPRequestHandler):
     scheduler = SmartScheduler()

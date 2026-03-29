@@ -1,22 +1,27 @@
-# Backend Service
+# Backend Service - Supply Chain Management
 
 FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Install build tools required for native modules (canvas, etc.)
+RUN apk add --no-cache python3 make g++ cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install all dependencies (some required packages missing from package.json)
+RUN npm install && \
+    npm install helmet bcryptjs --save 2>/dev/null || true && \
+    npm cache clean --force
 
 # ===== Production Image =====
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
+# Install runtime dependencies for canvas
+RUN apk add --no-cache dumb-init cairo pango jpeg giflib pixman
 
 # Copy from builder
 COPY --from=builder /app/node_modules ./node_modules

@@ -4,7 +4,7 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup -u 1001
 WORKDIR /app
 RUN mkdir -p /app/backups && chown -R appuser:appgroup /app/backups
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 COPY . .
 RUN chown -R appuser:appgroup /app
 USER appuser

@@ -2,7 +2,7 @@ FROM node:20-alpine
 RUN apk add --no-cache dumb-init curl vips-dev
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 COPY . .
 RUN mkdir -p /app/uploads/thumbnails /app/uploads/processed && \
     addgroup -g 1001 appgroup && \

@@ -1,25 +1,27 @@
 /**
- * KPICard — بطاقة مؤشر الأداء الرئيسي
+ * KPICard — بطاقة مؤشر الأداء الرئيسي (Phase 2)
  *
  * Premium metric card with:
  * - Large value display with animated counter
  * - Trend indicator (+/- percentage)
  * - Sparkline mini chart
- * - Gradient icon
+ * - Gradient icon with glow effect
  * - Loading skeleton
  * - Click-through navigation
+ * - Phase 2: comparison mode, target progress, pulse animation, responsive sizes
  */
 
 import { memo, useEffect, useRef, useState } from 'react';
 import {
   Box, Card, Typography, Skeleton, Tooltip,
-  useTheme, alpha,
+  LinearProgress, useTheme, alpha,
 } from '@mui/material';
 import {
   TrendingUp,
   TrendingDown,
   TrendingFlat,
   ArrowForwardIos,
+  FlagOutlined,
 } from '@mui/icons-material';
 
 // ─── Animated number counter ──────────────────────────────────────────────────
@@ -33,7 +35,6 @@ function useAnimatedValue(target, duration = 1200) {
     const animate = () => {
       const elapsed = Date.now() - start;
       const progress = Math.min(elapsed / duration, 1);
-      // Ease out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.round(target * eased));
       if (progress < 1) frameRef.current = requestAnimationFrame(animate);
@@ -64,15 +65,18 @@ function Sparkline({ data = [], color, height = 36, width = 80 }) {
   const polyline = points.map((p) => p.join(',')).join(' ');
   const area = `M${points[0][0]},${H} ${points.map((p) => `L${p[0]},${p[1]}`).join(' ')} L${W},${H} Z`;
 
+  // Unique gradient ID based on color
+  const gradId = `sg_${color?.replace(/[^a-zA-Z0-9]/g, '') || 'def'}`;
+
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ overflow: 'visible' }}>
       <defs>
-        <linearGradient id={`sg_${color}`} x1="0" y1="0" x2="0" y2="1">
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor={color} stopOpacity="0.3" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d={area} fill={`url(#sg_${color})`} />
+      <path d={area} fill={`url(#${gradId})`} />
       <polyline
         points={polyline}
         fill="none"
@@ -81,7 +85,6 @@ function Sparkline({ data = [], color, height = 36, width = 80 }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      {/* Last dot */}
       <circle
         cx={points[points.length - 1][0]}
         cy={points[points.length - 1][1]}
@@ -113,6 +116,49 @@ function TrendBadge({ value, suffix = '%', label }) {
   );
 }
 
+// ─── Target progress bar ──────────────────────────────────────────────────────
+function TargetProgress({ current, target, color, label }) {
+  if (!target || target <= 0) return null;
+  const pct = Math.min((current / target) * 100, 100);
+  const isComplete = pct >= 100;
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <FlagOutlined sx={{ fontSize: 12, color: 'text.disabled' }} />
+          <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+            {label || 'الهدف'}: {target.toLocaleString('ar-SA')}
+          </Typography>
+        </Box>
+        <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: isComplete ? '#10B981' : color }}>
+          {Math.round(pct)}%
+        </Typography>
+      </Box>
+      <LinearProgress
+        variant="determinate"
+        value={pct}
+        sx={{
+          height: 4,
+          borderRadius: 2,
+          backgroundColor: alpha(color, 0.12),
+          '& .MuiLinearProgress-bar': {
+            borderRadius: 2,
+            backgroundColor: isComplete ? '#10B981' : color,
+          },
+        }}
+      />
+    </Box>
+  );
+}
+
+// ─── SIZE PRESETS ─────────────────────────────────────────────────────────────
+const SIZE = {
+  sm: { iconSize: 36, iconRadius: '9px', iconFont: 18, valueFont: '1.5rem', p: 2 },
+  md: { iconSize: 44, iconRadius: '11px', iconFont: 22, valueFont: '1.875rem', p: 2.5 },
+  lg: { iconSize: 52, iconRadius: '13px', iconFont: 26, valueFont: '2.25rem', p: 3 },
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 const KPICard = memo(function KPICard({
   title,
@@ -126,6 +172,12 @@ const KPICard = memo(function KPICard({
   trendLabel,
   trendSuffix,
   sparkline,
+  // Phase 2 new props
+  target,
+  targetLabel,
+  comparison,       // { label, value }
+  size = 'md',
+  pulse = false,    // pulse animation for critical metrics
   loading = false,
   onClick,
   sx = {},
@@ -134,10 +186,11 @@ const KPICard = memo(function KPICard({
   const isDark  = theme.palette.mode === 'dark';
   const isClickable = Boolean(onClick);
 
+  const s = SIZE[size] || SIZE.md;
+
   // Determine colors
   const primaryColor  = color || theme.palette.primary.main;
   const cardGradient  = gradient || `linear-gradient(135deg, ${primaryColor}, ${theme.palette.secondary?.main || '#7C3AED'})`;
-  const lightBg       = alpha(primaryColor, isDark ? 0.12 : 0.07);
   const borderColor   = alpha(primaryColor, isDark ? 0.2 : 0.12);
 
   // Animate numeric values
@@ -147,13 +200,14 @@ const KPICard = memo(function KPICard({
 
   if (loading) {
     return (
-      <Card sx={{ p: 2.5, ...sx }}>
+      <Card sx={{ p: s.p, ...sx }}>
         <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 2 }}>
-          <Skeleton variant="rounded" width={44} height={44} />
+          <Skeleton variant="rounded" width={s.iconSize} height={s.iconSize} sx={{ borderRadius: s.iconRadius }} />
           <Skeleton variant="rounded" width={60} height={20} />
         </Box>
         <Skeleton variant="text" width="60%" height={40} />
         <Skeleton variant="text" width="40%" />
+        {target && <Skeleton variant="rounded" width="100%" height={4} sx={{ mt: 1.5, borderRadius: 2 }} />}
       </Card>
     );
   }
@@ -162,7 +216,7 @@ const KPICard = memo(function KPICard({
     <Card
       onClick={onClick}
       sx={{
-        p: 2.5,
+        p: s.p,
         cursor: isClickable ? 'pointer' : 'default',
         position: 'relative',
         overflow: 'hidden',
@@ -176,6 +230,14 @@ const KPICard = memo(function KPICard({
                 : `0 12px 28px ${alpha(primaryColor, 0.15)}, 0 0 0 1px ${borderColor}`,
             }
           : {},
+        // Phase 2: pulse animation for critical metrics
+        ...(pulse && {
+          animation: 'kpiPulse 2s ease-in-out infinite',
+          '@keyframes kpiPulse': {
+            '0%, 100%': { boxShadow: `0 0 0 0 ${alpha(primaryColor, 0.2)}` },
+            '50%': { boxShadow: `0 0 0 8px ${alpha(primaryColor, 0)}` },
+          },
+        }),
         ...sx,
       }}
     >
@@ -199,23 +261,23 @@ const KPICard = memo(function KPICard({
         {/* Icon */}
         <Box
           sx={{
-            width: 44,
-            height: 44,
-            borderRadius: '11px',
+            width: s.iconSize,
+            height: s.iconSize,
+            borderRadius: s.iconRadius,
             background: cardGradient,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             boxShadow: `0 4px 12px ${alpha(primaryColor, 0.35)}`,
             color: '#FFFFFF',
-            '& svg': { fontSize: 22 },
+            '& svg': { fontSize: s.iconFont },
             flexShrink: 0,
           }}
         >
           {icon}
         </Box>
 
-        {/* Trend */}
+        {/* Trend + arrow */}
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 0.5 }}>
           {trend !== undefined && (
             <TrendBadge value={trend} suffix={trendSuffix} label={trendLabel} />
@@ -233,7 +295,7 @@ const KPICard = memo(function KPICard({
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75, mb: 0.5 }}>
         <Typography
           sx={{
-            fontSize: '1.875rem',
+            fontSize: s.valueFont,
             fontWeight: 700,
             lineHeight: 1,
             color: isDark ? '#FFFFFF' : primaryColor,
@@ -244,29 +306,38 @@ const KPICard = memo(function KPICard({
           {displayVal}
         </Typography>
         {unit && (
-          <Typography
-            sx={{
-              fontSize: '0.875rem',
-              fontWeight: 600,
-              color: 'text.secondary',
-            }}
-          >
+          <Typography sx={{ fontSize: '0.875rem', fontWeight: 600, color: 'text.secondary' }}>
             {unit}
           </Typography>
         )}
       </Box>
 
       {/* Title */}
-      <Typography
-        sx={{
-          fontSize: '0.875rem',
-          fontWeight: 500,
-          color: 'text.secondary',
-          lineHeight: 1.4,
-        }}
-      >
+      <Typography sx={{ fontSize: '0.875rem', fontWeight: 500, color: 'text.secondary', lineHeight: 1.4 }}>
         {title}
       </Typography>
+
+      {/* Phase 2: Comparison */}
+      {comparison && (
+        <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled' }}>
+            {comparison.label}:
+          </Typography>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 600, color: 'text.secondary' }}>
+            {typeof comparison.value === 'number' ? comparison.value.toLocaleString('ar-SA') : comparison.value}
+          </Typography>
+        </Box>
+      )}
+
+      {/* Phase 2: Target progress */}
+      {target && (
+        <TargetProgress
+          current={numericVal}
+          target={target}
+          color={primaryColor}
+          label={targetLabel}
+        />
+      )}
 
       {/* Subtitle + sparkline */}
       {(subtitle || sparkline?.length) && (

@@ -25,5 +25,8 @@ export { default as ExportMenu } from './ExportMenu';
 // Tabs
 export { default as TabPanel, a11yProps } from './TabPanel';
 
+// Watermark
+export { default as WatermarkBackground } from './WatermarkBackground';
+
 // Error handling
 export { default as RouteErrorBoundary } from './RouteErrorBoundary';

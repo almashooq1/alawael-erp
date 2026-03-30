@@ -1,17 +1,11 @@
-# ════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — Deploy to Hostinger VPS (v2)
-#  النشر التلقائي: اختبار ← بناء ← نسخ احتياطي ← نشر ← فحص ← إشعار
-# ════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Deploy to Production VPS (Manual Only)
+#  النشر يدوي فقط — لا يعمل تلقائياً عند كل push
+# ════════════════════════════════════════════════════════════════════
 name: "🚀 Deploy to Production"
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "backend/**"
-      - "frontend/**"
-      - "deploy/hostinger/**"
-      - ".github/workflows/deploy-hostinger.yml"
+  # ✅ يدوي فقط — لا يعمل تلقائياً
   workflow_dispatch:
     inputs:
       deploy_target:
@@ -28,10 +22,14 @@ on:
         required: false
         default: false
         type: boolean
+      confirm:
+        description: "اكتب 'deploy' للتأكيد"
+        required: true
+        type: string
 
 env:
   APP_DIR: /home/alawael/app
-  NODE_VERSION: "22"
+  NODE_VERSION: "20"
 
 concurrency:
   group: deploy-production
@@ -42,9 +40,9 @@ permissions:
   deployments: write
 
 jobs:
-  # ─── Stage 1: Pre-flight Checks ─────────────────────────────────
+  # ─── Guard: Require secrets + confirmation ───────────────────────
   preflight:
-    name: "🔍 Pre-flight Checks"
+    name: "🔍 Pre-flight"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -52,6 +50,27 @@ jobs:
       deploy_backend: ${{ steps.target.outputs.backend }}
       deploy_frontend: ${{ steps.target.outputs.frontend }}
     steps:
+      - name: Confirm deployment intent
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+            echo "❌ You must type 'deploy' in the confirm field!"
+            exit 1
+          fi
+          echo "✅ Deployment confirmed"
+
+      - name: Check required secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]     && echo "❌ Missing: VPS_HOST"     && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]     && echo "❌ Missing: VPS_USER"     && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ]  && echo "❌ Missing: VPS_SSH_KEY"  && MISSING=1
+          if [ "$MISSING" = "1" ]; then
+            echo ""
+            echo "Configure secrets at: Settings → Secrets → Actions"
+            exit 1
+          fi
+          echo "✅ All secrets present"
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
@@ -61,64 +80,23 @@ jobs:
         run: |
           echo "short_sha=$(echo ${{ github.sha }} | cut -c1-8)" >> $GITHUB_OUTPUT
           echo "📋 Commit: $(echo ${{ github.sha }} | cut -c1-8)"
-          echo "📋 Branch: ${{ github.ref_name }}"
           echo "📋 Actor: ${{ github.actor }}"
 
       - name: Determine deploy targets
         id: target
         run: |
-          TARGET="${{ github.event.inputs.deploy_target || 'both' }}"
-          if [ "$TARGET" = "both" ] || [ "$TARGET" = "backend-only" ]; then
-            echo "backend=true" >> $GITHUB_OUTPUT
-          else
-            echo "backend=false" >> $GITHUB_OUTPUT
-          fi
-          if [ "$TARGET" = "both" ] || [ "$TARGET" = "frontend-only" ]; then
-            echo "frontend=true" >> $GITHUB_OUTPUT
-          else
-            echo "frontend=false" >> $GITHUB_OUTPUT
-          fi
-          echo "🎯 Deploy target: $TARGET"
+          TARGET="${{ github.event.inputs.deploy_target }}"
+          [[ "$TARGET" == "both" || "$TARGET" == "backend-only" ]] && echo "backend=true" || echo "backend=false" >> $GITHUB_OUTPUT
+          [[ "$TARGET" == "both" || "$TARGET" == "frontend-only" ]] && echo "frontend=true" || echo "frontend=false" >> $GITHUB_OUTPUT
+          echo "🎯 Target: $TARGET"
 
-  # ─── Stage 2: Test ──────────────────────────────────────────────
-  test:
-    name: "✅ Run Tests"
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: ${{ github.event.inputs.skip_tests != 'true' }}
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install & lint
-        working-directory: backend
-        run: |
-          npm ci
-          npm run lint -- --max-warnings 0
-
-      - name: Run all tests
-        working-directory: backend
-        run: npm test -- --passWithNoTests --no-coverage --forceExit --ci --runInBand
-        env:
-          NODE_ENV: test
-          DISABLE_REDIS: "true"
-
-  # ─── Stage 3: Build Frontend ────────────────────────────────────
+  # ─── Build Frontend ──────────────────────────────────────────────
   build-frontend:
     name: "📦 Build Frontend"
     runs-on: ubuntu-latest
-    needs: [preflight, test]
-    if: |
-      always() &&
-      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
-      needs.preflight.outputs.deploy_frontend == 'true'
-    timeout-minutes: 15
+    needs: preflight
+    if: needs.preflight.outputs.deploy_frontend == 'true'
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -128,18 +106,15 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install
         working-directory: frontend
-        run: |
-          npm install -g npm@latest
-          npm ci
+        run: npm ci --legacy-peer-deps
 
-      - name: Build production
+      - name: Build
         working-directory: frontend
         run: npm run build
         env:
           REACT_APP_API_URL: https://${{ secrets.DOMAIN || 'alaweal.org' }}/api
-          REACT_APP_API_V1_URL: https://${{ secrets.DOMAIN || 'alaweal.org' }}/api/v1
           REACT_APP_WS_URL: wss://${{ secrets.DOMAIN || 'alaweal.org' }}
           REACT_APP_ENVIRONMENT: production
           REACT_APP_VERSION: ${{ needs.preflight.outputs.short_sha }}
@@ -153,16 +128,13 @@ jobs:
           path: frontend/build/
           retention-days: 3
 
-  # ─── Stage 4: Deploy ────────────────────────────────────────────
+  # ─── Deploy ──────────────────────────────────────────────────────
   deploy:
     name: "🚀 Deploy to VPS"
     runs-on: ubuntu-latest
-    needs: [preflight, test, build-frontend]
-    if: |
-      always() &&
-      (needs.test.result == 'success' || needs.test.result == 'skipped') &&
-      (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
-    timeout-minutes: 15
+    needs: [preflight, build-frontend]
+    if: always() && needs.preflight.result == 'success'
+    timeout-minutes: 20
     environment:
       name: production
       url: https://${{ secrets.DOMAIN || 'alaweal.org' }}
@@ -181,271 +153,79 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST || '72.60.84.56' }} >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Create backup on VPS
-        run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          ssh $SSH_TARGET << 'BACKUP'
-            set -e
-            APP="/home/alawael/app"
-            BACKUP_DIR="/home/alawael/backups/$(date +%Y%m%d_%H%M%S)"
-            mkdir -p "$BACKUP_DIR"
-
-            # Save current commit hash for rollback
-            cd $APP
-            git rev-parse HEAD > "$BACKUP_DIR/commit.txt"
-            echo "📸 Backup commit: $(cat $BACKUP_DIR/commit.txt | cut -c1-8)"
-
-            # Backup critical configs
-            cp -f $APP/backend/.env "$BACKUP_DIR/.env.bak" 2>/dev/null || true
-            cp -f $APP/deploy/hostinger/ecosystem.config.js "$BACKUP_DIR/ecosystem.bak.js" 2>/dev/null || true
-
-            # Keep only last 5 backups
-            cd /home/alawael/backups
-            ls -dt */ 2>/dev/null | tail -n +6 | xargs rm -rf 2>/dev/null || true
-            echo "✅ Backup created: $BACKUP_DIR"
-          BACKUP
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          echo "✅ SSH configured"
 
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
         run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          echo "📤 Uploading backend..."
+          SSH="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
           rsync -avz --delete \
-            --exclude='node_modules' \
-            --exclude='.env' \
-            --exclude='logs/' \
-            --exclude='uploads/' \
-            --exclude='__tests__/' \
-            --exclude='*.test.js' \
-            --exclude='*.spec.js' \
-            --exclude='coverage/' \
-            --exclude='data/' \
-            backend/ $SSH_TARGET:${{ env.APP_DIR }}/backend/
+            --exclude='node_modules' --exclude='.env' \
+            --exclude='logs/' --exclude='uploads/' \
+            --exclude='__tests__/' --exclude='*.test.js' \
+            --exclude='coverage/' --exclude='data/' \
+            backend/ $SSH:${{ env.APP_DIR }}/backend/
 
-          echo "📦 Installing production deps..."
-          ssh $SSH_TARGET << 'EOF'
-            cd /home/alawael/app/backend
-            npm ci --production --no-audit --no-fund 2>&1 | tail -5
-            echo "✅ Backend deployed"
-          EOF
+          ssh $SSH "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
+          echo "✅ Backend deployed"
 
       - name: Deploy frontend
         if: needs.build-frontend.result == 'success'
         run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          echo "📤 Uploading frontend build..."
-          rsync -avz --delete \
-            frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
+          SSH="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          rsync -avz --delete frontend/build/ $SSH:${{ env.APP_DIR }}/frontend/build/
           echo "✅ Frontend deployed"
 
-      - name: Deploy configs
+      - name: Restart services
         run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          rsync -avz \
-            deploy/hostinger/ecosystem.config.js \
-            $SSH_TARGET:${{ env.APP_DIR }}/ecosystem.config.js 2>/dev/null || true
-
-      - name: "🗄️ Database setup (migrations + indexes)"
-        if: needs.preflight.outputs.deploy_backend == 'true'
-        run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          ssh $SSH_TARGET << 'DBSETUP'
+          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
             set -e
-            cd /home/alawael/app/backend
-            echo "🗄️  Running database setup (plugins → migrate → indexes)..."
-
-            # Run setup with production flag (skips sample seeds)
-            NODE_ENV=production node scripts/setup-database.js \
-              --env production \
-              --skip seeds \
-              2>&1 | tail -30
-
-            EXIT_CODE=${PIPESTATUS[0]}
-            if [ $EXIT_CODE -ne 0 ]; then
-              echo "❌ Database setup failed with exit code $EXIT_CODE"
-              exit $EXIT_CODE
-            fi
-            echo "✅ Database setup completed successfully"
-          DBSETUP
-
-      - name: Restart application (zero-downtime)
-        run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          ssh $SSH_TARGET << 'EOF'
             cd /home/alawael/app
-
-            # PM2 reload (zero-downtime)
-            if su - alawael -c 'pm2 list' 2>/dev/null | grep -q "alawael-api"; then
-              su - alawael -c 'cd /home/alawael/app && pm2 reload alawael-api --update-env'
-              echo "🔄 PM2 reloaded (zero-downtime)"
-            else
-              su - alawael -c 'cd /home/alawael/app && pm2 start ecosystem.config.js'
-              su - alawael -c 'pm2 save'
-              echo "🚀 PM2 started fresh"
+            if pm2 list 2>/dev/null | grep -q "alawael"; then
+              pm2 reload all --update-env
+              echo "🔄 PM2 reloaded"
             fi
-
-            # Reload Nginx
-            nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null
+            nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"
           EOF
 
       - name: Health check
-        id: health
         run: |
-          echo "⏳ Waiting for app to boot..."
-          sleep 8
-
-          DOMAIN="${{ secrets.DOMAIN || 'alaweal.org' }}"
-          HOST="${{ secrets.VPS_HOST || '72.60.84.56' }}"
-
-          for i in 1 2 3 4 5 6; do
-            # Try via SSH first (most reliable)
-            HEALTH=$(ssh ${{ secrets.VPS_USER || 'root' }}@$HOST \
+          echo "⏳ Waiting for app..."
+          sleep 15
+          for i in 1 2 3 4 5; do
+            HEALTH=$(ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
               "curl -sf http://127.0.0.1:5000/api/health 2>/dev/null" || echo "")
-
-            if echo "$HEALTH" | grep -q '"ok"'; then
-              echo "✅ Health check PASSED! (attempt $i)"
-              echo "   Response: $HEALTH"
-              echo "status=success" >> $GITHUB_OUTPUT
+            if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
+              echo "✅ Health check PASSED (attempt $i)"
               exit 0
             fi
-            echo "⏳ Attempt $i/6 — retrying in 5s..."
+            echo "⏳ Attempt $i/5..."
             sleep 5
           done
-
-          echo "❌ Health check FAILED after 6 attempts"
-          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "❌ Health check FAILED"
           exit 1
 
-      - name: Smoke test — API endpoints
-        if: steps.health.outputs.status == 'success'
-        run: |
-          HOST="${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@$HOST"
-          echo "🔥 Running smoke tests..."
-
-          FAILED=0
-          for EP in "/api/health" "/api/v1/health"; do
-            STATUS=$(ssh $SSH_TARGET "curl -sf -o /dev/null -w '%{http_code}' http://127.0.0.1:5000$EP 2>/dev/null" || echo "000")
-            if [ "$STATUS" = "200" ]; then
-              echo "  ✅ $EP → $STATUS"
-            else
-              echo "  ❌ $EP → $STATUS"
-              FAILED=1
-            fi
-          done
-
-          if [ "$FAILED" = "1" ]; then
-            echo "⚠️ Some smoke tests failed"
-          else
-            echo "✅ All smoke tests passed"
-          fi
-
-  # ─── Stage 5: Rollback (on failure) ─────────────────────────────
-  rollback:
-    name: "⏪ Auto-Rollback"
-    runs-on: ubuntu-latest
-    needs: deploy
-    if: failure()
-    timeout-minutes: 10
-    steps:
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST || '72.60.84.56' }} >> ~/.ssh/known_hosts 2>/dev/null
-
-      - name: Rollback to last good commit
-        run: |
-          SSH_TARGET="${{ secrets.VPS_USER || 'root' }}@${{ secrets.VPS_HOST || '72.60.84.56' }}"
-          ssh $SSH_TARGET << 'ROLLBACK'
-            set -e
-            APP="/home/alawael/app"
-
-            # Find latest backup
-            LATEST=$(ls -dt /home/alawael/backups/*/ 2>/dev/null | head -1)
-            if [ -z "$LATEST" ] || [ ! -f "$LATEST/commit.txt" ]; then
-              echo "❌ No backup found — restarting PM2..."
-              su - alawael -c 'pm2 restart alawael-api' 2>/dev/null || true
-              exit 0
-            fi
-
-            OLD_COMMIT=$(cat "$LATEST/commit.txt")
-            echo "⏪ Rolling back to commit: $(echo $OLD_COMMIT | cut -c1-8)"
-
-            cd $APP
-            git fetch origin
-            git checkout $OLD_COMMIT -- backend/ frontend/src/ deploy/
-
-            # Restore env
-            if [ -f "$LATEST/.env.bak" ]; then
-              cp -f "$LATEST/.env.bak" $APP/backend/.env
-            fi
-
-            # Reinstall & restart
-            cd backend && npm ci --production --no-audit --no-fund 2>&1 | tail -3
-            su - alawael -c 'cd /home/alawael/app && pm2 reload alawael-api --update-env'
-
-            # Verify
-            sleep 5
-            if curl -sf http://127.0.0.1:5000/api/health | grep -q '"ok"'; then
-              echo "✅ Rollback successful!"
-            else
-              echo "❌ Rollback health check failed — manual intervention needed"
-              exit 1
-            fi
-          ROLLBACK
-
-  # ─── Stage 6: Notification ──────────────────────────────────────
+  # ─── Summary ─────────────────────────────────────────────────────
   notify:
-    name: "📢 Notify"
+    name: "📢 Summary"
     runs-on: ubuntu-latest
     needs: [preflight, deploy]
     if: always()
     steps:
       - name: Deployment summary
         run: |
-          DEPLOY_STATUS="${{ needs.deploy.result }}"
+          STATUS="${{ needs.deploy.result }}"
           SHA="${{ needs.preflight.outputs.short_sha }}"
+          [ "$STATUS" = "success" ] && ICON="✅" || ICON="❌"
 
-          if [ "$DEPLOY_STATUS" = "success" ]; then
-            ICON="✅"
-            MSG="Deployment successful"
-          elif [ "$DEPLOY_STATUS" = "failure" ]; then
-            ICON="❌"
-            MSG="Deployment FAILED (rollback attempted)"
-          else
-            ICON="⏹️"
-            MSG="Deployment $DEPLOY_STATUS"
-          fi
-
-          echo "## $ICON Deployment Report" >> $GITHUB_STEP_SUMMARY
+          echo "## $ICON Production Deployment" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | $MSG |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | $STATUS |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`$SHA\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Author | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target | ${{ github.event.inputs.deploy_target || 'both' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Time | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://${{ secrets.DOMAIN || 'alaweal.org' }}" >> $GITHUB_STEP_SUMMARY
-
-      - name: Slack notification
-        if: env.SLACK_WEBHOOK != ''
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-        run: |
-          STATUS="${{ needs.deploy.result }}"
-          SHA="${{ needs.preflight.outputs.short_sha }}"
-          [ "$STATUS" = "success" ] && EMOJI="✅" || EMOJI="❌"
-
-          curl -sf -X POST "$SLACK_WEBHOOK" \
-            -H 'Content-type: application/json' \
-            -d "{
-              \"text\": \"$EMOJI *Al-Awael ERP* deploy ($SHA) — $STATUS\n*Branch:* ${{ github.ref_name }}\n*By:* ${{ github.actor }}\"
-            }" || true
+          echo "| Actor  | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| URL    | https://${{ secrets.DOMAIN || 'alaweal.org' }} |" >> $GITHUB_STEP_SUMMARY

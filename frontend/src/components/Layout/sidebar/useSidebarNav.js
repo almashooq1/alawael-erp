@@ -18,16 +18,28 @@ const useSidebarNav = ({ collapsed, onClose }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const userRole = currentUser?.role || 'guest';
+  const isAdmin = ['admin', 'super_admin', 'administrator'].includes(userRole);
 
   // Filter navigation items by role
+  // Admins and super_admins see everything; other roles see only permitted items
   const filteredNav = useMemo(() => {
     const items = getNavigationItems();
-    return items.filter(item => {
+    // Admin/super_admin bypass — show all items
+    if (isAdmin) return items;
+
+    const filtered = items.filter(item => {
       if (item.type === 'divider') return true;
-      if (item.roles.includes('*')) return true;
-      return item.roles.includes(userRole);
+      if (item.roles && item.roles.includes('*')) return true;
+      if (item.roles && item.roles.includes(userRole)) return true;
+      return false;
     });
-  }, [userRole]);
+
+    // Fallback: if filtering results in no navigable items, show all
+    const hasNavItems = filtered.some(item => item.type !== 'divider');
+    if (!hasNavItems) return items;
+
+    return filtered;
+  }, [userRole, isAdmin]);
 
   // Search filter
   const searchFilteredNav = useMemo(() => {

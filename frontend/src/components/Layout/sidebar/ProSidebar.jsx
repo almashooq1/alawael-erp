@@ -22,6 +22,12 @@ import SidebarUserFooter from './SidebarUserFooter';
 const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const nav = useSidebarNav({ collapsed, onClose });
 
+  // Resolved sidebar background — use gradient if available, fallback to solid + paper
+  const sidebarBg =
+    nav.theme.custom?.sidebar?.backgroundGradient ||
+    nav.theme.custom?.sidebar?.background ||
+    '#0A1628';
+
   const sidebarContent = (
     <Box
       sx={{
@@ -29,7 +35,8 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: nav.theme.custom?.sidebar?.background || nav.theme.palette.background.paper,
+        background: sidebarBg,
+        color: '#FFFFFF',
         transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
         overflow: 'hidden',
       }}

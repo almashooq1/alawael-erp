@@ -82,7 +82,21 @@ export function AuthProvider({ children }) {
         setRefreshToken(refreshToken);
       }
 
+      // Set user from login response immediately
       setCurrentUser(user || null);
+
+      // If login response didn't include full user data, fetch it
+      if (!user || !user.role) {
+        try {
+          const meResponse = await api.get('/auth/me');
+          const meData = meResponse?.data || meResponse;
+          if (meData) {
+            setCurrentUser(meData);
+          }
+        } catch (_fetchErr) {
+          // Non-blocking — login still succeeded
+        }
+      }
 
       return { success: true };
     } catch (err) {

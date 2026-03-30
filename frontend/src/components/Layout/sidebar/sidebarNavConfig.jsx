@@ -18,6 +18,7 @@
  */
 import {
   Dashboard as DashboardIcon,
+  AutoAwesome as PremiumIcon,
   People as PeopleIcon,
   School as SchoolIcon,
   Settings as SettingsIcon,
@@ -130,6 +131,32 @@ const getNavigationItems = () => [
     icon: <MonitorIcon />,
     path: '/monitoring',
     roles: ['admin', 'super_admin', 'manager'],
+  },
+
+  // ═══════════════════════════════════════════════════════
+  //  ★ لوحات بريميوم — Premium Glassmorphism Dashboards
+  // ═══════════════════════════════════════════════════════
+  { id: 'divider-premium', type: 'divider', label: '★ لوحات بريميوم' },
+  {
+    id: 'premium-dashboards',
+    label: 'لوحات بريميوم',
+    icon: <PremiumIcon />,
+    roles: ['admin', 'super_admin', 'manager'],
+    badge: 'NEW',
+    badgeColor: 'success',
+    children: [
+      { id: 'ceo-pro', label: 'لوحة الرئيس التنفيذي', path: '/ceo-pro' },
+      { id: 'hr-pro', label: 'الموارد البشرية المتقدمة', path: '/hr-pro' },
+      { id: 'finance-pro', label: 'المالية والمحاسبة', path: '/finance-pro' },
+      { id: 'patients-pro', label: 'إدارة المرضى', path: '/patients-pro' },
+      { id: 'schedule-pro', label: 'الجدول والمواعيد', path: '/schedule-pro' },
+      { id: 'reports-pro', label: 'التقارير والذكاء', path: '/reports-pro' },
+      { id: 'inventory-pro', label: 'المخزون والتوريد', path: '/inventory-pro' },
+      { id: 'notifications-pro', label: 'مركز الإشعارات', path: '/notifications-pro' },
+      { id: 'security-pro', label: 'الأمان والحماية', path: '/security-pro' },
+      { id: 'analytics-pro', label: 'التحليلات المتقدمة', path: '/analytics-pro' },
+      { id: 'settings-pro', label: 'إعدادات النظام', path: '/settings-pro' },
+    ],
   },
 
   // ═══════════════════════════════════════════════════════

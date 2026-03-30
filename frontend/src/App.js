@@ -154,6 +154,19 @@ const BudgetManagement = lazyWithRetry(() => import('./pages/finance/BudgetManag
 const AccountingDashboard = lazyWithRetry(() => import('./pages/finance/AccountingDashboard'));
 const ExpenseManagement = lazyWithRetry(() => import('./pages/finance/ExpenseManagement'));
 
+// ─── Premium Glassmorphism Dashboards ───────────────────────────────────────
+const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
+const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
+const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
+const PatientsDashboardPro = lazyWithRetry(() => import('./pages/PatientsDashboard'));
+const ScheduleDashboardPro = lazyWithRetry(() => import('./pages/ScheduleDashboard'));
+const ReportsDashboardPro = lazyWithRetry(() => import('./pages/ReportsDashboard'));
+const InventoryDashboardPro = lazyWithRetry(() => import('./pages/InventoryDashboard'));
+const NotificationsDashboardPro = lazyWithRetry(() => import('./pages/NotificationsDashboard'));
+const SecurityDashboardPro = lazyWithRetry(() => import('./pages/SecurityDashboard'));
+const AnalyticsDashboardPro = lazyWithRetry(() => import('./pages/AnalyticsDashboard'));
+const SettingsDashboardPro = lazyWithRetry(() => import('./pages/SettingsDashboard'));
+
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
   const { currentUser } = useAuth();
@@ -386,6 +399,21 @@ function AppContent() {
                                 path="surveillance"
                                 element={<Navigate to="/monitoring" replace />}
                               />
+                              {/* ─── Premium Glassmorphism Dashboards ─── */}
+                              <Route path="ceo-pro" element={<CEODashboardPro />} />
+                              <Route path="hr-pro" element={<HRAdvancedDashboard />} />
+                              <Route path="finance-pro" element={<FinanceDashboardPro />} />
+                              <Route path="patients-pro" element={<PatientsDashboardPro />} />
+                              <Route path="schedule-pro" element={<ScheduleDashboardPro />} />
+                              <Route path="reports-pro" element={<ReportsDashboardPro />} />
+                              <Route path="inventory-pro" element={<InventoryDashboardPro />} />
+                              <Route
+                                path="notifications-pro"
+                                element={<NotificationsDashboardPro />}
+                              />
+                              <Route path="security-pro" element={<SecurityDashboardPro />} />
+                              <Route path="analytics-pro" element={<AnalyticsDashboardPro />} />
+                              <Route path="settings-pro" element={<SettingsDashboardPro />} />
                             </Route>
                             {/* 404 - Not Found */}
                             <Route path="*" element={<NotFound />} />

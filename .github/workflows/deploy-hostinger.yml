@@ -30,6 +30,7 @@ on:
 env:
   APP_DIR: /home/alawael/app
   NODE_VERSION: "20"
+  DEPLOY_DOMAIN: alaweal.org
 
 concurrency:
   group: deploy-production
@@ -125,8 +126,8 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
-          REACT_APP_API_URL: https://${{ secrets.DOMAIN || 'alaweal.org' }}/api
-          REACT_APP_WS_URL: wss://${{ secrets.DOMAIN || 'alaweal.org' }}
+          REACT_APP_API_URL: https://${{ secrets.DOMAIN || env.DEPLOY_DOMAIN }}/api
+          REACT_APP_WS_URL: wss://${{ secrets.DOMAIN || env.DEPLOY_DOMAIN }}
           REACT_APP_ENVIRONMENT: production
           REACT_APP_VERSION: ${{ needs.preflight.outputs.short_sha }}
           GENERATE_SOURCEMAP: "false"
@@ -151,7 +152,7 @@ jobs:
     timeout-minutes: 20
     environment:
       name: production
-      url: https://${{ secrets.DOMAIN || 'alaweal.org' }}
+      url: https://alaweal.org
     steps:
       - uses: actions/checkout@v6
 

@@ -218,6 +218,182 @@ export const shadows = {
   cardHover: '0 8px 24px rgba(0,0,0,0.10)',
 };
 
+// ─── Surface Colors ──────────────────────────────────────────────────────────
+export const surfaceColors = {
+  // Base backgrounds
+  background: '#FAFAFA',
+  backgroundLighter: '#FFFFFF',
+  card: '#FFFFFF',
+  paper: '#FFFFFF',
+  paperAlt: '#F8FAFC',
+  tableHeader: '#F1F5F9',
+  hover: '#F8FAFC',
+
+  // Tints (very light, 6-10% opacity)
+  brandTint: '#EEF2FF',
+  brandTintLight: '#F5F7FF',
+  purpleTint: '#F5F3FF',
+  roseTint: '#FFF1F2',
+  greenTint: '#ECFDF5',
+  warningTint: '#FFFBEB',
+  infoTint: '#F0F9FF',
+  successTint: '#ECFDF5',
+  pinkTint: '#FDF2F8',
+
+  // Light state backgrounds (15-20% opacity)
+  infoLight: '#DBEAFE',
+  purpleLight: '#EDE9FE',
+  successLight: '#D1FAE5',
+  warningLight: '#FEF3C7',
+  warningLighter: '#FFFBEB',
+  pinkLight: '#FCE7F3',
+  errorLight: '#FEE2E2',
+
+  // Grays
+  lightGray: '#F1F5F9',
+  softGray: '#E2E8F0',
+
+  // Borders
+  border: '#E2E8F0',
+  borderLight: '#EEF2FF',
+  borderSubtle: '#F1F5F9',
+
+  // Divider
+  divider: '#E2E8F0',
+};
+
+// ─── Surface Colors Dark (dark mode) ─────────────────────────────────────────
+export const surfaceColorsDark = {
+  background: '#0F172A',
+  backgroundLighter: '#1E293B',
+  card: '#1E293B',
+  paper: '#1E293B',
+  paperAlt: '#0F172A',
+  tableHeader: '#0F172A',
+  hover: '#1E293B',
+  border: '#334155',
+  borderLight: '#1E293B',
+  borderSubtle: '#334155',
+  divider: '#334155',
+};
+
+// ─── Neutral Colors ───────────────────────────────────────────────────────────
+export const neutralColors = {
+  textPrimary: '#0F172A',
+  textSecondary: '#64748B',
+  textDark: '#1E293B',
+  textMuted: '#94A3B8',
+  textInverse: '#FFFFFF',
+  borderInactive: '#CBD5E1',
+  bgLight: '#F8FAFC',
+  bgMid: '#F1F5F9',
+  white: '#FFFFFF',
+  black: '#000000',
+};
+
+// ─── Status Colors ────────────────────────────────────────────────────────────
+export const statusColors = {
+  success: '#10B981',
+  error: '#EF4444',
+  warning: '#F59E0B',
+  info: '#0EA5E9',
+  primary: '#6366F1',
+  primaryBlue: '#3B82F6',
+  purple: '#7C3AED',
+  pink: '#EC4899',
+  orange: '#F97316',
+  teal: '#14B8A6',
+};
+
+// ─── Chart Colors ─────────────────────────────────────────────────────────────
+export const chartColors = [
+  '#6366F1',
+  '#10B981',
+  '#F59E0B',
+  '#EF4444',
+  '#0EA5E9',
+  '#7C3AED',
+  '#EC4899',
+  '#14B8A6',
+  '#F97316',
+  '#84CC16',
+  '#06B6D4',
+  '#8B5CF6',
+];
+
+// ─── Leave Colors ─────────────────────────────────────────────────────────────
+export const leaveColors = {
+  annual: '#6366F1',
+  sick: '#EF4444',
+  emergency: '#F97316',
+  maternity: '#EC4899',
+  unpaid: '#94A3B8',
+  other: '#64748B',
+};
+
+// ─── Rank Colors ──────────────────────────────────────────────────────────────
+export const rankColors = {
+  gold: '#F59E0B',
+  silver: '#94A3B8',
+  bronze: '#B45309',
+};
+
+// ─── Assessment Colors ────────────────────────────────────────────────────────
+export const assessmentColors = {
+  excellent: '#10B981',
+  good: '#6366F1',
+  average: '#F59E0B',
+  poor: '#EF4444',
+  pending: '#94A3B8',
+};
+
+// ─── Progress Colors ──────────────────────────────────────────────────────────
+export const progressColors = {
+  low: '#EF4444',
+  medium: '#F59E0B',
+  high: '#10B981',
+  complete: '#6366F1',
+  none: '#E2E8F0',
+};
+
+// ─── Scale Accent Colors (تدرج الألوان للمقاييس) ────────────────────────────
+export const scaleAccentColors = [
+  '#6366F1',
+  '#8B5CF6',
+  '#EC4899',
+  '#F43F5E',
+  '#F97316',
+  '#F59E0B',
+  '#10B981',
+  '#0EA5E9',
+  '#14B8A6',
+  '#84CC16',
+];
+
+// ─── Severity Colors (مستويات الخطورة) ──────────────────────────────────────
+export const severityColors = {
+  critical: '#DC2626',
+  high: '#EF4444',
+  medium: '#F59E0B',
+  low: '#10B981',
+  info: '#0EA5E9',
+  none: '#94A3B8',
+};
+
+// ─── Extended brandColors (backwards compat) ─────────────────────────────────
+// Some files use brandColors.primaryStart, brandColors.accentGreen, etc.
+Object.assign(brandColors, {
+  primaryStart: '#6366F1',
+  primaryEnd: '#7C3AED',
+  accentGreen: '#10B981',
+  accentSky: '#0EA5E9',
+  accentCoral: '#F43F5E',
+  accentOrange: '#F97316',
+  accentPurple: '#7C3AED',
+  primary: '#6366F1',
+  secondary: '#7C3AED',
+});
+
 export default {
   brand,
   violet,
@@ -230,4 +406,12 @@ export default {
   gradients,
   brandColors,
   shadows,
+  surfaceColors,
+  surfaceColorsDark,
+  neutralColors,
+  statusColors,
+  chartColors,
+  leaveColors,
+  rankColors,
+  assessmentColors,
 };

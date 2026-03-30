@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: "📖 التوثيق | Documentation"
+    url: https://github.com/almashooq1/alawael-erp/blob/main/README.md
+    about: "اقرأ التوثيق أولاً قبل فتح Issue"
+  - name: "💬 النقاشات | Discussions"
+    url: https://github.com/almashooq1/alawael-erp/discussions
+    about: "للأسئلة العامة والنقاشات، استخدم Discussions"

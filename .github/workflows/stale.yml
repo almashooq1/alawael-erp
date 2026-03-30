@@ -1,0 +1,81 @@
+# ════════════════════════════════════════════════════════════════════
+#  Al-Awael ERP — Stale Issues & PRs Management
+#  إدارة Issues و PRs القديمة تلقائياً
+# ════════════════════════════════════════════════════════════════════
+name: "🕐 Stale Issues & PRs"
+
+on:
+  schedule:
+    # تعمل كل يوم الأحد الساعة 9 صباحاً بتوقيت الرياض (6 UTC)
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: "🕐 Mark Stale Items"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # ─── Issues ─────────────────────────────────────────
+          # عدد أيام الخمول قبل التأشير بـ stale
+          days-before-issue-stale: 60
+          # عدد أيام إضافية قبل الإغلاق بعد التأشير
+          days-before-issue-close: 14
+
+          stale-issue-label: "stale"
+          close-issue-label: "auto-closed"
+          exempt-issue-labels: "pinned,security,critical,bug,in-progress"
+
+          stale-issue-message: |
+            👋 مرحباً!
+
+            لم يكن هناك أي نشاط على هذه المشكلة منذ **60 يوماً**.
+
+            إذا كانت المشكلة لا تزال قائمة، يرجى:
+            - إضافة تعليق للتأكيد
+            - إضافة معلومات إضافية قد تساعد
+
+            سيتم **إغلاق هذه المشكلة تلقائياً خلال 14 يوماً** إذا لم يكن هناك نشاط.
+
+            شكراً لمساهمتك! 🙏
+
+          close-issue-message: |
+            🔒 تم إغلاق هذه المشكلة تلقائياً بسبب عدم النشاط لمدة 74 يوماً.
+
+            إذا كانت المشكلة لا تزال موجودة، يمكنك:
+            - إعادة فتح هذه المشكلة
+            - فتح مشكلة جديدة مع تفاصيل محدّثة
+
+          # ─── Pull Requests ───────────────────────────────────
+          days-before-pr-stale: 30
+          days-before-pr-close: 7
+
+          stale-pr-label: "stale"
+          close-pr-label: "auto-closed"
+          exempt-pr-labels: "in-progress,do-not-merge,pinned"
+
+          stale-pr-message: |
+            👋 لم يكن هناك أي نشاط على هذا الـ PR منذ **30 يوماً**.
+
+            يرجى:
+            - مراجعة التعليقات والرد عليها
+            - دمج أو إغلاق الـ PR
+
+            سيتم **إغلاق هذا الـ PR تلقائياً خلال 7 أيام** إذا لم يكن هناك نشاط.
+
+          close-pr-message: |
+            🔒 تم إغلاق هذا الـ PR تلقائياً بسبب عدم النشاط.
+
+            يمكنك إعادة فتحه في أي وقت إذا أردت الاستمرار.
+
+          # ─── Settings ────────────────────────────────────────
+          # عدد أقصى للمعالجة في كل تشغيل
+          operations-per-run: 100
+          # لا تُشير كـ stale للـ issues المُعيّنة
+          exempt-all-assignees: true

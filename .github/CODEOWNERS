@@ -1,0 +1,34 @@
+# ═══════════════════════════════════════════════════════════
+#  CODEOWNERS — Al-Awael ERP
+#  يحدد من يتلقى طلبات المراجعة تلقائياً عند فتح PR
+# ═══════════════════════════════════════════════════════════
+
+# المالك الافتراضي لكل الملفات
+* @almashooq1
+
+# ─── GitHub Actions & CI/CD ─────────────────────────────
+.github/ @almashooq1
+
+# ─── Frontend ───────────────────────────────────────────
+frontend/ @almashooq1
+frontend/src/theme/ @almashooq1
+frontend/src/components/ @almashooq1
+frontend/src/pages/ @almashooq1
+
+# ─── Backend Core ───────────────────────────────────────
+backend/ @almashooq1
+backend/auth/ @almashooq1
+backend/middleware/ @almashooq1
+backend/models/ @almashooq1
+
+# ─── Database & Migrations ──────────────────────────────
+backend/database/ @almashooq1
+backend/migrations/ @almashooq1
+backend/seeds/ @almashooq1
+
+# ─── Configuration Files ────────────────────────────────
+docker-compose.yml @almashooq1
+docker-compose.production.yml @almashooq1
+Dockerfile @almashooq1
+nginx.conf @almashooq1
+.env.example @almashooq1

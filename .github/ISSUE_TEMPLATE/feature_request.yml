@@ -1,0 +1,99 @@
+name: "✨ Feature Request | طلب ميزة جديدة"
+description: "اقترح ميزة أو تحسيناً لنظام الأوائل ERP"
+title: "[FEATURE] "
+labels: ["enhancement", "needs-review"]
+assignees:
+  - almashooq1
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        نرحب بجميع الاقتراحات! يرجى وصف الميزة المطلوبة بوضوح.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "✨ ملخص الميزة | Feature Summary"
+      description: "وصف موجز وواضح للميزة المطلوبة"
+      placeholder: "أريد إضافة..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "🎯 المشكلة التي تحلها | Problem Statement"
+      description: "ما المشكلة التي تواجهها حالياً؟"
+      placeholder: "أشعر بالإحباط دائمًا عندما يجب عليّ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "💡 الحل المقترح | Proposed Solution"
+      description: "كيف تتصور عمل هذه الميزة؟"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: "📦 الوحدة المقترحة | Target Module"
+      multiple: true
+      options:
+        - "الواجهة الأمامية (Frontend / UI)"
+        - "الموارد البشرية (HR)"
+        - "المالية (Finance)"
+        - "الطلاب والمستفيدون"
+        - "التأهيل (Rehabilitation)"
+        - "التقارير والتحليلات"
+        - "الإشعارات"
+        - "الأمان (Security)"
+        - "API / Backend"
+        - "قاعدة البيانات"
+        - "CI/CD"
+        - "أخرى"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "🎯 الأولوية | Priority"
+      options:
+        - "🔴 عالية جداً — ضروري للعمل"
+        - "🟠 عالية — يحسن الكفاءة بشكل كبير"
+        - "🟡 متوسطة — تحسين مفيد"
+        - "🟢 منخفضة — أمر جميل"
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 البدائل المدروسة | Alternatives Considered"
+      description: "هل فكرت في حلول بديلة؟"
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: "✅ معايير القبول | Acceptance Criteria"
+      description: "ما الذي يجب تحقيقه لاعتبار الميزة مكتملة؟"
+      placeholder: |
+        - [ ] يجب أن...
+        - [ ] يجب أن...
+        - [ ] يجب أن...
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: "🎨 تصاميم توضيحية | Design Mockups"
+      description: "اسحب وأفلت الصور هنا (اختياري)"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "✅ تأكيد"
+      options:
+        - label: "بحثت في الـ Issues الموجودة ولم أجد نفس الطلب"
+          required: true

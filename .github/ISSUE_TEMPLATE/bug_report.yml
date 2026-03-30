@@ -1,0 +1,120 @@
+name: "🐛 Bug Report | تقرير خطأ"
+description: "أبلغ عن خطأ في نظام الأوائل ERP"
+title: "[BUG] "
+labels: ["bug", "needs-triage"]
+assignees:
+  - almashooq1
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        شكراً لإبلاغنا عن هذه المشكلة! يرجى ملء النموذج بدقة لمساعدتنا في إصلاحها بسرعة.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "📋 وصف المشكلة | Bug Description"
+      description: "وصف واضح وموجز للخطأ"
+      placeholder: "عند الضغط على زر X، يحدث Y بدلاً من Z..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: "🔄 خطوات إعادة الإنتاج | Steps to Reproduce"
+      description: "الخطوات بالترتيب لإعادة إنتاج المشكلة"
+      placeholder: |
+        1. اذهب إلى صفحة '...'
+        2. انقر على '...'
+        3. لاحظ الخطأ
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ السلوك المتوقع | Expected Behavior"
+      placeholder: "كنت أتوقع أن..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: "❌ السلوك الفعلي | Actual Behavior"
+      placeholder: "ما حدث فعلاً..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "🎯 خطورة المشكلة | Severity"
+      options:
+        - "🔴 Critical — يوقف العمل بالكامل"
+        - "🟠 High — يؤثر على وظيفة رئيسية"
+        - "🟡 Medium — وظيفة جزئية متأثرة"
+        - "🟢 Low — مشكلة بسيطة / تجميلية"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: "📦 الوحدة المتأثرة | Affected Module"
+      multiple: true
+      options:
+        - "الواجهة الأمامية (Frontend)"
+        - "الخلفية (Backend/API)"
+        - "المصادقة (Authentication)"
+        - "الموارد البشرية (HR)"
+        - "المالية (Finance)"
+        - "الطلاب والمستفيدون"
+        - "التأهيل (Rehabilitation)"
+        - "التقارير (Reports)"
+        - "الإشعارات (Notifications)"
+        - "قاعدة البيانات (Database)"
+        - "Docker / CI/CD"
+        - "أخرى"
+
+  - type: input
+    id: version
+    attributes:
+      label: "📌 الإصدار | Version"
+      placeholder: "مثال: v2.1.0 أو commit SHA"
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "💻 بيئة التشغيل | Environment"
+      placeholder: |
+        - نظام التشغيل: Windows 11 / Ubuntu 22.04
+        - المتصفح: Chrome 120 / Firefox 121
+        - Node.js: 20.x
+        - وضع التشغيل: Development / Production
+      render: markdown
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "📝 سجلات الأخطاء | Error Logs"
+      description: "أي رسائل خطأ أو console logs"
+      render: shell
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 لقطات الشاشة | Screenshots"
+      description: "اسحب وأفلت الصور هنا"
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "✅ تأكيد | Confirmation"
+      options:
+        - label: "بحثت في الـ Issues الموجودة ولم أجد نفس المشكلة"
+          required: true
+        - label: "قمت بتجربة إعادة تشغيل الخدمة أولاً"
+          required: false

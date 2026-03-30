@@ -319,7 +319,7 @@ const WelcomeHeader = ({ finance = {}, alerts = [], lastUpdated, refreshing, onR
               sx={{ zIndex: 1300 }}
             >
               {({ TransitionProps }) => (
-                <Grow {...TransitionProps} style={{ transformOrigin: 'left top' }}>
+                <Grow {...TransitionProps} style={{ transformOrigin: 'right top' }}>
                   <Paper
                     elevation={8}
                     sx={{
@@ -394,7 +394,7 @@ const WelcomeHeader = ({ finance = {}, alerts = [], lastUpdated, refreshing, onR
                                   return (
                                     <motion.div
                                       key={alert.id || idx}
-                                      initial={{ opacity: 0, x: 20 }}
+                                      initial={{ opacity: 0, x: -20 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: idx * 0.04 }}
                                     >
@@ -402,7 +402,7 @@ const WelcomeHeader = ({ finance = {}, alerts = [], lastUpdated, refreshing, onR
                                         sx={{
                                           py: 1.2,
                                           px: 2,
-                                          borderRight: `3px solid ${sev.color}`,
+                          borderInlineStart: `3px solid ${sev.color}`,
                                           background: !alert.read
                                             ? theme.palette.mode === 'dark'
                                               ? 'rgba(102,126,234,0.06)'

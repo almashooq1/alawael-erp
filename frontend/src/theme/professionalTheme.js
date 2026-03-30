@@ -183,7 +183,7 @@ const typography = {
 // ─── Component Overrides ─────────────────────────────────────────────────────
 const buildComponents = mode => {
   const isDark = mode === 'dark';
-  const surfaceBg = isDark ? '#0F172A' : '#FFFFFF';
+  const _surfaceBg = isDark ? '#0F172A' : '#FFFFFF';
   const _hoverBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
 
   return {
@@ -781,7 +781,7 @@ const buildComponents = mode => {
 };
 
 // Helper used only in component definitions (not exported)
-function rgba(r, g, b, a) {
+function _rgba(r, g, b, a) {
   return `rgba(${r},${g},${b},${a})`;
 }
 

@@ -180,9 +180,9 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
               sx={{
                 position: 'absolute',
                 top: 14,
-                right: 14,
+                left: 14,
                 opacity: 0,
-                transform: 'translateX(5px)',
+                transform: 'translateX(-5px)',
                 transition: 'all 0.3s ease',
                 color: 'text.disabled',
               }}
@@ -211,7 +211,7 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
           </Box>
 
           {/* Value & title */}
-          <Box sx={{ textAlign: 'left', mt: 1 }}>
+          <Box sx={{ textAlign: 'right', mt: 1 }}>
             <Typography
               variant="h3"
               sx={{
@@ -271,7 +271,7 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
             sx={{
               position: 'absolute',
               bottom: -20,
-              right: -20,
+              left: -20,
               width: 80,
               height: 80,
               borderRadius: '50%',

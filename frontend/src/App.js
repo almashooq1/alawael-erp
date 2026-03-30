@@ -155,6 +155,7 @@ const AccountingDashboard = lazyWithRetry(() => import('./pages/finance/Accounti
 const ExpenseManagement = lazyWithRetry(() => import('./pages/finance/ExpenseManagement'));
 
 // ─── Premium Glassmorphism Dashboards ───────────────────────────────────────
+const PremiumHub = lazyWithRetry(() => import('./pages/PremiumHub'));
 const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
 const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
 const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -400,6 +401,7 @@ function AppContent() {
                                 element={<Navigate to="/monitoring" replace />}
                               />
                               {/* ─── Premium Glassmorphism Dashboards ─── */}
+                              <Route path="premium" element={<PremiumHub />} />
                               <Route path="ceo-pro" element={<CEODashboardPro />} />
                               <Route path="hr-pro" element={<HRAdvancedDashboard />} />
                               <Route path="finance-pro" element={<FinanceDashboardPro />} />

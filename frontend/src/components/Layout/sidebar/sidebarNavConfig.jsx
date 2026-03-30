@@ -138,12 +138,19 @@ const getNavigationItems = () => [
   // ═══════════════════════════════════════════════════════
   { id: 'divider-premium', type: 'divider', label: '★ لوحات بريميوم' },
   {
-    id: 'premium-dashboards',
-    label: 'لوحات بريميوم',
+    id: 'premium-hub',
+    label: 'مركز اللوحات البريميوم',
     icon: <PremiumIcon />,
+    path: '/premium',
     roles: ['admin', 'super_admin', 'manager'],
     badge: 'NEW',
     badgeColor: 'success',
+  },
+  {
+    id: 'premium-dashboards',
+    label: 'اللوحات البريميوم',
+    icon: <PremiumIcon />,
+    roles: ['admin', 'super_admin', 'manager'],
     children: [
       { id: 'ceo-pro', label: 'لوحة الرئيس التنفيذي', path: '/ceo-pro' },
       { id: 'hr-pro', label: 'الموارد البشرية المتقدمة', path: '/hr-pro' },

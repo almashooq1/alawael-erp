@@ -167,6 +167,8 @@ const getNavigationItems = () => [
       { id: 'kpi-pro', label: 'مؤشرات الأداء الاستراتيجية', path: '/kpi-pro' },
       { id: 'rehab-pro', label: 'لوحة التأهيل الشاملة', path: '/rehab-pro' },
       { id: 'admin-executive', label: 'الإدارة التنفيذية', path: '/admin-executive' },
+      { id: 'pharmacy-pro', label: 'الصيدلية والأدوية', path: '/pharmacy-pro' },
+      { id: 'lab-pro', label: 'المختبرات والتحاليل', path: '/lab-pro' },
     ],
   },
 

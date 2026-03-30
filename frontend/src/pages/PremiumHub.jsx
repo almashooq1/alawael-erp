@@ -32,6 +32,8 @@ import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SpeedIcon from '@mui/icons-material/Speed';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BusinessIcon from '@mui/icons-material/Business';
+import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
+import BiotechIcon from '@mui/icons-material/Biotech';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -258,6 +260,36 @@ const PREMIUM_DASHBOARDS = [
       { label: 'قرار صادر', value: '١٣٧' },
       { label: 'مشروع نشط', value: '٢٤' },
       { label: 'إنجاز الإجراءات', value: '٩٤٪' },
+    ],
+  },
+  {
+    id: 'pharmacy-pro',
+    path: '/pharmacy-pro',
+    title: 'لوحة الصيدلية والأدوية',
+    subtitle: 'إدارة المخزون الدوائي والوصفات والتوريد',
+    icon: LocalPharmacyIcon,
+    gradient: 'linear-gradient(135deg, #ec4899 0%, #f59e0b 50%, #10b981 100%)',
+    glow: 'rgba(236,72,153,0.4)',
+    tags: ['الأدوية', 'الوصفات', 'التوريد'],
+    stats: [
+      { label: 'صنف دوائي', value: '٣,٢٤٧' },
+      { label: 'وصفة يومية', value: '١٨٧' },
+      { label: 'دقة الصرف', value: '٩٤٪' },
+    ],
+  },
+  {
+    id: 'lab-pro',
+    path: '/lab-pro',
+    title: 'لوحة المختبرات والتحاليل',
+    subtitle: 'إدارة التحاليل المخبرية والنتائج والجودة',
+    icon: BiotechIcon,
+    gradient: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%)',
+    glow: 'rgba(14,165,233,0.4)',
+    tags: ['التحاليل', 'المختبر', 'الجودة'],
+    stats: [
+      { label: 'تحليل اليوم', value: '٣٤٢' },
+      { label: 'دقة النتائج', value: '٩٩.٢٪' },
+      { label: 'متوسط الانتظار', value: '٤٥ د' },
     ],
   },
 ];

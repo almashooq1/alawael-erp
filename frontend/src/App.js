@@ -160,6 +160,8 @@ const TherapistProDashboard = lazyWithRetry(() => import('./pages/TherapistProDa
 const KPIProDashboard = lazyWithRetry(() => import('./pages/KPIProDashboard'));
 const RehabProDashboard = lazyWithRetry(() => import('./pages/RehabProDashboard'));
 const AdminExecutiveDashboard = lazyWithRetry(() => import('./pages/AdminExecutiveDashboard'));
+const PharmacyProDashboard = lazyWithRetry(() => import('./pages/PharmacyProDashboard'));
+const LabProDashboard = lazyWithRetry(() => import('./pages/LabProDashboard'));
 const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
 const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
 const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -424,6 +426,8 @@ function AppContent() {
                               <Route path="kpi-pro" element={<KPIProDashboard />} />
                               <Route path="rehab-pro" element={<RehabProDashboard />} />
                               <Route path="admin-executive" element={<AdminExecutiveDashboard />} />
+                              <Route path="pharmacy-pro" element={<PharmacyProDashboard />} />
+                              <Route path="lab-pro" element={<LabProDashboard />} />
                             </Route>
                             {/* 404 - Not Found */}
                             <Route path="*" element={<NotFound />} />

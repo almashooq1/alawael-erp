@@ -36,6 +36,10 @@ import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+import HandshakeIcon from '@mui/icons-material/Handshake';
+import EngineeringIcon from '@mui/icons-material/Engineering';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -322,6 +326,66 @@ const PREMIUM_DASHBOARDS = [
       { label: 'نسبة الامتثال', value: '٩٤.٧٪' },
       { label: 'عملية تدقيق', value: '١٢٨' },
       { label: 'إجراء تصحيحي', value: '٤٧' },
+    ],
+  },
+  {
+    id: 'training-pro',
+    path: '/training-pro',
+    title: 'لوحة التدريب والتطوير',
+    subtitle: 'إدارة البرامج التدريبية والتطوير المهني للموظفين',
+    icon: ModelTrainingIcon,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #8b5cf6 100%)',
+    glow: 'rgba(245,158,11,0.4)',
+    tags: ['التدريب', 'التطوير', 'الشهادات'],
+    stats: [
+      { label: 'برنامج تدريبي', value: '٤٨' },
+      { label: 'متدرب نشط', value: '٣٢٤' },
+      { label: 'معدل الإنجاز', value: '٧٨٪' },
+    ],
+  },
+  {
+    id: 'crm-pro',
+    path: '/crm-pro',
+    title: 'لوحة علاقات العملاء',
+    subtitle: 'متابعة العملاء والصفقات والفرص البيعية',
+    icon: HandshakeIcon,
+    gradient: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #10b981 100%)',
+    glow: 'rgba(99,102,241,0.4)',
+    tags: ['العملاء', 'الصفقات', 'CRM'],
+    stats: [
+      { label: 'عميل', value: '١,٨٤٢' },
+      { label: 'صفقة مفتوحة', value: '٨٧' },
+      { label: 'معدل الاحتفاظ', value: '٩٢٪' },
+    ],
+  },
+  {
+    id: 'operations-pro',
+    path: '/operations-pro',
+    title: 'لوحة العمليات والتشغيل',
+    subtitle: 'إدارة أوامر العمل والصيانة والمخزون والمرافق',
+    icon: EngineeringIcon,
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%)',
+    glow: 'rgba(239,68,68,0.4)',
+    tags: ['العمليات', 'الصيانة', 'المخزون'],
+    stats: [
+      { label: 'أمر عمل نشط', value: '١٤٧' },
+      { label: 'نسبة التشغيل', value: '٩٤٪' },
+      { label: 'أصناف المخزون', value: '٢,٤٨٠' },
+    ],
+  },
+  {
+    id: 'nursing-pro',
+    path: '/nursing-pro',
+    title: 'لوحة التمريض والرعاية',
+    subtitle: 'متابعة فريق التمريض وجولات الرعاية وعلامات المرضى الحيوية',
+    icon: FavoriteIcon,
+    gradient: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #06b6d4 100%)',
+    glow: 'rgba(236,72,153,0.4)',
+    tags: ['التمريض', 'الرعاية', 'العلامات الحيوية'],
+    stats: [
+      { label: 'ممرض/ة نشط', value: '٨٦' },
+      { label: 'مريض تحت الرعاية', value: '٣٤٨' },
+      { label: 'رضا المرضى', value: '٩٥٪' },
     ],
   },
 ];

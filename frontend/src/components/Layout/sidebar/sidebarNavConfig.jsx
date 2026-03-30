@@ -171,6 +171,10 @@ const getNavigationItems = () => [
       { id: 'lab-pro', label: 'المختبرات والتحاليل', path: '/lab-pro' },
       { id: 'insurance-pro', label: 'التأمين الصحي', path: '/insurance-pro' },
       { id: 'quality-pro', label: 'الجودة والامتثال', path: '/quality-pro' },
+      { id: 'training-pro', label: 'التدريب والتطوير', path: '/training-pro' },
+      { id: 'crm-pro', label: 'علاقات العملاء', path: '/crm-pro' },
+      { id: 'operations-pro', label: 'العمليات والتشغيل', path: '/operations-pro' },
+      { id: 'nursing-pro', label: 'التمريض والرعاية', path: '/nursing-pro' },
     ],
   },
 

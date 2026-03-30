@@ -169,6 +169,8 @@ const getNavigationItems = () => [
       { id: 'admin-executive', label: 'الإدارة التنفيذية', path: '/admin-executive' },
       { id: 'pharmacy-pro', label: 'الصيدلية والأدوية', path: '/pharmacy-pro' },
       { id: 'lab-pro', label: 'المختبرات والتحاليل', path: '/lab-pro' },
+      { id: 'insurance-pro', label: 'التأمين الصحي', path: '/insurance-pro' },
+      { id: 'quality-pro', label: 'الجودة والامتثال', path: '/quality-pro' },
     ],
   },
 

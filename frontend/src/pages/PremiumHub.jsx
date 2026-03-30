@@ -34,6 +34,8 @@ import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BusinessIcon from '@mui/icons-material/Business';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import BiotechIcon from '@mui/icons-material/Biotech';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import VerifiedIcon from '@mui/icons-material/Verified';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -290,6 +292,36 @@ const PREMIUM_DASHBOARDS = [
       { label: 'تحليل اليوم', value: '٣٤٢' },
       { label: 'دقة النتائج', value: '٩٩.٢٪' },
       { label: 'متوسط الانتظار', value: '٤٥ د' },
+    ],
+  },
+  {
+    id: 'insurance-pro',
+    path: '/insurance-pro',
+    title: 'لوحة التأمين الصحي',
+    subtitle: 'إدارة بوالص التأمين والمطالبات ومقدمي الخدمة',
+    icon: HealthAndSafetyIcon,
+    gradient: 'linear-gradient(135deg, #0ea5e9 0%, #22c55e 50%, #f59e0b 100%)',
+    glow: 'rgba(14,165,233,0.4)',
+    tags: ['التأمين', 'المطالبات', 'البوالص'],
+    stats: [
+      { label: 'مؤمّن', value: '١,٢٤٨' },
+      { label: 'مطالبة نشطة', value: '٣٨٧' },
+      { label: 'نسبة الموافقة', value: '٨٧٪' },
+    ],
+  },
+  {
+    id: 'quality-pro',
+    path: '/quality-pro',
+    title: 'لوحة الجودة والامتثال',
+    subtitle: 'إدارة معايير CBAHI والتدقيق والامتثال التنظيمي',
+    icon: VerifiedIcon,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #10b981 100%)',
+    glow: 'rgba(139,92,246,0.4)',
+    tags: ['الجودة', 'CBAHI', 'التدقيق'],
+    stats: [
+      { label: 'نسبة الامتثال', value: '٩٤.٧٪' },
+      { label: 'عملية تدقيق', value: '١٢٨' },
+      { label: 'إجراء تصحيحي', value: '٤٧' },
     ],
   },
 ];

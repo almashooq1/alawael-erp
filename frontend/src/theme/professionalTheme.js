@@ -184,7 +184,7 @@ const typography = {
 const buildComponents = mode => {
   const isDark = mode === 'dark';
   const surfaceBg = isDark ? '#0F172A' : '#FFFFFF';
-  const hoverBg = isDark ? 'rgba(255,255,255,0.05)' : rgba(0, 0, 0, 0.04);
+  const _hoverBg = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)';
 
   return {
     MuiCssBaseline: {

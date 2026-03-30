@@ -53,13 +53,6 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
       <SidebarNavList
         items={nav.searchFilteredNav}
         collapsed={collapsed}
-        isMobile={nav.isMobile}
-        expandedItems={nav.expandedItems}
-        isActive={nav.isActive}
-        onToggleExpand={nav.handleToggleExpand}
-        onNavigate={nav.handleNavigate}
-        onToggleCollapse={onToggleCollapse}
-        theme={nav.theme}
       />
 
       <SidebarUserFooter

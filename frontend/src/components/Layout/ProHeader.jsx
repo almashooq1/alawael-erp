@@ -178,7 +178,6 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
       elevation={0}
       sx={{
         width: { md: `calc(100% - ${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px)` },
-        mr:    { md: `${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px` },
         height: HEADER_HEIGHT,
         zIndex: theme.zIndex.drawer - 1,
         transition: theme.transitions.create(['width', 'margin'], {
@@ -202,10 +201,10 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
             size="small"
             sx={{
               color: isDark ? 'rgba(255,255,255,0.75)' : 'text.secondary',
-              mr: 0.5,
-            }}
-          >
-            <MenuIcon />
+            marginInlineEnd: 4,
+          }}
+        >
+          <MenuIcon />
           </IconButton>
         )}
 
@@ -578,7 +577,7 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
                 backgroundColor: !n.read
                   ? isDark ? 'rgba(99,102,241,0.07)' : alpha('#6366F1', 0.04)
                   : 'transparent',
-                borderRight: !n.read ? `3px solid #6366F1` : '3px solid transparent',
+              borderInlineStart: !n.read ? `3px solid #6366F1` : '3px solid transparent',
                 transition: 'background-color 0.15s',
                 '&:hover': {
                   backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
@@ -655,12 +654,12 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
         <Divider sx={{ mb: 0.5 }} />
 
         <MenuItem onClick={() => { setUserAnchor(null); navigate('/profile'); }}>
-          <AccountCircleOutlined sx={{ fontSize: 18, mr: 1.5, color: 'text.secondary' }} />
+          <AccountCircleOutlined sx={{ fontSize: 18, marginInlineEnd: 12, color: 'text.secondary' }} />
           <Typography variant="body2">الملف الشخصي</Typography>
         </MenuItem>
 
         <MenuItem onClick={() => { setUserAnchor(null); navigate('/settings'); }}>
-          <SettingsOutlined sx={{ fontSize: 18, mr: 1.5, color: 'text.secondary' }} />
+          <SettingsOutlined sx={{ fontSize: 18, marginInlineEnd: 12, color: 'text.secondary' }} />
           <Typography variant="body2">الإعدادات</Typography>
         </MenuItem>
 
@@ -670,7 +669,7 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
           onClick={handleLogout}
           sx={{ color: 'error.main', '&:hover': { backgroundColor: alpha('#F43F5E', 0.06) } }}
         >
-          <LogoutOutlined sx={{ fontSize: 18, mr: 1.5 }} />
+          <LogoutOutlined sx={{ fontSize: 18, marginInlineEnd: 12 }} />
           <Typography variant="body2" fontWeight={500}>تسجيل الخروج</Typography>
         </MenuItem>
       </Menu>

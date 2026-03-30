@@ -3,14 +3,15 @@
  *
  * Premium dark sidebar navigation with:
  * - Section headers with dividers
- * - Active state with left accent border + glow
+ * - Active state with right accent border (RTL)
  * - Collapsible parent items with animated children
  * - Tooltip in collapsed mode
  * - Notification badges
  * - Smooth transitions
+ * - Auto-groups from flat nav items with dividers
  */
 
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -22,7 +23,6 @@ import {
   Typography,
   Tooltip,
   Badge,
-  alpha,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -84,8 +84,8 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
           sx={{
             mx: 1,
             mb: 0.25,
-            pr: collapsed ? 1 : 2,
-            pl: collapsed ? 1 : 3.5,
+            paddingInlineEnd: collapsed ? 8 : 16,
+            paddingInlineStart: collapsed ? 8 : 28,
             py: 0.75,
             borderRadius: '7px',
             minHeight: 34,
@@ -145,8 +145,8 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
       sx={{
         mx: 1,
         mb: 0.25,
-        pr: collapsed ? 1 : 1.5,
-        pl: collapsed ? 1 : 1.5,
+        paddingInlineEnd: collapsed ? 8 : 12,
+        paddingInlineStart: collapsed ? 8 : 12,
         py: 0.75,
         borderRadius: '8px',
         minHeight: 42,
@@ -155,18 +155,18 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
         position: 'relative',
         // Active state
         backgroundColor: isHighlighted ? SB.ACTIVE_BG : 'transparent',
-        // Left accent border (RTL = right border)
+        // Right accent border for RTL (start side)
         '&::before': isHighlighted
           ? {
               content: '""',
               position: 'absolute',
-              right: 0,
+              insetInlineStart: 0,
               top: '20%',
               height: '60%',
               width: '3px',
-              borderRadius: '0 3px 3px 0',
+              borderRadius: '3px',
               backgroundColor: SB.ACTIVE_BORDER,
-              boxShadow: `0 0 8px rgba(99,102,241,0.6)`,
+              boxShadow: '0 0 8px rgba(99,102,241,0.6)',
             }
           : {},
         transition: 'background-color 0.15s',
@@ -179,7 +179,7 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
       <ListItemIcon
         sx={{
           minWidth: 0,
-          mr: collapsed ? 0 : 1.5,
+          marginInlineEnd: collapsed ? 0 : 12,
           color: isHighlighted ? SB.ICON_ACTIVE : SB.ICON,
           transition: 'color 0.15s',
           '& svg': { fontSize: 20 },
@@ -196,7 +196,7 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
                 height: 16,
                 minWidth: 16,
                 top: -2,
-                right: -2,
+                insetInlineEnd: -2,
               },
             }}
           >
@@ -241,7 +241,7 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
           {item.badge && !hasChildren && (
             <Box
               sx={{
-                ml: 1,
+                marginInlineStart: 8,
                 px: 0.75,
                 py: 0.125,
                 borderRadius: '100px',
@@ -327,8 +327,36 @@ function SectionTitle({ label, collapsed }) {
   );
 }
 
+// ─── Convert flat items array (with dividers) to groups ───────────────────────
+function buildNavGroups(items) {
+  const groups = [];
+  let currentGroup = { title: '', items: [] };
+
+  for (const item of items) {
+    if (item.type === 'divider') {
+      // Push previous group if it has items
+      if (currentGroup.items.length > 0) {
+        groups.push(currentGroup);
+      }
+      // Start new group with divider label
+      currentGroup = { title: item.label || '', items: [] };
+    } else {
+      currentGroup.items.push(item);
+    }
+  }
+
+  // Push the last group
+  if (currentGroup.items.length > 0) {
+    groups.push(currentGroup);
+  }
+
+  return groups;
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
-export default memo(function SidebarNavList({ navGroups = [], collapsed }) {
+export default memo(function SidebarNavList({ items = [], collapsed }) {
+  const navGroups = useMemo(() => buildNavGroups(items), [items]);
+
   return (
     <Box
       component="nav"

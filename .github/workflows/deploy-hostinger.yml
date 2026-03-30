@@ -138,7 +138,7 @@ jobs:
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
     timeout-minutes: 20
     environment:
-      name: VPS_HOST
+      name: VPS_USER
       url: https://alaweal.org
     steps:
       - uses: actions/checkout@v6

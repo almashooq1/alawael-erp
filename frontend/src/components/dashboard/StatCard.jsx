@@ -1,15 +1,15 @@
 /**
- * 📊 StatCard v3 — Enhanced Professional KPI Card
- * بطاقة إحصائية محسّنة مع عداد متحرك وتنقل سريع
+ * 📊 StatCard v4 — Premium KPI Card
+ * بطاقة إحصائية بريميوم مع عداد متحرك وتصميم محسّن
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Paper, useTheme, Tooltip } from '@mui/material';
+import { Box, Typography, Paper, useTheme, Tooltip, alpha } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -19,7 +19,7 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import { formatNumber } from 'services/dashboardService';
-import { gradients as paletteGradients, statusColors } from 'theme/palette';
+import { gradients as paletteGradients } from 'theme/palette';
 
 const ICON_MAP = {
   People: PeopleIcon,
@@ -32,18 +32,18 @@ const ICON_MAP = {
   Receipt: ReceiptLongIcon,
 };
 
-const GRADIENTS = [
-  paletteGradients.primary,
-  paletteGradients.success,
-  paletteGradients.info,
-  paletteGradients.warning,
-  paletteGradients.ocean,
-  paletteGradients.orange,
-  paletteGradients.accent,
-  paletteGradients.fire,
+// Color sets per card (gradient + icon bg + glow)
+const CARD_COLORS = [
+  { gradient: paletteGradients.primary,  glow: 'rgba(99,102,241,0.25)',  light: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.2)'  },
+  { gradient: paletteGradients.success,  glow: 'rgba(16,185,129,0.25)',  light: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.2)'  },
+  { gradient: paletteGradients.info,     glow: 'rgba(14,165,233,0.25)',  light: 'rgba(14,165,233,0.08)',  border: 'rgba(14,165,233,0.2)'  },
+  { gradient: paletteGradients.warning,  glow: 'rgba(245,158,11,0.25)',  light: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.2)'  },
+  { gradient: paletteGradients.ocean,    glow: 'rgba(14,165,233,0.25)',  light: 'rgba(14,165,233,0.08)',  border: 'rgba(14,165,233,0.2)'  },
+  { gradient: paletteGradients.orange,   glow: 'rgba(249,115,22,0.25)',  light: 'rgba(249,115,22,0.08)',  border: 'rgba(249,115,22,0.2)'  },
+  { gradient: paletteGradients.accent,   glow: 'rgba(245,158,11,0.25)',  light: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.2)'  },
+  { gradient: paletteGradients.fire,     glow: 'rgba(239,68,68,0.25)',   light: 'rgba(239,68,68,0.08)',   border: 'rgba(239,68,68,0.2)'   },
 ];
 
-// Navigation paths for each KPI card type
 const NAV_PATHS = {
   People: '/admin-portal/users',
   Accessibility: '/beneficiaries',
@@ -55,14 +55,13 @@ const NAV_PATHS = {
   Receipt: '/finance/invoices',
 };
 
-/* ── Animated Counter Hook ─────────────────────────────── */
-const useAnimatedCounter = (endValue, duration = 1200) => {
+/* ── Animated Counter ──────────────────────────────────── */
+const useAnimatedCounter = (endValue, duration = 1300) => {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const hasAnimated = useRef(false);
   const prevValue = useRef(endValue);
 
-  // Reset animation when endValue changes
   useEffect(() => {
     if (prevValue.current !== endValue) {
       hasAnimated.current = false;
@@ -72,7 +71,6 @@ const useAnimatedCounter = (endValue, duration = 1200) => {
 
   useEffect(() => {
     if (hasAnimated.current || !endValue) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
@@ -81,7 +79,6 @@ const useAnimatedCounter = (endValue, duration = 1200) => {
           const step = () => {
             const elapsed = Date.now() - start;
             const progress = Math.min(elapsed / duration, 1);
-            // easeOutExpo
             const eased = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
             setCount(Math.floor(eased * endValue));
             if (progress < 1) requestAnimationFrame(step);
@@ -91,7 +88,6 @@ const useAnimatedCounter = (endValue, duration = 1200) => {
       },
       { threshold: 0.3 }
     );
-
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [endValue, duration]);
@@ -99,11 +95,13 @@ const useAnimatedCounter = (endValue, duration = 1200) => {
   return { count, ref };
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
 const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const isDark = theme.palette.mode === 'dark';
   const IconComponent = ICON_MAP[icon] || PeopleIcon;
-  const gradient = GRADIENTS[index % GRADIENTS.length];
+  const colors = CARD_COLORS[index % CARD_COLORS.length];
   const navPath = NAV_PATHS[icon];
   const { count, ref } = useAnimatedCounter(value);
   const isZero = value === 0 || value === '0';
@@ -113,13 +111,16 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
     if (navPath) navigate(navPath);
   };
 
+  const isPositive = trend >= 0;
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.08, duration: 0.5, ease: 'easeOut' }}
+      initial={{ opacity: 0, y: 24, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay: index * 0.07, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
       whileHover={{ y: -6, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       style={{ cursor: 'pointer' }}
       onClick={handleClick}
       role="button"
@@ -127,160 +128,187 @@ const StatCard = ({ title, value, subtitle, icon, index = 0, trend, onClick }) =
       aria-label={`${title}: ${formatNumber(value)}`}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
     >
-      <Tooltip title={navPath ? `فتح ${title}` : ''} arrow placement="top">
-        <Paper
-          elevation={0}
-          sx={{
-            position: 'relative',
-            overflow: 'hidden',
-            borderRadius: 4,
-            p: 2.5,
-            minHeight: 140,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            background: theme.palette.mode === 'dark'
-              ? 'rgba(255,255,255,0.05)'
-              : '#fff',
-            border: '1px solid',
-            borderColor: theme.palette.mode === 'dark'
-              ? 'rgba(255,255,255,0.08)'
-              : 'rgba(0,0,0,0.06)',
-            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            // Muted styling when value is zero
-            ...(isZero && { opacity: 0.6, filter: 'grayscale(0.3)' }),
-            '&:hover': {
-              boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
-              borderColor: 'transparent',
-              // Restore full appearance on hover even if zero
-              ...(isZero && { opacity: 0.85, filter: 'grayscale(0)' }),
-              '& .stat-nav-icon': {
-                opacity: 1,
-                transform: 'translateX(0)',
-              },
-            },
-          }}
-        >
-          {/* Gradient accent bar */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              left: 0,
-              height: 4,
-              background: gradient,
-            }}
-          />
+      <Paper
+        elevation={0}
+        sx={{
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '18px',
+          p: 0,
+          minHeight: 152,
+          display: 'flex',
+          flexDirection: 'column',
+          background: isDark
+            ? 'rgba(15,23,42,0.8)'
+            : '#FFFFFF',
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : colors.border}`,
+          boxShadow: isDark
+            ? '0 2px 8px rgba(0,0,0,0.4)'
+            : `0 2px 12px ${colors.glow.replace('0.25', '0.08')}, 0 1px 3px rgba(0,0,0,0.04)`,
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          opacity: isZero ? 0.65 : 1,
+          '&:hover': {
+            border: `1px solid ${colors.border}`,
+            boxShadow: isDark
+              ? `0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px ${colors.border}`
+              : `0 16px 40px ${colors.glow}, 0 4px 8px rgba(0,0,0,0.04)`,
+            opacity: 1,
+            '& .stat-arrow': { opacity: 1, transform: 'translateX(-3px)' },
+            '& .stat-icon-wrap': { transform: 'scale(1.08)' },
+          },
+        }}
+      >
+        {/* Top gradient bar */}
+        <Box sx={{ height: 3, background: colors.gradient, flexShrink: 0 }} />
 
-          {/* Navigation hint icon */}
-          {navPath && (
+        {/* Main content */}
+        <Box sx={{ p: 2.5, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          {/* Top row: icon + trend */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+            {/* Icon */}
             <Box
-              className="stat-nav-icon"
+              className="stat-icon-wrap"
               sx={{
-                position: 'absolute',
-                top: 14,
-                left: 14,
-                opacity: 0,
-                transform: 'translateX(-5px)',
-                transition: 'all 0.3s ease',
-                color: 'text.disabled',
+                width: 48,
+                height: 48,
+                borderRadius: '14px',
+                background: colors.gradient,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: `0 6px 20px ${colors.glow}`,
+                transition: 'transform 0.25s ease',
+                border: '1px solid rgba(255,255,255,0.1)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0,
+                  height: '45%',
+                  background: 'rgba(255,255,255,0.14)',
+                  borderRadius: '14px 14px 0 0',
+                },
               }}
             >
-              <OpenInNewIcon sx={{ fontSize: 16 }} />
+              <IconComponent sx={{ color: '#FFFFFF', fontSize: 24, position: 'relative', zIndex: 1 }} />
             </Box>
-          )}
 
-          {/* Icon badge */}
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 16,
-              left: 16,
-              width: 48,
-              height: 48,
-              borderRadius: 3,
-              background: gradient,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
-            }}
-          >
-            <IconComponent sx={{ color: '#fff', fontSize: 26 }} />
+            {/* Trend badge */}
+            {trend !== undefined && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.4,
+                  px: 1,
+                  py: 0.4,
+                  borderRadius: '8px',
+                  background: isPositive
+                    ? 'rgba(16,185,129,0.1)'
+                    : 'rgba(244,63,94,0.1)',
+                  border: `1px solid ${isPositive ? 'rgba(16,185,129,0.2)' : 'rgba(244,63,94,0.2)'}`,
+                  color: isPositive ? '#10B981' : '#F43F5E',
+                  fontSize: '0.72rem',
+                  fontWeight: 700,
+                }}
+              >
+                {isPositive
+                  ? <TrendingUpIcon sx={{ fontSize: 14 }} />
+                  : <TrendingDownIcon sx={{ fontSize: 14 }} />
+                }
+                {Math.abs(trend)}%
+              </Box>
+            )}
           </Box>
 
-          {/* Value & title */}
-          <Box sx={{ textAlign: 'right', mt: 1 }}>
+          {/* Value */}
+          <Box sx={{ textAlign: 'right' }}>
             <Typography
-              variant="h3"
               sx={{
                 fontWeight: 800,
-                fontSize: 'clamp(1.5rem, 4vw, 2rem)',
-                background: gradient,
+                fontSize: 'clamp(1.6rem, 4vw, 2.1rem)',
+                lineHeight: 1.1,
+                background: colors.gradient,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-                lineHeight: 1.2,
+                letterSpacing: '-0.02em',
+                mb: 0.5,
               }}
             >
               {formatNumber(count)}
             </Typography>
             <Typography
-              variant="body2"
               sx={{
-                color: 'text.secondary',
+                color: isDark ? 'rgba(255,255,255,0.65)' : '#64748B',
                 fontWeight: 600,
-                mt: 0.5,
                 fontSize: '0.875rem',
+                lineHeight: 1.3,
               }}
             >
               {title}
             </Typography>
           </Box>
 
-          {/* Subtitle & trend */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
-            {subtitle && (
-              <Typography variant="caption" sx={{ color: 'text.disabled', fontSize: '0.75rem' }}>
-                {subtitle}
-              </Typography>
-            )}
-            {trend !== undefined && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.3,
-                  px: 0.8,
-                  py: 0.2,
-                  borderRadius: 1,
-                  background: trend >= 0 ? 'rgba(76,175,80,0.1)' : 'rgba(244,67,54,0.1)',
-                  color: trend >= 0 ? statusColors.success : statusColors.error,
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                }}
-              >
-                {trend >= 0 ? <TrendingUpIcon sx={{ fontSize: 16 }} /> : <TrendingDownIcon sx={{ fontSize: 16 }} />}
-                {Math.abs(trend)}%
-              </Box>
-            )}
-          </Box>
+          {/* Subtitle + arrow */}
+          {(subtitle || navPath) && (
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1.25 }}>
+              {subtitle && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: isDark ? 'rgba(255,255,255,0.3)' : '#94A3B8',
+                    fontSize: '0.72rem',
+                    fontWeight: 500,
+                  }}
+                >
+                  {subtitle}
+                </Typography>
+              )}
+              {navPath && (
+                <ArrowForwardIosIcon
+                  className="stat-arrow"
+                  sx={{
+                    fontSize: 11,
+                    color: isDark ? 'rgba(255,255,255,0.2)' : '#CBD5E1',
+                    opacity: 0,
+                    transition: 'all 0.25s ease',
+                    ml: 'auto',
+                  }}
+                />
+              )}
+            </Box>
+          )}
+        </Box>
 
-          {/* Decorative circle */}
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: -20,
-              left: -20,
-              width: 80,
-              height: 80,
-              borderRadius: '50%',
-              background: gradient,
-              opacity: 0.06,
-            }}
-          />
-        </Paper>
-      </Tooltip>
+        {/* Background orb decoration */}
+        <Box
+          sx={{
+            position: 'absolute',
+            bottom: -30,
+            left: -30,
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            background: colors.gradient,
+            opacity: isDark ? 0.06 : 0.05,
+            pointerEvents: 'none',
+          }}
+        />
+        <Box
+          sx={{
+            position: 'absolute',
+            top: -20,
+            right: -20,
+            width: 70,
+            height: 70,
+            borderRadius: '50%',
+            background: colors.gradient,
+            opacity: isDark ? 0.04 : 0.03,
+            pointerEvents: 'none',
+          }}
+        />
+      </Paper>
     </motion.div>
   );
 };

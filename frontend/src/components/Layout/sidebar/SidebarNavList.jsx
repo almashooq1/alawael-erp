@@ -1,14 +1,13 @@
 /**
- * SidebarNavList — قائمة التنقل الاحترافية
+ * SidebarNavList — قائمة التنقل الاحترافية المحسّنة
  *
  * Premium dark sidebar navigation with:
- * - Section headers with dividers
- * - Active state with right accent border (RTL)
- * - Collapsible parent items with animated children
+ * - Section headers with refined dividers
+ * - Active state with gradient background + accent line (RTL)
+ * - Collapsible parent items with smooth animated children
  * - Tooltip in collapsed mode
  * - Notification badges
- * - Smooth transitions
- * - Auto-groups from flat nav items with dividers
+ * - Polished micro-interactions
  */
 
 import { useState, useCallback, useMemo, memo } from 'react';
@@ -27,26 +26,126 @@ import {
 import {
   ExpandMore as ExpandMoreIcon,
   Circle as CircleIcon,
+  FiberManualRecord as DotIcon,
 } from '@mui/icons-material';
 
-// ─── Style constants ──────────────────────────────────────────────────────────
+// ─── Style tokens ─────────────────────────────────────────────────────────────
 const SB = {
-  ACTIVE_BG:     'rgba(99,102,241,0.14)',
-  ACTIVE_BORDER: '#6366F1',
-  HOVER_BG:      'rgba(255,255,255,0.05)',
-  TEXT:          'rgba(255,255,255,0.72)',
-  TEXT_ACTIVE:   '#FFFFFF',
-  TEXT_MUTED:    'rgba(255,255,255,0.35)',
-  ICON:          'rgba(255,255,255,0.48)',
-  ICON_ACTIVE:   '#818CF8',
-  CHILD_DOT:     'rgba(255,255,255,0.3)',
-  CHILD_DOT_ACT: '#818CF8',
+  ACTIVE_BG:        'rgba(99,102,241,0.15)',
+  ACTIVE_BG_HOVER:  'rgba(99,102,241,0.2)',
+  ACTIVE_BORDER:    '#6366F1',
+  HOVER_BG:         'rgba(255,255,255,0.045)',
+  TEXT:             'rgba(255,255,255,0.65)',
+  TEXT_ACTIVE:      '#FFFFFF',
+  TEXT_MUTED:       'rgba(255,255,255,0.28)',
+  ICON:             'rgba(255,255,255,0.42)',
+  ICON_ACTIVE:      '#A5B4FC',
+  CHILD_DOT:        'rgba(255,255,255,0.2)',
+  CHILD_DOT_ACT:    '#818CF8',
+  CHILD_TEXT:       'rgba(255,255,255,0.55)',
+  CHILD_TEXT_ACT:   'rgba(255,255,255,0.95)',
 };
 
-// ─── Single nav item ──────────────────────────────────────────────────────────
+// ─── Child nav item ───────────────────────────────────────────────────────────
+const ChildNavItem = memo(function ChildNavItem({ item, collapsed }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isActive =
+    location.pathname === item.path ||
+    (item.path && item.path !== '/' && location.pathname.startsWith(item.path));
+
+  return (
+    <Tooltip
+      title={collapsed ? item.label : ''}
+      placement="left"
+      disableHoverListener={!collapsed}
+      arrow
+    >
+      <ListItemButton
+        onClick={() => item.path && navigate(item.path)}
+        sx={{
+          mx: 1.25,
+          mb: 0.35,
+          pl: collapsed ? '12px' : '20px',
+          pr: collapsed ? '12px' : '12px',
+          py: '6px',
+          borderRadius: '8px',
+          minHeight: 34,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.25,
+          backgroundColor: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
+          transition: 'all 0.15s ease',
+          '&:hover': {
+            backgroundColor: isActive ? 'rgba(99,102,241,0.14)' : 'rgba(255,255,255,0.04)',
+          },
+        }}
+      >
+        {/* Animated bullet */}
+        <Box
+          sx={{
+            width: isActive ? 7 : 5,
+            height: isActive ? 7 : 5,
+            borderRadius: '50%',
+            flexShrink: 0,
+            backgroundColor: isActive ? '#818CF8' : 'rgba(255,255,255,0.2)',
+            boxShadow: isActive ? '0 0 6px rgba(129,140,248,0.7)' : 'none',
+            transition: 'all 0.2s ease',
+          }}
+        />
+
+        {!collapsed && (
+          <>
+            <Typography
+              sx={{
+                fontSize: '0.8125rem',
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? SB.CHILD_TEXT_ACT : SB.CHILD_TEXT,
+                flex: 1,
+                lineHeight: 1.4,
+                transition: 'all 0.15s',
+                letterSpacing: isActive ? '-0.01em' : 'normal',
+              }}
+            >
+              {item.label}
+            </Typography>
+
+            {item.badge && (
+              <Box
+                sx={{
+                  px: 0.75,
+                  py: 0.1,
+                  borderRadius: '100px',
+                  backgroundColor: item.badgeColor === 'success'
+                    ? 'rgba(16,185,129,0.18)'
+                    : item.badgeColor === 'warning'
+                    ? 'rgba(245,158,11,0.18)'
+                    : 'rgba(244,63,94,0.18)',
+                  color: item.badgeColor === 'success'
+                    ? '#6EE7B7'
+                    : item.badgeColor === 'warning'
+                    ? '#FCD34D'
+                    : '#FDA4AF',
+                  fontSize: '0.6rem',
+                  fontWeight: 700,
+                  lineHeight: 1.6,
+                }}
+              >
+                {item.badge}
+              </Box>
+            )}
+          </>
+        )}
+      </ListItemButton>
+    </Tooltip>
+  );
+});
+
+// ─── Parent nav item ──────────────────────────────────────────────────────────
 const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
-  const navigate   = useNavigate();
-  const location   = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
 
   const hasChildren = item.children?.length > 0;
@@ -65,125 +164,64 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
     }
   }, [hasChildren, item.path, navigate]);
 
-  const isHighlighted = isActive || isChildActive;
-
-  // ── Child item ──────────────────────────────────────────────────────────────
+  // Delegate child items to ChildNavItem
   if (depth > 0) {
-    const childActive = location.pathname === item.path ||
-      (item.path && location.pathname.startsWith(item.path));
-
-    return (
-      <Tooltip
-        title={collapsed ? item.label : ''}
-        placement="left"
-        disableHoverListener={!collapsed}
-        arrow
-      >
-        <ListItemButton
-          onClick={() => item.path && navigate(item.path)}
-          sx={{
-            mx: 1,
-            mb: 0.25,
-            paddingInlineEnd: collapsed ? 8 : 16,
-            paddingInlineStart: collapsed ? 8 : 28,
-            py: 0.75,
-            borderRadius: '7px',
-            minHeight: 34,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            backgroundColor: childActive ? 'rgba(99,102,241,0.1)' : 'transparent',
-            transition: 'background-color 0.15s',
-            '&:hover': {
-              backgroundColor: childActive ? 'rgba(99,102,241,0.15)' : SB.HOVER_BG,
-            },
-          }}
-        >
-          {/* Bullet */}
-          <CircleIcon
-            sx={{
-              fontSize: 6,
-              flexShrink: 0,
-              color: childActive ? SB.CHILD_DOT_ACT : SB.CHILD_DOT,
-              transition: 'color 0.15s',
-            }}
-          />
-
-          {!collapsed && (
-            <>
-              <Typography
-                sx={{
-                  fontSize: '0.8125rem',
-                  fontWeight: childActive ? 600 : 400,
-                  color: childActive ? SB.TEXT_ACTIVE : SB.TEXT,
-                  flex: 1,
-                  lineHeight: 1.4,
-                  transition: 'color 0.15s',
-                }}
-              >
-                {item.label}
-              </Typography>
-
-              {item.badge && (
-                <Badge
-                  badgeContent={item.badge}
-                  color={item.badgeColor || 'primary'}
-                  sx={{ '& .MuiBadge-badge': { position: 'static', transform: 'none', fontSize: '0.6rem', height: 16, minWidth: 16 } }}
-                />
-              )}
-            </>
-          )}
-        </ListItemButton>
-      </Tooltip>
-    );
+    return <ChildNavItem item={item} collapsed={collapsed} />;
   }
 
-  // ── Parent item ─────────────────────────────────────────────────────────────
+  const isHighlighted = isActive || isChildActive;
+
   const buttonContent = (
     <ListItemButton
       onClick={handleClick}
       sx={{
         mx: 1,
-        mb: 0.25,
-        paddingInlineEnd: collapsed ? 8 : 12,
-        paddingInlineStart: collapsed ? 8 : 12,
-        py: 0.75,
-        borderRadius: '8px',
+        mb: 0.35,
+        pl: collapsed ? '12px' : '14px',
+        pr: collapsed ? '12px' : '10px',
+        py: collapsed ? '10px' : '9px',
+        borderRadius: '10px',
         minHeight: 42,
         display: 'flex',
         alignItems: 'center',
         position: 'relative',
-        // Active state
+        overflow: 'hidden',
         backgroundColor: isHighlighted ? SB.ACTIVE_BG : 'transparent',
-        // Right accent border for RTL (start side)
+        // Active accent bar (RTL start side)
         '&::before': isHighlighted
           ? {
               content: '""',
               position: 'absolute',
               insetInlineStart: 0,
-              top: '20%',
-              height: '60%',
+              top: '18%',
+              height: '64%',
               width: '3px',
-              borderRadius: '3px',
-              backgroundColor: SB.ACTIVE_BORDER,
-              boxShadow: '0 0 8px rgba(99,102,241,0.6)',
+              borderRadius: '0 3px 3px 0',
+              background: 'linear-gradient(180deg, #818CF8 0%, #6366F1 100%)',
+              boxShadow: '0 0 10px rgba(99,102,241,0.7)',
             }
           : {},
-        transition: 'background-color 0.15s',
+        // Right-to-left border
+        transition: 'background-color 0.18s ease',
         '&:hover': {
-          backgroundColor: isHighlighted ? 'rgba(99,102,241,0.18)' : SB.HOVER_BG,
+          backgroundColor: isHighlighted ? SB.ACTIVE_BG_HOVER : SB.HOVER_BG,
+          '& .nav-icon': { color: isHighlighted ? SB.ICON_ACTIVE : 'rgba(255,255,255,0.7)' },
+          '& .nav-label': { color: isHighlighted ? '#FFFFFF' : 'rgba(255,255,255,0.85)' },
         },
       }}
     >
       {/* Icon */}
       <ListItemIcon
+        className="nav-icon"
         sx={{
           minWidth: 0,
-          marginInlineEnd: collapsed ? 0 : 12,
+          marginInlineEnd: collapsed ? 0 : '12px',
           color: isHighlighted ? SB.ICON_ACTIVE : SB.ICON,
-          transition: 'color 0.15s',
-          '& svg': { fontSize: 20 },
+          transition: 'color 0.18s ease',
+          '& svg': { fontSize: 19 },
           flexShrink: 0,
+          justifyContent: 'center',
+          display: 'flex',
         }}
       >
         {item.badge && !collapsed ? (
@@ -192,11 +230,12 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
             color={item.badgeColor || 'error'}
             sx={{
               '& .MuiBadge-badge': {
-                fontSize: '0.6rem',
-                height: 16,
-                minWidth: 16,
-                top: -2,
-                insetInlineEnd: -2,
+                fontSize: '0.55rem',
+                height: 15,
+                minWidth: 15,
+                top: -3,
+                insetInlineEnd: -3,
+                boxShadow: '0 0 0 1.5px #0A1628',
               },
             }}
           >
@@ -212,6 +251,7 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
         <>
           <ListItemText
             primary={item.label}
+            className="nav-label"
             sx={{
               m: 0,
               '& .MuiTypography-root': {
@@ -219,31 +259,33 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
                 fontWeight: isHighlighted ? 600 : 400,
                 color: isHighlighted ? SB.TEXT_ACTIVE : SB.TEXT,
                 lineHeight: 1.4,
-                transition: 'color 0.15s, font-weight 0.15s',
+                transition: 'all 0.18s ease',
+                letterSpacing: isHighlighted ? '-0.01em' : 'normal',
               },
             }}
           />
 
-          {/* Expand arrow for parents */}
+          {/* Expand icon for parents */}
           {hasChildren && (
             <ExpandMoreIcon
               sx={{
-                fontSize: 16,
-                color: SB.TEXT_MUTED,
-                transition: 'transform 0.25s ease',
-                transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                fontSize: 15,
+                color: isHighlighted ? 'rgba(165,180,252,0.6)' : SB.TEXT_MUTED,
+                transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+                transform: (open || isChildActive) ? 'rotate(180deg)' : 'rotate(0deg)',
                 flexShrink: 0,
+                ml: 0.5,
               }}
             />
           )}
 
-          {/* Badge (no children) */}
+          {/* Badge pill (for leaf items) */}
           {item.badge && !hasChildren && (
             <Box
               sx={{
-                marginInlineStart: 8,
+                marginInlineStart: 1,
                 px: 0.75,
-                py: 0.125,
+                py: 0.15,
                 borderRadius: '100px',
                 backgroundColor: item.badgeColor === 'success'
                   ? 'rgba(16,185,129,0.15)'
@@ -255,9 +297,10 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
                   : item.badgeColor === 'warning'
                   ? '#FCD34D'
                   : '#FDA4AF',
-                fontSize: '0.65rem',
+                fontSize: '0.6rem',
                 fontWeight: 700,
-                minWidth: 20,
+                lineHeight: 1.6,
+                minWidth: 18,
                 textAlign: 'center',
               }}
             >
@@ -271,7 +314,6 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
 
   return (
     <>
-      {/* Tooltip only in collapsed mode */}
       {collapsed ? (
         <Tooltip title={item.label} placement="left" arrow>
           {buttonContent}
@@ -282,7 +324,26 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
 
       {/* Children */}
       {hasChildren && !collapsed && (
-        <Collapse in={open || isChildActive} timeout={250} unmountOnExit>
+        <Collapse
+          in={open || isChildActive}
+          timeout={240}
+          unmountOnExit
+          sx={{
+            // Indent line for children
+            '& > .MuiCollapse-wrapper': {
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                insetInlineStart: '28px',
+                top: 4,
+                bottom: 8,
+                width: '1px',
+                background: 'linear-gradient(180deg, rgba(99,102,241,0.4) 0%, rgba(99,102,241,0.1) 100%)',
+              },
+            },
+          }}
+        >
           <List disablePadding sx={{ mb: 0.5 }}>
             {item.children.map((child) => (
               <NavItem key={child.id || child.path} item={child} collapsed={collapsed} depth={1} />
@@ -294,58 +355,71 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
   );
 });
 
-// ─── Section separator ────────────────────────────────────────────────────────
+// ─── Section title ────────────────────────────────────────────────────────────
 function SectionTitle({ label, collapsed }) {
   if (collapsed) {
     return (
       <Box
         sx={{
-          mx: 2,
-          my: 1,
+          mx: 2.5,
+          my: 1.25,
           height: '1px',
-          backgroundColor: 'rgba(255,255,255,0.07)',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 40%, rgba(255,255,255,0.08) 60%, transparent 100%)',
         }}
       />
     );
   }
 
   return (
-    <Box sx={{ px: 2.5, pt: 2, pb: 0.5 }}>
+    <Box sx={{ px: 2.75, pt: 2.25, pb: 0.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+      <Box
+        sx={{
+          height: '1px',
+          width: 16,
+          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.5))',
+          flexShrink: 0,
+        }}
+      />
       <Typography
         sx={{
-          fontSize: '0.65rem',
-          fontWeight: 600,
-          letterSpacing: '0.08em',
+          fontSize: '0.625rem',
+          fontWeight: 700,
+          letterSpacing: '0.1em',
           textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.3)',
+          color: 'rgba(255,255,255,0.25)',
           userSelect: 'none',
+          whiteSpace: 'nowrap',
+          flex: 1,
         }}
       >
         {label}
       </Typography>
+      <Box
+        sx={{
+          height: '1px',
+          flex: 1,
+          background: 'linear-gradient(90deg, rgba(255,255,255,0.07), transparent)',
+        }}
+      />
     </Box>
   );
 }
 
-// ─── Convert flat items array (with dividers) to groups ───────────────────────
+// ─── Build nav groups from flat array ─────────────────────────────────────────
 function buildNavGroups(items) {
   const groups = [];
   let currentGroup = { title: '', items: [] };
 
   for (const item of items) {
     if (item.type === 'divider') {
-      // Push previous group if it has items
       if (currentGroup.items.length > 0) {
         groups.push(currentGroup);
       }
-      // Start new group with divider label
       currentGroup = { title: item.label || '', items: [] };
     } else {
       currentGroup.items.push(item);
     }
   }
-
-  // Push the last group
   if (currentGroup.items.length > 0) {
     groups.push(currentGroup);
   }
@@ -364,14 +438,16 @@ export default memo(function SidebarNavList({ items = [], collapsed }) {
         flex: 1,
         overflow: 'hidden auto',
         py: 1,
-        // Scroll styling
-        '&::-webkit-scrollbar': { width: '4px' },
+        // Custom scrollbar
+        '&::-webkit-scrollbar': { width: '3px' },
         '&::-webkit-scrollbar-track': { background: 'transparent' },
         '&::-webkit-scrollbar-thumb': {
-          background: 'rgba(255,255,255,0.1)',
-          borderRadius: '2px',
-          '&:hover': { background: 'rgba(255,255,255,0.2)' },
+          background: 'rgba(99,102,241,0.25)',
+          borderRadius: '3px',
+          '&:hover': { background: 'rgba(99,102,241,0.45)' },
         },
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(99,102,241,0.25) transparent',
       }}
     >
       {navGroups.map((group, groupIdx) => (

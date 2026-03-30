@@ -1,9 +1,9 @@
 /**
- * SimpleLogin — صفحة تسجيل الدخول الاحترافية
+ * SimpleLogin — صفحة تسجيل الدخول المحسّنة
  *
  * Premium split-screen login:
- * - Left panel (40%): Clean white form
- * - Right panel (60%): Brand gradient with animated shapes
+ * - Left panel (42%): Clean white form with micro-interactions
+ * - Right panel (58%): Deep brand gradient with animated mesh & shapes
  * - Full Arabic RTL support
  * - Error handling + loading state
  * - Password visibility toggle
@@ -13,7 +13,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Box,
-  Paper,
   Typography,
   TextField,
   Button,
@@ -29,6 +28,7 @@ import {
   useMediaQuery,
   alpha,
   Fade,
+  Slide,
 } from '@mui/material';
 import {
   Email,
@@ -40,6 +40,7 @@ import {
   AutoAwesome,
   TrendingUp,
   Groups,
+  CheckCircle,
 } from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
@@ -48,24 +49,34 @@ import { useSnackbar } from 'contexts/SnackbarContext';
 // ─── Feature highlights (right panel) ────────────────────────────────────────
 const FEATURES = [
   {
-    icon: <Groups sx={{ fontSize: 22, color: '#818CF8' }} />,
+    icon: <Groups sx={{ fontSize: 20, color: '#A78BFA' }} />,
     title: 'إدارة شاملة للمستفيدين',
     desc: 'تتبع كامل لملفات المستفيدين وبرامج التأهيل',
+    color: '#A78BFA',
   },
   {
-    icon: <TrendingUp sx={{ fontSize: 22, color: '#6EE7B7' }} />,
+    icon: <TrendingUp sx={{ fontSize: 20, color: '#6EE7B7' }} />,
     title: 'تقارير وإحصاءات متقدمة',
     desc: 'لوحات معلومات تفاعلية بمؤشرات أداء دقيقة',
+    color: '#6EE7B7',
   },
   {
-    icon: <AutoAwesome sx={{ fontSize: 22, color: '#FCD34D' }} />,
+    icon: <AutoAwesome sx={{ fontSize: 20, color: '#FCD34D' }} />,
     title: 'ذكاء اصطناعي متكامل',
     desc: 'توصيات آلية وتحليل بيانات بتقنية AI',
+    color: '#FCD34D',
   },
 ];
 
-// ─── Animated floating shape ──────────────────────────────────────────────────
-function FloatingShape({ size, top, left, right, opacity, delay, color }) {
+// ─── Stats ────────────────────────────────────────────────────────────────────
+const STATS = [
+  { value: '+500', label: 'مستفيد' },
+  { value: '99.9%', label: 'وقت التشغيل' },
+  { value: '+30', label: 'وحدة إدارية' },
+];
+
+// ─── Animated floating blob ───────────────────────────────────────────────────
+function FloatingBlob({ size, top, left, right, bottom, opacity, delay, color }) {
   return (
     <Box
       sx={{
@@ -75,17 +86,19 @@ function FloatingShape({ size, top, left, right, opacity, delay, color }) {
         top,
         left,
         right,
+        bottom,
         borderRadius: '50%',
-        background: color || 'rgba(99,102,241,0.15)',
-        filter: 'blur(40px)',
+        background: color || 'rgba(99,102,241,0.18)',
+        filter: 'blur(60px)',
         opacity,
-        animation: `float ${3 + delay}s ease-in-out infinite alternate`,
-        '@keyframes float': {
-          from: { transform: 'translateY(0px) scale(1)' },
-          to:   { transform: `translateY(${-12 + delay * 3}px) scale(1.05)` },
+        animation: `blobFloat ${4 + delay * 0.8}s ease-in-out infinite alternate`,
+        '@keyframes blobFloat': {
+          from: { transform: 'translate(0, 0) scale(1)' },
+          to:   { transform: `translate(${delay % 2 === 0 ? '-12px' : '12px'}, -16px) scale(1.06)` },
         },
         animationDelay: `${delay}s`,
         pointerEvents: 'none',
+        willChange: 'transform',
       }}
     />
   );
@@ -105,13 +118,14 @@ export default function SimpleLogin() {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
   const [mounted, setMounted]   = useState(false);
+  const [focusedField, setFocusedField] = useState(null);
 
   useEffect(() => {
-    setMounted(true);
-    // Pre-fill dev credentials
+    const t = setTimeout(() => setMounted(true), 80);
     if (process.env.NODE_ENV === 'development') {
       setForm({ email: 'admin@alawael.org', password: 'Admin@123' });
     }
+    return () => clearTimeout(t);
   }, []);
 
   const handleChange = (e) => {
@@ -150,25 +164,38 @@ export default function SimpleLogin() {
     }
   };
 
+  // Shared input styles
+  const inputSx = (fieldName) => ({
+    borderRadius: '12px',
+    backgroundColor: focusedField === fieldName ? '#FFFFFF' : '#F8FAFC',
+    border: `1.5px solid ${focusedField === fieldName ? '#6366F1' : (error ? '#F43F5E' : '#E2E8F0')}`,
+    boxShadow: focusedField === fieldName ? `0 0 0 3px ${alpha('#6366F1', 0.12)}` : 'none',
+    transition: 'all 0.2s ease',
+    '& fieldset': { border: 'none' },
+    '& input': { fontSize: '0.9375rem', py: 1.375 },
+    '& .MuiInputBase-root': { borderRadius: '12px' },
+  });
+
   // ── Layout ─────────────────────────────────────────────────────────────────
   return (
     <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        backgroundColor: '#0A1628',
+        backgroundColor: '#080E1A',
         fontFamily: 'Cairo, sans-serif',
         direction: 'rtl',
+        overflow: 'hidden',
       }}
     >
-      {/* ── RIGHT PANEL — Brand/Visual (hidden on mobile) ─────────────────── */}
+      {/* ── RIGHT PANEL — Brand/Visual ─────────────────────────────────────── */}
       {!isMobile && (
         <Box
           sx={{
-            flex: '0 0 58%',
+            flex: '0 0 56%',
             position: 'relative',
             overflow: 'hidden',
-            background: 'linear-gradient(160deg, #0F172A 0%, #1E3A8A 35%, #312E81 70%, #4C1D95 100%)',
+            background: 'linear-gradient(145deg, #060D1F 0%, #0D1B40 25%, #1A1060 55%, #2D0A5E 80%, #3B0764 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -176,103 +203,152 @@ export default function SimpleLogin() {
             p: 6,
           }}
         >
-          {/* Animated background shapes */}
-          <FloatingShape size={300} top="-80px" right="-80px"   opacity={0.6} delay={0} color="rgba(99,102,241,0.2)" />
-          <FloatingShape size={250} bottom="0"  left="-60px"    opacity={0.5} delay={1} color="rgba(139,92,246,0.2)" />
-          <FloatingShape size={180} top="40%"   right="10%"     opacity={0.4} delay={2} color="rgba(245,158,11,0.12)" />
-          <FloatingShape size={120} top="15%"   left="20%"      opacity={0.3} delay={0.5} color="rgba(16,185,129,0.1)" />
+          {/* Animated blobs */}
+          <FloatingBlob size={420} top="-120px" right="-100px" opacity={0.5} delay={0}   color="rgba(79,70,229,0.25)" />
+          <FloatingBlob size={320} bottom="-80px" left="-80px"  opacity={0.45} delay={1.2} color="rgba(109,40,217,0.22)" />
+          <FloatingBlob size={220} top="38%"   right="8%"     opacity={0.35} delay={2.4} color="rgba(245,158,11,0.1)" />
+          <FloatingBlob size={160} top="12%"   left="15%"     opacity={0.25} delay={0.6} color="rgba(16,185,129,0.12)" />
+          <FloatingBlob size={100} bottom="20%" right="25%"   opacity={0.2}  delay={1.8} color="rgba(14,165,233,0.15)" />
 
-          {/* Mesh grid overlay */}
+          {/* Dot mesh grid */}
           <Box
             sx={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: `
-                linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px)
-              `,
-              backgroundSize: '48px 48px',
+              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
               pointerEvents: 'none',
             }}
           />
 
-          <Fade in={mounted} timeout={800}>
-            <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 440, width: '100%' }}>
+          {/* Subtle scan-line effect */}
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(255,255,255,0.015) 50%)',
+              backgroundSize: '100% 4px',
+              pointerEvents: 'none',
+            }}
+          />
+
+          {/* Bottom glow */}
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '40%',
+              background: 'linear-gradient(0deg, rgba(99,102,241,0.12) 0%, transparent 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+
+          <Fade in={mounted} timeout={900}>
+            <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 460, width: '100%' }}>
+
               {/* Logo */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
-                <Box
-                  sx={{
-                    width: 52,
-                    height: 52,
-                    borderRadius: '14px',
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    boxShadow: '0 8px 24px rgba(99,102,241,0.45)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                  }}
-                >
-                  <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.4rem', fontFamily: 'Cairo' }}>
-                    أ
-                  </Typography>
+              <Slide in={mounted} direction="down" timeout={600}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
+                  <Box
+                    sx={{
+                      width: 56,
+                      height: 56,
+                      borderRadius: '16px',
+                      background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 8px 32px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0, left: 0, right: 0,
+                        height: '50%',
+                        background: 'rgba(255,255,255,0.08)',
+                        borderRadius: '16px 16px 0 0',
+                      },
+                    }}
+                  >
+                    <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.5rem', fontFamily: 'Cairo', position: 'relative' }}>
+                      أ
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.3rem', lineHeight: 1.2, fontFamily: 'Cairo', letterSpacing: '-0.01em' }}>
+                      مراكز الأوائل
+                    </Typography>
+                    <Typography sx={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.78rem', letterSpacing: '0.04em', mt: 0.2 }}>
+                      نظام الإدارة المتكامل
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box>
-                  <Typography sx={{ color: '#FFFFFF', fontWeight: 700, fontSize: '1.25rem', lineHeight: 1.2, fontFamily: 'Cairo' }}>
-                    مراكز الأوائل
-                  </Typography>
-                  <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
-                    نظام الإدارة المتكامل
-                  </Typography>
-                </Box>
-              </Box>
+              </Slide>
 
               {/* Headline */}
               <Typography
                 sx={{
                   color: '#FFFFFF',
-                  fontWeight: 700,
-                  fontSize: '2rem',
-                  lineHeight: 1.3,
+                  fontWeight: 800,
+                  fontSize: '2.25rem',
+                  lineHeight: 1.25,
                   mb: 1.5,
                   fontFamily: 'Cairo',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 إدارة احترافية
                 <br />
-                <Box component="span" sx={{ background: 'linear-gradient(135deg, #818CF8, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                <Box
+                  component="span"
+                  sx={{
+                    background: 'linear-gradient(135deg, #818CF8 0%, #C4B5FD 50%, #A78BFA 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
                   لمراكز التأهيل
                 </Box>
               </Typography>
 
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: 1.7, mb: 5 }}>
+              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9375rem', lineHeight: 1.75, mb: 5, maxWidth: 380 }}>
                 منصة شاملة لإدارة المستفيدين، الموارد البشرية، والخدمات المالية وفق رؤية 2030
               </Typography>
 
               {/* Feature cards */}
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.75 }}>
                 {FEATURES.map((f, i) => (
-                  <Fade key={i} in={mounted} timeout={800 + i * 200}>
+                  <Fade key={i} in={mounted} timeout={700 + i * 180}>
                     <Box
                       sx={{
                         display: 'flex',
-                        alignItems: 'flex-start',
+                        alignItems: 'center',
                         gap: 2,
                         p: 2,
-                        borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        backdropFilter: 'blur(8px)',
-                        transition: 'background 0.2s',
-                        '&:hover': { background: 'rgba(255,255,255,0.08)' },
+                        borderRadius: '14px',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        backdropFilter: 'blur(12px)',
+                        transition: 'all 0.25s ease',
+                        cursor: 'default',
+                        '&:hover': {
+                          background: 'rgba(255,255,255,0.07)',
+                          border: `1px solid ${f.color}28`,
+                          transform: 'translateX(-4px)',
+                        },
                       }}
                     >
                       <Box
                         sx={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: '10px',
-                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          width: 42,
+                          height: 42,
+                          borderRadius: '11px',
+                          background: `${f.color}18`,
+                          border: `1px solid ${f.color}25`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -281,39 +357,75 @@ export default function SimpleLogin() {
                       >
                         {f.icon}
                       </Box>
-                      <Box>
-                        <Typography sx={{ color: '#FFFFFF', fontWeight: 600, fontSize: '0.875rem', mb: 0.25 }}>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: '0.875rem', mb: 0.2, lineHeight: 1.3 }}>
                           {f.title}
                         </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', lineHeight: 1.5 }}>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.78rem', lineHeight: 1.5 }}>
                           {f.desc}
                         </Typography>
                       </Box>
+                      <CheckCircle sx={{ fontSize: 16, color: `${f.color}80`, flexShrink: 0 }} />
                     </Box>
                   </Fade>
                 ))}
               </Box>
 
-              {/* Bottom badge */}
-              <Box
-                sx={{
-                  mt: 5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  px: 2,
-                  py: 1,
-                  borderRadius: '100px',
-                  backgroundColor: 'rgba(16,185,129,0.12)',
-                  border: '1px solid rgba(16,185,129,0.2)',
-                  width: 'fit-content',
-                }}
-              >
-                <ShieldIcon sx={{ fontSize: 16, color: '#34D399' }} />
-                <Typography sx={{ color: '#6EE7B7', fontSize: '0.75rem', fontWeight: 600 }}>
-                  نظام آمن ومعتمد • ISO 27001
-                </Typography>
-              </Box>
+              {/* Stats row */}
+              <Fade in={mounted} timeout={1400}>
+                <Box
+                  sx={{
+                    mt: 4,
+                    display: 'flex',
+                    gap: 0,
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    background: 'rgba(255,255,255,0.03)',
+                  }}
+                >
+                  {STATS.map((s, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        flex: 1,
+                        py: 1.75,
+                        textAlign: 'center',
+                        borderRight: i < STATS.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                      }}
+                    >
+                      <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.25rem', fontFamily: 'Cairo' }}>
+                        {s.value}
+                      </Typography>
+                      <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', mt: 0.2 }}>
+                        {s.label}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Fade>
+
+              {/* Security badge */}
+              <Fade in={mounted} timeout={1600}>
+                <Box
+                  sx={{
+                    mt: 3,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 2,
+                    py: 1,
+                    borderRadius: '100px',
+                    background: 'rgba(16,185,129,0.1)',
+                    border: '1px solid rgba(16,185,129,0.2)',
+                  }}
+                >
+                  <ShieldIcon sx={{ fontSize: 14, color: '#34D399' }} />
+                  <Typography sx={{ color: '#6EE7B7', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.02em' }}>
+                    نظام آمن ومعتمد • ISO 27001 • رؤية 2030
+                  </Typography>
+                </Box>
+              </Fade>
             </Box>
           </Fade>
         </Box>
@@ -327,43 +439,68 @@ export default function SimpleLogin() {
           alignItems: 'center',
           justifyContent: 'center',
           backgroundColor: '#FFFFFF',
-          p: { xs: 3, md: 6 },
+          p: { xs: 3, md: 5 },
           position: 'relative',
           minHeight: '100vh',
+          overflow: 'hidden',
         }}
       >
+        {/* Subtle background pattern */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(99,102,241,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139,92,246,0.04) 0%, transparent 50%)',
+            pointerEvents: 'none',
+          }}
+        />
+
         {/* Mobile logo */}
         {isMobile && (
           <Box sx={{ position: 'absolute', top: 24, right: 24, display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Box
               sx={{
-                width: 40,
-                height: 40,
-                borderRadius: '10px',
+                width: 42,
+                height: 42,
+                borderRadius: '12px',
                 background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
               }}
             >
-              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem' }}>أ</Typography>
+              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem' }}>أ</Typography>
             </Box>
-            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#0F172A' }}>مراكز الأوائل</Typography>
+            <Box>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#0F172A' }}>مراكز الأوائل</Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: '#94A3B8' }}>نظام الإدارة المتكامل</Typography>
+            </Box>
           </Box>
         )}
 
-        <Fade in={mounted} timeout={600}>
-          <Box sx={{ width: '100%', maxWidth: 400 }}>
-            {/* Header */}
-            <Box sx={{ mb: 4 }}>
+        <Fade in={mounted} timeout={500}>
+          <Box sx={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
+
+            {/* Welcome header */}
+            <Box sx={{ mb: 4.5 }}>
+              {!isMobile && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Box sx={{ width: 28, height: 3, borderRadius: 2, background: 'linear-gradient(90deg, #6366F1, #8B5CF6)' }} />
+                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#6366F1', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                    نظام مراكز الأوائل
+                  </Typography>
+                </Box>
+              )}
               <Typography
                 sx={{
-                  fontWeight: 700,
-                  fontSize: { xs: '1.625rem', md: '1.875rem' },
+                  fontWeight: 800,
+                  fontSize: { xs: '1.75rem', md: '2rem' },
                   color: '#0F172A',
                   lineHeight: 1.2,
-                  mb: 1,
+                  mb: 0.75,
                   fontFamily: 'Cairo',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 مرحباً بعودتك 👋
@@ -379,7 +516,13 @@ export default function SimpleLogin() {
                 <Alert
                   severity="error"
                   onClose={() => setError('')}
-                  sx={{ mb: 3, borderRadius: 2 }}
+                  sx={{
+                    mb: 3,
+                    borderRadius: '12px',
+                    border: '1px solid rgba(244,63,94,0.2)',
+                    backgroundColor: '#FFF1F2',
+                    '& .MuiAlert-icon': { color: '#F43F5E' },
+                  }}
                 >
                   {error}
                 </Alert>
@@ -388,9 +531,10 @@ export default function SimpleLogin() {
 
             {/* Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
+
               {/* Email */}
               <Box sx={{ mb: 2.5 }}>
-                <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155', mb: 0.75 }}>
+                <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#374151', mb: 0.875, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   البريد الإلكتروني
                 </Typography>
                 <TextField
@@ -398,6 +542,8 @@ export default function SimpleLogin() {
                   type="email"
                   value={form.email}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('email')}
+                  onBlur={() => setFocusedField(null)}
                   placeholder="admin@alawael.org"
                   fullWidth
                   size="medium"
@@ -406,25 +552,18 @@ export default function SimpleLogin() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Email sx={{ fontSize: 18, color: '#94A3B8' }} />
+                        <Email sx={{ fontSize: 17, color: focusedField === 'email' ? '#6366F1' : '#CBD5E1', transition: 'color 0.2s' }} />
                       </InputAdornment>
                     ),
-                    sx: {
-                      borderRadius: '10px',
-                      backgroundColor: '#F8FAFC',
-                      '&.Mui-focused': {
-                        backgroundColor: '#FFFFFF',
-                      },
-                      '& input': { fontSize: '0.9375rem' },
-                    },
+                    sx: inputSx('email'),
                   }}
                 />
               </Box>
 
               {/* Password */}
               <Box sx={{ mb: 1.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
-                  <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.875 }}>
+                  <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#374151' }}>
                     كلمة المرور
                   </Typography>
                   <Link
@@ -434,7 +573,8 @@ export default function SimpleLogin() {
                       color: '#6366F1',
                       textDecoration: 'none',
                       fontWeight: 500,
-                      '&:hover': { textDecoration: 'underline' },
+                      transition: 'color 0.15s',
+                      '&:hover': { color: '#4F46E5' },
                     }}
                   >
                     نسيت كلمة المرور؟
@@ -445,6 +585,8 @@ export default function SimpleLogin() {
                   type={showPwd ? 'text' : 'password'}
                   value={form.password}
                   onChange={handleChange}
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
                   placeholder="••••••••"
                   fullWidth
                   size="medium"
@@ -453,7 +595,7 @@ export default function SimpleLogin() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock sx={{ fontSize: 18, color: '#94A3B8' }} />
+                        <Lock sx={{ fontSize: 17, color: focusedField === 'password' ? '#6366F1' : '#CBD5E1', transition: 'color 0.2s' }} />
                       </InputAdornment>
                     ),
                     endAdornment: (
@@ -462,18 +604,17 @@ export default function SimpleLogin() {
                           onClick={() => setShowPwd((v) => !v)}
                           edge="end"
                           size="small"
-                          sx={{ color: '#94A3B8', '&:hover': { color: '#6366F1' } }}
+                          sx={{
+                            color: '#CBD5E1',
+                            borderRadius: '8px',
+                            '&:hover': { color: '#6366F1', backgroundColor: alpha('#6366F1', 0.08) },
+                          }}
                         >
-                          {showPwd ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                          {showPwd ? <VisibilityOff sx={{ fontSize: 17 }} /> : <Visibility sx={{ fontSize: 17 }} />}
                         </IconButton>
                       </InputAdornment>
                     ),
-                    sx: {
-                      borderRadius: '10px',
-                      backgroundColor: '#F8FAFC',
-                      '&.Mui-focused': { backgroundColor: '#FFFFFF' },
-                      '& input': { fontSize: '0.9375rem' },
-                    },
+                    sx: inputSx('password'),
                   }}
                 />
               </Box>
@@ -486,7 +627,8 @@ export default function SimpleLogin() {
                     onChange={(e) => setRemember(e.target.checked)}
                     size="small"
                     sx={{
-                      color: '#CBD5E1',
+                      color: '#E2E8F0',
+                      borderRadius: '4px',
                       '&.Mui-checked': { color: '#6366F1' },
                       p: 0.75,
                     }}
@@ -494,49 +636,78 @@ export default function SimpleLogin() {
                 }
                 label={
                   <Typography sx={{ fontSize: '0.8125rem', color: '#64748B' }}>
-                    تذكرني
+                    تذكرني لمدة 30 يوماً
                   </Typography>
                 }
-                sx={{ mb: 3, mr: 0 }}
+                sx={{ mb: 3.5, mr: 0 }}
               />
 
-              {/* Submit */}
+              {/* Submit button */}
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 size="large"
                 disabled={loading}
-                startIcon={loading ? null : <LoginIcon sx={{ fontSize: 18 }} />}
                 sx={{
-                  height: 48,
-                  borderRadius: '10px',
-                  fontSize: '0.9375rem',
+                  height: 52,
+                  borderRadius: '13px',
+                  fontSize: '1rem',
                   fontWeight: 700,
+                  fontFamily: 'Cairo',
                   letterSpacing: '0.01em',
-                  background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                  boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #4338CA 0%, #6D28D9 100%)',
-                    boxShadow: '0 6px 20px rgba(99,102,241,0.45)',
-                    transform: 'translateY(-1px)',
-                  },
-                  '&:active': { transform: 'translateY(0)' },
+                  background: loading
+                    ? '#E2E8F0'
+                    : 'linear-gradient(135deg, #4F46E5 0%, #6D28D9 100%)',
+                  boxShadow: loading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  transition: 'all 0.25s ease',
+                  '&::before': !loading ? {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0, left: 0, right: 0,
+                    height: '50%',
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: '13px 13px 0 0',
+                  } : {},
+                  '&:hover': !loading ? {
+                    background: 'linear-gradient(135deg, #4338CA 0%, #5B21B6 100%)',
+                    boxShadow: '0 8px 28px rgba(99,102,241,0.5)',
+                    transform: 'translateY(-2px)',
+                  } : {},
+                  '&:active': { transform: 'translateY(0)', boxShadow: '0 2px 12px rgba(99,102,241,0.35)' },
                   '&.Mui-disabled': {
-                    background: '#E2E8F0',
+                    background: '#F1F5F9',
                     boxShadow: 'none',
                     color: '#94A3B8',
                   },
                 }}
               >
-                {loading ? <CircularProgress size={22} sx={{ color: '#94A3B8' }} /> : 'تسجيل الدخول'}
+                {loading ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <CircularProgress size={18} sx={{ color: '#94A3B8' }} />
+                    <span>جارٍ تسجيل الدخول...</span>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                    <LoginIcon sx={{ fontSize: 18 }} />
+                    تسجيل الدخول
+                  </Box>
+                )}
               </Button>
             </Box>
 
             {/* Divider */}
-            <Divider sx={{ my: 3, '& .MuiDivider-wrapper': { px: 2 } }}>
-              <Typography variant="caption" color="text.secondary">
+            <Divider
+              sx={{
+                my: 3.5,
+                '&::before, &::after': { borderColor: '#F1F5F9' },
+                '& .MuiDivider-wrapper': { px: 2 },
+              }}
+            >
+              <Typography variant="caption" sx={{ color: '#CBD5E1', fontSize: '0.75rem', fontWeight: 500 }}>
                 نظام مراكز الأوائل
               </Typography>
             </Divider>
@@ -546,18 +717,34 @@ export default function SimpleLogin() {
               <Box
                 sx={{
                   p: 2,
-                  borderRadius: '10px',
-                  backgroundColor: alpha('#6366F1', 0.05),
-                  border: `1px solid ${alpha('#6366F1', 0.15)}`,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.04) 100%)',
+                  border: `1px solid ${alpha('#6366F1', 0.12)}`,
                   textAlign: 'center',
                 }}
               >
-                <Typography sx={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 600, mb: 0.5 }}>
-                  🔧 بيئة التطوير — بيانات تلقائية
+                <Typography sx={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 700, mb: 0.75 }}>
+                  🔧 بيئة التطوير
                 </Typography>
-                <Typography sx={{ fontSize: '0.7rem', color: '#94A3B8', fontFamily: 'monospace' }}>
-                  admin@alawael.org / Admin@123
-                </Typography>
+                <Box
+                  sx={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 0.75,
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: '6px',
+                    backgroundColor: alpha('#6366F1', 0.08),
+                  }}
+                >
+                  <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
+                    admin@alawael.org
+                  </Typography>
+                  <Box sx={{ width: 1, height: 12, backgroundColor: alpha('#6366F1', 0.25) }} />
+                  <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
+                    Admin@123
+                  </Typography>
+                </Box>
               </Box>
             )}
 
@@ -567,7 +754,7 @@ export default function SimpleLogin() {
                 mt: 4,
                 textAlign: 'center',
                 fontSize: '0.75rem',
-                color: '#94A3B8',
+                color: '#CBD5E1',
               }}
             >
               © {new Date().getFullYear()} مراكز الأوائل — جميع الحقوق محفوظة

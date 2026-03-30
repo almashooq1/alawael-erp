@@ -83,7 +83,7 @@ const lightPalette = {
     contrastText: '#FFFFFF',
   },
   background: {
-    default: slate[100],
+    default: '#F4F6FA',
     paper: '#FFFFFF',
   },
   text: {
@@ -135,8 +135,8 @@ const darkPalette = {
     contrastText: '#FFFFFF',
   },
   background: {
-    default: '#080E1A',
-    paper: '#0F172A',
+    default: '#0B1120',
+    paper: '#0F1A2E',
   },
   text: {
     primary: 'rgba(255,255,255,0.92)',
@@ -196,18 +196,21 @@ const buildComponents = mode => {
           backgroundColor: isDark ? '#080E1A' : slate[100],
           direction: 'rtl',
         },
-        '::-webkit-scrollbar': { width: '6px', height: '6px' },
+        '::-webkit-scrollbar': { width: '5px', height: '5px' },
         '::-webkit-scrollbar-track': {
-          background: isDark ? 'rgba(255,255,255,0.04)' : slate[100],
-          borderRadius: '3px',
+          background: 'transparent',
         },
         '::-webkit-scrollbar-thumb': {
-          background: isDark ? 'rgba(255,255,255,0.15)' : slate[300],
-          borderRadius: '3px',
+          background: isDark ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.18)',
+          borderRadius: '4px',
           '&:hover': {
-            background: isDark ? 'rgba(255,255,255,0.25)' : slate[400],
+            background: isDark ? 'rgba(99,102,241,0.4)' : 'rgba(99,102,241,0.35)',
           },
         },
+        scrollbarWidth: 'thin',
+        scrollbarColor: isDark
+          ? 'rgba(99,102,241,0.2) transparent'
+          : 'rgba(99,102,241,0.18) transparent',
       },
     },
 
@@ -250,14 +253,18 @@ const buildComponents = mode => {
       styleOverrides: {
         root: {
           borderRadius: BORDER_RADIUS.lg,
-          border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : slate[200]}`,
+          border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
           boxShadow: isDark
-            ? '0 1px 3px rgba(0,0,0,0.4)'
-            : '0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)',
+            ? '0 2px 8px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3)'
+            : '0 2px 8px rgba(99,102,241,0.06), 0 1px 2px rgba(0,0,0,0.03)',
           backgroundImage: 'none',
-          transition: 'box-shadow 0.25s ease, transform 0.25s ease',
+          transition: 'box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease',
           '&:hover': {
-            boxShadow: isDark ? '0 8px 24px rgba(0,0,0,0.5)' : '0 8px 24px rgba(0,0,0,0.08)',
+            boxShadow: isDark
+              ? '0 12px 32px rgba(0,0,0,0.5)'
+              : '0 12px 32px rgba(99,102,241,0.1), 0 4px 8px rgba(0,0,0,0.04)',
+            borderColor: isDark ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.15)',
+            transform: 'translateY(-1px)',
           },
         },
       },
@@ -287,10 +294,12 @@ const buildComponents = mode => {
       styleOverrides: {
         root: {
           backgroundImage: 'none',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          background: isDark ? 'rgba(10,22,40,0.92)' : 'rgba(255,255,255,0.95)',
-          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : slate[200]}`,
-          boxShadow: isDark ? '0 1px 8px rgba(0,0,0,0.4)' : '0 1px 8px rgba(0,0,0,0.06)',
+          backdropFilter: 'blur(20px) saturate(200%)',
+          background: isDark ? 'rgba(10,15,30,0.88)' : 'rgba(255,255,255,0.88)',
+          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
+          boxShadow: isDark
+            ? '0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3)'
+            : '0 1px 0 rgba(99,102,241,0.06), 0 4px 24px rgba(99,102,241,0.06)',
           color: isDark ? 'rgba(255,255,255,0.92)' : slate[900],
         },
       },
@@ -809,8 +818,8 @@ export const createAppTheme = (mode = 'light') => {
       sidebar: {
         width: SIDEBAR_WIDTH,
         collapsedWidth: SIDEBAR_COLLAPSED,
-        background: '#0A1628',
-        backgroundGradient: 'linear-gradient(180deg, #0A1628 0%, #0D1E38 50%, #080E1A 100%)',
+        background: '#080E1C',
+        backgroundGradient: 'linear-gradient(180deg, #080E1C 0%, #0B1830 50%, #060C18 100%)',
         headerGradient: 'linear-gradient(135deg, #1E3A8A 0%, #0A1628 60%)',
         activeBg: 'rgba(99,102,241,0.12)',
         activeBorder: brand[500],
@@ -824,15 +833,17 @@ export const createAppTheme = (mode = 'light') => {
       },
       header: {
         height: HEADER_HEIGHT,
-        background: isDark ? 'rgba(10,22,40,0.95)' : 'rgba(255,255,255,0.97)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        borderColor: isDark ? 'rgba(255,255,255,0.07)' : slate[200],
-        boxShadow: isDark ? '0 1px 8px rgba(0,0,0,0.4)' : '0 1px 8px rgba(0,0,0,0.06)',
+        background: isDark ? 'rgba(10,15,30,0.88)' : 'rgba(255,255,255,0.88)',
+        backdropFilter: 'blur(20px) saturate(200%)',
+        borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)',
+        boxShadow: isDark
+          ? '0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3)'
+          : '0 1px 0 rgba(99,102,241,0.06), 0 4px 24px rgba(99,102,241,0.06)',
       },
       transition: {
         fast: 'all 0.15s ease',
-        medium: 'all 0.25s ease',
-        slow: 'all 0.4s ease',
+        medium: 'all 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+        slow: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       },
       effects: {
         glassLight: {

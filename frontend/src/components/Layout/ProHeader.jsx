@@ -1,7 +1,8 @@
 /**
- * ProHeader — الهيدر الاحترافي
+ * ProHeader — الهيدر الاحترافي المحسّن
  *
  * Premium glassmorphism header with:
+ * - Refined glassmorphism effect
  * - Breadcrumb navigation
  * - Global search (Cmd+K)
  * - Live notifications panel
@@ -100,10 +101,58 @@ const NOTIF_ICONS = {
 };
 
 const NOTIF_COLORS = {
-  success: '#ECFDF5',
-  warning: '#FFFBEB',
-  info:    '#F0F9FF',
+  success: { bg: '#ECFDF5', ring: '#10B981' },
+  warning: { bg: '#FFFBEB', ring: '#F59E0B' },
+  info:    { bg: '#F0F9FF', ring: '#0EA5E9' },
 };
+
+// ─── Icon Button محسّن ────────────────────────────────────────────────────────
+function HeaderIconBtn({ children, tooltip, onClick, sx = {}, badgeContent, ...rest }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  return (
+    <Tooltip title={tooltip} arrow>
+      <IconButton
+        size="small"
+        onClick={onClick}
+        {...rest}
+        sx={{
+          width: 38,
+          height: 38,
+          borderRadius: '10px',
+          color: isDark ? 'rgba(255,255,255,0.65)' : '#64748B',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : alpha('#6366F1', 0.08),
+            color: isDark ? '#FFFFFF' : '#6366F1',
+            transform: 'translateY(-1px)',
+          },
+          '&:active': { transform: 'translateY(0)' },
+          ...sx,
+        }}
+      >
+        {badgeContent !== undefined ? (
+          <Badge
+            badgeContent={badgeContent}
+            color="error"
+            sx={{
+              '& .MuiBadge-badge': {
+                fontSize: '0.6rem',
+                minWidth: 17,
+                height: 17,
+                top: 1,
+                right: 1,
+                boxShadow: '0 0 0 2px ' + (isDark ? '#0F172A' : '#FFFFFF'),
+              },
+            }}
+          >
+            {children}
+          </Badge>
+        ) : children}
+      </IconButton>
+    </Tooltip>
+  );
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode: _themeMode, onToggleTheme }) {
@@ -182,11 +231,14 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         height: HEADER_HEIGHT,
         zIndex: theme.zIndex.appBar || 1100,
         background: isDark
-          ? 'rgba(15, 23, 42, 0.85)'
-          : 'rgba(255, 255, 255, 0.82)',
-        backdropFilter: 'blur(12px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          ? 'rgba(10, 15, 30, 0.88)'
+          : 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(20px) saturate(200%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
+        boxShadow: isDark
+          ? '0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3)'
+          : '0 1px 0 rgba(99,102,241,0.06), 0 4px 24px rgba(99,102,241,0.06)',
         color: isDark ? '#FFFFFF' : 'text.primary',
         transition: theme.transitions.create(['width', 'margin'], {
           easing: theme.transitions.easing.sharp,
@@ -194,26 +246,33 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         }),
       }}
     >
+      {/* Accent line at top */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 2,
+          background: 'linear-gradient(90deg, #6366F1 0%, #8B5CF6 50%, #0EA5E9 100%)',
+          opacity: 0.7,
+        }}
+      />
+
       <Toolbar
         sx={{
           height: HEADER_HEIGHT,
           minHeight: `${HEADER_HEIGHT}px !important`,
           px: { xs: 1.5, md: 3 },
-          gap: 1,
+          gap: 0.5,
+          pt: '2px',
         }}
       >
         {/* ── Mobile menu button ──────────────────────────────────────────── */}
         {isMobile && (
-          <IconButton
-            onClick={onToggleSidebar}
-            size="small"
-            sx={{
-              color: isDark ? 'rgba(255,255,255,0.75)' : 'text.secondary',
-            marginInlineEnd: 4,
-          }}
-        >
-          <MenuIcon />
-          </IconButton>
+          <HeaderIconBtn tooltip="القائمة" onClick={onToggleSidebar} sx={{ marginInlineEnd: 1 }}>
+            <MenuIcon sx={{ fontSize: 20 }} />
+          </HeaderIconBtn>
         )}
 
         {/* ── Breadcrumbs ─────────────────────────────────────────────────── */}
@@ -228,17 +287,23 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
             }}
           >
             {/* Home icon */}
-            <Tooltip title="الرئيسية">
+            <Tooltip title="الرئيسية" arrow>
               <IconButton
                 size="small"
                 onClick={() => navigate('/dashboard')}
                 sx={{
-                  color: crumbs.length === 0 ? 'primary.main' : 'text.secondary',
-                  p: 0.75,
-                  '&:hover': { color: 'primary.main' },
+                  width: 30,
+                  height: 30,
+                  borderRadius: '8px',
+                  color: crumbs.length === 0 ? '#6366F1' : (isDark ? 'rgba(255,255,255,0.5)' : '#94A3B8'),
+                  transition: 'all 0.2s',
+                  '&:hover': {
+                    backgroundColor: alpha('#6366F1', 0.08),
+                    color: '#6366F1',
+                  },
                 }}
               >
-                <HomeIcon sx={{ fontSize: 18 }} />
+                <HomeIcon sx={{ fontSize: 16 }} />
               </IconButton>
             </Tooltip>
 
@@ -246,9 +311,9 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
               <Box key={crumb.path} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <NavigateNext
                   sx={{
-                    fontSize: 16,
-                    color: 'text.disabled',
-                    transform: 'scaleX(-1)', // RTL flip
+                    fontSize: 14,
+                    color: isDark ? 'rgba(255,255,255,0.2)' : '#CBD5E1',
+                    transform: 'scaleX(-1)',
                   }}
                 />
                 <Typography
@@ -257,16 +322,24 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
                   sx={{
                     fontSize: '0.8125rem',
                     fontWeight: crumb.isLast ? 600 : 400,
-                    color: crumb.isLast ? 'text.primary' : 'text.secondary',
+                    color: crumb.isLast
+                      ? (isDark ? '#F1F5F9' : '#1E293B')
+                      : (isDark ? 'rgba(255,255,255,0.45)' : '#94A3B8'),
                     cursor: crumb.isLast ? 'default' : 'pointer',
                     background: 'none',
                     border: 'none',
                     fontFamily: 'inherit',
                     p: 0,
+                    px: crumb.isLast ? '6px' : '4px',
+                    py: '2px',
+                    borderRadius: '6px',
                     textDecoration: 'none',
-                    '&:hover': !crumb.isLast ? { color: 'primary.main' } : {},
-                    transition: 'color 0.15s',
-                    maxWidth: 160,
+                    '&:hover': !crumb.isLast ? {
+                      color: '#6366F1',
+                      backgroundColor: alpha('#6366F1', 0.06),
+                    } : {},
+                    transition: 'all 0.15s',
+                    maxWidth: 140,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -278,9 +351,29 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
             ))}
 
             {crumbs.length === 0 && (
-              <Typography variant="body2" color="text.primary" fontWeight={600}>
-                لوحة القيادة
-              </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.75,
+                  px: 1.25,
+                  py: 0.5,
+                  borderRadius: '8px',
+                  backgroundColor: alpha('#6366F1', 0.08),
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    backgroundColor: '#6366F1',
+                  }}
+                />
+                <Typography variant="body2" sx={{ color: '#6366F1', fontWeight: 600, fontSize: '0.8125rem' }}>
+                  لوحة القيادة
+                </Typography>
+              </Box>
             )}
           </Box>
         )}
@@ -293,16 +386,17 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
                 flex: 1,
                 display: 'flex',
                 alignItems: 'center',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : alpha('#6366F1', 0.06),
-                borderRadius: 2,
-                border: `1.5px solid ${alpha('#6366F1', 0.4)}`,
+                backgroundColor: isDark ? 'rgba(99,102,241,0.1)' : alpha('#6366F1', 0.05),
+                borderRadius: '12px',
+                border: `1.5px solid ${alpha('#6366F1', 0.35)}`,
                 px: 1.5,
                 gap: 1,
-                height: 40,
-                boxShadow: `0 0 0 3px ${alpha('#6366F1', 0.12)}`,
+                height: 42,
+                boxShadow: `0 0 0 4px ${alpha('#6366F1', 0.08)}`,
+                transition: 'all 0.2s',
               }}
             >
-              <SearchIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+              <SearchIcon sx={{ fontSize: 18, color: '#6366F1', flexShrink: 0 }} />
               <InputBase
                 autoFocus
                 ref={searchRef}
@@ -313,11 +407,20 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
                 sx={{
                   flex: 1,
                   fontSize: '0.875rem',
-                  '& input': { padding: 0 },
+                  '& input': { padding: 0, color: isDark ? '#F1F5F9' : '#1E293B' },
                 }}
               />
-              <IconButton size="small" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} sx={{ p: 0.5 }}>
-                <CloseOutlined sx={{ fontSize: 16 }} />
+              <IconButton
+                size="small"
+                onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                sx={{
+                  p: 0.5,
+                  borderRadius: '6px',
+                  color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
+                  '&:hover': { backgroundColor: alpha('#6366F1', 0.1), color: '#6366F1' },
+                }}
+              >
+                <CloseOutlined sx={{ fontSize: 15 }} />
               </IconButton>
             </Box>
           </Fade>
@@ -330,138 +433,103 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
 
           {/* Search trigger */}
           {!searchOpen && (
-            <Tooltip title="بحث (Ctrl+K)">
-              <IconButton
-                size="small"
+            <Tooltip title="بحث (Ctrl+K)" arrow>
+              <Box
                 onClick={() => setSearchOpen(true)}
                 sx={{
                   display: { xs: 'none', sm: 'flex' },
-                  color: 'text.secondary',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
-                  borderRadius: 2,
-                  px: 1.5,
-                  py: 0.5,
+                  alignItems: 'center',
                   gap: 0.75,
-                  height: 34,
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                  '&:hover': { color: 'primary.main', borderColor: 'primary.light' },
+                  cursor: 'pointer',
+                  px: 1.25,
+                  py: 0.75,
+                  borderRadius: '10px',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
+                  color: isDark ? 'rgba(255,255,255,0.45)' : '#94A3B8',
+                  fontSize: '0.8125rem',
+                  transition: 'all 0.2s',
+                  height: 36,
+                  '&:hover': {
+                    backgroundColor: alpha('#6366F1', 0.06),
+                    borderColor: alpha('#6366F1', 0.3),
+                    color: '#6366F1',
+                  },
                 }}
               >
-                <SearchIcon sx={{ fontSize: 16 }} />
-                <Typography sx={{ fontSize: '0.75rem', color: 'inherit', display: { md: 'block', xs: 'none' } }}>
+                <SearchIcon sx={{ fontSize: 15 }} />
+                <Typography sx={{ fontSize: '0.8rem', color: 'inherit', display: { md: 'block', xs: 'none' } }}>
                   بحث...
                 </Typography>
-                <Chip
-                  label="⌘K"
-                  size="small"
+                <Box
                   sx={{
-                    height: 18,
-                    fontSize: '0.6rem',
-                    fontFamily: 'mono',
                     display: { lg: 'flex', xs: 'none' },
+                    alignItems: 'center',
+                    px: 0.75,
+                    py: 0.2,
+                    borderRadius: '5px',
                     backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9',
-                    color: 'text.secondary',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
+                    fontSize: '0.6rem',
+                    fontFamily: 'monospace',
+                    color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
+                    lineHeight: 1.4,
                   }}
-                />
-              </IconButton>
+                >
+                  ⌘K
+                </Box>
+              </Box>
             </Tooltip>
           )}
 
           {/* Language toggle */}
-          <Tooltip title="تغيير اللغة">
-            <IconButton
-              size="small"
-              onClick={() => setLang((l) => (l === 'ar' ? 'en' : 'ar'))}
-              sx={{
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' },
-                width: 36,
-                height: 36,
-              }}
-            >
-              <LanguageOutlined sx={{ fontSize: 20 }} />
-            </IconButton>
-          </Tooltip>
+          <HeaderIconBtn tooltip="تغيير اللغة" onClick={() => setLang((l) => (l === 'ar' ? 'en' : 'ar'))}>
+            <LanguageOutlined sx={{ fontSize: 19 }} />
+          </HeaderIconBtn>
 
           {/* Theme toggle */}
-          <Tooltip title={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}>
-            <IconButton
-              size="small"
-              onClick={onToggleTheme}
-              sx={{
-                color: 'text.secondary',
-                '&:hover': { color: isDark ? '#F59E0B' : 'primary.main' },
-                width: 36,
-                height: 36,
-              }}
-            >
-              {isDark ? (
-                <LightModeOutlined sx={{ fontSize: 20, color: '#F59E0B' }} />
-              ) : (
-                <DarkModeOutlined sx={{ fontSize: 20 }} />
-              )}
-            </IconButton>
-          </Tooltip>
+          <HeaderIconBtn
+            tooltip={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}
+            onClick={onToggleTheme}
+            sx={isDark ? { '&:hover': { color: '#F59E0B !important' } } : {}}
+          >
+            {isDark ? (
+              <LightModeOutlined sx={{ fontSize: 19, color: '#F59E0B' }} />
+            ) : (
+              <DarkModeOutlined sx={{ fontSize: 19 }} />
+            )}
+          </HeaderIconBtn>
 
           {/* Fullscreen */}
-          <Tooltip title={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}>
-            <IconButton
-              size="small"
-              onClick={handleToggleFullscreen}
-              sx={{
-                display: { xs: 'none', md: 'flex' },
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' },
-                width: 36,
-                height: 36,
-              }}
-            >
-              {fullscreen ? (
-                <FullscreenExitOutlined sx={{ fontSize: 20 }} />
-              ) : (
-                <FullscreenOutlined sx={{ fontSize: 20 }} />
-              )}
-            </IconButton>
-          </Tooltip>
+          <HeaderIconBtn
+            tooltip={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}
+            onClick={handleToggleFullscreen}
+            sx={{ display: { xs: 'none', md: 'flex' } }}
+          >
+            {fullscreen ? (
+              <FullscreenExitOutlined sx={{ fontSize: 19 }} />
+            ) : (
+              <FullscreenOutlined sx={{ fontSize: 19 }} />
+            )}
+          </HeaderIconBtn>
 
           {/* Notifications */}
-          <Tooltip title="الإشعارات">
-            <IconButton
-              size="small"
-              onClick={(e) => setNotifAnchor(e.currentTarget)}
-              sx={{
-                color: 'text.secondary',
-                '&:hover': { color: 'primary.main' },
-                width: 36,
-                height: 36,
-              }}
-            >
-              <Badge
-                badgeContent={unreadCount}
-                color="error"
-                sx={{
-                  '& .MuiBadge-badge': {
-                    fontSize: '0.6rem',
-                    minWidth: 16,
-                    height: 16,
-                    top: 2,
-                    right: 2,
-                  },
-                }}
-              >
-                <NotificationsOutlined sx={{ fontSize: 20 }} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
+          <HeaderIconBtn
+            tooltip="الإشعارات"
+            onClick={(e) => setNotifAnchor(e.currentTarget)}
+            badgeContent={unreadCount || undefined}
+          >
+            <NotificationsOutlined sx={{ fontSize: 19 }} />
+          </HeaderIconBtn>
 
           {/* Divider */}
           <Box
             sx={{
               width: '1px',
-              height: 24,
-              backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
-              mx: 0.5,
+              height: 28,
+              background: isDark
+                ? 'linear-gradient(180deg, transparent, rgba(255,255,255,0.12), transparent)'
+                : 'linear-gradient(180deg, transparent, #E2E8F0, transparent)',
+              mx: 0.75,
             }}
           />
 
@@ -475,40 +543,61 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
               cursor: 'pointer',
               px: 1,
               py: 0.5,
-              borderRadius: 2,
+              borderRadius: '12px',
               border: `1px solid transparent`,
-              transition: 'all 0.15s',
+              transition: 'all 0.2s ease',
               '&:hover': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : alpha('#6366F1', 0.06),
-                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : alpha('#6366F1', 0.05),
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : alpha('#6366F1', 0.15),
+                '& .user-arrow': { transform: userAnchor ? 'rotate(180deg)' : 'rotate(0deg) translateY(-1px)' },
               },
             }}
           >
             <Avatar
               sx={{
-                width: 32,
-                height: 32,
+                width: 33,
+                height: 33,
                 fontSize: '0.875rem',
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                boxShadow: '0 2px 8px rgba(99,102,241,0.4)',
+                border: '2px solid rgba(255,255,255,0.9)',
               }}
             >
               {avatarLetter}
             </Avatar>
-            <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'right' }}>
-              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.2, color: 'text.primary' }}>
+            <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'right', minWidth: 0 }}>
+              <Typography
+                sx={{
+                  fontSize: '0.8125rem',
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  color: isDark ? '#F1F5F9' : '#1E293B',
+                  maxWidth: 110,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                }}
+              >
                 {displayName}
               </Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }}>
+              <Typography
+                sx={{
+                  fontSize: '0.7rem',
+                  color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
+                  lineHeight: 1.2,
+                }}
+              >
                 {displayRole}
               </Typography>
             </Box>
             <KeyboardArrowDown
+              className="user-arrow"
               sx={{
-                fontSize: 16,
-                color: 'text.secondary',
+                fontSize: 15,
+                color: isDark ? 'rgba(255,255,255,0.35)' : '#CBD5E1',
                 display: { xs: 'none', md: 'block' },
-                transition: 'transform 0.2s',
+                transition: 'transform 0.2s ease',
                 transform: userAnchor ? 'rotate(180deg)' : 'none',
               }}
             />
@@ -523,15 +612,22 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         onClose={() => setNotifAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        TransitionComponent={Fade}
         slotProps={{
           paper: {
+            elevation: 0,
             sx: {
-              width: 360,
-              maxHeight: 480,
+              width: 370,
+              maxHeight: 500,
               overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              mt: 1,
+              mt: 1.5,
+              borderRadius: '16px',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(99,102,241,0.1)'}`,
+              boxShadow: isDark
+                ? '0 20px 60px rgba(0,0,0,0.5)'
+                : '0 20px 60px rgba(99,102,241,0.12), 0 4px 16px rgba(0,0,0,0.06)',
             },
           },
         }}
@@ -539,65 +635,109 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         {/* Header */}
         <Box
           sx={{
-            px: 2,
-            py: 1.5,
+            px: 2.5,
+            py: 2,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'}`,
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)'
+              : 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)',
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
           }}
         >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600}>
-              الإشعارات
-            </Typography>
-            {unreadCount > 0 && (
-              <Chip
-                label={unreadCount}
-                size="small"
-                color="error"
-                sx={{ height: 18, fontSize: '0.65rem', minWidth: 24 }}
-              />
-            )}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
+              }}
+            >
+              <NotificationsOutlined sx={{ fontSize: 18, color: '#FFFFFF' }} />
+            </Box>
+            <Box>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.2 }}>
+                الإشعارات
+              </Typography>
+              {unreadCount > 0 && (
+                <Typography sx={{ fontSize: '0.7rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#94A3B8' }}>
+                  {unreadCount} إشعار جديد
+                </Typography>
+              )}
+            </Box>
           </Box>
           {unreadCount > 0 && (
             <Button
               size="small"
               onClick={handleMarkAllRead}
-              sx={{ fontSize: '0.75rem', p: 0.5, minWidth: 'auto' }}
+              sx={{
+                fontSize: '0.75rem',
+                px: 1.25,
+                py: 0.5,
+                borderRadius: '8px',
+                color: '#6366F1',
+                fontWeight: 600,
+                '&:hover': { backgroundColor: alpha('#6366F1', 0.08) },
+              }}
             >
-              تحديد الكل كمقروء
+              تحديد الكل
             </Button>
           )}
         </Box>
 
         {/* List */}
-        <List sx={{ overflow: 'auto', py: 0.5, flex: 1 }}>
-          {notifs.map((n) => (
+        <List sx={{ overflow: 'auto', py: 1, flex: 1 }}>
+          {notifs.map((n, idx) => (
             <ListItem
               key={n.id}
               alignItems="flex-start"
               onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
               sx={{
-                px: 2,
-                py: 1.25,
+                px: 2.5,
+                py: 1.5,
                 cursor: 'pointer',
+                position: 'relative',
                 backgroundColor: !n.read
-                  ? isDark ? 'rgba(99,102,241,0.07)' : alpha('#6366F1', 0.04)
+                  ? isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.03)'
                   : 'transparent',
-              borderInlineStart: !n.read ? `3px solid #6366F1` : '3px solid transparent',
+                borderBottom: idx < notifs.length - 1
+                  ? `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'}`
+                  : 'none',
                 transition: 'background-color 0.15s',
                 '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
                 },
               }}
             >
-              <ListItemAvatar sx={{ minWidth: 40 }}>
+              {/* Unread indicator */}
+              {!n.read && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    right: 10,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    backgroundColor: '#6366F1',
+                    boxShadow: '0 0 6px rgba(99,102,241,0.5)',
+                  }}
+                />
+              )}
+              <ListItemAvatar sx={{ minWidth: 46 }}>
                 <Avatar
                   sx={{
-                    width: 36,
-                    height: 36,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : NOTIF_COLORS[n.type],
+                    width: 38,
+                    height: 38,
+                    backgroundColor: NOTIF_COLORS[n.type].bg,
+                    border: `1.5px solid ${NOTIF_COLORS[n.type].ring}22`,
                   }}
                 >
                   {NOTIF_ICONS[n.type]}
@@ -605,16 +745,26 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Typography variant="body2" fontWeight={n.read ? 400 : 600} sx={{ lineHeight: 1.4 }}>
+                  <Typography variant="body2" fontWeight={n.read ? 400 : 600} sx={{ lineHeight: 1.4, fontSize: '0.8375rem' }}>
                     {n.title}
                   </Typography>
                 }
                 secondary={
                   <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, lineHeight: 1.5 }}>
                       {n.body}
                     </Typography>
-                    <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 0.5,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.4,
+                        color: isDark ? 'rgba(255,255,255,0.3)' : '#CBD5E1',
+                        fontSize: '0.68rem',
+                      }}
+                    >
                       {n.time}
                     </Typography>
                   </Box>
@@ -627,17 +777,28 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         {/* Footer */}
         <Box
           sx={{
-            px: 2,
-            py: 1.25,
-            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'}`,
-            textAlign: 'center',
+            px: 2.5,
+            py: 1.5,
+            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9'}`,
           }}
         >
           <Button
             size="small"
             fullWidth
+            variant="outlined"
             onClick={() => { setNotifAnchor(null); navigate('/notifications'); }}
-            sx={{ fontSize: '0.8125rem', color: 'primary.main' }}
+            sx={{
+              fontSize: '0.8125rem',
+              borderRadius: '10px',
+              py: 0.75,
+              borderColor: isDark ? 'rgba(99,102,241,0.3)' : alpha('#6366F1', 0.25),
+              color: '#6366F1',
+              fontWeight: 600,
+              '&:hover': {
+                borderColor: '#6366F1',
+                backgroundColor: alpha('#6366F1', 0.05),
+              },
+            }}
           >
             عرض كل الإشعارات
           </Button>
@@ -651,34 +812,101 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
         onClose={() => setUserAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        slotProps={{ paper: { sx: { width: 220, mt: 1 } } }}
+        TransitionComponent={Fade}
+        slotProps={{
+          paper: {
+            elevation: 0,
+            sx: {
+              width: 230,
+              mt: 1.5,
+              borderRadius: '16px',
+              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(99,102,241,0.1)'}`,
+              boxShadow: isDark
+                ? '0 20px 60px rgba(0,0,0,0.5)'
+                : '0 20px 60px rgba(99,102,241,0.12), 0 4px 16px rgba(0,0,0,0.06)',
+              overflow: 'hidden',
+            },
+          },
+        }}
       >
-        {/* User info */}
-        <Box sx={{ px: 2, py: 1.5, mb: 0.5 }}>
-          <Typography variant="subtitle2" fontWeight={700}>{displayName}</Typography>
-          <Typography variant="caption" color="text.secondary">{displayRole}</Typography>
+        {/* User info header */}
+        <Box
+          sx={{
+            px: 2.5,
+            py: 2,
+            mb: 0.5,
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)'
+              : 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)',
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 42,
+              height: 42,
+              fontSize: '1rem',
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+              boxShadow: '0 4px 12px rgba(99,102,241,0.4)',
+              border: '2px solid rgba(255,255,255,0.9)',
+            }}
+          >
+            {avatarLetter}
+          </Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="subtitle2" fontWeight={700} noWrap>{displayName}</Typography>
+            <Chip
+              label={displayRole}
+              size="small"
+              sx={{
+                height: 18,
+                fontSize: '0.65rem',
+                fontWeight: 600,
+                backgroundColor: alpha('#6366F1', 0.1),
+                color: '#6366F1',
+                border: `1px solid ${alpha('#6366F1', 0.2)}`,
+                '& .MuiChip-label': { px: 1 },
+              }}
+            />
+          </Box>
         </Box>
 
-        <Divider sx={{ mb: 0.5 }} />
-
-        <MenuItem onClick={() => { setUserAnchor(null); navigate('/profile'); }}>
-          <AccountCircleOutlined sx={{ fontSize: 18, marginInlineEnd: 12, color: 'text.secondary' }} />
+        <MenuItem
+          onClick={() => { setUserAnchor(null); navigate('/profile'); }}
+          sx={{ mx: 1, borderRadius: '8px', mb: 0.25, px: 1.5 }}
+        >
+          <AccountCircleOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5, color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }} />
           <Typography variant="body2">الملف الشخصي</Typography>
         </MenuItem>
 
-        <MenuItem onClick={() => { setUserAnchor(null); navigate('/settings'); }}>
-          <SettingsOutlined sx={{ fontSize: 18, marginInlineEnd: 12, color: 'text.secondary' }} />
+        <MenuItem
+          onClick={() => { setUserAnchor(null); navigate('/settings'); }}
+          sx={{ mx: 1, borderRadius: '8px', mb: 0.5, px: 1.5 }}
+        >
+          <SettingsOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5, color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }} />
           <Typography variant="body2">الإعدادات</Typography>
         </MenuItem>
 
-        <Divider sx={{ my: 0.5 }} />
+        <Divider sx={{ mx: 1 }} />
 
         <MenuItem
           onClick={handleLogout}
-          sx={{ color: 'error.main', '&:hover': { backgroundColor: alpha('#F43F5E', 0.06) } }}
+          sx={{
+            mx: 1,
+            mt: 0.5,
+            mb: 1,
+            borderRadius: '8px',
+            px: 1.5,
+            color: '#F43F5E',
+            '&:hover': { backgroundColor: alpha('#F43F5E', 0.07) },
+          }}
         >
-          <LogoutOutlined sx={{ fontSize: 18, marginInlineEnd: 12 }} />
-          <Typography variant="body2" fontWeight={500}>تسجيل الخروج</Typography>
+          <LogoutOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5 }} />
+          <Typography variant="body2" fontWeight={600}>تسجيل الخروج</Typography>
         </MenuItem>
       </Menu>
     </AppBar>

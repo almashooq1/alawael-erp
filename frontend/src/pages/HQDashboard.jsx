@@ -1,39 +1,57 @@
 /**
- * HQDashboard.jsx — لوحة تحكم المقر الرئيسي (الرياض)
- * HQ Executive Dashboard for 12-branch rehabilitation network
+ * 🏢 HQDashboard v5 — Premium Executive Command Center
+ * لوحة تحكم المقر الرئيسي — تصميم بريميوم احترافي شامل
  *
- * Access: hq_super_admin, hq_admin only
+ * Features:
+ *   • LiveMetricsTicker  — شريط مؤشرات مباشرة متحرك
+ *   • AICommandBar       — CMD+K شريط أوامر ذكي
+ *   • SmartInsightsPanel — رؤى ذكاء اصطناعي
+ *   • PerformanceRings   — حلقات أداء SVG
+ *   • Premium branch table بتصميم glass
+ *   • Floating action button
+ *
+ * Access: hq_super_admin, hq_admin
  * API:    GET /api/branch-management/hq/dashboard
- *         GET /api/branch-management/hq/comparison
- *         GET /api/branch-management/hq/alerts
- *         GET /api/branch-management/hq/financials
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
+  useTheme, ButtonBase, LinearProgress, Avatar, Badge,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Select, MenuItem, Tabs, Tab, Skeleton,
+} from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+/* ── New Premium Components ───────────────────────────── */
+import LiveMetricsTicker  from 'components/dashboard/LiveMetricsTicker';
+import SmartInsightsPanel from 'components/dashboard/SmartInsightsPanel';
+import PerformanceRings   from 'components/dashboard/PerformanceRings';
+import AICommandBar       from 'components/dashboard/AICommandBar';
+
+/* ── Icons ────────────────────────────────────────────── */
+import RefreshRoundedIcon        from '@mui/icons-material/RefreshRounded';
+import BusinessRoundedIcon       from '@mui/icons-material/BusinessRounded';
+import TrendingUpIcon            from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon          from '@mui/icons-material/TrendingDown';
+import GroupsRoundedIcon         from '@mui/icons-material/GroupsRounded';
+import EventNoteRoundedIcon      from '@mui/icons-material/EventNoteRounded';
+import AttachMoneyRoundedIcon    from '@mui/icons-material/AttachMoneyRounded';
+import SpeedRoundedIcon          from '@mui/icons-material/SpeedRounded';
+import WarningAmberRoundedIcon   from '@mui/icons-material/WarningAmberRounded';
+import CheckCircleRoundedIcon    from '@mui/icons-material/CheckCircleRounded';
+import ErrorRoundedIcon          from '@mui/icons-material/ErrorRounded';
+import EmojiEventsRoundedIcon    from '@mui/icons-material/EmojiEventsRounded';
+import FlashOnRoundedIcon        from '@mui/icons-material/FlashOnRounded';
+import OpenInNewRoundedIcon      from '@mui/icons-material/OpenInNewRounded';
+import MapRoundedIcon            from '@mui/icons-material/MapRounded';
+import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
+import CompareArrowsRoundedIcon  from '@mui/icons-material/CompareArrowsRounded';
+import KeyboardCommandKeyIcon    from '@mui/icons-material/KeyboardCommandKey';
+
+/* ─────────────────────────────────────────────────────── */
 const API_BASE = '/api/branch-management';
 
-const BRANCH_REGIONS = {
-  الرياض: ['HQ', 'RY-MAIN', 'RY-NORTH'],
-  جدة: ['JD-MAIN', 'JD-SOUTH'],
-  'المنطقة الشرقية': ['DM', 'KH'],
-  'الغرب والوسط': ['TF', 'TB', 'MD', 'QS', 'HL', 'AB'],
-};
-
-const STATUS_COLOR = {
-  active: '#10b981',
-  inactive: '#6b7280',
-  maintenance: '#f59e0b',
-};
-
-const ALERT_COLOR = {
-  critical: '#ef4444',
-  warning: '#f59e0b',
-  info: '#3b82f6',
-};
-
-// ─── API Helpers ──────────────────────────────────────────────────────────────
 const authHeaders = () => ({
   'Content-Type': 'application/json',
   Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
@@ -45,141 +63,392 @@ const apiFetch = async (url) => {
   return res.json();
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+const BRANCH_REGIONS = {
+  الرياض:            ['HQ', 'RY-MAIN', 'RY-NORTH'],
+  جدة:               ['JD-MAIN', 'JD-SOUTH'],
+  'المنطقة الشرقية': ['DM', 'KH'],
+  'الغرب والوسط':    ['TF', 'TB', 'MD', 'QS', 'HL', 'AB'],
+};
 
-/** KPI Card */
-const KPICard = ({ title, value, unit = '', change, color = '#3b82f6', icon }) => (
-  <div style={{
-    background: '#fff',
-    borderRadius: 12,
-    padding: '20px 24px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-    borderTop: `4px solid ${color}`,
-    minWidth: 180,
-    flex: 1,
-  }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-      <div>
-        <p style={{ margin: 0, fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{title}</p>
-        <p style={{ margin: '8px 0 0', fontSize: 28, fontWeight: 700, color: '#111827' }}>
-          {typeof value === 'number' ? value.toLocaleString('ar-SA') : value}
-          {unit && <span style={{ fontSize: 14, color: '#6b7280', marginRight: 4 }}>{unit}</span>}
-        </p>
-        {change !== undefined && (
-          <p style={{ margin: '4px 0 0', fontSize: 12, color: change >= 0 ? '#10b981' : '#ef4444' }}>
-            {change >= 0 ? '▲' : '▼'} {Math.abs(change)}% مقارنة بالشهر الماضي
-          </p>
-        )}
-      </div>
-      {icon && <span style={{ fontSize: 28 }}>{icon}</span>}
-    </div>
-  </div>
-);
+/* ─────────────────────────────────────────────────────── */
+/*  Glass KPI Card                                         */
+/* ─────────────────────────────────────────────────────── */
+const KPICard = ({ title, value, unit = '', change, gradient, glow, icon, delay = 0 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const isUp = change > 0;
+  const isDown = change < 0;
 
-/** Branch Status Badge */
-const StatusBadge = ({ status }) => (
-  <span style={{
-    display: 'inline-block',
-    padding: '2px 10px',
-    borderRadius: 20,
-    fontSize: 11,
-    fontWeight: 600,
-    background: `${STATUS_COLOR[status] || '#6b7280'}20`,
-    color: STATUS_COLOR[status] || '#6b7280',
-  }}>
-    {status === 'active' ? 'نشط' : status === 'maintenance' ? 'صيانة' : 'غير نشط'}
-  </span>
-);
-
-/** Alert Item */
-const AlertItem = ({ alert }) => (
-  <div style={{
-    display: 'flex',
-    gap: 12,
-    padding: '12px 0',
-    borderBottom: '1px solid #f3f4f6',
-    alignItems: 'flex-start',
-  }}>
-    <span style={{
-      width: 8, height: 8, borderRadius: '50%',
-      background: ALERT_COLOR[alert.type] || '#6b7280',
-      marginTop: 6, flexShrink: 0,
-    }} />
-    <div style={{ flex: 1 }}>
-      <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#111827' }}>{alert.message}</p>
-      <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9ca3af' }}>
-        {alert.branch_code} · {new Date(alert.created_at || Date.now()).toLocaleDateString('ar-SA')}
-      </p>
-    </div>
-  </div>
-);
-
-/** Branch Row in table */
-const BranchRow = ({ branch, onSelect }) => (
-  <tr
-    onClick={() => onSelect(branch.code)}
-    style={{ cursor: 'pointer', transition: 'background 0.15s' }}
-    onMouseEnter={e => e.currentTarget.style.background = '#f9fafb'}
-    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-  >
-    <td style={tdStyle}><strong>{branch.code}</strong></td>
-    <td style={tdStyle}>{branch.name_ar}</td>
-    <td style={tdStyle}><StatusBadge status={branch.status} /></td>
-    <td style={tdStyle}>{branch.stats?.patients_today ?? '—'}</td>
-    <td style={tdStyle}>{branch.stats?.sessions_today ?? '—'}</td>
-    <td style={tdStyle}>
-      <div style={{
-        background: '#e5e7eb', borderRadius: 4, height: 8, width: 100, overflow: 'hidden',
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.5, ease: [0.34, 1.1, 0.64, 1] }}
+      whileHover={{ y: -4, scale: 1.02 }}
+    >
+      <Paper elevation={0} sx={{
+        borderRadius: '18px',
+        p: 2.5,
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+        background: isDark
+          ? 'linear-gradient(145deg,rgba(15,20,40,0.97),rgba(20,15,45,0.97))'
+          : 'linear-gradient(145deg,rgba(255,255,255,0.97),rgba(250,248,255,0.97))',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid',
+        borderColor: isDark ? `${glow}22` : `${glow}18`,
+        boxShadow: isDark
+          ? `0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 ${glow}18`
+          : `0 8px 32px ${glow}14, inset 0 1px 0 rgba(255,255,255,1)`,
+        transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)',
+        '&:hover': { borderColor: `${glow}40`, boxShadow: `0 16px 48px ${glow}20` },
       }}>
-        <div style={{
-          width: `${branch.stats?.capacity_utilization ?? 0}%`,
-          height: '100%',
-          background: (branch.stats?.capacity_utilization ?? 0) > 85 ? '#ef4444' : '#10b981',
-          borderRadius: 4,
+        {/* Top bar */}
+        <Box sx={{
+          position: 'absolute', top: 0, left: 0, right: 0, height: '3px',
+          background: gradient, borderRadius: '18px 18px 0 0',
         }} />
-      </div>
-      <span style={{ fontSize: 11, color: '#6b7280', marginRight: 4 }}>
-        {branch.stats?.capacity_utilization ?? 0}%
-      </span>
-    </td>
-    <td style={tdStyle}>
-      {branch.stats?.monthly_revenue
-        ? `${(branch.stats.monthly_revenue / 1000).toFixed(0)}K ر.س`
-        : '—'}
-    </td>
-  </tr>
+
+        {/* BG orb */}
+        <Box sx={{
+          position: 'absolute', top: -30, insetInlineEnd: -20,
+          width: 100, height: 100, borderRadius: '50%',
+          background: gradient, opacity: isDark ? 0.07 : 0.05,
+          filter: 'blur(20px)', pointerEvents: 'none',
+        }} />
+
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <Box>
+            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', fontWeight: 500, mb: 0.8 }}>
+              {title}
+            </Typography>
+            <Typography sx={{
+              fontSize: '1.7rem', fontWeight: 900, lineHeight: 1.1,
+              background: gradient, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>
+              {typeof value === 'number' ? value.toLocaleString('ar-SA') : value}
+              {unit && <Box component="span" sx={{ fontSize: '0.8rem', fontWeight: 600 }}> {unit}</Box>}
+            </Typography>
+
+            {change !== undefined && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.6 }}>
+                {isUp   ? <TrendingUpIcon   sx={{ fontSize: 14, color: '#4caf50' }} />
+                : isDown ? <TrendingDownIcon sx={{ fontSize: 14, color: '#f44336' }} />
+                : null}
+                <Typography sx={{
+                  fontSize: '0.7rem', fontWeight: 700,
+                  color: isUp ? '#4caf50' : isDown ? '#f44336' : 'text.secondary',
+                }}>
+                  {change > 0 ? '+' : ''}{change}%
+                  <Box component="span" sx={{ fontWeight: 400, color: 'text.disabled', mr: 0.5 }}>
+                    {' '}vs الشهر الماضي
+                  </Box>
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* Icon circle */}
+          <Box sx={{
+            width: 48, height: 48, borderRadius: '14px',
+            background: gradient,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: `0 8px 20px ${glow}40`,
+            flexShrink: 0,
+            '& svg': { fontSize: 22, color: 'white' },
+          }}>
+            {icon}
+          </Box>
+        </Box>
+      </Paper>
+    </motion.div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────── */
+/*  Branch Table Row                                       */
+/* ─────────────────────────────────────────────────────── */
+const BranchRow = ({ branch, index, onSelect, isDark }) => {
+  const util = branch.stats?.capacity_utilization ?? 0;
+  const statusColor = branch.status === 'active' ? '#4caf50' : branch.status === 'maintenance' ? '#ff9800' : '#9e9e9e';
+
+  return (
+    <motion.tr
+      initial={{ opacity: 0, x: 16 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.04, duration: 0.3 }}
+      onClick={() => onSelect(branch.code)}
+      style={{ cursor: 'pointer' }}
+    >
+      <TableCell sx={{ py: 1.4, px: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+          <Box sx={{
+            width: 32, height: 32, borderRadius: '9px',
+            background: 'linear-gradient(135deg,#667eea,#764ba2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            '& svg': { fontSize: 16, color: 'white' },
+          }}>
+            <BusinessRoundedIcon />
+          </Box>
+          <Box>
+            <Typography sx={{ fontWeight: 800, fontSize: '0.8rem' }}>{branch.code}</Typography>
+            <Typography sx={{ fontSize: '0.65rem', color: 'text.disabled' }}>{branch.name_ar}</Typography>
+          </Box>
+        </Box>
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4 }}>
+        <Chip
+          label={branch.status === 'active' ? 'نشط' : branch.status === 'maintenance' ? 'صيانة' : 'متوقف'}
+          size="small"
+          sx={{
+            height: 20, fontSize: '0.6rem', fontWeight: 800,
+            background: `${statusColor}14`,
+            color: statusColor,
+            border: `1px solid ${statusColor}30`,
+          }}
+        />
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem' }}>
+          {branch.stats?.patients_today ?? '—'}
+        </Typography>
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem' }}>
+          {branch.stats?.sessions_today ?? '—'}
+        </Typography>
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4, minWidth: 120 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ flex: 1 }}>
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(util, 100)}
+              sx={{
+                height: 5, borderRadius: 3,
+                background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                '& .MuiLinearProgress-bar': {
+                  borderRadius: 3,
+                  background: util > 85 ? 'linear-gradient(90deg,#f44336,#ff5722)'
+                    : util > 65 ? 'linear-gradient(90deg,#ff9800,#ffd200)'
+                    : 'linear-gradient(90deg,#43cea2,#185a9d)',
+                },
+              }}
+            />
+          </Box>
+          <Typography sx={{ fontSize: '0.7rem', fontWeight: 800, color: util > 85 ? '#f44336' : 'text.secondary', minWidth: 28 }}>
+            {util}%
+          </Typography>
+        </Box>
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4 }}>
+        <Typography sx={{
+          fontWeight: 800, fontSize: '0.8rem',
+          background: 'linear-gradient(135deg,#43cea2,#185a9d)',
+          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+        }}>
+          {branch.stats?.monthly_revenue
+            ? `${(branch.stats.monthly_revenue / 1000).toFixed(0)}K`
+            : '—'}
+        </Typography>
+      </TableCell>
+
+      <TableCell sx={{ py: 1.4 }}>
+        <IconButton
+          size="small"
+          onClick={(e) => { e.stopPropagation(); onSelect(branch.code); }}
+          sx={{
+            width: 28, height: 28, borderRadius: '8px',
+            border: '1px solid rgba(102,126,234,0.2)',
+            background: 'rgba(102,126,234,0.06)',
+            '&:hover': { background: 'rgba(102,126,234,0.15)' },
+          }}
+        >
+          <OpenInNewRoundedIcon sx={{ fontSize: 14, color: '#667eea' }} />
+        </IconButton>
+      </TableCell>
+    </motion.tr>
+  );
+};
+
+/* ─────────────────────────────────────────────────────── */
+/*  Floating CMD+K Button                                  */
+/* ─────────────────────────────────────────────────────── */
+const FloatingCMD = ({ onClick }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0, y: 40 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    transition={{ delay: 1.2, type: 'spring', stiffness: 300, damping: 20 }}
+    style={{ position: 'fixed', bottom: 32, insetInlineEnd: 32, zIndex: 1200 }}
+  >
+    <Tooltip title="شريط الأوامر الذكي (Ctrl+K)" placement="right" arrow>
+      <Box
+        onClick={onClick}
+        component={motion.div}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.95 }}
+        sx={{
+          width: 56, height: 56, borderRadius: '16px',
+          background: 'linear-gradient(135deg,#667eea,#764ba2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer',
+          boxShadow: '0 8px 32px rgba(102,126,234,0.5)',
+          animation: 'fabGlow 3s ease-in-out infinite',
+          '@keyframes fabGlow': {
+            '0%,100%': { boxShadow: '0 8px 32px rgba(102,126,234,0.5)' },
+            '50%': { boxShadow: '0 12px 48px rgba(102,126,234,0.8)' },
+          },
+        }}
+      >
+        <FlashOnRoundedIcon sx={{ color: 'white', fontSize: 26 }} />
+      </Box>
+    </Tooltip>
+  </motion.div>
 );
 
-const tdStyle = {
-  padding: '12px 16px',
-  fontSize: 13,
-  color: '#374151',
-  borderBottom: '1px solid #f3f4f6',
-  verticalAlign: 'middle',
+/* ─────────────────────────────────────────────────────── */
+/*  Top Performers Card                                    */
+/* ─────────────────────────────────────────────────────── */
+const TopPerformers = ({ performers, isDark }) => {
+  const MEDALS = [
+    { bg: 'linear-gradient(135deg,#f7971e,#ffd200)', shadow: '#f7971e' },
+    { bg: 'linear-gradient(135deg,#b0bec5,#78909c)', shadow: '#b0bec5' },
+    { bg: 'linear-gradient(135deg,#a0522d,#cd7c2f)', shadow: '#a0522d' },
+  ];
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+      {(performers || []).slice(0, 5).map((b, i) => (
+        <motion.div
+          key={b.code}
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 + i * 0.06, duration: 0.35 }}
+        >
+          <Box sx={{
+            display: 'flex', alignItems: 'center', gap: 1.2,
+            p: 1.2, borderRadius: '12px',
+            background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+            border: '1px solid',
+            borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+            transition: 'all 0.2s',
+            '&:hover': {
+              background: isDark ? 'rgba(102,126,234,0.08)' : 'rgba(102,126,234,0.05)',
+              borderColor: 'rgba(102,126,234,0.2)',
+            },
+          }}>
+            <Box sx={{
+              width: 28, height: 28, borderRadius: '8px',
+              background: MEDALS[i]?.bg || 'linear-gradient(135deg,#667eea,#764ba2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: MEDALS[i] ? `0 3px 8px ${MEDALS[i].shadow}40` : 'none',
+              flexShrink: 0,
+            }}>
+              {i < 3
+                ? <EmojiEventsRoundedIcon sx={{ fontSize: 14, color: 'white' }} />
+                : <Typography sx={{ fontSize: '0.62rem', fontWeight: 900, color: 'white' }}>{i + 1}</Typography>
+              }
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.78rem', lineHeight: 1.2 }} noWrap>
+                {b.name_ar || b.code}
+              </Typography>
+              <Typography sx={{ fontSize: '0.62rem', color: 'text.disabled' }}>
+                النقاط: {b.performance_score ?? 0}
+              </Typography>
+            </Box>
+            <Box sx={{
+              px: 0.8, py: 0.2, borderRadius: '8px',
+              background: 'rgba(76,175,80,0.1)', border: '1px solid rgba(76,175,80,0.2)',
+            }}>
+              <Typography sx={{ fontSize: '0.62rem', fontWeight: 800, color: '#4caf50' }}>
+                {b.performance_score ?? 0}
+              </Typography>
+            </Box>
+          </Box>
+        </motion.div>
+      ))}
+    </Box>
+  );
 };
 
-const thStyle = {
-  ...tdStyle,
-  fontWeight: 600,
-  color: '#6b7280',
-  background: '#f9fafb',
-  fontSize: 12,
-  textTransform: 'uppercase',
+/* ─────────────────────────────────────────────────────── */
+/*  Alert Item                                             */
+/* ─────────────────────────────────────────────────────── */
+const AlertRow = ({ alert, index, isDark }) => {
+  const ALERT_COLORS = {
+    critical: { color: '#f44336', bg: 'rgba(244,67,54,0.08)', border: 'rgba(244,67,54,0.2)', icon: <ErrorRoundedIcon sx={{ fontSize: 16 }} /> },
+    warning:  { color: '#ff9800', bg: 'rgba(255,152,0,0.08)', border: 'rgba(255,152,0,0.2)', icon: <WarningAmberRoundedIcon sx={{ fontSize: 16 }} /> },
+    info:     { color: '#2196f3', bg: 'rgba(33,150,243,0.08)', border: 'rgba(33,150,243,0.2)', icon: <CheckCircleRoundedIcon sx={{ fontSize: 16 }} /> },
+  };
+  const cfg = ALERT_COLORS[alert.type] || ALERT_COLORS.info;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05, duration: 0.25 }}
+    >
+      <Box sx={{
+        display: 'flex', gap: 1.2, p: 1.2, borderRadius: '11px',
+        background: cfg.bg, border: `1px solid ${cfg.border}`,
+        mb: 0.8, borderInlineStart: `3px solid ${cfg.color}`,
+      }}>
+        <Box sx={{ color: cfg.color, flexShrink: 0, mt: 0.1 }}>{cfg.icon}</Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography sx={{ fontSize: '0.74rem', fontWeight: 700, lineHeight: 1.3 }} noWrap>
+            {alert.message}
+          </Typography>
+          <Typography sx={{ fontSize: '0.62rem', color: 'text.disabled' }}>
+            {alert.branch_code} · {new Date(alert.created_at || Date.now()).toLocaleDateString('ar-SA')}
+          </Typography>
+        </Box>
+      </Box>
+    </motion.div>
+  );
 };
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────── */
+/*  Main Component                                         */
+/* ─────────────────────────────────────────────────────── */
 const HQDashboard = () => {
-  const [dashboard, setDashboard] = useState(null);
-  const [alerts, setAlerts] = useState([]);
-  const [financials, setFinancials] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('overview'); // overview | financials | comparison
-  const [filterRegion, setFilterRegion] = useState('all');
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
-  // ── Data loading ──────────────────────────────────────────────────────────
-  const loadData = useCallback(async () => {
-    setLoading(true);
+  /* State */
+  const [dashboard, setDashboard]   = useState(null);
+  const [alerts, setAlerts]         = useState([]);
+  const [financials, setFinancials] = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab]   = useState(0);
+  const [filterRegion, setFilterRegion] = useState('all');
+  const [cmdOpen, setCmdOpen]       = useState(false);
+  const [metric, setMetric]         = useState('capacity_utilization');
+
+  /* ── Keyboard shortcut for CMD+K ──── */
+  useEffect(() => {
+    const handler = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  /* ── Data loading ────────────────── */
+  const loadData = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    else setRefreshing(true);
     setError(null);
     try {
       const [dashRes, alertsRes, finRes] = await Promise.all([
@@ -194,412 +463,675 @@ const HQDashboard = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // Auto-refresh every 5 minutes
+  /* Auto-refresh 5 min */
   useEffect(() => {
-    const timer = setInterval(loadData, 5 * 60 * 1000);
-    return () => clearInterval(timer);
+    const t = setInterval(() => loadData(true), 5 * 60 * 1000);
+    return () => clearInterval(t);
   }, [loadData]);
 
-  // ── Derived data ──────────────────────────────────────────────────────────
-  const branches = dashboard?.branches || [];
-  const summary = dashboard?.summary || {};
-  const kpis = dashboard?.kpis || {};
+  /* Derived */
+  const branches   = dashboard?.branches   || [];
+  const summary    = dashboard?.summary    || {};
+  const kpis       = dashboard?.kpis       || {};
+  const performers = dashboard?.top_performers || [];
 
   const filteredBranches = filterRegion === 'all'
     ? branches
     : branches.filter(b => BRANCH_REGIONS[filterRegion]?.includes(b.code));
 
   const criticalAlerts = alerts.filter(a => a.type === 'critical');
-  const warningAlerts = alerts.filter(a => a.type === 'warning');
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  /* ── Loading skeleton ─────────────── */
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 400 }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{
-          width: 48, height: 48, border: '4px solid #e5e7eb',
-          borderTopColor: '#3b82f6', borderRadius: '50%',
-          animation: 'spin 1s linear infinite', margin: '0 auto 16px',
-        }} />
-        <p style={{ color: '#6b7280', margin: 0 }}>جارٍ تحميل لوحة التحكم…</p>
-      </div>
-    </div>
-  );
-
-  if (error) return (
-    <div style={{ padding: 32, textAlign: 'center', color: '#ef4444' }}>
-      <p style={{ fontSize: 18, marginBottom: 8 }}>⚠️ خطأ في تحميل البيانات</p>
-      <p style={{ color: '#6b7280', fontSize: 14 }}>{error}</p>
-      <button
-        onClick={loadData}
-        style={{
-          marginTop: 16, padding: '8px 24px', background: '#3b82f6',
-          color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14,
-        }}
-      >
-        إعادة المحاولة
-      </button>
-    </div>
-  );
-
-  return (
-    <div dir="rtl" style={{ fontFamily: "'Segoe UI', 'Arial', sans-serif", background: '#f8fafc', minHeight: '100vh', padding: 24 }}>
-
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: '#111827' }}>
-            🏢 لوحة تحكم المقر الرئيسي — الرياض
-          </h1>
-          <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: 14 }}>
-            شبكة مراكز الأوائل للتأهيل · {branches.length} فرع · آخر تحديث: {new Date().toLocaleTimeString('ar-SA')}
-          </p>
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {criticalAlerts.length > 0 && (
-            <span style={{
-              background: '#fef2f2', color: '#ef4444', padding: '6px 14px',
-              borderRadius: 20, fontSize: 13, fontWeight: 600, border: '1px solid #fee2e2',
-            }}>
-              🔴 {criticalAlerts.length} تنبيه حرج
-            </span>
-          )}
-          <button
-            onClick={loadData}
-            style={{
-              padding: '8px 16px', background: '#fff', border: '1px solid #e5e7eb',
-              borderRadius: 8, cursor: 'pointer', fontSize: 13, color: '#374151',
-            }}
-          >
-            🔄 تحديث
-          </button>
-        </div>
-      </div>
-
-      {/* ── KPI Strip ── */}
-      <div style={{ display: 'flex', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
-        <KPICard
-          title="إجمالي المرضى اليوم"
-          value={summary.total_patients_today ?? 0}
-          change={summary.patients_change}
-          color="#3b82f6"
-          icon="👥"
-        />
-        <KPICard
-          title="الجلسات اليوم"
-          value={summary.total_sessions_today ?? 0}
-          change={summary.sessions_change}
-          color="#10b981"
-          icon="📋"
-        />
-        <KPICard
-          title="الإيرادات هذا الشهر"
-          value={summary.monthly_revenue ?? 0}
-          unit="ر.س"
-          change={summary.revenue_change}
-          color="#f59e0b"
-          icon="💰"
-        />
-        <KPICard
-          title="الفروع النشطة"
-          value={`${summary.active_branches ?? 0} / ${branches.length}`}
-          color="#8b5cf6"
-          icon="🏥"
-        />
-        <KPICard
-          title="متوسط نسبة الإشغال"
-          value={summary.avg_capacity_utilization ?? 0}
-          unit="%"
-          color="#06b6d4"
-          icon="📊"
-        />
-      </div>
-
-      {/* ── Tabs ── */}
-      <div style={{ display: 'flex', gap: 0, marginBottom: 24, background: '#fff', borderRadius: 10, padding: 4, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', width: 'fit-content' }}>
-        {[
-          { key: 'overview', label: '🗺️ نظرة عامة' },
-          { key: 'financials', label: '💵 الماليات الموحدة' },
-          { key: 'comparison', label: '📊 المقارنة بين الفروع' },
-        ].map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            style={{
-              padding: '8px 20px', border: 'none', cursor: 'pointer', borderRadius: 8,
-              fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
-              background: activeTab === tab.key ? '#3b82f6' : 'transparent',
-              color: activeTab === tab.key ? '#fff' : '#6b7280',
-            }}
-          >
-            {tab.label}
-          </button>
+    <Box sx={{ p: 3, direction: 'rtl' }}>
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+        {[1, 2, 3, 4, 5].map(i => (
+          <Skeleton key={i} variant="rounded" height={130} sx={{ flex: 1, minWidth: 150, borderRadius: '18px' }} />
         ))}
-      </div>
-
-      {/* ── Content ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 20 }}>
-
-        {/* Left Column — Main content */}
-        <div>
-          {/* Overview Tab */}
-          {activeTab === 'overview' && (
-            <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-              <div style={{ padding: '16px 20px', borderBottom: '1px solid #f3f4f6', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#111827' }}>
-                  جميع الفروع — لحظة حقيقية
-                </h2>
-                <select
-                  value={filterRegion}
-                  onChange={e => setFilterRegion(e.target.value)}
-                  style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: 13 }}
-                >
-                  <option value="all">جميع المناطق</option>
-                  {Object.keys(BRANCH_REGIONS).map(r => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr>
-                      <th style={thStyle}>الرمز</th>
-                      <th style={thStyle}>الفرع</th>
-                      <th style={thStyle}>الحالة</th>
-                      <th style={thStyle}>مرضى اليوم</th>
-                      <th style={thStyle}>جلسات اليوم</th>
-                      <th style={thStyle}>نسبة الإشغال</th>
-                      <th style={thStyle}>الإيراد (شهري)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBranches.length > 0
-                      ? filteredBranches.map(b => (
-                          <BranchRow
-                            key={b.code}
-                            branch={b}
-                            onSelect={(code) => window.location.href = `/branch/${code}`}
-                          />
-                        ))
-                      : (
-                        <tr>
-                          <td colSpan={7} style={{ ...tdStyle, textAlign: 'center', color: '#9ca3af', padding: 32 }}>
-                            لا توجد فروع في هذه المنطقة
-                          </td>
-                        </tr>
-                      )
-                    }
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Financials Tab */}
-          {activeTab === 'financials' && financials && (
-            <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 24 }}>
-              <h2 style={{ margin: '0 0 20px', fontSize: 16, fontWeight: 700 }}>الماليات الموحدة لجميع الفروع</h2>
-              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
-                <KPICard title="إجمالي الإيرادات" value={financials.total_revenue ?? 0} unit="ر.س" color="#10b981" icon="📈" />
-                <KPICard title="إجمالي المصروفات" value={financials.total_expenses ?? 0} unit="ر.س" color="#ef4444" icon="📉" />
-                <KPICard title="صافي الربح" value={financials.net_profit ?? 0} unit="ر.س" color="#3b82f6" icon="💎" />
-                <KPICard title="نسبة الربحية" value={financials.profit_margin ?? 0} unit="%" color="#8b5cf6" icon="%" />
-              </div>
-              {/* Branch-by-branch breakdown */}
-              <h3 style={{ margin: '0 0 12px', fontSize: 14, fontWeight: 600, color: '#374151' }}>تفصيل حسب الفرع</h3>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr>
-                    <th style={thStyle}>الفرع</th>
-                    <th style={thStyle}>الإيرادات</th>
-                    <th style={thStyle}>المصروفات</th>
-                    <th style={thStyle}>صافي الربح</th>
-                    <th style={thStyle}>تحقيق الهدف</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(financials.by_branch || []).map(b => (
-                    <tr key={b.branch_code}>
-                      <td style={tdStyle}><strong>{b.branch_code}</strong> — {b.name_ar}</td>
-                      <td style={tdStyle}>{(b.revenue || 0).toLocaleString('ar-SA')} ر.س</td>
-                      <td style={tdStyle}>{(b.expenses || 0).toLocaleString('ar-SA')} ر.س</td>
-                      <td style={{ ...tdStyle, color: b.net_profit >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-                        {(b.net_profit || 0).toLocaleString('ar-SA')} ر.س
-                      </td>
-                      <td style={tdStyle}>
-                        <div style={{ background: '#e5e7eb', borderRadius: 4, height: 8, width: 120, overflow: 'hidden' }}>
-                          <div style={{
-                            width: `${Math.min(b.target_achievement || 0, 100)}%`,
-                            height: '100%',
-                            background: (b.target_achievement || 0) >= 90 ? '#10b981' : (b.target_achievement || 0) >= 70 ? '#f59e0b' : '#ef4444',
-                            borderRadius: 4,
-                          }} />
-                        </div>
-                        <span style={{ fontSize: 11, color: '#6b7280' }}>{b.target_achievement ?? 0}%</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Comparison Tab */}
-          {activeTab === 'comparison' && (
-            <ComparisonTab branches={branches} />
-          )}
-        </div>
-
-        {/* Right Column — Alerts & Quick Stats */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          {/* Alerts Panel */}
-          <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>🔔 التنبيهات</h3>
-              <span style={{ background: '#fef3c7', color: '#d97706', padding: '2px 10px', borderRadius: 12, fontSize: 12, fontWeight: 600 }}>
-                {alerts.length}
-              </span>
-            </div>
-            {alerts.length === 0
-              ? <p style={{ color: '#9ca3af', fontSize: 13, textAlign: 'center', padding: 16 }}>✅ لا توجد تنبيهات نشطة</p>
-              : alerts.slice(0, 8).map((a, i) => <AlertItem key={i} alert={a} />)
-            }
-          </div>
-
-          {/* Top Performers */}
-          <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 20 }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700 }}>🏆 أفضل الفروع أداءً</h3>
-            {(dashboard?.top_performers || []).slice(0, 5).map((b, i) => (
-              <div key={b.code} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #f3f4f6' }}>
-                <span style={{
-                  width: 24, height: 24, borderRadius: '50%', background: i === 0 ? '#fbbf24' : i === 1 ? '#9ca3af' : '#cd7c2f',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 11, fontWeight: 700, color: '#fff', flexShrink: 0,
-                }}>{i + 1}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600 }}>{b.name_ar || b.code}</p>
-                  <p style={{ margin: 0, fontSize: 11, color: '#9ca3af' }}>مؤشر الأداء: {b.performance_score ?? 0}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Access */}
-          <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 20 }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 700 }}>⚡ وصول سريع</h3>
-            {[
-              { label: '📋 سجل المراجعة', href: '/audit-log' },
-              { label: '⚠️ التجاوز الطارئ', href: '/emergency-override' },
-              { label: '👥 محسّن الكوادر', href: '/staff-optimizer' },
-              { label: '🔐 مصفوفة الصلاحيات', href: '/permissions-matrix' },
-            ].map(link => (
-              <a
-                key={link.href}
-                href={link.href}
-                style={{
-                  display: 'block', padding: '10px 12px', marginBottom: 8,
-                  background: '#f8fafc', borderRadius: 8, color: '#374151',
-                  textDecoration: 'none', fontSize: 13, fontWeight: 500,
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#eff6ff'}
-                onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-
-        </div>
-      </div>
-
-      {/* CSS for spinner */}
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
-    </div>
+      </Box>
+      <Skeleton variant="rounded" height={44} sx={{ mb: 2.5, borderRadius: '14px' }} />
+      <Grid container spacing={2.5}>
+        <Grid item xs={12} md={8}>
+          <Skeleton variant="rounded" height={420} sx={{ borderRadius: '20px' }} />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Skeleton variant="rounded" height={420} sx={{ borderRadius: '20px' }} />
+        </Grid>
+      </Grid>
+    </Box>
   );
-};
 
-// ─── Comparison Tab ───────────────────────────────────────────────────────────
-const ComparisonTab = ({ branches }) => {
-  const [metric, setMetric] = useState('capacity_utilization');
-  const [compData, setCompData] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const codes = branches.map(b => b.code).join(',');
-        const res = await apiFetch(`${API_BASE}/hq/comparison?branches=${codes}&metric=${metric}`);
-        setCompData(res.data || res);
-      } catch {
-        setCompData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (branches.length > 0) load();
-  }, [metric, branches]);
-
-  const rows = compData?.comparison || branches.map(b => ({
-    code: b.code,
-    name_ar: b.name_ar,
-    value: b.stats?.[metric] ?? 0,
-  }));
-
-  const maxVal = Math.max(...rows.map(r => r.value || 0), 1);
-
-  return (
-    <div style={{ background: '#fff', borderRadius: 12, boxShadow: '0 1px 4px rgba(0,0,0,0.08)', padding: 24 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>مقارنة الفروع</h2>
-        <select
-          value={metric}
-          onChange={e => setMetric(e.target.value)}
-          style={{ padding: '6px 12px', border: '1px solid #e5e7eb', borderRadius: 6, fontSize: 13 }}
+  /* ── Error state ──────────────────── */
+  if (error) return (
+    <Box sx={{ p: 4, textAlign: 'center', direction: 'rtl' }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300 }}
+      >
+        <Box sx={{
+          width: 72, height: 72, borderRadius: '20px',
+          background: 'rgba(244,67,54,0.1)',
+          border: '1px solid rgba(244,67,54,0.2)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          mx: 'auto', mb: 2,
+        }}>
+          <ErrorRoundedIcon sx={{ fontSize: 36, color: '#f44336' }} />
+        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.8 }}>خطأ في تحميل البيانات</Typography>
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 2 }}>{error}</Typography>
+        <Box
+          component={motion.div}
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => loadData()}
+          sx={{
+            display: 'inline-flex', alignItems: 'center', gap: 1,
+            px: 3, py: 1.2, borderRadius: '12px',
+            background: 'linear-gradient(135deg,#667eea,#764ba2)',
+            cursor: 'pointer', color: 'white',
+            boxShadow: '0 6px 20px rgba(102,126,234,0.4)',
+          }}
         >
-          <option value="capacity_utilization">نسبة الإشغال</option>
-          <option value="patients_today">مرضى اليوم</option>
-          <option value="sessions_today">الجلسات</option>
-          <option value="monthly_revenue">الإيرادات الشهرية</option>
-          <option value="satisfaction_score">رضا الأسر</option>
-        </select>
-      </div>
+          <RefreshRoundedIcon sx={{ fontSize: 18 }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>إعادة المحاولة</Typography>
+        </Box>
+      </motion.div>
+    </Box>
+  );
 
-      {loading
-        ? <p style={{ textAlign: 'center', color: '#9ca3af' }}>جارٍ التحميل…</p>
-        : rows.sort((a, b) => (b.value || 0) - (a.value || 0)).map(row => (
-          <div key={row.code} style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>
-                {row.code} — {row.name_ar}
-              </span>
-              <span style={{ fontSize: 13, color: '#6b7280' }}>
-                {typeof row.value === 'number' ? row.value.toLocaleString('ar-SA') : row.value}
-              </span>
-            </div>
-            <div style={{ background: '#e5e7eb', borderRadius: 6, height: 10, overflow: 'hidden' }}>
-              <div style={{
-                width: `${((row.value || 0) / maxVal) * 100}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #3b82f6, #06b6d4)',
-                borderRadius: 6,
-                transition: 'width 0.5s ease',
-              }} />
-            </div>
-          </div>
-        ))
-      }
-    </div>
+  /* ── TAB CONTENT PANELS ──────────── */
+  const TABS = [
+    { label: 'نظرة عامة',        icon: <MapRoundedIcon sx={{ fontSize: 16 }} /> },
+    { label: 'الماليات الموحدة', icon: <AccountBalanceRoundedIcon sx={{ fontSize: 16 }} /> },
+    { label: 'مقارنة الفروع',   icon: <CompareArrowsRoundedIcon sx={{ fontSize: 16 }} /> },
+  ];
+
+  /* Comparison bar */
+  const compRows = branches.map(b => ({
+    code: b.code, name_ar: b.name_ar,
+    value: b.stats?.[metric] ?? 0,
+  })).sort((a, b2) => (b2.value || 0) - (a.value || 0));
+  const maxVal = Math.max(...compRows.map(r => r.value || 0), 1);
+
+  /* ─────────────────────────────────── */
+  return (
+    <Box sx={{ direction: 'rtl', minHeight: '100vh', p: { xs: 2, md: 3 } }}>
+
+      {/* ══ AI Command Bar ═══════════════════ */}
+      <AICommandBar open={cmdOpen} onClose={() => setCmdOpen(false)} />
+
+      {/* ══ Page Header ══════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Box sx={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 2, mb: 2.5,
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{
+              width: 52, height: 52, borderRadius: '16px',
+              background: 'linear-gradient(135deg,#667eea,#764ba2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 8px 24px rgba(102,126,234,0.45)',
+              animation: 'headerOrb 4s ease-in-out infinite',
+              '@keyframes headerOrb': {
+                '0%,100%': { boxShadow: '0 8px 24px rgba(102,126,234,0.45)' },
+                '50%': { boxShadow: '0 12px 36px rgba(102,126,234,0.7)' },
+              },
+            }}>
+              <BusinessRoundedIcon sx={{ color: 'white', fontSize: 28 }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{
+                fontWeight: 900, fontSize: 'clamp(1.2rem,2.5vw,1.6rem)',
+                background: 'linear-gradient(135deg,#667eea,#764ba2,#f093fb)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.3px', lineHeight: 1.2,
+              }}>
+                مركز القيادة التنفيذي
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.3 }}>
+                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
+                  شبكة الأوائل للتأهيل · {branches.length} فرع
+                </Typography>
+                <Box sx={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: '#4caf50',
+                  boxShadow: '0 0 8px rgba(76,175,80,0.6)',
+                  animation: 'onlinePulse 2s ease-in-out infinite',
+                  '@keyframes onlinePulse': {
+                    '0%,100%': { opacity: 1 },
+                    '50%': { opacity: 0.4 },
+                  },
+                }} />
+                <Typography sx={{ fontSize: '0.65rem', color: '#4caf50', fontWeight: 700 }}>مباشر</Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            {criticalAlerts.length > 0 && (
+              <Chip
+                icon={<ErrorRoundedIcon sx={{ fontSize: '14px !important' }} />}
+                label={`${criticalAlerts.length} تنبيه حرج`}
+                sx={{
+                  height: 28, fontWeight: 700, fontSize: '0.7rem',
+                  background: 'rgba(244,67,54,0.1)',
+                  border: '1px solid rgba(244,67,54,0.3)',
+                  color: '#f44336',
+                  '& .MuiChip-icon': { color: '#f44336' },
+                }}
+              />
+            )}
+
+            {/* CMD+K trigger */}
+            <Tooltip title="شريط الأوامر الذكي (Ctrl+K)" arrow>
+              <Box
+                onClick={() => setCmdOpen(true)}
+                sx={{
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  px: 1.5, py: 0.7, borderRadius: '10px',
+                  border: '1px solid',
+                  borderColor: isDark ? 'rgba(102,126,234,0.25)' : 'rgba(102,126,234,0.15)',
+                  background: isDark ? 'rgba(102,126,234,0.08)' : 'rgba(102,126,234,0.04)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  '&:hover': { background: 'rgba(102,126,234,0.15)', borderColor: 'rgba(102,126,234,0.4)' },
+                }}
+              >
+                <FlashOnRoundedIcon sx={{ fontSize: 16, color: '#667eea' }} />
+                <Typography sx={{ fontSize: '0.72rem', color: '#667eea', fontWeight: 600 }}>
+                  أوامر ذكية
+                </Typography>
+                <Box sx={{
+                  px: 0.7, py: 0.1, borderRadius: '5px',
+                  background: 'rgba(102,126,234,0.15)',
+                  border: '1px solid rgba(102,126,234,0.2)',
+                  fontFamily: 'monospace',
+                  fontSize: '0.58rem',
+                  color: '#667eea', fontWeight: 700,
+                }}>
+                  Ctrl+K
+                </Box>
+              </Box>
+            </Tooltip>
+
+            <Tooltip title="تحديث البيانات">
+              <IconButton
+                onClick={() => loadData(true)}
+                size="small"
+                sx={{
+                  width: 36, height: 36, borderRadius: '10px',
+                  border: '1px solid rgba(102,126,234,0.2)',
+                  background: 'rgba(102,126,234,0.06)',
+                  animation: refreshing ? 'spin 0.8s linear infinite' : 'none',
+                  '@keyframes spin': { '100%': { transform: 'rotate(360deg)' } },
+                  '&:hover': { background: 'rgba(102,126,234,0.15)' },
+                }}
+              >
+                <RefreshRoundedIcon sx={{ fontSize: 18, color: '#667eea' }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        </Box>
+      </motion.div>
+
+      {/* ══ KPI Cards Row ════════════════════ */}
+      <Grid container spacing={2} sx={{ mb: 2.5 }}>
+        {[
+          { title: 'مرضى اليوم',      value: summary.total_patients_today ?? 0,      change: summary.patients_change,  gradient: 'linear-gradient(135deg,#667eea,#764ba2)', glow: '#667eea', icon: <GroupsRoundedIcon />        },
+          { title: 'جلسات اليوم',     value: summary.total_sessions_today ?? 0,      change: summary.sessions_change,  gradient: 'linear-gradient(135deg,#4facfe,#00f2fe)', glow: '#4facfe', icon: <EventNoteRoundedIcon />     },
+          { title: 'الإيراد الشهري',  value: summary.monthly_revenue ?? 0,           change: summary.revenue_change,   gradient: 'linear-gradient(135deg,#43cea2,#185a9d)', glow: '#43cea2', icon: <AttachMoneyRoundedIcon />, unit: 'ر.س' },
+          { title: 'الفروع النشطة',   value: `${summary.active_branches ?? 0}/${branches.length}`, gradient: 'linear-gradient(135deg,#f7971e,#ffd200)', glow: '#f7971e', icon: <BusinessRoundedIcon />     },
+          { title: 'متوسط الإشغال',   value: summary.avg_capacity_utilization ?? 0,                gradient: 'linear-gradient(135deg,#f093fb,#f5576c)', glow: '#f093fb', icon: <SpeedRoundedIcon />, unit: '%' },
+        ].map((kpi, i) => (
+          <Grid item xs={12} sm={6} md={2.4} key={kpi.title}>
+            <KPICard {...kpi} delay={0.05 + i * 0.08} />
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* ══ Live Ticker ══════════════════════ */}
+      <LiveMetricsTicker />
+
+      {/* ══ Main Grid ════════════════════════ */}
+      <Grid container spacing={2.5}>
+
+        {/* ── Left column (main) ── */}
+        <Grid item xs={12} lg={8}>
+
+          {/* Tabs */}
+          <Paper elevation={0} sx={{
+            borderRadius: '20px',
+            overflow: 'hidden',
+            mb: 2.5,
+            background: isDark
+              ? 'linear-gradient(145deg,rgba(15,20,40,0.97),rgba(20,15,45,0.97))'
+              : 'linear-gradient(145deg,rgba(255,255,255,0.97),rgba(248,248,255,0.97))',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid',
+            borderColor: isDark ? 'rgba(102,126,234,0.15)' : 'rgba(102,126,234,0.1)',
+            boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.3)' : '0 8px 32px rgba(102,126,234,0.08)',
+          }}>
+            {/* Top accent */}
+            <Box sx={{
+              height: '3px',
+              background: 'linear-gradient(90deg,#667eea,#764ba2,#4facfe)',
+              backgroundSize: '200% auto',
+              animation: 'tBar 4s linear infinite',
+              '@keyframes tBar': { '0%': { backgroundPosition: '0% center' }, '100%': { backgroundPosition: '200% center' } },
+            }} />
+
+            {/* Tab headers */}
+            <Box sx={{
+              display: 'flex', gap: 0.5, p: 1.5, pb: 0,
+              borderBottom: '1px solid',
+              borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+            }}>
+              {TABS.map((tab, i) => (
+                <Box
+                  key={tab.label}
+                  onClick={() => setActiveTab(i)}
+                  sx={{
+                    display: 'flex', alignItems: 'center', gap: 0.7,
+                    px: 1.8, py: 0.9, borderRadius: '10px 10px 0 0',
+                    cursor: 'pointer',
+                    background: activeTab === i
+                      ? (isDark ? 'rgba(102,126,234,0.15)' : 'rgba(102,126,234,0.08)')
+                      : 'transparent',
+                    borderBottom: activeTab === i ? '2px solid #667eea' : '2px solid transparent',
+                    transition: 'all 0.2s',
+                    '&:hover': { background: 'rgba(102,126,234,0.08)' },
+                  }}
+                >
+                  <Box sx={{ color: activeTab === i ? '#667eea' : 'text.disabled' }}>
+                    {tab.icon}
+                  </Box>
+                  <Typography sx={{
+                    fontSize: '0.78rem', fontWeight: 700,
+                    color: activeTab === i ? '#667eea' : 'text.secondary',
+                  }}>
+                    {tab.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
+            {/* Tab body */}
+            <Box sx={{ p: 2 }}>
+              <AnimatePresence mode="wait">
+                {/* ── Overview Tab ── */}
+                {activeTab === 0 && (
+                  <motion.div
+                    key="overview"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    {/* Region filter */}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                      <Typography sx={{ fontWeight: 800, fontSize: '0.88rem' }}>
+                        جميع الفروع — وقت حقيقي
+                      </Typography>
+                      <Select
+                        value={filterRegion}
+                        onChange={e => setFilterRegion(e.target.value)}
+                        size="small"
+                        sx={{
+                          fontSize: '0.75rem', borderRadius: '10px', height: 32,
+                          '& .MuiOutlinedInput-notchedOutline': {
+                            borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
+                          },
+                        }}
+                      >
+                        <MenuItem value="all">جميع المناطق</MenuItem>
+                        {Object.keys(BRANCH_REGIONS).map(r => (
+                          <MenuItem key={r} value={r}>{r}</MenuItem>
+                        ))}
+                      </Select>
+                    </Box>
+
+                    <TableContainer sx={{
+                      borderRadius: '14px',
+                      border: '1px solid',
+                      borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                    }}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow sx={{
+                            background: isDark ? 'rgba(102,126,234,0.08)' : 'rgba(102,126,234,0.04)',
+                          }}>
+                            {['الفرع', 'الحالة', 'مرضى اليوم', 'جلسات', 'الإشغال', 'الإيراد', ''].map(h => (
+                              <TableCell key={h} sx={{
+                                py: 1.2, fontSize: '0.68rem',
+                                fontWeight: 800, color: 'text.secondary',
+                                textTransform: 'uppercase',
+                                letterSpacing: 0.5, borderBottom: 'none',
+                              }}>
+                                {h}
+                              </TableCell>
+                            ))}
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {filteredBranches.length > 0
+                            ? filteredBranches.map((b, i) => (
+                                <BranchRow
+                                  key={b.code}
+                                  branch={b}
+                                  index={i}
+                                  isDark={isDark}
+                                  onSelect={(code) => window.location.href = `/branch/${code}`}
+                                />
+                              ))
+                            : (
+                              <TableRow>
+                                <TableCell colSpan={7} sx={{ textAlign: 'center', py: 4, color: 'text.disabled' }}>
+                                  لا توجد فروع في هذه المنطقة
+                                </TableCell>
+                              </TableRow>
+                            )
+                          }
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </motion.div>
+                )}
+
+                {/* ── Financials Tab ── */}
+                {activeTab === 1 && (
+                  <motion.div
+                    key="fin"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    {financials ? (
+                      <>
+                        <Grid container spacing={1.5} sx={{ mb: 2 }}>
+                          {[
+                            { t: 'إجمالي الإيرادات', v: financials.total_revenue ?? 0,  g: 'linear-gradient(135deg,#43cea2,#185a9d)', gw: '#43cea2', u: 'ر.س' },
+                            { t: 'إجمالي المصروفات', v: financials.total_expenses ?? 0,  g: 'linear-gradient(135deg,#f5576c,#f093fb)', gw: '#f5576c', u: 'ر.س' },
+                            { t: 'صافي الربح',       v: financials.net_profit ?? 0,      g: 'linear-gradient(135deg,#667eea,#764ba2)', gw: '#667eea', u: 'ر.س' },
+                            { t: 'نسبة الربحية',     v: financials.profit_margin ?? 0,   g: 'linear-gradient(135deg,#f7971e,#ffd200)', gw: '#f7971e', u: '%'   },
+                          ].map((f, i) => (
+                            <Grid item xs={6} sm={3} key={f.t}>
+                              <KPICard title={f.t} value={f.v} unit={f.u} gradient={f.g} glow={f.gw} icon={<AttachMoneyRoundedIcon />} delay={i * 0.07} />
+                            </Grid>
+                          ))}
+                        </Grid>
+
+                        <TableContainer sx={{ borderRadius: '14px', border: '1px solid', borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)' }}>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow sx={{ background: isDark ? 'rgba(102,126,234,0.08)' : 'rgba(102,126,234,0.04)' }}>
+                                {['الفرع', 'الإيرادات', 'المصروفات', 'صافي الربح', 'تحقيق الهدف'].map(h => (
+                                  <TableCell key={h} sx={{ py: 1.2, fontSize: '0.68rem', fontWeight: 800, color: 'text.secondary', borderBottom: 'none' }}>{h}</TableCell>
+                                ))}
+                              </TableRow>
+                            </TableHead>
+                            <TableBody>
+                              {(financials.by_branch || []).map((b, i) => (
+                                <TableRow key={b.branch_code}
+                                  sx={{ '&:hover': { background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)' } }}
+                                >
+                                  <TableCell sx={{ py: 1.2, fontSize: '0.78rem' }}>
+                                    <Typography sx={{ fontWeight: 700 }}>{b.branch_code}</Typography>
+                                    <Typography sx={{ fontSize: '0.63rem', color: 'text.disabled' }}>{b.name_ar}</Typography>
+                                  </TableCell>
+                                  <TableCell sx={{ py: 1.2, fontSize: '0.78rem', fontWeight: 600 }}>
+                                    {(b.revenue || 0).toLocaleString('ar-SA')}
+                                  </TableCell>
+                                  <TableCell sx={{ py: 1.2, fontSize: '0.78rem', fontWeight: 600 }}>
+                                    {(b.expenses || 0).toLocaleString('ar-SA')}
+                                  </TableCell>
+                                  <TableCell sx={{ py: 1.2 }}>
+                                    <Typography sx={{
+                                      fontWeight: 800, fontSize: '0.78rem',
+                                      color: b.net_profit >= 0 ? '#4caf50' : '#f44336',
+                                    }}>
+                                      {(b.net_profit || 0).toLocaleString('ar-SA')}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell sx={{ py: 1.2, minWidth: 120 }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                      <Box sx={{ flex: 1 }}>
+                                        <LinearProgress
+                                          variant="determinate"
+                                          value={Math.min(b.target_achievement || 0, 100)}
+                                          sx={{
+                                            height: 5, borderRadius: 3,
+                                            background: 'rgba(128,128,128,0.15)',
+                                            '& .MuiLinearProgress-bar': {
+                                              borderRadius: 3,
+                                              background: (b.target_achievement || 0) >= 90
+                                                ? 'linear-gradient(90deg,#43cea2,#185a9d)'
+                                                : (b.target_achievement || 0) >= 70
+                                                  ? 'linear-gradient(90deg,#f7971e,#ffd200)'
+                                                  : 'linear-gradient(90deg,#f5576c,#f093fb)',
+                                            },
+                                          }}
+                                        />
+                                      </Box>
+                                      <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, color: 'text.secondary', minWidth: 28 }}>
+                                        {b.target_achievement ?? 0}%
+                                      </Typography>
+                                    </Box>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                      </>
+                    ) : (
+                      <Box sx={{ py: 5, textAlign: 'center' }}>
+                        <Typography sx={{ color: 'text.disabled' }}>لا تتوفر بيانات مالية</Typography>
+                      </Box>
+                    )}
+                  </motion.div>
+                )}
+
+                {/* ── Comparison Tab ── */}
+                {activeTab === 2 && (
+                  <motion.div
+                    key="comp"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                      <Typography sx={{ fontWeight: 800, fontSize: '0.88rem' }}>مقارنة الفروع</Typography>
+                      <Select
+                        value={metric}
+                        onChange={e => setMetric(e.target.value)}
+                        size="small"
+                        sx={{ fontSize: '0.75rem', borderRadius: '10px', height: 32 }}
+                      >
+                        <MenuItem value="capacity_utilization">نسبة الإشغال</MenuItem>
+                        <MenuItem value="patients_today">مرضى اليوم</MenuItem>
+                        <MenuItem value="sessions_today">الجلسات</MenuItem>
+                        <MenuItem value="monthly_revenue">الإيرادات الشهرية</MenuItem>
+                        <MenuItem value="satisfaction_score">رضا الأسر</MenuItem>
+                      </Select>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.2 }}>
+                      {compRows.map((row, i) => {
+                        const pct = ((row.value || 0) / maxVal) * 100;
+                        const GRADS = [
+                          'linear-gradient(90deg,#667eea,#764ba2)',
+                          'linear-gradient(90deg,#43cea2,#185a9d)',
+                          'linear-gradient(90deg,#4facfe,#00f2fe)',
+                          'linear-gradient(90deg,#f7971e,#ffd200)',
+                          'linear-gradient(90deg,#f093fb,#f5576c)',
+                        ];
+                        const grad = GRADS[i % GRADS.length];
+                        return (
+                          <motion.div
+                            key={row.code}
+                            initial={{ opacity: 0, x: -16 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.05, duration: 0.3 }}
+                          >
+                            <Box>
+                              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                                <Typography sx={{ fontSize: '0.76rem', fontWeight: 700 }}>
+                                  {row.code}
+                                  <Box component="span" sx={{ fontWeight: 400, color: 'text.secondary', mr: 0.5 }}>
+                                    {' '}{row.name_ar}
+                                  </Box>
+                                </Typography>
+                                <Typography sx={{
+                                  fontSize: '0.76rem', fontWeight: 800,
+                                  background: grad,
+                                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                                }}>
+                                  {typeof row.value === 'number' ? row.value.toLocaleString('ar-SA') : row.value}
+                                </Typography>
+                              </Box>
+                              <Box sx={{
+                                height: 8, borderRadius: 6,
+                                background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                                overflow: 'hidden',
+                              }}>
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${pct}%` }}
+                                  transition={{ delay: 0.1 + i * 0.04, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                                  style={{ height: '100%', borderRadius: 6, background: grad }}
+                                />
+                              </Box>
+                            </Box>
+                          </motion.div>
+                        );
+                      })}
+                    </Box>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </Box>
+          </Paper>
+
+          {/* Performance Rings */}
+          <PerformanceRings delay={0.3} />
+        </Grid>
+
+        {/* ── Right column (sidebar) ── */}
+        <Grid item xs={12} lg={4}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+
+            {/* Smart AI Insights */}
+            <SmartInsightsPanel
+              onRefresh={() => loadData(true)}
+              loading={refreshing}
+            />
+
+            {/* Alerts Panel */}
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.55 }}
+            >
+              <Paper elevation={0} sx={{
+                borderRadius: '20px', p: 2.5,
+                background: isDark
+                  ? 'linear-gradient(145deg,rgba(15,20,40,0.97),rgba(20,15,45,0.97))'
+                  : 'linear-gradient(145deg,rgba(255,255,255,0.97),rgba(250,248,255,0.97))',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid',
+                borderColor: isDark ? 'rgba(102,126,234,0.15)' : 'rgba(102,126,234,0.1)',
+                boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.3)' : '0 8px 32px rgba(102,126,234,0.08)',
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2 }}>
+                    <Box sx={{
+                      width: 36, height: 36, borderRadius: '11px',
+                      background: 'linear-gradient(135deg,#f5576c,#f093fb)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 5px 14px rgba(245,87,108,0.4)',
+                    }}>
+                      <WarningAmberRoundedIcon sx={{ color: 'white', fontSize: 18 }} />
+                    </Box>
+                    <Typography sx={{ fontWeight: 800, fontSize: '0.9rem' }}>التنبيهات</Typography>
+                  </Box>
+                  <Chip
+                    label={alerts.length}
+                    size="small"
+                    sx={{
+                      height: 22, fontWeight: 800, fontSize: '0.68rem',
+                      background: alerts.length > 0 ? 'linear-gradient(135deg,#f5576c,#f093fb)' : 'rgba(128,128,128,0.15)',
+                      color: alerts.length > 0 ? 'white' : 'text.disabled',
+                      border: 'none',
+                    }}
+                  />
+                </Box>
+                <Box sx={{ maxHeight: 280, overflowY: 'auto', '&::-webkit-scrollbar': { width: 3 }, '&::-webkit-scrollbar-thumb': { borderRadius: 4, background: 'rgba(102,126,234,0.25)' } }}>
+                  {alerts.length === 0
+                    ? <Box sx={{ py: 3, textAlign: 'center' }}>
+                        <CheckCircleRoundedIcon sx={{ fontSize: 28, color: '#4caf50', mb: 0.8 }} />
+                        <Typography sx={{ fontSize: '0.78rem', color: 'text.disabled', fontWeight: 600 }}>
+                          لا توجد تنبيهات نشطة
+                        </Typography>
+                      </Box>
+                    : alerts.slice(0, 8).map((a, i) => <AlertRow key={i} alert={a} index={i} isDark={isDark} />)
+                  }
+                </Box>
+              </Paper>
+            </motion.div>
+
+            {/* Top Performers */}
+            <motion.div
+              initial={{ opacity: 0, y: 28 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.65, duration: 0.55 }}
+            >
+              <Paper elevation={0} sx={{
+                borderRadius: '20px', p: 2.5,
+                background: isDark
+                  ? 'linear-gradient(145deg,rgba(15,20,40,0.97),rgba(20,15,45,0.97))'
+                  : 'linear-gradient(145deg,rgba(255,255,255,0.97),rgba(250,248,255,0.97))',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid',
+                borderColor: isDark ? 'rgba(102,126,234,0.15)' : 'rgba(102,126,234,0.1)',
+                boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.3)' : '0 8px 32px rgba(102,126,234,0.08)',
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.2, mb: 2 }}>
+                  <Box sx={{
+                    width: 36, height: 36, borderRadius: '11px',
+                    background: 'linear-gradient(135deg,#f7971e,#ffd200)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 5px 14px rgba(247,151,30,0.4)',
+                  }}>
+                    <EmojiEventsRoundedIcon sx={{ color: 'white', fontSize: 18 }} />
+                  </Box>
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.9rem' }}>أفضل الفروع أداءً</Typography>
+                </Box>
+                <TopPerformers performers={performers} isDark={isDark} />
+              </Paper>
+            </motion.div>
+
+          </Box>
+        </Grid>
+      </Grid>
+
+      {/* ══ Floating CMD Button ═══════════════ */}
+      <FloatingCMD onClick={() => setCmdOpen(true)} />
+
+    </Box>
   );
 };
 

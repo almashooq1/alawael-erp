@@ -1,5 +1,5 @@
 # ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — CI Pipeline (v3 — Stable)
+#  Al-Awael ERP — CI Pipeline (v4 — Stable)
 #  فحص جودة ← بناء الواجهة ← تدقيق أمني
 # ════════════════════════════════════════════════════════════════════
 name: "CI — Al-Awael ERP"
@@ -123,7 +123,7 @@ jobs:
           echo "✅ Tests completed (non-blocking)"
 
   # ═══════════════════════════════════════════════════════════════════
-  #  4. Security Scan — فحص أمني خفيف
+  #  4. Security Scan — فحص أمني خفيف (غير حرج)
   # ═══════════════════════════════════════════════════════════════════
   security:
     name: "🔒 Security Audit"
@@ -140,19 +140,25 @@ jobs:
       - name: Audit backend
         working-directory: backend
         run: |
-          npm ci
-          npm audit --audit-level=critical || echo "⚠️ Audit warnings — review recommended"
+          npm ci --no-audit
+          npm audit --audit-level=critical 2>&1 || echo "⚠️ Audit warnings — review recommended"
 
       - name: Scan for hardcoded secrets
         run: |
           echo "🔍 Scanning for leaked secrets..."
-          ! grep -rn --include="*.js" --include="*.jsx" \
+          FOUND=$(grep -rn --include="*.js" --include="*.jsx" \
             -E "(password|secret|api_key)\s*=\s*['\"][^'\"]{12,}['\"]" \
             frontend/src/ backend/routes/ backend/controllers/ 2>/dev/null \
             | grep -v "node_modules" \
             | grep -v "process\.env" \
             | grep -v "example\|mock\|test\|placeholder" \
-            | head -5 && echo "✅ No hardcoded secrets found" || echo "⚠️ Review above lines"
+            | head -5 || true)
+          if [ -z "$FOUND" ]; then
+            echo "✅ No hardcoded secrets found"
+          else
+            echo "⚠️ Review these lines:"
+            echo "$FOUND"
+          fi
 
   # ═══════════════════════════════════════════════════════════════════
   #  5. CI Summary
@@ -170,7 +176,7 @@ jobs:
           TESTS="${{ needs.test-backend.result }}"
           SEC="${{ needs.security.result }}"
 
-          icon() { case "$1" in success) echo "✅";; failure) echo "❌";; *) echo "⏭️";; esac; }
+          icon() { case "$1" in success) echo "✅";; failure) echo "❌";; skipped) echo "⏭️";; *) echo "⚠️";; esac; }
 
           echo "## 📋 Al-Awael ERP — CI Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -185,7 +191,7 @@ jobs:
           echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
           echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Time | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail only if frontend build broke
         if: needs.build-frontend.result == 'failure'

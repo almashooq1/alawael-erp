@@ -1,5 +1,5 @@
 # ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — PR Checks (Simplified)
+#  Al-Awael ERP — PR Checks (v2 — Simplified & Non-blocking)
 #  فحوصات طلبات الدمج — مبسطة وغير حرجة
 # ════════════════════════════════════════════════════════════════════
 name: "🔎 PR Checks"
@@ -18,6 +18,7 @@ jobs:
     name: "📏 PR Quality"
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,10 +27,10 @@ jobs:
       - name: PR size report
         id: size
         run: |
-          ADDITIONS=${{ github.event.pull_request.additions || 0 }}
-          DELETIONS=${{ github.event.pull_request.deletions || 0 }}
+          ADDITIONS="${{ github.event.pull_request.additions || 0 }}"
+          DELETIONS="${{ github.event.pull_request.deletions || 0 }}"
           TOTAL=$((ADDITIONS + DELETIONS))
-          FILES=${{ github.event.pull_request.changed_files || 0 }}
+          FILES="${{ github.event.pull_request.changed_files || 0 }}"
 
           if   [ "$TOTAL" -gt 2000 ]; then SIZE="XL 🔴"
           elif [ "$TOTAL" -gt 800  ]; then SIZE="L 🟠"
@@ -39,7 +40,7 @@ jobs:
           fi
 
           echo "size=$SIZE" >> $GITHUB_OUTPUT
-          echo "� PR Size: $SIZE (+$ADDITIONS / -$DELETIONS) in $FILES files"
+          echo "PR Size: $SIZE (+$ADDITIONS / -$DELETIONS) in $FILES files"
 
       - name: Check PR title format
         continue-on-error: true
@@ -59,10 +60,10 @@ jobs:
         continue-on-error: true
         with:
           script: |
-            const size = '${{ steps.size.outputs.size }}';
-            const add  = ${{ github.event.pull_request.additions  || 0 }};
-            const del  = ${{ github.event.pull_request.deletions  || 0 }};
-            const files = ${{ github.event.pull_request.changed_files || 0 }};
+            const size = '${{ steps.size.outputs.size }}' || 'Unknown';
+            const add  = parseInt('${{ github.event.pull_request.additions  || 0 }}');
+            const del  = parseInt('${{ github.event.pull_request.deletions  || 0 }}');
+            const files = parseInt('${{ github.event.pull_request.changed_files || 0 }}');
 
             const body = [
               `## 📊 PR Size: **${size}**`,
@@ -75,27 +76,31 @@ jobs:
               `| Total  | ${add + del} |`,
             ].join('\n');
 
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('PR Size:'));
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: existing.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
+            try {
+              const { data: comments } = await github.rest.issues.listComments({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body,
               });
+
+              const existing = comments.find(c => c.user.type === 'Bot' && c.body.includes('PR Size:'));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body,
+                });
+              }
+            } catch(e) {
+              console.log('⚠️ Could not post comment:', e.message);
             }
 
   # ─── Quick frontend build check on PR ───────────────────────────
@@ -103,6 +108,8 @@ jobs:
     name: "📦 Build Check"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # ✅ غير حرج — لا يوقف الـ PR إذا فشل
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

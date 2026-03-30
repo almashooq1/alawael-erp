@@ -187,6 +187,10 @@ const getNavigationItems = () => [
       { id: 'medical-records-pro', label: 'السجلات الطبية', path: '/medical-records-pro' },
       { id: 'transport-pro', label: 'النقل والمواصلات', path: '/transport-pro' },
       { id: 'compliance-pro', label: 'الامتثال التنظيمي', path: '/compliance-pro' },
+      { id: 'waste-management-pro', label: 'النفايات الطبية', path: '/waste-management-pro' },
+      { id: 'telemedicine-pro', label: 'الطب عن بُعد', path: '/telemedicine-pro' },
+      { id: 'clinical-trials-pro', label: 'الأبحاث السريرية', path: '/clinical-trials-pro' },
+      { id: 'patient-safety-pro', label: 'سلامة المرضى', path: '/patient-safety-pro' },
     ],
   },
 

@@ -184,6 +184,14 @@ const MedicalRecordsProDashboard = lazyWithRetry(
 );
 const TransportProDashboard = lazyWithRetry(() => import('./pages/TransportProDashboard'));
 const ComplianceProDashboard = lazyWithRetry(() => import('./pages/ComplianceProDashboard'));
+const WasteManagementProDashboard = lazyWithRetry(
+  () => import('./pages/WasteManagementProDashboard')
+);
+const TelemedicineProDashboard = lazyWithRetry(() => import('./pages/TelemedicineProDashboard'));
+const ClinicalTrialsProDashboard = lazyWithRetry(
+  () => import('./pages/ClinicalTrialsProDashboard')
+);
+const PatientSafetyProDashboard = lazyWithRetry(() => import('./pages/PatientSafetyProDashboard'));
 const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
 const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
 const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -474,6 +482,22 @@ function AppContent() {
                               />
                               <Route path="transport-pro" element={<TransportProDashboard />} />
                               <Route path="compliance-pro" element={<ComplianceProDashboard />} />
+                              <Route
+                                path="waste-management-pro"
+                                element={<WasteManagementProDashboard />}
+                              />
+                              <Route
+                                path="telemedicine-pro"
+                                element={<TelemedicineProDashboard />}
+                              />
+                              <Route
+                                path="clinical-trials-pro"
+                                element={<ClinicalTrialsProDashboard />}
+                              />
+                              <Route
+                                path="patient-safety-pro"
+                                element={<PatientSafetyProDashboard />}
+                              />
                             </Route>
                             {/* 404 - Not Found */}
                             <Route path="*" element={<NotFound />} />

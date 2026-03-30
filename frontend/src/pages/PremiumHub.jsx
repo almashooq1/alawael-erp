@@ -52,6 +52,10 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import FolderSharedIcon from '@mui/icons-material/FolderShared';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import GavelIcon from '@mui/icons-material/Gavel';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import ScienceIcon from '@mui/icons-material/Science';
+import ShieldIcon from '@mui/icons-material/Shield';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -578,6 +582,66 @@ const PREMIUM_DASHBOARDS = [
       { label: 'نسبة الامتثال', value: '٩٤.٧٪' },
       { label: 'معيار مُطبّق', value: '٢٤٨' },
       { label: 'تدقيق مكتمل', value: '٣٨' },
+    ],
+  },
+  {
+    id: 'waste-management-pro',
+    path: '/waste-management-pro',
+    title: 'لوحة النفايات الطبية',
+    subtitle: 'مراقبة النفايات والتخلص الآمن وإعادة التدوير والامتثال البيئي',
+    icon: DeleteSweepIcon,
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #22c55e 100%)',
+    glow: 'rgba(239,68,68,0.4)',
+    tags: ['النفايات', 'التدوير', 'البيئة'],
+    stats: [
+      { label: 'نفايات/شهر', value: '٢,٤٨٧ كجم' },
+      { label: 'إعادة تدوير', value: '٣٤٪' },
+      { label: 'الامتثال', value: '٩٦.٨٪' },
+    ],
+  },
+  {
+    id: 'telemedicine-pro',
+    path: '/telemedicine-pro',
+    title: 'لوحة الطب عن بُعد',
+    subtitle: 'إدارة الاستشارات الافتراضية والجلسات عن بُعد ومتابعة الجودة',
+    icon: VideocamIcon,
+    gradient: 'linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #22c55e 100%)',
+    glow: 'rgba(99,102,241,0.4)',
+    tags: ['عن بُعد', 'فيديو', 'استشارات'],
+    stats: [
+      { label: 'جلسة/شهر', value: '١,٢٤٨' },
+      { label: 'مريض نشط', value: '٨٤٧' },
+      { label: 'رضا المرضى', value: '٤.٧' },
+    ],
+  },
+  {
+    id: 'clinical-trials-pro',
+    path: '/clinical-trials-pro',
+    title: 'لوحة الأبحاث السريرية',
+    subtitle: 'إدارة التجارب السريرية والمشاركين والمنشورات العلمية',
+    icon: ScienceIcon,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #06b6d4 100%)',
+    glow: 'rgba(139,92,246,0.4)',
+    tags: ['الأبحاث', 'التجارب', 'المنشورات'],
+    stats: [
+      { label: 'دراسة نشطة', value: '٢٤' },
+      { label: 'مشارك', value: '١,٤٨٧' },
+      { label: 'نسبة الإنجاز', value: '٧٢٪' },
+    ],
+  },
+  {
+    id: 'patient-safety-pro',
+    path: '/patient-safety-pro',
+    title: 'لوحة سلامة المرضى',
+    subtitle: 'مراقبة الحوادث وأهداف السلامة ومؤشرات الأداء والإجراءات التصحيحية',
+    icon: ShieldIcon,
+    gradient: 'linear-gradient(135deg, #22c55e 0%, #06b6d4 50%, #6366f1 100%)',
+    glow: 'rgba(34,197,94,0.4)',
+    tags: ['السلامة', 'الحوادث', 'الامتثال'],
+    stats: [
+      { label: 'أيام بدون حوادث', value: '٤٧' },
+      { label: 'نسبة الامتثال', value: '٩٧.٢٪' },
+      { label: 'بلاغات/شهر', value: '١٢' },
     ],
   },
 ];

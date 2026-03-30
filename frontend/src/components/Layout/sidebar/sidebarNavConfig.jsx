@@ -183,6 +183,10 @@ const getNavigationItems = () => [
       { id: 'infection-control-pro', label: 'مكافحة العدوى', path: '/infection-control-pro' },
       { id: 'social-work-pro', label: 'الخدمة الاجتماعية', path: '/social-work-pro' },
       { id: 'maintenance-pro', label: 'الصيانة والمرافق', path: '/maintenance-pro' },
+      { id: 'blood-bank-pro', label: 'بنك الدم', path: '/blood-bank-pro' },
+      { id: 'medical-records-pro', label: 'السجلات الطبية', path: '/medical-records-pro' },
+      { id: 'transport-pro', label: 'النقل والمواصلات', path: '/transport-pro' },
+      { id: 'compliance-pro', label: 'الامتثال التنظيمي', path: '/compliance-pro' },
     ],
   },
 

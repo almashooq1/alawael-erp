@@ -48,6 +48,10 @@ import RestaurantIcon from '@mui/icons-material/Restaurant';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import BuildIcon from '@mui/icons-material/Build';
+import BloodtypeIcon from '@mui/icons-material/Bloodtype';
+import FolderSharedIcon from '@mui/icons-material/FolderShared';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import GavelIcon from '@mui/icons-material/Gavel';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -514,6 +518,66 @@ const PREMIUM_DASHBOARDS = [
       { label: 'أمر عمل نشط', value: '٦٧' },
       { label: 'نسبة الإنجاز', value: '٩١٪' },
       { label: 'صيانة وقائية', value: '٩٤٪' },
+    ],
+  },
+  {
+    id: 'blood-bank-pro',
+    path: '/blood-bank-pro',
+    title: 'لوحة بنك الدم',
+    subtitle: 'إدارة التبرعات والمخزون ونقل الدم والتحاليل',
+    icon: BloodtypeIcon,
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #8b5cf6 100%)',
+    glow: 'rgba(239,68,68,0.4)',
+    tags: ['بنك الدم', 'التبرعات', 'النقل'],
+    stats: [
+      { label: 'وحدة متاحة', value: '٨٤٧' },
+      { label: 'متبرع الشهر', value: '١٢٤' },
+      { label: 'سلامة الدم', value: '٩٨٪' },
+    ],
+  },
+  {
+    id: 'medical-records-pro',
+    path: '/medical-records-pro',
+    title: 'لوحة السجلات الطبية',
+    subtitle: 'إدارة الملفات الطبية والرقمنة والأرشفة والامتثال',
+    icon: FolderSharedIcon,
+    gradient: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 50%, #10b981 100%)',
+    glow: 'rgba(6,182,212,0.4)',
+    tags: ['السجلات', 'الرقمنة', 'الأرشفة'],
+    stats: [
+      { label: 'سجل فعّال', value: '٤,٨٤٢' },
+      { label: 'نسبة الرقمنة', value: '٨٧٪' },
+      { label: 'مستند اليوم', value: '١٨٧' },
+    ],
+  },
+  {
+    id: 'transport-pro',
+    path: '/transport-pro',
+    title: 'لوحة النقل والمواصلات',
+    subtitle: 'إدارة الأسطول والرحلات والسائقين واستهلاك الوقود',
+    icon: LocalShippingIcon,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #6366f1 100%)',
+    glow: 'rgba(245,158,11,0.4)',
+    tags: ['الأسطول', 'الرحلات', 'السائقون'],
+    stats: [
+      { label: 'مركبة نشطة', value: '٤٨' },
+      { label: 'رحلة اليوم', value: '١٢٤' },
+      { label: 'كفاءة الأسطول', value: '٩٢٪' },
+    ],
+  },
+  {
+    id: 'compliance-pro',
+    path: '/compliance-pro',
+    title: 'لوحة الامتثال التنظيمي',
+    subtitle: 'متابعة المعايير والتدقيق والمخالفات والإجراءات التصحيحية',
+    icon: GavelIcon,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 50%, #22c55e 100%)',
+    glow: 'rgba(139,92,246,0.4)',
+    tags: ['الامتثال', 'التدقيق', 'المعايير'],
+    stats: [
+      { label: 'نسبة الامتثال', value: '٩٤.٧٪' },
+      { label: 'معيار مُطبّق', value: '٢٤٨' },
+      { label: 'تدقيق مكتمل', value: '٣٨' },
     ],
   },
 ];

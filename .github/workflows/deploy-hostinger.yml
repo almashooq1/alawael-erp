@@ -167,35 +167,51 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          # Debug: verify key format
+          echo "Key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
+          echo "Key type: $(head -1 ~/.ssh/deploy_key)"
+          echo "VPS_USER length: ${#VPS_USER_VAL} chars"
+          echo "VPS_HOST length: ${#VPS_HOST_VAL} chars"
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo '✅ SSH test connection successful'" || {
+            echo "❌ SSH test failed, trying with verbose..."
+            ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo test" 2>&1 | tail -30
+            exit 1
+          }
           echo "✅ SSH configured"
+        env:
+          VPS_USER_VAL: ${{ secrets.VPS_USER }}
+          VPS_HOST_VAL: ${{ secrets.VPS_HOST }}
 
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
         run: |
-          SSH="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
           rsync -avz --delete \
+            -e "$SSH_CMD" \
             --exclude='node_modules' --exclude='.env' \
             --exclude='logs/' --exclude='uploads/' \
             --exclude='__tests__/' --exclude='*.test.js' \
             --exclude='coverage/' --exclude='data/' \
-            backend/ $SSH:${{ env.APP_DIR }}/backend/
+            backend/ $SSH_TARGET:${{ env.APP_DIR }}/backend/
 
-          ssh $SSH "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
+          $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
           echo "✅ Backend deployed"
 
       - name: Deploy frontend
         if: needs.build-frontend.result == 'success'
         run: |
-          SSH="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-          rsync -avz --delete frontend/build/ $SSH:${{ env.APP_DIR }}/frontend/build/
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
           echo "✅ Frontend deployed"
 
       - name: Restart services
         run: |
-          ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
             set -e
             cd /home/alawael/app
             if pm2 list 2>/dev/null | grep -q "alawael"; then
@@ -211,7 +227,7 @@ jobs:
           echo "⏳ Waiting for app..."
           sleep 15
           for i in 1 2 3 4 5; do
-            HEALTH=$(ssh "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            HEALTH=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
               "curl -sf http://127.0.0.1:5000/api/health 2>/dev/null" || echo "")
             if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
               echo "✅ Health check PASSED (attempt $i)"

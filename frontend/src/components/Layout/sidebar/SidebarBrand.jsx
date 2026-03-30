@@ -8,7 +8,7 @@
  * - Collapse toggle button
  */
 
-import { Box, Typography, IconButton, Tooltip, useTheme, alpha } from '@mui/material';
+import { Box, Typography, IconButton, Tooltip } from '@mui/material';
 import {
   MenuOpen as MenuOpenIcon,
   Menu as MenuIcon,
@@ -62,8 +62,6 @@ function BrandIcon({ size = 36 }) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SidebarBrand({ collapsed, onToggleCollapse }) {
-  const theme = useTheme();
-
   return (
     <Box
       sx={{

@@ -106,12 +106,12 @@ const NOTIF_COLORS = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onToggleTheme }) {
+export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode: _themeMode, onToggleTheme }) {
   const theme   = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, logout } = useAuth() || {};
+  const { currentUser, logout } = useAuth() || {};
 
   // Search
   const [searchOpen, setSearchOpen] = useState(false);
@@ -130,7 +130,7 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
   const [fullscreen, setFullscreen] = useState(false);
 
   // Language (demo)
-  const [lang, setLang] = useState('ar');
+  const [_lang, setLang] = useState('ar');
 
   // ── Breadcrumbs ─────────────────────────────────────────────────────────────
   const crumbs = location.pathname
@@ -163,11 +163,12 @@ export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onTog
     navigate('/login');
   }, [logout, navigate]);
 
-  const displayName = user?.name || user?.username || 'مدير النظام';
-  const displayRole = user?.role || 'مدير';
+  const displayName = currentUser?.name || currentUser?.username || 'مدير النظام';
+  const displayRole = currentUser?.role || 'مدير';
   const avatarLetter = displayName.charAt(0) || 'م';
 
-  const isDark = themeMode === 'dark';
+  const collapsed = sidebarCollapsed;
+  const isDark = theme.palette.mode === 'dark';
   const sb = theme.custom?.sidebar || {};
   const HEADER_HEIGHT = theme.custom?.header?.height || 64;
 

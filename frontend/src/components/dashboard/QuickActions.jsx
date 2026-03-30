@@ -18,7 +18,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import BadgeIcon from '@mui/icons-material/Badge';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 const QUICK_ACTIONS = [
   { label: 'مستخدم جديد', desc: 'إضافة مستخدم للنظام', icon: <PersonAddIcon />, path: '/admin-portal/users', gradient: gradients.primary, tag: null },
@@ -100,7 +100,7 @@ const QuickActions = () => {
                         : 'rgba(102,126,234,0.15)',
                       '& .action-arrow': {
                         opacity: 1,
-                        transform: 'translateX(4px)',
+                        transform: 'translateX(-4px)',
                       },
                     },
                   }}
@@ -161,14 +161,13 @@ const QuickActions = () => {
                   >
                     {action.desc}
                   </Typography>
-                  <ArrowBackIcon
+                  <ArrowForwardIcon
                     className="action-arrow"
                     sx={{
                       fontSize: 14,
                       color: 'text.disabled',
                       opacity: 0,
                       transition: 'all 0.3s',
-                      transform: 'translateX(0)',
                     }}
                   />
                 </ButtonBase>

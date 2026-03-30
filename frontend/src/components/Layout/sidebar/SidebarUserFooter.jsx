@@ -30,12 +30,12 @@ import { useAuth } from 'contexts/AuthContext';
 
 export default function SidebarUserFooter({ collapsed }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth() || {};
+  const { currentUser, logout } = useAuth() || {};
   const [menuAnchor, setMenuAnchor] = useState(null);
 
-  const displayName = user?.name || user?.username || 'مدير النظام';
-  const displayRole = user?.role || 'مدير';
-  const displayEmail = user?.email || '';
+  const displayName = currentUser?.name || currentUser?.username || 'مدير النظام';
+  const displayRole = currentUser?.role || 'مدير';
+  const displayEmail = currentUser?.email || '';
   const avatarLetter = displayName.charAt(0) || 'م';
 
   const handleLogout = async () => {
@@ -194,7 +194,7 @@ export default function SidebarUserFooter({ collapsed }) {
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.07)', color: '#FFFFFF' },
           }}
         >
-          <AccountCircleOutlined sx={{ fontSize: 17, mr: 1.5, opacity: 0.7 }} />
+          <AccountCircleOutlined sx={{ fontSize: 17, marginInlineEnd: 12, opacity: 0.7 }} />
           الملف الشخصي
         </MenuItem>
 
@@ -208,7 +208,7 @@ export default function SidebarUserFooter({ collapsed }) {
             '&:hover': { backgroundColor: 'rgba(255,255,255,0.07)', color: '#FFFFFF' },
           }}
         >
-          <SettingsOutlined sx={{ fontSize: 17, mr: 1.5, opacity: 0.7 }} />
+          <SettingsOutlined sx={{ fontSize: 17, marginInlineEnd: 12, opacity: 0.7 }} />
           الإعدادات
         </MenuItem>
 
@@ -225,7 +225,7 @@ export default function SidebarUserFooter({ collapsed }) {
             '&:hover': { backgroundColor: 'rgba(244,63,94,0.1)', color: '#FCA5A5' },
           }}
         >
-          <LogoutOutlined sx={{ fontSize: 17, mr: 1.5 }} />
+          <LogoutOutlined sx={{ fontSize: 17, marginInlineEnd: 12 }} />
           تسجيل الخروج
         </MenuItem>
       </Menu>

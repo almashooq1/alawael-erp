@@ -30,6 +30,8 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StarIcon from '@mui/icons-material/Star';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SpeedIcon from '@mui/icons-material/Speed';
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
+import BusinessIcon from '@mui/icons-material/Business';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -226,6 +228,36 @@ const PREMIUM_DASHBOARDS = [
       { label: 'مؤشر نشط', value: '٢٤' },
       { label: 'هدف مُنجز', value: '١٨' },
       { label: 'تحقق الأهداف', value: '٧٥٪' },
+    ],
+  },
+  {
+    id: 'rehab-pro',
+    path: '/rehab-pro',
+    title: 'لوحة التأهيل الشاملة',
+    subtitle: 'متابعة شاملة لبرامج إعادة التأهيل والمرضى',
+    icon: AccessibilityNewIcon,
+    gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #6366f1 100%)',
+    glow: 'rgba(16,185,129,0.4)',
+    tags: ['التأهيل', 'المرضى', 'البرامج'],
+    stats: [
+      { label: 'مريض نشط', value: '٤٩٤' },
+      { label: 'جلسة هذا الشهر', value: '٢٠٦٢' },
+      { label: 'معدل التحسّن', value: '٨٤٪' },
+    ],
+  },
+  {
+    id: 'admin-executive',
+    path: '/admin-executive',
+    title: 'لوحة الإدارة التنفيذية',
+    subtitle: 'متابعة القرارات والعمليات الإدارية',
+    icon: BusinessIcon,
+    gradient: 'linear-gradient(135deg, #7c3aed 0%, #dc2626 50%, #ea580c 100%)',
+    glow: 'rgba(124,58,237,0.4)',
+    tags: ['تنفيذية', 'القرارات', 'الأهداف'],
+    stats: [
+      { label: 'قرار صادر', value: '١٣٧' },
+      { label: 'مشروع نشط', value: '٢٤' },
+      { label: 'إنجاز الإجراءات', value: '٩٤٪' },
     ],
   },
 ];

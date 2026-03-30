@@ -165,6 +165,8 @@ const getNavigationItems = () => [
       { id: 'settings-pro', label: 'إعدادات النظام', path: '/settings-pro' },
       { id: 'therapist-pro', label: 'لوحة المعالج المتكاملة', path: '/therapist-pro' },
       { id: 'kpi-pro', label: 'مؤشرات الأداء الاستراتيجية', path: '/kpi-pro' },
+      { id: 'rehab-pro', label: 'لوحة التأهيل الشاملة', path: '/rehab-pro' },
+      { id: 'admin-executive', label: 'الإدارة التنفيذية', path: '/admin-executive' },
     ],
   },
 

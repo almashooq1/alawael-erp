@@ -17,6 +17,7 @@ import ProSidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
 import ProHeader from './ProHeader';
 import { DashboardSkeleton } from '../ui/LoadingSkeleton';
 import RouteErrorBoundary from '../shared/RouteErrorBoundary';
+import WatermarkBackground from '../shared/WatermarkBackground';
 
 const SIDEBAR_STATE_KEY = 'alawael-sidebar-collapsed';
 
@@ -56,8 +57,12 @@ const ProLayout = () => {
         flexDirection: 'row', // RTL: first child (sidebar) naturally goes to the right
         minHeight: '100vh',
         backgroundColor: theme.palette.background.default,
+        position: 'relative',
       }}
     >
+      {/* System Watermark */}
+      <WatermarkBackground zIndex={0} />
+
       {/* Sidebar */}
       <ProSidebar
         open={mobileOpen}

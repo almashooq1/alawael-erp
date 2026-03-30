@@ -128,19 +128,23 @@ export default function SimpleLogin() {
     setLoading(true);
     setError('');
     try {
-      await login?.(form.email, form.password);
-      showSnackbar?.('مرحباً بك في نظام مراكز الأوائل', 'success');
-      navigate('/dashboard', { replace: true });
+      const result = await login?.(form.email, form.password);
+      if (result?.success) {
+        showSnackbar?.('مرحباً بك في نظام مراكز الأوائل', 'success');
+        navigate('/dashboard', { replace: true });
+      } else {
+        const msg = result?.error || '';
+        if (msg.includes('Invalid') || msg.includes('credentials') || msg.includes('password') || msg.includes('غير صحيح')) {
+          setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+        } else if (msg.includes('network') || msg.includes('Network') || msg.includes('الاتصال')) {
+          setError('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت');
+        } else {
+          setError(msg || 'حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
+        }
+      }
     } catch (err) {
       logger.error('Login failed', err);
-      const msg = err?.response?.data?.message || err?.message || '';
-      if (msg.includes('Invalid') || msg.includes('credentials') || msg.includes('password')) {
-        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-      } else if (msg.includes('network') || msg.includes('Network')) {
-        setError('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت');
-      } else {
-        setError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
-      }
+      setError('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى');
     } finally {
       setLoading(false);
     }

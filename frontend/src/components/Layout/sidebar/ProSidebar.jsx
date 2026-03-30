@@ -86,27 +86,30 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
       component="nav"
       sx={{
         width: nav.width,
+        minWidth: nav.width,
         flexShrink: 0,
+        position: 'relative',
+        zIndex: (nav.theme.zIndex?.drawer || 1200) + 1,
         transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
       }}
     >
-      <Drawer
-        variant="permanent"
-        anchor="right"
+      <Box
         sx={{
-          '& .MuiDrawer-paper': {
-            width: nav.width,
-            border: 'none',
-            position: 'relative',
-            height: '100vh',
-            transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
-            overflowX: 'hidden',
-          },
+          position: 'fixed',
+          top: 0,
+          insetInlineStart: 0,
+          width: nav.width,
+          height: '100vh',
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
+          boxShadow: nav.theme.palette.mode === 'dark'
+            ? '-4px 0 24px rgba(0,0,0,0.4)'
+            : '-4px 0 24px rgba(0,0,0,0.08)',
         }}
-        open
       >
         {sidebarContent}
-      </Drawer>
+      </Box>
     </Box>
   );
 };

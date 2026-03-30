@@ -1,0 +1,235 @@
+﻿2026-03-30T12:00:08.0058831Z Current runner version: '2.333.0'
+2026-03-30T12:00:08.0089982Z ##[group]Runner Image Provisioner
+2026-03-30T12:00:08.0091473Z Hosted Compute Agent
+2026-03-30T12:00:08.0092422Z Version: 20260213.493
+2026-03-30T12:00:08.0093508Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-03-30T12:00:08.0094775Z Build Date: 2026-02-13T00:28:41Z
+2026-03-30T12:00:08.0096052Z Worker ID: {c449adcc-af87-4d2d-ba2e-6f691f959125}
+2026-03-30T12:00:08.0097200Z Azure Region: northcentralus
+2026-03-30T12:00:08.0098240Z ##[endgroup]
+2026-03-30T12:00:08.0100940Z ##[group]Operating System
+2026-03-30T12:00:08.0101911Z Ubuntu
+2026-03-30T12:00:08.0102722Z 24.04.4
+2026-03-30T12:00:08.0103482Z LTS
+2026-03-30T12:00:08.0104382Z ##[endgroup]
+2026-03-30T12:00:08.0105401Z ##[group]Runner Image
+2026-03-30T12:00:08.0106536Z Image: ubuntu-24.04
+2026-03-30T12:00:08.0107455Z Version: 20260323.65.1
+2026-03-30T12:00:08.0109682Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260323.65/images/ubuntu/Ubuntu2404-Readme.md
+2026-03-30T12:00:08.0112602Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260323.65
+2026-03-30T12:00:08.0114529Z ##[endgroup]
+2026-03-30T12:00:08.0116572Z ##[group]GITHUB_TOKEN Permissions
+2026-03-30T12:00:08.0119491Z Contents: read
+2026-03-30T12:00:08.0120593Z Deployments: write
+2026-03-30T12:00:08.0121576Z Metadata: read
+2026-03-30T12:00:08.0122632Z ##[endgroup]
+2026-03-30T12:00:08.0125349Z Secret source: Actions
+2026-03-30T12:00:08.0126880Z Prepare workflow directory
+2026-03-30T12:00:08.0588027Z Prepare all required actions
+2026-03-30T12:00:08.0644273Z Getting action download info
+2026-03-30T12:00:08.3772261Z Download action repository 'actions/checkout@v6' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-03-30T12:00:08.5006988Z Download action repository 'actions/download-artifact@v8' (SHA:3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c)
+2026-03-30T12:00:09.0778050Z Complete job name: 🚀 Deploy to VPS
+2026-03-30T12:00:09.1501441Z ##[group]Run actions/checkout@v6
+2026-03-30T12:00:09.1502391Z with:
+2026-03-30T12:00:09.1502858Z   repository: almashooq1/alawael-erp
+2026-03-30T12:00:09.1503592Z   token: ***
+2026-03-30T12:00:09.1504037Z   ssh-strict: true
+2026-03-30T12:00:09.1504477Z   ssh-user: git
+2026-03-30T12:00:09.1504937Z   persist-credentials: true
+2026-03-30T12:00:09.1505449Z   clean: true
+2026-03-30T12:00:09.1505900Z   sparse-checkout-cone-mode: true
+2026-03-30T12:00:09.1506427Z   fetch-depth: 1
+2026-03-30T12:00:09.1506863Z   fetch-tags: false
+2026-03-30T12:00:09.1507313Z   show-progress: true
+2026-03-30T12:00:09.1507765Z   lfs: false
+2026-03-30T12:00:09.1508193Z   submodules: false
+2026-03-30T12:00:09.1508673Z   set-safe-directory: true
+2026-03-30T12:00:09.1509390Z env:
+2026-03-30T12:00:09.1509840Z   APP_DIR: /home/alawael/app
+2026-03-30T12:00:09.1510570Z   NODE_VERSION: 20
+2026-03-30T12:00:09.1511027Z   DEPLOY_DOMAIN: alaweal.org
+2026-03-30T12:00:09.1511520Z ##[endgroup]
+2026-03-30T12:00:09.2419806Z Syncing repository: almashooq1/alawael-erp
+2026-03-30T12:00:09.2422187Z ##[group]Getting Git version info
+2026-03-30T12:00:09.2423245Z Working directory is '/home/runner/work/alawael-erp/alawael-erp'
+2026-03-30T12:00:09.2424325Z [command]/usr/bin/git version
+2026-03-30T12:00:09.2455253Z git version 2.53.0
+2026-03-30T12:00:09.2478458Z ##[endgroup]
+2026-03-30T12:00:09.2492582Z Temporarily overriding HOME='/home/runner/work/_temp/8785d6c2-a5bd-4532-ad36-7fada06ae848' before making global git config changes
+2026-03-30T12:00:09.2494123Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-30T12:00:09.2497325Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/alawael-erp/alawael-erp
+2026-03-30T12:00:09.2529645Z Deleting the contents of '/home/runner/work/alawael-erp/alawael-erp'
+2026-03-30T12:00:09.2534121Z ##[group]Initializing the repository
+2026-03-30T12:00:09.2538885Z [command]/usr/bin/git init /home/runner/work/alawael-erp/alawael-erp
+2026-03-30T12:00:09.2637585Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-03-30T12:00:09.2639864Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-03-30T12:00:09.2642113Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-03-30T12:00:09.2643668Z hint: call:
+2026-03-30T12:00:09.2644503Z hint:
+2026-03-30T12:00:09.2645534Z hint: 	git config --global init.defaultBranch <name>
+2026-03-30T12:00:09.2646816Z hint:
+2026-03-30T12:00:09.2647897Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-03-30T12:00:09.2649827Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-03-30T12:00:09.2651594Z hint:
+2026-03-30T12:00:09.2652434Z hint: 	git branch -m <name>
+2026-03-30T12:00:09.2653336Z hint:
+2026-03-30T12:00:09.2654456Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-03-30T12:00:09.2656411Z Initialized empty Git repository in /home/runner/work/alawael-erp/alawael-erp/.git/
+2026-03-30T12:00:09.2658950Z [command]/usr/bin/git remote add origin https://github.com/almashooq1/alawael-erp
+2026-03-30T12:00:09.2682751Z ##[endgroup]
+2026-03-30T12:00:09.2684164Z ##[group]Disabling automatic garbage collection
+2026-03-30T12:00:09.2686657Z [command]/usr/bin/git config --local gc.auto 0
+2026-03-30T12:00:09.2714589Z ##[endgroup]
+2026-03-30T12:00:09.2716069Z ##[group]Setting up auth
+2026-03-30T12:00:09.2717186Z Removing SSH command configuration
+2026-03-30T12:00:09.2722689Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-30T12:00:09.2753954Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-30T12:00:09.3024904Z Removing HTTP extra header
+2026-03-30T12:00:09.3031181Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-30T12:00:09.3061355Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-30T12:00:09.3268122Z Removing includeIf entries pointing to credentials config files
+2026-03-30T12:00:09.3273833Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-30T12:00:09.3302911Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-30T12:00:09.3514852Z [command]/usr/bin/git config --file /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-03-30T12:00:09.3549190Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git.path /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:09.3579044Z [command]/usr/bin/git config --local includeIf.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:09.3608706Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:09.3639378Z [command]/usr/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:09.3665691Z ##[endgroup]
+2026-03-30T12:00:09.3667168Z ##[group]Fetching the repository
+2026-03-30T12:00:09.3675656Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +64d31de671f583a806fe6b6a12d96d230030596e:refs/remotes/origin/main
+2026-03-30T12:00:13.1374015Z From https://github.com/almashooq1/alawael-erp
+2026-03-30T12:00:13.1375905Z  * [new ref]         64d31de671f583a806fe6b6a12d96d230030596e -> origin/main
+2026-03-30T12:00:13.1406888Z [command]/usr/bin/git branch --list --remote origin/main
+2026-03-30T12:00:13.1429740Z   origin/main
+2026-03-30T12:00:13.1437417Z [command]/usr/bin/git rev-parse refs/remotes/origin/main
+2026-03-30T12:00:13.1458737Z 64d31de671f583a806fe6b6a12d96d230030596e
+2026-03-30T12:00:13.1464380Z ##[endgroup]
+2026-03-30T12:00:13.1465224Z ##[group]Determining the checkout info
+2026-03-30T12:00:13.1466031Z ##[endgroup]
+2026-03-30T12:00:13.1468855Z [command]/usr/bin/git sparse-checkout disable
+2026-03-30T12:00:13.1504938Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-03-30T12:00:13.1530806Z ##[group]Checking out the ref
+2026-03-30T12:00:13.1534928Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-03-30T12:00:13.9991117Z Switched to a new branch 'main'
+2026-03-30T12:00:13.9993553Z branch 'main' set up to track 'origin/main'.
+2026-03-30T12:00:14.0045929Z ##[endgroup]
+2026-03-30T12:00:14.0086386Z [command]/usr/bin/git log -1 --format=%H
+2026-03-30T12:00:14.0112797Z 64d31de671f583a806fe6b6a12d96d230030596e
+2026-03-30T12:00:14.0323129Z ##[group]Run MISSING=0
+2026-03-30T12:00:14.0323438Z [36;1mMISSING=0[0m
+2026-03-30T12:00:14.0324020Z [36;1m[ -z "***" ]     && echo "❌ Missing: VPS_HOST"     && MISSING=1[0m
+2026-03-30T12:00:14.0324513Z [36;1m[ -z "***" ]     && echo "❌ Missing: VPS_USER"     && MISSING=1[0m
+2026-03-30T12:00:14.0324927Z [36;1m[ -z "***" ]  && echo "❌ Missing: VPS_SSH_KEY"  && MISSING=1[0m
+2026-03-30T12:00:14.0325255Z [36;1mif [ "$MISSING" = "1" ]; then[0m
+2026-03-30T12:00:14.0325496Z [36;1m  echo ""[0m
+2026-03-30T12:00:14.0325765Z [36;1m  echo "⚙️  Add secrets to Environment 'VPS_HOST' at:"[0m
+2026-03-30T12:00:14.0326206Z [36;1m  echo "   Settings → Environments → VPS_HOST → Add secret"[0m
+2026-03-30T12:00:14.0326523Z [36;1m  exit 1[0m
+2026-03-30T12:00:14.0326702Z [36;1mfi[0m
+2026-03-30T12:00:14.0326916Z [36;1mecho "✅ All secrets present"[0m
+2026-03-30T12:00:14.0357287Z shell: /usr/bin/bash -e {0}
+2026-03-30T12:00:14.0357547Z env:
+2026-03-30T12:00:14.0357799Z   APP_DIR: /home/alawael/app
+2026-03-30T12:00:14.0358052Z   NODE_VERSION: 20
+2026-03-30T12:00:14.0358260Z   DEPLOY_DOMAIN: alaweal.org
+2026-03-30T12:00:14.0358500Z ##[endgroup]
+2026-03-30T12:00:14.0425431Z ✅ All secrets present
+2026-03-30T12:00:14.0509154Z ##[group]Run actions/download-artifact@v8
+2026-03-30T12:00:14.0509463Z with:
+2026-03-30T12:00:14.0509762Z   name: frontend-build-prod-64d31de671f583a806fe6b6a12d96d230030596e
+2026-03-30T12:00:14.0510394Z   path: frontend/build/
+2026-03-30T12:00:14.0510643Z   merge-multiple: false
+2026-03-30T12:00:14.0510872Z   repository: almashooq1/alawael-erp
+2026-03-30T12:00:14.0511121Z   run-id: 23743438229
+2026-03-30T12:00:14.0511328Z   skip-decompress: false
+2026-03-30T12:00:14.0511551Z   digest-mismatch: error
+2026-03-30T12:00:14.0511750Z env:
+2026-03-30T12:00:14.0511931Z   APP_DIR: /home/alawael/app
+2026-03-30T12:00:14.0512153Z   NODE_VERSION: 20
+2026-03-30T12:00:14.0512380Z   DEPLOY_DOMAIN: alaweal.org
+2026-03-30T12:00:14.0512598Z ##[endgroup]
+2026-03-30T12:00:14.1816974Z Downloading single artifact
+2026-03-30T12:00:14.3439308Z Preparing to download the following artifacts:
+2026-03-30T12:00:14.3441227Z - frontend-build-prod-64d31de671f583a806fe6b6a12d96d230030596e (ID: 6177399107, Size: 5267202, Expected Digest: sha256:1edea422ee8f7189bd98929f60b0ac699e6b63d0c6af3bd8cbfc922a0313e7e0)
+2026-03-30T12:00:14.5454169Z Redirecting to blob download url: https://productionresultssa19.blob.core.windows.net/actions-results/cc29a2c7-81fa-4090-aacb-ef7b4bef3a87/workflow-job-run-7a4661a7-56f5-52a1-a496-3a2f6bcf8492/artifacts/d2f8ccfb57bcfa2988cd25a4f889a78ecc1d1a2d748ae6c463cd1e9965ac7432.zip
+2026-03-30T12:00:14.5455750Z Starting download of artifact to: /home/runner/work/alawael-erp/alawael-erp/frontend/build
+2026-03-30T12:00:14.6935417Z (node:2295) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-03-30T12:00:14.6937597Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-30T12:00:15.1756230Z SHA256 digest of downloaded artifact is 1edea422ee8f7189bd98929f60b0ac699e6b63d0c6af3bd8cbfc922a0313e7e0
+2026-03-30T12:00:15.1758658Z Artifact download completed successfully.
+2026-03-30T12:00:15.1759417Z Total of 1 artifact(s) downloaded
+2026-03-30T12:00:15.1762837Z Download artifact has finished successfully
+2026-03-30T12:00:15.1906098Z ##[group]Run mkdir -p ~/.ssh
+2026-03-30T12:00:15.1906413Z [36;1mmkdir -p ~/.ssh[0m
+2026-03-30T12:00:15.1906766Z [36;1mecho "***" > ~/.ssh/id_rsa[0m
+2026-03-30T12:00:15.1907022Z [36;1mchmod 600 ~/.ssh/id_rsa[0m
+2026-03-30T12:00:15.1907370Z [36;1mssh-keyscan -H "***" >> ~/.ssh/known_hosts 2>/dev/null[0m
+2026-03-30T12:00:15.1907704Z [36;1mecho "✅ SSH configured"[0m
+2026-03-30T12:00:15.1937043Z shell: /usr/bin/bash -e {0}
+2026-03-30T12:00:15.1937442Z env:
+2026-03-30T12:00:15.1937759Z   APP_DIR: /home/alawael/app
+2026-03-30T12:00:15.1938170Z   NODE_VERSION: 20
+2026-03-30T12:00:15.1938474Z   DEPLOY_DOMAIN: alaweal.org
+2026-03-30T12:00:15.1938704Z ##[endgroup]
+2026-03-30T12:00:16.9379808Z ✅ SSH configured
+2026-03-30T12:00:16.9428178Z ##[group]Run SSH="***@***"
+2026-03-30T12:00:16.9428550Z [36;1mSSH="***@***"[0m
+2026-03-30T12:00:16.9428788Z [36;1mrsync -avz --delete \[0m
+2026-03-30T12:00:16.9429110Z [36;1m  --exclude='node_modules' --exclude='.env' \[0m
+2026-03-30T12:00:16.9429467Z [36;1m  --exclude='logs/' --exclude='uploads/' \[0m
+2026-03-30T12:00:16.9429820Z [36;1m  --exclude='__tests__/' --exclude='*.test.js' \[0m
+2026-03-30T12:00:16.9430526Z [36;1m  --exclude='coverage/' --exclude='data/' \[0m
+2026-03-30T12:00:16.9430949Z [36;1m  backend/ $SSH:/home/alawael/app/backend/[0m
+2026-03-30T12:00:16.9431224Z [36;1m[0m
+2026-03-30T12:00:16.9431615Z [36;1mssh $SSH "cd /home/alawael/app/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"[0m
+2026-03-30T12:00:16.9432085Z [36;1mecho "✅ Backend deployed"[0m
+2026-03-30T12:00:16.9457539Z shell: /usr/bin/bash -e {0}
+2026-03-30T12:00:16.9457772Z env:
+2026-03-30T12:00:16.9457965Z   APP_DIR: /home/alawael/app
+2026-03-30T12:00:16.9458307Z   NODE_VERSION: 20
+2026-03-30T12:00:16.9458513Z   DEPLOY_DOMAIN: alaweal.org
+2026-03-30T12:00:16.9458735Z ##[endgroup]
+2026-03-30T12:00:17.9456504Z Load key "/home/runner/.ssh/id_rsa": error in libcrypto
+2026-03-30T12:00:18.0659477Z Permission denied, please try again.
+2026-03-30T12:00:18.1848865Z Permission denied, please try again.
+2026-03-30T12:00:18.3041506Z root@***@***: Permission denied (publickey,password).
+2026-03-30T12:00:18.3047754Z rsync: connection unexpectedly closed (0 bytes received so far) [sender]
+2026-03-30T12:00:18.3048953Z rsync error: unexplained error (code 255) at io.c(232) [sender=3.2.7]
+2026-03-30T12:00:18.3065146Z ##[error]Process completed with exit code 255.
+2026-03-30T12:00:18.3175688Z Post job cleanup.
+2026-03-30T12:00:18.3929287Z [command]/usr/bin/git version
+2026-03-30T12:00:18.3964430Z git version 2.53.0
+2026-03-30T12:00:18.4008499Z Temporarily overriding HOME='/home/runner/work/_temp/e3b9197d-001d-41d7-b73e-05cadd8f35d7' before making global git config changes
+2026-03-30T12:00:18.4009864Z Adding repository directory to the temporary git global config as a safe directory
+2026-03-30T12:00:18.4014748Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/alawael-erp/alawael-erp
+2026-03-30T12:00:18.4043701Z Removing SSH command configuration
+2026-03-30T12:00:18.4049761Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-03-30T12:00:18.4082809Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-03-30T12:00:18.4307449Z Removing HTTP extra header
+2026-03-30T12:00:18.4311727Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-03-30T12:00:18.4343767Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-03-30T12:00:18.4560061Z Removing includeIf entries pointing to credentials config files
+2026-03-30T12:00:18.4566073Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-03-30T12:00:18.4588348Z includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git.path
+2026-03-30T12:00:18.4589393Z includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git/worktrees/*.path
+2026-03-30T12:00:18.4590444Z includeif.gitdir:/github/workspace/.git.path
+2026-03-30T12:00:18.4591081Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-03-30T12:00:18.4597991Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git.path
+2026-03-30T12:00:18.4618519Z /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4628288Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git.path /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4661315Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git/worktrees/*.path
+2026-03-30T12:00:18.4682035Z /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4690860Z [command]/usr/bin/git config --local --unset includeif.gitdir:/home/runner/work/alawael-erp/alawael-erp/.git/worktrees/*.path /home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4721103Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-03-30T12:00:18.4742213Z /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4751042Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4780450Z [command]/usr/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-03-30T12:00:18.4800042Z /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4809194Z [command]/usr/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config
+2026-03-30T12:00:18.4838529Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-03-30T12:00:18.5052312Z Removing credentials config '/home/runner/work/_temp/git-credentials-e19aa238-0d8c-424a-ae1b-baa2a640e145.config'
+2026-03-30T12:00:18.5178525Z Evaluate and set environment url
+2026-03-30T12:00:18.5181448Z Evaluated environment url: https://alaweal.org
+2026-03-30T12:00:18.5182278Z Cleaning up orphan processes

@@ -1,0 +1,181 @@
+{
+  "total_count": 2,
+  "jobs": [
+    {
+      "id": 69165900318,
+      "run_id": 23743438229,
+      "workflow_name": "🚀 Deploy to Production",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/almashooq1/alawael-erp/actions/runs/23743438229",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOPqAPR88AAAAQGpviHg",
+      "head_sha": "64d31de671f583a806fe6b6a12d96d230030596e",
+      "url": "https://api.github.com/repos/almashooq1/alawael-erp/actions/jobs/69165900318",
+      "html_url": "https://github.com/almashooq1/alawael-erp/actions/runs/23743438229/job/69165900318",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-03-30T11:55:29Z",
+      "started_at": "2026-03-30T11:55:32Z",
+      "completed_at": "2026-03-30T11:55:42Z",
+      "name": "🔍 Pre-flight",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-03-30T11:55:32Z",
+          "completed_at": "2026-03-30T11:55:33Z"
+        },
+        {
+          "name": "Confirm deployment intent",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-03-30T11:55:33Z",
+          "completed_at": "2026-03-30T11:55:33Z"
+        },
+        {
+          "name": "Run actions/checkout@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-03-30T11:55:33Z",
+          "completed_at": "2026-03-30T11:55:39Z"
+        },
+        {
+          "name": "Gather info",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-03-30T11:55:39Z",
+          "completed_at": "2026-03-30T11:55:39Z"
+        },
+        {
+          "name": "Determine deploy targets",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-03-30T11:55:39Z",
+          "completed_at": "2026-03-30T11:55:39Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-03-30T11:55:39Z",
+          "completed_at": "2026-03-30T11:55:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-03-30T11:55:39Z",
+          "completed_at": "2026-03-30T11:55:39Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/almashooq1/alawael-erp/check-runs/69165900318",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000009104,
+      "runner_name": "GitHub Actions 1000009104",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 69165926232,
+      "run_id": 23743438229,
+      "workflow_name": "🚀 Deploy to Production",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/almashooq1/alawael-erp/actions/runs/23743438229",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOPqAPR88AAAAQGpxHWA",
+      "head_sha": "64d31de671f583a806fe6b6a12d96d230030596e",
+      "url": "https://api.github.com/repos/almashooq1/alawael-erp/actions/jobs/69165926232",
+      "html_url": "https://github.com/almashooq1/alawael-erp/actions/runs/23743438229/job/69165926232",
+      "status": "in_progress",
+      "conclusion": null,
+      "created_at": "2026-03-30T11:55:42Z",
+      "started_at": "2026-03-30T11:55:44Z",
+      "completed_at": null,
+      "name": "📦 Build Frontend",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-03-30T11:55:45Z",
+          "completed_at": "2026-03-30T11:55:46Z"
+        },
+        {
+          "name": "Run actions/checkout@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-03-30T11:55:46Z",
+          "completed_at": "2026-03-30T11:55:56Z"
+        },
+        {
+          "name": "Run actions/setup-node@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-03-30T11:55:56Z",
+          "completed_at": "2026-03-30T11:55:58Z"
+        },
+        {
+          "name": "Install",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-03-30T11:55:58Z",
+          "completed_at": "2026-03-30T11:56:41Z"
+        },
+        {
+          "name": "Build",
+          "status": "in_progress",
+          "conclusion": null,
+          "number": 5,
+          "started_at": "2026-03-30T11:56:41Z",
+          "completed_at": null
+        },
+        {
+          "name": "Upload artifact",
+          "status": "pending",
+          "conclusion": null,
+          "number": 6,
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "name": "Post Run actions/setup-node@v6",
+          "status": "pending",
+          "conclusion": null,
+          "number": 11,
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "name": "Post Run actions/checkout@v6",
+          "status": "pending",
+          "conclusion": null,
+          "number": 12,
+          "started_at": null,
+          "completed_at": null
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/almashooq1/alawael-erp/check-runs/69165926232",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000009105,
+      "runner_name": "GitHub Actions 1000009105",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

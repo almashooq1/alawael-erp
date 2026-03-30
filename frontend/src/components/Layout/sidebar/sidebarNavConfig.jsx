@@ -175,6 +175,10 @@ const getNavigationItems = () => [
       { id: 'crm-pro', label: 'علاقات العملاء', path: '/crm-pro' },
       { id: 'operations-pro', label: 'العمليات والتشغيل', path: '/operations-pro' },
       { id: 'nursing-pro', label: 'التمريض والرعاية', path: '/nursing-pro' },
+      { id: 'procurement-pro', label: 'المشتريات والعقود', path: '/procurement-pro' },
+      { id: 'radiology-pro', label: 'الأشعة والتصوير', path: '/radiology-pro' },
+      { id: 'emergency-pro', label: 'الطوارئ والإسعاف', path: '/emergency-pro' },
+      { id: 'risk-pro', label: 'إدارة المخاطر', path: '/risk-pro' },
     ],
   },
 

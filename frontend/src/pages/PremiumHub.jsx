@@ -40,6 +40,10 @@ import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import RadiologyIcon from '@mui/icons-material/Scanner';
+import EmergencyIcon from '@mui/icons-material/LocalHospital';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -386,6 +390,66 @@ const PREMIUM_DASHBOARDS = [
       { label: 'ممرض/ة نشط', value: '٨٦' },
       { label: 'مريض تحت الرعاية', value: '٣٤٨' },
       { label: 'رضا المرضى', value: '٩٥٪' },
+    ],
+  },
+  {
+    id: 'procurement-pro',
+    path: '/procurement-pro',
+    title: 'لوحة المشتريات والعقود',
+    subtitle: 'إدارة طلبات الشراء والموردين والعقود والتوفير',
+    icon: ShoppingCartIcon,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #f59e0b 50%, #22c55e 100%)',
+    glow: 'rgba(139,92,246,0.4)',
+    tags: ['المشتريات', 'الموردون', 'العقود'],
+    stats: [
+      { label: 'طلب شراء', value: '٢٤٧' },
+      { label: 'عقد نشط', value: '٦٤' },
+      { label: 'مورد', value: '١٨٦' },
+    ],
+  },
+  {
+    id: 'radiology-pro',
+    path: '/radiology-pro',
+    title: 'لوحة الأشعة والتصوير الطبي',
+    subtitle: 'متابعة الفحوصات والتقارير وأداء الأجهزة',
+    icon: RadiologyIcon,
+    gradient: 'linear-gradient(135deg, #06b6d4 0%, #8b5cf6 50%, #ec4899 100%)',
+    glow: 'rgba(6,182,212,0.4)',
+    tags: ['الأشعة', 'التصوير', 'التقارير'],
+    stats: [
+      { label: 'فحص اليوم', value: '١٢٤' },
+      { label: 'تقرير جاهز', value: '٩٨' },
+      { label: 'دقة التشخيص', value: '٩٦٪' },
+    ],
+  },
+  {
+    id: 'emergency-pro',
+    path: '/emergency-pro',
+    title: 'لوحة الطوارئ والإسعاف',
+    subtitle: 'متابعة حية للحالات الطارئة والإسعاف والأسرّة',
+    icon: EmergencyIcon,
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #f59e0b 50%, #06b6d4 100%)',
+    glow: 'rgba(239,68,68,0.4)',
+    tags: ['الطوارئ', 'الإسعاف', 'الفرز'],
+    stats: [
+      { label: 'حالة اليوم', value: '٨٧' },
+      { label: 'إسعاف نشط', value: '٦' },
+      { label: 'متوسط الانتظار', value: '١٨ د' },
+    ],
+  },
+  {
+    id: 'risk-pro',
+    path: '/risk-pro',
+    title: 'لوحة إدارة المخاطر',
+    subtitle: 'تحديد وتقييم ومتابعة المخاطر المؤسسية',
+    icon: WarningAmberIcon,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #8b5cf6 100%)',
+    glow: 'rgba(245,158,11,0.4)',
+    tags: ['المخاطر', 'التقييم', 'التصحيحية'],
+    stats: [
+      { label: 'خطر نشط', value: '٣٤' },
+      { label: 'خطر حرج', value: '٧' },
+      { label: 'مؤشر المخاطر', value: '٧٢٪' },
     ],
   },
 ];

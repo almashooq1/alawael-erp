@@ -143,7 +143,7 @@
     "stripe": "^20.4.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
-    "twilio": "^5.13.0",
+    "twilio": "^5.13.1",
     "uuid": "^13.0.0",
     "winston": "3.19.0"
   },

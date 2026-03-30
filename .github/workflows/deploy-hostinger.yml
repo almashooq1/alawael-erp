@@ -59,19 +59,6 @@ jobs:
           fi
           echo "✅ Deployment confirmed"
 
-      - name: Check required secrets
-        run: |
-          MISSING=0
-          [ -z "${{ secrets.VPS_HOST }}" ]     && echo "❌ Missing: VPS_HOST"     && MISSING=1
-          [ -z "${{ secrets.VPS_USER }}" ]     && echo "❌ Missing: VPS_USER"     && MISSING=1
-          [ -z "${{ secrets.VPS_SSH_KEY }}" ]  && echo "❌ Missing: VPS_SSH_KEY"  && MISSING=1
-          if [ "$MISSING" = "1" ]; then
-            echo ""
-            echo "⚙️  Configure secrets at: Settings → Secrets → Actions"
-            exit 1
-          fi
-          echo "✅ All secrets present"
-
       - uses: actions/checkout@v6
         with:
           fetch-depth: 2
@@ -151,10 +138,24 @@ jobs:
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
     timeout-minutes: 20
     environment:
-      name: production
+      name: VPS_HOST
       url: https://alaweal.org
     steps:
       - uses: actions/checkout@v6
+
+      - name: Check required secrets
+        run: |
+          MISSING=0
+          [ -z "${{ secrets.VPS_HOST }}" ]     && echo "❌ Missing: VPS_HOST"     && MISSING=1
+          [ -z "${{ secrets.VPS_USER }}" ]     && echo "❌ Missing: VPS_USER"     && MISSING=1
+          [ -z "${{ secrets.VPS_SSH_KEY }}" ]  && echo "❌ Missing: VPS_SSH_KEY"  && MISSING=1
+          if [ "$MISSING" = "1" ]; then
+            echo ""
+            echo "⚙️  Add secrets to Environment 'VPS_HOST' at:"
+            echo "   Settings → Environments → VPS_HOST → Add secret"
+            exit 1
+          fi
+          echo "✅ All secrets present"
 
       - name: Download frontend build
         if: needs.build-frontend.result == 'success'

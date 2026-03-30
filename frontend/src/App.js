@@ -172,6 +172,12 @@ const ProcurementProDashboard = lazyWithRetry(() => import('./pages/ProcurementP
 const RadiologyProDashboard = lazyWithRetry(() => import('./pages/RadiologyProDashboard'));
 const EmergencyProDashboard = lazyWithRetry(() => import('./pages/EmergencyProDashboard'));
 const RiskProDashboard = lazyWithRetry(() => import('./pages/RiskProDashboard'));
+const NutritionProDashboard = lazyWithRetry(() => import('./pages/NutritionProDashboard'));
+const InfectionControlProDashboard = lazyWithRetry(
+  () => import('./pages/InfectionControlProDashboard')
+);
+const SocialWorkProDashboard = lazyWithRetry(() => import('./pages/SocialWorkProDashboard'));
+const MaintenanceProDashboard = lazyWithRetry(() => import('./pages/MaintenanceProDashboard'));
 const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
 const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
 const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -448,6 +454,13 @@ function AppContent() {
                               <Route path="radiology-pro" element={<RadiologyProDashboard />} />
                               <Route path="emergency-pro" element={<EmergencyProDashboard />} />
                               <Route path="risk-pro" element={<RiskProDashboard />} />
+                              <Route path="nutrition-pro" element={<NutritionProDashboard />} />
+                              <Route
+                                path="infection-control-pro"
+                                element={<InfectionControlProDashboard />}
+                              />
+                              <Route path="social-work-pro" element={<SocialWorkProDashboard />} />
+                              <Route path="maintenance-pro" element={<MaintenanceProDashboard />} />
                             </Route>
                             {/* 404 - Not Found */}
                             <Route path="*" element={<NotFound />} />

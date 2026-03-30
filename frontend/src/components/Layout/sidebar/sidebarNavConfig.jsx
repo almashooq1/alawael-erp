@@ -179,6 +179,10 @@ const getNavigationItems = () => [
       { id: 'radiology-pro', label: 'الأشعة والتصوير', path: '/radiology-pro' },
       { id: 'emergency-pro', label: 'الطوارئ والإسعاف', path: '/emergency-pro' },
       { id: 'risk-pro', label: 'إدارة المخاطر', path: '/risk-pro' },
+      { id: 'nutrition-pro', label: 'التغذية والمطبخ', path: '/nutrition-pro' },
+      { id: 'infection-control-pro', label: 'مكافحة العدوى', path: '/infection-control-pro' },
+      { id: 'social-work-pro', label: 'الخدمة الاجتماعية', path: '/social-work-pro' },
+      { id: 'maintenance-pro', label: 'الصيانة والمرافق', path: '/maintenance-pro' },
     ],
   },
 

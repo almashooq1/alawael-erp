@@ -44,6 +44,10 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import RadiologyIcon from '@mui/icons-material/Scanner';
 import EmergencyIcon from '@mui/icons-material/LocalHospital';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
+import CoronavirusIcon from '@mui/icons-material/Coronavirus';
+import Diversity3Icon from '@mui/icons-material/Diversity3';
+import BuildIcon from '@mui/icons-material/Build';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -450,6 +454,66 @@ const PREMIUM_DASHBOARDS = [
       { label: 'خطر نشط', value: '٣٤' },
       { label: 'خطر حرج', value: '٧' },
       { label: 'مؤشر المخاطر', value: '٧٢٪' },
+    ],
+  },
+  {
+    id: 'nutrition-pro',
+    path: '/nutrition-pro',
+    title: 'لوحة التغذية والمطبخ',
+    subtitle: 'إدارة الوجبات والحمية والمخزون الغذائي',
+    icon: RestaurantIcon,
+    gradient: 'linear-gradient(135deg, #22c55e 0%, #f59e0b 50%, #ef4444 100%)',
+    glow: 'rgba(34,197,94,0.4)',
+    tags: ['التغذية', 'الوجبات', 'الحمية'],
+    stats: [
+      { label: 'وجبة يومية', value: '٨٤٧' },
+      { label: 'حمية خاصة', value: '١٢٤' },
+      { label: 'رضا المرضى', value: '٩٢٪' },
+    ],
+  },
+  {
+    id: 'infection-control-pro',
+    path: '/infection-control-pro',
+    title: 'لوحة مكافحة العدوى',
+    subtitle: 'مراقبة العدوى والتعقيم ومعايير السلامة',
+    icon: CoronavirusIcon,
+    gradient: 'linear-gradient(135deg, #ef4444 0%, #8b5cf6 50%, #06b6d4 100%)',
+    glow: 'rgba(239,68,68,0.4)',
+    tags: ['العدوى', 'التعقيم', 'الامتثال'],
+    stats: [
+      { label: 'حالة نشطة', value: '١٢' },
+      { label: 'نسبة الامتثال', value: '٩٤.٧٪' },
+      { label: 'أيام بدون عدوى', value: '٤٧' },
+    ],
+  },
+  {
+    id: 'social-work-pro',
+    path: '/social-work-pro',
+    title: 'لوحة الخدمة الاجتماعية',
+    subtitle: 'إدارة الحالات والإرشاد والدعم الأسري',
+    icon: Diversity3Icon,
+    gradient: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%)',
+    glow: 'rgba(139,92,246,0.4)',
+    tags: ['الإرشاد', 'الأسر', 'الحالات'],
+    stats: [
+      { label: 'حالة نشطة', value: '١٨٧' },
+      { label: 'جلسة دعم', value: '٣٤٢' },
+      { label: 'رضا الأسر', value: '٩١٪' },
+    ],
+  },
+  {
+    id: 'maintenance-pro',
+    path: '/maintenance-pro',
+    title: 'لوحة الصيانة والمرافق',
+    subtitle: 'إدارة أوامر العمل والصيانة الوقائية والمباني',
+    icon: BuildIcon,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #22c55e 50%, #06b6d4 100%)',
+    glow: 'rgba(245,158,11,0.4)',
+    tags: ['الصيانة', 'المرافق', 'أوامر العمل'],
+    stats: [
+      { label: 'أمر عمل نشط', value: '٦٧' },
+      { label: 'نسبة الإنجاز', value: '٩١٪' },
+      { label: 'صيانة وقائية', value: '٩٤٪' },
     ],
   },
 ];

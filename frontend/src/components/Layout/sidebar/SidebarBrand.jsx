@@ -1,107 +1,195 @@
 /**
- * SidebarBrand — Logo icon, system name, collapse toggle.
- * يدعم تحميل الشعار المخصص من إعدادات الهوية المؤسسية
+ * SidebarBrand — شعار القائمة الجانبية
+ *
+ * Premium dark sidebar logo area with:
+ * - Gradient brand icon
+ * - System name + tagline
+ * - Smooth collapse animation
+ * - Collapse toggle button
  */
-import { Box, Typography, IconButton } from '@mui/material';
+
+import { Box, Typography, IconButton, Tooltip, useTheme, alpha } from '@mui/material';
 import {
-  ChevronRight as ChevronRightIcon,
-  ChevronLeft as ChevronLeftIcon,
+  MenuOpen as MenuOpenIcon,
+  Menu as MenuIcon,
 } from '@mui/icons-material';
 
-const LOGO_URL = '/logo.svg';
+// ─── Brand Icon (SVG) ─────────────────────────────────────────────────────────
+function BrandIcon({ size = 36 }) {
+  return (
+    <Box
+      sx={{
+        width: size,
+        height: size,
+        borderRadius: '10px',
+        background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+        boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '50%',
+          background: 'rgba(255,255,255,0.12)',
+          borderRadius: 'inherit',
+        },
+      }}
+    >
+      <Typography
+        sx={{
+          color: '#FFFFFF',
+          fontWeight: 800,
+          fontSize: size * 0.44,
+          lineHeight: 1,
+          letterSpacing: '-1px',
+          fontFamily: 'Cairo, sans-serif',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
+        أ
+      </Typography>
+    </Box>
+  );
+}
 
-const SidebarBrand = ({ collapsed, isMobile, onToggleCollapse, theme, customLogo, customName }) => {
-  const logoSrc = customLogo || LOGO_URL;
-  const systemName = customName || 'مراكز الأوائل';
+// ─────────────────────────────────────────────────────────────────────────────
+export default function SidebarBrand({ collapsed, onToggleCollapse }) {
+  const theme = useTheme();
 
   return (
-  <Box
-    sx={{
-      px: collapsed && !isMobile ? 1 : 2.5,
-      py: 2,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: collapsed && !isMobile ? 'center' : 'space-between',
-      minHeight: theme.custom?.header?.height || 64,
-      borderBottom: `1px solid ${theme.palette.divider}`,
-    }}
-  >
-    {(!collapsed || isMobile) && (
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+    <Box
+      sx={{
+        height: 70,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: collapsed ? 'center' : 'space-between',
+        px: collapsed ? 1 : 2,
+        py: 1,
+        // Header gradient — slightly lighter than sidebar bg
+        background: 'linear-gradient(135deg, rgba(30,58,138,0.6) 0%, rgba(10,22,40,0) 100%)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        flexShrink: 0,
+        transition: 'padding 0.25s ease',
+        position: 'relative',
+        overflow: 'hidden',
+        // Subtle top highlight line
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '10%',
+          width: '80%',
+          height: '1px',
+          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.5), transparent)',
+        },
+      }}
+    >
+      {/* Logo + Text */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          overflow: 'hidden',
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
+        <BrandIcon size={38} />
+
+        {/* Text — hidden when collapsed */}
         <Box
-          component="img"
-          src={logoSrc}
-          alt={systemName}
           sx={{
-            width: 36,
-            height: 36,
-            borderRadius: '10px',
-            objectFit: 'cover',
-          }}
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling && (e.target.nextSibling.style.display = 'flex');
-          }}
-        />
-        <Box
-          sx={{
-            width: 36,
-            height: 36,
-            borderRadius: '10px',
-            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-            display: 'none',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: '1rem',
+            overflow: 'hidden',
+            opacity: collapsed ? 0 : 1,
+            width: collapsed ? 0 : 'auto',
+            transition: 'opacity 0.2s ease, width 0.25s ease',
+            whiteSpace: 'nowrap',
           }}
         >
-          أ
-        </Box>
-        <Box>
-          <Typography variant="subtitle2" fontWeight={700} noWrap>
-            {systemName}
+          <Typography
+            sx={{
+              color: '#FFFFFF',
+              fontWeight: 700,
+              fontSize: '1rem',
+              lineHeight: 1.25,
+              letterSpacing: '0.01em',
+              fontFamily: 'Cairo, sans-serif',
+            }}
+          >
+            مراكز الأوائل
           </Typography>
-          <Typography variant="caption" color="text.secondary" noWrap>
-            للرعاية النهارية
+          <Typography
+            sx={{
+              color: 'rgba(255,255,255,0.45)',
+              fontWeight: 400,
+              fontSize: '0.68rem',
+              lineHeight: 1.3,
+              letterSpacing: '0.02em',
+            }}
+          >
+            نظام إدارة متكامل
           </Typography>
         </Box>
       </Box>
-    )}
 
-    {collapsed && !isMobile && (
-      <Box
-        component="img"
-        src={logoSrc}
-        alt={systemName}
-        sx={{
-          width: 36,
-          height: 36,
-          borderRadius: '10px',
-          objectFit: 'cover',
-        }}
-      />
-    )}
+      {/* Collapse Toggle — desktop only */}
+      {!collapsed && (
+        <Tooltip title="طي القائمة" placement="right">
+          <IconButton
+            onClick={onToggleCollapse}
+            size="small"
+            sx={{
+              color: 'rgba(255,255,255,0.4)',
+              flexShrink: 0,
+              transition: 'color 0.15s, background-color 0.15s',
+              '&:hover': {
+                color: 'rgba(255,255,255,0.85)',
+                backgroundColor: 'rgba(255,255,255,0.07)',
+              },
+              width: 32,
+              height: 32,
+              borderRadius: '8px',
+            }}
+          >
+            <MenuOpenIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+      )}
 
-    {!isMobile && (
-      <IconButton
-        size="small"
-        aria-label="تبديل القائمة"
-        onClick={onToggleCollapse}
-        sx={{
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: '8px',
-          width: 28,
-          height: 28,
-          ml: collapsed ? 0 : 'auto',
-        }}
-      >
-        {collapsed ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
-      </IconButton>
-    )}
-  </Box>
+      {/* Expand toggle when collapsed */}
+      {collapsed && (
+        <Tooltip title="توسيع القائمة" placement="left">
+          <IconButton
+            onClick={onToggleCollapse}
+            size="small"
+            sx={{
+              color: 'rgba(255,255,255,0.4)',
+              transition: 'color 0.15s',
+              '&:hover': {
+                color: '#FFFFFF',
+                backgroundColor: 'rgba(255,255,255,0.07)',
+              },
+              width: 32,
+              height: 32,
+              borderRadius: '8px',
+              position: 'absolute',
+              left: '50%',
+              transform: 'translateX(-50%)',
+            }}
+          >
+            <MenuIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Tooltip>
+      )}
+    </Box>
   );
-};
-
-export default SidebarBrand;
+}

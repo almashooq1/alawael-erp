@@ -1,13 +1,12 @@
 /**
  * SimpleLogin — صفحة تسجيل الدخول الاحترافية
  *
- * Professional MUI login page with:
- * - Gradient background with decorative shapes
- * - Logo / branding
+ * Premium split-screen login:
+ * - Left panel (40%): Clean white form
+ * - Right panel (60%): Brand gradient with animated shapes
+ * - Full Arabic RTL support
+ * - Error handling + loading state
  * - Password visibility toggle
- * - Error alerts
- * - Loading state
- * - Dev-only test credentials
  */
 
 import { useState, useEffect } from 'react';
@@ -21,8 +20,15 @@ import {
   Alert,
   InputAdornment,
   IconButton,
-  CircularProgress,  Fade,
-  Collapse,
+  CircularProgress,
+  Checkbox,
+  FormControlLabel,
+  Divider,
+  Link,
+  useTheme,
+  useMediaQuery,
+  alpha,
+  Fade,
 } from '@mui/material';
 import {
   Email,
@@ -30,283 +36,541 @@ import {
   Visibility,
   VisibilityOff,
   Login as LoginIcon,
+  Shield as ShieldIcon,
+  AutoAwesome,
+  TrendingUp,
+  Groups,
 } from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
-import { gradients } from 'theme/palette';
-import { prefetchRoutes } from 'utils/lazyLoader';
 
-const SimpleLogin = () => {
-  const showSnackbar = useSnackbar();
-  const { login } = useAuth();
+// ─── Feature highlights (right panel) ────────────────────────────────────────
+const FEATURES = [
+  {
+    icon: <Groups sx={{ fontSize: 22, color: '#818CF8' }} />,
+    title: 'إدارة شاملة للمستفيدين',
+    desc: 'تتبع كامل لملفات المستفيدين وبرامج التأهيل',
+  },
+  {
+    icon: <TrendingUp sx={{ fontSize: 22, color: '#6EE7B7' }} />,
+    title: 'تقارير وإحصاءات متقدمة',
+    desc: 'لوحات معلومات تفاعلية بمؤشرات أداء دقيقة',
+  },
+  {
+    icon: <AutoAwesome sx={{ fontSize: 22, color: '#FCD34D' }} />,
+    title: 'ذكاء اصطناعي متكامل',
+    desc: 'توصيات آلية وتحليل بيانات بتقنية AI',
+  },
+];
 
-  // Prefetch dashboard & core routes while user types credentials
+// ─── Animated floating shape ──────────────────────────────────────────────────
+function FloatingShape({ size, top, left, right, opacity, delay, color }) {
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        width: size,
+        height: size,
+        top,
+        left,
+        right,
+        borderRadius: '50%',
+        background: color || 'rgba(99,102,241,0.15)',
+        filter: 'blur(40px)',
+        opacity,
+        animation: `float ${3 + delay}s ease-in-out infinite alternate`,
+        '@keyframes float': {
+          from: { transform: 'translateY(0px) scale(1)' },
+          to:   { transform: `translateY(${-12 + delay * 3}px) scale(1.05)` },
+        },
+        animationDelay: `${delay}s`,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+export default function SimpleLogin() {
+  const theme     = useTheme();
+  const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
+  const navigate  = useNavigate();
+  const { login } = useAuth() || {};
+  const showSnackbar = useSnackbar?.();
+
+  const [form, setForm]         = useState({ email: '', password: '' });
+  const [showPwd, setShowPwd]   = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [mounted, setMounted]   = useState(false);
+
   useEffect(() => {
-    prefetchRoutes([
-      () => import('components/dashboard/AdvancedDashboard'),
-      () => import('pages/common/Home'),
-      () => import('components/Layout/ProLayout'),
-    ]);
+    setMounted(true);
+    // Pre-fill dev credentials
+    if (process.env.NODE_ENV === 'development') {
+      setForm({ email: 'admin@alawael.org', password: 'Admin@123' });
+    }
   }, []);
-  const [email, setEmail] = useState(
-    process.env.NODE_ENV === 'development' ? 'admin@alawael.com' : ''
-  );
-  const [password, setPassword] = useState(
-    process.env.NODE_ENV === 'development' ? 'Admin@123456' : ''
-  );
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    if (error) setError('');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    if (!form.email || !form.password) {
+      setError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      return;
+    }
     setLoading(true);
-
+    setError('');
     try {
-      const result = await login(email.trim(), password);
-
-      if (result.success) {
-        showSnackbar('تم تسجيل الدخول بنجاح!', 'success');
-        navigate('/dashboard');
-      } else {
-        throw new Error(result.error || 'فشل تسجيل الدخول');
-      }
+      await login?.(form.email, form.password);
+      showSnackbar?.('مرحباً بك في نظام مراكز الأوائل', 'success');
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      logger.error('❌ Login error:', err);
-
-      const isNetworkError =
-        err.message === 'Network Error' ||
-        err.code === 'ERR_NETWORK' ||
-        err.code === 'ECONNREFUSED';
-      const errorMsg = isNetworkError
-        ? 'تعذر الاتصال بالخادم. تأكد أن الـ Backend يعمل على المنفذ الصحيح وأن الاتصال ليس محجوباً.'
-        : err.data?.message || err.message || 'فشل تسجيل الدخول';
-      setError(errorMsg);
-      showSnackbar('خطأ: ' + errorMsg, 'error');
+      logger.error('Login failed', err);
+      const msg = err?.response?.data?.message || err?.message || '';
+      if (msg.includes('Invalid') || msg.includes('credentials') || msg.includes('password')) {
+        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      } else if (msg.includes('network') || msg.includes('Network')) {
+        setError('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت');
+      } else {
+        setError('حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى');
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Layout ─────────────────────────────────────────────────────────────────
   return (
     <Box
       sx={{
         minHeight: '100vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: gradients.primary,
-        position: 'relative',
-        overflow: 'hidden',
+        backgroundColor: '#0A1628',
+        fontFamily: 'Cairo, sans-serif',
+        direction: 'rtl',
       }}
     >
-      {/* Decorative background circles */}
-      <Box
-        sx={{
-          position: 'absolute',
-          width: 400,
-          height: 400,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.05)',
-          top: -100,
-          right: -100,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          width: 300,
-          height: 300,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.04)',
-          bottom: -80,
-          left: -80,
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)',
-          top: '40%',
-          left: '10%',
-        }}
-      />
-
-      <Fade in timeout={800}>
-        <Paper
-          elevation={24}
+      {/* ── RIGHT PANEL — Brand/Visual (hidden on mobile) ─────────────────── */}
+      {!isMobile && (
+        <Box
           sx={{
-            p: { xs: 3, sm: 5 },
-            borderRadius: 4,
-            width: '100%',
-            maxWidth: 420,
-            mx: 2,
+            flex: '0 0 58%',
             position: 'relative',
-            zIndex: 1,
-            backdropFilter: 'blur(10px)',
-            boxShadow: '0 16px 64px rgba(0,0,0,0.2)',
+            overflow: 'hidden',
+            background: 'linear-gradient(160deg, #0F172A 0%, #1E3A8A 35%, #312E81 70%, #4C1D95 100%)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: 6,
           }}
         >
-          {/* Logo */}
-          <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box
-              component="img"
-              src="/logo.svg"
-              alt="مراكز الأوائل للرعاية النهارية"
-              sx={{
-                width: 80,
-                height: 80,
-                mx: 'auto',
-                mb: 2,
-                borderRadius: '50%',
-                boxShadow: '0 8px 24px rgba(102,126,234,0.35)',
-              }}
-            />
-            <Typography variant="h5" fontWeight="bold" gutterBottom>
-              نظام مراكز الأوائل
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              تسجيل الدخول إلى نظام الرعاية النهارية
-            </Typography>
-          </Box>
+          {/* Animated background shapes */}
+          <FloatingShape size={300} top="-80px" right="-80px"   opacity={0.6} delay={0} color="rgba(99,102,241,0.2)" />
+          <FloatingShape size={250} bottom="0"  left="-60px"    opacity={0.5} delay={1} color="rgba(139,92,246,0.2)" />
+          <FloatingShape size={180} top="40%"   right="10%"     opacity={0.4} delay={2} color="rgba(245,158,11,0.12)" />
+          <FloatingShape size={120} top="15%"   left="20%"      opacity={0.3} delay={0.5} color="rgba(16,185,129,0.1)" />
 
-          {/* Error Alert */}
-          <Collapse in={!!error}>
-            <Alert
-              severity="error"
-              sx={{ mb: 2.5, borderRadius: 2 }}
-              onClose={() => setError('')}
-            >
-              {error}
-            </Alert>
-          </Collapse>
+          {/* Mesh grid overlay */}
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `
+                linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px)
+              `,
+              backgroundSize: '48px 48px',
+              pointerEvents: 'none',
+            }}
+          />
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="البريد الإلكتروني"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-              autoFocus
-              sx={{ mb: 2.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Email color="action" />
-                  </InputAdornment>
-                ),
-              }}
-            />
+          <Fade in={mounted} timeout={800}>
+            <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 440, width: '100%' }}>
+              {/* Logo */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
+                <Box
+                  sx={{
+                    width: 52,
+                    height: 52,
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 8px 24px rgba(99,102,241,0.45)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                  }}
+                >
+                  <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.4rem', fontFamily: 'Cairo' }}>
+                    أ
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography sx={{ color: '#FFFFFF', fontWeight: 700, fontSize: '1.25rem', lineHeight: 1.2, fontFamily: 'Cairo' }}>
+                    مراكز الأوائل
+                  </Typography>
+                  <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem' }}>
+                    نظام الإدارة المتكامل
+                  </Typography>
+                </Box>
+              </Box>
 
-            <TextField
-              fullWidth
-              label="كلمة المرور"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-              sx={{ mb: 3.5 }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock color="action" />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      size="small"
-                      aria-label={showPassword ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              disabled={loading}
-              size="large"
-              startIcon={
-                loading ? (
-                  <CircularProgress size={20} sx={{ color: 'white' }} />
-                ) : (
-                  <LoginIcon />
-                )
-              }
-              sx={{
-                py: 1.5,
-                borderRadius: 2,
-                fontWeight: 'bold',
-                fontSize: '1rem',
-                background: gradients.primary,
-                boxShadow: '0 4px 16px rgba(102,126,234,0.35)',
-                '&:hover': {
-                  background: gradients.primary,
-                  filter: 'brightness(1.1)',
-                  boxShadow: '0 6px 24px rgba(102,126,234,0.45)',
-                },
-              }}
-            >
-              {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
-            </Button>
-          </form>
-
-          {/* Dev-only test credentials */}
-          {process.env.NODE_ENV === 'development' && (
-            <Box
-              sx={{
-                mt: 3,
-                p: 1.5,
-                borderRadius: 2,
-                bgcolor: 'rgba(102,126,234,0.06)',
-                border: '1px dashed rgba(102,126,234,0.2)',
-              }}
-            >
+              {/* Headline */}
               <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: 'block', textAlign: 'center' }}
+                sx={{
+                  color: '#FFFFFF',
+                  fontWeight: 700,
+                  fontSize: '2rem',
+                  lineHeight: 1.3,
+                  mb: 1.5,
+                  fontFamily: 'Cairo',
+                }}
               >
-                🔧 بيانات الاختبار — بيئة التطوير فقط
+                إدارة احترافية
+                <br />
+                <Box component="span" sx={{ background: 'linear-gradient(135deg, #818CF8, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  لمراكز التأهيل
+                </Box>
               </Typography>
-              <Typography
-                variant="caption"
-                color="text.disabled"
-                sx={{ display: 'block', textAlign: 'center', mt: 0.3 }}
+
+              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.95rem', lineHeight: 1.7, mb: 5 }}>
+                منصة شاملة لإدارة المستفيدين، الموارد البشرية، والخدمات المالية وفق رؤية 2030
+              </Typography>
+
+              {/* Feature cards */}
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {FEATURES.map((f, i) => (
+                  <Fade key={i} in={mounted} timeout={800 + i * 200}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 2,
+                        p: 2,
+                        borderRadius: '12px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        backdropFilter: 'blur(8px)',
+                        transition: 'background 0.2s',
+                        '&:hover': { background: 'rgba(255,255,255,0.08)' },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          width: 40,
+                          height: 40,
+                          borderRadius: '10px',
+                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                        }}
+                      >
+                        {f.icon}
+                      </Box>
+                      <Box>
+                        <Typography sx={{ color: '#FFFFFF', fontWeight: 600, fontSize: '0.875rem', mb: 0.25 }}>
+                          {f.title}
+                        </Typography>
+                        <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', lineHeight: 1.5 }}>
+                          {f.desc}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Fade>
+                ))}
+              </Box>
+
+              {/* Bottom badge */}
+              <Box
+                sx={{
+                  mt: 5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 2,
+                  py: 1,
+                  borderRadius: '100px',
+                  backgroundColor: 'rgba(16,185,129,0.12)',
+                  border: '1px solid rgba(16,185,129,0.2)',
+                  width: 'fit-content',
+                }}
               >
-                admin@test.com / Admin@123
+                <ShieldIcon sx={{ fontSize: 16, color: '#34D399' }} />
+                <Typography sx={{ color: '#6EE7B7', fontSize: '0.75rem', fontWeight: 600 }}>
+                  نظام آمن ومعتمد • ISO 27001
+                </Typography>
+              </Box>
+            </Box>
+          </Fade>
+        </Box>
+      )}
+
+      {/* ── LEFT PANEL — Login Form ──────────────────────────────────────── */}
+      <Box
+        sx={{
+          flex: 1,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#FFFFFF',
+          p: { xs: 3, md: 6 },
+          position: 'relative',
+          minHeight: '100vh',
+        }}
+      >
+        {/* Mobile logo */}
+        {isMobile && (
+          <Box sx={{ position: 'absolute', top: 24, right: 24, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: '10px',
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem' }}>أ</Typography>
+            </Box>
+            <Typography sx={{ fontWeight: 700, fontSize: '1rem', color: '#0F172A' }}>مراكز الأوائل</Typography>
+          </Box>
+        )}
+
+        <Fade in={mounted} timeout={600}>
+          <Box sx={{ width: '100%', maxWidth: 400 }}>
+            {/* Header */}
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: '1.625rem', md: '1.875rem' },
+                  color: '#0F172A',
+                  lineHeight: 1.2,
+                  mb: 1,
+                  fontFamily: 'Cairo',
+                }}
+              >
+                مرحباً بعودتك 👋
+              </Typography>
+              <Typography sx={{ color: '#64748B', fontSize: '0.9375rem', lineHeight: 1.6 }}>
+                سجّل الدخول للوصول إلى لوحة التحكم
               </Typography>
             </Box>
-          )}
 
-          <Typography
-            variant="caption"
-            color="text.disabled"
-            sx={{ display: 'block', textAlign: 'center', mt: 3 }}
-          >
-            نظام مراكز الأوائل للرعاية النهارية © {new Date().getFullYear()}
-          </Typography>
-        </Paper>
-      </Fade>
+            {/* Error alert */}
+            {error && (
+              <Fade in={Boolean(error)}>
+                <Alert
+                  severity="error"
+                  onClose={() => setError('')}
+                  sx={{ mb: 3, borderRadius: 2 }}
+                >
+                  {error}
+                </Alert>
+              </Fade>
+            )}
+
+            {/* Form */}
+            <Box component="form" onSubmit={handleSubmit} noValidate>
+              {/* Email */}
+              <Box sx={{ mb: 2.5 }}>
+                <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155', mb: 0.75 }}>
+                  البريد الإلكتروني
+                </Typography>
+                <TextField
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  placeholder="admin@alawael.org"
+                  fullWidth
+                  size="medium"
+                  disabled={loading}
+                  error={Boolean(error)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email sx={{ fontSize: 18, color: '#94A3B8' }} />
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      borderRadius: '10px',
+                      backgroundColor: '#F8FAFC',
+                      '&.Mui-focused': {
+                        backgroundColor: '#FFFFFF',
+                      },
+                      '& input': { fontSize: '0.9375rem' },
+                    },
+                  }}
+                />
+              </Box>
+
+              {/* Password */}
+              <Box sx={{ mb: 1.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+                  <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#334155' }}>
+                    كلمة المرور
+                  </Typography>
+                  <Link
+                    href="/forgot-password"
+                    sx={{
+                      fontSize: '0.8125rem',
+                      color: '#6366F1',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                      '&:hover': { textDecoration: 'underline' },
+                    }}
+                  >
+                    نسيت كلمة المرور؟
+                  </Link>
+                </Box>
+                <TextField
+                  name="password"
+                  type={showPwd ? 'text' : 'password'}
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  fullWidth
+                  size="medium"
+                  disabled={loading}
+                  error={Boolean(error)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock sx={{ fontSize: 18, color: '#94A3B8' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPwd((v) => !v)}
+                          edge="end"
+                          size="small"
+                          sx={{ color: '#94A3B8', '&:hover': { color: '#6366F1' } }}
+                        >
+                          {showPwd ? <VisibilityOff sx={{ fontSize: 18 }} /> : <Visibility sx={{ fontSize: 18 }} />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      borderRadius: '10px',
+                      backgroundColor: '#F8FAFC',
+                      '&.Mui-focused': { backgroundColor: '#FFFFFF' },
+                      '& input': { fontSize: '0.9375rem' },
+                    },
+                  }}
+                />
+              </Box>
+
+              {/* Remember me */}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    size="small"
+                    sx={{
+                      color: '#CBD5E1',
+                      '&.Mui-checked': { color: '#6366F1' },
+                      p: 0.75,
+                    }}
+                  />
+                }
+                label={
+                  <Typography sx={{ fontSize: '0.8125rem', color: '#64748B' }}>
+                    تذكرني
+                  </Typography>
+                }
+                sx={{ mb: 3, mr: 0 }}
+              />
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                startIcon={loading ? null : <LoginIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  height: 48,
+                  borderRadius: '10px',
+                  fontSize: '0.9375rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.01em',
+                  background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                  boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #4338CA 0%, #6D28D9 100%)',
+                    boxShadow: '0 6px 20px rgba(99,102,241,0.45)',
+                    transform: 'translateY(-1px)',
+                  },
+                  '&:active': { transform: 'translateY(0)' },
+                  '&.Mui-disabled': {
+                    background: '#E2E8F0',
+                    boxShadow: 'none',
+                    color: '#94A3B8',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={22} sx={{ color: '#94A3B8' }} /> : 'تسجيل الدخول'}
+              </Button>
+            </Box>
+
+            {/* Divider */}
+            <Divider sx={{ my: 3, '& .MuiDivider-wrapper': { px: 2 } }}>
+              <Typography variant="caption" color="text.secondary">
+                نظام مراكز الأوائل
+              </Typography>
+            </Divider>
+
+            {/* Dev hint */}
+            {process.env.NODE_ENV === 'development' && (
+              <Box
+                sx={{
+                  p: 2,
+                  borderRadius: '10px',
+                  backgroundColor: alpha('#6366F1', 0.05),
+                  border: `1px solid ${alpha('#6366F1', 0.15)}`,
+                  textAlign: 'center',
+                }}
+              >
+                <Typography sx={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 600, mb: 0.5 }}>
+                  🔧 بيئة التطوير — بيانات تلقائية
+                </Typography>
+                <Typography sx={{ fontSize: '0.7rem', color: '#94A3B8', fontFamily: 'monospace' }}>
+                  admin@alawael.org / Admin@123
+                </Typography>
+              </Box>
+            )}
+
+            {/* Footer */}
+            <Typography
+              sx={{
+                mt: 4,
+                textAlign: 'center',
+                fontSize: '0.75rem',
+                color: '#94A3B8',
+              }}
+            >
+              © {new Date().getFullYear()} مراكز الأوائل — جميع الحقوق محفوظة
+            </Typography>
+          </Box>
+        </Fade>
+      </Box>
     </Box>
   );
-};
-
-export default SimpleLogin;
+}

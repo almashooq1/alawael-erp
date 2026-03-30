@@ -1,286 +1,420 @@
 /**
- * Professional Header — AlAwael ERP
- * شريط علوي احترافي مع إشعارات وبحث وقائمة المستخدم
+ * ProHeader — الهيدر الاحترافي
  *
- * Features:
- * - Glassmorphism AppBar
+ * Premium glassmorphism header with:
  * - Breadcrumb navigation
- * - Global search bar
- * - Notification dropdown with real-time updates
+ * - Global search (Cmd+K)
+ * - Live notifications panel
+ * - Language & theme toggles
  * - User avatar menu
- * - Theme toggle (dark/light)
- * - Language toggle (AR/EN)
- * - Responsive design
+ * - Mobile hamburger
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  AppBar,
-  Toolbar,
-  Box,
-  Typography,
-  IconButton,
-  Badge,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Breadcrumbs,
-  Link as MuiLink,
-  InputBase,
-  Tooltip,
-  Chip,
-  Popover,
-  List,
-  ListItem,
-  ListItemAvatar,
-  useTheme,
-  useMediaQuery,
-  alpha,
+  AppBar, Toolbar, Box, IconButton, Avatar, Badge, Tooltip,
+  Menu, MenuItem, Divider, Typography, InputBase, Popover,
+  List, ListItem, ListItemAvatar, ListItemText, Chip, Button,
+  useTheme, useMediaQuery, Fade, alpha,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Search as SearchIcon,
-  Notifications as NotificationsIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon,
-  Person as PersonIcon,
-  Settings as SettingsIcon,
-  Logout as LogoutIcon,
-  Language as LanguageIcon,
-  NavigateNext as NavigateNextIcon,
+  NotificationsOutlined,
+  DarkModeOutlined,
+  LightModeOutlined,
+  LanguageOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
+  KeyboardArrowDown,
+  AccountCircleOutlined,
+  SettingsOutlined,
+  LogoutOutlined,
+  CheckCircleOutlined,
+  WarningAmberOutlined,
+  InfoOutlined,
+  NavigateNext,
   Home as HomeIcon,
-  Fullscreen as FullscreenIcon,
-  FullscreenExit as FullscreenExitIcon,
-  Circle as CircleIcon,
+  CloseOutlined,
 } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
-import { useThemeMode } from '../../contexts/ThemeContext';
-import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
+import { useAuth } from 'contexts/AuthContext';
 
-// ─── Breadcrumb Map ──────────────────────────────────────────────────────────
-const BREADCRUMB_MAP = {
-  dashboard: 'لوحة التحكم',
-  beneficiaries: 'المستفيدون',
-  hr: 'الموارد البشرية',
-  payroll: 'الرواتب',
-  incentives: 'الحوافز',
-  compensation: 'هيكل التعويضات',
-  analytics: 'التحليلات',
-  finance: 'المالية',
-  rehab: 'إعادة التأهيل',
-  sessions: 'الجلسات',
-  messages: 'الرسائل',
-  documents: 'المستندات',
-  reports: 'التقارير',
-  settings: 'الإعدادات',
-  profile: 'الملف الشخصي',
-  'admin-portal': 'لوحة الإدارة',
-  users: 'المستخدمون',
-  security: 'الأمان',
-  monitoring: 'المراقبة',
-  projects: 'المشاريع',
-  lms: 'التعليم الإلكتروني',
-  'student-portal': 'بوابة الطالب',
-  'therapist-portal': 'بوابة المعالج',
-  'parent-portal': 'بوابة ولي الأمر',
-  organization: 'الهيكل التنظيمي',
-  'integrated-care': 'الرعاية المتكاملة',
-  'assessment-scales': 'مقاييس التقييم',
-  'assessment-tests': 'اختبارات التقييم',
-  'ai-analytics': 'التحليلات الذكية',
-  'smart-documents': 'المستندات الذكية',
-  archiving: 'الأرشفة',
-  'export-import': 'تصدير واستيراد',
-  'communications-system': 'نظام التواصل',
-  'audit-logs': 'سجل المراجعة',
-  advanced: 'متقدم',
+// ─── Static breadcrumb map ────────────────────────────────────────────────────
+const routeLabels = {
+  '/':              'الرئيسية',
+  '/dashboard':     'لوحة القيادة',
+  '/beneficiaries': 'المستفيدون',
+  '/hr':            'الموارد البشرية',
+  '/finance':       'المالية',
+  '/rehab':         'التأهيل',
+  '/documents':     'الوثائق',
+  '/reports':       'التقارير',
+  '/settings':      'الإعدادات',
+  '/admin':         'إدارة النظام',
 };
 
-// ─── Header Component ────────────────────────────────────────────────────────
-const ProHeader = ({ sidebarCollapsed, onToggleSidebar }) => {
-  const theme = useTheme();
+const getLabel = (seg) =>
+  routeLabels[`/${seg}`] || seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+// ─── Mock notifications ───────────────────────────────────────────────────────
+const MOCK_NOTIFS = [
+  {
+    id: 1,
+    type: 'success',
+    title: 'تم قبول المستفيد',
+    body: 'تم قبول طلب تسجيل أحمد المطيري بنجاح',
+    time: 'منذ 5 دقائق',
+    read: false,
+  },
+  {
+    id: 2,
+    type: 'warning',
+    title: 'موعد قريب',
+    body: 'جلسة تأهيل السيد خالد العمري بعد ساعة',
+    time: 'منذ 20 دقيقة',
+    read: false,
+  },
+  {
+    id: 3,
+    type: 'info',
+    title: 'تقرير شهري جاهز',
+    body: 'تم إنشاء تقرير إحصاءات مارس 2026',
+    time: 'منذ ساعة',
+    read: true,
+  },
+  {
+    id: 4,
+    type: 'success',
+    title: 'راتب شهر مارس',
+    body: 'تمت معالجة مسير الرواتب لـ 48 موظف',
+    time: 'منذ 3 ساعات',
+    read: true,
+  },
+];
+
+const NOTIF_ICONS = {
+  success: <CheckCircleOutlined sx={{ fontSize: 18, color: '#10B981' }} />,
+  warning: <WarningAmberOutlined sx={{ fontSize: 18, color: '#F59E0B' }} />,
+  info:    <InfoOutlined sx={{ fontSize: 18, color: '#0EA5E9' }} />,
+};
+
+const NOTIF_COLORS = {
+  success: '#ECFDF5',
+  warning: '#FFFBEB',
+  info:    '#F0F9FF',
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+export default function ProHeader({ onToggleSidebar, collapsed, themeMode, onToggleTheme }) {
+  const theme   = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const { currentUser, logout } = useAuth();
-  const themeMode = useThemeMode?.() || {};
-  const { mode, toggleMode } = themeMode;
+  const { user, logout } = useAuth() || {};
 
-  const [userMenuAnchor, setUserMenuAnchor] = useState(null);
-  const [notifAnchor, setNotifAnchor] = useState(null);
-  const [searchFocused, setSearchFocused] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  // Search
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const searchRef = useRef(null);
 
-  // Mock notifications – in production these come from NotificationContext
-  const notifications = [
-    { id: 1, title: 'طلب إجازة جديد', body: 'أحمد محمد قدم طلب إجازة', time: 'منذ 5 دقائق', read: false, type: 'info' },
-    { id: 2, title: 'تنبيه مالي', body: 'تم تجاوز الميزانية المحددة', time: 'منذ 30 دقيقة', read: false, type: 'warning' },
-    { id: 3, title: 'جلسة قادمة', body: 'جلسة علاج طبيعي الساعة 2:00', time: 'منذ ساعة', read: true, type: 'event' },
-  ];
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  // Notifications
+  const [notifAnchor, setNotifAnchor] = useState(null);
+  const [notifs, setNotifs] = useState(MOCK_NOTIFS);
+  const unreadCount = notifs.filter((n) => !n.read).length;
 
-  // ─── Breadcrumbs ─────────────────────────────────────────────────────────
-  const breadcrumbs = (() => {
-    const parts = location.pathname.split('/').filter(Boolean);
-    if (parts.length === 0) return [{ label: 'لوحة التحكم', path: '/dashboard' }];
-    return parts.map((part, i) => ({
-      label: BREADCRUMB_MAP[part] || part,
-      path: '/' + parts.slice(0, i + 1).join('/'),
-      isLast: i === parts.length - 1,
+  // User menu
+  const [userAnchor, setUserAnchor] = useState(null);
+
+  // Fullscreen
+  const [fullscreen, setFullscreen] = useState(false);
+
+  // Language (demo)
+  const [lang, setLang] = useState('ar');
+
+  // ── Breadcrumbs ─────────────────────────────────────────────────────────────
+  const crumbs = location.pathname
+    .split('/')
+    .filter(Boolean)
+    .map((seg, idx, arr) => ({
+      label: getLabel(seg),
+      path: '/' + arr.slice(0, idx + 1).join('/'),
+      isLast: idx === arr.length - 1,
     }));
-  })();
 
-  // ─── Fullscreen Toggle ──────────────────────────────────────────────────
-  const toggleFullscreen = useCallback(() => {
+  // ── Handlers ────────────────────────────────────────────────────────────────
+  const handleMarkAllRead = useCallback(() => {
+    setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
+  }, []);
+
+  const handleToggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
+      document.documentElement.requestFullscreen?.();
+      setFullscreen(true);
     } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
+      document.exitFullscreen?.();
+      setFullscreen(false);
     }
   }, []);
 
-  // ─── Handlers ────────────────────────────────────────────────────────────
-  const handleLogout = () => {
-    setUserMenuAnchor(null);
-    logout?.();
+  const handleLogout = useCallback(async () => {
+    setUserAnchor(null);
+    try { await logout?.(); } catch (_) {}
     navigate('/login');
-  };
+  }, [logout, navigate]);
 
-  const headerWidth = isMobile
-    ? '100%'
-    : `calc(100% - ${sidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH}px)`;
+  const displayName = user?.name || user?.username || 'مدير النظام';
+  const displayRole = user?.role || 'مدير';
+  const avatarLetter = displayName.charAt(0) || 'م';
 
+  const isDark = themeMode === 'dark';
+  const sb = theme.custom?.sidebar || {};
+  const HEADER_HEIGHT = theme.custom?.header?.height || 64;
+
+  // ─────────────────────────────────────────────────────────────────────────
   return (
     <AppBar
       position="fixed"
       elevation={0}
       sx={{
-        width: headerWidth,
-        left: 0,
-        right: 'auto',
-        transition: theme.custom?.transition?.medium || 'all 0.3s ease',
-        zIndex: theme.zIndex.drawer + 1,
-        backdropFilter: 'blur(12px)',
-        backgroundColor: alpha(theme.palette.background.paper, 0.85),
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        color: theme.palette.text.primary,
+        width: { md: `calc(100% - ${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px)` },
+        mr:    { md: `${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px` },
+        height: HEADER_HEIGHT,
+        zIndex: theme.zIndex.drawer - 1,
+        transition: theme.transitions.create(['width', 'margin'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
       }}
     >
-      <Toolbar sx={{ gap: 1, minHeight: theme.custom?.header?.height || 64 }}>
-        {/* Mobile Menu Toggle */}
+      <Toolbar
+        sx={{
+          height: HEADER_HEIGHT,
+          minHeight: `${HEADER_HEIGHT}px !important`,
+          px: { xs: 1.5, md: 3 },
+          gap: 1,
+        }}
+      >
+        {/* ── Mobile menu button ──────────────────────────────────────────── */}
         {isMobile && (
-          <IconButton onClick={onToggleSidebar} edge="start" color="inherit" aria-label="تبديل القائمة">
+          <IconButton
+            onClick={onToggleSidebar}
+            size="small"
+            sx={{
+              color: isDark ? 'rgba(255,255,255,0.75)' : 'text.secondary',
+              mr: 0.5,
+            }}
+          >
             <MenuIcon />
           </IconButton>
         )}
 
-        {/* Breadcrumbs */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Breadcrumbs
-            separator={<NavigateNextIcon sx={{ fontSize: 16, transform: 'rotate(180deg)' }} />}
-            sx={{ '& .MuiBreadcrumbs-ol': { flexWrap: 'nowrap' } }}
+        {/* ── Breadcrumbs ─────────────────────────────────────────────────── */}
+        {!searchOpen && (
+          <Box
+            sx={{
+              display: { xs: 'none', sm: 'flex' },
+              alignItems: 'center',
+              gap: 0.5,
+              flex: 1,
+              minWidth: 0,
+            }}
           >
-            <MuiLink
-              underline="hover"
-              color="inherit"
-              onClick={() => navigate('/dashboard')}
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                cursor: 'pointer',
-                fontSize: '0.8125rem',
-              }}
-            >
-              <HomeIcon sx={{ fontSize: 16 }} />
-              الرئيسية
-            </MuiLink>
-            {breadcrumbs.map((crumb) =>
-              crumb.isLast ? (
+            {/* Home icon */}
+            <Tooltip title="الرئيسية">
+              <IconButton
+                size="small"
+                onClick={() => navigate('/dashboard')}
+                sx={{
+                  color: crumbs.length === 0 ? 'primary.main' : 'text.secondary',
+                  p: 0.75,
+                  '&:hover': { color: 'primary.main' },
+                }}
+              >
+                <HomeIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+
+            {crumbs.map((crumb) => (
+              <Box key={crumb.path} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <NavigateNext
+                  sx={{
+                    fontSize: 16,
+                    color: 'text.disabled',
+                    transform: 'scaleX(-1)', // RTL flip
+                  }}
+                />
                 <Typography
-                  key={crumb.path}
-                  variant="body2"
-                  color="text.primary"
-                  fontWeight={600}
-                  noWrap
+                  component={crumb.isLast ? 'span' : 'button'}
+                  onClick={!crumb.isLast ? () => navigate(crumb.path) : undefined}
+                  sx={{
+                    fontSize: '0.8125rem',
+                    fontWeight: crumb.isLast ? 600 : 400,
+                    color: crumb.isLast ? 'text.primary' : 'text.secondary',
+                    cursor: crumb.isLast ? 'default' : 'pointer',
+                    background: 'none',
+                    border: 'none',
+                    fontFamily: 'inherit',
+                    p: 0,
+                    textDecoration: 'none',
+                    '&:hover': !crumb.isLast ? { color: 'primary.main' } : {},
+                    transition: 'color 0.15s',
+                    maxWidth: 160,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
                 >
                   {crumb.label}
                 </Typography>
-              ) : (
-                <MuiLink
-                  key={crumb.path}
-                  underline="hover"
-                  color="inherit"
-                  onClick={() => navigate(crumb.path)}
-                  sx={{ cursor: 'pointer', fontSize: '0.8125rem' }}
-                >
-                  {crumb.label}
-                </MuiLink>
-              )
+              </Box>
+            ))}
+
+            {crumbs.length === 0 && (
+              <Typography variant="body2" color="text.primary" fontWeight={600}>
+                لوحة القيادة
+              </Typography>
             )}
-          </Breadcrumbs>
-        </Box>
+          </Box>
+        )}
 
-        {/* Search */}
-        <Box
-          sx={{
-            display: { xs: 'none', sm: 'flex' },
-            alignItems: 'center',
-            gap: 0.5,
-            px: 1.5,
-            py: 0.5,
-            borderRadius: '10px',
-            backgroundColor: searchFocused
-              ? alpha(theme.palette.primary.main, 0.06)
-              : theme.palette.action.hover,
-            border: `1px solid ${searchFocused ? alpha(theme.palette.primary.main, 0.3) : 'transparent'}`,
-            transition: 'all 0.2s ease',
-            width: searchFocused ? 280 : 200,
-          }}
-        >
-          <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-          <InputBase
-            ref={searchRef}
-            placeholder="بحث..."
-            onFocus={() => setSearchFocused(true)}
-            onBlur={() => setSearchFocused(false)}
-            sx={{ flex: 1, fontSize: '0.8125rem' }}
-          />
-          <Chip
-            label="⌘K"
-            size="small"
-            variant="outlined"
-            sx={{ height: 20, fontSize: '0.65rem', display: searchFocused ? 'none' : 'flex' }}
-          />
-        </Box>
+        {/* ── Search bar (expanded) ────────────────────────────────────────── */}
+        {searchOpen && (
+          <Fade in={searchOpen}>
+            <Box
+              sx={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : alpha('#6366F1', 0.06),
+                borderRadius: 2,
+                border: `1.5px solid ${alpha('#6366F1', 0.4)}`,
+                px: 1.5,
+                gap: 1,
+                height: 40,
+                boxShadow: `0 0 0 3px ${alpha('#6366F1', 0.12)}`,
+              }}
+            >
+              <SearchIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+              <InputBase
+                autoFocus
+                ref={searchRef}
+                placeholder="ابحث في النظام... (اضغط ESC للإغلاق)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); } }}
+                sx={{
+                  flex: 1,
+                  fontSize: '0.875rem',
+                  '& input': { padding: 0 },
+                }}
+              />
+              <IconButton size="small" onClick={() => { setSearchOpen(false); setSearchQuery(''); }} sx={{ p: 0.5 }}>
+                <CloseOutlined sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Box>
+          </Fade>
+        )}
 
-        {/* Actions */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* ── Action buttons ───────────────────────────────────────────────── */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {/* Fullscreen */}
-          <Tooltip title={isFullscreen ? 'إلغاء ملء الشاشة' : 'ملء الشاشة'}>
-            <IconButton size="small" color="inherit" onClick={toggleFullscreen} sx={{ display: { xs: 'none', md: 'flex' } }} aria-label="ملء الشاشة">
-              {isFullscreen ? <FullscreenExitIcon sx={{ fontSize: 20 }} /> : <FullscreenIcon sx={{ fontSize: 20 }} />}
-            </IconButton>
-          </Tooltip>
 
-          {/* Theme Toggle */}
-          <Tooltip title={mode === 'dark' ? 'الوضع الفاتح' : 'الوضع الداكن'}>
-            <IconButton size="small" color="inherit" onClick={toggleMode} aria-label="تبديل الوضع">
-              {mode === 'dark' ? <LightModeIcon sx={{ fontSize: 20 }} /> : <DarkModeIcon sx={{ fontSize: 20 }} />}
-            </IconButton>
-          </Tooltip>
+          {/* Search trigger */}
+          {!searchOpen && (
+            <Tooltip title="بحث (Ctrl+K)">
+              <IconButton
+                size="small"
+                onClick={() => setSearchOpen(true)}
+                sx={{
+                  display: { xs: 'none', sm: 'flex' },
+                  color: 'text.secondary',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
+                  borderRadius: 2,
+                  px: 1.5,
+                  py: 0.5,
+                  gap: 0.75,
+                  height: 34,
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  '&:hover': { color: 'primary.main', borderColor: 'primary.light' },
+                }}
+              >
+                <SearchIcon sx={{ fontSize: 16 }} />
+                <Typography sx={{ fontSize: '0.75rem', color: 'inherit', display: { md: 'block', xs: 'none' } }}>
+                  بحث...
+                </Typography>
+                <Chip
+                  label="⌘K"
+                  size="small"
+                  sx={{
+                    height: 18,
+                    fontSize: '0.6rem',
+                    fontFamily: 'mono',
+                    display: { lg: 'flex', xs: 'none' },
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9',
+                    color: 'text.secondary',
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          )}
 
-          {/* Language */}
+          {/* Language toggle */}
           <Tooltip title="تغيير اللغة">
-            <IconButton size="small" color="inherit" aria-label="تغيير اللغة">
-              <LanguageIcon sx={{ fontSize: 20 }} />
+            <IconButton
+              size="small"
+              onClick={() => setLang((l) => (l === 'ar' ? 'en' : 'ar'))}
+              sx={{
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+                width: 36,
+                height: 36,
+              }}
+            >
+              <LanguageOutlined sx={{ fontSize: 20 }} />
+            </IconButton>
+          </Tooltip>
+
+          {/* Theme toggle */}
+          <Tooltip title={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}>
+            <IconButton
+              size="small"
+              onClick={onToggleTheme}
+              sx={{
+                color: 'text.secondary',
+                '&:hover': { color: isDark ? '#F59E0B' : 'primary.main' },
+                width: 36,
+                height: 36,
+              }}
+            >
+              {isDark ? (
+                <LightModeOutlined sx={{ fontSize: 20, color: '#F59E0B' }} />
+              ) : (
+                <DarkModeOutlined sx={{ fontSize: 20 }} />
+              )}
+            </IconButton>
+          </Tooltip>
+
+          {/* Fullscreen */}
+          <Tooltip title={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}>
+            <IconButton
+              size="small"
+              onClick={handleToggleFullscreen}
+              sx={{
+                display: { xs: 'none', md: 'flex' },
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+                width: 36,
+                height: 36,
+              }}
+            >
+              {fullscreen ? (
+                <FullscreenExitOutlined sx={{ fontSize: 20 }} />
+              ) : (
+                <FullscreenOutlined sx={{ fontSize: 20 }} />
+              )}
             </IconButton>
           </Tooltip>
 
@@ -288,164 +422,258 @@ const ProHeader = ({ sidebarCollapsed, onToggleSidebar }) => {
           <Tooltip title="الإشعارات">
             <IconButton
               size="small"
-              color="inherit"
               onClick={(e) => setNotifAnchor(e.currentTarget)}
-              aria-label="الإشعارات"
+              sx={{
+                color: 'text.secondary',
+                '&:hover': { color: 'primary.main' },
+                width: 36,
+                height: 36,
+              }}
             >
-              <Badge badgeContent={unreadCount} color="error" variant={unreadCount > 0 ? 'standard' : 'dot'}>
-                <NotificationsIcon sx={{ fontSize: 20 }} />
+              <Badge
+                badgeContent={unreadCount}
+                color="error"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    fontSize: '0.6rem',
+                    minWidth: 16,
+                    height: 16,
+                    top: 2,
+                    right: 2,
+                  },
+                }}
+              >
+                <NotificationsOutlined sx={{ fontSize: 20 }} />
               </Badge>
             </IconButton>
           </Tooltip>
 
-          {/* User Avatar */}
-          <IconButton
-            onClick={(e) => setUserMenuAnchor(e.currentTarget)}
-            sx={{ p: 0, ml: 0.5 }}
-            aria-label="حساب المستخدم"
+          {/* Divider */}
+          <Box
+            sx={{
+              width: '1px',
+              height: 24,
+              backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
+              mx: 0.5,
+            }}
+          />
+
+          {/* User menu trigger */}
+          <Box
+            onClick={(e) => setUserAnchor(e.currentTarget)}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              cursor: 'pointer',
+              px: 1,
+              py: 0.5,
+              borderRadius: 2,
+              border: `1px solid transparent`,
+              transition: 'all 0.15s',
+              '&:hover': {
+                backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : alpha('#6366F1', 0.06),
+                borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0',
+              },
+            }}
           >
             <Avatar
               sx={{
-                width: 34,
-                height: 34,
-                fontSize: '0.8125rem',
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                width: 32,
+                height: 32,
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #4F46E5, #7C3AED)',
               }}
             >
-              {currentUser?.name?.[0] || currentUser?.email?.[0] || 'م'}
+              {avatarLetter}
             </Avatar>
-          </IconButton>
+            <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'right' }}>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.2, color: 'text.primary' }}>
+                {displayName}
+              </Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', lineHeight: 1.2 }}>
+                {displayRole}
+              </Typography>
+            </Box>
+            <KeyboardArrowDown
+              sx={{
+                fontSize: 16,
+                color: 'text.secondary',
+                display: { xs: 'none', md: 'block' },
+                transition: 'transform 0.2s',
+                transform: userAnchor ? 'rotate(180deg)' : 'none',
+              }}
+            />
+          </Box>
         </Box>
       </Toolbar>
 
-      {/* ─── Notification Popover ─────────────────────────────────────────── */}
+      {/* ── Notifications Popover ──────────────────────────────────────────── */}
       <Popover
         open={Boolean(notifAnchor)}
         anchorEl={notifAnchor}
         onClose={() => setNotifAnchor(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        sx={{
-          '& .MuiPaper-root': {
-            width: 360,
-            maxHeight: 460,
-            borderRadius: '12px',
-            mt: 1,
-            boxShadow: theme.shadows[8],
+        slotProps={{
+          paper: {
+            sx: {
+              width: 360,
+              maxHeight: 480,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              mt: 1,
+            },
           },
         }}
       >
-        <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Typography variant="subtitle1" fontWeight={700}>
-            الإشعارات
-          </Typography>
-          <Chip label={`${unreadCount} جديد`} color="primary" size="small" />
+        {/* Header */}
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'}`,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="subtitle2" fontWeight={600}>
+              الإشعارات
+            </Typography>
+            {unreadCount > 0 && (
+              <Chip
+                label={unreadCount}
+                size="small"
+                color="error"
+                sx={{ height: 18, fontSize: '0.65rem', minWidth: 24 }}
+              />
+            )}
+          </Box>
+          {unreadCount > 0 && (
+            <Button
+              size="small"
+              onClick={handleMarkAllRead}
+              sx={{ fontSize: '0.75rem', p: 0.5, minWidth: 'auto' }}
+            >
+              تحديد الكل كمقروء
+            </Button>
+          )}
         </Box>
-        <Divider />
-        <List disablePadding sx={{ maxHeight: 320, overflow: 'auto' }}>
-          {notifications.map((notif) => (
+
+        {/* List */}
+        <List sx={{ overflow: 'auto', py: 0.5, flex: 1 }}>
+          {notifs.map((n) => (
             <ListItem
-              key={notif.id}
+              key={n.id}
               alignItems="flex-start"
+              onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
               sx={{
+                px: 2,
+                py: 1.25,
                 cursor: 'pointer',
-                backgroundColor: notif.read ? 'transparent' : alpha(theme.palette.primary.main, 0.04),
-                '&:hover': { backgroundColor: theme.palette.action.hover },
+                backgroundColor: !n.read
+                  ? isDark ? 'rgba(99,102,241,0.07)' : alpha('#6366F1', 0.04)
+                  : 'transparent',
+                borderRight: !n.read ? `3px solid #6366F1` : '3px solid transparent',
+                transition: 'background-color 0.15s',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+                },
               }}
             >
-              <ListItemAvatar>
+              <ListItemAvatar sx={{ minWidth: 40 }}>
                 <Avatar
                   sx={{
                     width: 36,
                     height: 36,
-                    bgcolor:
-                      notif.type === 'warning'
-                        ? alpha(theme.palette.warning.main, 0.12)
-                        : notif.type === 'event'
-                        ? alpha(theme.palette.info.main, 0.12)
-                        : alpha(theme.palette.primary.main, 0.12),
-                    color:
-                      notif.type === 'warning'
-                        ? theme.palette.warning.main
-                        : notif.type === 'event'
-                        ? theme.palette.info.main
-                        : theme.palette.primary.main,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : NOTIF_COLORS[n.type],
                   }}
                 >
-                  <NotificationsIcon sx={{ fontSize: 18 }} />
+                  {NOTIF_ICONS[n.type]}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    {!notif.read && <CircleIcon sx={{ fontSize: 6, color: 'primary.main' }} />}
-                    <Typography variant="body2" fontWeight={notif.read ? 400 : 600} noWrap>
-                      {notif.title}
-                    </Typography>
-                  </Box>
+                  <Typography variant="body2" fontWeight={n.read ? 400 : 600} sx={{ lineHeight: 1.4 }}>
+                    {n.title}
+                  </Typography>
                 }
                 secondary={
-                  <>
-                    <Typography variant="caption" color="text.secondary" component="span">
-                      {notif.body}
+                  <Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25 }}>
+                      {n.body}
                     </Typography>
-                    <br />
-                    <Typography variant="caption" color="text.disabled" component="span">
-                      {notif.time}
+                    <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5, display: 'block' }}>
+                      {n.time}
                     </Typography>
-                  </>
+                  </Box>
                 }
               />
             </ListItem>
           ))}
         </List>
-        <Divider />
-        <Box sx={{ p: 1.5, textAlign: 'center' }}>
-          <MuiLink
-            onClick={() => { setNotifAnchor(null); navigate('/smart-notifications'); }}
-            sx={{ cursor: 'pointer', fontSize: '0.8125rem', fontWeight: 600 }}
+
+        {/* Footer */}
+        <Box
+          sx={{
+            px: 2,
+            py: 1.25,
+            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'}`,
+            textAlign: 'center',
+          }}
+        >
+          <Button
+            size="small"
+            fullWidth
+            onClick={() => { setNotifAnchor(null); navigate('/notifications'); }}
+            sx={{ fontSize: '0.8125rem', color: 'primary.main' }}
           >
-            عرض جميع الإشعارات
-          </MuiLink>
+            عرض كل الإشعارات
+          </Button>
         </Box>
       </Popover>
 
-      {/* ─── User Menu ─────────────────────────────────────────────────────── */}
+      {/* ── User Menu ─────────────────────────────────────────────────────── */}
       <Menu
-        anchorEl={userMenuAnchor}
-        open={Boolean(userMenuAnchor)}
-        onClose={() => setUserMenuAnchor(null)}
-        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-        PaperProps={{
-          sx: { width: 220, borderRadius: '12px', mt: 1, boxShadow: theme.shadows[8] },
-        }}
+        anchorEl={userAnchor}
+        open={Boolean(userAnchor)}
+        onClose={() => setUserAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        slotProps={{ paper: { sx: { width: 220, mt: 1 } } }}
       >
-        <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="subtitle2" fontWeight={700}>
-            {currentUser?.name || 'المستخدم'}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {currentUser?.email || ''}
-          </Typography>
+        {/* User info */}
+        <Box sx={{ px: 2, py: 1.5, mb: 0.5 }}>
+          <Typography variant="subtitle2" fontWeight={700}>{displayName}</Typography>
+          <Typography variant="caption" color="text.secondary">{displayRole}</Typography>
         </Box>
+
         <Divider sx={{ mb: 0.5 }} />
-        <MenuItem onClick={() => { setUserMenuAnchor(null); navigate('/profile'); }}>
-          <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>الملف الشخصي</ListItemText>
+
+        <MenuItem onClick={() => { setUserAnchor(null); navigate('/profile'); }}>
+          <AccountCircleOutlined sx={{ fontSize: 18, mr: 1.5, color: 'text.secondary' }} />
+          <Typography variant="body2">الملف الشخصي</Typography>
         </MenuItem>
-        <MenuItem onClick={() => { setUserMenuAnchor(null); navigate('/profile'); }}>
-          <ListItemIcon><SettingsIcon fontSize="small" /></ListItemIcon>
-          <ListItemText>الإعدادات</ListItemText>
+
+        <MenuItem onClick={() => { setUserAnchor(null); navigate('/settings'); }}>
+          <SettingsOutlined sx={{ fontSize: 18, mr: 1.5, color: 'text.secondary' }} />
+          <Typography variant="body2">الإعدادات</Typography>
         </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-          <ListItemIcon><LogoutIcon fontSize="small" color="error" /></ListItemIcon>
-          <ListItemText>تسجيل الخروج</ListItemText>
+
+        <Divider sx={{ my: 0.5 }} />
+
+        <MenuItem
+          onClick={handleLogout}
+          sx={{ color: 'error.main', '&:hover': { backgroundColor: alpha('#F43F5E', 0.06) } }}
+        >
+          <LogoutOutlined sx={{ fontSize: 18, mr: 1.5 }} />
+          <Typography variant="body2" fontWeight={500}>تسجيل الخروج</Typography>
         </MenuItem>
       </Menu>
     </AppBar>
   );
-};
-
-export default ProHeader;
+}

@@ -178,6 +178,21 @@ port*-process.json
 dead-analysis.txt
 dead-files-report.txt
 build_output.txt
+build-output.txt
+
+# ───────────────────────────────────────────────────────────────
+# 14. Frontend Build Helper Scripts (dev-only temp files)
+# ───────────────────────────────────────────────────────────────
+frontend/build-result.txt
+frontend/build-output.txt
+frontend/capture-build.cjs
+frontend/fix-map-i.cjs
+frontend/fix-unused-imports.cjs
+frontend/fix-unused-imports.js
+frontend/run-build.bat
+frontend/find-palette-imports.js
+frontend/*.bat
+frontend/*.cjs
 
 # ───────────────────────────────────────────────────────────────
 # 13. Archived Code & Legacy Backups

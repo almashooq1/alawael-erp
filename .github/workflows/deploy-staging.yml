@@ -45,7 +45,7 @@ jobs:
       short_sha: ${{ steps.info.outputs.short_sha }}
       has_ssh: ${{ steps.check.outputs.has_ssh }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 2
 
@@ -79,9 +79,9 @@ jobs:
     continue-on-error: true
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -102,7 +102,7 @@ jobs:
           CI: "false"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-build-staging-${{ github.sha }}
           path: frontend/build/
@@ -122,7 +122,7 @@ jobs:
       name: staging
       url: https://${{ secrets.STAGING_DOMAIN || 'staging.alaweal.org' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Download frontend
         uses: actions/download-artifact@v8

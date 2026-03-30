@@ -18,6 +18,7 @@ import ProHeader from './ProHeader';
 import { DashboardSkeleton } from '../ui/LoadingSkeleton';
 import RouteErrorBoundary from '../shared/RouteErrorBoundary';
 import WatermarkBackground from '../shared/WatermarkBackground';
+import { useThemeMode } from '../../contexts/ThemeContext';
 
 const SIDEBAR_STATE_KEY = 'alawael-sidebar-collapsed';
 
@@ -25,6 +26,7 @@ const ProLayout = () => {
   const theme = useTheme();
   const location = useLocation();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { toggleTheme, mode: themeMode } = useThemeMode();
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
@@ -87,6 +89,8 @@ const ProLayout = () => {
         <ProHeader
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={handleToggleMobile}
+          themeMode={themeMode}
+          onToggleTheme={toggleTheme}
         />
 
         {/* Content Area */}

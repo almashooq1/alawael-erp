@@ -180,7 +180,14 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
       sx={{
         width: { md: `calc(100% - ${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px)` },
         height: HEADER_HEIGHT,
-        zIndex: theme.zIndex.drawer - 1,
+        zIndex: theme.zIndex.appBar || 1100,
+        background: isDark
+          ? 'rgba(15, 23, 42, 0.85)'
+          : 'rgba(255, 255, 255, 0.82)',
+        backdropFilter: 'blur(12px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+        color: isDark ? '#FFFFFF' : 'text.primary',
         transition: theme.transitions.create(['width', 'margin'], {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,

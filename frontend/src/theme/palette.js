@@ -294,9 +294,13 @@ export const neutralColors = {
 // ─── Status Colors ────────────────────────────────────────────────────────────
 export const statusColors = {
   success: '#10B981',
+  successDark: '#059669',
   error: '#EF4444',
+  errorDark: '#DC2626',
   warning: '#F59E0B',
+  warningDark: '#D97706',
   info: '#0EA5E9',
+  infoDark: '#0284C7',
   primary: '#6366F1',
   primaryBlue: '#3B82F6',
   purple: '#7C3AED',
@@ -306,7 +310,8 @@ export const statusColors = {
 };
 
 // ─── Chart Colors ─────────────────────────────────────────────────────────────
-export const chartColors = [
+// Supports both array access (chartColors[i]) and named palettes (chartColors.main, chartColors.hr)
+const _chartColorsArray = [
   '#6366F1',
   '#10B981',
   '#F59E0B',
@@ -320,6 +325,17 @@ export const chartColors = [
   '#06B6D4',
   '#8B5CF6',
 ];
+
+export const chartColors = Object.assign([..._chartColorsArray], {
+  // Named palettes used by dashboard components
+  main: _chartColorsArray,
+  hr: ['#6366F1', '#10B981', '#F59E0B', '#0EA5E9', '#EC4899', '#14B8A6', '#F97316'],
+  finance: ['#10B981', '#6366F1', '#F59E0B', '#0EA5E9', '#F43F5E'],
+  expense: ['#F59E0B', '#6366F1', '#10B981', '#EC4899', '#F97316', '#0EA5E9', '#EF4444'],
+  clinical: ['#0EA5E9', '#10B981', '#6366F1', '#F59E0B', '#EC4899', '#F97316'],
+  operations: ['#14B8A6', '#6366F1', '#F59E0B', '#EF4444', '#0EA5E9'],
+  revenue: ['#10B981', '#059669', '#34D399', '#6EE7B7'],
+});
 
 // ─── Leave Colors ─────────────────────────────────────────────────────────────
 export const leaveColors = {
@@ -390,8 +406,18 @@ Object.assign(brandColors, {
   accentCoral: '#F43F5E',
   accentOrange: '#F97316',
   accentPurple: '#7C3AED',
+  accentPink: '#EC4899',
+  accentRose: '#F43F5E', // alias for accentCoral
+  accentTeal: '#14B8A6',
+  goldenYellow: '#F59E0B',
+  ocean: '#0EA5E9',
   primary: '#6366F1',
   secondary: '#7C3AED',
+});
+
+// ─── Extended gradients (backwards compat) ───────────────────────────────────
+Object.assign(gradients, {
+  primaryReversed: gradients.primaryRev,
 });
 
 export default {

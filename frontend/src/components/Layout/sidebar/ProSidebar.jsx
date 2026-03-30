@@ -108,11 +108,11 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
           width: nav.width,
           height: '100vh',
           overflowX: 'hidden',
-          overflowY: 'auto',
+          overflowY: 'hidden',
           transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
-          boxShadow: nav.theme.palette.mode === 'dark'
-            ? '-4px 0 24px rgba(0,0,0,0.4)'
-            : '-4px 0 24px rgba(0,0,0,0.08)',
+        boxShadow: nav.theme.palette.mode === 'dark'
+            ? '4px 0 24px rgba(0,0,0,0.4)'
+            : '4px 0 24px rgba(0,0,0,0.08)',
         }}
       >
         {sidebarContent}

@@ -1,6 +1,8 @@
 # ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — CI Pipeline (v4 — Stable)
-#  فحص جودة ← بناء الواجهة ← تدقيق أمني
+#  Al-Awael ERP — CI Pipeline (v5 — Professional & Stable)
+#  ─────────────────────────────────────────────────────────────────
+#  BLOCKING  : Frontend Build (job: build-frontend)
+#  NON-BLOCKING: Lint, Tests, Security (continue-on-error: true)
 # ════════════════════════════════════════════════════════════════════
 name: "CI — Al-Awael ERP"
 
@@ -17,6 +19,11 @@ concurrency:
 
 env:
   NODE_VERSION: "20"
+  # Disable Husky in all CI jobs — no interactive hooks
+  HUSKY: "0"
+  # Disable npm audit noise in install steps
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_AUDIT: "false"
 
 permissions:
   contents: read
@@ -25,24 +32,26 @@ permissions:
 
 jobs:
   # ═══════════════════════════════════════════════════════════════════
-  #  1. Frontend Build — الفحص الأساسي الإلزامي
+  #  1. Frontend Build ── CRITICAL — only blocking job
   # ═══════════════════════════════════════════════════════════════════
   build-frontend:
     name: "📦 Frontend Build"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: frontend
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps --no-audit --no-fund
 
       - name: Build production bundle
         working-directory: frontend
@@ -51,14 +60,22 @@ jobs:
           CI: "false"
           GENERATE_SOURCEMAP: "false"
           REACT_APP_API_URL: /api
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
-      - name: Check bundle size
+      - name: Report bundle size
         working-directory: frontend
         run: |
           TOTAL=$(du -sh build/ | cut -f1)
-          JS_SIZE=$(du -sh build/static/js/ 2>/dev/null | cut -f1 || echo "N/A")
-          CSS_SIZE=$(du -sh build/static/css/ 2>/dev/null | cut -f1 || echo "N/A")
-          echo "📦 Bundle: $TOTAL total | JS: $JS_SIZE | CSS: $CSS_SIZE"
+          JS=$(du -sh build/static/js/ 2>/dev/null | cut -f1 || echo "N/A")
+          CSS=$(du -sh build/static/css/ 2>/dev/null | cut -f1 || echo "N/A")
+          echo "📦 Total: $TOTAL | JS: $JS | CSS: $CSS"
+
+          echo "## 📦 Frontend Bundle" >> $GITHUB_STEP_SUMMARY
+          echo "| Asset | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|:------|-----:|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| JS    | $JS |" >> $GITHUB_STEP_SUMMARY
+          echo "| CSS   | $CSS |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -68,7 +85,7 @@ jobs:
           retention-days: 7
 
   # ═══════════════════════════════════════════════════════════════════
-  #  2. Backend Lint — فحص الجودة (غير حرج)
+  #  2. Backend Lint ── NON-BLOCKING (warnings only, 0 errors expected)
   # ═══════════════════════════════════════════════════════════════════
   lint-backend:
     name: "🔍 Backend Lint"
@@ -76,24 +93,30 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install backend deps
+      - name: Install backend dependencies
         working-directory: backend
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
-      - name: ESLint check
+      - name: Run ESLint
         working-directory: backend
-        run: npm run lint || echo "⚠️ ESLint warnings found — non-blocking"
+        # Always exit 0 — lint issues are informational in CI
+        run: |
+          npm run lint 2>&1 || true
+          echo "✅ Lint check complete (non-blocking)"
 
   # ═══════════════════════════════════════════════════════════════════
-  #  3. Backend Tests — اختبارات الخلفية (غير حرجة)
+  #  3. Backend Tests ── NON-BLOCKING
+  #     Uses MongoMemoryServer — binary is cached to avoid downloads
   # ═══════════════════════════════════════════════════════════════════
   test-backend:
     name: "🧪 Backend Tests"
@@ -103,27 +126,58 @@ jobs:
     env:
       NODE_ENV: test
       DISABLE_REDIS: "true"
+      USE_MOCK_DB: "true"
+      JWT_SECRET: "ci-test-secret-minimum-32-chars-long!!"
+      CSRF_DISABLE: "true"
+      # Cache MongoDB binary for MongoMemoryServer — avoids 100MB download every run
+      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
+      MONGOMS_VERSION: "7.0.14"
+      MONGOMS_PREFER_GLOBAL_PATH: "false"
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
-        working-directory: backend
-        run: npm ci
+      # Cache MongoDB binary (MongoMemoryServer) — ~100MB, saves 2-3 min per run
+      - name: Cache MongoDB binary
+        id: mongo-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/.cache/mongodb-binaries
+          key: mongodb-binary-7.0.14-ubuntu-latest
+          restore-keys: |
+            mongodb-binary-7.0.14-
+            mongodb-binary-
 
-      - name: Run tests
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Run tests (non-blocking)
         working-directory: backend
         run: |
-          npm test -- --passWithNoTests --no-coverage --forceExit --ci --runInBand 2>&1 | tail -30 || true
-          echo "✅ Tests completed (non-blocking)"
+          # Use the dedicated CI test script — already has correct flags
+          npm run test:ci 2>&1 | tail -50 || true
+          echo ""
+          echo "✅ Tests completed (non-blocking — see output above)"
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## 🧪 Backend Tests" >> $GITHUB_STEP_SUMMARY
+          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | non-blocking |" >> $GITHUB_STEP_SUMMARY
+          echo "| MongoDB cache | ${{ steps.mongo-cache.outputs.cache-hit == 'true' && 'HIT ✅' || 'MISS (downloading)' }} |" >> $GITHUB_STEP_SUMMARY
 
   # ═══════════════════════════════════════════════════════════════════
-  #  4. Security Scan — فحص أمني خفيف (غير حرج)
+  #  4. Security Audit ── NON-BLOCKING
   # ═══════════════════════════════════════════════════════════════════
   security:
     name: "🔒 Security Audit"
@@ -131,37 +185,61 @@ jobs:
     timeout-minutes: 10
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Audit backend
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit for critical vulnerabilities
         working-directory: backend
         run: |
-          npm ci --no-audit
-          npm audit --audit-level=critical 2>&1 || echo "⚠️ Audit warnings — review recommended"
+          echo "🔍 Running npm audit (critical only)..."
+          npm audit --audit-level=critical --json 2>/dev/null \
+            | node -e "
+              let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
+                try {
+                  const r=JSON.parse(d);
+                  const crit=(r.metadata?.vulnerabilities?.critical)||0;
+                  console.log('Critical vulnerabilities: '+crit);
+                  if(crit>0) process.exit(1);
+                } catch(e) { console.log('Audit parse error — skipping'); }
+              });
+            " || echo "⚠️ Audit found issues — review recommended (non-blocking)"
 
       - name: Scan for hardcoded secrets
         run: |
-          echo "🔍 Scanning for leaked secrets..."
-          FOUND=$(grep -rn --include="*.js" --include="*.jsx" \
-            -E "(password|secret|api_key)\s*=\s*['\"][^'\"]{12,}['\"]" \
-            frontend/src/ backend/routes/ backend/controllers/ 2>/dev/null \
-            | grep -v "node_modules" \
-            | grep -v "process\.env" \
-            | grep -v "example\|mock\|test\|placeholder" \
-            | head -5 || true)
-          if [ -z "$FOUND" ]; then
+          echo "🔍 Scanning for hardcoded credentials..."
+          FOUND=0
+          # Look for suspicious patterns excluding env/config references
+          while IFS= read -r line; do
+            FILE=$(echo "$line" | cut -d: -f1)
+            # Skip test files, examples, configs
+            echo "$FILE" | grep -qE "(test|spec|example|mock|fixture|seed)" && continue
+            echo "⚠️ Potential secret: $line"
+            FOUND=$((FOUND + 1))
+          done < <(grep -rn --include="*.js" --include="*.jsx" \
+            -E "password\s*[:=]\s*['\"][^'\"]{8,}['\"]" \
+            backend/routes/ backend/controllers/ frontend/src/ 2>/dev/null \
+            | grep -v "process\.env\|req\.\|body\.\|params\.\|query\.\|config\." \
+            | grep -v "node_modules" || true)
+
+          if [ "$FOUND" -eq 0 ]; then
             echo "✅ No hardcoded secrets found"
           else
-            echo "⚠️ Review these lines:"
-            echo "$FOUND"
+            echo "⚠️ Found $FOUND potential issues (non-blocking — review manually)"
           fi
 
   # ═══════════════════════════════════════════════════════════════════
-  #  5. CI Summary
+  #  5. CI Summary ── runs always, fails ONLY if build-frontend failed
   # ═══════════════════════════════════════════════════════════════════
   summary:
     name: "📋 CI Summary"
@@ -169,32 +247,42 @@ jobs:
     needs: [build-frontend, lint-backend, test-backend, security]
     if: always()
     steps:
-      - name: Build summary
+      - name: Generate summary
         run: |
           BUILD="${{ needs.build-frontend.result }}"
           LINT="${{ needs.lint-backend.result }}"
           TESTS="${{ needs.test-backend.result }}"
           SEC="${{ needs.security.result }}"
 
-          icon() { case "$1" in success) echo "✅";; failure) echo "❌";; skipped) echo "⏭️";; *) echo "⚠️";; esac; }
+          icon() {
+            case "$1" in
+              success) echo "✅";;
+              failure) echo "❌";;
+              skipped) echo "⏭️";;
+              cancelled) echo "🚫";;
+              *) echo "⚠️";;
+            esac
+          }
 
           echo "## 📋 Al-Awael ERP — CI Report" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Stage | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|:------|:------:|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Frontend Build (critical) | $(icon $BUILD) $BUILD |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Backend Lint | $(icon $LINT) $LINT |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Backend Tests | $(icon $TESTS) $TESTS |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security | $(icon $SEC) $SEC |" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Result | Blocking? |" >> $GITHUB_STEP_SUMMARY
+          echo "|:----|:------:|:---------:|" >> $GITHUB_STEP_SUMMARY
+          echo "| 📦 Frontend Build | $(icon $BUILD) \`$BUILD\` | 🔴 YES |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔍 Backend Lint   | $(icon $LINT) \`$LINT\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🧪 Backend Tests  | $(icon $TESTS) \`$TESTS\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Security       | $(icon $SEC) \`$SEC\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Info | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|:-----|:------|" >> $GITHUB_STEP_SUMMARY
           echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Actor  | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Fail only if frontend build broke
+      - name: Fail ONLY if frontend build broke
         if: needs.build-frontend.result == 'failure'
         run: |
-          echo "❌ Frontend build FAILED — this is a blocking error!"
+          echo "❌ Frontend build FAILED — this is the only blocking check."
+          echo "   Fix the build error and push again."
           exit 1

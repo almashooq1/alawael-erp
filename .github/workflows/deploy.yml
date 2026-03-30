@@ -5,7 +5,7 @@
 name: "⚡ Quick Deploy (Manual)"
 
 on:
-  # ✅ يدوي فقط — أُزيل التشغيل التلقائي على push
+  # ✅ يدوي فقط — لا يعمل تلقائياً على push
   workflow_dispatch:
     inputs:
       force_rebuild:
@@ -16,17 +16,24 @@ on:
 
 env:
   PROJECT_DIR: /opt/alawael-erp
+  HUSKY: "0"
 
 jobs:
   validate:
     name: "✅ Validate"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Validate docker-compose
+      - name: Validate docker-compose syntax
         run: |
-          docker compose config --quiet 2>/dev/null && echo "✅ docker-compose.yml valid" || echo "⚠️ docker-compose validation skipped"
+          # docker compose config validates YAML syntax
+          if docker compose config --quiet 2>/dev/null; then
+            echo "✅ docker-compose.yml is valid"
+          else
+            echo "⚠️ docker-compose validation skipped (non-blocking)"
+          fi
 
       - name: Check required secrets
         run: |
@@ -35,6 +42,7 @@ jobs:
           [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing: VPS_USER"    && MISSING=1
           [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
           if [ "$MISSING" = "1" ]; then
+            echo ""
             echo "⚙️  Set secrets at: Settings → Secrets and variables → Actions"
             exit 1
           fi
@@ -46,7 +54,8 @@ jobs:
     needs: validate
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -56,7 +65,7 @@ jobs:
       - name: Add VPS to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
           echo "✅ Added VPS to known hosts"
 
       - name: Deploy to VPS
@@ -64,43 +73,54 @@ jobs:
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
             set -e
             cd ${{ env.PROJECT_DIR }}
+
             echo "📥 Pulling latest..."
-            git fetch origin && git reset --hard origin/main
+            git fetch origin
+            git reset --hard origin/main
 
-            [ ! -f .env ] && cp .env.example .env && echo "⚠️ Created .env from example"
+            # Create .env if missing
+            [ ! -f .env ] && cp .env.example .env 2>/dev/null && echo "⚠️ Created .env from example — review settings"
 
-            echo "🐳 Pulling images..."
+            echo "🐳 Pulling base images..."
             docker compose pull mongodb redis 2>/dev/null || true
 
-            echo "🔨 Building & starting..."
+            echo "🔨 Building & starting services..."
             if [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
               docker compose up -d --build --force-recreate
             else
               docker compose up -d --build
             fi
 
+            # Cleanup old images
             docker image prune -f
+
+            echo "📊 Service status:"
             docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
-            echo "✅ Deployment done!"
+            echo "✅ Deployment complete!"
           ENDSSH
 
-      - name: Verify
+      - name: Verify deployment
         run: |
           sleep 30
+          echo "🔍 Checking service health..."
           ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
-            cd ${{ env.PROJECT_DIR }}
             for svc in alawael-backend alawael-frontend alawael-mongodb; do
-              STATUS=$(docker inspect --format='{{.State.Status}}' $svc 2>/dev/null || echo "missing")
-              [ "$STATUS" = "running" ] && echo "✅ $svc: running" || echo "⚠️  $svc: $STATUS"
+              STATUS=$(docker inspect --format='{{.State.Status}}' $svc 2>/dev/null || echo "not found")
+              if [ "$STATUS" = "running" ]; then
+                echo "✅ $svc: $STATUS"
+              else
+                echo "⚠️  $svc: $STATUS"
+              fi
             done
           ENDSSH
 
-      - name: Result
+      - name: Deployment summary
         if: always()
         run: |
-          echo "## 🚀 Quick Deploy Result" >> $GITHUB_STEP_SUMMARY
+          echo "## ⚡ Quick Deploy" >> $GITHUB_STEP_SUMMARY
           echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
           echo "| Actor  | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Force rebuild | ${{ github.event.inputs.force_rebuild }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY

@@ -156,6 +156,8 @@ const ExpenseManagement = lazyWithRetry(() => import('./pages/finance/ExpenseMan
 
 // ─── Premium Glassmorphism Dashboards ───────────────────────────────────────
 const PremiumHub = lazyWithRetry(() => import('./pages/PremiumHub'));
+const TherapistProDashboard = lazyWithRetry(() => import('./pages/TherapistProDashboard'));
+const KPIProDashboard = lazyWithRetry(() => import('./pages/KPIProDashboard'));
 const CEODashboardPro = lazyWithRetry(() => import('./pages/CEODashboard'));
 const HRAdvancedDashboard = lazyWithRetry(() => import('./pages/HRAdvancedDashboard'));
 const FinanceDashboardPro = lazyWithRetry(() => import('./pages/FinanceDashboard'));
@@ -416,6 +418,8 @@ function AppContent() {
                               <Route path="security-pro" element={<SecurityDashboardPro />} />
                               <Route path="analytics-pro" element={<AnalyticsDashboardPro />} />
                               <Route path="settings-pro" element={<SettingsDashboardPro />} />
+                              <Route path="therapist-pro" element={<TherapistProDashboard />} />
+                              <Route path="kpi-pro" element={<KPIProDashboard />} />
                             </Route>
                             {/* 404 - Not Found */}
                             <Route path="*" element={<NotFound />} />

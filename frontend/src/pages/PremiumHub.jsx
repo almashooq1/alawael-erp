@@ -28,6 +28,8 @@ import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import StarIcon from '@mui/icons-material/Star';
+import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
+import SpeedIcon from '@mui/icons-material/Speed';
 
 // ─── Dashboard Cards Config ────────────────────────────────────────────────────
 const PREMIUM_DASHBOARDS = [
@@ -194,6 +196,36 @@ const PREMIUM_DASHBOARDS = [
       { label: 'وحدة نظام', value: '٤٢' },
       { label: 'آخر نسخة احتياطية', value: 'أمس' },
       { label: 'وقت التشغيل', value: '٩٩.٩٪' },
+    ],
+  },
+  {
+    id: 'therapist-pro',
+    path: '/therapist-pro',
+    title: 'لوحة المعالج المتكاملة',
+    subtitle: 'إدارة الجلسات والمرضى والتأهيل',
+    icon: SupervisorAccountIcon,
+    gradient: 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)',
+    glow: 'rgba(6,182,212,0.4)',
+    tags: ['المعالج', 'الجلسات', 'التأهيل'],
+    stats: [
+      { label: 'مريض نشط', value: '٣٨' },
+      { label: 'جلسة اليوم', value: '١٢' },
+      { label: 'معدل الإنجاز', value: '٩٢٪' },
+    ],
+  },
+  {
+    id: 'kpi-pro',
+    path: '/kpi-pro',
+    title: 'مؤشرات الأداء الاستراتيجية',
+    subtitle: 'تتبع الأهداف ومؤشرات النجاح',
+    icon: SpeedIcon,
+    gradient: 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #6366f1 100%)',
+    glow: 'rgba(245,158,11,0.4)',
+    tags: ['KPIs', 'الأهداف', 'الأداء'],
+    stats: [
+      { label: 'مؤشر نشط', value: '٢٤' },
+      { label: 'هدف مُنجز', value: '١٨' },
+      { label: 'تحقق الأهداف', value: '٧٥٪' },
     ],
   },
 ];

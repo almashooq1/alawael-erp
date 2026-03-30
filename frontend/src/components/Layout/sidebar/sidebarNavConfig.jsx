@@ -163,6 +163,8 @@ const getNavigationItems = () => [
       { id: 'security-pro', label: 'الأمان والحماية', path: '/security-pro' },
       { id: 'analytics-pro', label: 'التحليلات المتقدمة', path: '/analytics-pro' },
       { id: 'settings-pro', label: 'إعدادات النظام', path: '/settings-pro' },
+      { id: 'therapist-pro', label: 'لوحة المعالج المتكاملة', path: '/therapist-pro' },
+      { id: 'kpi-pro', label: 'مؤشرات الأداء الاستراتيجية', path: '/kpi-pro' },
     ],
   },
 

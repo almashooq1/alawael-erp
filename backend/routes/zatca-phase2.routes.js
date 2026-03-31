@@ -7,7 +7,8 @@
 const express = require('express');
 const router = express.Router();
 const zatcaService = require('../services/zatca-phase2.service');
-const { requireAuth } = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const requireAuth = authenticateToken;
 
 // ─── معالجة فاتورة كاملة (بناء XML + QR + إرسال) ─────────────────────────
 /**

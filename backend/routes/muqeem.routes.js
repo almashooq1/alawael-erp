@@ -7,8 +7,8 @@
 const express = require('express');
 const router = express.Router();
 const muqeemService = require('../services/muqeem.service');
-const { requireAuth } = require('../middleware/auth.middleware');
-const { requirePermission } = require('../middleware/rbac.v2.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const requireAuth = authenticateToken;
 
 // ─── الاستعلام عن إقامة موظف ───────────────────────────────────────────────
 /**

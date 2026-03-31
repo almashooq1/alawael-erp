@@ -7,7 +7,8 @@
 const express = require('express');
 const router = express.Router();
 const nphiesService = require('../services/nphies.service');
-const { requireAuth } = require('../middleware/auth.middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const requireAuth = authenticateToken;
 
 // ─── التحقق من أهلية التأمين ─────────────────────────────────────────────
 /**

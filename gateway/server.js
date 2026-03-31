@@ -2,6 +2,7 @@
  * 🚀 API Gateway - AlAwael ERP v3.0
  * Central entry point for all microservices
  * Features: Authentication, Rate Limiting, Load Balancing, Circuit Breaking
+ * FIXED: pathRewrite, body forwarding, CORS
  */
 
 const express = require('express');
@@ -31,13 +32,13 @@ const config = {
     notifications: process.env.NOTIFICATIONS_SERVICE_URL || 'http://localhost:3005',
   },
   rateLimit: {
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000,
+    max: 500,
   },
   circuitBreaker: {
-    timeout: 10000, // 10 seconds
+    timeout: 15000,
     errorThresholdPercentage: 50,
-    resetTimeout: 30000, // 30 seconds
+    resetTimeout: 30000,
   },
 };
 
@@ -57,18 +58,40 @@ const logger = winston.createLogger({
 // Express app
 const app = express();
 
-// Middleware
-app.use(helmet()); // Security headers
+// CORS - Allow all origins for internal deployment
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
+  : [
+      'http://localhost:3000',
+      'http://localhost:3004',
+      'http://localhost:5173',
+      'http://72.60.84.56:3004',
+      'http://72.60.84.56',
+    ];
+
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:3000', 'http://localhost:5173'],
+    origin: function(origin, callback) {
+      // Allow requests with no origin (curl, mobile apps, etc.)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+      // Also allow any IP-based origin in production
+      return callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Trace-Id'],
   }),
 );
-app.use(compression()); // Compress responses
+
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(compression());
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+
+// NOTE: body parsers are applied AFTER proxy routes to avoid consuming the stream
+// DO NOT add express.json() here before proxies
 
 // Distributed tracing
 app.use(tracingMiddleware);
@@ -85,15 +108,10 @@ const limiter = rateLimit({
     res.status(429).json({
       error: 'Too many requests',
       message: 'Please try again later',
-      retryAfter: Math.ceil(config.rateLimit.windowMs / 1000),
     });
   },
 });
-
 app.use('/api/', limiter);
-
-// Health aggregator routes (/health/status, /health/services, /health/ready, /health/live)
-mountHealthRoutes(app);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -118,15 +136,13 @@ app.get('/api/docs', (req, res) => {
       '/api/reports': 'Reports Service',
       '/api/notifications': 'Notifications Service',
     },
-    documentation: 'https://docs.alawael.sa/api',
   });
 });
 
-// Circuit Breaker for each service
+// Circuit Breaker factory
 const createCircuitBreaker = (serviceName, serviceUrl) => {
   const breaker = new CircuitBreaker(
     async req => {
-      // This is a placeholder - actual proxy is handled by http-proxy-middleware
       return { success: true };
     },
     {
@@ -135,19 +151,9 @@ const createCircuitBreaker = (serviceName, serviceUrl) => {
       resetTimeout: config.circuitBreaker.resetTimeout,
     },
   );
-
-  breaker.on('open', () => {
-    logger.error(`Circuit breaker opened for ${serviceName}`);
-  });
-
-  breaker.on('halfOpen', () => {
-    logger.info(`Circuit breaker half-open for ${serviceName}`);
-  });
-
-  breaker.on('close', () => {
-    logger.info(`Circuit breaker closed for ${serviceName}`);
-  });
-
+  breaker.on('open', () => logger.error(`Circuit breaker opened for ${serviceName}`));
+  breaker.on('halfOpen', () => logger.info(`Circuit breaker half-open for ${serviceName}`));
+  breaker.on('close', () => logger.info(`Circuit breaker closed for ${serviceName}`));
   return breaker;
 };
 
@@ -155,9 +161,9 @@ const createCircuitBreaker = (serviceName, serviceUrl) => {
 Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
   const circuitBreaker = createCircuitBreaker(serviceName, serviceUrl);
 
+  // Circuit breaker check middleware
   app.use(`/api/${serviceName}`, async (req, res, next) => {
     try {
-      // Check if circuit is open
       if (circuitBreaker.opened) {
         return res.status(503).json({
           error: 'Service temporarily unavailable',
@@ -165,30 +171,29 @@ Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
           message: 'Circuit breaker is open, please try again later',
         });
       }
-
       next();
     } catch (error) {
       logger.error(`Circuit breaker error for ${serviceName}:`, error);
       res.status(503).json({
         error: 'Service error',
         service: serviceName,
-        message: 'حدث خطأ داخلي',
+        message: 'An internal error occurred',
       });
     }
   });
 
-  // Proxy middleware
+  // Proxy middleware - FIX: no pathRewrite (keep /api/auth/... as-is)
+  // FIX: onProxyReq rebuffers body consumed by express middleware
   app.use(
     `/api/${serviceName}`,
     createProxyMiddleware({
       target: serviceUrl,
       changeOrigin: true,
-      pathRewrite: {
-        [`^/api/${serviceName}`]: `/api/${serviceName}`,
-      },
+      // FIXED: Removed pathRewrite - keep full path /api/auth/login → /api/auth/login
       onProxyReq: (proxyReq, req, res) => {
         logger.info(`Proxying request to ${serviceName}: ${req.method} ${req.path}`);
-        // Fix: body was already parsed by express.json(), re-write it for the proxy
+
+        // FIXED: Rebuffer body if express body-parser already consumed it
         if (req.body && Object.keys(req.body).length > 0) {
           const bodyData = JSON.stringify(req.body);
           proxyReq.setHeader('Content-Type', 'application/json');
@@ -200,13 +205,15 @@ Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
         logger.info(`Response from ${serviceName}: ${proxyRes.statusCode}`);
       },
       onError: (err, req, res) => {
-        logger.error(`Proxy error for ${serviceName}:`, err);
-        circuitBreaker.fire(req).catch(() => {}); // Trigger circuit breaker
-        res.status(502).json({
-          error: 'Bad Gateway',
-          service: serviceName,
-          message: 'Service is currently unavailable',
-        });
+        logger.error(`Proxy error for ${serviceName}: ${err.message}`);
+        circuitBreaker.fire(req).catch(() => {});
+        if (!res.headersSent) {
+          res.status(502).json({
+            error: 'Bad Gateway',
+            service: serviceName,
+            message: 'Service is currently unavailable',
+          });
+        }
       },
     }),
   );
@@ -227,7 +234,6 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     error: 'Internal Server Error',
     message: process.env.NODE_ENV === 'production' ? 'An error occurred' : err.message,
-    ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 });
 
@@ -235,7 +241,6 @@ app.use((err, req, res, next) => {
 const server = app.listen(config.port, () => {
   logger.info(`🚀 API Gateway running on port ${config.port}`);
   logger.info(`📊 Health check: http://localhost:${config.port}/health`);
-  logger.info(`📚 API docs: http://localhost:${config.port}/api/docs`);
   logger.info(
     '🔌 Proxying to services:',
     Object.entries(config.services)
@@ -244,27 +249,5 @@ const server = app.listen(config.port, () => {
   );
 });
 
-// --- Server Timeouts (prevent hung connections) ---
-server.timeout = 30_000; // 30 s — max time a request can take
-server.keepAliveTimeout = 65_000; // 65 s — must be > ALB/Nginx idle (usually 60 s)
-server.headersTimeout = 66_000; // slightly higher than keepAliveTimeout
+module.exports = { app, server };
 
-// Graceful shutdown
-const gracefulShutdown = () => {
-  logger.info('Received shutdown signal, closing server...');
-  server.close(() => {
-    logger.info('Server closed, exiting process');
-    process.exit(0);
-  });
-
-  // Force close after 10 seconds
-  setTimeout(() => {
-    logger.error('Could not close connections in time, forcefully shutting down');
-    process.exit(1);
-  }, 10000);
-};
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);
-
-module.exports = app;

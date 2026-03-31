@@ -198,3 +198,22 @@ frontend/*.cjs
 # 13. Archived Code & Legacy Backups
 # ───────────────────────────────────────────────────────────────
 _archived/
+
+# ───────────────────────────────────────────────────────────────
+# 15. VPS Deployment Scripts (contain credentials - never commit)
+# ───────────────────────────────────────────────────────────────
+vps_*.py
+vps_*.txt
+fix_*.py
+fix_*.js
+fix_log.txt
+fix_palette.js
+fix_final.js
+build2.txt
+build_final.txt
+build_warnings.txt
+check_remaining.js
+test.txt
+test2.txt
+test3.txt
+testwrite.txt

@@ -113,6 +113,11 @@ import {
   WafRateLimitRoutes,
   PrintCenterRoutes,
   CarePlanRoutes,
+  // === الميزات الناقصة المضافة ===
+  MuqeemRoutes,
+  ZatcaPhase2Routes,
+  NphiesRoutes,
+  AuditLogsRoutes,
 } from './routes';
 
 // Pages — Keep eagerly loaded (critical path / small)
@@ -396,6 +401,11 @@ function AppContent() {
                               {WafRateLimitRoutes()}
                               {PrintCenterRoutes()}
                               {CarePlanRoutes()}
+                              {/* === الميزات الناقصة المضافة — Saudi Integrations + Audit === */}
+                              {MuqeemRoutes()}
+                              {ZatcaPhase2Routes()}
+                              {NphiesRoutes()}
+                              {AuditLogsRoutes()}
                               {/* === Shared / Cross-cutting Routes === */}
                               {/* AI & Analytics */}
                               <Route

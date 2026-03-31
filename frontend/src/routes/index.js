@@ -130,3 +130,17 @@ export { default as WafRateLimitRoutes } from './WafRateLimitRoutes';
 
 // === Print Center (مركز الطباعة — جميع قوالب الطباعة) ===
 export { default as PrintCenterRoutes } from './PrintCenterRoutes';
+
+// === الميزات الناقصة المضافة — Saudi Integrations + Audit ===
+
+// مقيم — وزارة الداخلية (إقامات الموظفين الأجانب)
+export { default as MuqeemRoutes } from './MuqeemRoutes';
+
+// ZATCA Phase 2 — الفوترة الإلكترونية (منصة فاتورة FATOORA)
+export { default as ZatcaPhase2Routes } from './ZatcaPhase2Routes';
+
+// NPHIES — التأمين الصحي HL7 FHIR R4
+export { default as NphiesRoutes } from './NphiesRoutes';
+
+// سجلات التدقيق المحسّنة — Enhanced Audit Trail
+export { default as AuditLogsRoutes } from './AuditLogsRoutes';

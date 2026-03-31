@@ -265,6 +265,16 @@ const financeOperationsRoutes = require('../routes/financeOperations.routes');
 // Branch Management System — نظام إدارة الفروع مع RBAC متقدم (12 فرع + HQ)
 const branchManagementRoutes = require('../routes/branch.routes');
 
+// ─── الميزات الناقصة المضافة — Missing Features Added ────────────────────────
+// مقيم (Muqeem) — وزارة الداخلية
+const muqeemRoutes = require('../routes/muqeem.routes');
+// ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية
+const zatcaPhase2Routes = require('../routes/zatca-phase2.routes');
+// NPHIES — المنصة الوطنية للمعلومات الصحية والتأمينية
+const nphiesRoutes = require('../routes/nphies.routes');
+// Enhanced Audit — سجل التدقيق المحسّن
+const { router: enhancedAuditRouter } = require('../middleware/enhancedAudit.middleware');
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -1442,6 +1452,38 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'branch-management', branchManagementRoutes);
   logger.info(
     'Branch Management System mounted (25 endpoints — HQ dashboard, cross-branch comparison, financials, staff optimizer, emergency override, branch dashboards, patients, schedule, staff, finance, transport, reports, KPIs, settings, audit logs, RBAC matrix — 12 branches + HQ Riyadh)'
+  );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── الميزات الناقصة المضافة — Missing Features ──────────────────────────
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // مقيم (Muqeem) — وزارة الداخلية: إقامات، تأشيرات، خروج ودخول
+  dualMount(app, 'muqeem', muqeemRoutes);
+  logger.info(
+    '✅ Muqeem routes mounted (7 endpoints: residence-info, workers, expiring, renew, exit-reentry-visa, final-exit-visa, change-occupation)'
+  );
+
+  // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية (UBL 2.1 + SHA-256 + TLV QR)
+  dualMount(app, 'zatca-phase2', zatcaPhase2Routes);
+  logger.info(
+    '✅ ZATCA Phase 2 routes mounted (7 endpoints: process, build-xml, qr, report, clear, compliance-check, status)'
+  );
+
+  // NPHIES — المنصة الوطنية للمعلومات الصحية والتأمينية (HL7 FHIR R4)
+  dualMount(app, 'nphies', nphiesRoutes);
+  logger.info(
+    '✅ NPHIES routes mounted (6 endpoints: eligibility-check, claim-submit, prior-auth, claim-status, cancel-claim, status)'
+  );
+
+  // Enhanced Audit Logs — سجلات التدقيق المحسّنة (فلترة + إحصاءات + ZATCA/NPHIES tracking)
+  dualMount(app, 'audit-logs', enhancedAuditRouter);
+  logger.info(
+    '✅ Enhanced Audit Logs routes mounted (3 endpoints: list with filters, stats, user-audit)'
+  );
+
+  logger.info(
+    '🇸🇦 Saudi Integrations Complete: Muqeem + ZATCA Phase 2 + NPHIES + Enhanced Audit — جميع التكاملات السعودية الناقصة مُضافة'
   );
 
   // ── Route Mount Summary ─────────────────────────────────────────────────

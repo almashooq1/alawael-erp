@@ -184,10 +184,17 @@ Object.entries(config.services).forEach(([serviceName, serviceUrl]) => {
       target: serviceUrl,
       changeOrigin: true,
       pathRewrite: {
-        [`^/api/${serviceName}`]: '',
+        [`^/api/${serviceName}`]: `/api/${serviceName}`,
       },
       onProxyReq: (proxyReq, req, res) => {
         logger.info(`Proxying request to ${serviceName}: ${req.method} ${req.path}`);
+        // Fix: body was already parsed by express.json(), re-write it for the proxy
+        if (req.body && Object.keys(req.body).length > 0) {
+          const bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader('Content-Type', 'application/json');
+          proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
       },
       onProxyRes: (proxyRes, req, res) => {
         logger.info(`Response from ${serviceName}: ${proxyRes.statusCode}`);

@@ -38,7 +38,6 @@ import {
   PersonOff,
   EventAvailable,
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
@@ -141,7 +140,7 @@ const DEMO_EVENTS = (() => {
 /*                          MAIN COMPONENT                               */
 /* ═══════════════════════════════════════════════════════════════════════ */
 export default function SessionCalendarView() {
-  const showSnackbar = useSnackbar();
+  const _showSnackbar = useSnackbar();
   const today = useMemo(() => new Date(), []);
 
   // ─── State ───

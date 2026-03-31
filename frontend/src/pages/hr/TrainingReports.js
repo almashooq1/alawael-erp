@@ -73,13 +73,13 @@ function TabPanel({ children, value, index }) {
 }
 
 export default function TrainingReports() {
-  const theme = useTheme();
-  const { showSnackbar } = useSnackbar();
+  const _theme = useTheme();
+  const { showSnackbar: _showSnackbar } = useSnackbar();
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dashboard, setDashboard] = useState(MOCK_TRAINING_DASHBOARD);
-  const [programs, setPrograms] = useState(MOCK_PROGRAMS);
-  const [certifications, setCertifications] = useState(MOCK_CERTIFICATIONS);
+  const [programs, _setPrograms] = useState(MOCK_PROGRAMS);
+  const [certifications, _setCertifications] = useState(MOCK_CERTIFICATIONS);
 
   const load = useCallback(async () => {
     setLoading(true);

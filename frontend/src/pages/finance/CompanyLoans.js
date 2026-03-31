@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -33,7 +34,8 @@ import {
   Refresh,
   Add,
   Payment,
-  TrendingUp,  Assessment,
+  TrendingUp,
+  Assessment,
   CalendarToday,
   CheckCircle,
   Warning,
@@ -123,6 +125,7 @@ const CompanyLoans = () => {
       console.error(e);
     }
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

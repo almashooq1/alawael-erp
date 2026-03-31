@@ -135,7 +135,7 @@ const GradientHeader = styled(Box)(() => ({
   },
 }));
 
-const TemplateCard = styled(Card)(({ theme, selected }) => ({
+const TemplateCard = styled(Card)(({ selected }) => ({
   borderRadius: 16,
   transition: 'all 0.3s',
   cursor: 'pointer',
@@ -508,7 +508,7 @@ const fieldRow = { display: 'flex', gap: 2, mb: 1.5, flexWrap: 'wrap' };
 const fieldBox = (flex = 1) => ({ flex, minWidth: 150 });
 const label = { fontSize: 11, color: '#666', mb: 0.3 };
 const value = { fontSize: 13, fontWeight: 600, borderBottom: '1px dotted #ccc', pb: 0.5, minHeight: 24 };
-const emptyLine = { borderBottom: '1px dotted #999', pb: 0.5, minHeight: 24, display: 'block' };
+const _emptyLine = { borderBottom: '1px dotted #999', pb: 0.5, minHeight: 24, display: 'block' };
 
 const formatDate = (d) => {
   if (!d) return '....../....../......';

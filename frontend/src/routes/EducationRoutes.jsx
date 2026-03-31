@@ -49,7 +49,7 @@ const BeneficiariesDashboard = lazyWithRetry(
 const BeneficiariesManagementPage = lazyWithRetry(
   () => import('../pages/Beneficiaries/BeneficiariesManagementPage')
 );
-const EnhancedBeneficiariesTable = lazyWithRetry(
+const _EnhancedBeneficiariesTable = lazyWithRetry(
   () => import('../pages/Beneficiaries/EnhancedBeneficiariesTable')
 );
 const BeneficiariesListPage = lazyWithRetry(

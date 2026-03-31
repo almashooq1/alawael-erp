@@ -98,7 +98,7 @@ const TabBtn = memo(({ label, active, onClick, count }) => {
 
 /* ─── Patient Card ─── */
 const PatientCard = memo(({ name, id, age, condition, status, progress, branch, lastVisit, delay = 0 }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const statusColors = { نشط: '#22c55e', مكتمل: '#6366f1', معلق: '#f59e0b', طارئ: '#ef4444', 'في الانتظار': '#06b6d4' };
   const c = statusColors[status] || '#6366f1';
   return (
@@ -177,7 +177,7 @@ const PatientRow = memo(({ name, id, age, condition, status, progress, branch })
 
 /* ─── Alert Item ─── */
 const AlertItem = memo(({ type, msg, patient, time }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#06b6d4', success: '#22c55e' };
   const c = colors[type] || colors.info;
   return (
@@ -213,7 +213,7 @@ const RingGauge = memo(({ value, max = 100, color, label, size = 80 }) => {
 
 /* ─── Appointment Row ─── */
 const AppointmentRow = memo(({ patient, doctor, time, type, status }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const statusColors = { مؤكد: '#22c55e', معلق: '#f59e0b', ملغى: '#ef4444', مكتمل: '#6366f1' };
   const c = statusColors[status] || '#06b6d4';
   return (

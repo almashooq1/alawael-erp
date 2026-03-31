@@ -38,7 +38,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const QUALITY_CATEGORIES = [
   { value: 'clinical', label: 'سريري', icon: '🏥', color: '#3b82f6' },
@@ -50,7 +49,7 @@ const QUALITY_CATEGORIES = [
 ];
 
 const TherapistQualityReports = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [reports, setReports] = useState([]);
   const [stats, setStats] = useState({});
@@ -80,6 +79,7 @@ const TherapistQualityReports = () => {
 
   useEffect(() => {
     fetchReports();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchReports = async () => {

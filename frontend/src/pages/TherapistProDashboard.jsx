@@ -8,7 +8,7 @@ import { useState } from 'react';
 import {
   Box, Typography, Grid, Paper, Avatar, Chip, LinearProgress,
   List, ListItem, ListItemAvatar, ListItemText, Divider,
-  useTheme, alpha, AvatarGroup,
+  useTheme, AvatarGroup,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -18,13 +18,12 @@ import {
   TrendingUpOutlined,
   CheckCircleOutlined,
   AccessTimeOutlined,
-  FavoriteBorderOutlined,
   AssignmentOutlined,
   EmojiEventsOutlined,
   NotificationsActiveOutlined,
 } from '@mui/icons-material';
 import {
-  AreaChart, Area, BarChart, Bar, RadialBarChart, RadialBar,
+  AreaChart, Area, RadialBarChart, RadialBar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 

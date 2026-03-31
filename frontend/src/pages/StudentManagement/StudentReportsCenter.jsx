@@ -61,7 +61,6 @@ import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
-import EmptyState from '../../components/dashboard/shared/EmptyState';
 
 /* ──────── Helper Components ──────── */
 const SectionHeader = ({ icon, title, subtitle, action }) => (
@@ -168,7 +167,7 @@ export default function StudentReportsCenter() {
   const [activeTab, setActiveTab] = useState(0);
   const [reportsSummary, setReportsSummary] = useState(null);
   const [analytics, setAnalytics] = useState(null);
-  const [schedules, setSchedules] = useState([]);
+  const [_schedules, setSchedules] = useState([]);
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
   const [selectedSections, setSelectedSections] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
@@ -180,7 +179,7 @@ export default function StudentReportsCenter() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showLogsDialog, setShowLogsDialog] = useState(false);
   const [deliveryLogs, setDeliveryLogs] = useState([]);
-  const [selectedSubId, setSelectedSubId] = useState(null);
+  const [_selectedSubId, setSelectedSubId] = useState(null);
   const [expandedSub, setExpandedSub] = useState(null);
   const [newSub, setNewSub] = useState({
     reportType: 'attendance',

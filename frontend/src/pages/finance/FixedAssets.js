@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -167,7 +168,7 @@ const FixedAssets = () => {
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [filterCat, setFilterCat] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [_filterStatus, _setFilterStatus] = useState('all');
   const [tabValue, setTabValue] = useState(0);
   const [viewDialog, setViewDialog] = useState(false);
   const [createDialog, setCreateDialog] = useState(false);

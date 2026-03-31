@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import {
-  Box, Typography, Grid, Skeleton, Chip, IconButton, Tooltip, Button
+  Box, Typography, Grid, Skeleton, Chip, Tooltip
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -132,7 +132,7 @@ const Funnel = memo(({ stages }) => {
     <Box>
       {stages.map((s, i) => {
         const pct = (s.value / max) * 100;
-        const leftMargin = `${(100 - pct) / 2}%`;
+        const _leftMargin = `${(100 - pct) / 2}%`;
         return (
           <motion.div key={i} initial={{ opacity: 0, scaleX: 0.5 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: i * 0.1 }}>
             <Box sx={{ mb: 1 }}>

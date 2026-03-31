@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
   Box, Typography, Grid, Skeleton, Chip, IconButton, Tooltip,
   Dialog, DialogTitle, DialogContent, DialogActions, Button,
-  TextField, MenuItem, Select, InputLabel, FormControl, CircularProgress, Badge
+  TextField, MenuItem, Select, InputLabel, FormControl,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -435,7 +435,7 @@ export default function InventoryDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filtered.map((item, i) => <SupplyRow key={item.id} item={item} onOrder={handleOrder} />)}
+{filtered.map((item, _i) => <SupplyRow key={item.id} item={item} onOrder={handleOrder} />)}
                         {filtered.length === 0 && <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)' }}>لا توجد أصناف مطابقة</td></tr>}
                       </tbody>
                     </table>

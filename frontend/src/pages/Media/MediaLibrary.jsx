@@ -51,7 +51,6 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import mediaService from '../../services/mediaService';
-import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
 
 /* ─── Constants ────────────────────────────────────────────────────────────── */
 const TYPE_CONFIG = {
@@ -70,7 +69,7 @@ const CATEGORIES = [
 ];
 
 /* ─── Helper Components ────────────────────────────────────────────────────── */
-const MediaTypeIcon = ({ type, size = 24 }) => {
+const _MediaTypeIcon = ({ type, size = 24 }) => {
   const config = TYPE_CONFIG[type] || TYPE_CONFIG.other;
   return (
     <Avatar sx={{ width: size, height: size, bgcolor: `${config.color}15`, color: config.color }}>
@@ -145,7 +144,7 @@ export default function MediaLibrary() {
   const [filters, setFilters] = useState({ mediaType: '', category: '', search: '', album: '' });
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(1);
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const [_uploadOpen, setUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [editItem, setEditItem] = useState(null);
@@ -299,7 +298,7 @@ export default function MediaLibrary() {
   /* ── Stats from dashboard ────────────────────────────────────────────── */
   const stats = dashboard?.stats || {};
   const recent = dashboard?.recent || [];
-  const favorites = dashboard?.favorites || [];
+  const _favorites = dashboard?.favorites || [];
 
   /* ── Render ──────────────────────────────────────────────────────────── */
   if (loading) {

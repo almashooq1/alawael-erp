@@ -127,7 +127,7 @@ export default function SuccessionPlanningPage() {
   const [tab, setTab] = useState(0);
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [dialog, setDialog] = useState({ open: false, data: null });
   const [detailDialog, setDetailDialog] = useState({ open: false, data: null });
   const [form, setForm] = useState({});

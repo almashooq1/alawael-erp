@@ -89,7 +89,7 @@ export default function BusTrackingDashboard() {
   const [newBus, setNewBus] = useState({ plateNumber: '', capacity: '', model: '', driverName: '', driverPhone: '' });
   const [tripDialog, setTripDialog] = useState(false);
   const [tripData, setTripData] = useState({ busId: '', routeId: '', type: 'morning' });
-  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoRefresh, _setAutoRefresh] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {

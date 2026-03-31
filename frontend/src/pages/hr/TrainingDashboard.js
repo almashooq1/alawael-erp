@@ -63,7 +63,7 @@ const formatCurrency = v =>
   }).format(v);
 
 export default function TrainingDashboard() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const [data, setData] = useState(MOCK_TRAINING_DASHBOARD);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);

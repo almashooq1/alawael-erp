@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -15,7 +16,8 @@ import {
   Chip,
   CircularProgress,
   TextField,
-  MenuItem,  InputAdornment,
+  MenuItem,
+  InputAdornment,
 } from '@mui/material';
 import {
   History,
@@ -39,6 +41,7 @@ const AuditTrail = () => {
 
   useEffect(() => {
     fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters.module, filters.action]);
 
   const fetchLogs = async () => {

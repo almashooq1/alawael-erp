@@ -23,7 +23,7 @@ export default function GosiDashboard() {
   const [calcDialog, setCalcDialog] = useState(false);
   const [calcResult, setCalcResult] = useState(null);
   const [calcForm, setCalcForm] = useState({ basicSalary: '', housingAllowance: '', employeeCount: '' });
-  const [statusDialog, setStatusDialog] = useState(false);
+  const [_statusDialog, _setStatusDialog] = useState(false);
   const [statusEmpId, setStatusEmpId] = useState('');
   const [empStatus, setEmpStatus] = useState(null);
 

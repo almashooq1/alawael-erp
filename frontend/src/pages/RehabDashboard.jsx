@@ -4,14 +4,14 @@
 
 import React, { useState, useEffect, useCallback, Component, memo } from 'react';
 import {
-  Box, Typography, IconButton, Tooltip, Skeleton, Avatar,
-  LinearProgress, CircularProgress, Alert, Snackbar,
+  Box, Typography, IconButton, Tooltip, Avatar,
+  CircularProgress, Alert, Snackbar,
   TextField, Select, MenuItem, FormControl, InputLabel,
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, Divider, useTheme, alpha,
 } from '@mui/material';
 import {
-  Refresh, Add, Visibility, Edit, Download, VideoCall,
+  Refresh, Add, Visibility, Edit, VideoCall,
   Psychology, TrendingUp, Assessment, SmartToy, Warning,
   CheckCircle, Schedule, FitnessCenter, NotificationsActive,
   MedicalServices, PlayArrow,
@@ -74,7 +74,7 @@ const StatCard = memo(({ title, value, subtitle, icon, gradient, trend, delay = 
       <Typography sx={{ fontSize: '2rem', fontWeight: 900, lineHeight: 1, background: `linear-gradient(135deg, ${gradient?.[0] || '#3b82f6'}, ${gradient?.[1] || '#60a5fa'})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{value ?? '—'}</Typography>
       <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, mt: 0.5 }}>{title}</Typography>
       {subtitle && <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mt: 0.3 }}>{subtitle}</Typography>}
-      {trend != null && (
+      {trend !== null && trend !== undefined && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 1 }}>
           <TrendingUp sx={{ fontSize: 13, color: trend > 0 ? '#10b981' : '#ef4444' }} />
           <Typography sx={{ fontSize: '0.68rem', color: trend > 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>{trend > 0 ? `+${trend}%` : `${trend}%`} مقارنة بالشهر الماضي</Typography>
@@ -100,7 +100,7 @@ const ProgressRow = memo(({ label, value = 0, gradient }) => (
 
 // ─── Plan Card ────────────────────────────────────────────────────────────────
 const PlanCard = memo(({ plan, onView, onEdit, idx }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const progress = plan.progressMetrics?.overallProgress ?? 0;
   const st = STATUS_MAP[plan.status] || STATUS_MAP.active;
   const risk = RISK_MAP[plan.latestRiskLevel];
@@ -568,7 +568,7 @@ function RehabDashboardInner() {
                             <Box sx={{ p: 1.5, borderRadius: 2, mb: 1.5, background: alpha(risk.color, 0.08), border: `1px solid ${alpha(risk.color, 0.25)}` }}>
                               <Typography sx={{ fontSize: '0.78rem', fontWeight: 700, color: risk.color }}>
                                 {risk.icon} مستوى الخطر: {risk.label}
-                                {plan.latestPredictedOutcome != null && ` · التحسن المتوقع: ${plan.latestPredictedOutcome}%`}
+                                {plan.latestPredictedOutcome !== null && plan.latestPredictedOutcome !== undefined && ` · التحسن المتوقع: ${plan.latestPredictedOutcome}%`}
                               </Typography>
                             </Box>
                           )}

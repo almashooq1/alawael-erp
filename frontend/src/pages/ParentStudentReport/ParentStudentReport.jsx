@@ -164,7 +164,7 @@ const ParentStudentReport = () => {
     progress = {},
     behavior = {},
     goals = {},
-    programs = [],
+    _programs = [],
     recommendations = [],
   } = report;
 

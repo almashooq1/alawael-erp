@@ -59,7 +59,7 @@ const VIEW_MODES = {
 /* ═══ Main Component ════════════════════════════════════════════════════ */
 export default function CorrespondenceList({ viewMode = 'all' }) {
   const navigate = useNavigate();
-  const location = useLocation();
+  const _location = useLocation();
   const [searchParams] = useSearchParams();
   const showSnackbar = useSnackbar();
 
@@ -74,7 +74,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
   const [typeFilter, setTypeFilter] = useState(searchParams.get('type') || '');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || '');
   const [priorityFilter, setPriorityFilter] = useState(searchParams.get('priority') || '');
-  const [showFilters, setShowFilters] = useState(false);
+  const [_showFilters, _setShowFilters] = useState(false);
 
   // Context menu
   const [anchorEl, setAnchorEl] = useState(null);

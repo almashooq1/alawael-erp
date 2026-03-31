@@ -138,7 +138,7 @@ const AppBlock = memo(({ patient, doctor, time, duration, type, status, room, de
 
 /* ─── Doctor Card ─── */
 const DoctorCard = memo(({ name, specialty, sessions, available, nextSlot, color, delay = 0 }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const pct = (sessions.done / sessions.total) * 100;
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay, type: 'spring' }}>
@@ -212,7 +212,7 @@ const WeekCalendar = memo(({ events }) => {
 
 /* ─── Alert Item ─── */
 const AlertItem = memo(({ type, msg, detail, time }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#8b5cf6', success: '#22c55e' };
   const c = colors[type] || colors.info;
   return (
@@ -291,7 +291,7 @@ export default function ScheduleDashboard() {
   const isDark = theme.palette.mode === 'dark';
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [lastRefresh, setLastRefresh] = useState(new Date());
+const [_lastRefresh, setLastRefresh] = useState(new Date());
   const [addDialog, setAddDialog] = useState(false);
   const [filterStatus, setFilterStatus] = useState('الكل');
 

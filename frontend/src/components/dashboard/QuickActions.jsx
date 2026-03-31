@@ -7,7 +7,7 @@ import React from 'react';
 import { Box, Paper, Typography, Grid, ButtonBase, useTheme, Chip, alpha } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { gradients, statusColors } from 'theme/palette';
+import { gradients } from 'theme/palette';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';

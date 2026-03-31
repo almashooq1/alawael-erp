@@ -25,8 +25,6 @@ import {
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
-  Circle as CircleIcon,
-  FiberManualRecord as DotIcon,
 } from '@mui/icons-material';
 
 // ─── Style tokens ─────────────────────────────────────────────────────────────

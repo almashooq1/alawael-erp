@@ -60,7 +60,7 @@ const formatCurrency = v =>
   }).format(v);
 
 export default function CRMReports() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
   const [dashData, setDashData] = useState(MOCK_CRM_DASHBOARD);

@@ -73,7 +73,7 @@ const normalizeAverages = (avg = {}) => ({
 });
 
 // Flatten backend rankings from {byAttendance, byProgress, byBehavior} to sorted array
-const flattenRankings = (rankings = {}, students = []) => {
+const flattenRankings = (_rankings = {}, students = []) => {
   // Compute overall score per student by averaging metrics
   const scoreMap = {};
   students.forEach(s => {
@@ -152,6 +152,7 @@ const StudentComparisonReport = () => {
     if (selectedIds.length >= 2) {
       loadComparison();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only on initial load with URL params
 
   const handlePrint = () => window.print();

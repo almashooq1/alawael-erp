@@ -328,7 +328,7 @@ const ExamManagement = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState(0);
+  const [_tab, _setTab] = useState(0);
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);

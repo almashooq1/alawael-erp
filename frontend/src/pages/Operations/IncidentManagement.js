@@ -39,7 +39,6 @@ import {
   Warning as CritIcon,
 } from '@mui/icons-material';
 import { incidentService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

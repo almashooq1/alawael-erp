@@ -106,7 +106,7 @@ const AttendanceManagement = () => {
   /* ─── Daily Tab State ─── */
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');

@@ -44,7 +44,7 @@ import {
   LocationOn as LocationIcon,
   Visibility as ViewIcon,
   Close as CloseIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { contactsService, MOCK_CONTACTS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 
@@ -75,7 +75,7 @@ const EMPTY = {
 };
 
 export default function ContactsManagement() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const { showSnackbar } = useSnackbar();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(false);

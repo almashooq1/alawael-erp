@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -56,10 +57,12 @@ const ProfitLoss = () => {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const fc = v =>

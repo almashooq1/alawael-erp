@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -109,7 +110,7 @@ const MultiCurrency = () => {
     }
   };
 
-  const formatCurrency = (v, cur = 'SAR') =>
+  const _formatCurrency = (v, cur = 'SAR') =>
     new Intl.NumberFormat('ar-SA', {
       style: 'currency',
       currency: cur,

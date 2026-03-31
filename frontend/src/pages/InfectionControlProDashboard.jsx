@@ -19,16 +19,13 @@ import {
 } from 'recharts';
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import CleanHandsIcon from '@mui/icons-material/CleanHands';
-import SanitizerIcon from '@mui/icons-material/Sanitizer';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ErrorIcon from '@mui/icons-material/Error';
-import VaccinesIcon from '@mui/icons-material/Vaccines';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import ShieldIcon from '@mui/icons-material/Shield';
 

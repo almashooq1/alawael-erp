@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -27,7 +28,8 @@ import {
   Tabs,
   Tab,
   Alert,
-  Switch,} from '@mui/material';
+  Switch,
+} from '@mui/material';
 import {
   CreditScore,
   Refresh,
@@ -107,6 +109,7 @@ const CreditManagement = () => {
       console.error(e);
     }
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

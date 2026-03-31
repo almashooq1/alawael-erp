@@ -47,7 +47,6 @@ import { gradients } from '../../theme/palette';
 import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
 import EmptyState from '../../components/dashboard/shared/EmptyState';
 import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
-import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
 
 /* ─── Animated counter ─── */

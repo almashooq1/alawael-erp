@@ -23,7 +23,7 @@ const severityColors = { minor: '#4caf50', moderate: '#ff9800', major: '#f44336'
 const statusLabels = { reported: 'مبلغ', acknowledged: 'تم الاستلام', in_progress: 'قيد المعالجة', contained: 'محتوى', resolved: 'محلول', closed: 'مغلق', escalated: 'مصعّد' };
 const statusColors = { reported: 'error', acknowledged: 'info', in_progress: 'warning', contained: 'primary', resolved: 'success', closed: 'success', escalated: 'error' };
 const typeLabels = { fire: 'حريق', earthquake: 'زلزال', flood: 'فيضان', medical: 'طبي', security: 'أمني', power_outage: 'انقطاع كهرباء', pandemic: 'وباء', evacuation: 'إخلاء', other: 'أخرى' };
-const PIE_COLORS = ['#4caf50', '#ff9800', '#f44336', '#9c27b0'];
+const _PIE_COLORS = ['#4caf50', '#ff9800', '#f44336', '#9c27b0'];
 
 export default function CrisisDashboard() {
   const [data, setData] = useState(null);

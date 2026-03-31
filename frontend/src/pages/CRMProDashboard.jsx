@@ -5,11 +5,10 @@
  * Gradient: #6366f1 → #06b6d4 → #10b981
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, IconButton, Tooltip,
+  IconButton, Tooltip,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {

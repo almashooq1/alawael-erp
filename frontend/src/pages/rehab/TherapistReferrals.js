@@ -40,7 +40,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const PRIORITIES = [
   { value: 'low', label: 'منخفضة', color: '#6b7280' },
@@ -65,7 +64,7 @@ const TYPES = [
 ];
 
 const TherapistReferrals = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [referrals, setReferrals] = useState([]);
   const [stats, setStats] = useState({});
@@ -88,6 +87,7 @@ const TherapistReferrals = () => {
 
   useEffect(() => {
     fetchReferrals();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchReferrals = async () => {

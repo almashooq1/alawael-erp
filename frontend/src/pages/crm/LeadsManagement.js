@@ -9,7 +9,8 @@ import {
   CardContent,
   Typography,
   Grid,
-  Chip,  Button,
+  Chip,
+  Button,
   IconButton,
   Tooltip,
   TextField,
@@ -91,7 +92,7 @@ const EMPTY = {
 };
 
 export default function LeadsManagement() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const { showSnackbar } = useSnackbar();
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(false);

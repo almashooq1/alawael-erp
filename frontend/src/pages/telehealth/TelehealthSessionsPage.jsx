@@ -43,7 +43,7 @@ const emptyForm = {
 };
 
 export default function TelehealthSessionsPage() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });

@@ -11,14 +11,16 @@ import {
   CardContent,
   Paper,
   Button,
-  Chip,  Divider,
+  Chip,
+  Divider,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
   Avatar,
-  IconButton,  Skeleton,
+  IconButton,
+  Skeleton,
   Alert,
 } from '@mui/material';
 import {
@@ -128,8 +130,8 @@ export default function DirectivesDashboard() {
 
   const totalIssued = stats?.byStatus?.issued || 0;
   const totalDraft = stats?.byStatus?.draft || 0;
-  const totalExpired = stats?.byStatus?.expired || 0;
-  const totalCancelled = stats?.byStatus?.cancelled || 0;
+  const _totalExpired = stats?.byStatus?.expired || 0;
+  const _totalCancelled = stats?.byStatus?.cancelled || 0;
 
   return (
     <Box sx={{ p: 3 }}>

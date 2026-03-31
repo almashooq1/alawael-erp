@@ -20,9 +20,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Divider,
   Button,
-  Avatar,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -49,7 +47,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
 import { formatCurrency, formatNumber, getGreeting, getArabicDate } from 'services/dashboardService';
-import { gradients, statusColors, brandColors } from '../../theme/palette';
+import { statusColors } from '../../theme/palette';
 
 /* ─────────────────────────────────────────────────────────── */
 /*  Mini Stat Card                                             */

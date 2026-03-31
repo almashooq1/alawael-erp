@@ -135,10 +135,10 @@ const RehabCenterLicenses = () => {
   const [highRiskLicenses, setHighRiskLicenses] = useState([]);
   const [archivedLicenses, setArchivedLicenses] = useState([]);
   const [complianceReport, setComplianceReport] = useState(null);
-  const [enhancedDashboard, setEnhancedDashboard] = useState(null);
+  const [_enhancedDashboard, setEnhancedDashboard] = useState(null);
   const [renewalForecast, setRenewalForecast] = useState([]);
   const [regionStats, setRegionStats] = useState([]);
-  const [duplicates, setDuplicates] = useState([]);
+  const [_duplicates, setDuplicates] = useState([]);
 
   // Form state
   const [formData, setFormData] = useState({});
@@ -280,7 +280,7 @@ const RehabCenterLicenses = () => {
     } catch { setComplianceReport(null); }
   }, []);
 
-  const fetchEnhancedDashboard = useCallback(async () => {
+  const _fetchEnhancedDashboard = useCallback(async () => {
     try {
       const res = await rehabLicenseService.getEnhancedDashboard();
       setEnhancedDashboard(res.data || null);
@@ -301,7 +301,7 @@ const RehabCenterLicenses = () => {
     } catch { setRegionStats([]); }
   }, []);
 
-  const fetchDuplicates = useCallback(async () => {
+  const _fetchDuplicates = useCallback(async () => {
     try {
       const res = await rehabLicenseService.findDuplicates();
       setDuplicates(res.data || []);
@@ -588,7 +588,7 @@ const RehabCenterLicenses = () => {
     }
   };
 
-  const handleAddCondition = async () => {
+  const _handleAddCondition = async () => {
     if (!conditionDialog) return;
     try {
       await rehabLicenseService.addCondition(conditionDialog._id, formData);

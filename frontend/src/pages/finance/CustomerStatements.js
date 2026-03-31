@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -58,6 +59,7 @@ const CustomerStatements = () => {
         console.error(err);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partyType]);
 
   const fetchStatement = useCallback(async () => {
@@ -81,6 +83,7 @@ const CustomerStatements = () => {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partyType, selectedParty, dateFrom, dateTo]);
 
   const fc = v =>

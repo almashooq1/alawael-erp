@@ -1,9 +1,11 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Container,
-  Card,  Typography,
+  Card,
+  Typography,
   Table,
   TableBody,
   TableCell,
@@ -16,14 +18,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,  CircularProgress,
+  TextField,
+  CircularProgress,
   IconButton,
-  Tooltip,} from '@mui/material';
-import {  Add,
-  Visibility,
-  AutoFixHigh,
-  DoneAll,
-} from '@mui/icons-material';
+  Tooltip,
+} from '@mui/material';
+import { Add, Visibility, AutoFixHigh, DoneAll } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors, statusColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -31,7 +31,7 @@ const API = process.env.REACT_APP_API_URL || '/api';
 const BankReconciliation = () => {
   const [reconciliations, setReconciliations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(0);
+  const [_tab, _setTab] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
   const [form, setForm] = useState({
     bankName: '',

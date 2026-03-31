@@ -151,7 +151,7 @@ export default function KnowledgeCenterPage() {
   const [tab, setTab] = useState(0);
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [dialog, setDialog] = useState({ open: false, data: null });
   const [viewDialog, setViewDialog] = useState({ open: false, data: null });

@@ -218,7 +218,7 @@ export default function OrgStructurePage() {
   const [departments, setDepartments] = useState([]);
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [dialog, setDialog] = useState({ open: false, type: '', data: null });
   const [form, setForm] = useState({});
   const [expanded, setExpanded] = useState({});

@@ -18,7 +18,7 @@ const statusLabels = { draft: 'مسودة', issued: 'مصدرة', signed: 'مو�
 const statusColors = { draft: 'default', issued: 'info', signed: 'success', revoked: 'error' };
 
 export default function BlockchainDashboard() {
-  const [data, setData] = useState(null);
+  const [_data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [certificates, setCertificates] = useState([]);
   const [templates, setTemplates] = useState([]);

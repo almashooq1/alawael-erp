@@ -51,7 +51,6 @@ const Glass = memo(({ children, sx = {}, ...rest }) => {
 /* ─── KPI Card ─── */
 const KPICard = memo(({ title, value, subtitle, icon, gradient, trend, delay = 0 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const up = trend >= 0;
   return (
     <motion.div
@@ -179,7 +178,6 @@ const RingGauge = memo(({ value, max = 100, color, label, size = 80 }) => {
 
 /* ─── Alert Row ─── */
 const AlertRow = memo(({ type, msg, branch, time }) => {
-  const theme = useTheme();
   const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#6366f1' };
   const c = colors[type] || colors.info;
   return (

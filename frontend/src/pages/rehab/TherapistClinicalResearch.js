@@ -44,7 +44,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const FIELDS = [
   { id: 'physical-rehab', label: 'التأهيل البدني', color: '#3b82f6', icon: '🏃' },
@@ -65,7 +64,7 @@ const STATUSES = [
 ];
 
 const TherapistClinicalResearch = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [research, setResearch] = useState([]);
   const [stats, setStats] = useState({});
@@ -74,7 +73,7 @@ const TherapistClinicalResearch = () => {
   const [fieldFilter, setFieldFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [detailDialog, setDetailDialog] = useState(null);
+  const [_detailDialog, _setDetailDialog] = useState(null);
   const [pubDialog, setPubDialog] = useState(null);
   const [editData, setEditData] = useState(null);
   const [form, setForm] = useState({
@@ -94,6 +93,7 @@ const TherapistClinicalResearch = () => {
 
   useEffect(() => {
     fetchResearch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchResearch = async () => {

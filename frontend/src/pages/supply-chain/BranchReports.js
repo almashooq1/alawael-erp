@@ -43,18 +43,18 @@ import {
 } from 'services/branchWarehouseService';
 
 const BranchReports = () => {
-  const { showSnackbar } = useSnackbar();
+  const { showSnackbar: _showSnackbar } = useSnackbar();
   const [tabValue, setTabValue] = useState(0);
-  const [selectedBranch, setSelectedBranch] = useState('all');
-  const [period, setPeriod] = useState('month');
+  const [_selectedBranch, _setSelectedBranch] = useState('all');
+  const [_period, _setPeriod] = useState('month');
   const [loading, setLoading] = useState(true);
 
   const [branches, setBranches] = useState([]);
   const [warehouses, setWarehouses] = useState([]);
   const [transfers, setTransfers] = useState([]);
   const [purchaseRequests, setPurchaseRequests] = useState([]);
-  const [branchStats, setBranchStats] = useState({});
-  const [whStats, setWhStats] = useState({});
+  const [_branchStats, setBranchStats] = useState({});
+  const [_whStats, setWhStats] = useState({});
   const [trStats, setTrStats] = useState({});
 
   const loadData = useCallback(async () => {
@@ -130,7 +130,7 @@ const BranchReports = () => {
   const totalLowStock = branchMetrics.reduce((s, b) => s + b.lowStockItems, 0);
   const totalPurchaseValue = branchMetrics.reduce((s, b) => s + b.purchaseValue, 0);
   const topBranch = [...branchMetrics].sort((a, b) => b.stockValue - a.stockValue)[0];
-  const lowStockBranch = [...branchMetrics].sort((a, b) => b.lowStockItems - a.lowStockItems)[0];
+  const _lowStockBranch = [...branchMetrics].sort((a, b) => b.lowStockItems - a.lowStockItems)[0];
 
   const kpiCards = [
     {

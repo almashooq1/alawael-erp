@@ -50,7 +50,7 @@ const TEMPLATE_TYPES = [
 ];
 
 const TherapistDocTemplates = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [templates, setTemplates] = useState([]);
   const [stats, setStats] = useState({});

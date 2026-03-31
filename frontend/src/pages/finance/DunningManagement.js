@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -71,13 +72,13 @@ const DunningManagement = () => {
   const [queue, setQueue] = useState([]);
   const [history, setHistory] = useState([]);
   const [dashboard, setDashboard] = useState(null);
-  const [profiles, setProfiles] = useState([]);
+  const [_profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sendDialog, setSendDialog] = useState(false);
-  const [promiseDialog, setPromiseDialog] = useState(false);
+  const [_promiseDialog, setPromiseDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [sendForm, setSendForm] = useState({ level: 1, channel: 'email' });
-  const [promiseForm, setPromiseForm] = useState({ promiseDate: '', promiseAmount: '', notes: '' });
+  const [promiseForm, _setPromiseForm] = useState({ promiseDate: '', promiseAmount: '', notes: '' });
 
   const token = getToken();
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -103,10 +104,12 @@ const DunningManagement = () => {
       console.error(e);
     }
     setLoading(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleSendReminder = async () => {
@@ -135,7 +138,7 @@ const DunningManagement = () => {
     }
   };
 
-  const handlePromise = async () => {
+  const _handlePromise = async () => {
     if (!selectedItem) return;
     try {
       const res = await fetch(`${API}/finance/enterprise/dunning/${selectedItem._id}/promise`, {

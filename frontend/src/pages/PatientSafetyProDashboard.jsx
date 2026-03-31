@@ -4,7 +4,6 @@
  * Gradient: #22c55e → #06b6d4 → #6366f1
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -20,7 +19,6 @@ import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import ShieldIcon from '@mui/icons-material/Shield';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 
 /* ─── Mock Data ────────────────────────────────────────────────────────────── */
 const KPI_DATA = [

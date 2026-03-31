@@ -19,8 +19,10 @@ import {
   DialogContent,
   DialogActions,
   Avatar,
-  Divider,  LinearProgress,
-  Alert,  CircularProgress,
+  Divider,
+  LinearProgress,
+  Alert,
+  CircularProgress,
   List,
   ListItem,
   ListItemText,
@@ -30,13 +32,18 @@ import {
   StepLabel,
 } from '@mui/material';
 import {
-  Draw as DrawIcon,  CheckCircle,
+  Draw as DrawIcon,
+  CheckCircle,
   Cancel,
-  ArrowBack,  History,
+  ArrowBack,
+  History,
   Comment as CommentIcon,
-  Person,  VerifiedUser,  Refresh,
+  Person,
+  VerifiedUser,
+  Refresh,
   Download,
-  Visibility,  PictureAsPdf,
+  Visibility,
+  PictureAsPdf,
   QrCode2,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -91,9 +98,9 @@ export default function ESignatureSigning() {
 
   // Signing state
   const [signDialogOpen, setSignDialogOpen] = useState(false);
-  const [signMethod, setSignMethod] = useState(0); // 0=draw, 1=type, 2=upload
-  const [typedSignature, setTypedSignature] = useState('');
-  const [signatureFont, setSignatureFont] = useState('Noto Kufi Arabic');
+  const [signMethod, _setSignMethod] = useState(0); // 0=draw, 1=type, 2=upload
+  const [typedSignature, _setTypedSignature] = useState('');
+  const [signatureFont, _setSignatureFont] = useState('Noto Kufi Arabic');
   const [uploadedSignature, setUploadedSignature] = useState(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [signingInProgress, setSigningInProgress] = useState(false);
@@ -156,7 +163,7 @@ export default function ESignatureSigning() {
     return { x: clientX - rect.left, y: clientY - rect.top };
   };
 
-  const startDraw = e => {
+  const _startDraw = e => {
     e.preventDefault();
     setIsDrawing(true);
     const ctx = canvasRef.current.getContext('2d');
@@ -165,7 +172,7 @@ export default function ESignatureSigning() {
     ctx.moveTo(pos.x, pos.y);
   };
 
-  const draw = e => {
+  const _draw = e => {
     e.preventDefault();
     if (!isDrawing) return;
     const ctx = canvasRef.current.getContext('2d');
@@ -174,12 +181,12 @@ export default function ESignatureSigning() {
     ctx.stroke();
   };
 
-  const stopDraw = e => {
+  const _stopDraw = e => {
     e.preventDefault();
     setIsDrawing(false);
   };
 
-  const clearCanvas = () => {
+  const _clearCanvas = () => {
     initCanvas();
   };
 
@@ -327,7 +334,7 @@ export default function ESignatureSigning() {
   };
 
   /* ─── Upload handler ───────────────────────────────────────────────────── */
-  const handleUpload = e => {
+  const _handleUpload = e => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
@@ -336,7 +343,7 @@ export default function ESignatureSigning() {
   };
 
   /* ─── Fonts for typed signature ────────────────────────────────────────── */
-  const fonts = [
+  const _fonts = [
     { value: 'Noto Kufi Arabic', label: 'نوتو كوفي' },
     { value: 'Amiri', label: 'الأميري' },
     { value: 'Cairo', label: 'القاهرة' },

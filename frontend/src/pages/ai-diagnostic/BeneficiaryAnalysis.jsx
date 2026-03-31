@@ -54,9 +54,9 @@ export default function BeneficiaryAnalysis() {
   const [patterns, setPatterns] = useState(null);
   const [risk, setRisk] = useState(null);
   const [goals, setGoals] = useState([]);
-  const [assessments, setAssessments] = useState([]);
+  const [_assessments, setAssessments] = useState([]);
   const [sessions, setSessions] = useState([]);
-  const [behaviors, setBehaviors] = useState([]);
+  const [_behaviors, setBehaviors] = useState([]);
   const [report, setReport] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
 

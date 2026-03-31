@@ -152,7 +152,7 @@ export default function WorkflowCalendar() {
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState('month'); // month | week
+  const [_view, _setView] = useState('month'); // month | week
   const [selectedDay, setSelectedDay] = useState(null);
   const [dialogEvents, setDialogEvents] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);

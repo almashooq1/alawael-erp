@@ -1453,7 +1453,7 @@ function ExportWizardDialog({ open, onClose, step, setStep, config, setConfig, m
                         <TableBody>
                           {preview.preview.slice(0, 10).map((row, i) => (
                             <TableRow key={i} hover>
-                              {Object.entries(row).filter(([k]) => !k.startsWith('_')).slice(0, 8).map(([key, val], j) => (
+              {Object.entries(row).filter(([k]) => !k.startsWith('_')).slice(0, 8).map(([_key, val], j) => (
                                 <TableCell key={j}>
                                   <Typography variant="caption" noWrap sx={{ maxWidth: 120, display: 'block' }}>
                                     {typeof val === 'object' ? JSON.stringify(val) : String(val ?? '')}

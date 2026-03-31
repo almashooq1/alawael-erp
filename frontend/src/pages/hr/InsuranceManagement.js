@@ -226,7 +226,7 @@ export default function InsuranceManagement() {
   const [claimDialog, setClaimDialog] = useState(false);
   const [claimForm, setClaimForm] = useState({ ...EMPTY_CLAIM });
   const [claimPolicyId, setClaimPolicyId] = useState(null);
-  const [quoteDialog, setQuoteDialog] = useState(false);
+  const [_quoteDialog, _setQuoteDialog] = useState(false);
   const [quoteForm, setQuoteForm] = useState({ ...EMPTY_QUOTE });
   const [deleteDialog, setDeleteDialog] = useState(false);
   const [deletePolicyId, setDeletePolicyId] = useState(null);

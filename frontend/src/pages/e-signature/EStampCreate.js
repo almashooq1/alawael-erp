@@ -11,7 +11,8 @@ import {
   MenuItem,
   Stepper,
   Step,
-  StepLabel,  Chip,
+  StepLabel,
+  Chip,
   Avatar,
   FormControlLabel,
   Switch,
@@ -30,7 +31,8 @@ import {
   Delete,
   Verified,
   Circle,
-  Square,  CloudUpload,
+  Square,
+  CloudUpload,
   DesignServices,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -81,7 +83,7 @@ export default function EStampCreate() {
   const [activeStep, setActiveStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [designMode, setDesignMode] = useState('auto'); // 'auto' | 'upload'
-  const [customImageFile, setCustomImageFile] = useState(null);
+  const [_customImageFile, setCustomImageFile] = useState(null);
   const [customImagePreview, setCustomImagePreview] = useState('');
 
   const [form, setForm] = useState({

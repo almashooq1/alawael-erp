@@ -159,7 +159,7 @@ export default function HRInsuranceDashboard() {
   const [policies, setPolicies] = useState([]);
   const [pagination, setPagination] = useState({ page: 0, limit: 10, total: 0 });
   const [companies, setCompanies] = useState([]);
-  const [coverageClasses, setCoverageClasses] = useState([]);
+  const [_coverageClasses, _setCoverageClasses] = useState([]);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -202,7 +202,7 @@ export default function HRInsuranceDashboard() {
   const fetchClasses = useCallback(async () => {
     try {
       const res = await hrInsuranceService.getCoverageClasses();
-      setCoverageClasses(res.data?.data || []);
+      _setCoverageClasses(res.data?.data || []);
     } catch { /* ref data optional */ }
   }, []);
 

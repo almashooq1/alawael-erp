@@ -279,7 +279,7 @@ const GradebookPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selected, setSelected] = useState(null);
-  const [tab, setTab] = useState(0);
+  const [_tab, _setTab] = useState(0);
 
   const [gbDlg, setGbDlg] = useState(false);
   const [editGb, setEditGb] = useState(null);

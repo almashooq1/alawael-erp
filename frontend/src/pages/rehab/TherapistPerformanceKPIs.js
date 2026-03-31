@@ -34,7 +34,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const KPI_LABELS = {
   sessionsCompleted: { label: 'الجلسات المكتملة', icon: '📋', color: '#3b82f6' },
@@ -53,7 +52,7 @@ const RANK_COLORS = {
 };
 
 const TherapistPerformanceKPIs = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [kpiData, setKpiData] = useState(null);
   const [stats, setStats] = useState({});
@@ -70,6 +69,7 @@ const TherapistPerformanceKPIs = () => {
 
   useEffect(() => {
     fetchKPIs();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchKPIs = async () => {

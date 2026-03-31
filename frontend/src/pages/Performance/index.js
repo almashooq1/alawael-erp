@@ -41,7 +41,7 @@ export default function PerformanceEvaluations() {
     form,
     setForm,
     loadData,
-    openCreate,
+    openCreate: _openCreate,
     openEdit,
     handleSave,
     handleDelete,

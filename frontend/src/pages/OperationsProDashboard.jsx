@@ -5,15 +5,14 @@
  * Gradient: #ef4444 → #f59e0b → #22c55e
  */
 
-import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
+  Box, Typography, Grid, Card, useTheme, alpha, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, IconButton, Tooltip,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
+  AreaChart, Area, PieChart, Pie, Cell,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
 } from 'recharts';

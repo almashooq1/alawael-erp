@@ -56,8 +56,8 @@ const pctColor = v => (v >= 80 ? 'success' : v >= 50 ? 'warning' : 'error');
 
 export default function DisabilityRehabDashboard() {
   const theme = useTheme();
-  const { user } = useAuth();
-  const { showSnackbar } = useSnackbar();
+  const { user: _user } = useAuth();
+  const { showSnackbar: _showSnackbar } = useSnackbar();
   const g = theme.palette.gradients || {};
 
   const [loading, setLoading] = useState(true);

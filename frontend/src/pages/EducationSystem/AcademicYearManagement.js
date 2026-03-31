@@ -241,7 +241,7 @@ const AcademicYearManagement = () => {
   const [years, setYears] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState(0);
+  const [_tab, _setTab] = useState(0);
 
   // dialogs
   const [yearDlg, setYearDlg] = useState(false);

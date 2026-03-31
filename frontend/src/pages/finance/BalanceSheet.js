@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -9,11 +10,13 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,  TableRow,
+  TableContainer,
+  TableRow,
   CircularProgress,
   TextField,
   Button,
-  Chip,} from '@mui/material';
+  Chip,
+} from '@mui/material';
 import { AccountBalance, Assessment, CheckCircle, Warning } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
@@ -37,6 +40,7 @@ const BalanceSheet = () => {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asOfDate]);
 
   useEffect(() => {

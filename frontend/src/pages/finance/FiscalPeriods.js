@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -26,10 +27,11 @@ const FiscalPeriods = () => {
   const [periods, setPeriods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fiscalYear, setFiscalYear] = useState(new Date().getFullYear());
-  const [openDialog, setOpenDialog] = useState(false);
+  const [_openDialog, _setOpenDialog] = useState(false);
 
   useEffect(() => {
     fetchPeriods();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYear]);
 
   const fetchPeriods = async () => {

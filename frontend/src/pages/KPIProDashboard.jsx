@@ -15,7 +15,6 @@ import {
   TrendingUpOutlined,
   TrendingDownOutlined,
   RemoveOutlined,
-  EmojiEventsOutlined,
   WarningAmberOutlined,
   CheckCircleOutlined,
   FlagOutlined,
@@ -24,7 +23,7 @@ import {
 import {
   ComposedChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
-  ScatterChart, Scatter, RadarChart, PolarGrid, PolarAngleAxis, Radar,
+  RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from 'recharts';
 
 const GRAD = 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #6366f1 100%)';

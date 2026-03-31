@@ -47,7 +47,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const GROUP_TYPES = [
   { value: 'social-skills', label: 'مهارات اجتماعية', color: '#8b5cf6', icon: '👥' },
@@ -60,7 +59,7 @@ const GROUP_TYPES = [
 ];
 
 const TherapistGroupTherapy = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [groups, setGroups] = useState([]);
   const [stats, setStats] = useState({});
@@ -83,6 +82,7 @@ const TherapistGroupTherapy = () => {
 
   useEffect(() => {
     fetchGroups();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchGroups = async () => {

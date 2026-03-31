@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -18,7 +19,7 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
-import {  TrendingUp, TrendingDown } from '@mui/icons-material';
+import { TrendingUp, TrendingDown } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -30,6 +31,7 @@ const BudgetVariance = () => {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYear]);
 
   const fetchData = async () => {

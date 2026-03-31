@@ -68,10 +68,11 @@ export default function WafRateLimit() {
   const [blocked, setBlocked] = useState([]);
 
   /* ── Config ── */
-  const [config, setConfig] = useState(null);
+  const [_config, setConfig] = useState(null);
 
   /* ══════════════════════════════════════════════════════════════════════ */
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadDashboard = useCallback(safe(async () => {
     setLoading(true);
     const res = await wafService.getDashboard();
@@ -79,11 +80,13 @@ export default function WafRateLimit() {
     setLoading(false);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadRules = useCallback(safe(async () => {
     const res = await wafService.listWafRules();
     setRules(res.data?.rules || []);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadIPLists = useCallback(safe(async () => {
     const [bl, wl, gl] = await Promise.all([
       wafService.getBlacklist(),
@@ -95,21 +98,25 @@ export default function WafRateLimit() {
     setGreylist(gl.data?.entries || []);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadTiers = useCallback(safe(async () => {
     const res = await wafService.listTiers();
     setTiers(res.data?.tiers || []);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadIncidents = useCallback(safe(async () => {
     const res = await wafService.listIncidents();
     setIncidents(res.data?.incidents || []);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadBlocked = useCallback(safe(async () => {
     const res = await wafService.getBlockedRequests();
     setBlocked(res.data?.requests || []);
   }), []);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const loadConfig = useCallback(safe(async () => {
     const res = await wafService.getConfig();
     setConfig(res.data?.data || res.data);

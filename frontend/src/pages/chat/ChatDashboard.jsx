@@ -20,7 +20,7 @@ import chatService from '../../services/chatService';
 // ── Status Colors ──
 const STATUS_COLORS = { online: '#4caf50', away: '#ff9800', busy: '#f44336', offline: '#9e9e9e' };
 const STATUS_LABELS = { online: 'متصل', away: 'بعيد', busy: 'مشغول', offline: 'غير متصل' };
-const MSG_TYPE_ICONS = { text: <Chat fontSize="small" />, file: <InsertDriveFile fontSize="small" />, image: <Image fontSize="small" />, audio: <MicNone fontSize="small" />, video: <Videocam fontSize="small" /> };
+const _MSG_TYPE_ICONS = { text: <Chat fontSize="small" />, file: <InsertDriveFile fontSize="small" />, image: <Image fontSize="small" />, audio: <MicNone fontSize="small" />, video: <Videocam fontSize="small" /> };
 
 // ── KPI Card ──
 function KPICard({ title, value, icon, color = '#1976d2', subtitle }) {
@@ -37,7 +37,7 @@ function KPICard({ title, value, icon, color = '#1976d2', subtitle }) {
 }
 
 export default function ChatDashboard() {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [tab, setTab] = useState(0);

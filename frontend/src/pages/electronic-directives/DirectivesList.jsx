@@ -64,7 +64,7 @@ const typeIcons = {
 
 export default function DirectivesList() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
 
   // ─── State ───────────────────────────────────────────
   const [directives, setDirectives] = useState([]);

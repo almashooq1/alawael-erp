@@ -175,8 +175,8 @@ export default function VisitorRegistry() {
         loadStats();
       }
     },
-    [showSnackbar]
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+    [showSnackbar] // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const handleVisitorCheckOut = useCallback(
     data => {
       if (data?.visitor) {
@@ -187,8 +187,8 @@ export default function VisitorRegistry() {
         loadStats();
       }
     },
-    [showSnackbar]
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+    [showSnackbar] // eslint-disable-line react-hooks/exhaustive-deps
+  );
   useSocketEvent('visitor:check-in', handleVisitorCheckIn);
   useSocketEvent('visitor:check-out', handleVisitorCheckOut);
 
@@ -684,7 +684,7 @@ export default function VisitorRegistry() {
       );
     const {
       byPurpose = [],
-      byStatus = [],
+      _byStatus = [],
       byDepartment = [],
       topHosts = [],
       peakHours = [],

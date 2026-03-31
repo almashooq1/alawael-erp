@@ -20,7 +20,6 @@ import {
   Menu,
   MenuItem,
   Divider,
-  Chip,
 } from '@mui/material';
 import {
   SettingsOutlined,

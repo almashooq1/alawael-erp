@@ -44,7 +44,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'mobility', nameAr: 'أجهزة التنقل', icon: '🦽', color: '#3b82f6' },
@@ -94,6 +93,7 @@ const TherapistEquipment = () => {
 
   useEffect(() => {
     fetchEquipment();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchEquipment = async () => {

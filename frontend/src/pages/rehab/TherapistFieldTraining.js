@@ -41,7 +41,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const TRAINING_TYPES = [
   { value: 'clinical', label: 'تدريب سريري', color: '#3b82f6' },
@@ -52,7 +51,7 @@ const TRAINING_TYPES = [
 ];
 
 const TherapistFieldTraining = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [training, setTraining] = useState([]);
   const [stats, setStats] = useState({});
@@ -79,6 +78,7 @@ const TherapistFieldTraining = () => {
 
   useEffect(() => {
     fetchTraining();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTraining = async () => {

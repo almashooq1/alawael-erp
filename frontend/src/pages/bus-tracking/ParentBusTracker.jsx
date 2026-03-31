@@ -47,7 +47,7 @@ export default function ParentBusTracker() {
   const [loading, setLoading] = useState(false);
   const [dashboard, setDashboard] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [selectedBus, setSelectedBus] = useState(null);
+  const [_selectedBus, setSelectedBus] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
   const [etaData, setEtaData] = useState({});
   const [error, setError] = useState('');

@@ -5,7 +5,6 @@
  * Gradient: #8b5cf6 → #06b6d4 → #22c55e
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
@@ -20,7 +19,6 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import PolicyIcon from '@mui/icons-material/Policy';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 
 // ─── Fake Data ──────────────────────────────────────────────────────────────

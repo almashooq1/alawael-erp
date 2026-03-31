@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -36,6 +37,7 @@ const TrialBalance = () => {
 
   useEffect(() => {
     fetchTrialBalance();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYear]);
 
   const fetchTrialBalance = async () => {

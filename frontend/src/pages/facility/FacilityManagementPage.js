@@ -220,7 +220,7 @@ export default function FacilityManagementPage() {
   const [maintenance, setMaintenance] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [dialog, setDialog] = useState({ open: false, type: '', data: null });
   const [form, setForm] = useState({});
   const [error, setError] = useState('');

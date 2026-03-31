@@ -64,7 +64,7 @@ const STATUSES = [
 ];
 
 const TherapistSmartGoals = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [goals, setGoals] = useState([]);
   const [stats, setStats] = useState({});

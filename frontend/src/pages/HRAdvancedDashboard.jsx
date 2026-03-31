@@ -17,7 +17,6 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import GroupsIcon from '@mui/icons-material/Groups';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import PersonOffIcon from '@mui/icons-material/PersonOff';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
 import StarIcon from '@mui/icons-material/Star';
 import SchoolIcon from '@mui/icons-material/School';
@@ -144,7 +143,7 @@ const EmployeeRow = memo(({ name, role, dept, score, status, joinDate }) => {
 
 /* ─── Training Card ─── */
 const TrainingCard = memo(({ title, instructor, enrolled, capacity, progress, category, delay = 0 }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const catColors = { 'طبي': '#06b6d4', 'إداري': '#6366f1', 'تقني': '#f59e0b', 'سلوكي': '#22c55e', 'سلامة': '#ef4444' };
   const c = catColors[category] || '#6366f1';
   return (
@@ -170,7 +169,7 @@ const TrainingCard = memo(({ title, instructor, enrolled, capacity, progress, ca
 
 /* ─── Alert Item ─── */
 const AlertItem = memo(({ type, msg, dept, time }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#6366f1', success: '#22c55e' };
   const c = colors[type] || colors.info;
   return (
@@ -394,7 +393,7 @@ export default function HRAdvancedDashboard() {
                 <Glass sx={{ p: 3 }}>
                   <Typography variant="h6" fontWeight={700} mb={2}>توزيع الموظفين حسب القسم</Typography>
                   {DEMO.deptDist.map((d, i) => {
-                    const pct = (d.count / DEMO.kpis[0].value.replace(',', '')) * 100;
+                    const _pct = (d.count / DEMO.kpis[0].value.replace(',', '')) * 100;
                     return (
                       <Box key={i} sx={{ mb: 1.5 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: .4 }}>

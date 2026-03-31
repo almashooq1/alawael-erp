@@ -21,7 +21,8 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,  Paper,
+  TableRow,
+  Paper,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -29,7 +30,8 @@ import {
   LinearProgress,
   InputAdornment,
   Tabs,
-  Tab,} from '@mui/material';
+  Tab,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -38,7 +40,7 @@ import {
   Refresh as RefreshIcon,
   Close as CloseIcon,
   Campaign as CampaignIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -83,7 +85,7 @@ const campaignCategories = [
   'صحة',
   'أخرى',
 ];
-const donorTypes = ['فرد', 'شركة', 'مؤسسة خيرية'];
+const _donorTypes = ['فرد', 'شركة', 'مؤسسة خيرية'];
 const paymentTypes = ['تحويل بنكي', 'شيك', 'نقدي', 'بطاقة ائتمان'];
 
 function TabPanel({ children, value, index }) {
@@ -110,14 +112,14 @@ export default function DonationsDashboard() {
   const [donors, setDonors] = useState([]);
   const [donations, setDonations] = useState([]);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [_page, _setPage] = useState(0);
+  const [_rowsPerPage, _setRowsPerPage] = useState(10);
   const [campaignFormOpen, setCampaignFormOpen] = useState(false);
   const [campaignForm, setCampaignForm] = useState(EMPTY_CAMPAIGN);
   const [donationFormOpen, setDonationFormOpen] = useState(false);
   const [donationForm, setDonationForm] = useState(EMPTY_DONATION);
   const [selected, setSelected] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [_detailOpen, _setDetailOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
 

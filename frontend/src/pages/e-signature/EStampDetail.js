@@ -6,10 +6,12 @@ import {
   Typography,
   Paper,
   Button,
-  Grid,  Chip,
+  Grid,
+  Chip,
   IconButton,
   Avatar,
-  Divider,  CircularProgress,
+  Divider,
+  CircularProgress,
   Tab,
   Tabs,
   Dialog,
@@ -38,12 +40,13 @@ import {
   Refresh,
   Delete,
   Verified,
-  History,  People,
+  History,
+  People,
   Send,
   Lock,
-  ContentCopy,} from '@mui/icons-material';
+  ContentCopy,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { gradients } from '../../theme/palette';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */
 const typeLabels = {
@@ -173,7 +176,7 @@ export default function EStampDetail() {
   const handleApprove = () => doAction(() => eStampService.approve(id), 'تم اعتماد الختم');
   const handleActivate = () => doAction(() => eStampService.activate(id), 'تم تفعيل الختم');
   const handleDeactivate = () => doAction(() => eStampService.deactivate(id, {}), 'تم تعليق الختم');
-  const handleRevoke = () => doAction(() => eStampService.revoke(id, {}), 'تم إلغاء الختم');
+  const _handleRevoke = () => doAction(() => eStampService.revoke(id, {}), 'تم إلغاء الختم');
   const handleSubmitApproval = () =>
     doAction(() => eStampService.submitForApproval(id), 'تم التقديم للاعتماد');
 

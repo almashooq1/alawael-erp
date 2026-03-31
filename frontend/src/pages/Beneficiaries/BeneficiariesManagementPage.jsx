@@ -187,7 +187,7 @@ const BeneficiariesManagementPage = () => {
     } catch { showSnackbar('فشل في تصدير البيانات', 'error'); }
   };
 
-  const handleDeleteBeneficiary = async (id) => {
+  const _handleDeleteBeneficiary = async (id) => {
     if (!window.confirm('هل أنت متأكد من أرشفة هذا المستفيد؟')) return;
     try {
       await beneficiaryService.remove(id, 'أرشفة من صفحة الإدارة');
@@ -196,7 +196,7 @@ const BeneficiariesManagementPage = () => {
     } catch { showSnackbar('فشل في أرشفة المستفيد', 'error'); }
   };
 
-  const handleStatusChange = async (id, newStatus) => {
+  const _handleStatusChange = async (id, newStatus) => {
     try {
       await beneficiaryService.updateStatus(id, newStatus);
       showSnackbar('تم تحديث حالة المستفيد', 'success');

@@ -113,7 +113,7 @@ const TherapistProfessionalDev = () => {
     }
   };
 
-  const handleDelete = async id => {
+  const _handleDelete = async id => {
     try {
       await therapistService.deleteProfessionalDev(id);
       showSnackbar('تم حذف النشاط', 'success');

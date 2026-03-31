@@ -43,7 +43,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const SERVICE_TYPES = [
   { value: 'speech-therapy', label: 'علاج نطق', icon: '🗣️' },
@@ -55,7 +54,7 @@ const SERVICE_TYPES = [
 ];
 
 const TherapistWaitingList = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [waitingList, setWaitingList] = useState([]);
   const [stats, setStats] = useState({});
@@ -78,6 +77,7 @@ const TherapistWaitingList = () => {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {

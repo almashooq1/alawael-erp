@@ -1,3 +1,4 @@
+/* eslint-disable import/no-anonymous-default-export */
 /**
  * Centralized Color Palette — AlAwael ERP
  * نظام الألوان المركزي — نظام الأوائل

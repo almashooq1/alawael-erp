@@ -58,7 +58,7 @@ const TYPES = [
 ];
 
 const TherapistClinicalLibrary = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({});

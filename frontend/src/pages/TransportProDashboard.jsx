@@ -5,7 +5,6 @@
  * Gradient: #f59e0b → #ef4444 → #6366f1
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
@@ -20,8 +19,6 @@ import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import RouteIcon from '@mui/icons-material/Route';
 import SpeedIcon from '@mui/icons-material/Speed';
-import LocalGasStationIcon from '@mui/icons-material/LocalGasStation';
-import BuildCircleIcon from '@mui/icons-material/BuildCircle';
 
 // ─── Fake Data ──────────────────────────────────────────────────────────────
 const KPI_DATA = [

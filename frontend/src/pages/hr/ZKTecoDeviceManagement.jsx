@@ -68,7 +68,7 @@ const ZKTecoDeviceManagement = () => {
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
-  const [tabIndex, setTabIndex] = useState(0);
+  const [_tabIndex, _setTabIndex] = useState(0);
   const [search, setSearch] = useState('');
 
   // Dialogs

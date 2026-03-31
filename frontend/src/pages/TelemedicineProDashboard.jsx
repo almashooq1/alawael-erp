@@ -4,7 +4,6 @@
  * Gradient: #6366f1 → #06b6d4 → #22c55e
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -19,8 +18,6 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import StarIcon from '@mui/icons-material/Star';
-import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
-import DevicesIcon from '@mui/icons-material/Devices';
 
 /* ─── Mock Data ────────────────────────────────────────────────────────────── */
 const KPI_DATA = [

@@ -5,13 +5,12 @@
  * Gradient: #0ea5e9 → #22c55e → #f59e0b
  */
 
-import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
+  Box, Typography, Grid, Card, useTheme, alpha, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   LinearProgress, IconButton, Tooltip,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,

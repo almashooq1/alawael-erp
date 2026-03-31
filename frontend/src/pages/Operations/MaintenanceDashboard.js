@@ -117,7 +117,7 @@ const EMPTY_ORDER = {
 };
 
 export default function MaintenanceDashboard() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const { showSnackbar } = useSnackbar();
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);

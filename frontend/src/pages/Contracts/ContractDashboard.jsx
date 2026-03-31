@@ -23,7 +23,7 @@ const typeLabels = {
   ONE_TIME_PURCHASE: 'شراء لمرة واحدة', DISTRIBUTION_AGREEMENT: 'عقد توزيع',
 };
 const statusLabels = { ACTIVE: 'نشط', DRAFT: 'مسودة', EXPIRED: 'منتهي', TERMINATED: 'ملغي', SUSPENDED: 'معلق' };
-const statusColors = { ACTIVE: 'success', DRAFT: 'default', EXPIRED: 'error', TERMINATED: 'error', SUSPENDED: 'warning' };
+const _statusColors = { ACTIVE: 'success', DRAFT: 'default', EXPIRED: 'error', TERMINATED: 'error', SUSPENDED: 'warning' };
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];
 
 export default function ContractDashboard() {

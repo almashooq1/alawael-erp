@@ -106,7 +106,7 @@ const EMPTY = {
 };
 
 export default function TrainingPrograms() {
-  const theme = useTheme();
+  const _theme = useTheme();
   const { showSnackbar } = useSnackbar();
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(false);

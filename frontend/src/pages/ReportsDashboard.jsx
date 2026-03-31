@@ -445,7 +445,7 @@ export default function ReportsDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredReports.map((r, i) => (
+                    {filteredReports.map((r) => (
                       <ReportRow key={r.id} report={r} onView={() => {}} onDownload={() => {}} />
                     ))}
                     {filteredReports.length === 0 && (

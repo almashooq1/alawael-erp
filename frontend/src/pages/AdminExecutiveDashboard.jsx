@@ -7,12 +7,12 @@
 import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, LinearProgress,
-  Chip, Avatar, Divider, Table, TableBody, TableCell,
+  Chip, Avatar, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  ComposedChart, Bar, Line, Area, AreaChart,
+  ComposedChart, Bar, Line, Area,
   PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
@@ -20,7 +20,6 @@ import BusinessIcon from '@mui/icons-material/Business';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import GavelIcon from '@mui/icons-material/Gavel';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';

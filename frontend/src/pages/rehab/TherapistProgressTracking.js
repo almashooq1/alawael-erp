@@ -56,7 +56,7 @@ const DOMAINS = [
 ];
 
 const TherapistProgressTracking = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState({});

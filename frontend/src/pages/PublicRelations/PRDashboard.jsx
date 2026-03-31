@@ -13,7 +13,7 @@ import { getPRDashboard } from '../../services/publicRelations.service';
 const SENTIMENT_LABELS = { positive: 'إيجابي', neutral: 'محايد', negative: 'سلبي' };
 const SENTIMENT_COLORS = { positive: '#4caf50', neutral: '#ff9800', negative: '#f44336' };
 const TYPE_LABELS = { press_release: 'بيان صحفي', news_article: 'مقال إخباري', tv_coverage: 'تغطية تلفزيونية', radio: 'إذاعة', social_media: 'وسائل التواصل', interview: 'مقابلة', report: 'تقرير', other: 'أخرى' };
-const COLORS = ['#1976d2', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2', '#0097a7', '#5d4037', '#607d8b'];
+const _COLORS = ['#1976d2', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2', '#0097a7', '#5d4037', '#607d8b'];
 
 export default function PRDashboard() {
   const theme = useTheme();

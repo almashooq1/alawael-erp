@@ -36,7 +36,6 @@ import {
   Visibility as ViewIcon,
   CheckCircle as CompleteIcon,
   Assessment as AssessIcon,
-  Icon,
   Person as PersonIcon,
   CalendarToday as CalendarIcon,
   TrendingUp as TrendIcon,

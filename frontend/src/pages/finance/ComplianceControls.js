@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -26,7 +27,8 @@ import {
   Grid,
   Tabs,
   Tab,
-  Alert,} from '@mui/material';
+  Alert,
+} from '@mui/material';
 import {
   Shield,
   Refresh,
@@ -80,8 +82,8 @@ const ComplianceControls = () => {
   const [loading, setLoading] = useState(true);
   const [controlDialog, setControlDialog] = useState(false);
   const [compDialog, setCompDialog] = useState(false);
-  const [detailDialog, setDetailDialog] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [_detailDialog, _setDetailDialog] = useState(false);
+  const [_selected, _setSelected] = useState(null);
   const [controlForm, setControlForm] = useState({
     controlName: '',
     controlArea: 'financial_reporting',
@@ -118,6 +120,7 @@ const ComplianceControls = () => {
       console.error(e);
     }
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

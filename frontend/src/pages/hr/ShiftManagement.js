@@ -68,7 +68,7 @@ export default function ShiftManagement() {
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [viewDialog, setViewDialog] = useState(null);
+  const [_viewDialog, _setViewDialog] = useState(null);
   const [form, setForm] = useState({
     name: '',
     shiftCode: '',
@@ -124,7 +124,7 @@ export default function ShiftManagement() {
     }
   };
 
-  const calcHours = (start, end) => {
+  const _calcHours = (start, end) => {
     if (!start || !end) return '-';
     const [sh, sm] = start.split(':').map(Number);
     const [eh, em] = end.split(':').map(Number);

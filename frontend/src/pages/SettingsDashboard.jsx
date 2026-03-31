@@ -4,20 +4,19 @@ import {
   TextField, Select, MenuItem, FormControl, InputLabel,
   Button, IconButton, Tooltip, LinearProgress, Divider,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction,
-  Tabs, Tab, Badge, CircularProgress, Alert, Snackbar,
+  Alert, Snackbar,
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings, Person, Palette, Notifications, Security,
   Backup, Language, Business, SaveAlt, RestartAlt,
-  CheckCircle, Warning, Error as ErrorIcon, Info,
-  Brightness4, Brightness7, Translate, Storage,
-  CloudUpload, CloudDownload, Schedule, Lock,
+  CheckCircle, Warning, Error as ErrorIcon,
+  Brightness4, Brightness7, Storage,
+  CloudUpload, Schedule, Lock,
   Wifi, Speed, Memory, Dns, AddCircle, DeleteOutline,
-  Edit, Visibility, VisibilityOff, PhotoCamera,
-  VpnKey, Shield, History, Download, Upload,
+  Edit, PhotoCamera,
+  VpnKey, Shield, History, Download,
   NotificationsActive, NotificationsOff, Email, Sms,
   Tune, ColorLens, TextFields, FormatSize,
 } from '@mui/icons-material';
@@ -48,7 +47,7 @@ const Glass = memo(({ children, sx, ...rest }) => {
 /* ─────────────────── KPI Card ─────────────────── */
 const KPICard = memo(({ title, value, subtitle, icon, gradient, trend, delay = 0 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const _isDark = theme.palette.mode === 'dark';
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -221,7 +220,7 @@ export default function SettingsDashboard() {
   const [sessionTimeout, setSessionTimeout] = useState(30);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
-  const [demoMode, setDemoMode] = useState(false);
+  const [_demoMode, _setDemoMode] = useState(false);
 
   // Appearance state
   const [fontSize, setFontSize] = useState(14);

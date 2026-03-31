@@ -34,7 +34,8 @@ import {
   Select,
   FormControl,
   InputLabel,
-  CircularProgress,  Divider,
+  CircularProgress,
+  Divider,
 } from '@mui/material';
 import {
   ArrowBack,
@@ -48,7 +49,8 @@ import {
   People,
   Delete,
   Edit,
-  PlayArrow,  Schedule,
+  PlayArrow,
+  Schedule,
   Category,
 } from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -99,10 +101,6 @@ const REPORT_TYPES = [
   },
 ];
 
-function TabPanel({ children, value, index }) {
-  return value === index ? <Box sx={{ pt: 2 }}>{children}</Box> : null;
-}
-
 export default function WorkflowReports() {
   const nav = useNavigate();
   const { showSnackbar } = useSnackbar();
@@ -112,7 +110,7 @@ export default function WorkflowReports() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [resultDialog, setResultDialog] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
+  const [_tabValue, _setTabValue] = useState(0);
 
   const [form, setForm] = useState({
     name: '',

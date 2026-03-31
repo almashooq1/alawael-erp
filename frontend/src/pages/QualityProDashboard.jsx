@@ -5,7 +5,6 @@
  * Gradient: #8b5cf6 → #06b6d4 → #10b981
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -13,7 +12,7 @@ import {
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
+  Area, PieChart, Pie, Cell, BarChart, Bar,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ComposedChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
@@ -27,7 +26,6 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingIcon from '@mui/icons-material/Pending';
-import CancelIcon from '@mui/icons-material/Cancel';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ShieldIcon from '@mui/icons-material/Shield';
 import FactCheckIcon from '@mui/icons-material/FactCheck';

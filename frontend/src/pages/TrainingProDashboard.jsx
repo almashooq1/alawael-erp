@@ -5,7 +5,6 @@
  * Gradient: #f59e0b → #ec4899 → #8b5cf6
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,

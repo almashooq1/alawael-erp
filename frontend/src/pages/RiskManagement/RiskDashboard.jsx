@@ -14,7 +14,7 @@ const CAT_LABELS = { strategic: 'استراتيجي', operational: 'تشغيلي
 const STATUS_LABELS = { identified: 'محددة', assessed: 'مقيّمة', mitigating: 'قيد التخفيف', monitoring: 'مراقبة', resolved: 'محلولة', accepted: 'مقبولة', closed: 'مغلقة' };
 const PRIORITY_LABELS = { critical: 'حرجة', high: 'عالية', medium: 'متوسطة', low: 'منخفضة' };
 const PRIORITY_COLORS = { critical: '#d32f2f', high: '#f57c00', medium: '#fbc02d', low: '#4caf50' };
-const COLORS = ['#d32f2f', '#f57c00', '#fbc02d', '#4caf50', '#2196f3', '#9c27b0', '#00bcd4', '#795548', '#607d8b', '#e91e63'];
+const _COLORS = ['#d32f2f', '#f57c00', '#fbc02d', '#4caf50', '#2196f3', '#9c27b0', '#00bcd4', '#795548', '#607d8b', '#e91e63'];
 
 export default function RiskDashboard() {
   const theme = useTheme();

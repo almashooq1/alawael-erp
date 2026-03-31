@@ -5,16 +5,15 @@
  * Gradient: #0ea5e9 → #6366f1 → #a855f7
  */
 
-import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, useTheme, alpha,
+  Box, Typography, Grid, Card, useTheme,
   LinearProgress, Chip, Avatar, IconButton, Tooltip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  ComposedChart, Line,
+  AreaChart, Area, PieChart, Pie, Cell,
+  ComposedChart, Bar, Line,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import BiotechIcon from '@mui/icons-material/Biotech';
@@ -23,7 +22,6 @@ import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import TimerIcon from '@mui/icons-material/Timer';
 import VerifiedIcon from '@mui/icons-material/Verified';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -31,7 +29,6 @@ import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import PendingIcon from '@mui/icons-material/Pending';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import PersonIcon from '@mui/icons-material/Person';
 
 // ─── Gradient + Glass helpers ──────────────────────────────────────────────────
 const GRAD = 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 50%, #a855f7 100%)';

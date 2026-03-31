@@ -77,13 +77,14 @@ import {
   CreateNewFolder as NewFolderIcon,
   FilePresent as FilePresentIcon,
   Category as CategoryIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   PieChart,
   Pie,
   Cell,
   BarChart,
-  Bar,  XAxis,
+  Bar,
+  XAxis,
   YAxis,
   CartesianGrid,
   Tooltip as RTooltip,
@@ -165,6 +166,8 @@ const MOCK_STORAGE_BREAKDOWN = [
   { name: 'أخرى', value: 8, size: '420 MB', color: '#718096' },
 ];
 
+const CATEGORIES = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'];
+
 const MOCK_TOP_DOCS = [
   { title: 'سياسة الخصوصية 2026', downloads: 342, category: 'سياسات' },
   { title: 'التقرير المالي Q1', downloads: 289, category: 'مالي' },
@@ -186,7 +189,7 @@ const formatFileSize = bytes => {
 
 /** Animated Stat Card with gradient or bordered style */
 const StatCard = ({ icon, label, value, gradient, color, trend, subtitle }) => {
-  const theme = useTheme();
+  const _theme = useTheme();
   return (
     <Card
       sx={{
@@ -438,7 +441,7 @@ const Documents = () => {
   const searchTimerRef = useRef(null);
   const searchQueryRef = useRef('');
 
-  const categories = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'];
+  const categories = CATEGORIES;
 
   /* ──── Data Loaders ──── */
   const loadDocuments = useCallback(async () => {
@@ -516,7 +519,7 @@ const Documents = () => {
       else counts['أخرى']++;
     });
     return categories.map(c => ({ name: c, count: counts[c] }));
-  }, [documents]);
+  }, [documents, categories]);
 
   const fileTypeDistribution = useMemo(() => {
     const groups = {
@@ -1453,7 +1456,7 @@ const Documents = () => {
                       </Box>
                     </Box>
                     <Box component="tbody">
-                      {categoryStats.map((cat) => {
+                      {categoryStats.map(cat => {
                         const c = CATEGORY_COLORS[cat.name] || '#607D8B';
                         const pct = totalDocs > 0 ? ((cat.count / totalDocs) * 100).toFixed(1) : 0;
                         return (

@@ -261,7 +261,7 @@ const TransportManagement = () => {
   // Dialogs
   const [routeDialogOpen, setRouteDialogOpen] = useState(false);
   const [tripDialogOpen, setTripDialogOpen] = useState(false);
-  const [driverDialogOpen, setDriverDialogOpen] = useState(false);
+  const [_driverDialogOpen, _setDriverDialogOpen] = useState(false);
   const [fuelDialogOpen, setFuelDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);

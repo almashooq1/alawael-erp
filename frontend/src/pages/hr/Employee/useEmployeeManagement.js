@@ -224,7 +224,7 @@ export default function useEmployeeManagement() {
     setSaving(true);
     try {
       if (dialogMode === 'add') {
-        const { data, isDemo: demo } = await createEmployee(form);
+        const { isDemo: demo } = await createEmployee(form);
         if (demo) {
           // API unavailable — local-only add
           const newEmp = {

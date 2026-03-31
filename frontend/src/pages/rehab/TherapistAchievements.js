@@ -37,7 +37,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const BADGE_TYPES = [
   {
@@ -89,7 +88,7 @@ const CATEGORIES = [
 ];
 
 const TherapistAchievements = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [achievements, setAchievements] = useState([]);
   const [stats, setStats] = useState({});
@@ -113,6 +112,7 @@ const TherapistAchievements = () => {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {

@@ -44,7 +44,7 @@ import {
 } from '../../services/hr/employeeAffairsPhase2Service';
 
 const UNIT_TYPES = ['شقة', 'غرفة مشتركة', 'فيلا', 'سكن عمال', 'استوديو'];
-const UNIT_STATUSES = ['متاح', 'مشغول', 'صيانة', 'محجوز'];
+const _UNIT_STATUSES = ['متاح', 'مشغول', 'صيانة', 'محجوز'];
 const ROUTE_TYPES = ['باص', 'ميكروباص', 'سيارة خاصة', 'خدمة نقل'];
 const unitStatusColor = { متاح: 'success', مشغول: 'primary', صيانة: 'warning', محجوز: 'info' };
 

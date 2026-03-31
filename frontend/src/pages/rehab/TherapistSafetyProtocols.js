@@ -48,7 +48,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const CATEGORIES = [
   { id: 'fall-prevention', label: 'الوقاية من السقوط', color: '#3b82f6', icon: '🛡️' },
@@ -67,7 +66,7 @@ const SEVERITIES = [
 ];
 
 const TherapistSafetyProtocols = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [protocols, setProtocols] = useState([]);
   const [stats, setStats] = useState({});
@@ -90,6 +89,7 @@ const TherapistSafetyProtocols = () => {
 
   useEffect(() => {
     fetchProtocols();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchProtocols = async () => {

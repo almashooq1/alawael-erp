@@ -144,7 +144,7 @@ export default function MeetingManagementPage() {
   const [tab, setTab] = useState(0);
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isDemo, setIsDemo] = useState(false);
+  const [_isDemo, setIsDemo] = useState(false);
   const [dialog, setDialog] = useState({ open: false, data: null });
   const [minutesDialog, setMinutesDialog] = useState({ open: false, meeting: null });
   const [form, setForm] = useState({});

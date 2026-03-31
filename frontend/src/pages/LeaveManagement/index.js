@@ -48,7 +48,7 @@ import { NewLeaveDialog, ViewDetailDialog, ActionDialog } from './LeaveDialogs';
 const LeaveManagement = () => {
   const {
     loading,
-    isDemo,
+    isDemo: _isDemo,
     search,
     setSearch,
     typeFilter,

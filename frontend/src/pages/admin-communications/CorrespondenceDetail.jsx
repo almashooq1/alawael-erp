@@ -211,7 +211,7 @@ function ApprovalDialog({ open, onClose, onApprove, onReject }) {
 export default function CorrespondenceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [_searchParams] = useSearchParams();
   const showSnackbar = useSnackbar();
 
   const [loading, setLoading] = useState(true);

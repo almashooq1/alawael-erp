@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -33,7 +34,9 @@ import {
   Refresh,
   Add,
   AccountBalance,
-  LocalShipping,  VerifiedUser,} from '@mui/icons-material';
+  LocalShipping,
+  VerifiedUser,
+} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -124,6 +127,7 @@ const BankGuarantees = () => {
       console.error(e);
     }
     setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

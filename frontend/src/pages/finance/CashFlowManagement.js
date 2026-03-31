@@ -15,7 +15,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  LinearProgress,  FormControl,
+  LinearProgress,
+  FormControl,
   InputLabel,
   Select,
   MenuItem,
@@ -76,7 +77,7 @@ const mockCashFlowData = {
 };
 
 const CashFlowManagement = () => {
-  const showSnackbar = useSnackbar();
+  const _showSnackbar = useSnackbar();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('2026-Q1');
@@ -108,7 +109,7 @@ const CashFlowManagement = () => {
     );
 
   const sections = [data.operating, data.investing, data.financing];
-  const sectionColors = [statusColors.success, statusColors.warning, statusColors.info];
+  const _sectionColors = [statusColors.success, statusColors.warning, statusColors.info];
   const sectionIcons = ['📊', '📈', '🏦'];
 
   return (

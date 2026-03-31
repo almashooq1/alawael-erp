@@ -29,7 +29,7 @@ import { useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
 
 /* ── helpers ── */
-const riskColor = (level) => {
+const _riskColor = (level) => {
   const map = { low: 'success', medium: 'warning', high: 'error', critical: 'error' };
   return map[level] || 'default';
 };

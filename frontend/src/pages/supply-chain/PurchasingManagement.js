@@ -41,7 +41,6 @@ import {
   Check as ApproveIcon,
   } from '@mui/icons-material';
 import { purchasingService } from 'services/operationsService';
-import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

@@ -4,7 +4,6 @@
  * Gradient: #8b5cf6 → #ec4899 → #06b6d4
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -16,10 +15,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import ScienceIcon from '@mui/icons-material/Science';
-import BiotechIcon from '@mui/icons-material/Biotech';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DescriptionIcon from '@mui/icons-material/Description';
-import TimelineIcon from '@mui/icons-material/Timeline';
 import VerifiedIcon from '@mui/icons-material/Verified';
 
 /* ─── Mock Data ────────────────────────────────────────────────────────────── */

@@ -19,8 +19,8 @@ import {
 import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#4caf50', '#ff9800', '#f44336', '#1976d2', '#9c27b0'];
-const complianceLevels = { full: 'ممتثل', partial: 'جزئي', non_compliant: 'غير ممتثل', pending: 'قيد المراجعة' };
-const complianceColors = { full: 'success', partial: 'warning', non_compliant: 'error', pending: 'info' };
+const _complianceLevels = { full: 'ممتثل', partial: 'جزئي', non_compliant: 'غير ممتثل', pending: 'قيد المراجعة' };
+const _complianceColors = { full: 'success', partial: 'warning', non_compliant: 'error', pending: 'info' };
 
 export default function QualityDashboard() {
   const [data, setData] = useState(null);

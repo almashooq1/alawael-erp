@@ -36,7 +36,7 @@ export default function DisabilityAuthorityDashboard() {
   const [reports, setReports] = useState([]);
   const [assessments, setAssessments] = useState([]);
   const [standards, setStandards] = useState([]);
-  const [reportDashboard, setReportDashboard] = useState(null);
+  const [_reportDashboard, setReportDashboard] = useState(null);
   const [cbahiDashboard, setCbahiDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

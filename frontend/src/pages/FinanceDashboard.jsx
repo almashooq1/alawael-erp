@@ -16,7 +16,6 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import PaidIcon from '@mui/icons-material/Paid';
 import SavingsIcon from '@mui/icons-material/Savings';
 import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -145,7 +144,6 @@ const InvoiceRow = memo(({ id, client, amount, status, date, branch }) => {
 
 /* ─── Expense Row ─── */
 const ExpenseRow = memo(({ category, amount, budget, pct }) => {
-  const theme = useTheme();
   const over = pct > 100;
   return (
     <Box sx={{ mb: 2 }}>
@@ -168,7 +166,6 @@ const ExpenseRow = memo(({ category, amount, budget, pct }) => {
 
 /* ─── Alert Item ─── */
 const AlertItem = memo(({ type, msg, dept, time }) => {
-  const theme = useTheme();
   const colors = { critical: '#ef4444', warning: '#f59e0b', info: '#6366f1', success: '#22c55e' };
   const c = colors[type] || colors.info;
   return (

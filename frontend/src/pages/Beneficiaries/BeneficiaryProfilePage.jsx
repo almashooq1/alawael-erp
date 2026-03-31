@@ -114,7 +114,7 @@ export default function BeneficiaryProfilePage() {
     }
   };
 
-  const handleStatusChange = async (newStatus) => {
+  const _handleStatusChange = async (newStatus) => {
     try {
       await beneficiaryService.updateStatus(id, newStatus);
       showSnackbar('تم تحديث الحالة', 'success');

@@ -223,7 +223,7 @@ const accountTypeLabelMap = {
 };
 
 const GeneralLedger = () => {
-  const showSnackbar = useSnackbar();
+  const _showSnackbar = useSnackbar();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');

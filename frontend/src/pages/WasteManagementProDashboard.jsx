@@ -4,10 +4,9 @@
  * Gradient: #ef4444 → #f59e0b → #22c55e
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Avatar,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import {
@@ -18,9 +17,7 @@ import {
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import RecyclingIcon from '@mui/icons-material/Recycling';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ScienceIcon from '@mui/icons-material/Science';
 
 /* ─── Mock Data ────────────────────────────────────────────────────────────── */
 const KPI_DATA = [

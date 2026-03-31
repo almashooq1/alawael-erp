@@ -166,7 +166,7 @@ const MontessoriStudents = () => {
   const males = students.filter((s) => s.gender === 'ذكر').length;
   const females = students.filter((s) => s.gender === 'أنثى').length;
   const totalPlans = plans.length;
-  const totalEvals = evaluations.length;
+  const _totalEvals = evaluations.length;
 
   const filtered = students.filter((s) => {
     const matchSearch = !search || s.fullName?.toLowerCase().includes(search.toLowerCase());

@@ -44,7 +44,6 @@ import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import {   surfaceColors } from '../../theme/palette';
 
 const PLATFORMS = [
   { value: 'zoom', label: 'Zoom', icon: '📹' },
@@ -61,7 +60,7 @@ const SESSION_TYPES = [
 ];
 
 const TherapistTelehealth = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({});
@@ -84,6 +83,7 @@ const TherapistTelehealth = () => {
 
   useEffect(() => {
     fetchSessions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchSessions = async () => {

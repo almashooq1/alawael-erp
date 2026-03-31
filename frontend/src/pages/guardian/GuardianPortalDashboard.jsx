@@ -23,7 +23,7 @@ export default function GuardianPortalDashboard() {
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [dashboard, setDashboard] = useState(null);
+  const [_dashboard, setDashboard] = useState(null);
   const [beneficiaries, setBeneficiaries] = useState([]);
   const [payments, setPayments] = useState([]);
   const [messages, setMessages] = useState([]);

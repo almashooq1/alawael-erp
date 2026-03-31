@@ -47,7 +47,7 @@ import {
 import workforceAnalyticsService from '../../services/workforceAnalyticsService';
 
 /* ═══ Helper — risk chip color ═══ */
-const riskColor = (level) => {
+const _riskColor = (level) => {
   const map = { high: 'error', medium: 'warning', low: 'success' };
   return map[level] || 'default';
 };

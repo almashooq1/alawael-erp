@@ -5,7 +5,6 @@
  * Gradient: #06b6d4 → #6366f1 → #10b981
  */
 
-import { useState } from 'react';
 import {
   Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
@@ -17,10 +16,8 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import FolderSharedIcon from '@mui/icons-material/FolderShared';
-import DescriptionIcon from '@mui/icons-material/Description';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import VerifiedIcon from '@mui/icons-material/Verified';
 import FindInPageIcon from '@mui/icons-material/FindInPage';
 
 // ─── Fake Data ──────────────────────────────────────────────────────────────

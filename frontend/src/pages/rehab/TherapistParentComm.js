@@ -54,7 +54,7 @@ const MESSAGE_TYPES = [
 ];
 
 const TherapistParentComm = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [messages, setMessages] = useState([]);
   const [stats, setStats] = useState({});

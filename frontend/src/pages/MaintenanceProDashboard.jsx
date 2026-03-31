@@ -20,7 +20,6 @@ import {
 import BuildIcon from '@mui/icons-material/Build';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import ElectricalServicesIcon from '@mui/icons-material/ElectricalServices';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -28,8 +27,6 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import EngineeringIcon from '@mui/icons-material/Engineering';
-import PlumbingIcon from '@mui/icons-material/Plumbing';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // ─── Gradient Palette ───────────────────────────────────────────────────────

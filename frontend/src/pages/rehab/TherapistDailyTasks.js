@@ -59,7 +59,7 @@ const PRIORITIES = [
 ];
 
 const TherapistDailyTasks = () => {
-  const { currentUser } = useAuth();
+  const { currentUser: _currentUser } = useAuth();
   const showSnackbar = useSnackbar();
   const [tasks, setTasks] = useState([]);
   const [stats, setStats] = useState({});

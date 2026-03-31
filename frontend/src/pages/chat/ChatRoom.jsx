@@ -12,7 +12,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';
 
-const STATUS_COLORS = { online: '#4caf50', away: '#ff9800', busy: '#f44336', offline: '#9e9e9e' };
+const _STATUS_COLORS = { online: '#4caf50', away: '#ff9800', busy: '#f44336', offline: '#9e9e9e' };
 const STATUS_LABELS = { online: 'متصل', away: 'بعيد', busy: 'مشغول', offline: 'غير متصل' };
 
 export default function ChatRoom() {

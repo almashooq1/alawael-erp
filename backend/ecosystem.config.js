@@ -16,7 +16,7 @@ module.exports = {
         REDIS_PASSWORD: 'Alawael2026Redis!',
         REDIS_DB: '0',
         REDIS_TLS: 'false',
-        USE_MOCK_CACHE: 'true',
+        USE_MOCK_CACHE: 'false',
         AUTO_MIGRATE: 'false',
       },
       error_file: '/home/alawael/logs/api-error.log',

@@ -266,6 +266,8 @@ const financeOperationsRoutes = require('../routes/financeOperations.routes');
 const branchManagementRoutes = require('../routes/branch.routes');
 
 // ─── الميزات الناقصة المضافة — Missing Features Added ────────────────────────
+// النماذج الناقصة من prompt_02 (MedicalHistory, BeneficiaryTransfer, EmergencyContact, LeaveBalance, EmploymentContract, ChartOfAccounts, AssessmentComparison)
+const missingModelsRoutes = require('../routes/missing-models.routes');
 // مقيم (Muqeem) — وزارة الداخلية
 const muqeemRoutes = require('../routes/muqeem.routes');
 // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية
@@ -1457,6 +1459,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ══════════════════════════════════════════════════════════════════════════
   // ── الميزات الناقصة المضافة — Missing Features ──────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
+
+  // النماذج الناقصة من prompt_02 (MedicalHistory, BeneficiaryTransfer, EmergencyContact, LeaveBalance, EmploymentContract, ChartOfAccounts, AssessmentComparison)
+  dualMount(app, 'clinical', missingModelsRoutes);
+  logger.info(
+    '✅ Missing Models routes mounted (7 models: medical-history, beneficiary-transfers, emergency-contacts, leave-balances, employment-contracts, chart-of-accounts, assessment-comparisons — 30+ endpoints)'
+  );
 
   // مقيم (Muqeem) — وزارة الداخلية: إقامات، تأشيرات، خروج ودخول
   dualMount(app, 'muqeem', muqeemRoutes);

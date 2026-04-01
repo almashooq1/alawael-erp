@@ -21,24 +21,27 @@ const JWT_EXPIRE = process.env.JWT_EXPIRE || '7d';
  */
 const login = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    // قبول email أو username كمعرّف (التوافق مع جميع إصدارات الفرونت)
+    const { username, email, password } = req.body;
+    const identifier = username || email;
 
     // التحقق من البيانات
-    if (!username || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({
         success: false,
-        message: 'يرجى إدخال اسم المستخدم وكلمة المرور',
+        message: 'يرجى إدخال البريد الإلكتروني وكلمة المرور',
       });
     }
 
-    // البحث عن المستخدم باسم المستخدم أو البريد الإلكتروني
+    // البحث عن المستخدم بالبريد الإلكتروني أو اسم المستخدم
     const user = await User.findOne({
-      $or: [{ username }, { email: username }],
+      $or: [{ email: identifier.toLowerCase() }, { username: identifier }],
     }).select('+password');
+
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+        message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       });
     }
 
@@ -46,16 +49,27 @@ const login = async (req, res) => {
     if (!user.isActive) {
       return res.status(403).json({
         success: false,
-        message: 'هذا الحساب غير مفعل',
+        message: 'هذا الحساب غير مفعل، يرجى التواصل مع الإدارة',
+      });
+    }
+
+    // التحقق من قفل الحساب
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      const minutesLeft = Math.ceil((user.lockUntil - Date.now()) / 60000);
+      return res.status(423).json({
+        success: false,
+        message: `تم قفل الحساب مؤقتاً. حاول مرة أخرى بعد ${minutesLeft} دقيقة`,
       });
     }
 
     // التحقق من كلمة المرور
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      // تسجيل المحاولة الفاشلة
+      await user.incLoginAttempts();
       return res.status(401).json({
         success: false,
-        message: 'اسم المستخدم أو كلمة المرور غير صحيحة',
+        message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       });
     }
 
@@ -70,9 +84,14 @@ const login = async (req, res) => {
       { expiresIn: JWT_EXPIRE }
     );
 
-    // تحديث آخر تسجيل دخول
-    user.lastLogin = new Date();
-    await user.save();
+    // تحديث آخر تسجيل دخول باستخدام updateOne (تجاوز pre-save hooks)
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { lastLogin: new Date(), failedLoginAttempts: 0, updatedAt: new Date() },
+        $unset: { lockUntil: '' },
+      }
+    );
 
     res.json({
       success: true,

@@ -77,7 +77,7 @@ jobs:
 
       - name: Run Jest tests
         working-directory: backend
-        run: npm test -- --forceExit --detectOpenHandles --ci --no-coverage
+        run: npm run test:ci
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test

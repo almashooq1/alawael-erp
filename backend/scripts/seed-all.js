@@ -131,6 +131,41 @@ const SEED_REGISTRY = [
     order: 14,
     envs: ['development', 'production', 'staging'],
   },
+  {
+    name: 'comprehensive-beneficiaries',
+    file: '../seeds/comprehensive-beneficiaries.seed.js',
+    description: 'بيانات مستفيدين شاملة وواقعية (35+ مستفيد - 3 فروع)',
+    order: 15,
+    envs: ['development', 'staging'],
+  },
+  {
+    name: 'comprehensive-employees',
+    file: '../seeds/comprehensive-employees.seed.js',
+    description: 'بيانات موظفين شاملة وواقعية (26+ موظف - 3 فروع)',
+    order: 16,
+    envs: ['development', 'staging'],
+  },
+  {
+    name: 'treatment-plans-sessions',
+    file: '../seeds/treatment-plans-sessions.seed.js',
+    description: 'الخطط العلاجية والجلسات (100+ جلسة للشهر الأخير)',
+    order: 17,
+    envs: ['development', 'staging'],
+  },
+  {
+    name: 'vehicles-transport',
+    file: '../seeds/vehicles-transport.seed.js',
+    description: 'المركبات ومسارات النقل (5 مركبات، 3 مسارات)',
+    order: 18,
+    envs: ['development', 'staging'],
+  },
+  {
+    name: 'invoices-payments',
+    file: '../seeds/invoices-payments.seed.js',
+    description: 'الفواتير والمدفوعات (30+ فاتورة مع سجلات الدفع)',
+    order: 19,
+    envs: ['development', 'staging'],
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -66,6 +66,7 @@ const accountRouter = require('../routes/account.real.routes');
 const paymentsRouter = require('../routes/payments.real.routes');
 const monitoringRouter = require('../routes/monitoring.real.routes');
 const aiPredictionsRouter = require('../routes/aiPredictions.real.routes');
+const aiAnalyticsRouter = require('../routes/ai-analytics.routes');
 const hrSystemRouter = require('../routes/hrSystem.real.routes');
 const integratedCareRouter = require('../routes/integratedCare.real.routes');
 const securityRouter = require('../routes/security.real.routes');
@@ -260,6 +261,7 @@ const noorRoutes = require('../routes/noor.routes');
 const carePlanRoutes = require('../routes/carePlan.routes');
 const systemSettingsRoutes = require('../routes/systemSettings.routes');
 const saudiTaxRoutes = require('../routes/saudiTax.routes');
+const advancedSettingsRoutes = require('../routes/advancedSettings.routes');
 const financeOperationsRoutes = require('../routes/financeOperations.routes');
 
 // Branch Management System — نظام إدارة الفروع مع RBAC متقدم (12 فرع + HQ)
@@ -276,6 +278,14 @@ const beneficiaryTransfersRoutes = require('../routes/beneficiary-transfers.rout
 
 // مقيم (Muqeem) — وزارة الداخلية
 const muqeemRoutes = require('../routes/muqeem.routes');
+// مقيم الكامل (Muqeem Full) — إقامات + تأشيرات + نقل خدمات + تنبيهات ذكية (البرومبت 16)
+const muqeemFullRoutes = require('../routes/muqeem-full.routes');
+// GOSI Full — التأمينات الاجتماعية الكاملة + مكافأة نهاية الخدمة (البرومبت 17)
+const gosiFullRoutes = require('../routes/gosi-full.routes');
+// نطاقات + WPS + عقود قوى (البرومبت 18) — Nitaqat + WPS + Qiwa Contracts
+const nitaqatRoutes = require('../routes/nitaqat.routes');
+// حماية البيانات الشخصية PDPL (البرومبت 19)
+const pdplRoutes = require('../routes/pdpl.routes');
 // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية
 const zatcaPhase2Routes = require('../routes/zatca-phase2.routes');
 // NPHIES — المنصة الوطنية للمعلومات الصحية والتأمينية
@@ -406,6 +416,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'payments', paymentsRouter);
   dualMount(app, 'monitoring', monitoringRouter);
   dualMount(app, 'ai-predictions', aiPredictionsRouter);
+  dualMount(app, 'ai-analytics', aiAnalyticsRouter);
+  logger.info(
+    '✅ prompt_20 AI Analytics routes mounted (22+ endpoints: dashboard, alerts, predictions, suggestions, reports, behavioral-analysis, schedule-optimize, models)'
+  );
   dualMount(app, 'hr-system', hrSystemRouter);
   dualMount(app, 'integrated-care', integratedCareRouter);
   dualMount(app, 'security', securityRouter);
@@ -1325,8 +1339,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'system-settings', systemSettingsRoutes);
   dualMount(app, 'saudi-tax', saudiTaxRoutes);
   dualMount(app, 'finance-operations', financeOperationsRoutes);
+  // ─── prompt_24: الإعدادات المتقدمة مع Override الفروع ────────────────────
+  dualMount(app, 'advanced-settings', advancedSettingsRoutes);
   logger.info(
-    'New gap-fix routes mounted (4 modules: care-plans, system-settings, saudi-tax, finance-operations)'
+    'New gap-fix routes mounted (5 modules: care-plans, system-settings, saudi-tax, finance-operations, advanced-settings[branch-override])'
   );
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -1507,6 +1523,18 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '✅ Muqeem routes mounted (7 endpoints: residence-info, workers, expiring, renew, exit-reentry-visa, final-exit-visa, change-occupation)'
   );
 
+  // مقيم الكامل — إدارة الإقامات + التأشيرات الكاملة + نقل الخدمات + تنبيهات ذكية (البرومبت 16)
+  dualMount(app, 'muqeem-full', muqeemFullRoutes);
+  logger.info(
+    '✅ Muqeem Full routes mounted (20+ endpoints: iqama-issue/renew/query, exit-reentry-visa, final-exit-visa, cancel, extend, transfers, alerts, dashboard, reports)'
+  );
+
+  // GOSI Full — التأمينات الاجتماعية + مكافأة نهاية الخدمة (البرومبت 17)
+  dualMount(app, 'gosi-full', gosiFullRoutes);
+  logger.info(
+    '✅ GOSI Full routes mounted (14+ endpoints: calculate, monthly, register, wage, payroll-link, payment-record, EOS-calculate/estimate/confirm/paid, period-report, dashboard, rates)'
+  );
+
   // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية (UBL 2.1 + SHA-256 + TLV QR)
   dualMount(app, 'zatca-phase2', zatcaPhase2Routes);
   logger.info(
@@ -1530,6 +1558,23 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   );
 
   // ─── prompt_05: وحدة التأهيل والبرامج — Rehabilitation & Programs Module ────
+
+  // --- prompt_18: Nitaqat 2.0 + WPS/Mudad + Qiwa Contracts ---
+  dualMount(app, 'nitaqat', nitaqatRoutes);
+  logger.info(
+    '[OK] prompt_18 Nitaqat routes mounted: calculate, latest, history, what-if, dashboard, activity-params, wps/generate, wps/validate, wps/upload, contracts CRUD + submit-qiwa (25+ endpoints)'
+  );
+
+  // --- prompt_19: PDPL / SDAIA Data Protection ---
+  dualMount(app, 'pdpl', pdplRoutes);
+  logger.info(
+    '[OK] prompt_19 PDPL routes mounted: processing-records, consents, subject-requests, export/erase, breaches, dashboard (22+ endpoints -- SDAIA compliance)'
+  );
+
+  logger.info(
+    '[SA] prompt_18+19 Complete: Nitaqat 2.0 + WPS/Mudad + Qiwa Contracts + PDPL/SDAIA compliance'
+  );
+
   dualMount(app, 'rehab-module', rehabProgramsModuleRoutes);
   logger.info(
     '✅ prompt_05 Rehabilitation & Programs Module routes mounted: programs, enrollments, rehab-plans+goals, sessions (CRUD+attendance+goal-progress+complete+autosave+chart), group-sessions, referrals (60+ endpoints)'
@@ -1557,6 +1602,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-module', qualityModuleRoutes);
   logger.info(
     '✅ prompt_08 Operational Modules mounted: communication-module (announcements/messages/notifications/contacts — 22+ endpoints), files-module (folders/files/versioning/archive — 18+ endpoints), inventory-module (items/transactions/purchase-orders/stats — 25+ endpoints), quality-module (indicators/measurements/incidents/dashboard — 30+ endpoints)'
+  );
+
+  // ─── بوابة ولي الأمر الشاملة — Parent Portal Full API ──────────────────
+  safeMount(app, ['/api/parent-portal', '/api/v1/parent-portal'], '../routes/parentPortal.routes');
+  logger.info(
+    '✅ Parent Portal routes mounted (40+ endpoints: OTP auth, dashboard, children+sessions+progress, appointments, transport-live, invoices, messages, notifications, complaints+rating, settings, FCM devices, admin-complaints)'
   );
 
   // ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────

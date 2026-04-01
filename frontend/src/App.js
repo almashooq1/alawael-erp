@@ -153,7 +153,7 @@ const DocumentsPage = lazyWithRetry(() => import('./pages/documents/DocumentsMgm
 const SmartDocumentsPage = lazyWithRetry(() => import('./pages/documents/SmartDocumentsPage'));
 const ArchivingDashboard = lazyWithRetry(() => import('./pages/documents/ElectronicArchiving'));
 const DocumentAdvancedPage = lazyWithRetry(() => import('./pages/documents/DocumentAdvancedPage'));
-const AIAnalyticsDashboard = lazyWithRetry(() => import('./pages/common/AIAnalyticsDashboard'));
+const AIAnalyticsDashboard = lazyWithRetry(() => import('./pages/AI/AiAnalyticsDashboard'));
 const MediaLibrary = lazyWithRetry(() => import('./pages/Media/MediaLibrary'));
 const BudgetManagement = lazyWithRetry(() => import('./pages/finance/BudgetManagement'));
 const AccountingDashboard = lazyWithRetry(() => import('./pages/finance/AccountingDashboard'));

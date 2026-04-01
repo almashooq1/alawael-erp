@@ -474,6 +474,49 @@ app.use('/api', globalValidation());
 // ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
 mountAllRoutes(app, { authRateLimiter });
 
+// ─── AI Scheduler — جدولة فحوصات الذكاء الاصطناعي اليومية (البرومبت 20) ──────
+try {
+  const { startScheduler } = require('./services/ai/aiScheduler');
+  // تأخير 30 ثانية بعد البدء للسماح لقاعدة البيانات بالاتصال
+  setTimeout(() => {
+    startScheduler();
+    logger.info(
+      '✅ prompt_20 AI Scheduler started (daily checks at 06:00, monthly reports on 1st)'
+    );
+  }, 30000);
+} catch (err) {
+  logger.warn('⚠️  AI Scheduler could not start', { error: err.message });
+}
+
+// ─── SLA Scheduler — جدولة فحص SLA تذاكر الدعم الفني (البرومبت 22) ───────────
+if (!isTestEnv) {
+  try {
+    const { startSlaScheduler } = require('./services/ticketSlaScheduler');
+    // تأخير 35 ثانية لضمان اتصال قاعدة البيانات
+    setTimeout(() => {
+      startSlaScheduler();
+      logger.info(
+        '✅ prompt_22 SLA Scheduler started (every 15 min: response + resolution breach checks)'
+      );
+    }, 35000);
+  } catch (err) {
+    logger.warn('⚠️  SLA Scheduler could not start', { error: err.message });
+  }
+}
+
+// ─── Settings Seed — تهيئة الإعدادات الافتراضية (البرومبت 24) ────────────────
+if (!isTestEnv) {
+  setTimeout(async () => {
+    try {
+      const settingsService = require('./services/settingsService');
+      await settingsService.seedDefaultSettings();
+      logger.info('✅ prompt_24 Default settings seeded (GlobalSetting collection)');
+    } catch (err) {
+      logger.warn('⚠️  Settings seed failed', { error: err.message });
+    }
+  }, 40000);
+}
+
 // ─── Infrastructure API Routes (v2) ─────────────────────────────────────────
 mountEventStoreRoutes(app);
 mountMessageQueueRoutes(app);

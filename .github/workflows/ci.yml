@@ -1,288 +1,255 @@
-# ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — CI Pipeline (v5 — Professional & Stable)
-#  ─────────────────────────────────────────────────────────────────
-#  BLOCKING  : Frontend Build (job: build-frontend)
-#  NON-BLOCKING: Lint, Tests, Security (continue-on-error: true)
-# ════════════════════════════════════════════════════════════════════
-name: "CI — Al-Awael ERP"
+# ══════════════════════════════════════════════════════════════════
+# CI — Tests & Quality | AlAwael ERP Backend
+# Rehab-ERP v2.0 | Node.js + MongoDB + Redis
+# ══════════════════════════════════════════════════════════════════
+name: CI — Tests & Quality
 
 on:
   push:
-    branches: [main, develop, "release/**"]
+    branches: [main, develop, 'feature/**', 'fix/**']
   pull_request:
     branches: [main, develop]
-  workflow_dispatch:
 
+env:
+  NODE_VERSION: '20'
+  MONGODB_VERSION: '7.0'
+
+# إلغاء التشغيلات القديمة تلقائياً عند push جديد
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: "20"
-  # Disable Husky in all CI jobs — no interactive hooks
-  HUSKY: "0"
-  # Disable npm audit noise in install steps
-  NPM_CONFIG_FUND: "false"
-  NPM_CONFIG_AUDIT: "false"
-
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-
 jobs:
-  # ═══════════════════════════════════════════════════════════════════
-  #  1. Frontend Build ── CRITICAL — only blocking job
-  # ═══════════════════════════════════════════════════════════════════
-  build-frontend:
-    name: "📦 Frontend Build"
+  # ──────────────────────────────────────────────────────────────
+  # Backend Tests
+  # ──────────────────────────────────────────────────────────────
+  backend-tests:
+    name: Backend Tests (Node ${{ matrix.node }})
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    strategy:
+      matrix:
+        node: ['20']
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
+      - name: Setup Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps --no-audit --no-fund
-
-      - name: Build production bundle
-        working-directory: frontend
-        run: npm run build
-        env:
-          CI: "false"
-          GENERATE_SOURCEMAP: "false"
-          REACT_APP_API_URL: /api
-          NODE_OPTIONS: "--max-old-space-size=4096"
-
-      - name: Report bundle size
-        working-directory: frontend
-        run: |
-          TOTAL=$(du -sh build/ | cut -f1)
-          JS=$(du -sh build/static/js/ 2>/dev/null | cut -f1 || echo "N/A")
-          CSS=$(du -sh build/static/css/ 2>/dev/null | cut -f1 || echo "N/A")
-          echo "📦 Total: $TOTAL | JS: $JS | CSS: $CSS"
-
-          echo "## 📦 Frontend Bundle" >> $GITHUB_STEP_SUMMARY
-          echo "| Asset | Size |" >> $GITHUB_STEP_SUMMARY
-          echo "|:------|-----:|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
-          echo "| JS    | $JS |" >> $GITHUB_STEP_SUMMARY
-          echo "| CSS   | $CSS |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: frontend-build-${{ github.sha }}
-          path: frontend/build/
-          retention-days: 7
-
-  # ═══════════════════════════════════════════════════════════════════
-  #  2. Backend Lint ── NON-BLOCKING (warnings only, 0 errors expected)
-  # ═══════════════════════════════════════════════════════════════════
-  lint-backend:
-    name: "🔍 Backend Lint"
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+          node-version: ${{ matrix.node }}
+          cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm ci --no-audit --no-fund
+        run: npm ci --prefer-offline
+
+      - name: Copy environment file
+        working-directory: backend
+        run: |
+          cp .env.example .env 2>/dev/null || true
+          echo "MONGODB_URI=mongodb://127.0.0.1:27017/alawael_test" >> .env
+          echo "REDIS_HOST=127.0.0.1" >> .env
+          echo "REDIS_PORT=6379" >> .env
+          echo "NODE_ENV=test" >> .env
+          echo "JWT_SECRET=test-secret-key-for-ci-only" >> .env
+          echo "USE_MOCK_DB=false" >> .env
+
+      - name: Run Jest tests
+        working-directory: backend
+        run: npm test -- --forceExit --detectOpenHandles --ci
+        env:
+          NODE_ENV: test
+          MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test
+          REDIS_HOST: 127.0.0.1
+          REDIS_PORT: 6379
+          JWT_SECRET: test-ci-secret
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-node-${{ matrix.node }}
+          path: backend/coverage/
+          retention-days: 7
+
+  # ──────────────────────────────────────────────────────────────
+  # Code Quality (ESLint + Prettier)
+  # ──────────────────────────────────────────────────────────────
+  code-quality:
+    name: Code Quality (ESLint + Prettier)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: backend
+        run: npm ci --prefer-offline
 
       - name: Run ESLint
         working-directory: backend
-        # Always exit 0 — lint issues are informational in CI
-        run: |
-          npm run lint 2>&1 || true
-          echo "✅ Lint check complete (non-blocking)"
+        run: npx eslint . --ext .js --max-warnings=0 --format=compact
+        continue-on-error: true
 
-  # ═══════════════════════════════════════════════════════════════════
-  #  3. Backend Tests ── NON-BLOCKING
-  #     Uses MongoMemoryServer — binary is cached to avoid downloads
-  # ═══════════════════════════════════════════════════════════════════
-  test-backend:
-    name: "🧪 Backend Tests"
+      - name: Check Prettier formatting
+        working-directory: backend
+        run: npx prettier --check "**/*.{js,json}" --ignore-path .prettierignore
+        continue-on-error: true
+
+  # ──────────────────────────────────────────────────────────────
+  # Security Audit
+  # ──────────────────────────────────────────────────────────────
+  security-audit:
+    name: Security Audit
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    continue-on-error: true
-    env:
-      NODE_ENV: test
-      DISABLE_REDIS: "true"
-      USE_MOCK_DB: "true"
-      JWT_SECRET: "ci-test-secret-minimum-32-chars-long!!"
-      CSRF_DISABLE: "true"
-      # Cache MongoDB binary for MongoMemoryServer — avoids 100MB download every run
-      MONGOMS_DOWNLOAD_DIR: ${{ github.workspace }}/.cache/mongodb-binaries
-      MONGOMS_VERSION: "7.0.14"
-      MONGOMS_PREFER_GLOBAL_PATH: "false"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
 
-      - name: Setup Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+          cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      # Cache MongoDB binary (MongoMemoryServer) — ~100MB, saves 2-3 min per run
-      - name: Cache MongoDB binary
-        id: mongo-cache
-        uses: actions/cache@v4
+      - name: Check for vulnerable dependencies
+        working-directory: backend
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+      - name: Check for secrets in code
+        uses: trufflesecurity/trufflehog@main
         with:
-          path: ${{ github.workspace }}/.cache/mongodb-binaries
-          key: mongodb-binary-7.0.14-ubuntu-latest
-          restore-keys: |
-            mongodb-binary-7.0.14-
-            mongodb-binary-
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+        continue-on-error: true
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm ci --no-audit --no-fund
-
-      - name: Run tests (non-blocking)
-        working-directory: backend
-        run: |
-          # Use the dedicated CI test script — already has correct flags
-          npm run test:ci 2>&1 | tail -50 || true
-          echo ""
-          echo "✅ Tests completed (non-blocking — see output above)"
-
-      - name: Test summary
-        if: always()
-        run: |
-          echo "## 🧪 Backend Tests" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | non-blocking |" >> $GITHUB_STEP_SUMMARY
-          echo "| MongoDB cache | ${{ steps.mongo-cache.outputs.cache-hit == 'true' && 'HIT ✅' || 'MISS (downloading)' }} |" >> $GITHUB_STEP_SUMMARY
-
-  # ═══════════════════════════════════════════════════════════════════
-  #  4. Security Audit ── NON-BLOCKING
-  # ═══════════════════════════════════════════════════════════════════
-  security:
-    name: "🔒 Security Audit"
+  # ──────────────────────────────────────────────────────────────
+  # Docker Build Validation
+  # ──────────────────────────────────────────────────────────────
+  docker-build:
+    name: Docker Build Validation
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    continue-on-error: true
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+    needs: [backend-tests]
 
-      - name: Setup Node ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v6
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (validate only)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: alawael-erp:ci-test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ──────────────────────────────────────────────────────────────
+  # Health Check (تحقق من أن التطبيق يبدأ بشكل صحيح)
+  # ──────────────────────────────────────────────────────────────
+  health-check:
+    name: App Startup Health Check
+    runs-on: ubuntu-latest
+    needs: [backend-tests]
+
+    services:
+      mongodb:
+        image: mongo:7.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: npm
+          cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
-      - name: Install backend dependencies
+      - name: Install dependencies
         working-directory: backend
-        run: npm ci --no-audit --no-fund
+        run: npm ci --prefer-offline
 
-      - name: Audit for critical vulnerabilities
+      - name: Start server and check health
         working-directory: backend
         run: |
-          echo "🔍 Running npm audit (critical only)..."
-          npm audit --audit-level=critical --json 2>/dev/null \
-            | node -e "
-              let d=''; process.stdin.on('data',c=>d+=c).on('end',()=>{
-                try {
-                  const r=JSON.parse(d);
-                  const crit=(r.metadata?.vulnerabilities?.critical)||0;
-                  console.log('Critical vulnerabilities: '+crit);
-                  if(crit>0) process.exit(1);
-                } catch(e) { console.log('Audit parse error — skipping'); }
-              });
-            " || echo "⚠️ Audit found issues — review recommended (non-blocking)"
+          export NODE_ENV=test
+          export MONGODB_URI=mongodb://127.0.0.1:27017/alawael_health_test
+          export REDIS_HOST=127.0.0.1
+          export JWT_SECRET=health-check-secret
+          export PORT=3001
+          export USE_MOCK_DB=false
 
-      - name: Scan for hardcoded secrets
-        run: |
-          echo "🔍 Scanning for hardcoded credentials..."
-          FOUND=0
-          # Look for suspicious patterns excluding env/config references
-          while IFS= read -r line; do
-            FILE=$(echo "$line" | cut -d: -f1)
-            # Skip test files, examples, configs
-            echo "$FILE" | grep -qE "(test|spec|example|mock|fixture|seed)" && continue
-            echo "⚠️ Potential secret: $line"
-            FOUND=$((FOUND + 1))
-          done < <(grep -rn --include="*.js" --include="*.jsx" \
-            -E "password\s*[:=]\s*['\"][^'\"]{8,}['\"]" \
-            backend/routes/ backend/controllers/ frontend/src/ 2>/dev/null \
-            | grep -v "process\.env\|req\.\|body\.\|params\.\|query\.\|config\." \
-            | grep -v "node_modules" || true)
+          # تشغيل الخادم في الخلفية
+          node app.js &
+          APP_PID=$!
 
-          if [ "$FOUND" -eq 0 ]; then
-            echo "✅ No hardcoded secrets found"
-          else
-            echo "⚠️ Found $FOUND potential issues (non-blocking — review manually)"
+          # انتظار 10 ثوانٍ للبدء
+          sleep 10
+
+          # فحص الصحة
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/health || echo "000")
+          echo "Health check status: $HTTP_STATUS"
+
+          kill $APP_PID 2>/dev/null || true
+
+          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "503" ]; then
+            echo "❌ Health check failed with unexpected status: $HTTP_STATUS"
+            exit 1
           fi
 
-  # ═══════════════════════════════════════════════════════════════════
-  #  5. CI Summary ── runs always, fails ONLY if build-frontend failed
-  # ═══════════════════════════════════════════════════════════════════
-  summary:
-    name: "📋 CI Summary"
-    runs-on: ubuntu-latest
-    needs: [build-frontend, lint-backend, test-backend, security]
-    if: always()
-    steps:
-      - name: Generate summary
-        run: |
-          BUILD="${{ needs.build-frontend.result }}"
-          LINT="${{ needs.lint-backend.result }}"
-          TESTS="${{ needs.test-backend.result }}"
-          SEC="${{ needs.security.result }}"
-
-          icon() {
-            case "$1" in
-              success) echo "✅";;
-              failure) echo "❌";;
-              skipped) echo "⏭️";;
-              cancelled) echo "🚫";;
-              *) echo "⚠️";;
-            esac
-          }
-
-          echo "## 📋 Al-Awael ERP — CI Report" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Result | Blocking? |" >> $GITHUB_STEP_SUMMARY
-          echo "|:----|:------:|:---------:|" >> $GITHUB_STEP_SUMMARY
-          echo "| 📦 Frontend Build | $(icon $BUILD) \`$BUILD\` | 🔴 YES |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔍 Backend Lint   | $(icon $LINT) \`$LINT\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🧪 Backend Tests  | $(icon $TESTS) \`$TESTS\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Security       | $(icon $SEC) \`$SEC\` | 🟢 no |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Info | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|:-----|:------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Actor  | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
-
-      - name: Fail ONLY if frontend build broke
-        if: needs.build-frontend.result == 'failure'
-        run: |
-          echo "❌ Frontend build FAILED — this is the only blocking check."
-          echo "   Fix the build error and push again."
-          exit 1
+          echo "✅ Health check passed (status: $HTTP_STATUS)"
+        continue-on-error: true

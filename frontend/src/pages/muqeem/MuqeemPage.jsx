@@ -18,7 +18,6 @@ import {
   Warning as WarnIcon,
   Search as SearchIcon,
   Refresh as RefreshIcon,
-  People as WorkersIcon,
   CheckCircle as CheckIcon,
   Work as OccupationIcon,
 } from '@mui/icons-material';

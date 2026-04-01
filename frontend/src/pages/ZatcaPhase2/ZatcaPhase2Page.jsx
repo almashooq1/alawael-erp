@@ -9,14 +9,13 @@ import {
   Box, Typography, Card, CardContent, Grid, Button, TextField,
   Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
   Tabs, Tab, Chip, Divider, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, IconButton, Tooltip,
+  TableContainer, TableHead, TableRow,
 } from '@mui/material';
 import {
   Receipt as InvoiceIcon,
   QrCode as QrIcon,
   Send as SendIcon,
   CheckCircle as ClearedIcon,
-  Warning as RejectedIcon,
   Code as XmlIcon,
   Refresh as RefreshIcon,
   Info as InfoIcon,
@@ -122,7 +121,7 @@ export default function ZatcaPhase2Page() {
     setLoading(true);
     setError(null);
     try {
-      const { subtotal, vat, total } = calcTotals();
+      const { vat, total } = calcTotals();
       const payload = {
         sellerName: invoice.sellerName,
         vatNumber: invoice.sellerVatNumber,

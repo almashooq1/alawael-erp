@@ -196,7 +196,8 @@ gosiComplianceReportSchema.index({ organization: 1, 'period.startDate': -1 });
 
 const GOSIComplianceReport =
   mongoose.models.GOSIComplianceReport ||
-  mongoose.models.GOSIComplianceReport || mongoose.model('GOSIComplianceReport', gosiComplianceReportSchema);
+  mongoose.models.GOSIComplianceReport ||
+  mongoose.model('GOSIComplianceReport', gosiComplianceReportSchema);
 
 /* ═══════════════════════════════════════════════════════
  * 5) GOSINotification — إشعارات التأمينات
@@ -250,6 +251,105 @@ const GOSINotification =
   mongoose.models.GOSINotification || mongoose.model('GOSINotification', gosiNotificationSchema);
 
 /* ═══════════════════════════════════════════════════════
+ * 6) GOSIPayment — سجلات دفع الاشتراكات الشهرية
+ * ═══════════════════════════════════════════════════════ */
+const gosiPaymentSchema = new Schema(
+  {
+    organization: { type: Schema.Types.ObjectId, ref: 'Organization', index: true },
+    period: { type: String, required: true, comment: 'YYYY-MM' }, // YYYY-MM
+    totalEmployeeShare: { type: Number, default: 0, comment: 'إجمالي حصة الموظفين' },
+    totalEmployerShare: { type: Number, default: 0, comment: 'إجمالي حصة صاحب العمل' },
+    grandTotal: { type: Number, default: 0, comment: 'الإجمالي الكلي' },
+    totalEmployees: { type: Number, default: 0 },
+    saudiEmployees: { type: Number, default: 0 },
+    gccEmployees: { type: Number, default: 0 },
+    expatEmployees: { type: Number, default: 0 },
+    sadadNumber: { type: String, comment: 'رقم سداد' },
+    paymentDate: { type: Date },
+    dueDate: { type: Date, comment: 'آخر موعد للسداد: 15 من الشهر التالي' },
+    status: {
+      type: String,
+      enum: ['pending', 'submitted', 'paid', 'overdue', 'adjusted'],
+      default: 'pending',
+      index: true,
+    },
+    paymentDetails: { type: Schema.Types.Mixed },
+    notes: { type: String },
+    generatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    approvedAt: { type: Date },
+  },
+  { timestamps: true }
+);
+
+gosiPaymentSchema.index({ organization: 1, period: 1 }, { unique: true });
+gosiPaymentSchema.index({ status: 1, dueDate: 1 });
+
+const GOSIPayment = mongoose.models.GOSIPayment || mongoose.model('GOSIPayment', gosiPaymentSchema);
+
+/* ═══════════════════════════════════════════════════════
+ * 7) EndOfServiceCalculation — حسابات مكافأة نهاية الخدمة
+ * ═══════════════════════════════════════════════════════ */
+const endOfServiceSchema = new Schema(
+  {
+    employee: { type: Schema.Types.ObjectId, ref: 'Employee', required: true, index: true },
+    organization: { type: Schema.Types.ObjectId, ref: 'Organization' },
+    terminationType: {
+      type: String,
+      enum: [
+        'employer_termination', // إنهاء من صاحب العمل (مادة 84)
+        'contract_expiry', // انتهاء العقد (مادة 84)
+        'resignation', // استقالة (مادة 85)
+        'force_majeure', // قوة قاهرة (مادة 87)
+        'female_marriage', // زواج الموظفة (مادة 87)
+        'female_childbirth', // وضع الموظفة (مادة 87)
+        'retirement', // تقاعد
+        'death', // وفاة
+        'disability', // عجز
+      ],
+      required: true,
+    },
+    startDate: { type: Date, required: true, comment: 'تاريخ بداية الخدمة' },
+    endDate: { type: Date, required: true, comment: 'تاريخ نهاية الخدمة' },
+    totalYears: { type: Number, comment: 'إجمالي سنوات الخدمة بالكسور' },
+    lastSalary: { type: Number, comment: 'آخر راتب فعلي شامل' },
+    basicSalary: { type: Number },
+    housingAllowance: { type: Number, default: 0 },
+    transportAllowance: { type: Number, default: 0 },
+    otherAllowances: { type: Number, default: 0 },
+    // تفصيل الحساب
+    firstFiveYearsAmount: { type: Number, default: 0, comment: 'نصف شهر × 5 سنوات' },
+    remainingYearsAmount: { type: Number, default: 0, comment: 'شهر كامل × بقية السنوات' },
+    fractionYearAmount: { type: Number, default: 0, comment: 'كسور السنة' },
+    fullEntitlement: { type: Number, comment: 'المستحق الكامل (مادة 84)' },
+    entitlementRatio: { type: Number, default: 1.0, comment: 'النسبة المستحقة' },
+    finalAmount: { type: Number, comment: 'المبلغ النهائي بعد تطبيق النسبة' },
+    // المادة القانونية المطبقة
+    applicableArticle: { type: String },
+    ratioDescription: { type: String },
+    // تفصيل الحساب الكامل (JSON)
+    calculationBreakdown: { type: Schema.Types.Mixed },
+    isEstimated: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ['estimated', 'confirmed', 'paid'],
+      default: 'estimated',
+    },
+    paidDate: { type: Date },
+    calculatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    confirmedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+  },
+  { timestamps: true }
+);
+
+endOfServiceSchema.index({ employee: 1, status: 1 });
+endOfServiceSchema.index({ organization: 1, createdAt: -1 });
+
+const EndOfServiceCalculation =
+  mongoose.models.EndOfServiceCalculation ||
+  mongoose.model('EndOfServiceCalculation', endOfServiceSchema);
+
+/* ═══════════════════════════════════════════════════════
  * Exports
  * ═══════════════════════════════════════════════════════ */
 module.exports = {
@@ -258,4 +358,6 @@ module.exports = {
   GOSICertificate,
   GOSIComplianceReport,
   GOSINotification,
+  GOSIPayment,
+  EndOfServiceCalculation,
 };

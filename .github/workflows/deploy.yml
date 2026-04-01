@@ -1,126 +1,296 @@
-# ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — Quick Deploy (Manual Only)
-#  نشر سريع يدوي — لا يعمل تلقائياً
-# ════════════════════════════════════════════════════════════════════
-name: "⚡ Quick Deploy (Manual)"
+name: Deploy to Production
 
 on:
-  # ✅ يدوي فقط — لا يعمل تلقائياً على push
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
-      force_rebuild:
-        description: "إعادة بناء كل الـ images؟"
-        required: false
-        default: "false"
-        type: boolean
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
-  PROJECT_DIR: /opt/alawael-erp
-  HUSKY: "0"
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  NODE_VERSION: '20'
 
 jobs:
-  validate:
-    name: "✅ Validate"
+  # ─────────────────────────────────────────
+  # Build & Push Docker Image
+  # ─────────────────────────────────────────
+  build-image:
+    name: Build Docker Image
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Validate docker-compose syntax
-        run: |
-          # docker compose config validates YAML syntax
-          if docker compose config --quiet 2>/dev/null; then
-            echo "✅ docker-compose.yml is valid"
-          else
-            echo "⚠️ docker-compose validation skipped (non-blocking)"
-          fi
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Check required secrets
-        run: |
-          MISSING=0
-          [ -z "${{ secrets.VPS_HOST }}" ]    && echo "❌ Missing: VPS_HOST"    && MISSING=1
-          [ -z "${{ secrets.VPS_USER }}" ]    && echo "❌ Missing: VPS_USER"    && MISSING=1
-          [ -z "${{ secrets.VPS_SSH_KEY }}" ] && echo "❌ Missing: VPS_SSH_KEY" && MISSING=1
-          if [ "$MISSING" = "1" ]; then
-            echo ""
-            echo "⚙️  Set secrets at: Settings → Secrets and variables → Actions"
-            exit 1
-          fi
-          echo "✅ All required secrets present"
-
-  deploy:
-    name: "🚀 Deploy via Docker"
-    runs-on: ubuntu-latest
-    needs: validate
-    environment: production
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Setup SSH Agent
-        uses: webfactory/ssh-agent@v0.9.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Add VPS to known hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
-          echo "✅ Added VPS to known hosts"
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=staging,enable=${{ github.event.inputs.environment == 'staging' }}
 
-      - name: Deploy to VPS
-        run: |
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=production
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            GIT_SHA=${{ github.sha }}
+
+  # ─────────────────────────────────────────
+  # Deploy to VPS
+  # ─────────────────────────────────────────
+  deploy:
+    name: Deploy to VPS (${{ github.event.inputs.environment || 'production' }})
+    runs-on: ubuntu-latest
+    needs: [build-image]
+    environment:
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ secrets.APP_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
             set -e
-            cd ${{ env.PROJECT_DIR }}
 
-            echo "📥 Pulling latest..."
-            git fetch origin
+            # ─── Variables ───
+            APP_DIR="/opt/rehab-erp"
+            BACKUP_DIR="/opt/backups/deploys"
+            TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+            GIT_SHA="${{ github.sha }}"
+            IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${GIT_SHA:0:7}"
+
+            echo "🚀 Starting deployment at $TIMESTAMP"
+            echo "📦 Image: $IMAGE"
+
+            # ─── Pre-deployment backup (MongoDB) ───
+            mkdir -p $BACKUP_DIR
+            cd $APP_DIR
+
+            echo "📋 Creating pre-deployment backup..."
+            docker compose exec -T mongodb mongodump \
+              --uri="$MONGO_URI" \
+              --archive="$BACKUP_DIR/db_${TIMESTAMP}.archive.gz" \
+              --gzip 2>/dev/null || echo "⚠️ Backup skipped (MongoDB not running yet)"
+
+            # ─── Enable maintenance mode ───
+            echo "🔧 Enabling maintenance mode..."
+            docker compose exec -T app node -e "
+              const fs = require('fs');
+              fs.writeFileSync('/app/public/maintenance.json', JSON.stringify({
+                active: true,
+                message: 'System is being updated. Please try again in a few minutes.',
+                timestamp: new Date().toISOString()
+              }));
+            " 2>/dev/null || true
+
+            # ─── Pull latest code ───
+            echo "📥 Pulling latest code..."
+            git fetch origin main
             git reset --hard origin/main
 
-            # Create .env if missing
-            [ ! -f .env ] && cp .env.example .env 2>/dev/null && echo "⚠️ Created .env from example — review settings"
+            # ─── Login to GHCR ───
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-            echo "🐳 Pulling base images..."
-            docker compose pull mongodb redis 2>/dev/null || true
+            # ─── Pull latest Docker images ───
+            echo "🐳 Pulling Docker images..."
+            docker compose pull
 
-            echo "🔨 Building & starting services..."
-            if [ "${{ github.event.inputs.force_rebuild }}" = "true" ]; then
-              docker compose up -d --build --force-recreate
-            else
-              docker compose up -d --build
-            fi
+            # ─── Run new containers ───
+            echo "🔄 Starting new containers..."
+            docker compose up -d --build --remove-orphans
 
-            # Cleanup old images
-            docker image prune -f
-
-            echo "📊 Service status:"
-            docker compose ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
-            echo "✅ Deployment complete!"
-          ENDSSH
-
-      - name: Verify deployment
-        run: |
-          sleep 30
-          echo "🔍 Checking service health..."
-          ssh ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'ENDSSH'
-            for svc in alawael-backend alawael-frontend alawael-mongodb; do
-              STATUS=$(docker inspect --format='{{.State.Status}}' $svc 2>/dev/null || echo "not found")
-              if [ "$STATUS" = "running" ]; then
-                echo "✅ $svc: $STATUS"
-              else
-                echo "⚠️  $svc: $STATUS"
+            # ─── Wait for app to be healthy ───
+            echo "⏳ Waiting for containers to be healthy..."
+            MAX_WAIT=60
+            WAITED=0
+            until docker compose exec -T app node -e "process.exit(0)" 2>/dev/null; do
+              sleep 2
+              WAITED=$((WAITED + 2))
+              if [ $WAITED -ge $MAX_WAIT ]; then
+                echo "❌ App container did not start in time"
+                exit 1
               fi
             done
-          ENDSSH
+            echo "✅ App container is running"
 
-      - name: Deployment summary
-        if: always()
+            # ─── Run database migrations ───
+            echo "🗄️ Running database migrations..."
+            docker compose exec -T app node backend/migrations/run-migrations.js 2>/dev/null || \
+            docker compose exec -T app npm run migrate 2>/dev/null || \
+            echo "ℹ️ No migration script found, skipping"
+
+            # ─── Run seeders if needed ───
+            echo "🌱 Running role/permission seeder..."
+            docker compose exec -T app node backend/database/seeders/RehabRolePermissionSeeder.js 2>/dev/null || \
+            echo "ℹ️ Seeder skipped"
+
+            # ─── Clear and rebuild caches ───
+            echo "🧹 Clearing application caches..."
+            docker compose exec -T redis redis-cli FLUSHDB 2>/dev/null || echo "⚠️ Redis flush skipped"
+
+            # ─── Restart queue workers ───
+            echo "🔄 Restarting queue workers..."
+            docker compose restart worker 2>/dev/null || true
+            docker compose restart scheduler 2>/dev/null || true
+
+            # ─── Disable maintenance mode ───
+            echo "✅ Disabling maintenance mode..."
+            docker compose exec -T app node -e "
+              const fs = require('fs');
+              const path = '/app/public/maintenance.json';
+              if (fs.existsSync(path)) fs.unlinkSync(path);
+            " 2>/dev/null || true
+
+            echo "🎉 Deployment completed successfully at $(date)"
+            echo "📝 SHA: ${GIT_SHA:0:7}"
+
+            # ─── Cleanup old images ───
+            docker image prune -f --filter "until=48h" 2>/dev/null || true
+
+            # ─── Cleanup old backups (keep last 10) ───
+            ls -t $BACKUP_DIR/db_*.archive.gz 2>/dev/null | tail -n +11 | xargs -r rm -f || true
+
+      # ─────────────────────────────────────────
+      # Health Check
+      # ─────────────────────────────────────────
+      - name: Verify deployment health
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            set -e
+            APP_URL="${{ secrets.APP_URL }}"
+
+            echo "🔍 Running health checks..."
+
+            # HTTP health check
+            for i in 1 2 3; do
+              HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$APP_URL/api/health" 2>/dev/null || echo "000")
+              if [ "$HTTP_STATUS" = "200" ]; then
+                echo "✅ HTTP health check passed (status: $HTTP_STATUS)"
+                break
+              fi
+              echo "⏳ Attempt $i: HTTP status $HTTP_STATUS — retrying in 10s..."
+              sleep 10
+              if [ $i -eq 3 ]; then
+                echo "❌ Health check failed after 3 attempts (status: $HTTP_STATUS)"
+                exit 1
+              fi
+            done
+
+            # MongoDB check
+            docker compose -f /opt/rehab-erp/docker-compose.yml exec -T mongodb \
+              mongosh --quiet --eval "db.adminCommand('ping').ok" 2>/dev/null | grep -q "1" && \
+              echo "✅ MongoDB: Connected" || echo "⚠️ MongoDB: Could not verify"
+
+            # Redis check
+            docker compose -f /opt/rehab-erp/docker-compose.yml exec -T redis \
+              redis-cli ping 2>/dev/null | grep -q "PONG" && \
+              echo "✅ Redis: Connected" || echo "⚠️ Redis: Could not verify"
+
+            echo "🎉 All health checks passed!"
+
+      # ─────────────────────────────────────────
+      # Notify on success
+      # ─────────────────────────────────────────
+      - name: Notify success
+        if: success()
         run: |
-          echo "## ⚡ Quick Deploy" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`$(echo ${{ github.sha }} | cut -c1-8)\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Actor  | ${{ github.actor }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Force rebuild | ${{ github.event.inputs.force_rebuild }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Deployment successful!"
+          echo "🔗 URL: ${{ secrets.APP_URL }}"
+          echo "📦 SHA: ${{ github.sha }}"
+          echo "🕐 Time: $(date -u)"
+
+      # ─────────────────────────────────────────
+      # Rollback on failure
+      # ─────────────────────────────────────────
+      - name: Rollback on failure
+        if: failure()
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            echo "⚠️ Deployment failed — initiating rollback..."
+
+            cd /opt/rehab-erp
+
+            # Disable maintenance mode first
+            docker compose exec -T app node -e "
+              const fs = require('fs');
+              const path = '/app/public/maintenance.json';
+              if (fs.existsSync(path)) fs.unlinkSync(path);
+            " 2>/dev/null || true
+
+            # Restore last working image
+            LAST_BACKUP=$(ls -t /opt/backups/deploys/db_*.archive.gz 2>/dev/null | head -1)
+            if [ -n "$LAST_BACKUP" ]; then
+              echo "📋 Found backup: $LAST_BACKUP"
+              docker compose exec -T mongodb mongorestore \
+                --uri="$MONGO_URI" \
+                --archive="$LAST_BACKUP" \
+                --gzip \
+                --drop 2>/dev/null && echo "✅ Database restored" || echo "⚠️ Database restore failed"
+            fi
+
+            # Restart previous containers
+            docker compose up -d --remove-orphans
+
+            echo "🔄 Rollback completed at $(date)"
+            echo "⚠️ ALERT: Deployment to ${{ github.event.inputs.environment || 'production' }} FAILED for SHA ${{ github.sha }}"

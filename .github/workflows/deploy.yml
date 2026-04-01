@@ -85,9 +85,6 @@ jobs:
     name: Deploy to VPS (${{ github.event.inputs.environment || 'production' }})
     runs-on: ubuntu-latest
     needs: [build-image]
-    environment:
-      name: ${{ github.event.inputs.environment || 'production' }}
-      url: ${{ secrets.APP_URL }}
 
     steps:
       - name: Checkout code

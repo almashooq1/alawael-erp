@@ -1,0 +1,36 @@
+name: Fix Admin Password (Emergency)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'اكتب "yes" لتأكيد إعادة تعيين كلمة مرور الأدمن'
+        required: true
+        default: 'yes'
+
+jobs:
+  fix-admin:
+    name: Reset Admin Password on VPS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fix admin password via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_SSH_PORT || 22 }}
+          script: |
+            set -e
+            echo "🔧 Fixing admin password..."
+            cd /opt/rehab-erp
+
+            # Run create-admin.js inside the running app container
+            docker compose exec -T app node backend/create-admin.js
+            echo "✅ Admin password reset completed"
+
+      - name: Confirm fix
+        run: |
+          echo "✅ Done!"
+          echo "🔑 Login: admin@alawael.com.sa / Admin@2026"

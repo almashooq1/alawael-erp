@@ -38,7 +38,18 @@ async function ensureAdmin() {
 
     if (admin) {
       // تحقق إذا كانت كلمة المرور المخزنة صحيحة
-      const isValid = await bcrypt.compare(ADMIN_PASSWORD, admin.password);
+      // نتعامل مع حالة password = null أو غير موجود
+      let isValid = false;
+      if (admin.password) {
+        try {
+          isValid = await bcrypt.compare(ADMIN_PASSWORD, admin.password);
+        } catch (compareErr) {
+          logger.warn('[ensureAdmin] bcrypt.compare failed (corrupt hash?):', compareErr.message);
+          isValid = false;
+        }
+      } else {
+        logger.warn('[ensureAdmin] Admin has no password stored — will reset');
+      }
       if (!isValid) {
         logger.warn('[ensureAdmin] Admin password mismatch — resetting to default...');
         const salt = await bcrypt.genSalt(12);

@@ -151,7 +151,8 @@ exports.getDashboardOverview = catchAsync(async (req, res) => {
 
   const guardian = await Guardian.findById(guardianId)
     .select('beneficiaries')
-    .populate('beneficiaries').lean();
+    .populate('beneficiaries')
+    .lean();
 
   const overview = {
     beneficiaryCount: guardian.beneficiaries.length,
@@ -316,7 +317,7 @@ exports.downloadProfileData = catchAsync(async (req, res) => {
   const payments = await PortalPayment.find({ guardianId }).limit(100).lean();
 
   const data = {
-    guardian: guardian.toObject(),
+    guardian: guardian,
     linkedBeneficiaries: guardian.beneficiaries ? guardian.beneficiaries.length : 0,
     recentPayments: payments.length,
   };
@@ -399,7 +400,7 @@ exports.linkBeneficiary = catchAsync(async (req, res) => {
     });
   }
 
-  const guardian = await Guardian.findById(guardianId).lean();
+  const guardian = await Guardian.findById(guardianId);
   const beneficiary = await Beneficiary.findById(beneficiaryId).lean();
 
   if (!beneficiary) {
@@ -409,7 +410,7 @@ exports.linkBeneficiary = catchAsync(async (req, res) => {
     });
   }
 
-  if (guardian.beneficiaries.includes(beneficiaryId)) {
+  if (guardian.beneficiaries.some(b => b.toString() === beneficiaryId.toString())) {
     return res.status(400).json({
       success: false,
       message: 'Beneficiary already linked',
@@ -432,7 +433,7 @@ exports.unlinkBeneficiary = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { beneficiaryId } = req.params;
 
-  const guardian = await Guardian.findById(guardianId).lean();
+  const guardian = await Guardian.findById(guardianId);
   await guardian.unlinkBeneficiary(beneficiaryId);
 
   res.status(200).json({
@@ -453,7 +454,7 @@ exports.getBeneficiaryProgress = catchAsync(async (req, res) => {
 
   // Verify access
   const guardian = await Guardian.findById(guardianId).lean();
-  if (!guardian.beneficiaries.includes(beneficiaryId)) {
+  if (!guardian || !guardian.beneficiaries.some(b => b.toString() === beneficiaryId.toString())) {
     return res.status(403).json({ success: false, message: 'Unauthorized' });
   }
 
@@ -472,7 +473,10 @@ exports.getBeneficiaryProgress = catchAsync(async (req, res) => {
 exports.getBeneficiaryMonthlyProgress = catchAsync(async (req, res) => {
   const { beneficiaryId } = req.params;
 
-  const progress = await BeneficiaryProgress.find({ beneficiaryId }).sort({ month: -1 }).limit(12).lean();
+  const progress = await BeneficiaryProgress.find({ beneficiaryId })
+    .sort({ month: -1 })
+    .limit(12)
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -514,7 +518,8 @@ exports.getBeneficiaryGrades = catchAsync(async (req, res) => {
 
   const grades = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month academicScore previousMonthScore scoreImprovement').lean();
+    .select('month academicScore previousMonthScore scoreImprovement')
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -586,7 +591,8 @@ exports.getBeneficiaryAttendance = catchAsync(async (req, res) => {
 
   const records = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month attendanceRate absenceDays lateDays').lean();
+    .select('month attendanceRate absenceDays lateDays')
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -627,7 +633,8 @@ exports.getBeneficiaryAttendanceReport = catchAsync(async (req, res) => {
   const report = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
     .limit(12)
-    .select('month attendanceRate absenceDays lateDays').lean();
+    .select('month attendanceRate absenceDays lateDays')
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -646,7 +653,8 @@ exports.getBehavior = catchAsync(async (req, res) => {
 
   const records = await BeneficiaryProgress.find({ beneficiaryId })
     .sort({ month: -1 })
-    .select('month behaviorRating challenges').lean();
+    .select('month behaviorRating challenges')
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -733,7 +741,7 @@ exports.generateReport = catchAsync(async (req, res) => {
     });
   }
 
-  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 }).lean();
+  const progress = await BeneficiaryProgress.findOne({ beneficiaryId }).sort({ month: -1 });
 
   if (progress) {
     progress.reportGenerated = true;
@@ -776,7 +784,8 @@ exports.getPayments = catchAsync(async (req, res) => {
   const payments = await PortalPayment.find({ guardianId })
     .sort({ dueDate: -1 })
     .skip(skip)
-    .limit(limit).lean();
+    .limit(limit)
+    .lean();
 
   const total = await PortalPayment.countDocuments({ guardianId });
 
@@ -857,7 +866,7 @@ exports.makePayment = catchAsync(async (req, res) => {
     });
   }
 
-  const payment = await PortalPayment.findById(paymentId).lean();
+  const payment = await PortalPayment.findById(paymentId);
 
   if (payment.guardianId.toString() !== guardianId.toString()) {
     return res.status(403).json({
@@ -904,7 +913,7 @@ exports.makePayment = catchAsync(async (req, res) => {
 exports.requestInvoice = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
 
-  const payment = await PortalPayment.findById(paymentId).lean();
+  const payment = await PortalPayment.findById(paymentId);
   payment.invoiceSentAt = new Date();
   await payment.save();
 
@@ -921,7 +930,7 @@ exports.requestInvoice = catchAsync(async (req, res) => {
 exports.getReceipt = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
 
-  const payment = await PortalPayment.findById(paymentId).lean();
+  const payment = await PortalPayment.findById(paymentId);
 
   if (!payment.receiptGenerated) {
     await payment.generateReceipt();
@@ -941,7 +950,7 @@ exports.requestRefund = catchAsync(async (req, res) => {
   const { paymentId } = req.params;
   const { reason } = req.body;
 
-  const payment = await PortalPayment.findById(paymentId).lean();
+  const payment = await PortalPayment.findById(paymentId);
   await payment.requestRefund(reason || 'No reason provided');
 
   res.status(200).json({
@@ -1171,7 +1180,8 @@ exports.getNotifications = catchAsync(async (req, res) => {
   const notifications = await PortalNotification.find({ guardianId })
     .sort({ createdAt: -1 })
     .skip(skip)
-    .limit(limit).lean();
+    .limit(limit)
+    .lean();
 
   const total = await PortalNotification.countDocuments({ guardianId });
 
@@ -1239,7 +1249,9 @@ exports.markAllNotificationsRead = catchAsync(async (req, res) => {
 exports.getNotificationPreferences = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
 
-  const guardian = await Guardian.findById(guardianId).select('notificationPreference language').lean();
+  const guardian = await Guardian.findById(guardianId)
+    .select('notificationPreference language')
+    .lean();
 
   res.status(200).json({
     success: true,
@@ -1699,7 +1711,7 @@ exports.getBeneficiaryWeeklySchedule = catchAsync(async (req, res) => {
   const dayNames = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
   const formattedWeek = dayNames.map((name, idx) => {
-    const daySchedule = weeklySchedule.find(s => s.dayOfWeek === idx).lean();
+    const daySchedule = weeklySchedule.find(s => s.dayOfWeek === idx);
     return {
       dayOfWeek: idx,
       dayName: name,
@@ -2238,7 +2250,7 @@ exports.replySupportTicket = catchAsync(async (req, res) => {
   }
 
   const GuardianSupportTicket = _getModel('GuardianSupportTicket');
-  const ticket = await GuardianSupportTicket.findById(ticketId).lean();
+  const ticket = await GuardianSupportTicket.findById(ticketId);
 
   if (!ticket) {
     return res.status(404).json({ success: false, message: 'Ticket not found' });
@@ -3328,7 +3340,10 @@ exports.getBeneficiaryHealthRecords = catchAsync(async (req, res) => {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const HealthRecord = _getModel('GuardianHealthRecord');
-  const records = await HealthRecord.find({ beneficiaryId }).sort({ recordDate: -1 }).limit(50).lean();
+  const records = await HealthRecord.find({ beneficiaryId })
+    .sort({ recordDate: -1 })
+    .limit(50)
+    .lean();
   res.json({ success: true, data: records });
 });
 
@@ -3344,7 +3359,11 @@ exports.getBeneficiaryMedications = catchAsync(async (req, res) => {
     return res.status(403).json({ success: false, message: 'غير مصرح' });
   }
   const HealthRecord = _getModel('GuardianHealthRecord');
-  const meds = await HealthRecord.find({ beneficiaryId, recordType: 'medication', isActive: true }).lean();
+  const meds = await HealthRecord.find({
+    beneficiaryId,
+    recordType: 'medication',
+    isActive: true,
+  }).lean();
   res.json({ success: true, data: meds });
 });
 
@@ -3552,7 +3571,8 @@ exports.getTherapyProgress = catchAsync(async (req, res) => {
   const TherapySession = _getModel('GuardianTherapySession');
   const sessions = await TherapySession.find({ beneficiaryId, status: 'completed' })
     .sort({ sessionDate: -1 })
-    .limit(30).lean();
+    .limit(30)
+    .lean();
   const totalSessions = await TherapySession.countDocuments({ beneficiaryId });
   const completedSessions = sessions.length;
   const avgRating =
@@ -4397,7 +4417,9 @@ exports.getHomeActivities = catchAsync(async (req, res) => {
  */
 exports.getSiblingsComparison = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
-  const guardian = await Guardian.findById(guardianId).populate('beneficiaries', 'name status').lean();
+  const guardian = await Guardian.findById(guardianId)
+    .populate('beneficiaries', 'name status')
+    .lean();
   if (!guardian || !guardian.beneficiaries.length) {
     return res.status(404).json({ success: false, message: 'لا يوجد مستفيدين' });
   }
@@ -5240,7 +5262,7 @@ exports.getExpenseForecast = catchAsync(async (req, res) => {
 exports.getBudgetAnalytics = catchAsync(async (req, res) => {
   const Model = _getModel('GuardianBudgetPlan');
   const plans = await Model.find({ guardianId: req.user._id }).sort({ createdAt: -1 }).lean();
-  const activePlan = plans.find(p => p.status === 'active').lean();
+  const activePlan = plans.find(p => p.status === 'active');
   const totalSpent = activePlan
     ? (activePlan.categories || []).reduce((s, c) => s + (c.spent || 0), 0)
     : 0;

@@ -3,16 +3,23 @@
  * يُنشئ أو يُعيد تعيين كلمة مرور مدير النظام
  *
  * الاستخدام:
- *   node backend/create-admin.js
+ *   node backend/create-admin.js   (من مجلد root)
+ *   node create-admin.js           (من مجلد backend)
  */
 'use strict';
-require('dotenv').config();
+
+// تحديد مسار .env تلقائياً (يعمل من root أو backend)
+const path = require('path');
+const fs = require('fs');
+const envPath = fs.existsSync(path.join(__dirname, '.env'))
+  ? path.join(__dirname, '.env')
+  : path.join(__dirname, '..', '.env');
+require('dotenv').config({ path: envPath });
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb://admin:adminpassword@localhost:27017/alawael_erp?authSource=admin';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael-erp';
 
 // ─── بيانات المدير الموحّدة ───────────────────────────────────────────────────
 const ADMIN_EMAIL = 'admin@alawael.com.sa';
@@ -28,46 +35,68 @@ async function createAdmin() {
   console.log('✅ تم الاتصال بنجاح\n');
 
   const User = require('./models/User');
-  const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, salt);
 
-  // ─── التحقق من وجود المدير (البريد الجديد) ────────────────────────────────
-  let admin = await User.findOne({ email: ADMIN_EMAIL }).select('+password');
+  // تشفير كلمة المرور (12 rounds)
+  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
 
-  if (admin) {
-    // إعادة تعيين كلمة المرور
-    admin.password = hashedPassword;
-    admin.failedLoginAttempts = 0;
-    admin.lockUntil = undefined;
-    admin.isActive = true;
-    await admin.save();
+  // ─── البحث عن المدير (البريد الجديد) ───────────────────────────────────────
+  let existing = await User.findOne({ email: ADMIN_EMAIL });
 
+  if (existing) {
+    // إعادة تعيين كلمة المرور مباشرة بـ updateOne (تجاوز pre-save hooks)
+    await User.updateOne(
+      { _id: existing._id },
+      {
+        $set: {
+          password: hashedPassword,
+          isActive: true,
+          failedLoginAttempts: 0,
+          updatedAt: new Date(),
+        },
+        $unset: { lockUntil: '' },
+      }
+    );
     console.log('✅ تم إعادة تعيين كلمة مرور المدير');
-    console.log('   البريد الإلكتروني:', admin.email);
+    console.log('   ID:', existing._id);
+    console.log('   البريد الإلكتروني:', ADMIN_EMAIL);
   } else {
-    // التحقق من البريد القديم
-    const legacy = await User.findOne({ email: ADMIN_EMAIL_LEGACY }).select('+password');
-    if (legacy) {
-      legacy.email = ADMIN_EMAIL;
-      legacy.password = hashedPassword;
-      legacy.failedLoginAttempts = 0;
-      legacy.lockUntil = undefined;
-      legacy.isActive = true;
-      await legacy.save();
+    // البحث عن البريد القديم
+    const legacy = await User.findOne({ email: ADMIN_EMAIL_LEGACY });
 
-      console.log('✅ تم تحديث المدير القديم وتغيير بريده الإلكتروني');
+    if (legacy) {
+      await User.updateOne(
+        { _id: legacy._id },
+        {
+          $set: {
+            email: ADMIN_EMAIL,
+            password: hashedPassword,
+            isActive: true,
+            failedLoginAttempts: 0,
+            updatedAt: new Date(),
+          },
+          $unset: { lockUntil: '' },
+        }
+      );
+      console.log('✅ تم تحديث المدير القديم');
       console.log('   من:', ADMIN_EMAIL_LEGACY, '← إلى:', ADMIN_EMAIL);
     } else {
-      // إنشاء مدير جديد
-      admin = await User.create({
+      // إنشاء مدير جديد — الإدخال المباشر عبر insertOne يتجاوز pre-save hooks
+      const db = mongoose.connection.db;
+      await db.collection('users').insertOne({
         email: ADMIN_EMAIL,
         password: hashedPassword,
         fullName: ADMIN_FULLNAME,
         role: 'admin',
         isActive: true,
+        failedLoginAttempts: 0,
+        tokenVersion: 0,
+        emailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        customPermissions: [],
+        deniedPermissions: [],
       });
       console.log('✅ تم إنشاء مدير النظام بنجاح');
-      console.log('   ID:', admin.id);
     }
   }
 

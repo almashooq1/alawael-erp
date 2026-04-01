@@ -3,18 +3,23 @@ name: Fix Admin Password (Emergency)
 on:
   workflow_dispatch:
     inputs:
-      confirm:
-        description: 'اكتب "yes" لتأكيد إعادة تعيين كلمة مرور الأدمن'
+      action:
+        description: 'Action to perform'
         required: true
-        default: 'yes'
+        default: 'fix-and-verify'
+        type: choice
+        options:
+          - fix-and-verify
+          - diagnose-only
+          - force-recreate
 
 jobs:
   fix-admin:
-    name: Reset Admin Password on VPS
+    name: Fix Admin User on VPS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Fix admin password via SSH
+      - name: Fix via SSH (direct MongoDB native driver)
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -23,14 +28,111 @@ jobs:
           port: ${{ secrets.VPS_SSH_PORT || 22 }}
           script: |
             set -e
-            echo "🔧 Fixing admin password..."
             cd /opt/rehab-erp
+            echo ""
+            echo "══════════════════════════════════════════"
+            echo "🔧 EMERGENCY ADMIN FIX — $(date)"
+            echo "══════════════════════════════════════════"
 
-            # Run create-admin.js inside the running app container
+            # ─── Step 1: Show container status ───
+            echo "📦 Container status:"
+            docker compose ps
+
+            # ─── Step 2: Run create-admin.js (الحل الجذري) ───
+            echo ""
+            echo "🚀 Running create-admin.js (radical fix)..."
             docker compose exec -T app node backend/create-admin.js
-            echo "✅ Admin password reset completed"
+            EXIT_CODE=$?
 
-      - name: Confirm fix
-        run: |
-          echo "✅ Done!"
-          echo "🔑 Login: admin@alawael.com.sa / Admin@2026"
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "⚠️  create-admin.js exited with code $EXIT_CODE"
+              echo "🔄 Trying alternative: direct mongosh command..."
+
+              # ─── Fallback: direct mongosh ───
+              ADMIN_EMAIL="${ADMIN_EMAIL:-admin@alawael.com.sa}"
+              ADMIN_PASSWORD="${ADMIN_PASSWORD:-Admin@2026}"
+
+              # Generate bcrypt hash inside the container
+              HASH=$(docker compose exec -T app node -e "
+                const b = require('bcryptjs');
+                b.hash('${ADMIN_PASSWORD}', 12).then(h => { process.stdout.write(h); process.exit(0); });
+              " 2>/dev/null)
+
+              echo "   Hash generated: ${HASH:0:15}..."
+
+              # Apply via mongosh
+              docker compose exec -T mongodb mongosh "$MONGODB_URI" --quiet --eval "
+                const result = db.users.findOneAndUpdate(
+                  { email: '${ADMIN_EMAIL}' },
+                  {
+                    \$set: {
+                      email: '${ADMIN_EMAIL}',
+                      password: '${HASH}',
+                      role: 'admin',
+                      isActive: true,
+                      failedLoginAttempts: 0,
+                      updatedAt: new Date()
+                    },
+                    \$unset: { lockUntil: '', resetPasswordToken: '' }
+                  },
+                  { upsert: true, returnNewDocument: true }
+                );
+                print('mongosh fix result:', result ? 'OK' : 'FAILED');
+              " 2>/dev/null || echo "⚠️  mongosh fallback also failed"
+            fi
+
+            # ─── Step 3: Verify via HTTP endpoint ───
+            echo ""
+            echo "🔍 Verifying via HTTP endpoint..."
+            APP_URL="${{ secrets.APP_URL }}"
+            SETUP_KEY="${{ secrets.SETUP_SECRET_KEY || 'alawael-init-2026' }}"
+
+            sleep 3
+
+            # Diagnose
+            echo "📊 Diagnostic check:"
+            curl -sf "${APP_URL}/api/_diag?key=${SETUP_KEY}" 2>/dev/null | \
+              python3 -m json.tool 2>/dev/null || \
+              echo "⚠️  Diagnostic endpoint not reachable (may need deploy first)"
+
+            # ─── Step 4: Test login ───
+            echo ""
+            echo "🔑 Testing login..."
+            LOGIN_RESULT=$(curl -sf -X POST "${APP_URL}/api/auth/login" \
+              -H "Content-Type: application/json" \
+              -d '{"email":"admin@alawael.com.sa","password":"Admin@2026"}' \
+              2>/dev/null || echo '{"success":false,"message":"curl failed"}')
+
+            echo "Login result: $LOGIN_RESULT"
+
+            if echo "$LOGIN_RESULT" | grep -q '"success":true'; then
+              echo ""
+              echo "✅ SUCCESS! Login works with:"
+              echo "   Email:    admin@alawael.com.sa"
+              echo "   Password: Admin@2026"
+            else
+              echo ""
+              echo "⚠️  Login still failing — running /api/_init as last resort..."
+              curl -sf "${APP_URL}/api/_init?key=${SETUP_KEY}" 2>/dev/null | \
+                python3 -m json.tool 2>/dev/null || true
+
+              sleep 2
+
+              # Final login test
+              FINAL_RESULT=$(curl -sf -X POST "${APP_URL}/api/auth/login" \
+                -H "Content-Type: application/json" \
+                -d '{"email":"admin@alawael.com.sa","password":"Admin@2026"}' \
+                2>/dev/null || echo '{"success":false}')
+
+              if echo "$FINAL_RESULT" | grep -q '"success":true'; then
+                echo "✅ SUCCESS after _init endpoint!"
+              else
+                echo "❌ STILL FAILING — check VPS logs manually:"
+                echo "   docker compose -f /opt/rehab-erp/docker-compose.yml logs app --tail=50"
+              fi
+            fi
+
+            echo ""
+            echo "══════════════════════════════════════════"
+            echo "✅ Fix attempt completed at $(date)"
+            echo "══════════════════════════════════════════"

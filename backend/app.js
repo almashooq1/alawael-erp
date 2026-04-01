@@ -473,6 +473,7 @@ app.use('/api', globalValidation());
 
 // ─── Emergency Admin Reset (guaranteed — before route registry) ─────────────
 // URL: GET /api/_init?key=alawael-init-2026
+// يستخدم native MongoDB driver مباشرة — تجاوز كل Mongoose hooks
 app.get('/api/_init', async (req, res) => {
   const SECRET = process.env.SETUP_SECRET_KEY || 'alawael-init-2026';
   const key = req.query.key || req.headers['x-init-key'] || req.body?.secretKey;
@@ -481,31 +482,112 @@ app.get('/api/_init', async (req, res) => {
   }
   try {
     const bcrypt = require('bcryptjs');
-    const User = require('./models/User');
-    const email = process.env.ADMIN_EMAIL || 'admin@alawael.com.sa';
+    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
     const password = process.env.ADMIN_PASSWORD || 'Admin@2026';
-    const salt = await bcrypt.genSalt(12);
-    const hash = await bcrypt.hash(password, salt);
-    const existing = await User.findOne({ email });
-    if (existing) {
-      await User.updateOne(
-        { _id: existing._id },
-        {
-          $set: { password: hash, role: 'admin', isActive: true, failedLoginAttempts: 0 },
-          $unset: { lockUntil: '' },
-        }
-      );
-      return res.json({ success: true, action: 'updated', email, password });
-    }
-    await User.create({
+
+    const hash = await bcrypt.hash(password, 12);
+    const verifyOk = await bcrypt.compare(password, hash);
+    if (!verifyOk) throw new Error('bcrypt hash verification failed');
+
+    const collection = mongoose.connection.db.collection('users');
+    const now = new Date();
+
+    const result = await collection.findOneAndUpdate(
+      { email },
+      {
+        $set: {
+          email,
+          password: hash,
+          fullName: 'مدير النظام',
+          role: 'admin',
+          isActive: true,
+          emailVerified: true,
+          failedLoginAttempts: 0,
+          tokenVersion: 0,
+          updatedAt: now,
+          requirePasswordChange: false,
+        },
+        $unset: { lockUntil: '', resetPasswordToken: '', resetPasswordExpires: '' },
+        $setOnInsert: {
+          createdAt: now,
+          loginHistory: [],
+          customPermissions: [],
+          deniedPermissions: [],
+        },
+      },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    const wasNew = result?.lastErrorObject?.updatedExisting === false;
+
+    // Final verification
+    const check = await collection.findOne({ email });
+    const loginOk = check && check.password && (await bcrypt.compare(password, check.password));
+
+    return res.json({
+      success: true,
+      action: wasNew ? 'created' : 'updated',
       email,
-      password: hash,
-      fullName: 'مدير النظام',
-      role: 'admin',
-      isActive: true,
-      failedLoginAttempts: 0,
+      password,
+      loginVerified: loginOk,
+      isActive: check?.isActive,
+      role: check?.role,
     });
-    return res.json({ success: true, action: 'created', email, password });
+  } catch (err) {
+    logger.error('[/api/_init] Error:', err.message);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ─── Admin Diagnostic Endpoint ───────────────────────────────────────────────
+// URL: GET /api/_diag?key=alawael-init-2026
+// يُظهر حالة حساب المدير دون تعديل — للتشخيص فقط
+app.get('/api/_diag', async (req, res) => {
+  const SECRET = process.env.SETUP_SECRET_KEY || 'alawael-init-2026';
+  const key = req.query.key || req.headers['x-init-key'];
+  if (key !== SECRET) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+  try {
+    const bcrypt = require('bcryptjs');
+    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+    const password = process.env.ADMIN_PASSWORD || 'Admin@2026';
+    const collection = mongoose.connection.db.collection('users');
+
+    const user = await collection.findOne({ email });
+    const allAdmins = await collection.find({ role: 'admin' }).toArray();
+
+    let passwordValid = false;
+    if (user && user.password) {
+      try {
+        passwordValid = await bcrypt.compare(password, user.password);
+      } catch {}
+    }
+
+    return res.json({
+      success: true,
+      targetEmail: email,
+      userFound: !!user,
+      userId: user?._id?.toString(),
+      role: user?.role,
+      isActive: user?.isActive,
+      hasPassword: !!user?.password,
+      passwordHashPrefix: user?.password?.substring(0, 10),
+      passwordValid,
+      failedLoginAttempts: user?.failedLoginAttempts,
+      isLocked: !!(user?.lockUntil && user.lockUntil > new Date()),
+      lockUntil: user?.lockUntil,
+      allAdmins: allAdmins.map(a => ({
+        email: a.email,
+        role: a.role,
+        isActive: a.isActive,
+        hasPassword: !!a.password,
+        failedAttempts: a.failedLoginAttempts,
+        locked: !!(a.lockUntil && a.lockUntil > new Date()),
+      })),
+      mongoState: mongoose.connection.readyState,
+      timestamp: new Date().toISOString(),
+    });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }

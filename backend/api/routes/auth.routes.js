@@ -177,8 +177,25 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Check password — guard against null/undefined stored hash
+    if (!user.password) {
+      logger.error(
+        '❌ Login failed: User has no password stored for email:',
+        email.replace(/(.{2}).*(@.*)/, '$1***$2')
+      );
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+    }
+
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await bcrypt.compare(password, user.password);
+    } catch (bcryptErr) {
+      logger.error('❌ bcrypt.compare error:', bcryptErr.message, '— resetting password flag');
+      isPasswordValid = false;
+    }
 
     if (!isPasswordValid) {
       // Increment failed attempts (may trigger lock)

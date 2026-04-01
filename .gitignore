@@ -217,3 +217,23 @@ test.txt
 test2.txt
 test3.txt
 testwrite.txt
+test_redis.js
+
+# ───────────────────────────────────────────────────────────────
+# 16. GitHub Actions & Deployment Utility Scripts
+# ───────────────────────────────────────────────────────────────
+add_missing_secrets.py
+check_deploy.py
+check_deploy_logs.py
+check_new_run.py
+fetch_logs.py
+wait_and_check.py
+update_github_secret.py
+update_ssh_key.py
+run_jobs*.json
+run_status.json
+run2_*.json
+run3_*.json
+runs*.json
+deploy_logs*.txt
+deploy_logs*.zip

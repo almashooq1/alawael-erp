@@ -32,6 +32,7 @@ const isTestEnv = process.env.NODE_ENV === 'test' || !!process.env.JEST_WORKER_I
 
 // Database & Utils
 const { connectDB } = require('./config/database');
+const { ensureAdmin } = require('./utils/ensureAdmin');
 const { seedDatabase } = require('./db/seeders/initialData');
 const { createIndexes } = require('./config/database.optimization');
 const { scheduleBackups } = require('./config/backup');
@@ -108,6 +109,16 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
 
   try {
     await connectDB();
+
+    // ── تأكد من وجود مستخدم Admin (يعمل في كل بدء تشغيل) ──────────────────
+    if (process.env.USE_MOCK_DB !== 'true') {
+      try {
+        await ensureAdmin();
+      } catch (err) {
+        logger.warn('[ensureAdmin] Skipped:', err.message);
+      }
+    }
+
     if (process.env.USE_MOCK_DB === 'true') {
       logger.info('Using in-memory database');
       await seedMockVehicles();

@@ -27,14 +27,12 @@ const MONGODB_URI =
   process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/alawael-erp';
 
 // ─── بيانات المدير الموحّدة ───────────────────────────────────────────────────
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@2026';
 const ADMIN_FULLNAME = process.env.ADMIN_FULL_NAME || 'عبدالله بن سعود المطيري';
 
-// جميع الإيميلات القديمة المحتملة
-const ALL_POSSIBLE_EMAILS = [
-  ADMIN_EMAIL,
-  'admin@alawael.com',
+// الإيميلات القديمة للحذف (لا تشمل الإيميل الرئيسي)
+const LEGACY_EMAILS_TO_DELETE = [
   'admin@alawael.org',
   'admin@rehab-center.sa',
   'admin@example.com',
@@ -71,7 +69,7 @@ async function createAdmin() {
 
   // ─── حذف جميع الحسابات القديمة / المتعارضة ─────────────────────────────
   const deleteResult = await collection.deleteMany({
-    email: { $in: ALL_POSSIBLE_EMAILS.filter(e => e !== ADMIN_EMAIL) },
+    email: { $in: LEGACY_EMAILS_TO_DELETE },
   });
   if (deleteResult.deletedCount > 0) {
     console.log(`🗑️  حُذفت ${deleteResult.deletedCount} حسابات قديمة متعارضة`);

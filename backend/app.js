@@ -482,7 +482,7 @@ app.get('/api/_init', async (req, res) => {
   }
   try {
     const bcrypt = require('bcryptjs');
-    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
     const password = process.env.ADMIN_PASSWORD || 'Admin@2026';
 
     const hash = await bcrypt.hash(password, 12);

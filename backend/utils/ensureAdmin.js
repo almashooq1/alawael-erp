@@ -13,13 +13,12 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const logger = require('./logger');
 
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@2026';
 const ADMIN_FULL_NAME = process.env.ADMIN_FULL_NAME || 'مدير النظام';
 
-// جميع الإيميلات القديمة التي قد تكون موجودة
+// الإيميلات القديمة للحذف فقط (لا تشمل admin@alawael.com الذي هو الرئيسي)
 const LEGACY_EMAILS = [
-  'admin@alawael.com',
   'admin@alawael.org',
   'admin@rehab-center.sa',
   'admin@example.com',

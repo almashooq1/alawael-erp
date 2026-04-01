@@ -5,7 +5,9 @@
 name: "🚀 Deploy to Production"
 
 on:
-  # ✅ يدوي فقط — لا يعمل تلقائياً
+  # ✅ تلقائي عند كل push على main + يدوي
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       deploy_target:
@@ -25,6 +27,7 @@ on:
       confirm:
         description: "اكتب 'deploy' للتأكيد"
         required: true
+        default: "deploy"
         type: string
 
 env:
@@ -53,7 +56,10 @@ jobs:
     steps:
       - name: Confirm deployment intent
         run: |
-          if [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
+          # للـ push التلقائي: لا يحتاج تأكيد
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "✅ Auto-deploy triggered by push to main"
+          elif [ "${{ github.event.inputs.confirm }}" != "deploy" ]; then
             echo "❌ You must type 'deploy' in the confirm field!"
             exit 1
           fi
@@ -74,7 +80,8 @@ jobs:
       - name: Determine deploy targets
         id: target
         run: |
-          TARGET="${{ github.event.inputs.deploy_target }}"
+          # عند push التلقائي: نشر الكل بالقيمة الافتراضية 'both'
+          TARGET="${{ github.event.inputs.deploy_target || 'both' }}"
           echo "🎯 Target: $TARGET"
 
           if [ "$TARGET" = "both" ] || [ "$TARGET" = "backend-only" ]; then

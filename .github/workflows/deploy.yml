@@ -1,8 +1,9 @@
 name: Deploy to Production
 
 on:
-  push:
-    branches: [main]
+  # ℹ️ تم تعطيل push التلقائي — النشر يتم الآن عبر deploy-hostinger.yml
+  # push:
+  #   branches: [main]
   workflow_dispatch:
     inputs:
       environment:

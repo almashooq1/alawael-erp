@@ -1,252 +1,586 @@
 /**
- * Waitlist Management Routes — مسارات إدارة قائمة الانتظار
+ * waitlist.routes.js — مسارات قائمة الانتظار
+ * Waitlist Management Routes
  *
- * Dedicated CRUD for the Waitlist model with position management,
- * priority queuing, and auto-expiry support.
+ * سير العمل الكامل:
+ *   pending → contacted → assessment_scheduled → approved → enrolled
+ *   pending/contacted → rejected | cancelled
+ *
+ * المسارات:
+ *  GET    /api/waitlist              — قائمة الانتظار (مع فلترة وترتيب ذكي)
+ *  GET    /api/waitlist/stats        — إحصائيات قائمة الانتظار
+ *  GET    /api/waitlist/smart        — القائمة الذكية مرتبةً بالأولوية
+ *  GET    /api/waitlist/:id          — تفاصيل طلب واحد
+ *  POST   /api/waitlist              — تسجيل طلب جديد
+ *  PUT    /api/waitlist/:id          — تحديث بيانات الطلب
+ *  POST   /api/waitlist/:id/contact        — تسجيل التواصل مع المتقدم
+ *  POST   /api/waitlist/:id/schedule-assessment — جدولة تقييم
+ *  POST   /api/waitlist/:id/approve        — الموافقة على الطلب
+ *  POST   /api/waitlist/:id/enroll         — تسجيل المتقدم كمستفيد فعلي
+ *  POST   /api/waitlist/:id/reject         — رفض الطلب
+ *  POST   /api/waitlist/:id/cancel         — إلغاء الطلب
+ *
+ * @module routes/waitlist.routes
  */
+
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const Waitlist = require('../models/Waitlist');
-const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
-const { authenticate } = require('../middleware/auth');
-const { safeError } = require('../utils/safeError');
+const mongoose = require('mongoose');
 
-router.use(authenticate);
+const WaitlistEntry = require('../models/WaitlistEntry');
+const Beneficiary = require('../models/Beneficiary');
+const beneficiaryService = require('../services/BeneficiaryService');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { WAITLIST_STATUSES } = require('../constants/beneficiary.constants');
 
-// ═══════════════════════════════════════════════════════════════════════════
-// CRUD — عمليات قائمة الانتظار
-// ═══════════════════════════════════════════════════════════════════════════
+// ─── دوال مساعدة ──────────────────────────────────────────────────────────────
+const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
+const fail = (res, msg, status = 400, extra = {}) =>
+  res.status(status).json({ success: false, message: msg, ...extra });
 
+const isValidId = id => mongoose.Types.ObjectId.isValid(id);
+
+const validateId = (req, res, next) => {
+  if (!isValidId(req.params.id)) return fail(res, 'معرّف غير صحيح', 400);
+  next();
+};
+
+// ─── جميع المسارات تتطلب مصادقة ───────────────────────────────────────────────
+router.use(authenticateToken);
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/waitlist/stats — إحصائيات قائمة الانتظار
+// ══════════════════════════════════════════════════════════════════════════════
+router.get('/stats', async (req, res) => {
+  try {
+    const { branchId } = req.query;
+    const stats = await WaitlistEntry.getStats(branchId || null);
+    return ok(res, stats);
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/waitlist/smart — القائمة الذكية
+// ══════════════════════════════════════════════════════════════════════════════
+/**
+ * @query {string}  branchId  معرّف الفرع (مطلوب)
+ * @query {number}  [limit=50]
+ */
+router.get('/smart', async (req, res) => {
+  try {
+    const { branchId, limit = 50 } = req.query;
+    if (!branchId || !isValidId(branchId)) {
+      return fail(res, 'معرّف الفرع مطلوب وصحيح', 422);
+    }
+
+    const entries = await beneficiaryService.getSmartWaitlist(branchId, {
+      limit: Math.min(parseInt(limit, 10), 200),
+    });
+
+    return ok(res, entries, { total: entries.length });
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/waitlist — قائمة الانتظار
+// ══════════════════════════════════════════════════════════════════════════════
+/**
+ * @query {string}  [branchId]        تصفية بالفرع
+ * @query {string}  [status]          تصفية بالحالة
+ * @query {string}  [priorityLevel]   تصفية بالأولوية
+ * @query {string}  [disabilityType]  تصفية بنوع الإعاقة
+ * @query {string}  [search]          بحث بالاسم أو الجوال أو الهوية
+ * @query {number}  [page=1]
+ * @query {number}  [limit=25]
+ * @query {string}  [sort=createdAt]
+ * @query {string}  [direction=desc]
+ */
 router.get('/', async (req, res) => {
   try {
-    const { status, department, priority, search, page = 1, limit = 20 } = req.query;
+    const {
+      branchId,
+      status,
+      priorityLevel,
+      disabilityType,
+      search,
+      page = 1,
+      limit = 25,
+      sort = 'createdAt',
+      direction = 'desc',
+    } = req.query;
+
     const filter = {};
+
+    // تصفية بالفرع: إذا لم يكن super-admin، يرى فرعه فقط
+    if (branchId && isValidId(branchId)) {
+      filter.branch = branchId;
+    } else if (req.user?.branch && !req.user?.isSuperAdmin) {
+      filter.branch = req.user.branch;
+    }
+
     if (status) filter.status = status;
-    if (department) filter.department = department;
-    if (priority) filter.priority = priority;
-    if (search) {
+    if (priorityLevel) filter.priorityLevel = priorityLevel;
+    if (disabilityType) filter.disabilityType = disabilityType;
+
+    if (search && search.trim()) {
+      const s = search.trim();
       filter.$or = [
-        { department: { $regex: escapeRegex(search), $options: 'i' } },
-        { notes: { $regex: escapeRegex(search), $options: 'i' } },
+        { applicantName: new RegExp(s, 'i') },
+        { applicantPhone: new RegExp(s) },
+        { applicantNationalId: new RegExp(s) },
       ];
     }
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const sortOrder = { priority: -1, createdAt: 1 }; // HIGH first, then FIFO
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
+    const sortObj = { [sort]: direction === 'asc' ? 1 : -1 };
 
     const [entries, total] = await Promise.all([
-      Waitlist.find(filter)
-        .populate('beneficiary', 'name fileNumber')
-        .populate('preferredTherapist', 'name')
-        .sort(sortOrder)
+      WaitlistEntry.find(filter)
+        .populate('branch', 'nameAr code')
+        .populate('beneficiary', 'fileNumber')
+        .populate('createdBy', 'name')
+        .sort(sortObj)
         .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      Waitlist.countDocuments(filter),
+        .limit(limitNum)
+        .lean({ virtuals: true }),
+      WaitlistEntry.countDocuments(filter),
     ]);
 
-    // Add position numbers
-    const data = entries.map((entry, idx) => ({
-      ...entry,
-      position: skip + idx + 1,
-    }));
-
-    res.json({
-      success: true,
-      data,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
+    return ok(res, entries, {
+      meta: {
         total,
-        pages: Math.ceil(total / limit),
+        page: pageNum,
+        limit: limitNum,
+        totalPages: Math.ceil(total / limitNum),
       },
     });
-  } catch (error) {
-    logger.error('[Waitlist] List error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+  } catch (err) {
+    return fail(res, err.message, 500);
   }
 });
 
-router.get('/stats', async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// GET /api/waitlist/:id — تفاصيل طلب
+// ══════════════════════════════════════════════════════════════════════════════
+router.get('/:id', validateId, async (req, res) => {
   try {
-    const [byStatus, byDepartment, byPriority] = await Promise.all([
-      Waitlist.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
-      Waitlist.aggregate([
-        { $match: { status: 'WAITING' } },
-        { $group: { _id: '$department', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-      Waitlist.aggregate([
-        { $match: { status: 'WAITING' } },
-        { $group: { _id: '$priority', count: { $sum: 1 } } },
-      ]),
-    ]);
+    const entry = await WaitlistEntry.findById(req.params.id)
+      .populate('branch', 'nameAr code')
+      .populate('beneficiary', 'fileNumber firstName_ar lastName_ar status')
+      .populate('createdBy', 'name')
+      .populate('assignedTo', 'name')
+      .lean({ virtuals: true });
 
-    res.json({
-      success: true,
-      data: {
-        byStatus: Object.fromEntries(byStatus.map(s => [s._id, s.count])),
-        byDepartment: byDepartment.map(d => ({ department: d._id, count: d.count })),
-        byPriority: Object.fromEntries(byPriority.map(p => [p._id, p.count])),
-        totalWaiting: byStatus.find(s => s._id === 'WAITING')?.count || 0,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+    return ok(res, entry);
+  } catch (err) {
+    return fail(res, err.message, 500);
   }
 });
 
-router.get('/:id', async (req, res) => {
-  try {
-    const entry = await Waitlist.findById(req.params.id)
-      .populate('beneficiary', 'name fileNumber phone')
-      .populate('preferredTherapist', 'name')
-      .lean();
-    if (!entry)
-      return res.status(404).json({ success: false, error: 'السجل غير موجود في قائمة الانتظار' });
-    res.json({ success: true, data: entry });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist — تسجيل طلب جديد
+// ══════════════════════════════════════════════════════════════════════════════
 router.post('/', async (req, res) => {
   try {
-    // Check for duplicate — same beneficiary + department + WAITING
-    const existing = await Waitlist.findOne({
-      beneficiary: req.body.beneficiary,
-      department: req.body.department,
-      status: 'WAITING',
+    const {
+      branch,
+      applicantName,
+      applicantPhone,
+      applicantEmail,
+      applicantNationalId,
+      disabilityType,
+      disabilitySeverity,
+      gender,
+      age,
+      requestedServices,
+      preferredSchedule,
+      priorityLevel,
+      priorityReason,
+      distanceKm,
+      referralSource,
+      notes,
+    } = req.body;
+
+    // التحقق من الحقول المطلوبة
+    if (!branch || !isValidId(branch)) return fail(res, 'الفرع مطلوب', 422);
+    if (!applicantName) return fail(res, 'اسم المتقدم مطلوب', 422);
+    if (!applicantPhone) return fail(res, 'رقم الجوال مطلوب', 422);
+    if (!disabilityType) return fail(res, 'نوع الإعاقة مطلوب', 422);
+    if (!disabilitySeverity) return fail(res, 'شدة الإعاقة مطلوبة', 422);
+
+    // التحقق من تكرار الطلب برقم الجوال في نفس الفرع
+    if (applicantPhone) {
+      const duplicate = await WaitlistEntry.findOne({
+        branch,
+        applicantPhone: applicantPhone.trim(),
+        status: {
+          $nin: [
+            WAITLIST_STATUSES.ENROLLED,
+            WAITLIST_STATUSES.CANCELLED,
+            WAITLIST_STATUSES.REJECTED,
+          ],
+        },
+      }).lean();
+
+      if (duplicate) {
+        return fail(res, 'يوجد طلب نشط مسبق بنفس رقم الجوال لهذا الفرع', 422, {
+          existingId: duplicate._id,
+          existingStatus: duplicate.status,
+        });
+      }
+    }
+
+    const entry = await WaitlistEntry.create({
+      branch,
+      applicantName: applicantName.trim(),
+      applicantPhone: applicantPhone.trim(),
+      applicantEmail: applicantEmail?.trim()?.toLowerCase(),
+      applicantNationalId: applicantNationalId?.trim(),
+      disabilityType,
+      disabilitySeverity,
+      gender,
+      age,
+      requestedServices: requestedServices || [],
+      preferredSchedule,
+      priorityLevel: priorityLevel || 'normal',
+      priorityReason,
+      distanceKm,
+      referralSource,
+      notes,
+      createdBy: req.user?._id,
+      statusHistory: [
+        {
+          status: WAITLIST_STATUSES.PENDING,
+          changedAt: new Date(),
+          changedBy: req.user?._id,
+          note: 'تسجيل طلب جديد',
+        },
+      ],
     });
-    if (existing) {
-      return res
-        .status(409)
-        .json({ success: false, error: 'المستفيد مسجل بالفعل في قائمة الانتظار لهذا القسم' });
-    }
 
-    const entry = await Waitlist.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: entry });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    return res.status(201).json({ success: true, data: entry });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(e => e.message);
+      return fail(res, messages.join(', '), 422);
+    }
+    return fail(res, err.message, 500);
   }
 });
 
-router.put('/:id', async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// PUT /api/waitlist/:id — تحديث بيانات الطلب
+// ══════════════════════════════════════════════════════════════════════════════
+router.put('/:id', validateId, async (req, res) => {
   try {
-    const entry = await Waitlist.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
+    const allowedFields = [
+      'applicantName',
+      'applicantPhone',
+      'applicantEmail',
+      'applicantNationalId',
+      'disabilityType',
+      'disabilitySeverity',
+      'gender',
+      'age',
+      'requestedServices',
+      'preferredSchedule',
+      'priorityLevel',
+      'priorityReason',
+      'distanceKm',
+      'referralSource',
+      'notes',
+      'assignedTo',
+    ];
+
+    const updates = {};
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
     });
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    res.json({ success: true, data: entry });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
-  }
-});
 
-router.delete('/:id', async (req, res) => {
-  try {
-    const entry = await Waitlist.findByIdAndDelete(req.params.id);
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    res.json({ success: true, message: 'تم الحذف بنجاح' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
+    if (Object.keys(updates).length === 0) return fail(res, 'لا توجد بيانات للتحديث', 400);
 
-// ═══════════════════════════════════════════════════════════════════════════
-// STATUS TRANSITIONS — تغيير الحالة
-// ═══════════════════════════════════════════════════════════════════════════
+    // لا يمكن تحديث طلب مغلق
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
 
-router.patch('/:id/offer', async (req, res) => {
-  try {
-    const entry = await Waitlist.findById(req.params.id);
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    if (entry.status !== 'WAITING') {
-      return res
-        .status(400)
-        .json({ success: false, error: 'لا يمكن تقديم عرض إلا للسجلات في حالة الانتظار' });
+    if (
+      [
+        WAITLIST_STATUSES.ENROLLED,
+        WAITLIST_STATUSES.CANCELLED,
+        WAITLIST_STATUSES.REJECTED,
+      ].includes(entry.status)
+    ) {
+      return fail(res, 'لا يمكن تعديل طلب مغلق', 422);
     }
 
-    entry.status = 'OFFERED';
-    // Set expiry to 48 hours from now if not already set
-    if (!entry.expertiryDate) {
-      entry.expertiryDate = new Date(Date.now() + 48 * 60 * 60 * 1000);
-    }
+    Object.assign(entry, updates);
     await entry.save();
 
-    res.json({ success: true, data: entry, message: 'تم تقديم العرض بنجاح' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    return ok(res, entry.toObject({ virtuals: true }));
+  } catch (err) {
+    return fail(res, err.message, 500);
   }
 });
 
-router.patch('/:id/book', async (req, res) => {
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/contact — تسجيل التواصل
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/contact', validateId, async (req, res) => {
   try {
-    const entry = await Waitlist.findById(req.params.id);
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    if (entry.status !== 'OFFERED') {
-      return res.status(400).json({ success: false, error: 'لا يمكن الحجز إلا للعروض المقدمة' });
+    const { note } = req.body;
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    if (entry.status !== WAITLIST_STATUSES.PENDING) {
+      return fail(res, `لا يمكن تسجيل التواصل على طلب بحالة "${entry.status}"`, 422);
     }
-    entry.status = 'BOOKED';
-    await entry.save();
-    res.json({ success: true, data: entry, message: 'تم الحجز بنجاح' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
 
-router.patch('/:id/expire', async (req, res) => {
-  try {
-    const entry = await Waitlist.findByIdAndUpdate(
-      req.params.id,
-      { status: 'EXPIRED' },
-      { new: true }
-    );
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    res.json({ success: true, data: entry, message: 'تم إنهاء صلاحية السجل' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// PRIORITY & POSITION — الأولوية والترتيب
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.patch('/:id/priority', async (req, res) => {
-  try {
-    const { priority } = req.body;
-    if (!['HIGH', 'NORMAL', 'LOW'].includes(priority)) {
-      return res.status(400).json({ success: false, error: 'أولوية غير صحيحة' });
-    }
-    const entry = await Waitlist.findByIdAndUpdate(req.params.id, { priority }, { new: true });
-    if (!entry) return res.status(404).json({ success: false, error: 'السجل غير موجود' });
-    res.json({ success: true, data: entry });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-// Auto-expire overdue entries
-router.post('/auto-expire', async (req, res) => {
-  try {
-    const result = await Waitlist.updateMany(
-      {
-        status: 'OFFERED',
-        expertiryDate: { $lte: new Date() },
-      },
-      { status: 'EXPIRED' }
-    );
-    res.json({
-      success: true,
-      message: `تم إنهاء صلاحية ${result.modifiedCount} سجل(ات)`,
-      modified: result.modifiedCount,
+    await entry.markContacted(note);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.CONTACTED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: note || 'تم التواصل مع المتقدم',
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    await entry.save();
+
+    return ok(res, entry.toObject({ virtuals: true }), {
+      message: 'تم تسجيل التواصل بنجاح',
+    });
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/schedule-assessment — جدولة تقييم
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/schedule-assessment', validateId, async (req, res) => {
+  try {
+    const { assessmentDate, note } = req.body;
+
+    if (!assessmentDate) return fail(res, 'تاريخ التقييم مطلوب', 422);
+
+    const parsedDate = new Date(assessmentDate);
+    if (isNaN(parsedDate.getTime())) return fail(res, 'تاريخ التقييم غير صحيح', 422);
+
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    if (![WAITLIST_STATUSES.PENDING, WAITLIST_STATUSES.CONTACTED].includes(entry.status)) {
+      return fail(res, `لا يمكن جدولة تقييم لطلب بحالة "${entry.status}"`, 422);
+    }
+
+    await entry.scheduleAssessment(parsedDate, note);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.ASSESSMENT_SCHEDULED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: note || `تم جدولة تقييم بتاريخ ${parsedDate.toLocaleDateString('ar-SA')}`,
+    });
+    await entry.save();
+
+    return ok(res, entry.toObject({ virtuals: true }), {
+      message: 'تم جدولة التقييم بنجاح',
+    });
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/approve — الموافقة على الطلب
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/approve', validateId, async (req, res) => {
+  try {
+    const { note } = req.body;
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    const validStatuses = [
+      WAITLIST_STATUSES.CONTACTED,
+      WAITLIST_STATUSES.ASSESSMENT_SCHEDULED,
+      WAITLIST_STATUSES.PENDING,
+    ];
+
+    if (!validStatuses.includes(entry.status)) {
+      return fail(res, `لا يمكن الموافقة على طلب بحالة "${entry.status}"`, 422);
+    }
+
+    await entry.approve(note);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.APPROVED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: note || 'تمت الموافقة على الطلب',
+    });
+    await entry.save();
+
+    return ok(res, entry.toObject({ virtuals: true }), {
+      message: 'تمت الموافقة على الطلب بنجاح',
+    });
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/enroll — تسجيل كمستفيد فعلي
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/enroll', validateId, async (req, res) => {
+  try {
+    const { beneficiaryId, branchId } = req.body;
+
+    const entry = await WaitlistEntry.findById(req.params.id).populate('branch', 'code');
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    // التحقق من الحالة
+    if (
+      ![
+        WAITLIST_STATUSES.APPROVED,
+        WAITLIST_STATUSES.CONTACTED,
+        WAITLIST_STATUSES.PENDING,
+      ].includes(entry.status)
+    ) {
+      return fail(res, `لا يمكن تسجيل طلب بحالة "${entry.status}"`, 422);
+    }
+
+    let finalBeneficiaryId = beneficiaryId;
+
+    // إذا لم يكن المستفيد موجوداً، أنشئه تلقائياً
+    if (!finalBeneficiaryId) {
+      const targetBranch = branchId || entry.branch?._id || entry.branch;
+
+      // التحقق من السعة
+      await beneficiaryService.checkBranchCapacity(targetBranch);
+
+      // توليد رقم ملف
+      const branchCode = entry.branch?.code;
+      const fileNumber = await beneficiaryService.generateFileNumber(targetBranch, branchCode);
+
+      const newBeneficiary = await Beneficiary.create({
+        branch: targetBranch,
+        fileNumber,
+        firstName_ar: entry.applicantName.split(' ')[0] || entry.applicantName,
+        lastName_ar: entry.applicantName.split(' ').slice(-1)[0] || entry.applicantName,
+        phone: entry.applicantPhone,
+        email: entry.applicantEmail,
+        nationalId: entry.applicantNationalId,
+        disabilityType: entry.disabilityType,
+        disabilitySeverity: entry.disabilitySeverity,
+        gender: entry.gender,
+        status: 'active',
+        enrollmentDate: new Date(),
+        referralSource: entry.referralSource,
+        createdBy: req.user?._id,
+      });
+
+      finalBeneficiaryId = newBeneficiary._id;
+    }
+
+    await entry.enroll(finalBeneficiaryId);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.ENROLLED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: 'تم تسجيل المتقدم كمستفيد',
+    });
+    await entry.save();
+
+    return ok(
+      res,
+      { entry: entry.toObject({ virtuals: true }), beneficiaryId: finalBeneficiaryId },
+      { message: 'تم تسجيل المتقدم كمستفيد بنجاح' }
+    );
+  } catch (err) {
+    if (err.code === 'BRANCH_CAPACITY_EXCEEDED') {
+      return fail(res, err.message, 422, { code: err.code });
+    }
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/reject — رفض الطلب
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/reject', validateId, async (req, res) => {
+  try {
+    const { reason } = req.body;
+    if (!reason || !reason.trim()) return fail(res, 'سبب الرفض مطلوب', 422);
+
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    if (
+      [
+        WAITLIST_STATUSES.ENROLLED,
+        WAITLIST_STATUSES.CANCELLED,
+        WAITLIST_STATUSES.REJECTED,
+      ].includes(entry.status)
+    ) {
+      return fail(res, 'الطلب مغلق مسبقاً', 422);
+    }
+
+    await entry.reject(reason);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.REJECTED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: reason,
+    });
+    await entry.save();
+
+    return ok(res, entry.toObject({ virtuals: true }), {
+      message: 'تم رفض الطلب',
+    });
+  } catch (err) {
+    return fail(res, err.message, 500);
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// POST /api/waitlist/:id/cancel — إلغاء الطلب
+// ══════════════════════════════════════════════════════════════════════════════
+router.post('/:id/cancel', validateId, async (req, res) => {
+  try {
+    const { reason } = req.body;
+
+    const entry = await WaitlistEntry.findById(req.params.id);
+    if (!entry) return fail(res, 'الطلب غير موجود', 404);
+
+    if (
+      [
+        WAITLIST_STATUSES.ENROLLED,
+        WAITLIST_STATUSES.CANCELLED,
+        WAITLIST_STATUSES.REJECTED,
+      ].includes(entry.status)
+    ) {
+      return fail(res, 'الطلب مغلق مسبقاً ولا يمكن إلغاؤه', 422);
+    }
+
+    await entry.cancel(reason);
+    entry.statusHistory.push({
+      status: WAITLIST_STATUSES.CANCELLED,
+      changedAt: new Date(),
+      changedBy: req.user?._id,
+      note: reason || 'إلغاء من قِبل المتقدم',
+    });
+    await entry.save();
+
+    return ok(res, entry.toObject({ virtuals: true }), {
+      message: 'تم إلغاء الطلب',
+    });
+  } catch (err) {
+    return fail(res, err.message, 500);
   }
 });
 

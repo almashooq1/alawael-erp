@@ -268,6 +268,12 @@ const branchManagementRoutes = require('../routes/branch.routes');
 // ─── الميزات الناقصة المضافة — Missing Features Added ────────────────────────
 // النماذج الناقصة من prompt_02 (MedicalHistory, BeneficiaryTransfer, EmergencyContact, LeaveBalance, EmploymentContract, ChartOfAccounts, AssessmentComparison)
 const missingModelsRoutes = require('../routes/missing-models.routes');
+
+// ─── prompt_04: وحدة إدارة المستفيدين — Beneficiary Management Module ─────────
+const guardiansRoutes = require('../routes/guardians.routes');
+const disabilityAssessmentsRoutes = require('../routes/disability-assessments.routes');
+const beneficiaryTransfersRoutes = require('../routes/beneficiary-transfers.routes');
+
 // مقيم (Muqeem) — وزارة الداخلية
 const muqeemRoutes = require('../routes/muqeem.routes');
 // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية
@@ -276,6 +282,27 @@ const zatcaPhase2Routes = require('../routes/zatca-phase2.routes');
 const nphiesRoutes = require('../routes/nphies.routes');
 // Enhanced Audit — سجل التدقيق المحسّن
 const { router: enhancedAuditRouter } = require('../middleware/enhancedAudit.middleware');
+
+// ─── prompt_05: وحدة التأهيل والبرامج — Rehabilitation & Programs Module ────
+const rehabProgramsModuleRoutes = require('../routes/rehab-programs-module.routes');
+
+// ─── prompt_06: وحدة المقاييس والتقييمات السريرية — Assessment Scales & Clinical Assessments Module ────
+const assessmentScalesRoutes = require('../routes/assessment-scales.routes');
+
+// ─── prompt_07: الوحدات التشغيلية — HR + Finance + Transport + Scheduling ────
+const hrModuleRoutes = require('../routes/hr-module.routes');
+const financeModuleRoutes = require('../routes/finance-module.routes');
+const transportModuleRoutes = require('../routes/transport-module.routes');
+const schedulingModuleRoutes = require('../routes/scheduling-module.routes');
+
+// ─── prompt_08: التواصل + الملفات + المخزون + الجودة ────────────────────────
+const communicationModuleRoutes = require('../routes/communication-module.routes');
+const filesModuleRoutes = require('../routes/files-module.routes');
+const inventoryModuleRoutes = require('../routes/inventory-module.routes');
+const qualityModuleRoutes = require('../routes/quality-module.routes');
+
+// ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────────
+const reportsAnalyticsModuleRoutes = require('../routes/reports-analytics-module.routes');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -1466,6 +1493,14 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '✅ Missing Models routes mounted (7 models: medical-history, beneficiary-transfers, emergency-contacts, leave-balances, employment-contracts, chart-of-accounts, assessment-comparisons — 30+ endpoints)'
   );
 
+  // ─── prompt_04: وحدة إدارة المستفيدين — Beneficiary Management Module ─────────
+  dualMount(app, 'guardians', guardiansRoutes);
+  dualMount(app, 'disability-assessments', disabilityAssessmentsRoutes);
+  dualMount(app, 'beneficiary-transfers', beneficiaryTransfersRoutes);
+  logger.info(
+    '✅ prompt_04 Beneficiary Management routes mounted: guardians (8 endpoints), disability-assessments (7 endpoints), beneficiary-transfers workflow (6 endpoints)'
+  );
+
   // مقيم (Muqeem) — وزارة الداخلية: إقامات، تأشيرات، خروج ودخول
   dualMount(app, 'muqeem', muqeemRoutes);
   logger.info(
@@ -1492,6 +1527,42 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   logger.info(
     '🇸🇦 Saudi Integrations Complete: Muqeem + ZATCA Phase 2 + NPHIES + Enhanced Audit — جميع التكاملات السعودية الناقصة مُضافة'
+  );
+
+  // ─── prompt_05: وحدة التأهيل والبرامج — Rehabilitation & Programs Module ────
+  dualMount(app, 'rehab-module', rehabProgramsModuleRoutes);
+  logger.info(
+    '✅ prompt_05 Rehabilitation & Programs Module routes mounted: programs, enrollments, rehab-plans+goals, sessions (CRUD+attendance+goal-progress+complete+autosave+chart), group-sessions, referrals (60+ endpoints)'
+  );
+
+  // ─── prompt_06: وحدة المقاييس والتقييمات السريرية — Assessment Scales & Clinical Assessments ────
+  dualMount(app, 'assessment-scales', assessmentScalesRoutes);
+  logger.info(
+    '✅ prompt_06 Assessment Scales & Clinical Assessments routes mounted (17 tools library: Vineland-3/CARS-2/GARS-3/VB-MAPP/ABLLS-R/PEP-3/SB-5/WISC-V/Conners-3/GMFM-88/BOT-2/CELF-5/PLS-5/Bayley-4/BASC-3/GFTA-3/AFLS, 25+ endpoints: tools library, clinical assessments, administer/autosave/batch-save/complete, domain scores, reports, comparisons, timeline, chart)'
+  );
+
+  // ─── prompt_07: الوحدات التشغيلية — HR + Finance + Transport + Scheduling ────
+  dualMount(app, 'hr-module', hrModuleRoutes);
+  dualMount(app, 'finance-module', financeModuleRoutes);
+  dualMount(app, 'transport-module', transportModuleRoutes);
+  dualMount(app, 'scheduling-module', schedulingModuleRoutes);
+  logger.info(
+    '✅ prompt_07 Operational Modules mounted: hr-module (employees/payroll/leaves/attendance/EOS), finance-module (accounts/journal-entries/invoices-ZATCA/payments/insurance-claims/reports), transport-module (vehicles/routes/trips-GPS/maintenance/reports), scheduling-module (appointments-conflicts/availability/recurrences/rooms/waitlist/reports — 120+ endpoints)'
+  );
+
+  // ─── prompt_08: التواصل + الملفات + المخزون + الجودة ────────────────────
+  dualMount(app, 'communication-module', communicationModuleRoutes);
+  dualMount(app, 'files-module', filesModuleRoutes);
+  dualMount(app, 'inventory-module', inventoryModuleRoutes);
+  dualMount(app, 'quality-module', qualityModuleRoutes);
+  logger.info(
+    '✅ prompt_08 Operational Modules mounted: communication-module (announcements/messages/notifications/contacts — 22+ endpoints), files-module (folders/files/versioning/archive — 18+ endpoints), inventory-module (items/transactions/purchase-orders/stats — 25+ endpoints), quality-module (indicators/measurements/incidents/dashboard — 30+ endpoints)'
+  );
+
+  // ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────
+  dualMount(app, 'reports-analytics', reportsAnalyticsModuleRoutes);
+  logger.info(
+    '✅ prompt_09 Reports & Analytics Module mounted: templates (CRUD), jobs (run/status/download), schedules (CRUD+toggle), analytics (executive/beneficiaries/clinical/financial/hr/operational/quality), built-in reports (9 reports: beneficiary-list/progress/assessments-summary/sessions-log/attendance/financial-summary/hr-headcount/inventory-status/quality-indicators), stats (35+ endpoints)'
   );
 
   // ── Route Mount Summary ─────────────────────────────────────────────────

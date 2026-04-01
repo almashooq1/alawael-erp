@@ -161,6 +161,11 @@ jobs:
             done
             echo "✅ App container is running"
 
+            # ─── Ensure admin user (CRITICAL — runs every deploy) ───
+            echo "👤 Ensuring admin user exists with correct password..."
+            docker compose exec -T app node backend/create-admin.js || \
+            echo "⚠️ create-admin.js failed — admin may need manual reset"
+
             # ─── Run database migrations ───
             echo "🗄️ Running database migrations..."
             docker compose exec -T app node backend/migrations/run-migrations.js 2>/dev/null || \

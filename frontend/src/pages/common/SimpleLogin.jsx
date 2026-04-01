@@ -123,7 +123,7 @@ export default function SimpleLogin() {
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 80);
     if (process.env.NODE_ENV === 'development') {
-      setForm({ email: 'admin@alawael.org', password: 'Admin@123' });
+      setForm({ email: 'admin@alawael.com.sa', password: 'Admin@2026' });
     }
     return () => clearTimeout(t);
   }, []);
@@ -738,11 +738,11 @@ export default function SimpleLogin() {
                   }}
                 >
                   <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
-                    admin@alawael.org
+                    admin@alawael.com.sa
                   </Typography>
                   <Box sx={{ width: 1, height: 12, backgroundColor: alpha('#6366F1', 0.25) }} />
                   <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
-                    Admin@123
+                    Admin@2026
                   </Typography>
                 </Box>
               </Box>

@@ -23,7 +23,8 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawae
 
 // ─── بيانات المدير الموحّدة ───────────────────────────────────────────────────
 const ADMIN_EMAIL = 'admin@alawael.com.sa';
-const ADMIN_EMAIL_LEGACY = 'admin@alawael.com'; // البريد القديم
+// جميع الإيميلات القديمة المحتملة
+const LEGACY_EMAILS = ['admin@alawael.com', 'admin@alawael.org', 'admin@rehab-center.sa'];
 const ADMIN_PASSWORD = 'Admin@2026';
 const ADMIN_FULLNAME = 'عبدالله بن سعود المطيري';
 
@@ -60,8 +61,8 @@ async function createAdmin() {
     console.log('   ID:', existing._id);
     console.log('   البريد الإلكتروني:', ADMIN_EMAIL);
   } else {
-    // البحث عن البريد القديم
-    const legacy = await User.findOne({ email: ADMIN_EMAIL_LEGACY });
+    // البحث عن أي بريد إلكتروني قديم
+    const legacy = await User.findOne({ email: { $in: LEGACY_EMAILS } });
 
     if (legacy) {
       await User.updateOne(
@@ -78,7 +79,7 @@ async function createAdmin() {
         }
       );
       console.log('✅ تم تحديث المدير القديم');
-      console.log('   من:', ADMIN_EMAIL_LEGACY, '← إلى:', ADMIN_EMAIL);
+      console.log('   من:', legacy.email, '← إلى:', ADMIN_EMAIL);
     } else {
       // إنشاء مدير جديد — الإدخال المباشر عبر insertOne يتجاوز pre-save hooks
       const db = mongoose.connection.db;

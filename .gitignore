@@ -237,3 +237,15 @@ run3_*.json
 runs*.json
 deploy_logs*.txt
 deploy_logs*.zip
+  
+# Diagnostic/utility scripts  
+check_duplicates.js  
+check_status.js  
+project_health_report.js  
+check_remaining.js  
+backend/check_app.js  
+backend/check_routes.js  
+backend/trace_indexes.js  
+backend/fix_last4.js  
+backend/fix_indexes_v2.js  
+backend/fix_duplicate_models.js  

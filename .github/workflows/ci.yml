@@ -70,6 +70,7 @@ jobs:
         run: npm ci
         env:
           HUSKY: 0
+          npm_config_engine_strict: "false"
 
       - name: Copy environment file
         working-directory: backend
@@ -126,6 +127,7 @@ jobs:
         run: npm ci
         env:
           HUSKY: 0
+          npm_config_engine_strict: "false"
 
       - name: Run ESLint
         working-directory: backend
@@ -234,6 +236,7 @@ jobs:
         run: npm ci
         env:
           HUSKY: 0
+          npm_config_engine_strict: "false"
 
       - name: Start server and check health
         working-directory: backend

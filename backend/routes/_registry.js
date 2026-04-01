@@ -314,6 +314,9 @@ const qualityModuleRoutes = require('../routes/quality-module.routes');
 // ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────────
 const reportsAnalyticsModuleRoutes = require('../routes/reports-analytics-module.routes');
 
+// ─── Setup & Admin Init (محمي بـ SETUP_SECRET_KEY) ──────────────────────────
+const setupRoutes = require('../routes/setup.routes');
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -1615,6 +1618,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info(
     '✅ prompt_09 Reports & Analytics Module mounted: templates (CRUD), jobs (run/status/download), schedules (CRUD+toggle), analytics (executive/beneficiaries/clinical/financial/hr/operational/quality), built-in reports (9 reports: beneficiary-list/progress/assessments-summary/sessions-log/attendance/financial-summary/hr-headcount/inventory-status/quality-indicators), stats (35+ endpoints)'
   );
+
+  // ── Setup & Admin Init — إعداد أولي (محمي بـ secret key) ──────────────
+  dualMount(app, 'setup', setupRoutes);
+  logger.info('✅ Setup routes mounted (/api/setup/status, /api/setup/init-admin)');
 
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;

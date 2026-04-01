@@ -39,7 +39,7 @@ describe('API Endpoints', () => {
       'SETTINGS',
     ];
 
-    it.each(expectedGroups)('has %s group' => {
+    it.each(expectedGroups)('has %s group', group => {
       expect(API[group]).toBeDefined();
       expect(typeof API[group]).toBe('object');
     });

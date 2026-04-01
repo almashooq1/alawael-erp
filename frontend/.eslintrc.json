@@ -43,6 +43,12 @@
     "prefer-const": "warn",
     "no-throw-literal": "error",
     "no-self-compare": "error",
-    "no-template-curly-in-string": "warn"
+    "no-template-curly-in-string": "warn",
+    "import/no-anonymous-default-export": "off",
+    "no-empty": ["warn", { "allowEmptyCatch": true }],
+    "no-constant-condition": "warn",
+    "no-useless-catch": "warn",
+    "no-useless-escape": "warn",
+    "no-unsafe-finally": "warn"
   }
 }

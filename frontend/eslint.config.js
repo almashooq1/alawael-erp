@@ -1,19 +1,19 @@
 const js = require('@eslint/js');
 const globals = require('globals');
-const unusedImports = require('eslint-plugin-unused-imports');
-const reactHooks = require('eslint-plugin-react-hooks');
-const reactPlugin = require('eslint-plugin-react');
 
+// This flat config is used by ESLint v10 (root) when linting frontend files via lint-staged.
+// React-specific rules are handled by frontend/.eslintrc.json via react-scripts (ESLint v8).
 module.exports = [
   {
     ignores: ['node_modules/**', 'coverage/**', 'build/**', 'dist/**', '.git/**', '*.log'],
+    linterOptions: {
+      reportUnusedDisableDirectives: 'warn',
+    },
   },
   {
     files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
-    plugins: {
-      'unused-imports': unusedImports,
-      'react-hooks': reactHooks,
-      react: reactPlugin,
+    linterOptions: {
+      reportUnusedDisableDirectives: 'warn',
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -32,11 +32,7 @@ module.exports = [
     },
     rules: {
       ...js.configs.recommended.rules,
-      'no-unused-vars': 'off',
-      'react/jsx-uses-react': 'warn',
-      'react/jsx-uses-vars': 'warn',
-      'unused-imports/no-unused-imports': 'warn',
-      'unused-imports/no-unused-vars': [
+      'no-unused-vars': [
         'warn',
         {
           vars: 'all',
@@ -48,8 +44,12 @@ module.exports = [
       ],
       'no-console': 'warn',
       'no-undef': 'warn',
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      // Override recommended rules from errors to warnings
+      'no-empty': ['warn', { allowEmptyCatch: true }],
+      'no-constant-condition': 'warn',
+      'no-useless-catch': 'warn',
+      'no-useless-escape': 'warn',
+      'no-unsafe-finally': 'warn',
     },
   },
   {

@@ -413,7 +413,7 @@ class RecommendationEngine {
     }
     if (approach === 'TEACCH') {
       reasons.push('التنظيم البصري يقلل القلق ويزيد الاستقلالية');
-      if (vabs_adaptive_composite && data.vabs_adaptive_composite < 70)
+      if (data.vabs_adaptive_composite && data.vabs_adaptive_composite < 70)
         reasons.push('ضعف الأداء التكيفي يستفيد من هيكلة TEACCH');
     }
     if (approach === 'DIR_FLOORTIME') {

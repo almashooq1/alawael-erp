@@ -7,22 +7,20 @@ const express = require('express');
 const router = express.Router();
 const settingsService = require('../services/settingsService');
 const { GlobalSetting } = require('../models/BranchSetting');
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // ─── Middleware: يتطلب مصادقة لجميع المسارات ─────────────────────────────────
-router.use(auth);
+router.use(authenticate);
 
 // ─── Helper للتحقق من دور المدير ──────────────────────────────────────────────
 function requireAdmin(req, res, next) {
   const adminRoles = ['admin', 'super_admin', 'manager'];
   if (!adminRoles.includes(req.user?.role)) {
-    return res
-      .status(403)
-      .json({
-        message: 'غير مصرح — يتطلب صلاحية مدير',
-        messageEn: 'Forbidden — admin role required',
-      });
+    return res.status(403).json({
+      message: 'غير مصرح — يتطلب صلاحية مدير',
+      messageEn: 'Forbidden — admin role required',
+    });
   }
   next();
 }

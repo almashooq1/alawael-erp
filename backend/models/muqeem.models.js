@@ -100,7 +100,7 @@ const employeeResidencySchema = new Schema(
   { timestamps: true }
 );
 
-employeeResidencySchema.index({ iqamaNumber: 1 });
+// REMOVED DUPLICATE: employeeResidencySchema.index({ iqamaNumber: 1 }); — field already has index:true
 employeeResidencySchema.index({ iqamaExpiryDate: 1, status: 1 });
 employeeResidencySchema.index({ employee: 1, status: 1 });
 employeeResidencySchema.index({ passportExpiryDate: 1, status: 1 });
@@ -180,7 +180,7 @@ const visaRequestSchema = new Schema(
 );
 
 visaRequestSchema.index({ employee: 1, visaType: 1, status: 1 });
-visaRequestSchema.index({ visaNumber: 1 });
+// REMOVED DUPLICATE: visaRequestSchema.index({ visaNumber: 1 }); — field already has index:true
 visaRequestSchema.index({ visaEndDate: 1, status: 1 });
 
 const VisaRequest = mongoose.models.VisaRequest || mongoose.model('VisaRequest', visaRequestSchema);
@@ -294,7 +294,7 @@ const transferRequestSchema = new Schema(
 );
 
 transferRequestSchema.index({ employee: 1, status: 1 });
-transferRequestSchema.index({ muqeemRequestId: 1 });
+// REMOVED DUPLICATE: transferRequestSchema.index({ muqeemRequestId: 1 }); — field already has index:true
 
 const TransferRequest =
   mongoose.models.TransferRequest || mongoose.model('TransferRequest', transferRequestSchema);

@@ -70,4 +70,6 @@ qualityMeasurementSchema.index({ branch_id: 1, period_start: -1 });
 qualityMeasurementSchema.index({ performance_status: 1 });
 qualityMeasurementSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('QualityMeasurement', qualityMeasurementSchema);
+module.exports =
+  mongoose.models.QualityMeasurement ||
+  mongoose.model('QualityMeasurement', qualityMeasurementSchema);

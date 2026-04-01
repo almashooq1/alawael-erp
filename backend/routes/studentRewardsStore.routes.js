@@ -39,7 +39,7 @@ let RewardItem;
 try {
   RewardItem = mongoose.model('RewardItem');
 } catch {
-  RewardItem = mongoose.model('RewardItem', rewardItemSchema);
+  RewardItem = mongoose.models.RewardItem || mongoose.model('RewardItem', rewardItemSchema);
 }
 
 // ─── Reward Transaction Schema ───────────────────────────────────────────────
@@ -85,7 +85,9 @@ let RewardTransaction;
 try {
   RewardTransaction = mongoose.model('RewardTransaction');
 } catch {
-  RewardTransaction = mongoose.model('RewardTransaction', rewardTransactionSchema);
+  RewardTransaction =
+    mongoose.models.RewardTransaction ||
+    mongoose.model('RewardTransaction', rewardTransactionSchema);
 }
 
 // ─── Badge Schema ────────────────────────────────────────────────────────────
@@ -112,7 +114,7 @@ let Badge;
 try {
   Badge = mongoose.model('StudentBadge');
 } catch {
-  Badge = mongoose.model('StudentBadge', badgeSchema);
+  Badge = mongoose.models.StudentBadge || mongoose.model('StudentBadge', badgeSchema);
 }
 
 // ─── Student Badge Earned Schema ─────────────────────────────────────────────
@@ -128,7 +130,8 @@ let StudentBadgeEarned;
 try {
   StudentBadgeEarned = mongoose.model('StudentBadgeEarned');
 } catch {
-  StudentBadgeEarned = mongoose.model('StudentBadgeEarned', studentBadgeSchema);
+  StudentBadgeEarned =
+    mongoose.models.StudentBadgeEarned || mongoose.model('StudentBadgeEarned', studentBadgeSchema);
 }
 
 // ─── Helper: Get Balance ─────────────────────────────────────────────────────
@@ -227,12 +230,10 @@ router.post('/:studentId/redeem', async (req, res) => {
 
     const balance = await getBalance(req.params.studentId);
     if (balance < item.pointsCost) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: `رصيدك (${balance}) غير كافٍ. تحتاج ${item.pointsCost} نقطة`,
-        });
+      return res.status(400).json({
+        success: false,
+        message: `رصيدك (${balance}) غير كافٍ. تحتاج ${item.pointsCost} نقطة`,
+      });
     }
 
     const newBalance = balance - item.pointsCost;

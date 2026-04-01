@@ -79,7 +79,8 @@ let Certificate;
 try {
   Certificate = mongoose.model('StudentCertificate');
 } catch {
-  Certificate = mongoose.model('StudentCertificate', certificateSchema);
+  Certificate =
+    mongoose.models.StudentCertificate || mongoose.model('StudentCertificate', certificateSchema);
 }
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

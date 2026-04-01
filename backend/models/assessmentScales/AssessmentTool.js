@@ -172,7 +172,7 @@ const assessmentToolSchema = new mongoose.Schema(
 // ── الفهارس ────────────────────────────────────────────────────
 assessmentToolSchema.index({ category: 1, is_active: 1 });
 assessmentToolSchema.index({ min_age_months: 1, max_age_months: 1 });
-assessmentToolSchema.index({ code: 1 }, { unique: true });
+// REMOVED DUPLICATE: code already has unique:true in field definition
 
 // ── Virtuals ────────────────────────────────────────────────────
 assessmentToolSchema.virtual('age_range_display').get(function () {

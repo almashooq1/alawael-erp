@@ -111,4 +111,6 @@ endOfServiceSchema.index({ employee_id: 1 });
 endOfServiceSchema.index({ branch_id: 1, status: 1 });
 endOfServiceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('EndOfServiceCalculation', endOfServiceSchema);
+module.exports =
+  mongoose.models.EndOfServiceCalculation ||
+  mongoose.model('EndOfServiceCalculation', endOfServiceSchema);

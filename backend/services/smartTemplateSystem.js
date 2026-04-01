@@ -95,7 +95,8 @@ const templateSchema = new mongoose.Schema({
   tags: [String],
 });
 
-const Template = mongoose.model('NotificationTemplate', templateSchema);
+const Template =
+  mongoose.models.NotificationTemplate || mongoose.model('NotificationTemplate', templateSchema);
 
 // ═══════════════════════════════════════════════════════════════
 // 🎯 نظام القوالب الذكية

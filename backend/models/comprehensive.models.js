@@ -344,6 +344,7 @@ module.exports = {
     mongoose.models.ProgressTracking || mongoose.model('ProgressTracking', progressTrackingSchema),
   FamilyCommunication:
     mongoose.models.FamilyCommunication ||
+    mongoose.models.FamilyCommunication ||
     mongoose.model('FamilyCommunication', familyCommunicationSchema),
   MedicalRecords:
     mongoose.models.MedicalRecords || mongoose.model('MedicalRecords', medicalRecordsSchema),

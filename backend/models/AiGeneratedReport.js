@@ -117,4 +117,5 @@ aiGeneratedReportSchema.index({ status: 1, report_type: 1 });
 aiGeneratedReportSchema.index({ period_start: 1, period_end: 1 });
 aiGeneratedReportSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('AiGeneratedReport', aiGeneratedReportSchema);
+module.exports =
+  mongoose.models.AiGeneratedReport || mongoose.model('AiGeneratedReport', aiGeneratedReportSchema);

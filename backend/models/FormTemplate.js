@@ -551,7 +551,8 @@ let FormTemplateModel;
 try {
   FormTemplateModel = mongoose.model('FormTemplate');
 } catch {
-  FormTemplateModel = mongoose.model('FormTemplate', FormTemplateSchema);
+  FormTemplateModel =
+    mongoose.models.FormTemplate || mongoose.model('FormTemplate', FormTemplateSchema);
 }
 
 module.exports = FormTemplateModel;

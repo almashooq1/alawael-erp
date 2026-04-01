@@ -75,4 +75,5 @@ ChartOfAccountsSchema.methods.getPath = async function () {
   return path.join(' > ');
 };
 
-module.exports = mongoose.model('ChartOfAccounts', ChartOfAccountsSchema);
+module.exports =
+  mongoose.models.ChartOfAccounts || mongoose.model('ChartOfAccounts', ChartOfAccountsSchema);

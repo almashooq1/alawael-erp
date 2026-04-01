@@ -226,10 +226,10 @@ ActivitySchema.index({ type: 1 });
 // 2. MODELS — النماذج
 // ════════════════════════════════════════════════════════════════
 
-const CrmContact = mongoose.model('CrmContact', ContactSchema);
-const CrmDeal = mongoose.model('CrmDeal', DealSchema);
-const CrmFollowUp = mongoose.model('CrmFollowUp', FollowUpSchema);
-const CrmActivity = mongoose.model('CrmActivity', ActivitySchema);
+const CrmContact = mongoose.models.CrmContact || mongoose.model('CrmContact', ContactSchema);
+const CrmDeal = mongoose.models.CrmDeal || mongoose.model('CrmDeal', DealSchema);
+const CrmFollowUp = mongoose.models.CrmFollowUp || mongoose.model('CrmFollowUp', FollowUpSchema);
+const CrmActivity = mongoose.models.CrmActivity || mongoose.model('CrmActivity', ActivitySchema);
 
 // ════════════════════════════════════════════════════════════════
 // 3. SERVICE — الخدمة
@@ -370,15 +370,18 @@ class CRMAdvancedService {
         CrmContact.countDocuments({ status: 'غير نشط' }),
         CrmContact.aggregate([
           { $match: { status: { $ne: 'محذوف' } } },
-          { $group: { _id: '$type', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$type', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         CrmContact.aggregate([
           { $match: { status: { $ne: 'محذوف' } } },
-          { $group: { _id: '$sector', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$sector', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         CrmContact.aggregate([
           { $match: { status: { $ne: 'محذوف' } } },
-          { $group: { _id: '$tier', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$tier', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]),
         CrmContact.aggregate([
           { $match: { status: { $ne: 'محذوف' } } },
@@ -632,7 +635,8 @@ class CRMAdvancedService {
             },
           },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
 
     const pipelineMap = {};
@@ -792,7 +796,8 @@ class CRMAdvancedService {
       CrmDeal.countDocuments({ stage: { $nin: ['مغلق - ربح', 'مغلق - خسارة'] } }),
       CrmDeal.aggregate([
         { $match: { stage: 'مغلق - ربح' } },
-        { $group: { _id: null, total: { $sum: '$value' }, avg: { $avg: '$value' } } }, { $limit: 1000 }
+        { $group: { _id: null, total: { $sum: '$value' }, avg: { $avg: '$value' } } },
+        { $limit: 1000 },
       ]),
       // Monthly trend (last 6 months)
       CrmDeal.aggregate([
@@ -806,16 +811,19 @@ class CRMAdvancedService {
             revenue: { $sum: { $cond: [{ $eq: ['$stage', 'مغلق - ربح'] }, '$value', 0] } },
           },
         },
-        { $sort: { _id: 1 } }, { $limit: 1000 }
+        { $sort: { _id: 1 } },
+        { $limit: 1000 },
       ]),
       // Pipeline distribution
       CrmDeal.aggregate([
-        { $group: { _id: '$stage', count: { $sum: 1 }, value: { $sum: '$value' } } }, { $limit: 1000 }
+        { $group: { _id: '$stage', count: { $sum: 1 }, value: { $sum: '$value' } } },
+        { $limit: 1000 },
       ]),
       // Source distribution
       CrmDeal.aggregate([
         { $group: { _id: '$source', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }, { $limit: 1000 }
+        { $sort: { count: -1 } },
+        { $limit: 1000 },
       ]),
       // Top performers
       CrmDeal.aggregate([
@@ -932,7 +940,8 @@ class CRMAdvancedService {
             total: { $sum: 1 },
             converted: { $sum: { $cond: [{ $eq: ['$stage', 'مغلق - ربح'] }, 1, 0] } },
           },
-        }, { $limit: 1000 }
+        },
+        { $limit: 1000 },
       ]),
       CrmDeal.aggregate([
         { $match: match },
@@ -943,7 +952,8 @@ class CRMAdvancedService {
             converted: { $sum: { $cond: [{ $eq: ['$stage', 'مغلق - ربح'] }, 1, 0] } },
           },
         },
-        { $sort: { total: -1 } }, { $limit: 1000 }
+        { $sort: { total: -1 } },
+        { $limit: 1000 },
       ]),
       CrmDeal.aggregate([
         { $match: match },
@@ -954,7 +964,8 @@ class CRMAdvancedService {
             converted: { $sum: { $cond: [{ $eq: ['$stage', 'مغلق - ربح'] }, 1, 0] } },
           },
         },
-        { $sort: { _id: 1 } }, { $limit: 1000 }
+        { $sort: { _id: 1 } },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -1024,7 +1035,8 @@ class CRMAdvancedService {
       CrmActivity.aggregate([
         { $match: match },
         { $group: { _id: '$type', count: { $sum: 1 } } },
-        { $sort: { count: -1 } }, { $limit: 1000 }
+        { $sort: { count: -1 } },
+        { $limit: 1000 },
       ]),
       CrmActivity.find(match).sort({ createdAt: -1 }).limit(Number(lim)).lean(),
       CrmActivity.countDocuments(match),
@@ -1066,12 +1078,14 @@ class CRMAdvancedService {
             deals: { $sum: 1 },
           },
         },
-        { $sort: { _id: 1 } }, { $limit: 1000 }
+        { $sort: { _id: 1 } },
+        { $limit: 1000 },
       ]),
       CrmDeal.aggregate([
         { $match: match },
         { $group: { _id: '$source', revenue: { $sum: '$value' }, deals: { $sum: 1 } } },
-        { $sort: { revenue: -1 } }, { $limit: 1000 }
+        { $sort: { revenue: -1 } },
+        { $limit: 1000 },
       ]),
       CrmDeal.aggregate([
         { $match: { ...match, assignedToName: { $exists: true } } },
@@ -1089,7 +1103,8 @@ class CRMAdvancedService {
             avg: { $avg: '$value' },
             max: { $max: '$value' },
           },
-        }, { $limit: 1000 }
+        },
+        { $limit: 1000 },
       ]),
     ]);
 
@@ -1245,7 +1260,10 @@ class CRMAdvancedService {
   async getLeadsPipeline() {
     const Lead = mongoose.model('Lead');
     const stages = ['NEW', 'CONTACTED', 'ASSESSMENT_BOOKED', 'CONVERTED', 'LOST'];
-    const pipeline = await Lead.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]);
+    const pipeline = await Lead.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+      { $limit: 1000 },
+    ]);
 
     const map = {};
     pipeline.forEach(p => {

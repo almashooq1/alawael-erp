@@ -65,11 +65,11 @@ paymentSchema.pre('save', async function (next) {
   next();
 });
 
-paymentSchema.index({ payment_number: 1 });
+// REMOVED DUPLICATE: paymentSchema.index({ payment_number: 1 }); — field already has index:true
 paymentSchema.index({ invoice_id: 1 });
 paymentSchema.index({ beneficiary_id: 1 });
 paymentSchema.index({ branch_id: 1, payment_date: -1 });
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Payment', paymentSchema);
+module.exports = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);

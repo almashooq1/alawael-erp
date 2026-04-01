@@ -47,4 +47,5 @@ attendanceRecordSchema.index({ branch_id: 1, date: -1 });
 attendanceRecordSchema.index({ status: 1 });
 attendanceRecordSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('AttendanceRecord', attendanceRecordSchema);
+module.exports =
+  mongoose.models.AttendanceRecord || mongoose.model('AttendanceRecord', attendanceRecordSchema);

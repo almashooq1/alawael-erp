@@ -119,7 +119,9 @@ let HealthRecord;
 try {
   HealthRecord = mongoose.model('StudentHealthRecord');
 } catch {
-  HealthRecord = mongoose.model('StudentHealthRecord', healthRecordSchema);
+  HealthRecord =
+    mongoose.models.StudentHealthRecord ||
+    mongoose.model('StudentHealthRecord', healthRecordSchema);
 }
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

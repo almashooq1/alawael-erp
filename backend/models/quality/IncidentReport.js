@@ -101,4 +101,5 @@ incidentReportSchema.index({ status: 1, incident_date: -1 });
 incidentReportSchema.index({ branch_id: 1, incident_date: -1 });
 incidentReportSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('IncidentReport', incidentReportSchema);
+module.exports =
+  mongoose.models.IncidentReport || mongoose.model('IncidentReport', incidentReportSchema);

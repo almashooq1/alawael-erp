@@ -370,11 +370,14 @@ module.exports = {
     mongoose.models.MedicalEquipment || mongoose.model('MedicalEquipment', MedicalEquipmentSchema),
   CalibrationRecord:
     mongoose.models.CalibrationRecord ||
+    mongoose.models.CalibrationRecord ||
     mongoose.model('CalibrationRecord', CalibrationRecordSchema),
   EquipmentMaintenance:
     mongoose.models.EquipmentMaintenance ||
+    mongoose.models.EquipmentMaintenance ||
     mongoose.model('EquipmentMaintenance', EquipmentMaintenanceSchema),
   SafetyCertificate:
+    mongoose.models.EquipmentSafetyCert ||
     mongoose.models.EquipmentSafetyCert ||
     mongoose.model('EquipmentSafetyCert', SafetyCertificateSchema),
 };

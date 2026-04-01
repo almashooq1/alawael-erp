@@ -61,8 +61,8 @@ const assessmentItemResponseSchema = new mongoose.Schema(
 
 // ── الفهارس ────────────────────────────────────────────────────
 assessmentItemResponseSchema.index({ assessment_id: 1, item_id: 1 }, { unique: true });
-assessmentItemResponseSchema.index({ assessment_id: 1 });
-assessmentItemResponseSchema.index({ item_id: 1 });
+// REMOVED DUPLICATE: assessmentItemResponseSchema.index({ assessment_id: 1 }); — field already has index:true
+// REMOVED DUPLICATE: assessmentItemResponseSchema.index({ item_id: 1 }); — field already has index:true
 
 // ── Statics ─────────────────────────────────────────────────────
 
@@ -113,5 +113,6 @@ assessmentItemResponseSchema.statics.countAnswered = function (assessmentId) {
 };
 
 module.exports =
+  mongoose.models.AssessmentItemResponse ||
   mongoose.models.AssessmentItemResponse ||
   mongoose.model('AssessmentItemResponse', assessmentItemResponseSchema);

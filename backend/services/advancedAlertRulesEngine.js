@@ -171,7 +171,7 @@ const alertRuleSchema = new mongoose.Schema({
   notes: String,
 });
 
-const AlertRule = mongoose.model('AlertRule', alertRuleSchema);
+const AlertRule = mongoose.models.AlertRule || mongoose.model('AlertRule', alertRuleSchema);
 
 // ═══════════════════════════════════════════════════════════════
 // 🎯 محرك القواعس المتقدم

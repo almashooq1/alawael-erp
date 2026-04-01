@@ -54,6 +54,7 @@ const eligibilityCheckSchema = new mongoose.Schema(
 eligibilityCheckSchema.index({ beneficiaryId: 1, checkDate: -1 });
 eligibilityCheckSchema.index({ status: 1, coverageStatus: 1 });
 
-const EligibilityCheck = mongoose.model('EligibilityCheck', eligibilityCheckSchema);
+const EligibilityCheck =
+  mongoose.models.EligibilityCheck || mongoose.model('EligibilityCheck', eligibilityCheckSchema);
 
 module.exports = EligibilityCheck;

@@ -134,4 +134,4 @@ branchSchema.statics.findByCode = async function (code) {
   return this.findOne({ code: code.toUpperCase() });
 };
 
-module.exports = mongoose.model('Branch', branchSchema);
+module.exports = mongoose.models.Branch || mongoose.model('Branch', branchSchema);

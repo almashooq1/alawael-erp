@@ -77,4 +77,6 @@ inventoryTransactionSchema.index({ transaction_type: 1, transaction_date: -1 });
 inventoryTransactionSchema.index({ branch_id: 1, transaction_date: -1 });
 inventoryTransactionSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('InventoryTransaction', inventoryTransactionSchema);
+module.exports =
+  mongoose.models.InventoryTransaction ||
+  mongoose.model('InventoryTransaction', inventoryTransactionSchema);

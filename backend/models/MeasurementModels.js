@@ -1029,11 +1029,14 @@ module.exports = {
     mongoose.models.MeasurementType || mongoose.model('MeasurementType', MeasurementTypeSchema),
   MeasurementMaster:
     mongoose.models.MeasurementMaster ||
+    mongoose.models.MeasurementMaster ||
     mongoose.model('MeasurementMaster', MeasurementMasterSchema),
   MeasurementResult:
     mongoose.models.MeasurementResult ||
+    mongoose.models.MeasurementResult ||
     mongoose.model('MeasurementResult', MeasurementResultSchema),
   IndividualRehabPlan:
+    mongoose.models.IndividualRehabPlan ||
     mongoose.models.IndividualRehabPlan ||
     mongoose.model('IndividualRehabPlan', IndividualRehabPlanSchema),
   QuickAssessment:

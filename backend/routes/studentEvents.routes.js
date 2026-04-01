@@ -87,7 +87,7 @@ let Event;
 try {
   Event = mongoose.model('StudentEvent');
 } catch {
-  Event = mongoose.model('StudentEvent', eventSchema);
+  Event = mongoose.models.StudentEvent || mongoose.model('StudentEvent', eventSchema);
 }
 
 // ─── Event Registration Schema ───────────────────────────────────────────────
@@ -120,7 +120,9 @@ let EventRegistration;
 try {
   EventRegistration = mongoose.model('StudentEventRegistration');
 } catch {
-  EventRegistration = mongoose.model('StudentEventRegistration', eventRegistrationSchema);
+  EventRegistration =
+    mongoose.models.StudentEventRegistration ||
+    mongoose.model('StudentEventRegistration', eventRegistrationSchema);
 }
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

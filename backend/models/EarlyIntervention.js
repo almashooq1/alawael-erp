@@ -912,11 +912,14 @@ earlyReferralSchema.index({ organization: 1 });
 
 const EarlyInterventionChild =
   mongoose.models.EarlyInterventionChild ||
+  mongoose.models.EarlyInterventionChild ||
   mongoose.model('EarlyInterventionChild', earlyInterventionChildSchema);
 const DevelopmentalScreening =
   mongoose.models.DevelopmentalScreening ||
+  mongoose.models.DevelopmentalScreening ||
   mongoose.model('DevelopmentalScreening', developmentalScreeningSchema);
 const DevelopmentalMilestone =
+  mongoose.models.DevelopmentalMilestone ||
   mongoose.models.DevelopmentalMilestone ||
   mongoose.model('DevelopmentalMilestone', developmentalMilestoneSchema);
 const IFSP = mongoose.models.IFSP || mongoose.model('IFSP', ifspSchema);

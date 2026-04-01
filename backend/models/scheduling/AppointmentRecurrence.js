@@ -44,4 +44,6 @@ appointmentRecurrenceSchema.index({ therapist_id: 1, status: 1 });
 appointmentRecurrenceSchema.index({ branch_id: 1 });
 appointmentRecurrenceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('AppointmentRecurrence', appointmentRecurrenceSchema);
+module.exports =
+  mongoose.models.AppointmentRecurrence ||
+  mongoose.model('AppointmentRecurrence', appointmentRecurrenceSchema);

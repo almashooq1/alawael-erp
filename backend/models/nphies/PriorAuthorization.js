@@ -82,7 +82,7 @@ const priorAuthorizationSchema = new mongoose.Schema(
 );
 
 priorAuthorizationSchema.index({ beneficiaryId: 1, status: 1 });
-priorAuthorizationSchema.index({ preAuthRef: 1 });
+// REMOVED DUPLICATE: priorAuthorizationSchema.index({ preAuthRef: 1 }); — field already has index:true
 
 // Virtual: هل الموافقة المسبقة صالحة؟
 priorAuthorizationSchema.virtual('isValid').get(function () {
@@ -99,6 +99,8 @@ priorAuthorizationSchema.virtual('remainingSessions').get(function () {
   return Math.max(0, (this.approvedSessions || 0) - this.usedSessions);
 });
 
-const PriorAuthorization = mongoose.model('PriorAuthorization', priorAuthorizationSchema);
+const PriorAuthorization =
+  mongoose.models.PriorAuthorization ||
+  mongoose.model('PriorAuthorization', priorAuthorizationSchema);
 
 module.exports = PriorAuthorization;

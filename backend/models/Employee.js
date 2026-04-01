@@ -59,10 +59,10 @@ employeeSchema.virtual('fullName').get(function () {
 // ─── Indexes ─────────────────────────────────────────────────────────────────
 // employeeId + email already have { unique: true } → implicit unique index
 // department already has { index: true }
-employeeSchema.index({ status: 1 }); // Filter active/terminated employees
+// REMOVED DUPLICATE: employeeSchema.index({ status: 1 }); // Filter active/terminated employees — field already has index:true
 employeeSchema.index({ role: 1 }); // Role-based queries (doctors, therapists)
 employeeSchema.index({ department: 1, status: 1 }); // Department + status filters
-employeeSchema.index({ userId: 1 }); // Lookup employee by auth user
+// REMOVED DUPLICATE: employeeSchema.index({ userId: 1 }); // Lookup employee by auth user — field already has index:true
 employeeSchema.index({ joinDate: -1 }); // Sorted hiring reports
 
 module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

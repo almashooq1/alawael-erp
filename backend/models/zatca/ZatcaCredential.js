@@ -102,6 +102,7 @@ zatcaCredentialSchema.methods.getPreviousInvoiceHash = function () {
   return this.lastInvoiceHash;
 };
 
-const ZatcaCredential = mongoose.model('ZatcaCredential', zatcaCredentialSchema);
+const ZatcaCredential =
+  mongoose.models.ZatcaCredential || mongoose.model('ZatcaCredential', zatcaCredentialSchema);
 
 module.exports = ZatcaCredential;

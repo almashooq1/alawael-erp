@@ -77,4 +77,5 @@ performanceReviewSchema.index({ employee_id: 1, review_period_end: -1 });
 performanceReviewSchema.index({ branch_id: 1, status: 1 });
 performanceReviewSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('PerformanceReview', performanceReviewSchema);
+module.exports =
+  mongoose.models.PerformanceReview || mongoose.model('PerformanceReview', performanceReviewSchema);

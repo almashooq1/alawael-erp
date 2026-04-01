@@ -34,8 +34,9 @@ const insuranceCompanySchema = new mongoose.Schema(
 );
 
 insuranceCompanySchema.index({ status: 1 });
-insuranceCompanySchema.index({ nphiesId: 1 });
+// REMOVED DUPLICATE: insuranceCompanySchema.index({ nphiesId: 1 }); — field already has index:true
 
-const InsuranceCompany = mongoose.model('InsuranceCompany', insuranceCompanySchema);
+const InsuranceCompany =
+  mongoose.models.InsuranceCompany || mongoose.model('InsuranceCompany', insuranceCompanySchema);
 
 module.exports = InsuranceCompany;

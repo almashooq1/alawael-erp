@@ -107,6 +107,7 @@ const dataBreachIncidentSchema = new Schema(
 // ─── تسجيل النماذج بأمان ─────────────────────────────────────────────────────
 const DataProcessingRecord =
   mongoose.models.DataProcessingRecord ||
+  mongoose.models.DataProcessingRecord ||
   mongoose.model('DataProcessingRecord', dataProcessingRecordSchema);
 
 const ConsentRecord =
@@ -114,9 +115,11 @@ const ConsentRecord =
 
 const DataSubjectRequest =
   mongoose.models.DataSubjectRequest ||
+  mongoose.models.DataSubjectRequest ||
   mongoose.model('DataSubjectRequest', dataSubjectRequestSchema);
 
 const DataBreachIncident =
+  mongoose.models.DataBreachIncident ||
   mongoose.models.DataBreachIncident ||
   mongoose.model('DataBreachIncident', dataBreachIncidentSchema);
 

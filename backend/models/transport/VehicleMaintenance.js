@@ -65,4 +65,6 @@ vehicleMaintenanceSchema.index({ vehicle_id: 1, scheduled_date: -1 });
 vehicleMaintenanceSchema.index({ branch_id: 1, status: 1 });
 vehicleMaintenanceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('VehicleMaintenance', vehicleMaintenanceSchema);
+module.exports =
+  mongoose.models.VehicleMaintenance ||
+  mongoose.model('VehicleMaintenance', vehicleMaintenanceSchema);

@@ -157,4 +157,4 @@ trainingPlanSchema.pre('save', function (next) {
 trainingPlanSchema.index({ year: 1, department: 1 });
 trainingPlanSchema.index({ status: 1 });
 
-module.exports = mongoose.model('TrainingPlan', trainingPlanSchema);
+module.exports = mongoose.models.TrainingPlan || mongoose.model('TrainingPlan', trainingPlanSchema);

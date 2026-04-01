@@ -32,7 +32,7 @@ const alertSchema = new mongoose.Schema({
   ],
 });
 
-const AlertModel = mongoose.model('Alert', alertSchema);
+const AlertModel = mongoose.models.Alert || mongoose.model('Alert', alertSchema);
 
 class AlertService extends EventEmitter {
   constructor() {

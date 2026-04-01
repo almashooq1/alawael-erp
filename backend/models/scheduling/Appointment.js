@@ -76,7 +76,7 @@ appointmentSchema.pre('save', async function (next) {
   next();
 });
 
-appointmentSchema.index({ appointment_number: 1 });
+// REMOVED DUPLICATE: appointmentSchema.index({ appointment_number: 1 }); — field already has index:true
 appointmentSchema.index({ beneficiary_id: 1, appointment_date: -1 });
 appointmentSchema.index({ therapist_id: 1, appointment_date: 1 });
 appointmentSchema.index({ branch_id: 1, appointment_date: 1 });
@@ -85,4 +85,4 @@ appointmentSchema.index({ status: 1 });
 appointmentSchema.index({ recurrence_id: 1 });
 appointmentSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Appointment', appointmentSchema);
+module.exports = mongoose.models.Appointment || mongoose.model('Appointment', appointmentSchema);

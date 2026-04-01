@@ -25,10 +25,11 @@ const chartOfAccountSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-chartOfAccountSchema.index({ code: 1 });
+// REMOVED DUPLICATE: chartOfAccountSchema.index({ code: 1 }); — field already has index:true
 chartOfAccountSchema.index({ account_type: 1 });
 chartOfAccountSchema.index({ parent_code: 1 });
 chartOfAccountSchema.index({ is_active: 1 });
 chartOfAccountSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('ChartOfAccount', chartOfAccountSchema);
+module.exports =
+  mongoose.models.ChartOfAccount || mongoose.model('ChartOfAccount', chartOfAccountSchema);

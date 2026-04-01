@@ -184,7 +184,8 @@ const userSchema = new mongoose.Schema({
 });
 
 // Update timestamp, hash password, and cap loginHistory on save
-userSchema.pre('save', async function (next) {
+// Kareem 3.0 (Mongoose 9): async hooks — no next callback, use throw for errors
+userSchema.pre('save', async function () {
   this.updatedAt = Date.now();
 
   // Only hash password if it was modified (or is new) and not already hashed
@@ -200,10 +201,6 @@ userSchema.pre('save', async function (next) {
   // Cap loginHistory to last 50 entries to prevent unbounded document growth
   if (this.loginHistory && this.loginHistory.length > 50) {
     this.loginHistory = this.loginHistory.slice(-50);
-  }
-
-  if (typeof next === 'function') {
-    next();
   }
 });
 // Method to compare passwords
@@ -258,11 +255,11 @@ userSchema.methods.resetLoginAttempts = function () {
 };
 
 // Pre-validate: ensure at least one identifier (email, phone, or username) exists
-userSchema.pre('validate', function (next) {
+// Kareem 3.0 (Mongoose 9): use throw instead of next(err), no next callback needed
+userSchema.pre('validate', function () {
   if (!this.email && !this.phone && !this.username) {
-    return next(new Error('At least one identifier (email, phone, or username) is required'));
+    throw new Error('At least one identifier (email, phone, or username) is required');
   }
-  next();
 });
 
 // ─── Indexes ─────────────────────────────────────────────────────────────────

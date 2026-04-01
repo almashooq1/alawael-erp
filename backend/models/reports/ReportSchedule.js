@@ -156,4 +156,5 @@ reportScheduleSchema.pre(/^find/, function () {
   }
 });
 
-module.exports = mongoose.model('ReportSchedule', reportScheduleSchema);
+module.exports =
+  mongoose.models.ReportSchedule || mongoose.model('ReportSchedule', reportScheduleSchema);

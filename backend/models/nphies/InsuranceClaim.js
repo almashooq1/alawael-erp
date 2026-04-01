@@ -130,8 +130,8 @@ const insuranceClaimSchema = new mongoose.Schema(
 );
 
 insuranceClaimSchema.index({ beneficiaryId: 1, status: 1 });
-insuranceClaimSchema.index({ claimNumber: 1 });
-insuranceClaimSchema.index({ nphiesClaimId: 1 });
+// REMOVED DUPLICATE: insuranceClaimSchema.index({ claimNumber: 1 }); — field already has index:true
+// REMOVED DUPLICATE: insuranceClaimSchema.index({ nphiesClaimId: 1 }); — field already has index:true
 insuranceClaimSchema.index({ claimDate: -1 });
 
 // Virtual: هل المطالبة مكتملة؟
@@ -145,6 +145,7 @@ insuranceClaimSchema.virtual('approvalRate').get(function () {
   return ((this.approvedAmount / this.totalAmount) * 100).toFixed(1);
 });
 
-const InsuranceClaim = mongoose.model('InsuranceClaim', insuranceClaimSchema);
+const InsuranceClaim =
+  mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema);
 
 module.exports = InsuranceClaim;

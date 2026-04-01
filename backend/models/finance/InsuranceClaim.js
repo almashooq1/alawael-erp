@@ -95,10 +95,11 @@ insuranceClaimSchema.pre('save', async function (next) {
   next();
 });
 
-insuranceClaimSchema.index({ claim_number: 1 });
+// REMOVED DUPLICATE: insuranceClaimSchema.index({ claim_number: 1 }); — field already has index:true
 insuranceClaimSchema.index({ beneficiary_id: 1 });
 insuranceClaimSchema.index({ branch_id: 1, status: 1 });
 insuranceClaimSchema.index({ insurance_company_id: 1 });
 insuranceClaimSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('InsuranceClaim', insuranceClaimSchema);
+module.exports =
+  mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema);

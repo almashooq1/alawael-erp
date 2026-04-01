@@ -577,7 +577,7 @@ let AuditLog;
 try {
   AuditLog = mongoose.model('AuditLog');
 } catch (err) {
-  AuditLog = mongoose.model('AuditLog', auditLogSchema);
+  AuditLog = mongoose.models.AuditLog || mongoose.model('AuditLog', auditLogSchema);
 }
 
 module.exports = {

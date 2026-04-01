@@ -114,4 +114,4 @@ fileRecordSchema.index({ expiry_date: 1, is_expired: 1 });
 fileRecordSchema.index({ branch_id: 1, category: 1 });
 fileRecordSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('FileRecord', fileRecordSchema);
+module.exports = mongoose.models.FileRecord || mongoose.model('FileRecord', fileRecordSchema);

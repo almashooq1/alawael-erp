@@ -510,4 +510,6 @@ RehabilitationPlanSchema.statics.getPlansNeedingReview = async function () {
 
 // ─── Export ────────────────────────────────────────────────────────────────────
 
-module.exports = mongoose.model('RehabilitationPlan', RehabilitationPlanSchema);
+module.exports =
+  mongoose.models.RehabilitationPlan ||
+  mongoose.model('RehabilitationPlan', RehabilitationPlanSchema);

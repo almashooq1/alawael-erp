@@ -108,4 +108,4 @@ BranchTargetSchema.methods.getAchievement = function (metricName, actualValue) {
   };
 };
 
-module.exports = mongoose.model('BranchTarget', BranchTargetSchema);
+module.exports = mongoose.models.BranchTarget || mongoose.model('BranchTarget', BranchTargetSchema);

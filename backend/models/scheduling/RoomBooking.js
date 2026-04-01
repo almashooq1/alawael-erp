@@ -27,4 +27,4 @@ roomBookingSchema.index({ branch_id: 1, booking_date: 1 });
 roomBookingSchema.index({ appointment_id: 1 });
 roomBookingSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('RoomBooking', roomBookingSchema);
+module.exports = mongoose.models.RoomBooking || mongoose.model('RoomBooking', roomBookingSchema);

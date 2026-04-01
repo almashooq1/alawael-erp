@@ -75,4 +75,6 @@ const AssessmentComparisonSchema = new mongoose.Schema(
 AssessmentComparisonSchema.index({ beneficiary: 1, createdAt: -1 });
 AssessmentComparisonSchema.index({ baselineAssessment: 1, currentAssessment: 1 }, { unique: true });
 
-module.exports = mongoose.model('AssessmentComparison', AssessmentComparisonSchema);
+module.exports =
+  mongoose.models.AssessmentComparison ||
+  mongoose.model('AssessmentComparison', AssessmentComparisonSchema);

@@ -66,4 +66,5 @@ certificationSchema.index({ expiry_date: 1 });
 certificationSchema.index({ status: 1 });
 certificationSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Certification', certificationSchema);
+module.exports =
+  mongoose.models.Certification || mongoose.model('Certification', certificationSchema);

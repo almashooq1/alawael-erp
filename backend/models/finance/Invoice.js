@@ -114,12 +114,12 @@ invoiceSchema.pre('save', async function (next) {
   next();
 });
 
-invoiceSchema.index({ invoice_number: 1 });
-invoiceSchema.index({ uuid: 1 });
+// REMOVED DUPLICATE: invoiceSchema.index({ invoice_number: 1 }); — field already has index:true
+// REMOVED DUPLICATE: invoiceSchema.index({ uuid: 1 }); — field already has index:true
 invoiceSchema.index({ beneficiary_id: 1 });
 invoiceSchema.index({ branch_id: 1, invoice_date: -1 });
 invoiceSchema.index({ status: 1 });
 invoiceSchema.index({ zatca_status: 1 });
 invoiceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Invoice', invoiceSchema);
+module.exports = mongoose.models.Invoice || mongoose.model('Invoice', invoiceSchema);

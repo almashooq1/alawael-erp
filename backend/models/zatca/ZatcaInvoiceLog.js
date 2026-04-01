@@ -74,7 +74,7 @@ const zatcaInvoiceLogSchema = new mongoose.Schema(
 
 // Indexes
 zatcaInvoiceLogSchema.index({ invoiceId: 1, requestType: 1 });
-zatcaInvoiceLogSchema.index({ zatcaUuid: 1 });
+// REMOVED DUPLICATE: zatcaInvoiceLogSchema.index({ zatcaUuid: 1 }); — field already has index:true
 zatcaInvoiceLogSchema.index({ responseStatus: 1 });
 zatcaInvoiceLogSchema.index({ createdAt: -1 });
 
@@ -83,6 +83,7 @@ zatcaInvoiceLogSchema.virtual('isSuccess').get(function () {
   return ['PASS', 'WARNING'].includes(this.responseStatus);
 });
 
-const ZatcaInvoiceLog = mongoose.model('ZatcaInvoiceLog', zatcaInvoiceLogSchema);
+const ZatcaInvoiceLog =
+  mongoose.models.ZatcaInvoiceLog || mongoose.model('ZatcaInvoiceLog', zatcaInvoiceLogSchema);
 
 module.exports = ZatcaInvoiceLog;

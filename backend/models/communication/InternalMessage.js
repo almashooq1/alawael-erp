@@ -71,4 +71,5 @@ internalMessageSchema.index({ 'recipients.user_id': 1, 'recipients.is_read': 1 }
 internalMessageSchema.index({ thread_id: 1, createdAt: 1 });
 internalMessageSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('InternalMessage', internalMessageSchema);
+module.exports =
+  mongoose.models.InternalMessage || mongoose.model('InternalMessage', internalMessageSchema);

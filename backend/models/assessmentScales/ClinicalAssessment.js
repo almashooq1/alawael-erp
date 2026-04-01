@@ -185,7 +185,7 @@ const clinicalAssessmentSchema = new mongoose.Schema(
 clinicalAssessmentSchema.index({ beneficiary_id: 1, tool_id: 1 });
 clinicalAssessmentSchema.index({ assessor_id: 1, assessment_date: -1 });
 clinicalAssessmentSchema.index({ status: 1, assessment_date: -1 });
-clinicalAssessmentSchema.index({ assessment_type: 1 });
+// REMOVED DUPLICATE INDEX: clinicalAssessmentSchema.index({ assessment_type: 1 });
 clinicalAssessmentSchema.index({ branch_id: 1, assessment_date: -1 });
 
 // ── Pre-save: توليد رقم التقييم ────────────────────────────────
@@ -337,5 +337,6 @@ clinicalAssessmentSchema.statics.getBeneficiaryTimeline = async function (benefi
 };
 
 module.exports =
+  mongoose.models.ClinicalAssessment ||
   mongoose.models.ClinicalAssessment ||
   mongoose.model('ClinicalAssessment', clinicalAssessmentSchema);

@@ -93,4 +93,4 @@ onboardingSchema.pre('save', function (next) {
 onboardingSchema.index({ status: 1, startDate: 1 });
 onboardingSchema.index({ 'tasks.status': 1 });
 
-module.exports = mongoose.model('Onboarding', onboardingSchema);
+module.exports = mongoose.models.Onboarding || mongoose.model('Onboarding', onboardingSchema);

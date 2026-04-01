@@ -289,10 +289,11 @@ const PayrollSchema = new Schema(
 // MODELS
 // ============================================
 
-const Employee = mongoose.model('Employee', EmployeeSchema);
-const LeaveRequest = mongoose.model('LeaveRequest', LeaveRequestSchema);
-const Attendance = mongoose.model('Attendance', AttendanceSchema);
-const Payroll = mongoose.model('Payroll', PayrollSchema);
+const Employee = mongoose.models.Employee || mongoose.model('Employee', EmployeeSchema);
+const LeaveRequest =
+  mongoose.models.LeaveRequest || mongoose.model('LeaveRequest', LeaveRequestSchema);
+const Attendance = mongoose.models.Attendance || mongoose.model('Attendance', AttendanceSchema);
+const Payroll = mongoose.models.Payroll || mongoose.model('Payroll', PayrollSchema);
 
 // ============================================
 // SERVICE CLASS

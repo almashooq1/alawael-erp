@@ -109,4 +109,4 @@ reportJobSchema.pre(/^find/, function () {
   }
 });
 
-module.exports = mongoose.model('ReportJob', reportJobSchema);
+module.exports = mongoose.models.ReportJob || mongoose.model('ReportJob', reportJobSchema);

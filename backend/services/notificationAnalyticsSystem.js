@@ -124,7 +124,9 @@ const notificationMetricsSchema = new mongoose.Schema({
   },
 });
 
-const NotificationMetrics = mongoose.model('NotificationMetrics', notificationMetricsSchema);
+const NotificationMetrics =
+  mongoose.models.NotificationMetrics ||
+  mongoose.model('NotificationMetrics', notificationMetricsSchema);
 
 // ═══════════════════════════════════════════════════════════════
 // 🎯 نظام التحليلات والمراقبة

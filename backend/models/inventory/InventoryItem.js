@@ -98,4 +98,5 @@ inventoryItemSchema.index({ name_ar: 'text', name_en: 'text', barcode: 'text', i
 inventoryItemSchema.index({ branch_id: 1, category: 1 });
 inventoryItemSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('InventoryItem', inventoryItemSchema);
+module.exports =
+  mongoose.models.InventoryItem || mongoose.model('InventoryItem', inventoryItemSchema);

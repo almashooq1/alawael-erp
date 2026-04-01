@@ -28,9 +28,10 @@ const branchAuditLogSchema = new mongoose.Schema(
   }
 );
 
-branchAuditLogSchema.index({ timestamp: -1 });
+// REMOVED DUPLICATE: branchAuditLogSchema.index({ timestamp: -1 }); — field already has index:true
 branchAuditLogSchema.index({ user_id: 1, timestamp: -1 });
 branchAuditLogSchema.index({ target_branch: 1, timestamp: -1 });
 branchAuditLogSchema.index({ allowed: 1, timestamp: -1 });
 
-module.exports = mongoose.model('BranchAuditLog', branchAuditLogSchema);
+module.exports =
+  mongoose.models.BranchAuditLog || mongoose.model('BranchAuditLog', branchAuditLogSchema);

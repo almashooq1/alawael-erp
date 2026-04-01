@@ -143,4 +143,5 @@ reportTemplateSchema.pre(/^find/, function () {
   }
 });
 
-module.exports = mongoose.model('ReportTemplate', reportTemplateSchema);
+module.exports =
+  mongoose.models.ReportTemplate || mongoose.model('ReportTemplate', reportTemplateSchema);

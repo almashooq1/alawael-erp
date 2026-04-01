@@ -65,4 +65,5 @@ transportRouteSchema.index({ branch_id: 1, is_active: 1 });
 transportRouteSchema.index({ vehicle_id: 1 });
 transportRouteSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('TransportRoute', transportRouteSchema);
+module.exports =
+  mongoose.models.TransportRoute || mongoose.model('TransportRoute', transportRouteSchema);

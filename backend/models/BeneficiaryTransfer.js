@@ -59,4 +59,6 @@ BeneficiaryTransferSchema.index({ beneficiary: 1, status: 1 });
 BeneficiaryTransferSchema.index({ fromBranch: 1 });
 BeneficiaryTransferSchema.index({ toBranch: 1 });
 
-module.exports = mongoose.model('BeneficiaryTransfer', BeneficiaryTransferSchema);
+module.exports =
+  mongoose.models.BeneficiaryTransfer ||
+  mongoose.model('BeneficiaryTransfer', BeneficiaryTransferSchema);

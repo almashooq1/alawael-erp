@@ -131,4 +131,4 @@ careerPathSchema.index({ 'aiAnalysis.retentionRisk': 1 });
 careerPathSchema.index({ 'aiAnalysis.readinessScore': -1 });
 careerPathSchema.index({ status: 1 });
 
-module.exports = mongoose.model('CareerPath', careerPathSchema);
+module.exports = mongoose.models.CareerPath || mongoose.model('CareerPath', careerPathSchema);

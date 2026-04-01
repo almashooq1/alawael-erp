@@ -160,4 +160,4 @@ aiAlertSchema.methods.dismiss = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('AiAlert', aiAlertSchema);
+module.exports = mongoose.models.AiAlert || mongoose.model('AiAlert', aiAlertSchema);

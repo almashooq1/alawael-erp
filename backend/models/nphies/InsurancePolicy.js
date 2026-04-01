@@ -68,6 +68,7 @@ insurancePolicySchema.virtual('isExpired').get(function () {
   return this.endDate < new Date();
 });
 
-const InsurancePolicy = mongoose.model('InsurancePolicy', insurancePolicySchema);
+const InsurancePolicy =
+  mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', insurancePolicySchema);
 
 module.exports = InsurancePolicy;

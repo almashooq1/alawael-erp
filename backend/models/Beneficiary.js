@@ -239,7 +239,10 @@ const beneficiarySchema = new mongoose.Schema(
       certificationNumber: String,
     },
     // Legacy field alias
-    category: { type: String, enum: ['physical', 'mental', 'sensory', 'multiple', 'other'] },
+    category: {
+      type: String,
+      enum: ['physical', 'mental', 'sensory', 'multiple', 'learning', 'speech', 'other'],
+    },
 
     // ── Medical Info ───────────────────────────────────────
     medicalInfo: {

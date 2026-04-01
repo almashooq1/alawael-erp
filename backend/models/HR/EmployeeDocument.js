@@ -130,4 +130,5 @@ documentSchema.index({ expiryDate: 1, isExpired: 1 });
 documentSchema.index({ 'verification.isVerified': 1 });
 documentSchema.index({ tags: 1 });
 
-module.exports = mongoose.model('EmployeeDocument', documentSchema);
+module.exports =
+  mongoose.models.EmployeeDocument || mongoose.model('EmployeeDocument', documentSchema);

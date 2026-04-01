@@ -65,7 +65,7 @@ const assessmentDomainScoreSchema = new mongoose.Schema(
 
 // ── الفهارس ────────────────────────────────────────────────────
 assessmentDomainScoreSchema.index({ assessment_id: 1, domain_id: 1 }, { unique: true });
-assessmentDomainScoreSchema.index({ domain_id: 1 });
+// REMOVED DUPLICATE: assessmentDomainScoreSchema.index({ domain_id: 1 }); — field already has index:true
 
 // ── Methods ─────────────────────────────────────────────────────
 
@@ -110,5 +110,6 @@ assessmentDomainScoreSchema.methods.classifyPercentile = function (pct) {
 };
 
 module.exports =
+  mongoose.models.AssessmentDomainScore ||
   mongoose.models.AssessmentDomainScore ||
   mongoose.model('AssessmentDomainScore', assessmentDomainScoreSchema);

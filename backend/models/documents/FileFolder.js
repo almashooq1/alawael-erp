@@ -44,4 +44,4 @@ fileFolderSchema.index({ parent_folder_id: 1 });
 fileFolderSchema.index({ branch_id: 1, is_active: 1 });
 fileFolderSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('FileFolder', fileFolderSchema);
+module.exports = mongoose.models.FileFolder || mongoose.model('FileFolder', fileFolderSchema);

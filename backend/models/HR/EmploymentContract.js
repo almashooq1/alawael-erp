@@ -63,4 +63,6 @@ employmentContractSchema.index({ branch_id: 1 });
 employmentContractSchema.index({ end_date: 1 });
 employmentContractSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('EmploymentContract', employmentContractSchema);
+module.exports =
+  mongoose.models.EmploymentContract ||
+  mongoose.model('EmploymentContract', employmentContractSchema);

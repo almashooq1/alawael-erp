@@ -576,15 +576,20 @@ assessmentHistorySchema.index({ beneficiary_id: 1, assessment_type: 1, assessmen
 // ══════════════════════════════════════════════════════════════
 // Exports
 // ══════════════════════════════════════════════════════════════
-const VABSAssessment = mongoose.model('VABSAssessment', vabsAssessmentSchema);
-const CARS2Assessment = mongoose.model('CARS2Assessment', cars2AssessmentSchema);
-const PEP3Assessment = mongoose.model('PEP3Assessment', pep3AssessmentSchema);
-const ICFAssessment = mongoose.model('ICFAssessment', icfAssessmentSchema);
+const VABSAssessment =
+  mongoose.models.VABSAssessment || mongoose.model('VABSAssessment', vabsAssessmentSchema);
+const CARS2Assessment =
+  mongoose.models.CARS2Assessment || mongoose.model('CARS2Assessment', cars2AssessmentSchema);
+const PEP3Assessment =
+  mongoose.models.PEP3Assessment || mongoose.model('PEP3Assessment', pep3AssessmentSchema);
+const ICFAssessment =
+  mongoose.models.ICFAssessment || mongoose.model('ICFAssessment', icfAssessmentSchema);
 const DevelopmentalMilestones = mongoose.model(
   'DevelopmentalMilestones',
   developmentalMilestonesSchema
 );
-const AssessmentHistory = mongoose.model('AssessmentHistory', assessmentHistorySchema);
+const AssessmentHistory =
+  mongoose.models.AssessmentHistory || mongoose.model('AssessmentHistory', assessmentHistorySchema);
 
 module.exports = {
   VABSAssessment,

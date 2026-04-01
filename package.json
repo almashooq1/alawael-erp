@@ -23,6 +23,7 @@
     "cleanup:run": "cd backend && npm run cleanup:run",
     "db:reset": "cd backend && npm run db:reset",
     "db:seed": "cd backend && npm run db:seed",
+    "db:seed:rehab": "cd backend && npm run db:seed:rehab",
     "db:status": "cd backend && npm run db:status",
     "deploy:build": "cd frontend && npm run build && cd ../backend && npm ci --only=production",
     "predeploy:docker": "node scripts/prepare-deploy.js --docker",
@@ -74,6 +75,18 @@
       "prettier --write"
     ]
   },
+  "dependencies": {
+    "csv-parse": "^6.2.1",
+    "dompurify": "^3.3.3",
+    "framer-motion": "^12.38.0",
+    "i18next": "^25.10.5",
+    "jspdf": "^4.2.1",
+    "libsodium-wrappers": "^0.8.2",
+    "react-i18next": "^16.6.2",
+    "stripe": "^20.4.1",
+    "twilio": "^5.13.0",
+    "uuid": "^13.0.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "concurrently": "^8.2.0",
@@ -89,17 +102,5 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
-  },
-  "dependencies": {
-    "csv-parse": "^6.2.1",
-    "dompurify": "^3.3.3",
-    "framer-motion": "^12.38.0",
-    "i18next": "^25.10.5",
-    "jspdf": "^4.2.1",
-    "libsodium-wrappers": "^0.8.2",
-    "react-i18next": "^16.6.2",
-    "stripe": "^20.4.1",
-    "twilio": "^5.13.0",
-    "uuid": "^13.0.0"
   }
 }

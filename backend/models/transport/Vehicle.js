@@ -64,8 +64,8 @@ vehicleSchema.virtual('is_registration_expiring').get(function () {
 });
 
 vehicleSchema.index({ branch_id: 1, status: 1 });
-vehicleSchema.index({ license_plate: 1 });
+// REMOVED DUPLICATE: vehicleSchema.index({ license_plate: 1 }); — field already has index:true
 vehicleSchema.index({ gps_device_id: 1 });
 vehicleSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Vehicle', vehicleSchema);
+module.exports = mongoose.models.Vehicle || mongoose.model('Vehicle', vehicleSchema);

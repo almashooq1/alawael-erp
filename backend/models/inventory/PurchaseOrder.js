@@ -92,4 +92,5 @@ purchaseOrderSchema.index({ supplier_id: 1, status: 1 });
 purchaseOrderSchema.index({ branch_id: 1, status: 1 });
 purchaseOrderSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('PurchaseOrder', purchaseOrderSchema);
+module.exports =
+  mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', purchaseOrderSchema);

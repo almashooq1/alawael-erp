@@ -313,7 +313,8 @@ let FormSubmissionModel;
 try {
   FormSubmissionModel = mongoose.model('FormSubmission');
 } catch {
-  FormSubmissionModel = mongoose.model('FormSubmission', FormSubmissionSchema);
+  FormSubmissionModel =
+    mongoose.models.FormSubmission || mongoose.model('FormSubmission', FormSubmissionSchema);
 }
 
 module.exports = FormSubmissionModel;

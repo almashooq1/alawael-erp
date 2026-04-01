@@ -38,6 +38,6 @@ const visitorSchema = new mongoose.Schema(
 );
 
 visitorSchema.index({ status: 1, checkInTime: -1 });
-visitorSchema.index({ expectedArrival: 1 });
+// REMOVED DUPLICATE: visitorSchema.index({ expectedArrival: 1 }); — field already has index:true
 
 module.exports = mongoose.models.Visitor || mongoose.model('Visitor', visitorSchema);

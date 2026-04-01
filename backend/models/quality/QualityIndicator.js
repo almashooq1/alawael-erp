@@ -72,4 +72,5 @@ qualityIndicatorSchema.index({ category: 1, is_active: 1 });
 qualityIndicatorSchema.index({ measurement_frequency: 1 });
 qualityIndicatorSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('QualityIndicator', qualityIndicatorSchema);
+module.exports =
+  mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', qualityIndicatorSchema);

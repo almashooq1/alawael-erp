@@ -113,4 +113,4 @@ aiPredictionSchema.methods.validatePrediction = function (actualValue) {
   return this.save();
 };
 
-module.exports = mongoose.model('AiPrediction', aiPredictionSchema);
+module.exports = mongoose.models.AiPrediction || mongoose.model('AiPrediction', aiPredictionSchema);

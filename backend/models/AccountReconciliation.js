@@ -72,8 +72,10 @@ intercompanyTransactionSchema.index({ status: 1 });
 
 const AccountReconciliation =
   mongoose.models.AccountReconciliation ||
+  mongoose.models.AccountReconciliation ||
   mongoose.model('AccountReconciliation', accountReconciliationSchema);
 const IntercompanyTransaction =
+  mongoose.models.IntercompanyTransaction ||
   mongoose.models.IntercompanyTransaction ||
   mongoose.model('IntercompanyTransaction', intercompanyTransactionSchema);
 

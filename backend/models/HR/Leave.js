@@ -78,4 +78,4 @@ leaveSchema.index({ branch_id: 1, status: 1 });
 leaveSchema.index({ leave_type: 1 });
 leaveSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Leave', leaveSchema);
+module.exports = mongoose.models.Leave || mongoose.model('Leave', leaveSchema);

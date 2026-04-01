@@ -228,12 +228,17 @@ const VendorContractSchema = new mongoose.Schema({
 });
 
 // إنشاء النماذج
-const Vendor = mongoose.model('Vendor', VendorSchema);
-const PurchaseRequest = mongoose.model('PurchaseRequest', PurchaseRequestSchema);
-const PurchaseOrder = mongoose.model('PurchaseOrder', PurchaseOrderSchema);
-const PurchaseReceipt = mongoose.model('PurchaseReceipt', PurchaseReceiptSchema);
-const VendorInvoice = mongoose.model('VendorInvoice', VendorInvoiceSchema);
-const VendorContract = mongoose.model('VendorContract', VendorContractSchema);
+const Vendor = mongoose.models.Vendor || mongoose.model('Vendor', VendorSchema);
+const PurchaseRequest =
+  mongoose.models.PurchaseRequest || mongoose.model('PurchaseRequest', PurchaseRequestSchema);
+const PurchaseOrder =
+  mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', PurchaseOrderSchema);
+const PurchaseReceipt =
+  mongoose.models.PurchaseReceipt || mongoose.model('PurchaseReceipt', PurchaseReceiptSchema);
+const VendorInvoice =
+  mongoose.models.VendorInvoice || mongoose.model('VendorInvoice', VendorInvoiceSchema);
+const VendorContract =
+  mongoose.models.VendorContract || mongoose.model('VendorContract', VendorContractSchema);
 
 // ============================================
 // 🔐 Authentication — all purchasing endpoints require a valid token

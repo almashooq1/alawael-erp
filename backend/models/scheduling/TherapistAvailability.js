@@ -47,4 +47,6 @@ therapistAvailabilitySchema.index({ therapist_id: 1, branch_id: 1 }, { unique: t
 therapistAvailabilitySchema.index({ is_active: 1 });
 therapistAvailabilitySchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('TherapistAvailability', therapistAvailabilitySchema);
+module.exports =
+  mongoose.models.TherapistAvailability ||
+  mongoose.model('TherapistAvailability', therapistAvailabilitySchema);

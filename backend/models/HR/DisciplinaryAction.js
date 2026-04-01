@@ -127,4 +127,5 @@ DisciplinaryActionSchema.pre('save', async function (next) {
 
 module.exports =
   mongoose.models.DisciplinaryAction ||
+  mongoose.models.DisciplinaryAction ||
   mongoose.model('DisciplinaryAction', DisciplinaryActionSchema);

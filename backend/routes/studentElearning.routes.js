@@ -94,7 +94,7 @@ let Course;
 try {
   Course = mongoose.model('StudentCourse');
 } catch {
-  Course = mongoose.model('StudentCourse', courseSchema);
+  Course = mongoose.models.StudentCourse || mongoose.model('StudentCourse', courseSchema);
 }
 
 // ─── Enrollment Schema ───────────────────────────────────────────────────────
@@ -145,7 +145,9 @@ let Enrollment;
 try {
   Enrollment = mongoose.model('StudentCourseEnrollment');
 } catch {
-  Enrollment = mongoose.model('StudentCourseEnrollment', enrollmentSchema);
+  Enrollment =
+    mongoose.models.StudentCourseEnrollment ||
+    mongoose.model('StudentCourseEnrollment', enrollmentSchema);
 }
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

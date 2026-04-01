@@ -244,11 +244,16 @@ const QueuedNotificationSchema = new Schema(
 QueuedNotificationSchema.index({ sendAfter: 1, isSent: 1 });
 
 // ─── الصادرات ──────────────────────────────────────────────────────────────
-const ParentOTP = mongoose.model('ParentOTP', ParentOTPSchema);
-const ParentDevice = mongoose.model('ParentDevice', ParentDeviceSchema);
-const ParentMessage = mongoose.model('ParentMessage', ParentMessageSchema);
-const ParentComplaint = mongoose.model('ParentComplaint', ParentComplaintSchema);
-const QueuedNotification = mongoose.model('QueuedNotification', QueuedNotificationSchema);
+const ParentOTP = mongoose.models.ParentOTP || mongoose.model('ParentOTP', ParentOTPSchema);
+const ParentDevice =
+  mongoose.models.ParentDevice || mongoose.model('ParentDevice', ParentDeviceSchema);
+const ParentMessage =
+  mongoose.models.ParentMessage || mongoose.model('ParentMessage', ParentMessageSchema);
+const ParentComplaint =
+  mongoose.models.ParentComplaint || mongoose.model('ParentComplaint', ParentComplaintSchema);
+const QueuedNotification =
+  mongoose.models.QueuedNotification ||
+  mongoose.model('QueuedNotification', QueuedNotificationSchema);
 
 module.exports = {
   ParentOTP,

@@ -56,4 +56,5 @@ contactDirectorySchema.index({ contact_type: 1, is_active: 1 });
 contactDirectorySchema.index({ name_ar: 'text', name_en: 'text', email: 'text' });
 contactDirectorySchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('ContactDirectory', contactDirectorySchema);
+module.exports =
+  mongoose.models.ContactDirectory || mongoose.model('ContactDirectory', contactDirectorySchema);

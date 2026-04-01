@@ -154,7 +154,7 @@ const goalsBankSchema = new mongoose.Schema(
 );
 
 goalsBankSchema.index({ domain: 1, disability_types: 1, performance_level: 1 });
-goalsBankSchema.index({ goal_code: 1 }, { unique: true });
+// REMOVED DUPLICATE INDEX: goalsBankSchema.index({ goal_code: 1 }, { unique: true });
 goalsBankSchema.index({ tags: 1 });
 
 // ══════════════════════════════════════════════════════════════
@@ -568,8 +568,8 @@ sessionLogSchema.index({ therapist_id: 1, session_date: -1 });
 // ══════════════════════════════════════════════════════════════
 // Exports
 // ══════════════════════════════════════════════════════════════
-const GoalsBank = mongoose.model('GoalsBank', goalsBankSchema);
-const SmartIEP = mongoose.model('SmartIEP', smartIEPSchema);
-const SessionLog = mongoose.model('SessionLog', sessionLogSchema);
+const GoalsBank = mongoose.models.GoalsBank || mongoose.model('GoalsBank', goalsBankSchema);
+const SmartIEP = mongoose.models.SmartIEP || mongoose.model('SmartIEP', smartIEPSchema);
+const SessionLog = mongoose.models.SessionLog || mongoose.model('SessionLog', sessionLogSchema);
 
 module.exports = { GoalsBank, SmartIEP, SessionLog };

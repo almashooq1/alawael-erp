@@ -69,4 +69,5 @@ notificationLogSchema.index({ user_id: 1, read_at: 1 });
 notificationLogSchema.index({ reference_type: 1, reference_id: 1 });
 notificationLogSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('NotificationLog', notificationLogSchema);
+module.exports =
+  mongoose.models.NotificationLog || mongoose.model('NotificationLog', notificationLogSchema);

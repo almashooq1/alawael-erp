@@ -55,11 +55,11 @@ journalEntrySchema.pre('save', async function (next) {
   next();
 });
 
-journalEntrySchema.index({ entry_number: 1 });
+// REMOVED DUPLICATE: journalEntrySchema.index({ entry_number: 1 }); — field already has index:true
 journalEntrySchema.index({ entry_date: -1 });
 journalEntrySchema.index({ branch_id: 1 });
 journalEntrySchema.index({ status: 1 });
 journalEntrySchema.index({ reference_type: 1, reference_id: 1 });
 journalEntrySchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('JournalEntry', journalEntrySchema);
+module.exports = mongoose.models.JournalEntry || mongoose.model('JournalEntry', journalEntrySchema);

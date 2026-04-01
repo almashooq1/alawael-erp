@@ -77,4 +77,5 @@ payrollRecordSchema.index({ branch_id: 1, year: 1, month: 1 });
 payrollRecordSchema.index({ status: 1 });
 payrollRecordSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('PayrollRecord', payrollRecordSchema);
+module.exports =
+  mongoose.models.PayrollRecord || mongoose.model('PayrollRecord', payrollRecordSchema);

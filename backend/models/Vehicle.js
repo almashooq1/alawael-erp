@@ -20,7 +20,7 @@ const VehicleSchema = new Schema(
     registrationNumber: {
       type: String,
       unique: true,
-      required: true,
+      sparse: true,
       uppercase: true,
       trim: true,
     },
@@ -33,13 +33,13 @@ const VehicleSchema = new Schema(
     vin: {
       type: String,
       unique: true,
-      required: true,
+      sparse: true,
       uppercase: true,
     },
     engineNumber: {
       type: String,
       unique: true,
-      required: true,
+      sparse: true,
     },
 
     // بيانات المالك

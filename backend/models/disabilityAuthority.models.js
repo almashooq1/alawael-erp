@@ -378,6 +378,7 @@ CBAHIComplianceSchema.index({ assessmentDate: -1, branch: 1 });
 // ============================================================
 const DisabilityAuthorityReport =
   mongoose.models.DisabilityAuthorityReport ||
+  mongoose.models.DisabilityAuthorityReport ||
   mongoose.model('DisabilityAuthorityReport', DisabilityAuthorityReportSchema);
 const CBAHIStandard =
   mongoose.models.CBAHIStandard || mongoose.model('CBAHIStandard', CBAHIStandardSchema);

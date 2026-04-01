@@ -146,4 +146,5 @@ aiModelConfigSchema.methods.recordPerformance = function () {
   return this.save();
 };
 
-module.exports = mongoose.model('AiModelConfig', aiModelConfigSchema);
+module.exports =
+  mongoose.models.AiModelConfig || mongoose.model('AiModelConfig', aiModelConfigSchema);

@@ -86,6 +86,7 @@ const MedicalHistorySchema = new mongoose.Schema(
   }
 );
 
-MedicalHistorySchema.index({ beneficiary: 1 });
+// REMOVED DUPLICATE: MedicalHistorySchema.index({ beneficiary: 1 }); — field already has index:true
 
-module.exports = mongoose.model('MedicalHistory', MedicalHistorySchema);
+module.exports =
+  mongoose.models.MedicalHistory || mongoose.model('MedicalHistory', MedicalHistorySchema);

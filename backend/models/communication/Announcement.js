@@ -89,4 +89,4 @@ announcementSchema.index({ is_published: 1, publish_at: -1 });
 announcementSchema.index({ target_audience: 1, expires_at: 1 });
 announcementSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Announcement', announcementSchema);
+module.exports = mongoose.models.Announcement || mongoose.model('Announcement', announcementSchema);

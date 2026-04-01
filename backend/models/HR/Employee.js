@@ -149,7 +149,7 @@ employeeSchema.index({ status: 1 });
 employeeSchema.index({ specialization: 1 });
 employeeSchema.index({ is_saudi: 1 });
 employeeSchema.index({ hire_date: 1 });
-employeeSchema.index({ national_id: 1 });
+// REMOVED DUPLICATE: employeeSchema.index({ national_id: 1 }); — field already has index:true
 employeeSchema.index({ deleted_at: 1 });
 
 // Auto-generate employee_number before save
@@ -250,4 +250,4 @@ employeeSchema.statics.findExpiringDocuments = function (days = 90) {
   });
 };
 
-module.exports = mongoose.model('Employee', employeeSchema);
+module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);

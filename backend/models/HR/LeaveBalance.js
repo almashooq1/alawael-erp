@@ -44,4 +44,4 @@ leaveBalanceSchema.statics.getOrCreate = async function (employeeId, year) {
 leaveBalanceSchema.index({ employee_id: 1, year: 1 }, { unique: true });
 leaveBalanceSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('LeaveBalance', leaveBalanceSchema);
+module.exports = mongoose.models.LeaveBalance || mongoose.model('LeaveBalance', leaveBalanceSchema);

@@ -81,4 +81,6 @@ EmploymentContractSchema.index({ employee: 1, status: 1 });
 EmploymentContractSchema.index({ branch: 1 });
 EmploymentContractSchema.index({ endDate: 1 }); // للتنبيه عند قرب الانتهاء
 
-module.exports = mongoose.model('EmploymentContract', EmploymentContractSchema);
+module.exports =
+  mongoose.models.EmploymentContract ||
+  mongoose.model('EmploymentContract', EmploymentContractSchema);

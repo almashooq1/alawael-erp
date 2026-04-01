@@ -88,7 +88,7 @@ tripSchema.pre('save', async function (next) {
   next();
 });
 
-tripSchema.index({ trip_number: 1 });
+// REMOVED DUPLICATE: tripSchema.index({ trip_number: 1 }); — field already has index:true
 tripSchema.index({ route_id: 1, trip_date: -1 });
 tripSchema.index({ vehicle_id: 1, trip_date: -1 });
 tripSchema.index({ driver_id: 1, trip_date: -1 });
@@ -96,4 +96,4 @@ tripSchema.index({ branch_id: 1, trip_date: -1 });
 tripSchema.index({ status: 1 });
 tripSchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('Trip', tripSchema);
+module.exports = mongoose.models.Trip || mongoose.model('Trip', tripSchema);

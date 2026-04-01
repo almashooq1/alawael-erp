@@ -125,4 +125,4 @@ aiSuggestionSchema.methods.reject = function (userId, reason) {
   return this.save();
 };
 
-module.exports = mongoose.model('AiSuggestion', aiSuggestionSchema);
+module.exports = mongoose.models.AiSuggestion || mongoose.model('AiSuggestion', aiSuggestionSchema);

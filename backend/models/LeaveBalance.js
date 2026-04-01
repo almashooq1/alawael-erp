@@ -59,4 +59,4 @@ LeaveBalanceSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('LeaveBalance', LeaveBalanceSchema);
+module.exports = mongoose.models.LeaveBalance || mongoose.model('LeaveBalance', LeaveBalanceSchema);

@@ -98,7 +98,7 @@ const assessmentToolDomainSchema = new mongoose.Schema(
 // ── الفهارس ────────────────────────────────────────────────────
 assessmentToolDomainSchema.index({ tool_id: 1, code: 1 }, { unique: true });
 assessmentToolDomainSchema.index({ tool_id: 1, sort_order: 1 });
-assessmentToolDomainSchema.index({ parent_domain_id: 1 });
+// REMOVED DUPLICATE: assessmentToolDomainSchema.index({ parent_domain_id: 1 }); — field already has index:true
 
 // ── Methods ─────────────────────────────────────────────────────
 
@@ -167,5 +167,6 @@ assessmentToolDomainSchema.statics.findChildren = function (parentId) {
 };
 
 module.exports =
+  mongoose.models.AssessmentToolDomain ||
   mongoose.models.AssessmentToolDomain ||
   mongoose.model('AssessmentToolDomain', assessmentToolDomainSchema);

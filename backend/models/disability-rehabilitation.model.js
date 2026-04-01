@@ -1651,6 +1651,7 @@ rehabilitationProgramSchema.pre('save', function (next) {
 // ============================================
 const DisabilityRehabilitation =
   mongoose.models.DisabilityRehabilitation ||
+  mongoose.models.DisabilityRehabilitation ||
   mongoose.model('DisabilityRehabilitation', rehabilitationProgramSchema);
 
 module.exports = DisabilityRehabilitation;

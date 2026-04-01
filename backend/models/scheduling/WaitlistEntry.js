@@ -66,4 +66,5 @@ waitlistEntrySchema.index({ status: 1 });
 waitlistEntrySchema.index({ registration_date: 1 });
 waitlistEntrySchema.index({ deleted_at: 1 });
 
-module.exports = mongoose.model('WaitlistEntry', waitlistEntrySchema);
+module.exports =
+  mongoose.models.WaitlistEntry || mongoose.model('WaitlistEntry', waitlistEntrySchema);

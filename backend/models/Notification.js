@@ -89,7 +89,8 @@ try {
     notificationSchema.index({ createdAt: -1 });
     notificationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-    Notification = mongoose.model('Notification', notificationSchema);
+    Notification =
+      mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
   }
 }
 

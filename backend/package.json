@@ -59,6 +59,7 @@
     "db:seed:prod": "node scripts/seed-all.js --env production",
     "db:seed:dry": "node scripts/seed-all.js --dry-run",
     "db:seed": "node seed/users-seed.js && node seed/system-settings-seed.js && node seed/disability-rehabilitation-seed.js && node seed/payroll-seed-data.js",
+    "db:seed:rehab": "node database/seeders/00-DatabaseSeeder.js",
     "db:seed:users": "node seed/users-seed.js",
     "db:seed:settings": "node seed/system-settings-seed.js",
     "db:seed:comprehensive": "node seeds/run-comprehensive-seeds.js",

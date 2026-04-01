@@ -67,7 +67,8 @@ let Complaint;
 try {
   Complaint = mongoose.model('StudentComplaint');
 } catch {
-  Complaint = mongoose.model('StudentComplaint', complaintSchema);
+  Complaint =
+    mongoose.models.StudentComplaint || mongoose.model('StudentComplaint', complaintSchema);
 }
 
 // ─── Routes ──────────────────────────────────────────────────────────────────

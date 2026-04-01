@@ -37,4 +37,4 @@ gpsTrackingSchema.index({ trip_id: 1, timestamp: 1 });
 gpsTrackingSchema.index({ timestamp: -1 });
 gpsTrackingSchema.index({ is_speeding: 1 });
 
-module.exports = mongoose.model('GpsTracking', gpsTrackingSchema);
+module.exports = mongoose.models.GpsTracking || mongoose.model('GpsTracking', gpsTrackingSchema);

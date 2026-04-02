@@ -146,6 +146,32 @@ jobs:
           " 2>&1 || echo "startup check timed out or errored"
         continue-on-error: true
 
+      - name: Pre-jest diagnostics
+        working-directory: backend
+        run: |
+          echo "=== Testing jest --listTests (init check) ==="
+          node node_modules/jest/bin/jest.js \
+            --listTests \
+            --testPathPattern="auth.test" 2>&1 || echo "listTests FAILED"
+          echo "=== Checking key module loads ==="
+          node -e "require('./config/database'); console.log('database.js OK')" 2>&1 || true
+          node -e "require('./config/redis'); console.log('redis.js OK')" 2>&1 || true
+          node -e "require('./config/mongoose.plugins'); console.log('mongoose.plugins OK')" 2>&1 || true
+          echo "=== node_modules bson check ==="
+          ls node_modules/bson/package.json 2>&1 || echo "bson NOT at top-level node_modules"
+          node -e "const b=require('bson'); console.log('bson OK, version:', require('bson/package.json').version)" 2>&1 || echo "bson require FAILED"
+        env:
+          NODE_ENV: test
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+          CI: 'true'
+          JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
+          JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
+          ENCRYPTION_KEY: test-ci-encryption-key-minimum-32chars-ok!!
+          SESSION_SECRET: test-ci-session-secret-min-16chars!
+          SMART_TEST_MODE: 'true'
+        continue-on-error: true
+
       - name: Run Jest tests
         working-directory: backend
         shell: bash
@@ -170,20 +196,22 @@ jobs:
               break
             fi
             echo "❌ Tests failed on attempt $ATTEMPT"
-            echo "=== LAST 100 LINES OF OUTPUT ==="
-            tail -100 jest-output.txt || true
+            echo "=== FULL jest-output.txt ==="
+            cat jest-output.txt || echo "(empty)"
             if [ $ATTEMPT -lt 3 ]; then
-              echo "Retrying in 5 seconds..."
               sleep 5
             fi
           done
-          echo "=== FINAL 200 LINES OF JEST OUTPUT ==="
-          tail -200 jest-output.txt || true
-          # Write full output to GitHub Step Summary
+          echo "=== FINAL JEST OUTPUT ==="
+          cat jest-output.txt || echo "(empty)"
+          # Write to GitHub Step Summary
           echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -300 jest-output.txt >> $GITHUB_STEP_SUMMARY || echo "no output" >> $GITHUB_STEP_SUMMARY
+          cat jest-output.txt >> $GITHUB_STEP_SUMMARY || echo "no output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
+          # Post as annotation for API access
+          OUTPUT_ANNOTATION=$(cat jest-output.txt 2>/dev/null | head -c 3000 | tr '\n' '~' || echo "NO_OUTPUT")
+          echo "::error title=JEST_OUTPUT::${OUTPUT_ANNOTATION}"
           exit $FINAL_EXIT
         env:
           NODE_ENV: test

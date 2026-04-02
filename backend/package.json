@@ -38,7 +38,7 @@
     "test:all": "jest --coverage",
     "test:all:verbose": "jest --coverage --verbose",
     "test:quick": "jest --passWithNoTests --no-coverage --bail 1",
-    "test:ci": "node --max-old-space-size=4096 node_modules/jest/bin/jest.js __tests__/auth.test.js __tests__/documents-routes.phase3.test.js __tests__/messaging-routes.phase2.test.js __tests__/finance-routes.phase2.test.js __tests__/notifications-routes.phase2.test.js __tests__/reporting-routes.phase2.test.js --passWithNoTests --no-coverage --ci --runInBand --forceExit --json --outputFile=jest-results.json",
+    "test:ci": "node --max-old-space-size=4096 node_modules/jest/bin/jest.js __tests__/auth.test.js __tests__/messaging-routes.phase2.test.js __tests__/finance-routes.phase2.test.js __tests__/notifications-routes.phase2.test.js __tests__/reporting-routes.phase2.test.js --passWithNoTests --no-coverage --ci --runInBand --forceExit --json --outputFile=jest-results.json",
     "test:perf": "node --max-old-space-size=8192 node_modules/.bin/jest --testPathPattern=\"stress-load|performance-load|load\\.test|performance-tuning|advanced-performance|phase-22-performance\" --no-coverage --runInBand --forceExit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

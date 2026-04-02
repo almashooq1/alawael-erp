@@ -130,11 +130,15 @@ function validateEnv() {
     logger.warn(`Environment validation warnings:\n${messages}`);
   }
 
-  // Strict mode: enforce in production, CI, or when explicitly enabled
+  // Strict mode: enforce in production or when explicitly enabled.
+  // Skip strict validation in test environments — Jest manages its own env vars
+  // via jest.env.js (setupFiles) and tests should not fail due to missing CI secrets.
+  const isTestEnv = process.env.NODE_ENV === 'test' || !!process.env.JEST_WORKER_ID;
   const isStrict =
-    process.env.STRICT_ENV_VALIDATION === 'true' ||
-    process.env.CI === 'true' ||
-    process.env.NODE_ENV === 'production';
+    !isTestEnv &&
+    (process.env.STRICT_ENV_VALIDATION === 'true' ||
+      process.env.CI === 'true' ||
+      process.env.NODE_ENV === 'production');
 
   if (isStrict) {
     const { error: strictError } = strictOverrides.validate(process.env);

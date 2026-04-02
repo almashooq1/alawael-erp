@@ -7,7 +7,7 @@
 // Test environment
 process.env.NODE_ENV = 'test';
 process.env.USE_MOCK_DB = 'true';
-process.env.JWT_SECRET = 'test-secret-key';
+process.env.JWT_SECRET = 'test-secret-key-minimum-32-chars-for-jest!!';
 process.env.SMART_TEST_MODE = 'true';
 process.env.MONGOOSE_BUFFER_TIMEOUT = '500000';
 process.env.DATABASE_POOL_SIZE = '1';

@@ -72,8 +72,12 @@ jobs:
           echo "REDIS_HOST=127.0.0.1" >> .env
           echo "REDIS_PORT=6379" >> .env
           echo "NODE_ENV=test" >> .env
-          echo "JWT_SECRET=test-secret-key-for-ci-only" >> .env
+          echo "JWT_SECRET=test-ci-secret-key-minimum-32-chars-ok!!" >> .env
+          echo "JWT_REFRESH_SECRET=test-ci-refresh-secret-minimum-32-chars-ok!!" >> .env
+          echo "ENCRYPTION_KEY=test-ci-encryption-key-minimum-32chars-ok!!" >> .env
+          echo "SESSION_SECRET=test-ci-session-secret-min-16chars!" >> .env
           echo "USE_MOCK_DB=false" >> .env
+          echo "DISABLE_REDIS=true" >> .env
 
       - name: Check versions
         working-directory: backend
@@ -97,7 +101,11 @@ jobs:
           MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test
           REDIS_HOST: 127.0.0.1
           REDIS_PORT: 6379
-          JWT_SECRET: test-ci-secret
+          JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
+          JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
+          ENCRYPTION_KEY: test-ci-encryption-key-minimum-32chars-ok!!
+          SESSION_SECRET: test-ci-session-secret-min-16chars!
+          DISABLE_REDIS: 'true'
 
       - name: Upload test results
         if: always()

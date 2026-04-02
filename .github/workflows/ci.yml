@@ -75,9 +75,23 @@ jobs:
           echo "JWT_SECRET=test-secret-key-for-ci-only" >> .env
           echo "USE_MOCK_DB=false" >> .env
 
+      - name: Check versions
+        working-directory: backend
+        run: |
+          node --version
+          node node_modules/.bin/jest --version
+
       - name: Run Jest tests
         working-directory: backend
-        run: npm run test:ci
+        shell: bash
+        run: |
+          set +e
+          npm run test:ci 2>&1 | tee jest-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "=== JEST EXIT CODE: $EXIT_CODE ==="
+          echo "=== LAST 100 LINES ==="
+          tail -100 jest-output.txt
+          exit $EXIT_CODE
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test
@@ -91,8 +105,9 @@ jobs:
         with:
           name: test-results-node-${{ matrix.node }}
           path: |
-            backend/coverage/
             backend/jest-results.json
+            backend/jest-output.txt
+          if-no-files-found: warn
           retention-days: 7
 
   # ──────────────────────────────────────────────────────────────

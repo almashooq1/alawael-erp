@@ -62,10 +62,10 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: |
-          npm install --no-audit --no-fund --ignore-scripts
-          # Rebuild native modules that need compilation (e.g. bcrypt, etc.)
-          npm rebuild 2>/dev/null || true
+        run: npm install --no-audit --no-fund
+        env:
+          HUSKY: '0'
+          CI: 'true'
 
       - name: Copy environment file
         working-directory: backend

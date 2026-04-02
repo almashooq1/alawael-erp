@@ -16,7 +16,7 @@ env:
 
 # إلغاء التشغيلات القديمة تلقائياً عند push جديد
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:

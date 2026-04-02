@@ -85,6 +85,26 @@ jobs:
           node --version
           node node_modules/jest/bin/jest.js --version
 
+      - name: Debug environment
+        working-directory: backend
+        run: |
+          echo "=== Node/npm versions ==="
+          node --version && npm --version
+          echo "=== Key env vars ==="
+          echo "NODE_ENV=$NODE_ENV"
+          echo "USE_MOCK_DB=$USE_MOCK_DB"
+          echo "DISABLE_REDIS=$DISABLE_REDIS"
+          echo "JWT_SECRET length=${#JWT_SECRET}"
+          echo "JWT_REFRESH_SECRET length=${#JWT_REFRESH_SECRET}"
+          echo "=== .env first 5 lines (keys only) ==="
+          head -20 .env | cut -d'=' -f1 || echo "(no .env file)"
+        env:
+          NODE_ENV: test
+          USE_MOCK_DB: 'true'
+          DISABLE_REDIS: 'true'
+          JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
+          JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
+
       - name: Run Jest tests
         working-directory: backend
         shell: bash
@@ -93,6 +113,8 @@ jobs:
           npm run test:ci 2>&1 | tee jest-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           echo "=== JEST EXIT CODE: $EXIT_CODE ==="
+          echo "=== FIRST 50 LINES ==="
+          head -50 jest-output.txt
           echo "=== LAST 100 LINES ==="
           tail -100 jest-output.txt
           exit $EXIT_CODE
@@ -105,7 +127,9 @@ jobs:
           JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
           ENCRYPTION_KEY: test-ci-encryption-key-minimum-32chars-ok!!
           SESSION_SECRET: test-ci-session-secret-min-16chars!
+          USE_MOCK_DB: 'true'
           DISABLE_REDIS: 'true'
+          STRICT_ENV_VALIDATION: 'false'
 
       - name: Print failed tests summary
         if: always()

@@ -123,9 +123,6 @@ module.exports = {
   // Timeout settings
   testTimeout: 120000,
 
-  // Retry flaky tests in CI (up to 2 times)
-  testRetries: process.env.CI === 'true' ? 2 : 0,
-
   // Verbose output
   verbose: true,
 

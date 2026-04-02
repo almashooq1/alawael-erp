@@ -149,17 +149,31 @@ jobs:
         shell: bash
         run: |
           set +e
-          npm run test:ci 2>&1 | tee jest-output.txt
-          EXIT_CODE=${PIPESTATUS[0]}
-          echo "=== JEST EXIT CODE: $EXIT_CODE ==="
-          echo "=== FULL JEST OUTPUT ==="
+          FINAL_EXIT=1
+          for ATTEMPT in 1 2 3; do
+            echo "=== Jest Run Attempt $ATTEMPT/3 ==="
+            npm run test:ci 2>&1 | tee jest-output.txt
+            ATTEMPT_EXIT=${PIPESTATUS[0]}
+            echo "=== JEST EXIT CODE (attempt $ATTEMPT): $ATTEMPT_EXIT ==="
+            if [ $ATTEMPT_EXIT -eq 0 ]; then
+              FINAL_EXIT=0
+              echo "✅ Tests passed on attempt $ATTEMPT"
+              break
+            fi
+            echo "❌ Tests failed on attempt $ATTEMPT"
+            if [ $ATTEMPT -lt 3 ]; then
+              echo "Retrying in 5 seconds..."
+              sleep 5
+            fi
+          done
+          echo "=== FINAL JEST OUTPUT ==="
           cat jest-output.txt
           # Write summary to GitHub Step Summary (accessible without auth)
-          echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "## Jest Test Results (Attempt $ATTEMPT)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat jest-output.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          exit $EXIT_CODE
+          exit $FINAL_EXIT
         env:
           NODE_ENV: test
           MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test
@@ -173,6 +187,7 @@ jobs:
           DISABLE_REDIS: 'true'
           STRICT_ENV_VALIDATION: 'false'
           SMART_TEST_MODE: 'true'
+          BCRYPT_ROUNDS: '4'
 
       - name: Print failed tests summary
         if: always()

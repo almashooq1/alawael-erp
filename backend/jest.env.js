@@ -19,3 +19,5 @@ process.env.ENCRYPTION_KEY =
 process.env.SESSION_SECRET = process.env.SESSION_SECRET || 'test-session-secret-min-16chars!';
 process.env.CSRF_DISABLE = 'true';
 process.env.DISABLE_REDIS = 'true';
+// Use fewer bcrypt rounds in tests (4 vs 12 = 256x faster, prevents CI slowness)
+process.env.BCRYPT_ROUNDS = '4';

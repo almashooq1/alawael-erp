@@ -46,6 +46,9 @@ try {
 // Max concurrent sessions per user (configurable via env)
 const MAX_CONCURRENT_SESSIONS = parseInt(process.env.MAX_CONCURRENT_SESSIONS, 10) || 5;
 
+// bcrypt rounds — reduced in test env (4 vs 12 = 256x faster) to prevent CI slowness
+const BCRYPT_ROUNDS = parseInt(process.env.BCRYPT_ROUNDS, 10) || 12;
+
 // JWT
 const JWT_SECRET = jwtSecret;
 const JWT_REFRESH_SECRET = jwtRefreshSecret;
@@ -75,7 +78,7 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
     }
 
     // Hash password before creating user
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user — role is always 'user'; admin roles must be assigned by an admin
@@ -547,7 +550,7 @@ router.post(
       }
 
       // Hash new password before saving
-      const salt = await bcrypt.genSalt(12);
+      const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
       user.password = await bcrypt.hash(newPassword, salt);
       // Increment tokenVersion to invalidate all existing tokens for this user
       user.tokenVersion = (user.tokenVersion || 0) + 1;
@@ -697,7 +700,7 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
     }
 
     // Hash and save new password
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     user.password = await bcrypt.hash(newPassword, salt);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;

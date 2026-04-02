@@ -135,7 +135,7 @@ class ConflictDetectionService {
     }
 
     // 7. إجازة معتمدة
-    const Leave = require('../../models/hr/Leave');
+    const Leave = require('../../models/HR/Leave');
     const leaveConflict = await Leave.findOne({
       employee_id: therapist_id,
       status: 'approved',

@@ -1,10 +1,10 @@
-const Employee = require('../../models/hr/Employee');
-const PayrollRecord = require('../../models/hr/PayrollRecord');
-const Leave = require('../../models/hr/Leave');
-const LeaveBalance = require('../../models/hr/LeaveBalance');
-const AttendanceRecord = require('../../models/hr/AttendanceRecord');
-const Certification = require('../../models/hr/Certification');
-const EndOfServiceCalculation = require('../../models/hr/EndOfServiceCalculation');
+const Employee = require('../../models/HR/Employee');
+const PayrollRecord = require('../../models/HR/PayrollRecord');
+const Leave = require('../../models/HR/Leave');
+const LeaveBalance = require('../../models/HR/LeaveBalance');
+const AttendanceRecord = require('../../models/HR/AttendanceRecord');
+const Certification = require('../../models/HR/Certification');
+const EndOfServiceCalculation = require('../../models/HR/EndOfServiceCalculation');
 
 // ===== خدمة حساب الرواتب =====
 class PayrollCalculationService {

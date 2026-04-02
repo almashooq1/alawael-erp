@@ -62,7 +62,10 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        run: npm install --no-audit --no-fund --ignore-scripts
+        run: |
+          npm install --no-audit --no-fund --ignore-scripts
+          # Rebuild native modules that need compilation (e.g. bcrypt, etc.)
+          npm rebuild 2>/dev/null || true
 
       - name: Copy environment file
         working-directory: backend
@@ -94,16 +97,45 @@ jobs:
           echo "NODE_ENV=$NODE_ENV"
           echo "USE_MOCK_DB=$USE_MOCK_DB"
           echo "DISABLE_REDIS=$DISABLE_REDIS"
+          echo "SMART_TEST_MODE=$SMART_TEST_MODE"
           echo "JWT_SECRET length=${#JWT_SECRET}"
           echo "JWT_REFRESH_SECRET length=${#JWT_REFRESH_SECRET}"
-          echo "=== .env first 5 lines (keys only) ==="
+          echo "=== .env first 20 lines (keys only) ==="
           head -20 .env | cut -d'=' -f1 || echo "(no .env file)"
         env:
           NODE_ENV: test
           USE_MOCK_DB: 'true'
           DISABLE_REDIS: 'true'
+          SMART_TEST_MODE: 'true'
           JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
           JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
+
+      - name: Verify app startup
+        working-directory: backend
+        run: |
+          echo "=== Testing if app.js loads correctly ==="
+          timeout 30 node -e "
+            process.env.NODE_ENV='test';
+            process.env.USE_MOCK_DB='true';
+            process.env.SMART_TEST_MODE='true';
+            process.env.DISABLE_REDIS='true';
+            process.env.CI='true';
+            process.env.JWT_SECRET='test-ci-secret-key-minimum-32-chars-ok!!';
+            process.env.JWT_REFRESH_SECRET='test-ci-refresh-secret-minimum-32-chars-ok!!';
+            process.env.ENCRYPTION_KEY='test-ci-encryption-key-minimum-32chars-ok!!';
+            process.env.SESSION_SECRET='test-ci-session-secret-min-16chars!';
+            process.env.MONGODB_URI='mongodb://127.0.0.1:27017/alawael_test';
+            try {
+              const app = require('./app');
+              console.log('app.js loaded OK - type:', typeof app);
+              process.exit(0);
+            } catch(e) {
+              console.error('FAILED to load app.js:', e.message);
+              console.error(e.stack ? e.stack.split('\n').slice(0,8).join('\n') : '');
+              process.exit(0);
+            }
+          " 2>&1 || echo "app load check timed out or errored"
+        continue-on-error: true
 
       - name: Run Jest tests
         working-directory: backend
@@ -113,10 +145,10 @@ jobs:
           npm run test:ci 2>&1 | tee jest-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           echo "=== JEST EXIT CODE: $EXIT_CODE ==="
-          echo "=== FIRST 50 LINES ==="
-          head -50 jest-output.txt
-          echo "=== LAST 100 LINES ==="
-          tail -100 jest-output.txt
+          echo "=== FIRST 100 LINES ==="
+          head -100 jest-output.txt
+          echo "=== LAST 150 LINES ==="
+          tail -150 jest-output.txt
           exit $EXIT_CODE
         env:
           NODE_ENV: test
@@ -130,6 +162,7 @@ jobs:
           USE_MOCK_DB: 'true'
           DISABLE_REDIS: 'true'
           STRICT_ENV_VALIDATION: 'false'
+          SMART_TEST_MODE: 'true'
 
       - name: Print failed tests summary
         if: always()

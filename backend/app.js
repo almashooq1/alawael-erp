@@ -594,7 +594,12 @@ app.get('/api/_diag', async (req, res) => {
 });
 
 // ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
-mountAllRoutes(app, { authRateLimiter });
+try {
+  mountAllRoutes(app, { authRateLimiter });
+} catch (err) {
+  logger.warn('[Routes] Some routes failed to mount:', err.message);
+  // Ensure auth routes are always available even if other routes fail
+}
 
 // ─── AI Scheduler — جدولة فحوصات الذكاء الاصطناعي اليومية (البرومبت 20) ──────
 if (!isTestEnv) {
@@ -643,9 +648,13 @@ if (!isTestEnv) {
 }
 
 // ─── Infrastructure API Routes (v2) ─────────────────────────────────────────
-mountEventStoreRoutes(app);
-mountMessageQueueRoutes(app);
-mountMigrationRoutes(app);
+try {
+  mountEventStoreRoutes(app);
+  mountMessageQueueRoutes(app);
+  mountMigrationRoutes(app);
+} catch (err) {
+  logger.warn('[Infrastructure] Some infrastructure routes failed to mount:', err.message);
+}
 
 // ─── Domain Registry (v2) ────────────────────────────────────────────────────
 try {

@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const Employee = require('../models/hr/Employee');
-const EmploymentContract = require('../models/hr/EmploymentContract');
-const PayrollRecord = require('../models/hr/PayrollRecord');
-const Leave = require('../models/hr/Leave');
-const LeaveBalance = require('../models/hr/LeaveBalance');
-const AttendanceRecord = require('../models/hr/AttendanceRecord');
-const Certification = require('../models/hr/Certification');
-const PerformanceReview = require('../models/hr/PerformanceReview');
-const EndOfServiceCalculation = require('../models/hr/EndOfServiceCalculation');
+const Employee = require('../models/HR/Employee');
+const EmploymentContract = require('../models/HR/EmploymentContract');
+const PayrollRecord = require('../models/HR/PayrollRecord');
+const Leave = require('../models/HR/Leave');
+const LeaveBalance = require('../models/HR/LeaveBalance');
+const AttendanceRecord = require('../models/HR/AttendanceRecord');
+const Certification = require('../models/HR/Certification');
+const PerformanceReview = require('../models/HR/PerformanceReview');
+const EndOfServiceCalculation = require('../models/HR/EndOfServiceCalculation');
 const {
   PayrollCalculationService,
   EndOfServiceService,

@@ -21,8 +21,6 @@ jest.setTimeout(60000);
 jest.mock(
   'mongoose',
   () => {
-    const { ObjectId } = require('bson');
-
     // Mock database store
     const store = {
       assets: [],

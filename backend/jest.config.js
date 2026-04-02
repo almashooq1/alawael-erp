@@ -33,6 +33,8 @@ module.exports = {
 
   // Module name mapper for path aliases
   moduleNameMapper: {
+    // uuid v13 is ESM-only; redirect to CJS shim so Jest (CJS mode) can load it
+    '^uuid$': '<rootDir>/__mocks__/uuid-cjs-shim.js',
     '^@/(.*)$': '<rootDir>/$1',
     '^@utils/(.*)$': '<rootDir>/utils/$1',
     '^@models/(.*)$': '<rootDir>/models/$1',

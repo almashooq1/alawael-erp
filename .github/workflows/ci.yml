@@ -195,49 +195,30 @@ jobs:
         run: |
           if [ -f jest-results.json ]; then
             echo "=== JEST RESULTS SUMMARY ==="
-            python3 << 'EOF'
-import json, sys, os
-try:
-    with open('jest-results.json', 'r') as f:
-        d = json.load(f)
-    suites = d.get('testResults', [])
-    total_failed = 0
-    for s in suites:
-        tests = s.get('testResults', [])
-        failed = [t for t in tests if t['status'] == 'failed']
-        if failed:
-            filepath = s['testFilePath'].split('/')[-1]
-            total_failed += len(failed)
-            print('FAIL SUITE: ' + filepath)
-            for t in failed:
-                name = t['fullName'][:120]
-                print('  x ' + name)
-                msgs = t.get('failureMessages', [])
-                if msgs:
-                    # Print as annotation (visible in GitHub UI)
-                    short_msg = msgs[0][:300].replace('\n', ' | ')
-                    print('::error title=' + name[:50] + '::' + short_msg)
-    print('Total failed: %d' % total_failed)
-    # Also write to step summary
-    summary_path = os.environ.get('GITHUB_STEP_SUMMARY', '')
-    if summary_path:
-        with open(summary_path, 'a') as sf:
-            sf.write('## Failed Tests\n')
-            for s in suites:
-                tests = s.get('testResults', [])
-                failed = [t for t in tests if t['status'] == 'failed']
-                if failed:
-                    sf.write('### ' + s['testFilePath'].split('/')[-1] + '\n')
-                    for t in failed:
-                        sf.write('- **' + t['fullName'][:100] + '**\n')
-                        msgs = t.get('failureMessages', [])
-                        if msgs:
-                            sf.write('```\n' + msgs[0][:500] + '\n```\n')
-except Exception as e:
-    print('Parse error: ' + str(e))
-    import traceback
-    traceback.print_exc()
-EOF
+            node -e "
+              try {
+                const d = require('./jest-results.json');
+                const suites = d.testResults || [];
+                let total = 0;
+                suites.forEach(s => {
+                  const failed = (s.testResults || []).filter(t => t.status === 'failed');
+                  if (failed.length > 0) {
+                    const f = s.testFilePath.split('/').pop();
+                    total += failed.length;
+                    console.log('FAIL SUITE: ' + f);
+                    failed.forEach(t => {
+                      const name = t.fullName.slice(0, 120);
+                      console.log('  x ' + name);
+                      if (t.failureMessages && t.failureMessages[0]) {
+                        const msg = t.failureMessages[0].slice(0, 300).replace(/\n/g, ' | ');
+                        console.log('::error title=' + name.slice(0, 50) + '::' + msg);
+                      }
+                    });
+                  }
+                });
+                console.log('Total failed: ' + total);
+              } catch(e) { console.log('Parse error: ' + e.message); }
+            "
           else
             echo "jest-results.json not found"
             echo "::error::jest-results.json not found - Jest may have crashed before producing output"

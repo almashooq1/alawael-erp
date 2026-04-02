@@ -161,7 +161,7 @@ jobs:
               __tests__/notifications-routes.phase2.test.js \
               __tests__/reporting-routes.phase2.test.js \
               --passWithNoTests --no-coverage --ci --runInBand --forceExit \
-              --verbose --json --outputFile=jest-results.json 2>&1 | tee jest-output.txt
+              --verbose 2>&1 | tee jest-output.txt
             ATTEMPT_EXIT=${PIPESTATUS[0]}
             echo "=== JEST EXIT CODE (attempt $ATTEMPT): $ATTEMPT_EXIT ==="
             if [ $ATTEMPT_EXIT -eq 0 ]; then

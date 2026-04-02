@@ -113,23 +113,7 @@ jobs:
         run: |
           if [ -f jest-results.json ]; then
             echo "=== JEST RESULTS SUMMARY ==="
-            python3 -c "
-import json, sys
-with open('jest-results.json') as f:
-    d = json.load(f)
-suites = d.get('testResults', [])
-total_failed = 0
-for s in suites:
-    failed = [t for t in s.get('testResults', []) if t['status'] == 'failed']
-    if failed:
-        print(f'FAIL: {s[\"testFilePath\"]}')
-        for t in failed[:5]:
-            msg = t.get('failureMessages', [''])[0][:300]
-            print(f'  × {t[\"fullName\"]}')
-            print(f'    {msg[:200]}')
-        total_failed += len(failed)
-print(f'Total failed: {total_failed}')
-" 2>/dev/null || echo "Could not parse jest-results.json"
+            cat jest-results.json | python3 -c "import json,sys; d=json.load(sys.stdin); suites=d.get('testResults',[]); [print('FAIL: '+s['testFilePath']) or [print('  x '+t['fullName'][:120]) for t in s.get('testResults',[]) if t['status']=='failed'] for s in suites if any(t['status']=='failed' for t in s.get('testResults',[]))]; print('Total failed suites: '+str(sum(1 for s in suites if any(t['status']=='failed' for t in s.get('testResults',[])))))" || echo "Could not parse jest-results.json"
           else
             echo "jest-results.json not found"
           fi

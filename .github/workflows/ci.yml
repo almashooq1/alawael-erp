@@ -128,13 +128,20 @@ jobs:
             try {
               const app = require('./app');
               console.log('app.js loaded OK - type:', typeof app);
-              process.exit(0);
             } catch(e) {
               console.error('FAILED to load app.js:', e.message);
               console.error(e.stack ? e.stack.split('\n').slice(0,8).join('\n') : '');
+            }
+            try {
+              const server = require('./server');
+              console.log('server.js loaded OK - type:', typeof server);
+              process.exit(0);
+            } catch(e) {
+              console.error('FAILED to load server.js:', e.message);
+              console.error(e.stack ? e.stack.split('\n').slice(0,8).join('\n') : '');
               process.exit(0);
             }
-          " 2>&1 || echo "app load check timed out or errored"
+          " 2>&1 || echo "startup check timed out or errored"
         continue-on-error: true
 
       - name: Run Jest tests
@@ -145,10 +152,13 @@ jobs:
           npm run test:ci 2>&1 | tee jest-output.txt
           EXIT_CODE=${PIPESTATUS[0]}
           echo "=== JEST EXIT CODE: $EXIT_CODE ==="
-          echo "=== FIRST 100 LINES ==="
-          head -100 jest-output.txt
-          echo "=== LAST 150 LINES ==="
-          tail -150 jest-output.txt
+          echo "=== FULL JEST OUTPUT ==="
+          cat jest-output.txt
+          # Write summary to GitHub Step Summary (accessible without auth)
+          echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat jest-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           exit $EXIT_CODE
         env:
           NODE_ENV: test

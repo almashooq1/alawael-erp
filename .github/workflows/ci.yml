@@ -161,30 +161,28 @@ jobs:
               __tests__/notifications-routes.phase2.test.js \
               __tests__/reporting-routes.phase2.test.js \
               --passWithNoTests --no-coverage --ci --runInBand --forceExit \
-              --json --outputFile=jest-results.json 2>&1 | tee jest-output.txt
+              --verbose --json --outputFile=jest-results.json 2>&1 | tee jest-output.txt
             ATTEMPT_EXIT=${PIPESTATUS[0]}
             echo "=== JEST EXIT CODE (attempt $ATTEMPT): $ATTEMPT_EXIT ==="
-            echo "=== FIRST 40 LINES OF OUTPUT ==="
-            head -40 jest-output.txt || true
             if [ $ATTEMPT_EXIT -eq 0 ]; then
               FINAL_EXIT=0
               echo "✅ Tests passed on attempt $ATTEMPT"
               break
             fi
             echo "❌ Tests failed on attempt $ATTEMPT"
-            echo "=== LAST 60 LINES OF OUTPUT ==="
-            tail -60 jest-output.txt || true
+            echo "=== LAST 100 LINES OF OUTPUT ==="
+            tail -100 jest-output.txt || true
             if [ $ATTEMPT -lt 3 ]; then
               echo "Retrying in 5 seconds..."
               sleep 5
             fi
           done
-          echo "=== FINAL JEST OUTPUT ==="
-          cat jest-output.txt
-          # Write summary to GitHub Step Summary (accessible without auth)
-          echo "## Jest Test Results (Attempt $ATTEMPT)" >> $GITHUB_STEP_SUMMARY
+          echo "=== FINAL 200 LINES OF JEST OUTPUT ==="
+          tail -200 jest-output.txt || true
+          # Write full output to GitHub Step Summary
+          echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat jest-output.txt >> $GITHUB_STEP_SUMMARY
+          tail -300 jest-output.txt >> $GITHUB_STEP_SUMMARY || echo "no output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
           exit $FINAL_EXIT
         env:

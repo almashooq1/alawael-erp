@@ -79,7 +79,7 @@ jobs:
         working-directory: backend
         run: |
           node --version
-          node node_modules/.bin/jest --version
+          node node_modules/jest/bin/jest.js --version
 
       - name: Run Jest tests
         working-directory: backend

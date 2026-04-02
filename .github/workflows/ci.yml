@@ -107,6 +107,34 @@ jobs:
           SESSION_SECRET: test-ci-session-secret-min-16chars!
           DISABLE_REDIS: 'true'
 
+      - name: Print failed tests summary
+        if: always()
+        working-directory: backend
+        run: |
+          if [ -f jest-results.json ]; then
+            echo "=== JEST RESULTS SUMMARY ==="
+            python3 -c "
+import json, sys
+with open('jest-results.json') as f:
+    d = json.load(f)
+suites = d.get('testResults', [])
+total_failed = 0
+for s in suites:
+    failed = [t for t in s.get('testResults', []) if t['status'] == 'failed']
+    if failed:
+        print(f'FAIL: {s[\"testFilePath\"]}')
+        for t in failed[:5]:
+            msg = t.get('failureMessages', [''])[0][:300]
+            print(f'  × {t[\"fullName\"]}')
+            print(f'    {msg[:200]}')
+        total_failed += len(failed)
+print(f'Total failed: {total_failed}')
+" 2>/dev/null || echo "Could not parse jest-results.json"
+          else
+            echo "jest-results.json not found"
+          fi
+        continue-on-error: true
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

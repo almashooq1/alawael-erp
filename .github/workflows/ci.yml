@@ -229,6 +229,57 @@ EOF
           fi
         continue-on-error: true
 
+      - name: Post failure details as commit comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let output = 'No output captured.';
+            try {
+              const raw = fs.readFileSync('backend/jest-output.txt', 'utf8');
+              // Take last 6000 chars (most relevant — bottom of jest output)
+              output = raw.length > 6000 ? '...(truncated)\n' + raw.slice(-6000) : raw;
+            } catch(e) { output = 'Could not read jest-output.txt: ' + e.message; }
+
+            // Also read jest-results.json for structured failures
+            let failures = '';
+            try {
+              const results = JSON.parse(fs.readFileSync('backend/jest-results.json', 'utf8'));
+              const failedSuites = (results.testResults || []).filter(s =>
+                (s.testResults || []).some(t => t.status === 'failed')
+              );
+              if (failedSuites.length > 0) {
+                failures = '\n\n## Failed Tests:\n';
+                for (const suite of failedSuites) {
+                  failures += `\n### ${suite.testFilePath.split('/').pop()}\n`;
+                  for (const t of suite.testResults.filter(x => x.status === 'failed')) {
+                    failures += `- ❌ **${t.fullName}**\n`;
+                    if (t.failureMessages && t.failureMessages[0]) {
+                      failures += `\`\`\`\n${t.failureMessages[0].slice(0, 800)}\n\`\`\`\n`;
+                    }
+                  }
+                }
+              }
+            } catch(e) { failures = '\n(Could not parse jest-results.json: ' + e.message + ')'; }
+
+            const body = `## ❌ Jest Tests Failed (Run #${context.runNumber} — Node ${process.env.MATRIX_NODE || '22'})\n${failures}\n\n<details><summary>Full Jest Output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n</details>`;
+            try {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.sha,
+                body: body.slice(0, 65536)  // GitHub comment limit
+              });
+              console.log('Commit comment posted successfully');
+            } catch(err) {
+              console.log('Could not post commit comment:', err.message);
+            }
+        env:
+          MATRIX_NODE: ${{ matrix.node }}
+        continue-on-error: true
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4

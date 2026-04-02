@@ -339,14 +339,16 @@ jest.mock(
   { virtual: true }
 );
 
-// Suppress console
+// Suppress console (keep error/warn in CI for debugging)
+const _isCI = process.env.CI === 'true';
 global.console = {
   ...console,
   log: jest.fn(),
   debug: jest.fn(),
   info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
+  // In CI keep real error/warn so they appear in jest-output.txt / Step Summary
+  error: _isCI ? console.error : jest.fn(),
+  warn: _isCI ? console.warn : jest.fn(),
 };
 
 // ─── MongoMemoryServer URI override ────────────────────────────────

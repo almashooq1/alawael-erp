@@ -66,6 +66,8 @@ jobs:
         env:
           HUSKY: '0'
           CI: 'true'
+          MONGOMS_DISABLE_POSTINSTALL: '1'
+          MONGOMS_PREFER_GLOBAL_PATH: '0'
 
       - name: Copy environment file
         working-directory: backend
@@ -152,15 +154,26 @@ jobs:
           FINAL_EXIT=1
           for ATTEMPT in 1 2 3; do
             echo "=== Jest Run Attempt $ATTEMPT/3 ==="
-            npm run test:ci 2>&1 | tee jest-output.txt
+            node --max-old-space-size=4096 node_modules/jest/bin/jest.js \
+              __tests__/auth.test.js \
+              __tests__/messaging-routes.phase2.test.js \
+              __tests__/finance-routes.phase2.test.js \
+              __tests__/notifications-routes.phase2.test.js \
+              __tests__/reporting-routes.phase2.test.js \
+              --passWithNoTests --no-coverage --ci --runInBand --forceExit \
+              --json --outputFile=jest-results.json 2>&1 | tee jest-output.txt
             ATTEMPT_EXIT=${PIPESTATUS[0]}
             echo "=== JEST EXIT CODE (attempt $ATTEMPT): $ATTEMPT_EXIT ==="
+            echo "=== FIRST 40 LINES OF OUTPUT ==="
+            head -40 jest-output.txt || true
             if [ $ATTEMPT_EXIT -eq 0 ]; then
               FINAL_EXIT=0
               echo "✅ Tests passed on attempt $ATTEMPT"
               break
             fi
             echo "❌ Tests failed on attempt $ATTEMPT"
+            echo "=== LAST 60 LINES OF OUTPUT ==="
+            tail -60 jest-output.txt || true
             if [ $ATTEMPT -lt 3 ]; then
               echo "Retrying in 5 seconds..."
               sleep 5

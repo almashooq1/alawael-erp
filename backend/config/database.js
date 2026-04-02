@@ -27,7 +27,10 @@ const calculateBackoffDelay = attemptNumber => {
 
 // ==================== WAIT HELPER ====================
 // Helper function to wait/sleep for specified milliseconds
-const wait = ms => new Promise(resolve => { setTimeout(resolve, ms); });
+const wait = ms =>
+  new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
 
 // ==================== CONNECTION HEALTH TRACKING ====================
 // Track connection health status
@@ -42,6 +45,18 @@ const connectionHealth = {
 
 // ==================== CONNECTION RETRY WITH EXPONENTIAL BACKOFF ====================
 const connectDB = async () => {
+  // ========== CI FAST BYPASS ==========
+  // In CI environment with test/mock mode, skip MongoMemoryServer entirely
+  // (jest mocks mongoose anyway, so no real DB connection is needed)
+  if (
+    process.env.CI === 'true' &&
+    (process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test')
+  ) {
+    connectionHealth.isConnected = true;
+    isConnected = true;
+    return mongoose.connection;
+  }
+
   // ========== MOCK/TEST DATABASE HANDLING ==========
   if (process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test') {
     if (isConnected && mongoose.connection.readyState === 1) {
@@ -60,7 +75,9 @@ const connectDB = async () => {
       mongoServer = await Promise.race([
         MongoMemoryServer.create(),
         new Promise((_, reject) =>
-          setTimeout(() => { reject(new Error('MongoMemoryServer startup timeout after 30s')); }, 30000)
+          setTimeout(() => {
+            reject(new Error('MongoMemoryServer startup timeout after 30s'));
+          }, 30000)
         ),
       ]);
 
@@ -272,7 +289,9 @@ const disconnectDB = async () => {
 
       // Set a timeout to prevent hanging disconnections
       const disconnectTimeout = new Promise((_, reject) =>
-        setTimeout(() => { reject(new Error('Disconnection timeout')); }, 10000)
+        setTimeout(() => {
+          reject(new Error('Disconnection timeout'));
+        }, 10000)
       );
 
       await Promise.race([mongoose.connection.close(), disconnectTimeout]);

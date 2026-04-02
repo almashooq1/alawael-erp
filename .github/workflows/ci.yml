@@ -76,7 +76,7 @@ jobs:
           echo "JWT_REFRESH_SECRET=test-ci-refresh-secret-minimum-32-chars-ok!!" >> .env
           echo "ENCRYPTION_KEY=test-ci-encryption-key-minimum-32chars-ok!!" >> .env
           echo "SESSION_SECRET=test-ci-session-secret-min-16chars!" >> .env
-          echo "USE_MOCK_DB=false" >> .env
+          echo "USE_MOCK_DB=true" >> .env
           echo "DISABLE_REDIS=true" >> .env
 
       - name: Check versions

@@ -597,17 +597,20 @@ app.get('/api/_diag', async (req, res) => {
 mountAllRoutes(app, { authRateLimiter });
 
 // ─── AI Scheduler — جدولة فحوصات الذكاء الاصطناعي اليومية (البرومبت 20) ──────
-try {
-  const { startScheduler } = require('./services/ai/aiScheduler');
-  // تأخير 30 ثانية بعد البدء للسماح لقاعدة البيانات بالاتصال
-  setTimeout(() => {
-    startScheduler();
-    logger.info(
-      '✅ prompt_20 AI Scheduler started (daily checks at 06:00, monthly reports on 1st)'
-    );
-  }, 30000);
-} catch (err) {
-  logger.warn('⚠️  AI Scheduler could not start', { error: err.message });
+if (!isTestEnv) {
+  try {
+    const { startScheduler } = require('./services/ai/aiScheduler');
+    // تأخير 30 ثانية بعد البدء للسماح لقاعدة البيانات بالاتصال
+    const aiSchedulerTimer = setTimeout(() => {
+      startScheduler();
+      logger.info(
+        '✅ prompt_20 AI Scheduler started (daily checks at 06:00, monthly reports on 1st)'
+      );
+    }, 30000);
+    if (aiSchedulerTimer.unref) aiSchedulerTimer.unref();
+  } catch (err) {
+    logger.warn('⚠️  AI Scheduler could not start', { error: err.message });
+  }
 }
 
 // ─── SLA Scheduler — جدولة فحص SLA تذاكر الدعم الفني (البرومبت 22) ───────────

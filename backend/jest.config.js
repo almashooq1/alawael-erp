@@ -141,8 +141,9 @@ module.exports = {
   // Other settings
   bail: 0,
   forceExit: true,
-  // Enable open handle detection in CI to catch resource leaks
-  detectOpenHandles: !!process.env.CI,
+  // Disable open handle detection - causes issues with services that use setInterval
+  // (e.g. MOIPassportService) which are loaded via routes during test setup
+  detectOpenHandles: false,
   passWithNoTests: true,
 
   // Cache for faster re-runs

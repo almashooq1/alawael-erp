@@ -91,6 +91,10 @@ class MOIPassportService extends EventEmitter {
         }
       }
     }, 60000); // Update every minute
+    // Allow process to exit even if this timer is still active (important for Jest tests)
+    if (this.metricsInterval.unref) {
+      this.metricsInterval.unref();
+    }
   }
 
   /**
@@ -340,7 +344,9 @@ class MOIPassportService extends EventEmitter {
    * Sleep utility
    */
   _sleep(ms) {
-    return new Promise(resolve => { setTimeout(resolve, ms); });
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
   }
 
   /**

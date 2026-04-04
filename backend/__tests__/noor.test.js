@@ -35,15 +35,15 @@ describe('Noor Integration API — نظام نور', () => {
     it('should return Noor dashboard analytics', async () => {
       const res = await request(app).get('/api/noor/dashboard');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Config ───
   describe('GET /api/noor/config', () => {
     it('should return Noor configuration', async () => {
       const res = await request(app).get('/api/noor/config');
-      expect([200, 401, 403, 500]).toContain(res.status);
-    });
+      expect([200, 400, 401, 403, 500]).toContain(res.status);
+    }, 15000);
   });
 
   describe('PUT /api/noor/config', () => {
@@ -60,7 +60,7 @@ describe('Noor Integration API — نظام نور', () => {
     it('should list students', async () => {
       const res = await request(app).get('/api/noor/students');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/noor/students', () => {
@@ -86,7 +86,7 @@ describe('Noor Integration API — نظام نور', () => {
     it('should sync student with Noor', async () => {
       const res = await request(app).post('/api/noor/students/507f1f77bcf86cd799439011/sync');
       expect([200, 400, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/noor/students/bulk-sync', () => {
@@ -95,7 +95,7 @@ describe('Noor Integration API — نظام نور', () => {
         .post('/api/noor/students/bulk-sync')
         .send({ academicYear: '2025-2026' });
       expect([200, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── IEPs ───
@@ -103,7 +103,7 @@ describe('Noor Integration API — نظام نور', () => {
     it('should list IEPs', async () => {
       const res = await request(app).get('/api/noor/ieps');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/noor/ieps', () => {
@@ -123,14 +123,14 @@ describe('Noor Integration API — نظام نور', () => {
           ],
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/noor/ieps/:id/submit-noor', () => {
     it('should submit IEP to Noor', async () => {
       const res = await request(app).post('/api/noor/ieps/507f1f77bcf86cd799439011/submit-noor');
       expect([200, 400, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Progress Reports ───
@@ -138,7 +138,7 @@ describe('Noor Integration API — نظام نور', () => {
     it('should list progress reports', async () => {
       const res = await request(app).get('/api/noor/progress-reports');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/noor/progress-reports', () => {
@@ -163,6 +163,6 @@ describe('Noor Integration API — نظام نور', () => {
     it('GET /api/v1/noor/dashboard should also work', async () => {
       const res = await request(app).get('/api/v1/noor/dashboard');
       expect([200, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 });

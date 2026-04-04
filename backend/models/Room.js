@@ -1,55 +1,48 @@
-/**
- * نموذج الغرف والمرافق
- * Room Model — Rooms, labs, offices, training halls
- */
+'use strict';
+
 const mongoose = require('mongoose');
 
 const roomSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true, maxlength: 100 },
-    code: { type: String, unique: true, sparse: true, maxlength: 20 },
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    code: { type: String, required: true, trim: true }, // R-001
+    nameAr: { type: String, required: true },
+    nameEn: { type: String, default: null },
     type: {
       type: String,
       enum: [
-        'office',
-        'meeting_room',
-        'training_hall',
-        'therapy_room',
-        'lab',
+        'therapy',
+        'assessment',
+        'sensory',
+        'gym',
         'classroom',
+        'meeting',
+        'office',
+        'waiting',
         'storage',
-        'common_area',
-        'other',
       ],
-      default: 'office',
+      required: true,
     },
-    building: { type: String },
-    floor: { type: Number },
+    floor: { type: String, default: null },
+    building: { type: String, default: null },
     capacity: { type: Number, default: 1 },
-    area: { type: Number },
+    areaSqm: { type: Number, default: null },
+    equipment: { type: [String], default: [] },
+    features: { type: [String], default: [] }, // ['soundproof', 'camera', 'ac']
+    isAccessible: { type: Boolean, default: true },
+    hasCamera: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
     status: {
       type: String,
-      enum: ['available', 'occupied', 'under_maintenance', 'reserved', 'closed'],
+      enum: ['available', 'occupied', 'maintenance', 'reserved'],
       default: 'available',
     },
-    equipment: [
-      {
-        name: { type: String },
-        quantity: { type: Number, default: 1 },
-        condition: { type: String, enum: ['good', 'fair', 'poor'], default: 'good' },
-      },
-    ],
-    amenities: [{ type: String }],
-    department: { type: String },
-    responsiblePerson: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    photos: [{ url: String, caption: String }],
-    notes: { type: String },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    notes: { type: String, default: null },
   },
   { timestamps: true }
 );
 
-roomSchema.index({ type: 1, status: 1 });
-roomSchema.index({ building: 1, floor: 1 });
+roomSchema.index({ branchId: 1, code: 1 }, { unique: true });
+roomSchema.index({ branchId: 1, status: 1 });
 
-module.exports = mongoose.models.Room || mongoose.model('Room', roomSchema);
+module.exports = mongoose.model('Room', roomSchema);

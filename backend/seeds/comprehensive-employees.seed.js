@@ -8,6 +8,7 @@
 'use strict';
 
 const bcrypt = require('bcryptjs');
+const { EXTRA_EMPLOYEES, mergeWithDefaults } = require('./seed-extensions.config');
 
 const COMPREHENSIVE_EMPLOYEES = [
   // ══════════════════════════════════════════════════════════════════
@@ -927,10 +928,16 @@ async function seed(connection) {
   const col = db.collection('employees');
   const usersCol = db.collection('users');
 
+  // دمج الموظفين الافتراضيين مع الإضافيين من seed-extensions.config.js
+  const allEmployees = mergeWithDefaults(COMPREHENSIVE_EMPLOYEES, EXTRA_EMPLOYEES, 'employeeId');
+  if (EXTRA_EMPLOYEES.length > 0) {
+    console.log(`  ℹ️  إضافة ${EXTRA_EMPLOYEES.length} موظف إضافي من seed-extensions.config.js`);
+  }
+
   let created = 0;
   let skipped = 0;
 
-  for (const emp of COMPREHENSIVE_EMPLOYEES) {
+  for (const emp of allEmployees) {
     const existing = await col.findOne({
       $or: [{ employeeId: emp.employeeId }, { nationalId: emp.nationalId }],
     });

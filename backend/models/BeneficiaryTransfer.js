@@ -1,64 +1,37 @@
-/**
- * BeneficiaryTransfer Model — نقل المستفيد بين الفروع
- * Based on: beneficiary_transfers table (prompt_02 §5.2)
- */
+'use strict';
+
 const mongoose = require('mongoose');
 
-const BeneficiaryTransferSchema = new mongoose.Schema(
+const beneficiaryTransferSchema = new mongoose.Schema(
   {
-    beneficiary: {
+    beneficiaryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Beneficiary',
       required: true,
     },
-    fromBranch: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Branch',
-      required: true,
-    },
-    toBranch: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Branch',
-      required: true,
-    },
+    fromBranchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    toBranchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    requestedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     reason: { type: String, required: true },
+    transferDate: { type: Date, required: true },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected', 'completed'],
+      enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
       default: 'pending',
     },
-    requestedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    approvedAt: { type: Date },
-    transferDate: { type: Date },
-    rejectionReason: { type: String },
-    notes: { type: String },
-    // وثائق مرفقة
-    attachments: [
-      {
-        fileName: String,
-        filePath: String,
-        uploadedAt: { type: Date, default: Date.now },
-      },
-    ],
+    rejectionReason: { type: String, default: null },
+    transferNotes: { type: mongoose.Schema.Types.Mixed, default: null },
+    transferRecords: { type: Boolean, default: true }, // نقل السجلات
+    continuePlan: { type: Boolean, default: true }, // استمرار الخطة العلاجية
+    approvedAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
   },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
+  { timestamps: true }
 );
 
-BeneficiaryTransferSchema.index({ beneficiary: 1, status: 1 });
-BeneficiaryTransferSchema.index({ fromBranch: 1 });
-BeneficiaryTransferSchema.index({ toBranch: 1 });
+beneficiaryTransferSchema.index({ beneficiaryId: 1, status: 1 });
+beneficiaryTransferSchema.index({ fromBranchId: 1, status: 1 });
+beneficiaryTransferSchema.index({ toBranchId: 1, status: 1 });
 
-module.exports =
-  mongoose.models.BeneficiaryTransfer ||
-  mongoose.model('BeneficiaryTransfer', BeneficiaryTransferSchema);
+module.exports = mongoose.model('BeneficiaryTransfer', beneficiaryTransferSchema);

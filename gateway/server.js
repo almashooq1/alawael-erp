@@ -70,17 +70,11 @@ const app = express();
 // CORS - Allow all origins for internal deployment
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',')
-  : [
-      'http://localhost:3000',
-      'http://localhost:3004',
-      'http://localhost:5173',
-      'http://72.60.84.56:3004',
-      'http://72.60.84.56',
-    ];
+  : ['http://localhost:3000', 'http://localhost:3004', 'http://localhost:5173', 'http://72.60.84.56:3004', 'http://72.60.84.56'];
 
 app.use(
   cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
       // Allow requests with no origin (curl, mobile apps, etc.)
       if (!origin) return callback(null, true);
       if (allowedOrigins.indexOf(origin) !== -1) {
@@ -98,6 +92,10 @@ app.use(
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(compression());
 app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
+
+// Body parsers with size limits (security: prevent large payload attacks)
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb', extended: true }));
 
 // NOTE: body parsers are applied AFTER proxy routes to avoid consuming the stream
 // DO NOT add express.json() here before proxies
@@ -258,5 +256,9 @@ const server = app.listen(config.port, () => {
   );
 });
 
-module.exports = { app, server };
+// Server timeouts (security & stability)
+server.timeout = 120000; // 120s request timeout
+server.keepAliveTimeout = 65000; // 65s keep-alive (> typical proxy 60s idle)
+server.headersTimeout = 66000; // Must be > keepAliveTimeout
 
+module.exports = { app, server };

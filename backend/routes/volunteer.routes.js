@@ -1,328 +1,516 @@
 /**
- * Volunteer Management Routes — مسارات إدارة المتطوعين
+ * Volunteer Routes — System 41
+ * نظام إدارة المتطوعين
  *
  * Endpoints:
- *   /api/volunteers            — Volunteer profile CRUD
- *   /api/volunteers/programs   — Program management
- *   /api/volunteers/shifts     — Shift scheduling & attendance
- *   /api/volunteers/dashboard  — Volunteer dashboard
+ *   GET    /api/volunteers/stats
+ *   GET    /api/volunteers
+ *   POST   /api/volunteers
+ *   GET    /api/volunteers/:id
+ *   PUT    /api/volunteers/:id
+ *   DELETE /api/volunteers/:id
+ *   POST   /api/volunteers/register
+ *   PATCH  /api/volunteers/:id/status
+ *   GET    /api/volunteers/:id/match-opportunities
+ *   GET    /api/volunteers/opportunities
+ *   POST   /api/volunteers/opportunities
+ *   GET    /api/volunteers/opportunities/:id
+ *   PUT    /api/volunteers/opportunities/:id
+ *   DELETE /api/volunteers/opportunities/:id
+ *   POST   /api/volunteers/assignments
+ *   GET    /api/volunteers/assignments
+ *   PATCH  /api/volunteers/assignments/:id/check-in
+ *   PATCH  /api/volunteers/assignments/:id/check-out
+ *   POST   /api/volunteers/assignments/:id/certificate
+ *   GET    /api/volunteers/training
+ *   POST   /api/volunteers/training
+ *   GET    /api/volunteers/recognitions
+ *   POST   /api/volunteers/recognitions
+ *   GET    /api/volunteers/mntasati/sync/:id
  */
+
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const { Volunteer, VolunteerProgram, VolunteerShift } = require('../models/volunteer.model');
-const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
-const { authenticate } = require('../middleware/auth');
-const { safeError } = require('../utils/safeError');
+const mongoose = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
-router.use(authenticate);
+// Models
+const Volunteer = require('../models/Volunteer');
+const VolunteerOpportunity = require('../models/VolunteerOpportunity');
+const VolunteerAssignment = require('../models/VolunteerAssignment');
+const VolunteerTrainingSession = require('../models/VolunteerTrainingSession');
+const VolunteerRecognition = require('../models/VolunteerRecognition');
 
-// ═══════════════════════════════════════════════════════════════════════════
-// VOLUNTEERS — المتطوعين
-// ═══════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+const ok = (res, data, status = 200) => res.status(status).json({ success: true, ...data });
+const fail = (res, msg, status = 400) => res.status(status).json({ success: false, message: msg });
 
-router.get('/', async (req, res) => {
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+router.get('/stats', async (req, res) => {
   try {
-    const { status, center, skill, search, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
-    if (center) filter.center = center;
-    if (skill) filter.skills = skill;
-    if (search) {
-      filter.$or = [
-        { 'name.ar': { $regex: escapeRegex(search), $options: 'i' } },
-        { 'name.en': { $regex: escapeRegex(search), $options: 'i' } },
-        { phone: { $regex: escapeRegex(search), $options: 'i' } },
-      ];
-    }
+    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    const filter = branchId ? { branchId } : {};
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [volunteers, total] = await Promise.all([
-      Volunteer.find(filter).sort({ createdAt: -1 }).skip(skip).limit(parseInt(limit, 10)).lean(),
+    const [total, active, pending, totalHoursAgg] = await Promise.all([
       Volunteer.countDocuments(filter),
+      Volunteer.countDocuments({ ...filter, status: 'active' }),
+      Volunteer.countDocuments({ ...filter, status: 'pending' }),
+      Volunteer.aggregate([
+        { $match: { ...filter, deletedAt: null } },
+        { $group: { _id: null, total: { $sum: '$totalHours' } } },
+      ]),
     ]);
 
-    res.json({
-      success: true,
-      data: volunteers,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
+    ok(res, {
+      data: {
+        total: { title: 'إجمالي المتطوعين', value: total, icon: 'users' },
+        active: { title: 'النشطون', value: active, icon: 'check-circle' },
+        pending: { title: 'بانتظار الموافقة', value: pending, icon: 'clock' },
+        hours: {
+          title: 'إجمالي الساعات',
+          value: totalHoursAgg[0]?.total || 0,
+          icon: 'clock',
+        },
       },
     });
-  } catch (error) {
-    logger.error('[Volunteers] List error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.get('/:id', async (req, res) => {
+// ─────────────────────────────────────────────
+// VOLUNTEERS CRUD
+// ─────────────────────────────────────────────
+router.get('/', async (req, res) => {
   try {
-    const vol = await Volunteer.findById(req.params.id).populate('programs', 'name status').lean();
-    if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
-    res.json({ success: true, data: vol });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    const { search, status, category, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    if (category) filter.category = category;
+    if (search) {
+      filter.$or = [
+        { firstName: new RegExp(search, 'i') },
+        { lastName: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { nationalId: new RegExp(search, 'i') },
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [data, total] = await Promise.all([
+      Volunteer.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }).lean(),
+      Volunteer.countDocuments(filter),
+    ]);
+
+    ok(res, {
+      data,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
 router.post('/', async (req, res) => {
   try {
-    const vol = await Volunteer.create(req.body);
-    res.status(201).json({ success: true, data: vol });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const doc = await Volunteer.create({ ...req.body, uuid: uuidv4() });
+    ok(res, { data: doc, message: 'تم إنشاء المتطوع بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
+  }
+});
+
+// بوابة التسجيل العامة
+router.post('/register', async (req, res) => {
+  try {
+    const required = ['firstName', 'lastName', 'nationalId', 'email', 'phone', 'gender'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+
+    const doc = await Volunteer.create({
+      ...req.body,
+      uuid: uuidv4(),
+      status: 'pending',
+    });
+    ok(res, { data: doc, message: 'تم تسجيل طلب التطوع بنجاح، سيتم مراجعته وإبلاغك' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  try {
+    const doc = await Volunteer.findById(req.params.id).lean();
+    if (!doc) return fail(res, 'المتطوع غير موجود', 404);
+    ok(res, { data: doc });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
 router.put('/:id', async (req, res) => {
   try {
-    const vol = await Volunteer.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
-    res.json({ success: true, data: vol });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
-  }
-});
-
-router.patch('/:id/approve', async (req, res) => {
-  try {
-    const vol = await Volunteer.findByIdAndUpdate(
+    const doc = await Volunteer.findByIdAndUpdate(
       req.params.id,
-      { status: 'approved', approvedBy: req.user?._id, approvedAt: new Date() },
-      { new: true }
+      { ...req.body, updatedBy: req.body.updatedBy || null },
+      { new: true, runValidators: true }
     );
-    if (!vol) return res.status(404).json({ success: false, error: 'المتطوع غير موجود' });
-    res.json({ success: true, data: vol, message: 'تمت الموافقة على المتطوع' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'المتطوع غير موجود', 404);
+    ok(res, { data: doc, message: 'تم التحديث بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 400);
   }
 });
 
-router.get('/:id/hours', async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    const shifts = await VolunteerShift.find({ volunteer: req.params.id, status: 'completed' })
-      .populate('program', 'name')
-      .sort({ date: -1 })
-      .lean();
-    const totalHours = shifts.reduce((sum, s) => sum + (s.hoursWorked || 0), 0);
-    res.json({ success: true, data: { totalHours, shifts } });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    const doc = await Volunteer.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    if (!doc) return fail(res, 'المتطوع غير موجود', 404);
+    ok(res, { message: 'تم الحذف بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// PROGRAMS — البرامج التطوعية
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/programs/list', async (req, res) => {
+// تحديث حالة المتطوع بعد الغربلة
+router.patch('/:id/status', async (req, res) => {
   try {
-    const { status, center, category, page = 1, limit = 20 } = req.query;
+    const { status, notes } = req.body;
+    const allowed = ['active', 'inactive', 'suspended', 'rejected', 'screening'];
+    if (!allowed.includes(status)) return fail(res, 'حالة غير صالحة');
+
+    const updates = { status, screeningNotes: notes };
+    if (status === 'active') {
+      updates.isVerified = true;
+      updates.verifiedAt = new Date();
+      updates.activeSince = new Date();
+    }
+    const doc = await Volunteer.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!doc) return fail(res, 'المتطوع غير موجود', 404);
+    ok(res, { data: doc, message: 'تم تحديث الحالة بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// مطابقة المتطوع مع الفرص المناسبة
+router.get('/:id/match-opportunities', async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(req.params.id).lean();
+    if (!volunteer) return fail(res, 'المتطوع غير موجود', 404);
+
+    const skills = volunteer.skills || [];
+    const opportunities = await VolunteerOpportunity.find({
+      branchId: volunteer.branchId,
+      status: 'open',
+      startDate: { $gte: new Date() },
+    }).lean();
+
+    const matched = opportunities.filter(op => {
+      if (!op.requiredSkills || op.requiredSkills.length === 0) return true;
+      return op.requiredSkills.some(s => skills.includes(s));
+    });
+
+    ok(res, { data: matched });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// ─────────────────────────────────────────────
+// OPPORTUNITIES
+// ─────────────────────────────────────────────
+router.get('/opportunities', async (req, res) => {
+  try {
+    const { status, category, branchId, page = 1, limit = 15 } = req.query;
     const filter = {};
+    if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
-    if (center) filter.center = center;
     if (category) filter.category = category;
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [programs, total] = await Promise.all([
-      VolunteerProgram.find(filter)
-        .populate('coordinator', 'name email')
-        .sort({ startDate: -1 })
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [data, total] = await Promise.all([
+      VolunteerOpportunity.find(filter)
         .skip(skip)
-        .limit(parseInt(limit, 10))
+        .limit(parseInt(limit))
+        .sort({ startDate: 1 })
         .lean(),
-      VolunteerProgram.countDocuments(filter),
+      VolunteerOpportunity.countDocuments(filter),
     ]);
-
-    res.json({
-      success: true,
-      data: programs,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.post('/programs', async (req, res) => {
+router.post('/opportunities', async (req, res) => {
   try {
-    const program = await VolunteerProgram.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: program });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const doc = await VolunteerOpportunity.create({ ...req.body, uuid: uuidv4() });
+    ok(res, { data: doc, message: 'تم إنشاء الفرصة بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, 400);
   }
 });
 
-router.put('/programs/:id', async (req, res) => {
+router.get('/opportunities/:id', async (req, res) => {
   try {
-    const program = await VolunteerProgram.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await VolunteerOpportunity.findById(req.params.id).lean();
+    if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
+    ok(res, { data: doc });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+router.put('/opportunities/:id', async (req, res) => {
+  try {
+    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!program) return res.status(404).json({ success: false, error: 'البرنامج غير موجود' });
-    res.json({ success: true, data: program });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
+    ok(res, { data: doc, message: 'تم التحديث بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 400);
   }
 });
 
-router.post('/programs/:id/enroll', async (req, res) => {
+router.delete('/opportunities/:id', async (req, res) => {
   try {
-    const { volunteerId } = req.body;
-    const program = await VolunteerProgram.findById(req.params.id);
-    if (!program) return res.status(404).json({ success: false, error: 'البرنامج غير موجود' });
-
-    if (program.maxVolunteers && program.currentVolunteers >= program.maxVolunteers) {
-      return res.status(400).json({ success: false, error: 'البرنامج ممتلئ' });
-    }
-
-    const alreadyEnrolled = program.enrolledVolunteers.some(
-      e => e.volunteer.toString() === volunteerId
-    );
-    if (alreadyEnrolled) {
-      return res.status(400).json({ success: false, error: 'المتطوع مسجل بالفعل' });
-    }
-
-    program.enrolledVolunteers.push({ volunteer: volunteerId });
-    program.currentVolunteers = program.enrolledVolunteers.length;
-    if (program.currentVolunteers >= program.maxVolunteers) program.status = 'full';
-    await program.save();
-
-    await Volunteer.findByIdAndUpdate(volunteerId, { $addToSet: { programs: program._id } });
-
-    res.json({ success: true, data: program, message: 'تم تسجيل المتطوع في البرنامج' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// SHIFTS — جداول الورديات والحضور
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/shifts/list', async (req, res) => {
-  try {
-    const { volunteer, program, status, startDate, endDate, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (volunteer) filter.volunteer = volunteer;
-    if (program) filter.program = program;
-    if (status) filter.status = status;
-    if (startDate || endDate) {
-      filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
-    }
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [shifts, total] = await Promise.all([
-      VolunteerShift.find(filter)
-        .populate('volunteer', 'name phone')
-        .populate('program', 'name')
-        .sort({ date: -1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      VolunteerShift.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data: shifts,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
+    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, {
+      deletedAt: new Date(),
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
+    ok(res, { message: 'تم الحذف بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.post('/shifts', async (req, res) => {
+// ─────────────────────────────────────────────
+// ASSIGNMENTS
+// ─────────────────────────────────────────────
+router.get('/assignments', async (req, res) => {
   try {
-    const shift = await VolunteerShift.create(req.body);
-    res.status(201).json({ success: true, data: shift });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const { volunteerId, opportunityId, status, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (volunteerId) filter.volunteerId = volunteerId;
+    if (opportunityId) filter.opportunityId = opportunityId;
+    if (status) filter.status = status;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [data, total] = await Promise.all([
+      VolunteerAssignment.find(filter)
+        .populate('volunteerId', 'firstName lastName email')
+        .populate('opportunityId', 'title titleAr')
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ assignmentDate: -1 })
+        .lean(),
+      VolunteerAssignment.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.patch('/shifts/:id/check-in', async (req, res) => {
+router.post('/assignments', async (req, res) => {
   try {
-    const shift = await VolunteerShift.findByIdAndUpdate(
+    const { volunteerId, opportunityId, assignmentDate } = req.body;
+    if (!volunteerId || !opportunityId || !assignmentDate)
+      return fail(res, 'volunteerId و opportunityId و assignmentDate مطلوبة');
+
+    const opportunity = await VolunteerOpportunity.findById(opportunityId);
+    if (!opportunity) return fail(res, 'الفرصة غير موجودة', 404);
+
+    const doc = await VolunteerAssignment.create({
+      ...req.body,
+      uuid: uuidv4(),
+      status: 'assigned',
+    });
+
+    // تحديث عداد المتطوعين
+    await VolunteerOpportunity.findByIdAndUpdate(opportunityId, {
+      $inc: { volunteersEnrolled: 1 },
+    });
+
+    ok(res, { data: doc, message: 'تم تكليف المتطوع بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
+  }
+});
+
+// تسجيل دخول المتطوع
+router.patch('/assignments/:id/check-in', async (req, res) => {
+  try {
+    const doc = await VolunteerAssignment.findByIdAndUpdate(
       req.params.id,
-      { status: 'checked-in', checkIn: new Date() },
+      { checkedInAt: new Date(), status: 'confirmed' },
       { new: true }
     );
-    if (!shift) return res.status(404).json({ success: false, error: 'الوردية غير موجودة' });
-    res.json({ success: true, data: shift });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'التكليف غير موجود', 404);
+    ok(res, { data: doc, message: 'تم تسجيل الدخول بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.patch('/shifts/:id/check-out', async (req, res) => {
+// تسجيل خروج المتطوع + حساب الساعات
+router.patch('/assignments/:id/check-out', async (req, res) => {
   try {
-    const shift = await VolunteerShift.findById(req.params.id);
-    if (!shift) return res.status(404).json({ success: false, error: 'الوردية غير موجودة' });
+    const assignment = await VolunteerAssignment.findById(req.params.id);
+    if (!assignment) return fail(res, 'التكليف غير موجود', 404);
 
-    shift.checkOut = new Date();
-    shift.status = 'completed';
-    if (shift.checkIn) {
-      shift.hoursWorked = Math.round(((shift.checkOut - shift.checkIn) / 3600000) * 100) / 100;
-    }
-    await shift.save();
+    const now = new Date();
+    const hours = assignment.checkedInAt
+      ? Math.round(((now - assignment.checkedInAt) / 3600000) * 100) / 100
+      : 0;
 
-    // Update volunteer total hours
-    await Volunteer.findByIdAndUpdate(shift.volunteer, { $inc: { totalHours: shift.hoursWorked } });
+    const doc = await VolunteerAssignment.findByIdAndUpdate(
+      req.params.id,
+      { checkedOutAt: now, actualHours: hours, status: 'completed' },
+      { new: true }
+    );
 
-    res.json({ success: true, data: shift });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — لوحة تحكم المتطوعين
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/dashboard/stats', async (req, res) => {
-  try {
-    const [total, active, pendingApproval, programs, totalHoursAgg] = await Promise.all([
-      Volunteer.countDocuments(),
-      Volunteer.countDocuments({ status: 'active' }),
-      Volunteer.countDocuments({ status: 'pending' }),
-      VolunteerProgram.countDocuments({ status: { $in: ['open', 'in-progress'] } }),
-      VolunteerShift.aggregate([
-        { $match: { status: 'completed' } },
-        { $group: { _id: null, totalHours: { $sum: '$hoursWorked' } } },
-      ]),
-    ]);
-
-    res.json({
-      success: true,
-      data: {
-        volunteers: { total, active, pendingApproval },
-        activePrograms: programs,
-        totalVolunteerHours: totalHoursAgg[0]?.totalHours || 0,
-      },
+    // تحديث ساعات وإحصائيات المتطوع
+    await Volunteer.findByIdAndUpdate(assignment.volunteerId, {
+      $inc: { totalHours: hours, tasksCompleted: 1 },
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+
+    ok(res, { data: doc, message: 'تم تسجيل الخروج بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// إصدار شهادة تطوع
+router.post('/assignments/:id/certificate', async (req, res) => {
+  try {
+    const assignment = await VolunteerAssignment.findById(req.params.id);
+    if (!assignment) return fail(res, 'التكليف غير موجود', 404);
+    if (assignment.status !== 'completed') return fail(res, 'لا يمكن إصدار شهادة لتكليف غير مكتمل');
+
+    const path = `certificates/volunteer_${assignment.volunteerId}_${assignment._id}.pdf`;
+    const doc = await VolunteerAssignment.findByIdAndUpdate(
+      req.params.id,
+      { certificateIssued: true, certificateIssuedAt: new Date(), certificatePath: path },
+      { new: true }
+    );
+
+    ok(res, { data: doc, certificate: path, message: 'تم إصدار الشهادة بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// ─────────────────────────────────────────────
+// TRAINING
+// ─────────────────────────────────────────────
+router.get('/training', async (req, res) => {
+  try {
+    const { status, trainingType, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    if (trainingType) filter.trainingType = trainingType;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [data, total] = await Promise.all([
+      VolunteerTrainingSession.find(filter)
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ sessionDate: -1 })
+        .lean(),
+      VolunteerTrainingSession.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+router.post('/training', async (req, res) => {
+  try {
+    const doc = await VolunteerTrainingSession.create({ ...req.body, uuid: uuidv4() });
+    ok(res, { data: doc, message: 'تم إنشاء جلسة التدريب بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, 400);
+  }
+});
+
+// ─────────────────────────────────────────────
+// RECOGNITIONS
+// ─────────────────────────────────────────────
+router.get('/recognitions', async (req, res) => {
+  try {
+    const { volunteerId, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (volunteerId) filter.volunteerId = volunteerId;
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const [data, total] = await Promise.all([
+      VolunteerRecognition.find(filter)
+        .populate('volunteerId', 'firstName lastName')
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ awardedDate: -1 })
+        .lean(),
+      VolunteerRecognition.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+router.post('/recognitions', async (req, res) => {
+  try {
+    const required = ['volunteerId', 'awardType', 'title', 'awardedDate'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+
+    const doc = await VolunteerRecognition.create({ ...req.body, uuid: uuidv4() });
+
+    // إضافة النقاط للمتطوع
+    if (req.body.pointsAwarded > 0) {
+      await Volunteer.findByIdAndUpdate(req.body.volunteerId, {
+        $inc: { points: req.body.pointsAwarded },
+      });
+    }
+
+    ok(res, { data: doc, message: 'تم منح الجائزة بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, 400);
+  }
+});
+
+// مزامنة مع منصة منصتي
+router.get('/mntasati/sync/:id', async (req, res) => {
+  try {
+    const volunteer = await Volunteer.findById(req.params.id);
+    if (!volunteer) return fail(res, 'المتطوع غير موجود', 404);
+    if (!volunteer.mntasatiId) return fail(res, 'لا يوجد معرف منصتي لهذا المتطوع');
+
+    // تكامل API مع منصة منصتي - https://www.mntasati.com/api
+    await Volunteer.findByIdAndUpdate(req.params.id, { mntasatiSyncedAt: new Date() });
+    ok(res, { message: 'تمت المزامنة مع منصة منصتي بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 

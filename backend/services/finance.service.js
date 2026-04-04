@@ -218,11 +218,15 @@ class FinanceService {
   }
 
   /**
-   * Delete transaction
+   * Delete transaction (soft delete — isArchived flag)
    */
   static async deleteTransaction(transactionId) {
     try {
-      const transaction = await Transaction.findByIdAndDelete(transactionId);
+      const transaction = await Transaction.findByIdAndUpdate(
+        transactionId,
+        { isArchived: true, archivedAt: new Date() },
+        { new: true }
+      );
 
       if (!transaction) {
         throw new Error('Transaction not found');
@@ -407,11 +411,15 @@ class FinanceService {
   }
 
   /**
-   * Delete budget
+   * Delete budget (soft delete — isArchived flag)
    */
   static async deleteBudget(budgetId) {
     try {
-      const budget = await Budget.findByIdAndDelete(budgetId);
+      const budget = await Budget.findByIdAndUpdate(
+        budgetId,
+        { isArchived: true, archivedAt: new Date() },
+        { new: true }
+      );
 
       if (!budget) {
         throw new Error('Budget not found');

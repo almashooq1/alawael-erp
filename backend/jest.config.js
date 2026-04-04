@@ -10,6 +10,8 @@
 
 'use strict';
 
+const path = require('path');
+
 module.exports = {
   // Test environment
   testEnvironment: 'node',
@@ -22,6 +24,10 @@ module.exports = {
   // jest.setup.js runs AFTER the test framework is installed
   setupFiles: ['<rootDir>/jest.env.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+
+  // Restrict Jest to backend directories only — prevents picking up frontend JSX files
+  // when running with a test-path pattern on the CLI
+  roots: ['<rootDir>/__tests__', '<rootDir>/tests'],
 
   // Test match patterns — scoped to __tests__/ and tests/ only (prevents OOM from stray .test.js)
   testMatch: [
@@ -88,6 +94,14 @@ module.exports = {
     'performanceRoutes\\.comprehensive\\.test',
     'advanced-performance-tests\\.test',
     'phase-22-performance\\.test',
+    // JSX/React test files (frontend-only — not supported by backend Jest config which has no Babel/React)
+    '\\.jsx$',
+    '/frontend/',
+    '\\\\frontend\\\\',
+    // Absolute paths — ensures exclusion works on Windows (backslash separators)
+    path.resolve(__dirname, '..', 'frontend').replace(/\\/g, '\\\\'),
+    path.resolve(__dirname, '..', '_archived').replace(/\\/g, '\\\\'),
+    path.resolve(__dirname, '..', 'supply-chain-management').replace(/\\/g, '\\\\'),
     // Standalone Node scripts (not Jest tests) — use process.exit(), http.request, custom runners
     'tests/tests/supply-chain\\.test',
     'tests/tests/sso-e2e\\.test',
@@ -118,6 +132,25 @@ module.exports = {
     'tests/tests/comprehensive\\.test',
   ],
   watchPathIgnorePatterns: ['/node_modules/', '/coverage/', '/dist/'],
+
+  // Exclude non-backend directories from haste-map to prevent duplicate mock warnings
+  // (frontend, _archived, backups, supply-chain-management contain conflicting __mocks__ files)
+  modulePathIgnorePatterns: [
+    '<rootDir>/../frontend',
+    '<rootDir>/../_archived',
+    '<rootDir>/../backups',
+    '<rootDir>/../supply-chain-management',
+  ],
+
+  // Block duplicate __mocks__ files in non-backend folders from haste-map scanning
+  haste: {
+    blockList: [
+      /[/\\]frontend[/\\]/,
+      /[/\\]_archived[/\\]/,
+      /[/\\]backups[/\\]/,
+      /[/\\]supply-chain-management[/\\]/,
+    ],
+  },
 
   // Module file extensions
   moduleFileExtensions: ['js', 'json', 'node'],

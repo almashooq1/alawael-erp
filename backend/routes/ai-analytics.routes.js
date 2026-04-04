@@ -572,12 +572,12 @@ router.post(
 
 /**
  * POST /api/ai-analytics/schedule/optimize
- * اقتراح جدول أسبوعي محسّن
+ * اقتراح جدول أسبوعي محسّن باستخدام خوارزمية Greedy + Constraint Satisfaction
  */
 router.post(
   '/schedule/optimize',
   asyncHandler(async (req, res) => {
-    const { branch_id, week_start } = req.body;
+    const { branch_id, week_start, constraints = {} } = req.body;
     if (!branch_id || !week_start) {
       return res.status(400).json({ message: 'branch_id و week_start مطلوبان' });
     }
@@ -587,32 +587,120 @@ router.post(
       return res.status(400).json({ message: 'تنسيق التاريخ غير صحيح' });
     }
 
-    // بناء اقتراح جدول أسبوعي بسيط بناءً على المستفيدين والأخصائيين
     const Beneficiary = require('../models/Beneficiary');
     const Appointment = require('../models/Appointment');
+    const User = (() => {
+      try {
+        return require('../models/User');
+      } catch (_) {
+        return null;
+      }
+    })();
 
     const weekEnd = new Date(weekStartDate);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
-    const [activeBeneficiaries, existingAppointments] = await Promise.all([
-      Beneficiary.find({ branch_id, status: 'active', deleted_at: null }).limit(50).lean(),
+    const [activeBeneficiaries, existingAppointments, specialists] = await Promise.all([
+      Beneficiary.find({ branch_id, status: 'active', deleted_at: null })
+        .select(
+          '_id name_ar full_name disability_severity disability_type status branch_id preferred_time required_specialty'
+        )
+        .lean(),
       Appointment.find({
         branch_id,
         appointment_date: { $gte: weekStartDate, $lte: weekEnd },
         status: { $ne: 'cancelled' },
       }).lean(),
+      User
+        ? User.find({ branch_id, is_active: true, deleted_at: null })
+            .select('_id name_ar name specialties availability max_caseload current_caseload')
+            .lean()
+        : Promise.resolve([]),
     ]);
 
+    const {
+      optimizeWeeklySchedule,
+      generateScheduleSummaryAr,
+    } = require('../services/ai/scheduleOptimizer.service');
+
+    const result = optimizeWeeklySchedule({
+      branchId: branch_id,
+      weekStart: weekStartDate,
+      beneficiaries: activeBeneficiaries,
+      specialists,
+      existingAppointments,
+      constraints,
+    });
+
     res.json({
-      message: 'تم تحليل الجدول',
-      data: {
-        branch_id,
-        week_start,
-        active_beneficiaries: activeBeneficiaries.length,
-        existing_appointments: existingAppointments.length,
-        available_slots: Math.max(0, activeBeneficiaries.length * 3 - existingAppointments.length),
-        suggestion: `يوجد ${activeBeneficiaries.length} مستفيد نشط مع ${existingAppointments.length} موعد محجوز للأسبوع القادم`,
-      },
+      message: generateScheduleSummaryAr(result),
+      data: result,
+    });
+  })
+);
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SMART PLAN SUGGESTION — اقتراح الخطة العلاجية الذكية
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/ai-analytics/suggest-plan
+ * اقتراح خطة علاجية بناءً على حالات مشابهة
+ */
+router.post(
+  '/suggest-plan',
+  asyncHandler(async (req, res) => {
+    const { beneficiary_id, assessment_id } = req.body;
+    if (!beneficiary_id) {
+      return res.status(400).json({ message: 'beneficiary_id مطلوب' });
+    }
+
+    const Beneficiary = require('../models/Beneficiary');
+    const beneficiary = await Beneficiary.findById(beneficiary_id).lean();
+    if (!beneficiary) return res.status(404).json({ message: 'المستفيد غير موجود' });
+
+    // جلب التقييم إن وُجد
+    let assessment = null;
+    if (assessment_id) {
+      const Assessment = (() => {
+        try {
+          return require('../models/Assessment');
+        } catch (_) {
+          return null;
+        }
+      })();
+      if (Assessment) {
+        assessment = await Assessment.findById(assessment_id).lean();
+      }
+    }
+
+    const {
+      findSimilarBeneficiaries,
+      fetchSuccessfulGoals,
+      suggestPlan,
+    } = require('../services/ai/smartPlanSuggestion.service');
+
+    const Goal = (() => {
+      try {
+        return require('../models/Goal');
+      } catch (_) {
+        return null;
+      }
+    })();
+
+    const similarBeneficiaries = await findSimilarBeneficiaries(beneficiary, Beneficiary);
+    const successfulGoals = await fetchSuccessfulGoals(similarBeneficiaries, Goal);
+    const suggestion = await suggestPlan(
+      beneficiary,
+      assessment,
+      similarBeneficiaries,
+      successfulGoals
+    );
+
+    res.json({
+      message: 'تم توليد اقتراح الخطة العلاجية',
+      suggestion,
+      similar_cases_found: similarBeneficiaries.length,
     });
   })
 );

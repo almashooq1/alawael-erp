@@ -1023,7 +1023,7 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
       ]),
     ]);
 
-    const activePlan = plans.find(p => p.status === 'ACTIVE').lean();
+    const activePlan = plans.find(p => p.status === 'ACTIVE') || null;
     const pendingReferrals = referrals.filter(r =>
       ['PENDING', 'ACCEPTED', 'IN_PROGRESS'].includes(r.status)
     );

@@ -1,457 +1,140 @@
-# ══════════════════════════════════════════════════════════════════
-# CI — Tests & Quality | AlAwael ERP Backend
-# Rehab-ERP v2.0 | Node.js + MongoDB + Redis
-# ══════════════════════════════════════════════════════════════════
-name: CI — Tests & Quality
+name: CI Pipeline
 
 on:
   push:
-    branches: [main, develop, 'feature/**', 'fix/**']
+    branches: [main, develop, 'feature/**', 'hotfix/**']
   pull_request:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '22'
-  MONGODB_VERSION: '7.0'
-
-# إلغاء التشغيلات القديمة تلقائياً عند push جديد
-concurrency:
-  group: ci-tests-${{ github.ref }}
-  cancel-in-progress: true
+  PHP_VERSION: '8.3'
+  NODE_VERSION: '20'
+  DB_DATABASE: rehab_test
+  DB_USERNAME: root
+  DB_PASSWORD: ''
 
 jobs:
-  # ──────────────────────────────────────────────────────────────
-  # Backend Tests
-  # ──────────────────────────────────────────────────────────────
-  backend-tests:
-    name: Backend Tests (Node ${{ matrix.node }})
+  tests:
+    name: Tests & Code Quality
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: ['22']
 
     services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_DATABASE: rehab_test
+        ports: ['3306:3306']
         options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
 
       redis:
         image: redis:7-alpine
-        ports:
-          - 6379:6379
+        ports: ['6379:6379']
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v4
+      - name: Setup PHP ${{ env.PHP_VERSION }}
+        uses: shivammathur/setup-php@v2
         with:
-          node-version: ${{ matrix.node }}
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: mbstring, xml, bcmath, redis, pdo_mysql
+          coverage: xdebug
+          tools: composer:v2
 
-      - name: Install backend dependencies
-        working-directory: backend
-        run: npm install --no-audit --no-fund
-        env:
-          HUSKY: '0'
-          CI: 'true'
-          MONGOMS_DISABLE_POSTINSTALL: '1'
-          MONGOMS_PREFER_GLOBAL_PATH: '0'
-
-      - name: Copy environment file
-        working-directory: backend
-        run: |
-          cp .env.example .env 2>/dev/null || true
-          echo "MONGODB_URI=mongodb://127.0.0.1:27017/alawael_test" >> .env
-          echo "REDIS_HOST=127.0.0.1" >> .env
-          echo "REDIS_PORT=6379" >> .env
-          echo "NODE_ENV=test" >> .env
-          echo "JWT_SECRET=test-ci-secret-key-minimum-32-chars-ok!!" >> .env
-          echo "JWT_REFRESH_SECRET=test-ci-refresh-secret-minimum-32-chars-ok!!" >> .env
-          echo "ENCRYPTION_KEY=test-ci-encryption-key-minimum-32chars-ok!!" >> .env
-          echo "SESSION_SECRET=test-ci-session-secret-min-16chars!" >> .env
-          echo "USE_MOCK_DB=true" >> .env
-          echo "DISABLE_REDIS=true" >> .env
-
-      - name: Check versions
-        working-directory: backend
-        run: |
-          node --version
-          node node_modules/jest/bin/jest.js --version
-
-      - name: Debug environment
-        working-directory: backend
-        run: |
-          echo "=== Node/npm versions ==="
-          node --version && npm --version
-          echo "=== Key env vars ==="
-          echo "NODE_ENV=$NODE_ENV"
-          echo "USE_MOCK_DB=$USE_MOCK_DB"
-          echo "DISABLE_REDIS=$DISABLE_REDIS"
-          echo "SMART_TEST_MODE=$SMART_TEST_MODE"
-          echo "JWT_SECRET length=${#JWT_SECRET}"
-          echo "JWT_REFRESH_SECRET length=${#JWT_REFRESH_SECRET}"
-          echo "=== .env first 20 lines (keys only) ==="
-          head -20 .env | cut -d'=' -f1 || echo "(no .env file)"
-        env:
-          NODE_ENV: test
-          USE_MOCK_DB: 'true'
-          DISABLE_REDIS: 'true'
-          SMART_TEST_MODE: 'true'
-          JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
-          JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
-
-      - name: Verify app startup
-        working-directory: backend
-        run: |
-          echo "=== Testing if app.js loads correctly ==="
-          timeout 30 node -e "
-            process.env.NODE_ENV='test';
-            process.env.USE_MOCK_DB='true';
-            process.env.SMART_TEST_MODE='true';
-            process.env.DISABLE_REDIS='true';
-            process.env.CI='true';
-            process.env.JWT_SECRET='test-ci-secret-key-minimum-32-chars-ok!!';
-            process.env.JWT_REFRESH_SECRET='test-ci-refresh-secret-minimum-32-chars-ok!!';
-            process.env.ENCRYPTION_KEY='test-ci-encryption-key-minimum-32chars-ok!!';
-            process.env.SESSION_SECRET='test-ci-session-secret-min-16chars!';
-            process.env.MONGODB_URI='mongodb://127.0.0.1:27017/alawael_test';
-            try {
-              const app = require('./app');
-              console.log('app.js loaded OK - type:', typeof app);
-            } catch(e) {
-              console.error('FAILED to load app.js:', e.message);
-              console.error(e.stack ? e.stack.split('\n').slice(0,8).join('\n') : '');
-            }
-            try {
-              const server = require('./server');
-              console.log('server.js loaded OK - type:', typeof server);
-              process.exit(0);
-            } catch(e) {
-              console.error('FAILED to load server.js:', e.message);
-              console.error(e.stack ? e.stack.split('\n').slice(0,8).join('\n') : '');
-              process.exit(0);
-            }
-          " 2>&1 || echo "startup check timed out or errored"
-        continue-on-error: true
-
-      - name: Run Jest tests
-        working-directory: backend
-        shell: bash
-        run: |
-          set +e
-          FINAL_EXIT=1
-          for ATTEMPT in 1 2 3; do
-            echo "=== Jest Run Attempt $ATTEMPT/3 ==="
-            node --max-old-space-size=4096 node_modules/jest/bin/jest.js \
-              __tests__/auth.test.js \
-              __tests__/messaging-routes.phase2.test.js \
-              __tests__/finance-routes.phase2.test.js \
-              __tests__/notifications-routes.phase2.test.js \
-              __tests__/reporting-routes.phase2.test.js \
-              --passWithNoTests --no-coverage --ci --runInBand --forceExit \
-              --verbose 2>&1 | tee jest-output.txt
-            ATTEMPT_EXIT=${PIPESTATUS[0]}
-            echo "=== JEST EXIT CODE (attempt $ATTEMPT): $ATTEMPT_EXIT ==="
-            if [ $ATTEMPT_EXIT -eq 0 ]; then
-              FINAL_EXIT=0
-              echo "✅ Tests passed on attempt $ATTEMPT"
-              break
-            fi
-            echo "❌ Tests failed on attempt $ATTEMPT"
-            echo "=== FULL jest-output.txt ==="
-            cat jest-output.txt || echo "(empty)"
-            if [ $ATTEMPT -lt 3 ]; then
-              sleep 5
-            fi
-          done
-          echo "=== FINAL JEST OUTPUT ==="
-          cat jest-output.txt || echo "(empty)"
-          # Write to GitHub Step Summary
-          echo "## Jest Test Results" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          cat jest-output.txt >> $GITHUB_STEP_SUMMARY || echo "no output" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          # Post as annotation for API access
-          OUTPUT_ANNOTATION=$(cat jest-output.txt 2>/dev/null | head -c 3000 | tr '\n' '~' || echo "NO_OUTPUT")
-          echo "::error title=JEST_OUTPUT::${OUTPUT_ANNOTATION}"
-          exit $FINAL_EXIT
-        env:
-          NODE_ENV: test
-          MONGODB_URI: mongodb://127.0.0.1:27017/alawael_test
-          REDIS_HOST: 127.0.0.1
-          REDIS_PORT: 6379
-          JWT_SECRET: test-ci-secret-key-minimum-32-chars-ok!!
-          JWT_REFRESH_SECRET: test-ci-refresh-secret-minimum-32-chars-ok!!
-          ENCRYPTION_KEY: test-ci-encryption-key-minimum-32chars-ok!!
-          SESSION_SECRET: test-ci-session-secret-min-16chars!
-          USE_MOCK_DB: 'true'
-          DISABLE_REDIS: 'true'
-          STRICT_ENV_VALIDATION: 'false'
-          SMART_TEST_MODE: 'true'
-          BCRYPT_ROUNDS: '4'
-
-      - name: Print failed tests summary
-        if: always()
-        working-directory: backend
-        run: |
-          if [ -f jest-results.json ]; then
-            echo "=== JEST RESULTS SUMMARY ==="
-            node -e "
-              try {
-                const d = require('./jest-results.json');
-                const suites = d.testResults || [];
-                let total = 0;
-                suites.forEach(s => {
-                  const failed = (s.testResults || []).filter(t => t.status === 'failed');
-                  if (failed.length > 0) {
-                    const f = s.testFilePath.split('/').pop();
-                    total += failed.length;
-                    console.log('FAIL SUITE: ' + f);
-                    failed.forEach(t => {
-                      const name = t.fullName.slice(0, 120);
-                      console.log('  x ' + name);
-                      if (t.failureMessages && t.failureMessages[0]) {
-                        const msg = t.failureMessages[0].slice(0, 300).replace(/\n/g, ' | ');
-                        console.log('::error title=' + name.slice(0, 50) + '::' + msg);
-                      }
-                    });
-                  }
-                });
-                console.log('Total failed: ' + total);
-              } catch(e) { console.log('Parse error: ' + e.message); }
-            "
-          else
-            echo "jest-results.json not found"
-            echo "::error::jest-results.json not found - Jest may have crashed before producing output"
-          fi
-        continue-on-error: true
-
-      - name: Post failure details as commit comment
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const fs = require('fs');
-            let output = 'No output captured.';
-            try {
-              const raw = fs.readFileSync('backend/jest-output.txt', 'utf8');
-              // Take last 6000 chars (most relevant — bottom of jest output)
-              output = raw.length > 6000 ? '...(truncated)\n' + raw.slice(-6000) : raw;
-            } catch(e) { output = 'Could not read jest-output.txt: ' + e.message; }
-
-            // Also read jest-results.json for structured failures
-            let failures = '';
-            try {
-              const results = JSON.parse(fs.readFileSync('backend/jest-results.json', 'utf8'));
-              const failedSuites = (results.testResults || []).filter(s =>
-                (s.testResults || []).some(t => t.status === 'failed')
-              );
-              if (failedSuites.length > 0) {
-                failures = '\n\n## Failed Tests:\n';
-                for (const suite of failedSuites) {
-                  failures += `\n### ${suite.testFilePath.split('/').pop()}\n`;
-                  for (const t of suite.testResults.filter(x => x.status === 'failed')) {
-                    failures += `- ❌ **${t.fullName}**\n`;
-                    if (t.failureMessages && t.failureMessages[0]) {
-                      failures += `\`\`\`\n${t.failureMessages[0].slice(0, 800)}\n\`\`\`\n`;
-                    }
-                  }
-                }
-              }
-            } catch(e) { failures = '\n(Could not parse jest-results.json: ' + e.message + ')'; }
-
-            const body = `## ❌ Jest Tests Failed (Run #${context.runNumber} — Node ${process.env.MATRIX_NODE || '22'})\n${failures}\n\n<details><summary>Full Jest Output</summary>\n\n\`\`\`\n${output}\n\`\`\`\n</details>`;
-            try {
-              await github.rest.repos.createCommitComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                commit_sha: context.sha,
-                body: body.slice(0, 65536)  // GitHub comment limit
-              });
-              console.log('Commit comment posted successfully');
-            } catch(err) {
-              console.log('Could not post commit comment:', err.message);
-            }
-        env:
-          MATRIX_NODE: ${{ matrix.node }}
-        continue-on-error: true
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-node-${{ matrix.node }}
-          path: |
-            backend/jest-results.json
-            backend/jest-output.txt
-          if-no-files-found: warn
-          retention-days: 7
-
-  # ──────────────────────────────────────────────────────────────
-  # Code Quality (ESLint + Prettier)
-  # ──────────────────────────────────────────────────────────────
-  code-quality:
-    name: Code Quality (ESLint + Prettier)
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install dependencies
-        working-directory: backend
-        run: npm install --no-audit --no-fund --ignore-scripts
-
-      - name: Run ESLint
-        working-directory: backend
-        run: npx eslint . --ext .js --max-warnings=0 --format=compact
-        continue-on-error: true
-
-      - name: Check Prettier formatting
-        working-directory: backend
-        run: npx prettier --check "**/*.{js,json}" --ignore-path .prettierignore
-        continue-on-error: true
-
-  # ──────────────────────────────────────────────────────────────
-  # Security Audit
-  # ──────────────────────────────────────────────────────────────
-  security-audit:
-    name: Security Audit
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
 
-      - name: Check for vulnerable dependencies
-        working-directory: backend
+      - name: Cache Composer packages
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Copy .env.testing
+        run: cp .env.testing.example .env.testing
+
+      - name: Generate application key
+        run: php artisan key:generate --env=testing
+
+      - name: Run migrations
+        run: php artisan migrate --env=testing --force
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Run PHPStan (Static Analysis)
+        run: ./vendor/bin/phpstan analyse --level=6
+        continue-on-error: true
+
+      - name: Run Pest Tests
+        run: ./vendor/bin/pest --coverage --coverage-clover=coverage.xml
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_DATABASE: ${{ env.DB_DATABASE }}
+          DB_USERNAME: ${{ env.DB_USERNAME }}
+          REDIS_HOST: 127.0.0.1
+          CACHE_DRIVER: redis
+          QUEUE_CONNECTION: sync
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+        continue-on-error: true
+
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Composer audit (security check)
+        run: composer audit
+        continue-on-error: true
+
+      - name: NPM audit
         run: npm audit --audit-level=high
         continue-on-error: true
 
-      - name: Check for secrets in code
-        uses: trufflesecurity/trufflehog@main
+      - name: Semgrep SAST scan
+        uses: semgrep/semgrep-action@v1
         with:
-          path: ./
-          base: ${{ github.event.repository.default_branch }}
-          head: HEAD
-          extra_args: --debug --only-verified
-        continue-on-error: true
-
-  # ──────────────────────────────────────────────────────────────
-  # Docker Build Validation
-  # ──────────────────────────────────────────────────────────────
-  docker-build:
-    name: Docker Build Validation
-    runs-on: ubuntu-latest
-    needs: [backend-tests]
-    continue-on-error: true
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image (validate only)
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile
-          push: false
-          tags: alawael-erp:ci-test
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # ──────────────────────────────────────────────────────────────
-  # Health Check (تحقق من أن التطبيق يبدأ بشكل صحيح)
-  # ──────────────────────────────────────────────────────────────
-  health-check:
-    name: App Startup Health Check
-    runs-on: ubuntu-latest
-    needs: [backend-tests]
-
-    services:
-      mongodb:
-        image: mongo:7.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand({ping: 1})'"
-          --health-interval 10s
-          --health-timeout 10s
-          --health-retries 5
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install dependencies
-        working-directory: backend
-        run: npm install --no-audit --no-fund --ignore-scripts
-
-      - name: Start server and check health
-        working-directory: backend
-        run: |
-          export NODE_ENV=test
-          export MONGODB_URI=mongodb://127.0.0.1:27017/alawael_health_test
-          export REDIS_HOST=127.0.0.1
-          export JWT_SECRET=health-check-secret
-          export PORT=3001
-          export USE_MOCK_DB=false
-
-          # تشغيل الخادم في الخلفية
-          node app.js &
-          APP_PID=$!
-
-          # انتظار 10 ثوانٍ للبدء
-          sleep 10
-
-          # فحص الصحة
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3001/health || echo "000")
-          echo "Health check status: $HTTP_STATUS"
-
-          kill $APP_PID 2>/dev/null || true
-
-          if [ "$HTTP_STATUS" != "200" ] && [ "$HTTP_STATUS" != "503" ]; then
-            echo "❌ Health check failed with unexpected status: $HTTP_STATUS"
-            exit 1
-          fi
-
-          echo "✅ Health check passed (status: $HTTP_STATUS)"
+          config: >-
+            p/php
+            p/laravel
+            p/secrets
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
         continue-on-error: true

@@ -1,187 +1,103 @@
-# ════════════════════════════════════════════════════════════════════
-#  Al-Awael ERP — Deploy to Staging (Manual / develop branch)
-#  بيئة الاختبار — يدوي أو على فرع develop فقط
-# ════════════════════════════════════════════════════════════════════
-name: "🧪 Deploy to Staging"
+name: Deploy to Staging
 
 on:
-  # يعمل على فرع develop/staging فقط (ليس main)
   push:
-    branches: [develop, staging]
-    paths:
-      - "backend/**"
-      - "frontend/**"
+    branches: [develop]
   workflow_dispatch:
     inputs:
-      deploy_target:
-        description: "ماذا تنشر؟"
-        required: true
-        default: "both"
-        type: choice
-        options: [both, backend-only, frontend-only]
-      skip_tests:
-        description: "تخطي الاختبارات؟"
+      reason:
+        description: 'سبب النشر اليدوي'
         required: false
-        default: false
-        type: boolean
-
-env:
-  APP_DIR: /home/alawael/staging
-  NODE_VERSION: "20"
-
-concurrency:
-  group: deploy-staging
-  cancel-in-progress: true
-
-permissions:
-  contents: read
 
 jobs:
-  preflight:
-    name: "🔍 Pre-flight"
+  deploy-staging:
+    name: Deploy to Staging Environment
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      short_sha: ${{ steps.info.outputs.short_sha }}
-      has_ssh: ${{ steps.check.outputs.has_ssh }}
+    environment: staging
+
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          fetch-depth: 2
+          php-version: '8.3'
+          extensions: mbstring, xml, bcmath, redis, pdo_mysql
 
-      - name: Info
-        id: info
-        run: |
-          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-8)
-          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "📋 Commit: $SHORT_SHA | Branch: ${{ github.ref_name }}"
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
 
-      - name: Check SSH secret
-        id: check
-        env:
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-        run: |
-          if [ -n "$STAGING_SSH_KEY" ] || [ -n "$VPS_SSH_KEY" ]; then
-            echo "has_ssh=true" >> $GITHUB_OUTPUT
-            echo "✅ SSH secret available — will deploy"
-          else
-            echo "has_ssh=false" >> $GITHUB_OUTPUT
-            echo "⚠️ No SSH secrets — staging deploy will be skipped"
-            echo "   Add VPS_SSH_KEY or STAGING_SSH_KEY to enable deployments"
-          fi
-
-  build-frontend:
-    name: "📦 Build Frontend"
-    runs-on: ubuntu-latest
-    needs: preflight
-    # ✅ بناء الـ frontend فائدته التحقق من أن الكود يبني بنجاح
-    continue-on-error: true
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Install
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps
+      - name: Install npm dependencies
+        run: npm ci
 
-      - name: Build
-        working-directory: frontend
+      - name: Build assets for staging
         run: npm run build
         env:
-          REACT_APP_API_URL: https://${{ secrets.STAGING_DOMAIN || 'staging.alaweal.org' }}/api
-          REACT_APP_ENVIRONMENT: staging
-          REACT_APP_VERSION: ${{ needs.preflight.outputs.short_sha }}
-          GENERATE_SOURCEMAP: "true"
-          CI: "false"
+          VITE_APP_ENV: staging
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v7
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          name: frontend-build-staging-${{ github.sha }}
-          path: frontend/build/
-          retention-days: 3
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  deploy:
-    name: "🧪 Deploy Staging"
-    runs-on: ubuntu-latest
-    needs: [preflight, build-frontend]
-    # ✅ يعمل فقط إذا توفر SSH key وبناء الـ frontend نجح
-    if: |
-      always() &&
-      needs.preflight.outputs.has_ssh == 'true' &&
-      needs.build-frontend.result == 'success'
-    timeout-minutes: 15
-    environment:
-      name: staging
-      url: https://${{ secrets.STAGING_DOMAIN || 'staging.alaweal.org' }}
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Download frontend
-        uses: actions/download-artifact@v8
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
         with:
-          name: frontend-build-staging-${{ github.sha }}
-          path: frontend/build/
+          context: .
+          file: ./docker/production/Dockerfile
+          push: true
+          tags: |
+            rehaberp/app:staging
+            rehaberp/app:staging-${{ github.sha }}
 
-      - name: Setup SSH
-        env:
-          STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/rehab-erp-staging
+            export IMAGE_TAG=staging-${{ github.sha }}
+            docker pull rehaberp/app:${IMAGE_TAG}
+            docker run --rm --env-file .env.staging rehaberp/app:${IMAGE_TAG} php artisan migrate --force
+            sed -i "s|rehaberp/app:.*|rehaberp/app:${IMAGE_TAG}|g" docker-compose.staging.yml
+            docker compose -f docker-compose.staging.yml up -d --no-deps app worker
+            docker compose exec app php artisan config:cache
+            docker compose exec app php artisan route:cache
+            docker compose exec app php artisan view:cache
+
+      - name: Register deployment
         run: |
-          mkdir -p ~/.ssh
-          SSH_KEY="${STAGING_SSH_KEY:-$VPS_SSH_KEY}"
-          echo "$SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          HOST="${{ secrets.STAGING_HOST || secrets.VPS_HOST }}"
-          [ -n "$HOST" ] && ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
-          echo "✅ SSH configured"
+          curl -X POST "${{ secrets.APP_URL }}/api/deployments" \
+            -H "X-API-Key: ${{ secrets.DEPLOYMENT_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"version":"${{ github.sha }}","environment":"staging","commit_hash":"${{ github.sha }}","branch":"develop","deployed_by":"GitHub Actions"}'
+        continue-on-error: true
 
-      - name: Deploy backend
-        run: |
-          SSH_TARGET="${{ secrets.STAGING_USER || secrets.VPS_USER || 'root' }}@${{ secrets.STAGING_HOST || secrets.VPS_HOST }}"
-          rsync -avz --delete \
-            --exclude='node_modules' --exclude='.env' \
-            --exclude='logs/' --exclude='uploads/' \
-            --exclude='__tests__/' --exclude='*.test.js' \
-            backend/ $SSH_TARGET:${{ env.APP_DIR }}/backend/ 2>/dev/null || echo "⚠️ Backend rsync skipped"
-
-      - name: Deploy frontend
-        run: |
-          SSH_TARGET="${{ secrets.STAGING_USER || secrets.VPS_USER || 'root' }}@${{ secrets.STAGING_HOST || secrets.VPS_HOST }}"
-          rsync -avz --delete \
-            frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/ 2>/dev/null || echo "⚠️ Frontend rsync skipped"
-
-      - name: Summary
+      - name: Notify Slack
         if: always()
-        run: |
-          echo "## 🧪 Staging Deployment" >> $GITHUB_STEP_SUMMARY
-          echo "| Detail | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|:-------|:------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`${{ needs.preflight.outputs.short_sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Time   | $(date -u '+%Y-%m-%d %H:%M UTC') |" >> $GITHUB_STEP_SUMMARY
-
-  # ─── Job يعمل دائماً ليعطي ملخصاً عند تخطي الـ deploy ──────────
-  skip-notice:
-    name: "ℹ️ Deploy Skipped"
-    runs-on: ubuntu-latest
-    needs: preflight
-    if: needs.preflight.outputs.has_ssh != 'true'
-    steps:
-      - name: Notice
-        run: |
-          echo "## ℹ️ Staging Deploy Skipped" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "No SSH secrets configured. To enable staging deployments:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Go to **Settings → Secrets and variables → Actions**" >> $GITHUB_STEP_SUMMARY
-          echo "2. Add \`VPS_SSH_KEY\` (or \`STAGING_SSH_KEY\`)" >> $GITHUB_STEP_SUMMARY
-          echo "3. Add \`VPS_HOST\` (or \`STAGING_HOST\`)" >> $GITHUB_STEP_SUMMARY
-          echo "4. Add \`VPS_USER\` (or \`STAGING_USER\`)" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Build check still ran above"
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && '✅' || '❌' }} Staging deployment ${{ job.status }}",
+              "attachments": [{
+                "color": "${{ job.status == 'success' && 'good' || 'danger' }}",
+                "fields": [
+                  {"title": "Branch", "value": "${{ github.ref_name }}", "short": true},
+                  {"title": "Commit", "value": "${{ github.sha }}", "short": true}
+                ]
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

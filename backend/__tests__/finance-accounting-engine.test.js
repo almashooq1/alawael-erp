@@ -604,7 +604,7 @@ describe('FinanceCoreService', () => {
 
       await expect(
         FinanceCoreService.createJournalEntry('JE-TEST', 'One line', entries, 'user-1')
-      ).rejects.toThrow('Unbalanced Journal Entry');
+      ).rejects.toThrow('Journal entry must have at least 2 lines');
     });
 
     it('should handle multi-line balanced entries', async () => {

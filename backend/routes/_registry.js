@@ -45,7 +45,8 @@ const financeEnterpriseRoutes = require('../routes/finance.routes.enterprise');
 const financeUltimateRoutes = require('../routes/finance.routes.ultimate');
 const financeEliteRoutes = require('../routes/finance.routes.elite');
 const integrationRoutes = require('../routes/integration.routes.minimal');
-const disabilityRehabilitationRoutes = require('../routes/disability-rehabilitation');
+// NOTE: disability-rehabilitation (old .js) — الإصدار القديم. تمّ استبداله بـ disability-rehabilitation.routes.js
+//       (مثبّت لاحقاً عبر safeMount على /api/ و /api/v1/ معاً).
 const maintenanceRoutes = require('../routes/maintenance');
 const webhooksRoutes = require('../routes/webhooks');
 const assetRoutes = require('../routes/assets');
@@ -311,8 +312,49 @@ const filesModuleRoutes = require('../routes/files-module.routes');
 const inventoryModuleRoutes = require('../routes/inventory-module.routes');
 const qualityModuleRoutes = require('../routes/quality-module.routes');
 
+// ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────────
+const notificationEnhancedRoutes = require('../routes/notification-enhanced.routes');
+const documentEnhancedRoutes = require('../routes/document-enhanced.routes');
+const branchEnhancedRoutes = require('../routes/branch-enhanced.routes');
+const inventoryEnhancedRoutes = require('../routes/inventory-enhanced.routes');
+const qualityEnhancedRoutes = require('../routes/quality-enhanced.routes');
+
 // ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────────
 const reportsAnalyticsModuleRoutes = require('../routes/reports-analytics-module.routes');
+
+// ─── prompt_21: بوابة ولي الأمر المحسّنة — Parent Portal Enhanced (PWA) ───────
+const parentPortalEnhancedRoutes = require('../routes/parent-portal-enhanced.routes');
+
+// ─── prompt_22: نظام التذاكر الشامل — Ticketing & Support System ──────────────
+const ticketingSystemRoutes = require('../routes/ticketing-system.routes');
+
+// ─── prompt_23: سجل التدقيق الشامل المحسّن — Audit Trail Enhanced ─────────────
+const auditTrailEnhancedRoutes = require('../routes/audit-trail-enhanced.routes');
+
+// ─── prompt_24: نظام الإعدادات المركزي — Central Settings System ──────────────
+const centralSettingsRoutes = require('../routes/central-settings.routes');
+
+// ─── prompt_26: وحدة الطب عن بعد — Telehealth & Remote Consultation Module ────
+const telehealthRoutes = require('../routes/telehealth.routes');
+
+// ─── prompt_27: بوابة التحويلات الطبية — Medical Referral Portal ─────────────
+const referralPortalRoutes = require('../routes/referral.routes');
+
+// ─── prompt_28: نظام IoT والأجهزة القابلة للارتداء — IoT & Wearables System ──
+const iotWearablesRoutes = require('../routes/iot-wearables.routes');
+
+// ─── prompt_29: نظام التأهيل بالألعاب المحسّن — Gamification Enhanced System ──
+const gamificationEnhancedRoutes = require('../routes/gamification-enhanced.routes');
+
+// ─── prompt_30: CRM وإدارة علاقات العملاء — CRM Enhanced ─────────────────────
+const crmEnhancedRoutes = require('../routes/crm-enhanced.routes');
+
+// ─── prompt_31: نظام الشكاوى والملاحظات المحسّن — Complaints Enhanced ──────────
+const complaintsEnhancedRoutes = require('../routes/complaints-enhanced.routes');
+
+// ─── prompt_19: CDSS + E-Learning Enhanced ────────────────────────────────
+const cdssRoutes = require('../routes/cdss.routes');
+const elearningEnhancedRoutes = require('../routes/elearning-enhanced.routes');
 
 // ─── Setup & Admin Init (محمي بـ SETUP_SECRET_KEY) ──────────────────────────
 const setupRoutes = require('../routes/setup.routes');
@@ -432,6 +474,9 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'export-import', exportImportRouter);
   dualMount(app, 'exports', exportsRouter);
   dualMount(app, 'student-reports', studentReportsRouter);
+  // NOTE: rehabilitation-programs (rehabPrograms.real.routes) هو الإصدار القديم المبسّط.
+  //       وحدة التأهيل الشاملة الجديدة موجودة على /api/rehab-module (rehab-programs-module.routes).
+  //       كلا المسارين محتفظ به لضمان التوافق مع الكود القديم.
   dualMount(app, 'rehabilitation-programs', rehabProgramsRouter);
   dualMount(app, 'documents-smart', documentsSmartRouter);
 
@@ -655,8 +700,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   logger.info('New frontend-backend integration routes mounted (8 new + 4 dual-mounted)');
 
   // ── Phase 2 Routes ──────────────────────────────────────────────────────
-  // disability-rehabilitation.js → /api/v1 only (different module from .routes.js)
-  app.use('/api/v1/disability-rehabilitation', disabilityRehabilitationRoutes);
   // maintenance, assets, schedules — already dual-mounted above
   dualMount(app, 'webhooks', webhooksRoutes);
   dualMount(app, 'basic-analytics', analyticsRoutes);
@@ -673,14 +716,24 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // Phase 21-28
   safeMount(app, ['/api/phases-21-28', '/api/v1/phases-21-28'], '../routes/phases-21-28.routes');
 
-  // Disability Rehabilitation (/api/ only; /api/v1/ already mounted above via disabilityRehabilitationRoutes)
+  // Disability Rehabilitation (موحّد على /api/ و /api/v1/ معاً)
+  // يستخدم disability-rehabilitation.routes.js (الإصدار الجديد الأكثر اكتمالاً).
+  // الإصدار القديم disability-rehabilitation.js كان مثبّتاً على /api/v1/ فقط، وتمّ توحيده هنا.
   // NOTE: /api/rehabilitation alias removed — frontend uses /api/rehab-plans (rehabilitationPlan.routes)
-  //       and /api/disability-rehabilitation for the older disability-rehabilitation module.
-  safeMount(app, '/api/disability-rehabilitation', '../routes/disability-rehabilitation.routes');
+  //       and /api/disability-rehabilitation for the unified disability-rehabilitation module.
+  safeMount(
+    app,
+    ['/api/disability-rehabilitation', '/api/v1/disability-rehabilitation'],
+    '../routes/disability-rehabilitation.routes'
+  );
 
   // Rehabilitation Services (Phase 5–9: 61 specialized therapy & support services)
-  safeMount(app, '/api/disability-rehab', '../rehabilitation-services/rehabilitation-routes');
-  safeMount(app, '/api/v1/disability-rehab', '../rehabilitation-services/rehabilitation-routes');
+  // تمّ توحيد الـ safeMount المزدوج في استدعاء واحد بمصفوفة مسارات
+  safeMount(
+    app,
+    ['/api/disability-rehab', '/api/v1/disability-rehab'],
+    '../rehabilitation-services/rehabilitation-routes'
+  );
 
   // Phase 17 (namespaced to avoid collisions with analytics/integrations)
   if (process.env.SKIP_PHASE17 === 'true') {
@@ -1607,6 +1660,16 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     '✅ prompt_08 Operational Modules mounted: communication-module (announcements/messages/notifications/contacts — 22+ endpoints), files-module (folders/files/versioning/archive — 18+ endpoints), inventory-module (items/transactions/purchase-orders/stats — 25+ endpoints), quality-module (indicators/measurements/incidents/dashboard — 30+ endpoints)'
   );
 
+  // ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────
+  dualMount(app, 'communication/notifications', notificationEnhancedRoutes);
+  dualMount(app, 'documents-enhanced', documentEnhancedRoutes);
+  dualMount(app, 'branches-enhanced', branchEnhancedRoutes);
+  dualMount(app, 'inventory-enhanced', inventoryEnhancedRoutes);
+  dualMount(app, 'quality-enhanced', qualityEnhancedRoutes);
+  logger.info(
+    '✅ prompt_08 Enhanced Modules mounted: communication/notifications (SMS/WhatsApp/FCM/templates/escalations/broadcasts), documents-enhanced (AES-256/versioning/e-signatures/OCR/sharing/retention), branches-enhanced (settings/rooms/services/transfers/comparison), inventory-enhanced (receive/issue/transfer/PO/assets-depreciation/stock-counts), quality-enhanced (CBAHI/incidents-RCA/complaints/NPS/audits/PDCA/risks — 200+ endpoints)'
+  );
+
   // ─── بوابة ولي الأمر الشاملة — Parent Portal Full API ──────────────────
   safeMount(app, ['/api/parent-portal', '/api/v1/parent-portal'], '../routes/parentPortal.routes');
   logger.info(
@@ -1617,6 +1680,242 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'reports-analytics', reportsAnalyticsModuleRoutes);
   logger.info(
     '✅ prompt_09 Reports & Analytics Module mounted: templates (CRUD), jobs (run/status/download), schedules (CRUD+toggle), analytics (executive/beneficiaries/clinical/financial/hr/operational/quality), built-in reports (9 reports: beneficiary-list/progress/assessments-summary/sessions-log/attendance/financial-summary/hr-headcount/inventory-status/quality-indicators), stats (35+ endpoints)'
+  );
+
+  // ─── prompt_21: بوابة ولي الأمر المحسّنة — Parent Portal Enhanced (PWA) ───
+  dualMount(app, 'parent-portal-enhanced', parentPortalEnhancedRoutes);
+  logger.info(
+    '✅ prompt_21 Parent Portal Enhanced (PWA) mounted: OTP auth + rate-limiting, FCM push notifications, live transport tracking, children/sessions/progress, appointments, invoices, messages, complaints+rating, settings+quiet-hours, admin endpoints (40+ endpoints)'
+  );
+
+  // ─── prompt_22: نظام التذاكر الشامل — Ticketing & Support System ──────────
+  dualMount(app, 'ticketing-system', ticketingSystemRoutes);
+  logger.info(
+    '✅ prompt_22 Ticketing & Support System mounted: CRUD tickets+comments, SLA calc+business-hours, auto-assignment (direct/round-robin/least-busy), escalation rules, dashboard stats, /check-sla cron endpoint, admin SLA-configs+escalation-rules+auto-assignments (50+ endpoints)'
+  );
+
+  // ─── prompt_23: سجل التدقيق الشامل المحسّن — Audit Trail Enhanced ─────────
+  dualMount(app, 'audit-trail-enhanced', auditTrailEnhancedRoutes);
+  logger.info(
+    '✅ prompt_23 Audit Trail Enhanced mounted: advanced search+filters, statistics (by-action/module/user/hourly), for-model history, user-activity, sensitive-access log, login-attempts analysis, export (JSON/10k records), cleanup with dry-run, 3yr/7yr retention policy (20+ endpoints)'
+  );
+
+  // ─── prompt_24: نظام الإعدادات المركزي — Central Settings System ──────────
+  dualMount(app, 'central-settings', centralSettingsRoutes);
+  logger.info(
+    '✅ prompt_24 Central Settings System mounted: public settings, all-groups, group-by-name, bulk-update with validation, file-upload (image/file types), branch-override reset, branch-specific settings, seed 27 defaults across 6 groups (general/appointments/billing/notifications/security/appearance), key lookup (20+ endpoints)'
+  );
+
+  // ─── prompt_26: وحدة الطب عن بعد — Telehealth & Remote Consultation Module ──
+  dualMount(app, 'telehealth', telehealthRoutes);
+  logger.info(
+    '✅ prompt_26 Telehealth Module mounted: consultations (CRUD + start/end/participants/adjust-quality), waiting-room (join/device-test/provider-queue), prescriptions (issue/cancel/verify), availability-slots (CRUD+bulk), remote-monitoring devices+readings, virtual-sessions+whiteboard, recordings, stats — Agora WebRTC + Wasfaty + Sehhaty/Mawid sync (50+ endpoints)'
+  );
+
+  // ─── prompt_27: بوابة التحويلات الطبية — Medical Referral Portal ─────────────
+  dualMount(app, 'referrals', referralPortalRoutes);
+  logger.info(
+    '✅ prompt_27 Medical Referral Portal mounted: facilities (CRUD), referrals (CRUD + review/accept/reject + status-transition + auto-assign + recalculate-priority), communications (outbound email/SMS), documents (upload/download/delete), assessments (upsert), FHIR import (ServiceRequest R4) + integration logs, analytics (by-status/specialty/avg-processing/acceptance-rate) — HL7 FHIR R4 + MOH integration (60+ endpoints)'
+  );
+
+  // ─── prompt_28: نظام IoT والأجهزة القابلة للارتداء — IoT & Wearables System ──
+  dualMount(app, 'iot-wearables', iotWearablesRoutes);
+  logger.info(
+    '✅ prompt_28 IoT & Wearables System mounted: device-types (CRUD), devices (CRUD + assign/return + online status), readings (ingest-single/batch + beneficiary vitals), alerts (list/acknowledge/resolve), alert-rules (CRUD + default thresholds), maintenance (schedule/complete/calibration), vital-baselines (CRUD), beneficiary-devices/vitals, dashboard stats, aggregates — MQTT broker + TimeSeries + anomaly detection (50+ endpoints)'
+  );
+
+  // ─── prompt_29: نظام التأهيل بالألعاب المحسّن — Gamification Enhanced System ──
+  dualMount(app, 'gamification-v2', gamificationEnhancedRoutes);
+  logger.info(
+    '✅ prompt_29 Gamification Enhanced System mounted: profiles (list/get/update), XP/points award, transactions log, badges (CRUD + award + beneficiary-badges + mark-seen), levels (CRUD + seed defaults), challenges (CRUD + join + update-progress + beneficiary-challenges), rehab-games (CRUD + record-session + sessions-by-beneficiary), rewards (CRUD + redeem + redemptions + approve/deliver), leaderboard (get + update), stats, form-options — 10 levels + 16 metric types + daily XP cap + streak tracking (60+ endpoints)'
+  );
+
+  // ─── prompt_30: CRM وإدارة علاقات العملاء — CRM Enhanced ─────────────────────
+  dualMount(app, 'crm-enhanced', crmEnhancedRoutes);
+  logger.info(
+    '✅ prompt_30 CRM Enhanced mounted: leads (CRUD + activity + enroll + pipeline + stats + form-options), partners (CRUD + stats), campaigns (CRUD + stats + launch), segments (CRUD), surveys (CRUD + respond), referral-commissions (CRUD) — Lead scoring 0-100 + auto-assign + multi-channel messaging (SMS/Email/WhatsApp/Push) + NPS/CSAT surveys + B2B partners + referral commissions (60+ endpoints)'
+  );
+
+  // ─── prompt_31: نظام الشكاوى والملاحظات المحسّن — Complaints Enhanced ──────────
+  dualMount(app, 'complaints-enhanced', complaintsEnhancedRoutes);
+  logger.info(
+    '✅ prompt_31 Complaints Enhanced mounted: complaints-v2 (CRUD + status-change + escalate + rate + analytics + public-portal), categories (CRUD), sla-configs (CRUD), feedback (CRUD + respond + stats) — AI sentiment analysis (Arabic keywords) + SLA tracking + 3-level auto-escalation + complaint number generator CMP-YYYYMM-XXXXX + multi-channel intake (70+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبتات 21-31 مُثبّتة بالكامل: بوابة ولي الأمر + نظام التذاكر + سجل التدقيق + الإعدادات المركزي + الطب عن بعد + بوابة التحويلات الطبية + IoT والأجهزة القابلة للارتداء + التأهيل بالألعاب + CRM وإدارة العلاقات + نظام الشكاوى والملاحظات'
+  );
+
+  // ─── prompt_32: نظام دعم القرار السريري — CDSS ────────────────────────────
+  dualMount(app, 'cdss', cdssRoutes);
+  logger.info(
+    '✅ prompt_32 CDSS routes mounted: stats, clinical-rules (CRUD), alerts (list + evaluate + acknowledge/override/resolve), drug-library (CRUD + check-interactions), risk-assessments (CRUD + auto), rehab-suggestions (generate + accept/reject), differential-diagnoses (CRUD + confirm), prescriptions/validate, decision-log — محرك قواعد سريري + تنبيهات تفاعلات الأدوية + تقييم المخاطر الآلي + اقتراح خطط التأهيل + التشخيص التفريقي (30+ endpoints)'
+  );
+
+  // ─── prompt_33: نظام التعلم الإلكتروني والتدريب المحسّن — E-Learning Enhanced ──
+  dualMount(app, 'elearning-enhanced', elearningEnhancedRoutes);
+  logger.info(
+    '✅ prompt_33 E-Learning Enhanced routes mounted: stats, courses (CRUD + enroll + modules CRUD), enrollments (list + detail + certificate download), progress/update (auto-certificate + CPD), quizzes (CRUD + questions CRUD + submit), cpd/records (CRUD + verify + report), compliance (list + assign-mandatory), learning-paths (CRUD), forums (CRUD + replies), trainer-evaluations — SCORM متوافق + شهادات تلقائية + CPD + الامتثال التدريبي + منتديات النقاش (35+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبتات 32-33 مُثبّتة بالكامل: نظام دعم القرار السريري CDSS + نظام التعلم الإلكتروني والتدريب E-Learning Enhanced'
+  );
+
+  // ─── prompt_20: النظام 34 — إدارة الأصول والموارد ────────────────────────────
+  safeMount(
+    app,
+    ['/api/asset-management', '/api/v1/asset-management'],
+    require('./asset-management.routes')
+  );
+  logger.info(
+    '✅ prompt_20 Asset Management routes mounted (System 34): categories (CRUD), assets (CRUD + scan-barcode + stats), depreciation (CRUD + post), work-orders (CRUD + complete), transfers (CRUD + approve/receive/reject), bookings (CRUD + cancel), inventories (CRUD + items + complete), dashboard — إدارة الأصول الثابتة + الإهلاك + الصيانة + النقل بين الفروع + حجز الموارد + الجرد (40+ endpoints)'
+  );
+
+  // ─── prompt_20: النظام 35 — إدارة العقود والاتفاقيات ────────────────────────
+  safeMount(
+    app,
+    ['/api/contract-management', '/api/v1/contract-management'],
+    require('./contract-management.routes')
+  );
+  logger.info(
+    '✅ prompt_20 Contract Management routes mounted (System 35): templates (CRUD), contracts (CRUD + stats + expiring-soon + dashboard), parties (CRUD), approvals (submit + process), amendments (CRUD), negotiations (CRUD + resolve), sign + renew + terminate — إدارة العقود والاتفاقيات + سير الموافقات + التوقيع الرقمي + التجديد التلقائي + الملاحق + التفاوض (45+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبت 20 مُثبّت بالكامل: نظام إدارة الأصول والموارد (34) + نظام إدارة العقود والاتفاقيات (35)'
+  );
+
+  // ─── prompt_21: النظام 36 — لوحة KPIs الذكية ─────────────────────────────
+  safeMount(app, ['/api/smart-kpi', '/api/v1/smart-kpi'], require('./kpi-dashboard.routes'));
+  logger.info(
+    '✅ prompt_21 Smart KPI Dashboard routes mounted (System 36): dashboard, year-over-year, branch-benchmark, calculate, definitions CRUD, categories CRUD, targets, values, alerts (acknowledge), scorecards, reports (generate + download), stats — لوحة KPIs الذكية + حساب المؤشرات + بطاقات الأداء + التنبيهات + التقارير (30+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 37 — الحضور البيومتري ZKTeco ──────────────────────
+  safeMount(
+    app,
+    ['/api/biometric-attendance', '/api/v1/biometric-attendance'],
+    require('./biometric-attendance.routes')
+  );
+  logger.info(
+    '✅ prompt_21 Biometric Attendance routes mounted (System 37 - ZKTeco): devices CRUD (sync/ping/enroll/push-data/health-check), logs (list/manual), daily attendance (list/stats/live-monitor/monthly-report/mobile-checkin/approve), policies CRUD — الحضور البيومتري ZKTeco + المراقبة الحية + تسجيل الموبايل GPS (25+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 37 — إدارة الإجازات ───────────────────────────────
+  safeMount(
+    app,
+    ['/api/leave-management', '/api/v1/leave-management'],
+    require('./leave-requests.routes')
+  );
+  logger.info(
+    '✅ prompt_21 Leave Management routes mounted (System 37): leave requests CRUD (submit/approve/reject/cancel), balance query, balances initialize/update — إدارة الإجازات والاستئذانات + أرصدة الإجازات + نظام العمل السعودي (15+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 37 — جداول الدوام والوقت الإضافي ─────────────────
+  safeMount(app, ['/api/work-shifts', '/api/v1/work-shifts'], require('./work-shifts.routes'));
+  logger.info(
+    '✅ prompt_21 Work Shifts routes mounted (System 37): shifts CRUD, employee assignments (list/assign/current), overtime requests (list/submit/approve/reject/summary) — جداول الدوام + تعيين الموظفين + الوقت الإضافي (20+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 36 — لوحة KPIs الذكية ───────────────────────────────
+  safeMount(
+    app,
+    ['/api/kpi-dashboard', '/api/v1/kpi-dashboard'],
+    require('./kpi-dashboard.routes')
+  );
+  logger.info(
+    '✅ prompt_21 KPI Dashboard routes mounted (System 36): categories CRUD, definitions CRUD, dashboard data, year-over-year comparison, branch benchmark, manual KPI calculation, set targets, values list, alerts (acknowledge), scorecards CRUD+generate, reports, stats — لوحة KPIs الذكية (35+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 36 — تقارير KPI ──────────────────────────────────────
+  safeMount(app, ['/api/kpi-reports', '/api/v1/kpi-reports'], require('./kpi-reports.routes'));
+  logger.info(
+    '✅ prompt_21 KPI Reports routes mounted (System 36): list reports, get report, generate (pdf/excel/powerpoint), download, delete, stats summary — تقارير مؤشرات الأداء (10+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 37 — الحضور البيومتري ZKTeco ─────────────────────────
+  safeMount(
+    app,
+    ['/api/biometric-attendance', '/api/v1/biometric-attendance'],
+    require('./biometric-attendance.routes')
+  );
+  logger.info(
+    '✅ prompt_21 Biometric Attendance routes mounted (System 37): ZKTeco devices CRUD + ping/sync/enroll/push-data/health-check, work shifts CRUD + assign, attendance logs + manual entry, daily attendance + live monitor + monthly report, mobile check-in (GPS geofence), overtime CRUD + approve, policies CRUD, stats — الحضور البيومتري ZKTeco + دوامات + وقت إضافي (50+ endpoints)'
+  );
+
+  // ─── prompt_21: النظام 37 — إدارة الإجازات ──────────────────────────────────
+  safeMount(
+    app,
+    ['/api/leave-requests', '/api/v1/leave-requests'],
+    require('./leave-requests.routes')
+  );
+  logger.info(
+    '✅ prompt_21 Leave Requests routes mounted (System 37): leave requests CRUD, approve, reject, balance check/initialize/all — إدارة الإجازات + الأرصدة + نظام العمل السعودي (15+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبت 21 مُثبّت بالكامل: لوحة KPIs الذكية (36) + الحضور البيومتري ZKTeco + إدارة الإجازات + جداول الدوام (37)'
+  );
+
+  // ─── prompt_22: النظام 38 — بوابة الدفع الذكية ───────────────────────────
+  safeMount(
+    app,
+    ['/api/payment-gateway', '/api/v1/payment-gateway'],
+    require('./payment-gateway.routes')
+  );
+  logger.info(
+    '✅ prompt_22 Payment Gateway routes mounted (System 38): initiate payment (Moyasar/HyperPay/PayTabs/Tap/STC Pay/SADAD/Tabby/Tamara), refund, retry-failed, reconciliation report, webhook (HMAC), transactions CRUD — بوابة الدفع الذكية + ZATCA Phase 2 + محافظ رقمية + أقساط (20+ endpoints)'
+  );
+
+  // ─── prompt_22: النظام 39 — المحفظة الرقمية ونقاط الولاء ────────────────
+  safeMount(
+    app,
+    ['/api/digital-wallet', '/api/v1/digital-wallet'],
+    require('./digital-wallet.routes')
+  );
+  logger.info(
+    '✅ prompt_22 Digital Wallet routes mounted (System 39): wallet CRUD (create/topup/debit/transfer/block/unblock), apply coupon, redeem loyalty points, statement, loyalty history, coupons CRUD — المحفظة الرقمية + نقاط الولاء + كوبونات الخصم (25+ endpoints)'
+  );
+
+  // ─── prompt_22: النظام 40 — التأمين الذكي NPHIES ────────────────────────
+  safeMount(
+    app,
+    ['/api/smart-insurance', '/api/v1/smart-insurance'],
+    require('./smart-insurance.routes')
+  );
+  logger.info(
+    '✅ prompt_22 Smart Insurance routes mounted (System 40): insurance companies CRUD, policies CRUD + eligibility check (NPHIES), claims CRUD + submit + NPHIES status, prior-auth CRUD + request, reconciliation report, expiry alerts, eligibility checks list — التأمين الذكي + NPHIES + CCHI + الموافقة المسبقة (40+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبت 22 مُثبّت بالكامل: بوابة الدفع الذكية (38) + المحفظة الرقمية ونقاط الولاء (39) + التأمين الذكي NPHIES (40)'
+  );
+
+  // ─── prompt_23: النظام 41 — إدارة المتطوعين ─────────────────────────────
+  safeMount(app, ['/api/volunteers', '/api/v1/volunteers'], require('./volunteer.routes'));
+  logger.info(
+    '✅ prompt_23 Volunteer Management routes mounted (System 41): volunteers CRUD + register portal + status update + match-opportunities + mntasati-sync, opportunities CRUD, assignments (check-in/check-out/certificate), training sessions CRUD + enroll, recognitions CRUD — إدارة المتطوعين + التكليفات + التدريب + التقدير (25+ endpoints)'
+  );
+
+  // ─── prompt_23: النظام 42 — الخدمة المجتمعية ────────────────────────────
+  safeMount(
+    app,
+    ['/api/community-service', '/api/v1/community-service'],
+    require('./community-service.routes')
+  );
+  logger.info(
+    '✅ prompt_23 Community Service routes mounted (System 42): programs CRUD, events CRUD + upcoming, partnerships CRUD, resources CRUD + search, referrals CRUD + status update, donations CRUD, impact-report — الخدمة المجتمعية + البرامج + الفعاليات + الشراكات + الإحالات + التبرعات (26+ endpoints)'
+  );
+
+  // ─── prompt_23: النظام 43 — التوظيف الداخلي ─────────────────────────────
+  safeMount(app, ['/api/recruitment', '/api/v1/recruitment'], require('./recruitment.routes'));
+  logger.info(
+    '✅ prompt_23 Internal Recruitment routes mounted (System 43): job postings CRUD + publish/close/apply, ATS applications + status update, interviews schedule/complete, offers create/send/respond (auto-onboarding), onboarding task update, talent-pool CRUD, nitaqat report, cost report — التوظيف الداخلي + ATS + المقابلات + عروض العمل + الإعداد + نطاقات (28+ endpoints)'
+  );
+
+  logger.info(
+    '🎉 البرومبت 23 مُثبّت بالكامل: إدارة المتطوعين (41) + الخدمة المجتمعية (42) + التوظيف الداخلي (43)'
   );
 
   // ── Setup & Admin Init — إعداد أولي (محمي بـ secret key) ──────────────

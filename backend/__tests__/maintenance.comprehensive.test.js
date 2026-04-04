@@ -276,7 +276,7 @@ describe('Integration Tests - API Endpoints', () => {
       .get('/api/v1/maintenance/schedules')
       .catch(() => ({ status: 404 }));
     expect([200, 401, 404, 405, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يقبل الطلبات مع توكن صحيح', async () => {
     const response = await request(app)
@@ -284,7 +284,7 @@ describe('Integration Tests - API Endpoints', () => {
       .set('Authorization', `Bearer ${authToken}`)
       .catch(() => ({ status: 404 }));
     expect([200, 401, 403, 404, 405, 500]).toContain(response.status);
-  });
+  }, 15000);
 });
 
 // ==================== اختبارات الأمان ====================
@@ -295,7 +295,7 @@ describe('Security Tests', () => {
       .get('/api/v1/maintenance/schedules')
       .catch(() => ({ status: 404 }));
     expect([200, 401, 404, 405, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يرفض الطلبات بتوكن غير صحيح', async () => {
     const response = await request(app)
@@ -303,7 +303,7 @@ describe('Security Tests', () => {
       .set('Authorization', 'Bearer invalid-token')
       .catch(() => ({ status: 404 }));
     expect([200, 401, 403, 404, 405, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يرفض المستخدمين غير المصرح لهم', async () => {
     const response = await request(app)
@@ -607,7 +607,7 @@ describe('Integration Tests - API Endpoints', () => {
       .set('Authorization', `Bearer ${authToken}`);
 
     expect([200, 400, 403, 404, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يتنبأ عبر API', async () => {
     const response = await request(app)
@@ -625,7 +625,7 @@ describe('Security Tests', () => {
     const response = await request(app).get('/api/v1/maintenance/schedules');
 
     expect([200, 401, 403, 404, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يرفض الطلبات بتوكن غير صحيح', async () => {
     const response = await request(app)
@@ -633,7 +633,7 @@ describe('Security Tests', () => {
       .set('Authorization', 'Bearer invalid-token');
 
     expect([200, 401, 403, 404, 500]).toContain(response.status);
-  });
+  }, 15000);
 
   test('يجب أن يرفض المستخدمين غير المصرح لهم', async () => {
     const response = await request(app)

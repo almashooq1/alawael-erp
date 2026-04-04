@@ -8,6 +8,7 @@
 'use strict';
 
 const { ObjectId } = require('mongodb');
+const { EXTRA_BENEFICIARIES, mergeWithDefaults } = require('./seed-extensions.config');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper: حساب العمر
@@ -785,10 +786,23 @@ async function seed(connection) {
 
   const col = db.collection('beneficiaries');
 
+  // دمج المستفيدين الافتراضيين مع الإضافيين من seed-extensions.config.js
+  const allBeneficiaries = mergeWithDefaults(
+    COMPREHENSIVE_BENEFICIARIES,
+    EXTRA_BENEFICIARIES,
+    'beneficiaryNumber'
+  );
+
+  if (EXTRA_BENEFICIARIES.length > 0) {
+    console.log(
+      `  ℹ️  إضافة ${EXTRA_BENEFICIARIES.length} مستفيد إضافي من seed-extensions.config.js`
+    );
+  }
+
   let created = 0;
   let skipped = 0;
 
-  for (const ben of COMPREHENSIVE_BENEFICIARIES) {
+  for (const ben of allBeneficiaries) {
     const existing = await col.findOne({
       $or: [
         { beneficiaryNumber: ben.beneficiaryNumber },

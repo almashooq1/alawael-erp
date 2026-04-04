@@ -1,0 +1,16 @@
+[03:15:50] attempt 1:
+  Backend Tests (Node 22) | completed | failure
+  Code Quality (ESLint + Prettier) | completed | success
+  Security Audit | completed | success
+  Docker Build Validation | completed | skipped
+  App Startup Health Check | completed | skipped
+
+=== FINAL RESULT ===
+Traceback (most recent call last):
+  File "c:\Users\x-be\OneDrive\«·„” ‰œ« \04-10-2025\66666\monitor_ci.py", line 28, in <module>
+    print(f'  {icon} {name}: {job["conclusion"]}')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1256.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u274c' in position 2: character maps to <undefined>

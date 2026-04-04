@@ -365,5 +365,122 @@
 
   // Prevent TS from picking up tsconfig.json inside node_modules
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "genieai.telemetry.disable": true
+  "genieai.telemetry.disable": true,
+
+  // ────────────────────────────────────────────────────────────
+  // 🐘 PHP Intelephense - Pest & Laravel Support
+  // ────────────────────────────────────────────────────────────
+
+  // تحديد إصدار PHP
+  "intelephense.environment.phpVersion": "8.2.0",
+
+  // تضمين ملف الـ stubs لدوال Pest و Laravel
+  "intelephense.stubs": [
+    "apache",
+    "bcmath",
+    "bz2",
+    "calendar",
+    "com_dotnet",
+    "Core",
+    "ctype",
+    "curl",
+    "date",
+    "dba",
+    "dom",
+    "enchant",
+    "exif",
+    "FFI",
+    "fileinfo",
+    "filter",
+    "fpm",
+    "ftp",
+    "gd",
+    "gettext",
+    "gmp",
+    "hash",
+    "iconv",
+    "imap",
+    "intl",
+    "json",
+    "ldap",
+    "libxml",
+    "mbstring",
+    "meta",
+    "mysqli",
+    "oci8",
+    "odbc",
+    "openssl",
+    "pcntl",
+    "pcre",
+    "PDO",
+    "pdo_ibm",
+    "pdo_mysql",
+    "pdo_pgsql",
+    "pdo_sqlite",
+    "pgsql",
+    "Phar",
+    "posix",
+    "pspell",
+    "random",
+    "readline",
+    "Reflection",
+    "session",
+    "shmop",
+    "SimpleXML",
+    "snmp",
+    "soap",
+    "sockets",
+    "sodium",
+    "SPL",
+    "sqlite3",
+    "standard",
+    "superglobals",
+    "sysvmsg",
+    "sysvsem",
+    "sysvshm",
+    "tidy",
+    "tokenizer",
+    "xml",
+    "xmlreader",
+    "xmlrpc",
+    "xmlwriter",
+    "xsl",
+    "Zend OPcache",
+    "zip",
+    "zlib"
+  ],
+
+  // استثناء المجلدات الثقيلة من فهرسة PHP
+  "intelephense.files.exclude": [
+    "**/.git/**",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/vendor/composer/**",
+    "**/.history/**",
+    "**/backend/**",
+    "**/frontend/**",
+    "**/mobile/**",
+    "**/intelligent-agent/**",
+    "**/supply-chain-management/**",
+    "**/whatsapp/**",
+    "**/graphql/**",
+    "**/secretary_ai/**",
+    "**/gateway/**",
+    "**/monitoring/**",
+    "**/k8s/**",
+    "**/helm/**",
+    "**/deploy/**"
+  ],
+
+  // تحسين الأداء
+  "intelephense.telemetry.enabled": false,
+  "intelephense.completion.triggerParameterHints": false,
+  "intelephense.references.exclude": ["**/node_modules/**", "**/backend/**"],
+
+  // تعطيل التحقق من الإصدار لتسريع الأداء
+  "intelephense.diagnostics.undefinedFunctions": false,
+  "intelephense.diagnostics.undefinedMethods": false,
+  "intelephense.diagnostics.undefinedClassConstants": false,
+  "intelephense.diagnostics.undefinedTypes": false
 }

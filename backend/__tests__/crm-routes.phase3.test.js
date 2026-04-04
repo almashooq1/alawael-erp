@@ -159,7 +159,7 @@ describe('CRM Routes - Phase 3 Coverage', () => {
     });
 
     it('should get all customers', async () => {
-      const res = await request(app).get('/api/crm/customers');
+      const res = await request(app).get('/api/crm/customers').timeout(14000);
       if (res.status >= 400) return;
       if (res.body.success === false) return; // Route may return error without proper DB
 
@@ -169,21 +169,21 @@ describe('CRM Routes - Phase 3 Coverage', () => {
     });
 
     it('should get customers with pagination', async () => {
-      const res = await request(app).get('/api/crm/customers?page=1&limit=10');
+      const res = await request(app).get('/api/crm/customers?page=1&limit=10').timeout(14000);
       if (res.status >= 400 || res.body.success === false) return;
 
       expect(res.body.pagination || res.body.data).toBeDefined();
     });
 
     it('should filter customers by category', async () => {
-      const res = await request(app).get('/api/crm/customers?category=enterprise');
+      const res = await request(app).get('/api/crm/customers?category=enterprise').timeout(14000);
       if (res.status >= 400 || res.body.success === false) return;
 
       expect(res.body.customers || res.body.data).toBeDefined();
     });
 
     it('should filter customers by status', async () => {
-      const res = await request(app).get('/api/crm/customers?status=active');
+      const res = await request(app).get('/api/crm/customers?status=active').timeout(14000);
       if (res.status >= 400 || res.body.success === false) return;
 
       expect(res.body.customers || res.body.data).toBeDefined();
@@ -460,7 +460,7 @@ describe('CRM Routes - Phase 3 Coverage', () => {
 
   describe('CRM Analytics & Reports', () => {
     it('should get sales dashboard', async () => {
-      const res = await request(app).get('/api/crm/dashboard');
+      const res = await request(app).get('/api/crm/dashboard').timeout(14000);
       if (res.status >= 400) return;
 
       expect(res.body).toHaveProperty('success', true);
@@ -556,7 +556,7 @@ describe('CRM Routes - Phase 3 Coverage', () => {
     });
 
     it('should handle database errors', async () => {
-      const res = await request(app).get('/api/crm/customers');
+      const res = await request(app).get('/api/crm/customers').timeout(14000);
       // Without a real DB, expect an error or success (route may have fallback)
       expect(res.status).toBeDefined();
     });

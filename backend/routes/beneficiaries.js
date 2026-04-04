@@ -17,9 +17,10 @@ const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
-
-// All beneficiary routes require authentication
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+// All beneficiary routes require authentication + branch scope
 router.use(authenticate);
+router.use(requireBranchAccess);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -65,8 +66,8 @@ router.get('/', async (req, res) => {
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
     const skip = (pageNum - 1) * limitNum;
 
-    // Build query
-    const filter = {};
+    // Build query — apply branch scope filter for multi-tenant isolation
+    const filter = { ...branchFilter(req) };
     if (archived === 'true') {
       filter.isArchived = true;
     } else {
@@ -269,6 +270,7 @@ router.get('/at-risk', async (req, res) => {
   try {
     const { limit = 50 } = req.query;
     const riskFilter = {
+      ...branchFilter(req),
       isArchived: { $ne: true },
       status: 'active',
       $or: [
@@ -314,6 +316,7 @@ router.get('/at-risk', async (req, res) => {
 router.get('/cities', async (req, res) => {
   try {
     const cities = await Beneficiary.distinct('address.city', {
+      ...branchFilter(req),
       isArchived: { $ne: true },
       'address.city': { $exists: true, $nin: [null, ''] },
     });
@@ -331,7 +334,7 @@ router.get('/cities', async (req, res) => {
 router.get('/recent', async (req, res) => {
   try {
     const limit = parseInt(req.query.limit, 10) || 10;
-    const data = await Beneficiary.find({ isArchived: { $ne: true } })
+    const data = await Beneficiary.find({ ...branchFilter(req), isArchived: { $ne: true } })
       .select(
         'firstName lastName firstName_ar lastName_ar name category status progress sessions createdAt joinDate disability'
       )
@@ -353,7 +356,7 @@ router.get('/recent', async (req, res) => {
 router.get('/export', async (req, res) => {
   try {
     const { status, category, format = 'csv' } = req.query;
-    const filter = { isArchived: { $ne: true } };
+    const filter = { ...branchFilter(req), isArchived: { $ne: true } };
     if (status) filter.status = status;
     if (category) filter.category = category;
 

@@ -14,6 +14,30 @@ const request = require('supertest');
 const express = require('express');
 const mongoose = require('mongoose');
 
+// ─── Mock Mongoose models so jest.fn() methods are available ─────────────────
+jest.mock('../models/MDTCoordination', () => {
+  const makeMockModel = () => ({
+    find: jest.fn(),
+    findById: jest.fn(),
+    findOne: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    findByIdAndDelete: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    countDocuments: jest.fn(),
+    create: jest.fn(),
+    aggregate: jest.fn(),
+    deleteMany: jest.fn(),
+    updateMany: jest.fn(),
+    distinct: jest.fn(),
+  });
+  return {
+    MDTMeeting: makeMockModel(),
+    UnifiedRehabPlan: makeMockModel(),
+    ReferralTicket: makeMockModel(),
+  };
+});
+
 let app;
 let MDTMeeting, UnifiedRehabPlan, ReferralTicket;
 let testUserId;

@@ -330,18 +330,10 @@ const beneficiarySchema = new mongoose.Schema(
     accountVerificationCode: { type: String, select: false },
 
     // ── Status & Lifecycle ─────────────────────────────────
+    // الحالة — lowercase فقط (ACTIVE/INACTIVE أُزيلت لتجنب التعارض)
     status: {
       type: String,
-      enum: [
-        'active',
-        'inactive',
-        'pending',
-        'transferred',
-        'deceased',
-        'graduated',
-        'ACTIVE',
-        'INACTIVE',
-      ],
+      enum: ['active', 'inactive', 'pending', 'transferred', 'deceased', 'graduated'],
       default: 'active',
     },
     registrationDate: { type: Date, default: Date.now, index: true },
@@ -368,7 +360,11 @@ const beneficiarySchema = new mongoose.Schema(
     satisfactionScore: { type: Number, min: 1, max: 5 },
     lastActivityDate: Date,
 
-    // ── System Fields ──────────────────────────────────────
+    // ── Branch (Multi-tenant) — الحقل الرسمي: branchId ──────────────
+    // branch_id محتفظ به للتوافق مع السجلات القديمة فقط (deprecated alias)
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: true },
+    branch_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', index: false },
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     lastModifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     generalNotes: String,
@@ -394,6 +390,9 @@ beneficiarySchema.index({ email: 1 }, { sparse: true });
 beneficiarySchema.index({ phone: 1 }, { sparse: true });
 beneficiarySchema.index({ category: 1, status: 1 });
 beneficiarySchema.index({ 'disability.type': 1 });
+// فهرس مركّب للفرع — ضروري لعزل بيانات الفروع (multi-tenant)
+beneficiarySchema.index({ branchId: 1, status: 1 });
+beneficiarySchema.index({ branchId: 1, isArchived: 1 });
 
 // ─── Virtuals ───────────────────────────────────────────────────────────────
 

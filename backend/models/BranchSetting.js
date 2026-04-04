@@ -1,105 +1,48 @@
-/**
- * BranchSetting Model — إعدادات الفروع (Override)
- * البرومبت 24: نظام الإعدادات المركزي
- *
- * يسمح لكل فرع بتجاوز الإعدادات العامة بقيم خاصة به.
- * منطق الأولوية: إعداد الفرع > الإعداد العام > القيمة الافتراضية
- */
+'use strict';
 
 const mongoose = require('mongoose');
 
-// ─── Schema لإعداد عام واحد ────────────────────────────────────────────────
-const globalSettingSchema = new mongoose.Schema(
-  {
-    group: {
-      type: String,
-      required: true,
-      enum: [
-        'general', // إعدادات عامة
-        'appointments', // المواعيد
-        'billing', // الفواتير
-        'transport', // النقل
-        'notifications', // الإشعارات
-        'integrations', // التكاملات
-        'hr', // الموارد البشرية
-        'security', // الأمان
-        'appearance', // المظهر
-        'reports', // التقارير
-      ],
-      index: true,
-    },
-    key: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-    },
-    value: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
-    },
-    type: {
-      type: String,
-      enum: ['string', 'integer', 'float', 'boolean', 'json', 'array', 'color', 'image'],
-      default: 'string',
-    },
-    labelAr: { type: String, required: true },
-    labelEn: { type: String, required: true },
-    descriptionAr: { type: String, default: '' },
-    descriptionEn: { type: String, default: '' },
-    validationRules: { type: String, default: null }, // e.g. "required|max:100"
-    options: { type: mongoose.Schema.Types.Mixed, default: null }, // لقوائم الاختيار
-    isPublic: { type: Boolean, default: false }, // يظهر للعميل/ولي الأمر
-    isEncrypted: { type: Boolean, default: false }, // مشفر (API keys)
-    sortOrder: { type: Number, default: 0 },
-  },
-  {
-    timestamps: true,
-    collection: 'global_settings',
-  }
-);
-
-// ─── Schema لإعداد فرع (Override) ─────────────────────────────────────────
 const branchSettingSchema = new mongoose.Schema(
   {
-    branchId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Branch',
-      required: true,
-      index: true,
-    },
-    key: {
+    branchId: { type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true },
+    key: { type: String, required: true, trim: true },
+    value: { type: String, default: null },
+    type: {
       type: String,
-      required: true,
-      trim: true,
+      enum: ['string', 'integer', 'boolean', 'json', 'date'],
+      default: 'string',
     },
-    value: {
-      type: mongoose.Schema.Types.Mixed,
-      default: null,
+    group: {
+      type: String,
+      enum: ['general', 'scheduling', 'billing', 'notifications', 'hr'],
+      default: 'general',
     },
-    overriddenBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
-    overriddenAt: {
-      type: Date,
-      default: Date.now,
-    },
+    description: { type: String, default: null },
   },
-  {
-    timestamps: true,
-    collection: 'branch_settings',
-  }
+  { timestamps: true }
 );
 
-// فهرس مركب لضمان إعداد واحد لكل فرع
 branchSettingSchema.index({ branchId: 1, key: 1 }, { unique: true });
+branchSettingSchema.index({ branchId: 1, group: 1 });
 
-const GlobalSetting =
-  mongoose.models.GlobalSetting || mongoose.model('GlobalSetting', globalSettingSchema);
+/**
+ * الحصول على القيمة بالنوع الصحيح
+ */
+branchSettingSchema.methods.getParsedValue = function () {
+  switch (this.type) {
+    case 'integer':
+      return parseInt(this.value, 10);
+    case 'boolean':
+      return this.value === 'true' || this.value === '1';
+    case 'json':
+      try {
+        return JSON.parse(this.value);
+      } catch {
+        return null;
+      }
+    default:
+      return this.value;
+  }
+};
 
-const BranchSetting =
-  mongoose.models.BranchSetting || mongoose.model('BranchSetting', branchSettingSchema);
-
-module.exports = { GlobalSetting, BranchSetting };
+module.exports = mongoose.model('BranchSetting', branchSettingSchema);

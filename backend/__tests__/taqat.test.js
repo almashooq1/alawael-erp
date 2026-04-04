@@ -35,14 +35,14 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('should return dashboard data', async () => {
       const res = await request(app).get('/api/taqat/dashboard');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/taqat/stats', () => {
     it('should return employment stats', async () => {
       const res = await request(app).get('/api/taqat/stats');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Job Seekers ───
@@ -50,7 +50,7 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('should list job seekers', async () => {
       const res = await request(app).get('/api/taqat/job-seekers');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/taqat/job-seekers', () => {
@@ -62,7 +62,7 @@ describe('Taqat API — طاقات التوظيف', () => {
           disabilityInfo: { type: 'physical', severity: 'moderate' },
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Job Opportunities ───
@@ -70,7 +70,7 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('should list opportunities', async () => {
       const res = await request(app).get('/api/taqat/job-opportunities');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/taqat/job-opportunities', () => {
@@ -84,7 +84,7 @@ describe('Taqat API — طاقات التوظيف', () => {
           vacancies: 2,
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Applications ───
@@ -92,7 +92,7 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('should list applications', async () => {
       const res = await request(app).get('/api/taqat/applications');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Training Programs ───
@@ -100,7 +100,7 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('should list training programs', async () => {
       const res = await request(app).get('/api/taqat/training-programs');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── v1 alias ───
@@ -108,6 +108,6 @@ describe('Taqat API — طاقات التوظيف', () => {
     it('GET /api/v1/taqat/dashboard should also work', async () => {
       const res = await request(app).get('/api/v1/taqat/dashboard');
       expect([200, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 });

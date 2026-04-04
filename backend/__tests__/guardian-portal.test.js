@@ -115,7 +115,7 @@ beforeAll(async () => {
     lastName: TEST_PREFIX,
     mrn: `MRN-${TEST_PREFIX}-1`,
     email: `ben1-${TEST_PREFIX}@test.com`,
-    status: 'ACTIVE',
+    status: 'active',
     dob: new Date('2015-03-20'),
   });
   testBeneficiaryId = beneficiary._id.toString();
@@ -126,7 +126,7 @@ beforeAll(async () => {
     lastName: `ثاني ${TEST_PREFIX}`,
     mrn: `MRN-${TEST_PREFIX}-2`,
     email: `ben2-${TEST_PREFIX}@test.com`,
-    status: 'ACTIVE',
+    status: 'active',
     dob: new Date('2017-08-10'),
   });
   testBeneficiary2Id = beneficiary2._id.toString();
@@ -430,7 +430,7 @@ describe('Guardian Portal — Beneficiaries', () => {
       lastName: `اختبار ${TEST_PREFIX}`,
       mrn: `MRN-${TEST_PREFIX}-LINK`,
       email: `link-${TEST_PREFIX}@test.com`,
-      status: 'ACTIVE',
+      status: 'active',
     });
     const res = await request(app)
       .post('/api/guardian/beneficiaries/link')
@@ -455,7 +455,7 @@ describe('Guardian Portal — Beneficiaries', () => {
       lastName: `ربط ${TEST_PREFIX}`,
       mrn: `MRN-${TEST_PREFIX}-UNLINK`,
       email: `unlink-${TEST_PREFIX}@test.com`,
-      status: 'ACTIVE',
+      status: 'active',
     });
     await Guardian.findByIdAndUpdate(guardianId, { $push: { beneficiaries: tempBen._id } });
 

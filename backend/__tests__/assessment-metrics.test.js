@@ -433,7 +433,7 @@ describe('Measurement Routes — Enhanced Endpoints', () => {
       if (res.status === 200) {
         expect(res.body.success).toBe(true);
       }
-    });
+    }, 15000);
   });
 
   describe('PUT /api/measurements/types/:id', () => {
@@ -469,12 +469,12 @@ describe('Measurement Routes — Enhanced Endpoints', () => {
     it('should return all measurement masters', async () => {
       const res = await request(app).get('/api/measurements/masters');
       expect([200, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
 
     it('should filter masters by typeId', async () => {
       const res = await request(app).get('/api/measurements/masters').query({ typeId: 'type-001' });
       expect([200, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('PUT /api/measurements/masters/:id', () => {

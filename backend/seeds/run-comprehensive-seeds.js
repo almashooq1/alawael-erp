@@ -29,55 +29,12 @@ const benefSeed = require('./comprehensive-beneficiaries.seed');
 const plansSeed = require('./treatment-plans-sessions.seed');
 const invoicesSeed = require('./invoices-payments.seed');
 const vehiclesSeed = require('./vehicles-transport.seed');
+const assessmentsSeed = require('./assessments.seed');
+const ticketsSeed = require('./tickets.seed');
 
-// ─── بيانات الفروع الثلاثة المستخدمة في الـ seeds الشاملة ──────────────────
-const REHAB_BRANCHES = [
-  {
-    branchCode: 'RUH-MAIN',
-    nameAr: 'فرع الرياض الرئيسي',
-    nameEn: 'Riyadh Main Branch',
-    city: 'الرياض',
-    cityEn: 'Riyadh',
-    region: 'riyadh',
-    address: 'طريق الملك فهد، حي الملقا، الرياض',
-    phone: '+966-11-4000001',
-    email: 'riyadh@alawael.com.sa',
-    coordinates: { lat: 24.7136, lng: 46.6753 },
-    capacity: { maxDailySessions: 60, maxBeneficiaries: 150, therapyRooms: 15 },
-    status: 'active',
-    isActive: true,
-  },
-  {
-    branchCode: 'JED-MAIN',
-    nameAr: 'فرع جدة الرئيسي',
-    nameEn: 'Jeddah Main Branch',
-    city: 'جدة',
-    cityEn: 'Jeddah',
-    region: 'makkah',
-    address: 'حي الروضة، شارع فلسطين، جدة',
-    phone: '+966-12-4000002',
-    email: 'jeddah@alawael.com.sa',
-    coordinates: { lat: 21.5433, lng: 39.1728 },
-    capacity: { maxDailySessions: 54, maxBeneficiaries: 130, therapyRooms: 14 },
-    status: 'active',
-    isActive: true,
-  },
-  {
-    branchCode: 'DAM-MAIN',
-    nameAr: 'فرع الدمام الرئيسي',
-    nameEn: 'Dammam Main Branch',
-    city: 'الدمام',
-    cityEn: 'Dammam',
-    region: 'eastern',
-    address: 'حي الشاطئ، طريق الملك عبدالعزيز، الدمام',
-    phone: '+966-13-4000003',
-    email: 'dammam@alawael.com.sa',
-    coordinates: { lat: 26.4207, lng: 50.0888 },
-    capacity: { maxDailySessions: 48, maxBeneficiaries: 120, therapyRooms: 12 },
-    status: 'active',
-    isActive: true,
-  },
-];
+// ─── الفروع — مستوردة من ملف الإعداد القابل للتوسع ────────────────────────────
+// لإضافة فرع جديد: عدّل backend/seeds/branches.config.js فقط
+const { BRANCHES: REHAB_BRANCHES, getActiveBranches } = require('./branches.config');
 
 // ─── إعدادات النظام الأساسية ──────────────────────────────────────────────────
 const SYSTEM_SETTINGS = [
@@ -324,16 +281,18 @@ async function seedRoles(db) {
 }
 
 async function seedBranches(db) {
-  logSection('الفروع الثلاثة');
+  const activeBranches = getActiveBranches();
+  logSection(`الفروع (${activeBranches.length} فرع)`);
   const col = db.collection('branches');
   const now = new Date();
   let created = 0,
     skipped = 0;
 
-  for (const branch of REHAB_BRANCHES) {
+  for (const branch of activeBranches) {
     const exists = await col.findOne({ branchCode: branch.branchCode });
     if (exists) {
       skipped++;
+      log(`  ↳ ${branch.branchCode} (${branch.nameAr}) — موجود مسبقاً`, 'warning');
       continue;
     }
     await col.insertOne({
@@ -343,8 +302,12 @@ async function seedBranches(db) {
       updatedAt: now,
     });
     created++;
+    log(`  ↳ ${branch.branchCode} (${branch.nameAr}) — تم الإنشاء`, 'success');
   }
-  log(`Branches: ${created} created, ${skipped} skipped`, 'success');
+  log(
+    `Branches: ${created} created, ${skipped} skipped (total configured: ${REHAB_BRANCHES.length})`,
+    'success'
+  );
 }
 
 async function seedSettings(db) {
@@ -399,6 +362,8 @@ async function runDown(db) {
   const filter = { 'metadata.isComprehensiveSeed': true };
 
   const collections = [
+    'assessments',
+    'tickets',
     'sessions',
     'treatmentplans',
     'invoices',
@@ -493,20 +458,30 @@ async function main() {
     logSection('المركبات والمسارات');
     await vehiclesSeed.seed(db);
 
+    // 10. التقييمات (15 تقييم أولي + 5 متابعة)
+    logSection('التقييمات السريرية');
+    await assessmentsSeed.seed(db);
+
+    // 11. تذاكر الدعم (20 تذكرة بفئات متنوعة)
+    logSection('تذاكر الدعم الفني والتشغيلي');
+    await ticketsSeed.seed(db);
+
     // ─── ملخص ────────────────────────────────────────────────────────────
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
     logHeader('✅ اكتمل إنشاء البيانات التجريبية بنجاح!');
 
     const summary = [
-      ['الفروع', '3'],
-      ['الأدوار', '7'],
+      ['الفروع', String(getActiveBranches().length)],
+      ['الأدوار', String(ROLES_PERMISSIONS.length)],
       ['إعدادات النظام', `${SYSTEM_SETTINGS.length}+`],
       ['الموظفون', '30+'],
       ['المستفيدون', '50'],
       ['الخطط العلاجية', '20+'],
       ['الجلسات', '100+'],
       ['الفواتير', '30+'],
+      ['التقييمات', '20+'],
+      ['التذاكر', '20+'],
       ['المركبات', '5'],
       ['المسارات', '3'],
     ];

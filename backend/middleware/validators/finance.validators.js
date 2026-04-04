@@ -3,7 +3,7 @@
  * قواعد التحقق للوحدة المالية
  */
 
-const { body } = require('express-validator');
+const { body, query } = require('express-validator');
 const {
   paginationRules,
   dateRangeRules,
@@ -251,7 +251,7 @@ const generateFiscalPeriods = [
 
 const listFiscalPeriods = [
   ...paginationRules,
-  body('fiscalYear')
+  query('fiscalYear')
     .optional()
     .isInt({ min: 2000, max: 2100 })
     .withMessage('السنة المالية غير صحيحة'),

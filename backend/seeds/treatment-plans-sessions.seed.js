@@ -8,6 +8,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const { SESSIONS_CONFIG } = require('./seed-extensions.config');
 
 function generateSessionToken(benNumber, therapistId, date, therapyType) {
   const raw = `${benNumber}-${therapistId}-${date.toISOString().split('T')[0]}-${therapyType}-${Date.now()}-${Math.random()}`;
@@ -212,8 +213,19 @@ async function seed(connection) {
   let sessionsCreated = 0;
   const now = new Date();
 
-  // تاريخ بدء الجلسات (الشهر الماضي)
-  const sessionStartDate = addDays(now, -30);
+  // ── استخدام SESSIONS_CONFIG لضبط الجلسات ──────────────────────────
+  const daysBack = Math.round(SESSIONS_CONFIG.monthsBack * 30.44);
+  const sessionStartDate = addDays(now, -daysBack);
+  const attendanceThreshold = SESSIONS_CONFIG.attendanceRate * 100;
+  const excusedThreshold =
+    attendanceThreshold + (100 - attendanceThreshold) * SESSIONS_CONFIG.excusedAbsenceRate;
+  const sessionDuration = SESSIONS_CONFIG.defaultDurationMinutes;
+  const workDays = SESSIONS_CONFIG.workDays; // [0,1,2,3,4] = الأحد-الخميس
+  const maxPerWeek = SESSIONS_CONFIG.maxSessionsPerWeekPerBeneficiary;
+
+  console.log(
+    `  ℹ️  إنشاء جلسات: ${SESSIONS_CONFIG.monthsBack} أشهر | حضور ${Math.round(attendanceThreshold)}% | مدة ${sessionDuration} د`
+  );
 
   for (const ben of activeBeneficiaries) {
     const therapyTypes = THERAPY_BY_DISABILITY[ben.primaryDisability] || ['behavior_therapy'];
@@ -234,8 +246,10 @@ async function seed(connection) {
       // إنشاء الخطة العلاجية
       const startDate = addDays(ben.enrollmentDate || now, 7);
       const endDate = addDays(startDate, 270); // 9 أشهر
-      const sessionsPerWeek =
+      // الحد الأقصى للجلسات الأسبوعية من SESSIONS_CONFIG
+      const rawPerWeek =
         therapyType === 'behavior_therapy' ? 4 : therapyType === 'speech_therapy' ? 3 : 2;
+      const sessionsPerWeek = Math.min(rawPerWeek, maxPerWeek);
 
       const plan = {
         beneficiary: {
@@ -251,7 +265,7 @@ async function seed(connection) {
         startDate,
         endDate,
         sessionsPerWeek,
-        sessionDurationMinutes: 45,
+        sessionDurationMinutes: sessionDuration,
         status: 'active',
         goals: generateGoals(therapyType),
         approvedBy: `MGR-${ben.branchCode.split('-')[0]}-001`,
@@ -264,15 +278,15 @@ async function seed(connection) {
       const planResult = await plansCol.insertOne(plan);
       plansCreated++;
 
-      // إنشاء الجلسات للشهر الماضي
+      // إنشاء الجلسات حسب SESSIONS_CONFIG.monthsBack
       const sessionDays = getSessionDays(sessionsPerWeek);
       let currentDate = new Date(sessionStartDate);
 
       while (currentDate <= now) {
         const dayOfWeek = currentDate.getDay();
 
-        // تخطي الجمعة (5) والسبت (6)
-        if (dayOfWeek === 5 || dayOfWeek === 6) {
+        // تخطي أيام العطلة (ما ليس في workDays)
+        if (!workDays.includes(dayOfWeek)) {
           currentDate = addDays(currentDate, 1);
           continue;
         }
@@ -282,18 +296,18 @@ async function seed(connection) {
           continue;
         }
 
-        // تحديد حالة الجلسة: 85% حضور، 10% غياب بعذر، 5% غياب بدون عذر
+        // تحديد حالة الجلسة حسب SESSIONS_CONFIG
         const rand = Math.random() * 100;
         let status, attendanceStatus, notesAr, notesEn;
 
-        if (rand <= 85) {
+        if (rand <= attendanceThreshold) {
           status = 'completed';
           attendanceStatus = 'present';
           const noteSet = SESSION_NOTES[therapyType] || SESSION_NOTES.behavior_therapy;
           const note = pickRandom(noteSet);
           notesAr = note.ar;
           notesEn = note.en;
-        } else if (rand <= 95) {
+        } else if (rand <= excusedThreshold) {
           status = 'cancelled';
           attendanceStatus = 'absent_excused';
           notesAr = pickRandom(ABSENCE_REASONS);
@@ -308,7 +322,7 @@ async function seed(connection) {
         const timeSlots = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
         const startTime = pickRandom(timeSlots);
         const [sh, sm] = startTime.split(':').map(Number);
-        const endMinutes = sh * 60 + sm + 45;
+        const endMinutes = sh * 60 + sm + sessionDuration;
         const endTime = `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}`;
 
         await sessionsCol.insertOne({
@@ -324,7 +338,7 @@ async function seed(connection) {
           sessionDate: new Date(currentDate),
           startTime,
           endTime,
-          durationMinutes: 45,
+          durationMinutes: sessionDuration,
           sessionType: therapyType,
           status,
           attendanceStatus,

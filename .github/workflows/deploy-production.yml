@@ -1,0 +1,123 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'الإصدار المراد نشره (مثال: v1.5.0)'
+        required: true
+      reason:
+        description: 'سبب النشر'
+        required: true
+
+jobs:
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist --no-interaction --no-dev --optimize-autoloader
+          npm ci
+
+      - name: Build production assets
+        run: npm run build
+        env:
+          VITE_APP_ENV: production
+
+      - name: Pre-deployment backup
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/rehab-erp
+            docker compose exec app php artisan backup:run --only-db
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push production Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            rehaberp/app:latest
+            rehaberp/app:${{ github.ref_name }}
+
+      - name: Zero-downtime deployment
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/rehab-erp
+            export NEW_VERSION=${{ github.ref_name }}
+            CURRENT=$(docker ps --format '{{.Names}}' | grep -c "rehab_app_blue" || echo 0)
+            if [ "$CURRENT" -gt 0 ]; then
+              NEW_COLOR="green"; OLD_COLOR="blue"
+            else
+              NEW_COLOR="blue"; OLD_COLOR="green"
+            fi
+            echo "Deploying to $NEW_COLOR, current is $OLD_COLOR"
+            docker pull rehaberp/app:${NEW_VERSION}
+            docker run --rm --env-file .env rehaberp/app:${NEW_VERSION} php artisan migrate --force
+            docker run -d --name rehab_app_${NEW_COLOR} \
+              --env-file .env \
+              --network rehab-network \
+              rehaberp/app:${NEW_VERSION}
+            sleep 10
+            docker exec rehab_app_${NEW_COLOR} php artisan health:check || true
+            docker exec rehab_nginx sh -c "sed -i 's|rehab_app_${OLD_COLOR}|rehab_app_${NEW_COLOR}|g' /etc/nginx/nginx.conf && nginx -s reload"
+            sleep 5
+            docker stop rehab_app_${OLD_COLOR} 2>/dev/null || true
+            docker rm rehab_app_${OLD_COLOR} 2>/dev/null || true
+            echo "Deployment complete: ${NEW_VERSION} on ${NEW_COLOR}"
+
+      - name: Register production deployment
+        if: success()
+        run: |
+          curl -X POST "${{ secrets.PROD_APP_URL }}/api/deployments" \
+            -H "X-API-Key: ${{ secrets.DEPLOYMENT_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"version":"${{ github.ref_name }}","environment":"production","commit_hash":"${{ github.sha }}","deployed_by":"GitHub Actions","release_notes":"${{ github.event.inputs.reason || github.event.head_commit.message }}"}'
+        continue-on-error: true
+
+      - name: Notify Slack on success
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Production deployment succeeded: ${{ github.ref_name }}",
+              "attachments": [{"color": "good", "fields": [{"title": "Version", "value": "${{ github.ref_name }}", "short": true}]}]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true
+
+      - name: Notify Slack on failure
+        if: failure()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "❌ Production deployment FAILED: ${{ github.ref_name }}",
+              "attachments": [{"color": "danger", "fields": [{"title": "Version", "value": "${{ github.ref_name }}", "short": true}]}]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        continue-on-error: true

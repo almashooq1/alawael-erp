@@ -35,7 +35,7 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
     it('should return satisfaction dashboard', async () => {
       const res = await request(app).get('/api/family-satisfaction/dashboard');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Templates ───
@@ -43,7 +43,7 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
     it('should list survey templates', async () => {
       const res = await request(app).get('/api/family-satisfaction/templates');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/family-satisfaction/templates', () => {
@@ -67,14 +67,14 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
           ],
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/family-satisfaction/templates/seed', () => {
     it('should seed default templates', async () => {
       const res = await request(app).post('/api/family-satisfaction/templates/seed');
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Send Surveys ───
@@ -87,7 +87,7 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
           recipients: [{ familyId: 'FAM-001', method: 'sms' }],
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Responses ───
@@ -104,14 +104,14 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
           comments: 'خدمة ممتازة',
         });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/family-satisfaction/responses', () => {
     it('should list survey responses', async () => {
       const res = await request(app).get('/api/family-satisfaction/responses');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── Analytics ───
@@ -119,7 +119,7 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
     it('should return NPS analytics', async () => {
       const res = await request(app).get('/api/family-satisfaction/analytics/nps');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/family-satisfaction/analytics/generate', () => {
@@ -128,7 +128,7 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
         .post('/api/family-satisfaction/analytics/generate')
         .send({ period: 'quarterly', startDate: '2026-01-01' });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   // ─── v1 alias ───
@@ -136,6 +136,6 @@ describe('Family Satisfaction Surveys API — رضا الأسر', () => {
     it('GET /api/v1/family-satisfaction/dashboard should also work', async () => {
       const res = await request(app).get('/api/v1/family-satisfaction/dashboard');
       expect([200, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 });

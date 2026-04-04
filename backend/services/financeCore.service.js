@@ -22,15 +22,16 @@ class FinanceCoreService {
   static async createJournalEntry(reference, description, entries, userId) {
     // entries: [{ accountId: '...', account: 'Cash', debit: 100, credit: 0 }]
 
+    // التحقق من عدد السطور أولاً
+    if (!entries || entries.length < 2) {
+      throw new Error('Journal entry must have at least 2 lines');
+    }
+
     const totalDebit = entries.reduce((sum, e) => sum + (e.debit || 0), 0);
     const totalCredit = entries.reduce((sum, e) => sum + (e.credit || 0), 0);
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
       throw new Error(`Unbalanced Journal Entry. Debit: ${totalDebit}, Credit: ${totalCredit}`);
-    }
-
-    if (!entries || entries.length < 2) {
-      throw new Error('Journal entry must have at least 2 lines');
     }
 
     // Build lines array with proper schema mapping

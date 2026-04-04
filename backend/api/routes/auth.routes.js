@@ -77,8 +77,8 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       });
     }
 
-    // Hash password before creating user
-    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    // Hash password before creating user (cost factor 12 per security audit)
+    const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user — role is always 'user'; admin roles must be assigned by an admin
@@ -549,8 +549,8 @@ router.post(
         });
       }
 
-      // Hash new password before saving
-      const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+      // Hash new password before saving (cost factor 12 per security audit)
+      const salt = await bcrypt.genSalt(12);
       user.password = await bcrypt.hash(newPassword, salt);
       // Increment tokenVersion to invalidate all existing tokens for this user
       user.tokenVersion = (user.tokenVersion || 0) + 1;
@@ -699,8 +699,8 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
       return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
     }
 
-    // Hash and save new password
-    const salt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    // Hash and save new password (cost factor 12 per security audit)
+    const salt = await bcrypt.genSalt(12);
     user.password = await bcrypt.hash(newPassword, salt);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;

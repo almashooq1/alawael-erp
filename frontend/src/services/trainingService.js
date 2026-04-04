@@ -270,11 +270,13 @@ export const MOCK_CERTIFICATIONS = Array.from({ length: 12 }, (_, i) => ({
   _id: `cert-${String(i + 1).padStart(3, '0')}`,
   employeeName: _employees[i % _employees.length],
   programTitle: MOCK_PROGRAMS[i % MOCK_PROGRAMS.length].title,
+  certificationName: MOCK_PROGRAMS[i % MOCK_PROGRAMS.length].title, // alias for TrainingReports.js
   issueDate: new Date(2026, randInt(0, 3), randInt(1, 28)).toISOString(),
   expiryDate: new Date(2028, randInt(0, 11), randInt(1, 28)).toISOString(),
   certNumber: `CERT-${2026}-${String(i + 1).padStart(4, '0')}`,
   grade: pick(['ممتاز', 'جيد جداً', 'جيد', 'مقبول']),
   status: pick(['سارية', 'منتهية', 'ملغية']),
+  type: pick(['مهنية', 'أكاديمية', 'تقنية', 'سلامة وصحة']),
 }));
 
 export const MOCK_TRAINING_DASHBOARD = {

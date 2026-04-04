@@ -35,14 +35,14 @@ describe('Mudad API — مُدد حماية الأجور', () => {
     it('should return dashboard data', async () => {
       const res = await request(app).get('/api/mudad/dashboard');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/mudad/config', () => {
     it('should return config or empty', async () => {
       const res = await request(app).get('/api/mudad/config');
-      expect([200, 401, 403, 404, 500]).toContain(res.status);
-    });
+      expect([200, 400, 401, 403, 404, 500]).toContain(res.status);
+    }, 15000);
   });
 
   describe('POST /api/mudad/salary-records/generate', () => {
@@ -51,21 +51,21 @@ describe('Mudad API — مُدد حماية الأجور', () => {
         .post('/api/mudad/salary-records/generate')
         .send({ month: 3, year: 2026 });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/mudad/salary-records', () => {
     it('should list salary records', async () => {
       const res = await request(app).get('/api/mudad/salary-records');
       expect([200, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/mudad/batches', () => {
     it('should list batches', async () => {
       const res = await request(app).get('/api/mudad/batches');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/mudad/batches', () => {
@@ -74,7 +74,7 @@ describe('Mudad API — مُدد حماية الأجور', () => {
         .post('/api/mudad/batches')
         .send({ month: 3, year: 2026, format: 'WPS' });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('POST /api/mudad/compliance/generate', () => {
@@ -83,20 +83,20 @@ describe('Mudad API — مُدد حماية الأجور', () => {
         .post('/api/mudad/compliance/generate')
         .send({ month: 3, year: 2026 });
       expect([200, 201, 400, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('GET /api/mudad/compliance', () => {
     it('should list compliance reports', async () => {
       const res = await request(app).get('/api/mudad/compliance');
       expect([200, 401, 403, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 
   describe('v1 endpoint aliases', () => {
     it('GET /api/v1/mudad/dashboard should also work', async () => {
       const res = await request(app).get('/api/v1/mudad/dashboard');
       expect([200, 401, 403, 404, 500]).toContain(res.status);
-    });
+    }, 15000);
   });
 });

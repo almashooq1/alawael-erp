@@ -169,6 +169,85 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Report Scheduler initialization skipped:', err.message);
   }
 
+  // Initialize KPI & Attendance Scheduler (prompt_21 — Systems 36 & 37)
+  try {
+    const { startKpiAttendanceScheduler } = require('./scheduler/kpi-attendance.scheduler');
+    startKpiAttendanceScheduler();
+    logger.info(
+      '📊 KPI & Attendance Scheduler ready (7 jobs: KPI daily/monthly/alerts + ZKTeco sync + attendance daily/absence-alerts/overtime)'
+    );
+  } catch (err) {
+    logger.info('KPI & Attendance Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Payment Gateway Scheduler (prompt_22 — System 38)
+  try {
+    const { register: registerPaymentScheduler } = require('./scheduler/payment-gateway.scheduler');
+    registerPaymentScheduler();
+    logger.info(
+      '💳 Payment Gateway Scheduler ready (3 jobs: retry-failed-payments every 15min + ZATCA daily 02:00 + expire-old-transactions daily 01:30)'
+    );
+  } catch (err) {
+    logger.info('Payment Gateway Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Digital Wallet Scheduler (prompt_22 — System 39)
+  try {
+    const { register: registerWalletScheduler } = require('./scheduler/wallet.scheduler');
+    registerWalletScheduler();
+    logger.info(
+      '👛 Digital Wallet Scheduler ready (2 jobs: expire-loyalty-points daily 01:00 + low-balance-alerts daily 09:00)'
+    );
+  } catch (err) {
+    logger.info('Digital Wallet Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Smart Insurance Scheduler (prompt_22 — System 40)
+  try {
+    const {
+      register: registerInsuranceScheduler,
+    } = require('./scheduler/smart-insurance.scheduler');
+    registerInsuranceScheduler();
+    logger.info(
+      '🏥 Smart Insurance Scheduler ready (4 jobs: expiry-alerts daily 08:00 + pending-claims every 30min + sync-eligibility weekly Mon 03:00 + expire-policies daily 00:30)'
+    );
+  } catch (err) {
+    logger.info('Smart Insurance Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Volunteer Management Scheduler (prompt_23 — System 41)
+  try {
+    const { initVolunteerScheduler } = require('./scheduler/volunteer.scheduler');
+    initVolunteerScheduler();
+    logger.info(
+      '🤝 Volunteer Management Scheduler ready (3 jobs: monthly-report 1st of month 09:00 + sync-mntasati weekly Sun 03:00 + close-past-opportunities daily 01:00)'
+    );
+  } catch (err) {
+    logger.info('Volunteer Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Community Service Scheduler (prompt_23 — System 42)
+  try {
+    const { initCommunityServiceScheduler } = require('./scheduler/community-service.scheduler');
+    initCommunityServiceScheduler();
+    logger.info(
+      '🌍 Community Service Scheduler ready (3 jobs: events-reminder daily 08:00 + csr-report last day of month 23:00 + referrals-followup daily 09:00)'
+    );
+  } catch (err) {
+    logger.info('Community Service Scheduler initialization skipped:', err.message);
+  }
+
+  // Initialize Internal Recruitment Scheduler (prompt_23 — System 43)
+  try {
+    const { initRecruitmentScheduler } = require('./scheduler/recruitment.scheduler');
+    initRecruitmentScheduler();
+    logger.info(
+      '💼 Internal Recruitment Scheduler ready (4 jobs: close-expired-postings daily 00:30 + interview-reminders daily 07:30 + expire-offers daily 01:00 + nitaqat-report 1st of month 09:00)'
+    );
+  } catch (err) {
+    logger.info('Recruitment Scheduler initialization skipped:', err.message);
+  }
+
   // Schedule log cleanup — daily at startup, then every 24h
   try {
     const { cleanupOldLogs } = require('./config/logging.advanced');
@@ -208,9 +287,19 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
   if (process.env.NODE_ENV === 'production') process.exit(1);
 });
 
-// NOTE: unhandledRejection / uncaughtException handlers are registered
-// centrally in errors/errorHandler.js (called from app.js).
-// Do NOT add duplicate handlers here — they cause race conditions in PM2 cluster mode.
+// Process-level error handlers (safety net)
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Do NOT exit in cluster mode — let PM2 restart gracefully
+});
+
+process.on('uncaughtException', err => {
+  logger.error('Uncaught Exception:', err);
+  // Exit for truly unrecoverable errors
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
+});
 
 // --- Graceful Shutdown ---
 const { setupGracefulShutdown } = require('./utils/gracefulShutdown');

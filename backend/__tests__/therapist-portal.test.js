@@ -90,7 +90,7 @@ beforeAll(async () => {
     firstName: 'مستفيد',
     lastName: TEST_PREFIX,
     mrn: `MRN-${TEST_PREFIX}`,
-    status: 'ACTIVE',
+    status: 'active',
     dob: new Date('2010-05-15'),
     gender: 'male',
   });
@@ -178,6 +178,7 @@ beforeAll(async () => {
   // 6. Therapy program (needed by TherapeuticPlan)
   const program = await TherapyProgram.create({
     name: `برنامج تأهيلي ${TEST_PREFIX}`,
+    code: `PRG-${TEST_PREFIX}`,
   });
 
   // 7. Therapeutic plan

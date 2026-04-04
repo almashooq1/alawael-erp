@@ -16,7 +16,15 @@
 const logger = require('../utils/logger');
 
 // الأدوار التي تملك صلاحية رؤية جميع الفروع
-const CROSS_BRANCH_ROLES = ['super_admin', 'hq_super_admin', 'hq_admin', 'ceo', 'admin'];
+// ملاحظة: 'super-admin' مضاف لدعم أدوار نظام التأهيل (rehab-roles.js)
+const CROSS_BRANCH_ROLES = [
+  'super_admin',
+  'hq_super_admin',
+  'hq_admin',
+  'ceo',
+  'admin',
+  'super-admin',
+];
 
 /**
  * requireBranchAccess

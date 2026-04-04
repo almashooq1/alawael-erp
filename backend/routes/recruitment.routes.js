@@ -1,454 +1,729 @@
 /**
- * Recruitment & Talent Acquisition Routes — مسارات التوظيف والاستقطاب
+ * Recruitment Routes — System 43
+ * نظام التوظيف الداخلي
  *
  * Endpoints:
- *   /api/recruitment/jobs          — Job postings CRUD
- *   /api/recruitment/applications  — Applications pipeline
- *   /api/recruitment/interviews    — Interview scheduling
- *   /api/recruitment/dashboard     — Recruitment dashboard
+ *   GET    /api/recruitment/stats
+ *   GET    /api/recruitment/postings
+ *   POST   /api/recruitment/postings
+ *   GET    /api/recruitment/postings/:id
+ *   PUT    /api/recruitment/postings/:id
+ *   DELETE /api/recruitment/postings/:id
+ *   POST   /api/recruitment/postings/:id/publish
+ *   POST   /api/recruitment/postings/:id/close
+ *   POST   /api/recruitment/postings/:id/apply
+ *   GET    /api/recruitment/applications
+ *   GET    /api/recruitment/applications/:id
+ *   PATCH  /api/recruitment/applications/:id/status
+ *   POST   /api/recruitment/applications/:id/interview
+ *   POST   /api/recruitment/applications/:id/offer
+ *   GET    /api/recruitment/interviews
+ *   PATCH  /api/recruitment/interviews/:id/complete
+ *   GET    /api/recruitment/offers
+ *   POST   /api/recruitment/offers/:id/send
+ *   PATCH  /api/recruitment/offers/:id/respond
+ *   GET    /api/recruitment/onboarding
+ *   PATCH  /api/recruitment/onboarding/:id/task
+ *   GET    /api/recruitment/talent-pool
+ *   POST   /api/recruitment/talent-pool
+ *   GET    /api/recruitment/reports/nitaqat
+ *   GET    /api/recruitment/reports/cost
  */
+
+'use strict';
 
 const express = require('express');
 const router = express.Router();
-const { JobPosting, JobApplication, Interview } = require('../models/recruitment.model');
-const { authenticate } = require('../middleware/auth');
-const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
-const { safeError } = require('../utils/safeError');
+const { v4: uuidv4 } = require('uuid');
 
-// ── Auth: all recruitment routes require authentication ──────────────────
-router.use(authenticate);
+// Models
+const JobPosting = require('../models/JobPosting');
+const JobApplication = require('../models/JobApplication');
+const RecruitmentInterview = require('../models/RecruitmentInterview');
+const JobOffer = require('../models/JobOffer');
+const OnboardingChecklist = require('../models/OnboardingChecklist');
+const TalentPool = require('../models/TalentPool');
 
-// ═══════════════════════════════════════════════════════════════════════════
-// JOB POSTINGS — الوظائف
-// ═══════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+const ok = (res, data, status = 200) => res.status(status).json({ success: true, ...data });
+const fail = (res, msg, status = 400) => res.status(status).json({ success: false, message: msg });
 
-router.get('/jobs', async (req, res) => {
+const paginate = (page, limit) => ({
+  skip: (parseInt(page) - 1) * parseInt(limit),
+  limit: parseInt(limit),
+});
+
+const DEFAULT_ONBOARDING_TASKS = [
+  { taskId: 1, title: 'استلام الهوية الوظيفية', status: 'pending', responsible: 'hr' },
+  { taskId: 2, title: 'توقيع عقد العمل', status: 'pending', responsible: 'hr' },
+  { taskId: 3, title: 'إعداد بيانات الرواتب', status: 'pending', responsible: 'payroll' },
+  { taskId: 4, title: 'إنشاء حساب النظام', status: 'pending', responsible: 'it' },
+  { taskId: 5, title: 'جولة تعريفية بالمركز', status: 'pending', responsible: 'manager' },
+  { taskId: 6, title: 'التدريب التعريفي', status: 'pending', responsible: 'hr' },
+  { taskId: 7, title: 'مراجعة السياسات والإجراءات', status: 'pending', responsible: 'employee' },
+  { taskId: 8, title: 'إتمام تدريب السلامة', status: 'pending', responsible: 'employee' },
+];
+
+// ─────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────
+router.get('/stats', async (req, res) => {
   try {
-    const { status, department, type, level, search, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
-    if (status) filter.status = status;
-    if (department) filter.department = department;
-    if (type) filter.type = type;
-    if (level) filter.level = level;
-    if (search) {
-      filter.$or = [
-        { 'title.ar': { $regex: escapeRegex(search), $options: 'i' } },
-        { 'title.en': { $regex: escapeRegex(search), $options: 'i' } },
-        { description: { $regex: escapeRegex(search), $options: 'i' } },
-      ];
-    }
+    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    const filter = branchId ? { branchId } : {};
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(now.getDate() - now.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
 
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [jobs, total] = await Promise.all([
-      JobPosting.find(filter)
-        .populate('hiringManager', 'name')
-        .populate('recruiter', 'name')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(parseInt(limit, 10))
-        .lean(),
-      JobPosting.countDocuments(filter),
+    const [openJobs, newApps, weekInterviews, sentOffers] = await Promise.all([
+      JobPosting.countDocuments({ ...filter, status: 'published' }),
+      JobApplication.countDocuments({ ...filter, status: 'received' }),
+      RecruitmentInterview.countDocuments({
+        ...filter,
+        scheduledAt: { $gte: weekStart, $lt: weekEnd },
+        status: 'scheduled',
+      }),
+      JobOffer.countDocuments({ ...filter, status: 'sent' }),
     ]);
 
-    res.json({
-      success: true,
-      data: jobs,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
+    ok(res, {
+      data: {
+        openJobs: { title: 'وظائف مفتوحة', value: openJobs, icon: 'briefcase' },
+        applications: { title: 'طلبات جديدة', value: newApps, icon: 'document' },
+        interviews: { title: 'مقابلات هذا الأسبوع', value: weekInterviews, icon: 'calendar' },
+        offersent: { title: 'عروض مُرسلة', value: sentOffers, icon: 'mail' },
       },
     });
-  } catch (error) {
-    logger.error('[Recruitment] Jobs list error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.get('/jobs/:id', async (req, res) => {
+// ─────────────────────────────────────────────
+// JOB POSTINGS CRUD
+// ─────────────────────────────────────────────
+router.get('/postings', async (req, res) => {
   try {
-    const job = await JobPosting.findById(req.params.id)
-      .populate('hiringManager', 'name email')
-      .populate('recruiter', 'name email')
-      .lean();
-    if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
-    res.json({ success: true, data: job });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    const {
+      search,
+      status,
+      department,
+      employmentType,
+      branchId,
+      page = 1,
+      limit = 15,
+    } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    if (department) filter.department = new RegExp(department, 'i');
+    if (employmentType) filter.employmentType = employmentType;
+    if (search) {
+      filter.$or = [{ title: new RegExp(search, 'i') }, { titleAr: new RegExp(search, 'i') }];
+    }
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
+      JobPosting.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }).lean(),
+      JobPosting.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.post('/jobs', async (req, res) => {
+router.post('/postings', async (req, res) => {
   try {
-    const job = await JobPosting.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: job });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const required = [
+      'title',
+      'titleAr',
+      'employmentType',
+      'workLocation',
+      'experienceLevel',
+      'applicationDeadline',
+    ];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+    const doc = await JobPosting.create({ ...req.body, uuid: uuidv4() });
+    ok(res, { data: doc, message: 'تم إنشاء إعلان الوظيفة بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
   }
 });
 
-router.put('/jobs/:id', async (req, res) => {
+router.get('/postings/:id', async (req, res) => {
   try {
-    const job = await JobPosting.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await JobPosting.findById(req.params.id).lean();
+    if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
+    ok(res, { data: doc });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+router.put('/postings/:id', async (req, res) => {
+  try {
+    const doc = await JobPosting.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
-    if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
-    res.json({ success: true, data: job });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
+    ok(res, { data: doc, message: 'تم التحديث بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 400);
   }
 });
 
-router.patch('/jobs/:id/publish', async (req, res) => {
+router.delete('/postings/:id', async (req, res) => {
   try {
-    const job = await JobPosting.findByIdAndUpdate(
+    const doc = await JobPosting.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
+    if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
+    ok(res, { message: 'تم الحذف بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// نشر الوظيفة
+router.post('/postings/:id/publish', async (req, res) => {
+  try {
+    const doc = await JobPosting.findByIdAndUpdate(
       req.params.id,
-      { status: 'open', publishDate: new Date() },
+      { status: 'published', publishedAt: new Date() },
       { new: true }
     );
-    if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
-    res.json({ success: true, data: job, message: 'تم نشر الوظيفة' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
+    // TODO: مزامنة مع منصات التوظيف (Jadarat, Taqat, LinkedIn)
+    ok(res, { data: doc, message: 'تم نشر الوظيفة بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.patch('/jobs/:id/close', async (req, res) => {
+// إغلاق الوظيفة
+router.post('/postings/:id/close', async (req, res) => {
   try {
-    const job = await JobPosting.findByIdAndUpdate(
+    const doc = await JobPosting.findByIdAndUpdate(
       req.params.id,
       { status: 'closed' },
       { new: true }
     );
-    if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
-    res.json({ success: true, data: job, message: 'تم إغلاق الوظيفة' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الوظيفة غير موجودة', 404);
+    ok(res, { data: doc, message: 'تم إغلاق الوظيفة' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.delete('/jobs/:id', async (req, res) => {
+// تقديم طلب توظيف
+router.post('/postings/:id/apply', async (req, res) => {
   try {
-    const job = await JobPosting.findByIdAndUpdate(
-      req.params.id,
-      { isDeleted: true },
-      { new: true }
-    );
-    if (!job) return res.status(404).json({ success: false, error: 'الوظيفة غير موجودة' });
-    res.json({ success: true, message: 'تم الحذف' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    const posting = await JobPosting.findById(req.params.id);
+    if (!posting) return fail(res, 'الوظيفة غير موجودة', 404);
+    if (posting.status !== 'published') return fail(res, 'هذه الوظيفة غير متاحة للتقديم');
+    if (posting.applicationDeadline < new Date())
+      return fail(res, 'انتهى موعد التقديم على هذه الوظيفة');
+
+    const required = ['applicantName', 'applicantEmail', 'gender', 'yearsOfExperience'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+    if (!req.body.consentObtained)
+      return fail(res, 'يجب الموافقة على شروط وأحكام استخدام البيانات');
+
+    const doc = await JobApplication.create({
+      ...req.body,
+      uuid: uuidv4(),
+      jobPostingId: posting._id,
+      branchId: posting.branchId,
+      status: 'received',
+    });
+
+    // تحديث عداد الطلبات
+    await JobPosting.findByIdAndUpdate(req.params.id, { $inc: { applicationsCount: 1 } });
+
+    ok(res, { data: doc, message: 'تم استلام طلبك بنجاح، سيتم مراجعته وإبلاغك' }, 201);
+  } catch (err) {
+    fail(res, err.message, 400);
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// APPLICATIONS — طلبات التوظيف
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ─────────────────────────────────────────────
+// APPLICATIONS
+// ─────────────────────────────────────────────
 router.get('/applications', async (req, res) => {
   try {
-    const { jobPosting, stage, source, page = 1, limit = 20 } = req.query;
-    const filter = { isDeleted: { $ne: true } };
-    if (jobPosting) filter.jobPosting = jobPosting;
-    if (stage) filter.stage = stage;
+    const {
+      status,
+      jobPostingId,
+      source,
+      isSaudi,
+      hasDisability,
+      branchId,
+      page = 1,
+      limit = 15,
+    } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    if (jobPostingId) filter.jobPostingId = jobPostingId;
     if (source) filter.source = source;
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [applications, total] = await Promise.all([
+    if (isSaudi !== undefined) filter.isSaudi = isSaudi === 'true';
+    if (hasDisability !== undefined) filter.hasDisability = hasDisability === 'true';
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
       JobApplication.find(filter)
-        .populate('jobPosting', 'title jobNumber department')
-        .sort({ createdAt: -1 })
+        .populate('jobPostingId', 'title titleAr department')
         .skip(skip)
-        .limit(parseInt(limit, 10))
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 })
         .lean(),
       JobApplication.countDocuments(filter),
     ]);
-
-    res.json({
-      success: true,
-      data: applications,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-router.get('/applications/pipeline', async (req, res) => {
-  try {
-    const { jobPosting } = req.query;
-    const match = { isDeleted: { $ne: true } };
-    if (jobPosting) match.jobPosting = new (require('mongoose').Types.ObjectId)(jobPosting);
-
-    const pipeline = await JobApplication.aggregate([
-      { $match: match },
-      { $group: { _id: '$stage', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]);
-
-    const stages = [
-      'new',
-      'screening',
-      'phone_interview',
-      'technical_test',
-      'interview',
-      'final_interview',
-      'offer',
-      'hired',
-      'rejected',
-      'withdrawn',
-    ];
-    const pipelineMap = Object.fromEntries(pipeline.map(p => [p._id, p.count]));
-    const data = stages.map(s => ({ stage: s, count: pipelineMap[s] || 0 }));
-
-    res.json({ success: true, data });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
 router.get('/applications/:id', async (req, res) => {
   try {
-    const app = await JobApplication.findById(req.params.id)
-      .populate('jobPosting', 'title jobNumber department')
-      .populate('stageHistory.changedBy', 'name')
+    const doc = await JobApplication.findById(req.params.id)
+      .populate('jobPostingId', 'title titleAr department employmentType')
       .lean();
-    if (!app) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
-    res.json({ success: true, data: app });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    if (!doc) return fail(res, 'الطلب غير موجود', 404);
+    ok(res, { data: doc });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.post('/applications', async (req, res) => {
+// تحديث حالة الطلب
+router.patch('/applications/:id/status', async (req, res) => {
   try {
-    const application = await JobApplication.create(req.body);
+    const { status, rejectionReason, hrNotes } = req.body;
+    const allowed = [
+      'received',
+      'screening',
+      'shortlisted',
+      'interview',
+      'offer',
+      'hired',
+      'rejected',
+      'withdrawn',
+    ];
+    if (!allowed.includes(status)) return fail(res, 'حالة غير صالحة');
 
-    // Increment applications count on job posting
-    await JobPosting.findByIdAndUpdate(application.jobPosting, {
-      $inc: { applicationsCount: 1 },
-    });
+    const updates = { status, hrNotes };
+    if (status === 'shortlisted') updates.shortlistedAt = new Date();
+    if (status === 'rejected') {
+      updates.rejectedAt = new Date();
+      updates.rejectionReason = rejectionReason;
+    }
+    if (status === 'hired') updates.hiredAt = new Date();
 
-    res.status(201).json({ success: true, data: application });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const doc = await JobApplication.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!doc) return fail(res, 'الطلب غير موجود', 404);
+    ok(res, { data: doc, message: 'تم تحديث حالة الطلب بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.patch('/applications/:id/stage', async (req, res) => {
+// جدولة مقابلة
+router.post('/applications/:id/interview', async (req, res) => {
   try {
-    const { stage, notes } = req.body;
     const application = await JobApplication.findById(req.params.id);
-    if (!application) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
+    if (!application) return fail(res, 'الطلب غير موجود', 404);
 
-    application.stage = stage;
-    application.stageHistory.push({
-      stage,
-      notes,
-      changedBy: req.user?._id,
+    const required = ['interviewType', 'scheduledAt', 'interviewers'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+
+    const interview = await RecruitmentInterview.create({
+      ...req.body,
+      uuid: uuidv4(),
+      applicationId: application._id,
+      branchId: application.branchId,
+      status: 'scheduled',
     });
 
-    if (stage === 'rejected' && req.body.rejectionReason) {
-      application.rejectionReason = req.body.rejectionReason;
+    await JobApplication.findByIdAndUpdate(req.params.id, { status: 'interview' });
+
+    ok(res, { data: interview, message: 'تم جدولة المقابلة بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, 400);
+  }
+});
+
+// إنشاء عرض عمل
+router.post('/applications/:id/offer', async (req, res) => {
+  try {
+    const application = await JobApplication.findById(req.params.id);
+    if (!application) return fail(res, 'الطلب غير موجود', 404);
+    if (application.status !== 'interview' && application.status !== 'shortlisted') {
+      return fail(res, 'لا يمكن إنشاء عرض عمل إلا بعد المقابلة');
     }
 
-    await application.save();
-    res.json({ success: true, data: application });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
+    const required = ['offeredSalary', 'employmentType', 'offerExpiry', 'proposedStartDate'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
 
-router.patch('/applications/:id/rate', async (req, res) => {
-  try {
-    const { rating, evaluationNotes } = req.body;
-    const application = await JobApplication.findByIdAndUpdate(
-      req.params.id,
-      { rating, evaluationNotes },
-      { new: true }
-    );
-    if (!application) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
-    res.json({ success: true, data: application });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-router.patch('/applications/:id/offer', async (req, res) => {
-  try {
-    const application = await JobApplication.findById(req.params.id);
-    if (!application) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
-
-    application.stage = 'offer';
-    application.offerDetails = {
+    const offerNumber = `OFF-${Date.now().toString(36).toUpperCase()}`;
+    const offer = await JobOffer.create({
       ...req.body,
+      uuid: uuidv4(),
+      offerNumber,
+      applicationId: application._id,
+      jobPostingId: application.jobPostingId,
+      branchId: application.branchId,
       offerDate: new Date(),
-      status: 'pending',
-    };
-    application.stageHistory.push({
-      stage: 'offer',
-      notes: 'تم تقديم العرض الوظيفي',
-      changedBy: req.user?._id,
+      status: 'draft',
     });
 
-    await application.save();
-    res.json({ success: true, data: application, message: 'تم إرسال العرض الوظيفي' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    await JobApplication.findByIdAndUpdate(req.params.id, { status: 'offer' });
+
+    ok(res, { data: offer, message: 'تم إنشاء عرض العمل بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════
-// INTERVIEWS — المقابلات
-// ═══════════════════════════════════════════════════════════════════════════
-
+// ─────────────────────────────────────────────
+// INTERVIEWS
+// ─────────────────────────────────────────────
 router.get('/interviews', async (req, res) => {
   try {
-    const { status, type, startDate, endDate, page = 1, limit = 20 } = req.query;
+    const { status, interviewType, branchId, page = 1, limit = 15 } = req.query;
     const filter = {};
+    if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
-    if (type) filter.type = type;
-    if (startDate || endDate) {
-      filter.scheduledDate = {};
-      if (startDate) filter.scheduledDate.$gte = new Date(startDate);
-      if (endDate) filter.scheduledDate.$lte = new Date(endDate);
-    }
-
-    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
-    const [interviews, total] = await Promise.all([
-      Interview.find(filter)
-        .populate('application', 'applicant applicationNumber')
-        .populate('jobPosting', 'title jobNumber')
-        .populate('interviewers.user', 'name')
-        .sort({ scheduledDate: 1 })
+    if (interviewType) filter.interviewType = interviewType;
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
+      RecruitmentInterview.find(filter)
+        .populate('applicationId', 'applicantName applicantEmail')
         .skip(skip)
-        .limit(parseInt(limit, 10))
+        .limit(parseInt(limit))
+        .sort({ scheduledAt: -1 })
         .lean(),
-      Interview.countDocuments(filter),
+      RecruitmentInterview.countDocuments(filter),
     ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
 
-    res.json({
-      success: true,
-      data: interviews,
-      pagination: {
-        page: parseInt(page, 10),
-        limit: parseInt(limit, 10),
-        total,
-        pages: Math.ceil(total / limit),
+// إكمال المقابلة وتسجيل النتيجة
+router.patch('/interviews/:id/complete', async (req, res) => {
+  try {
+    const { score, feedback, strengths, weaknesses, recommendation } = req.body;
+    const doc = await RecruitmentInterview.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: 'completed',
+        completedAt: new Date(),
+        score,
+        feedback,
+        strengths,
+        weaknesses,
+        recommendation,
       },
+      { new: true }
+    );
+    if (!doc) return fail(res, 'المقابلة غير موجودة', 404);
+    ok(res, { data: doc, message: 'تم تسجيل نتيجة المقابلة بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// ─────────────────────────────────────────────
+// OFFERS
+// ─────────────────────────────────────────────
+router.get('/offers', async (req, res) => {
+  try {
+    const { status, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
+      JobOffer.find(filter)
+        .populate('applicationId', 'applicantName applicantEmail')
+        .populate('jobPostingId', 'title titleAr')
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 })
+        .lean(),
+      JobOffer.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// إرسال عرض العمل
+router.post('/offers/:id/send', async (req, res) => {
+  try {
+    const offer = await JobOffer.findByIdAndUpdate(
+      req.params.id,
+      { status: 'sent', sentAt: new Date() },
+      { new: true }
+    );
+    if (!offer) return fail(res, 'العرض غير موجود', 404);
+    ok(res, { data: offer, message: 'تم إرسال عرض العمل بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// رد المتقدم على العرض (قبول/رفض)
+router.patch('/offers/:id/respond', async (req, res) => {
+  try {
+    const { accepted, rejectionReason } = req.body;
+    if (accepted === undefined) return fail(res, 'يجب تحديد accepted (true/false)');
+
+    const offer = await JobOffer.findById(req.params.id);
+    if (!offer) return fail(res, 'العرض غير موجود', 404);
+
+    const updatedOffer = await JobOffer.findByIdAndUpdate(
+      req.params.id,
+      {
+        status: accepted ? 'accepted' : 'rejected',
+        respondedAt: new Date(),
+        rejectionReason: accepted ? undefined : rejectionReason,
+      },
+      { new: true }
+    );
+
+    if (accepted) {
+      // تحديث حالة الطلب
+      await JobApplication.findByIdAndUpdate(offer.applicationId, {
+        status: 'hired',
+        hiredAt: new Date(),
+      });
+      // تحديث حالة الإعلان
+      await JobPosting.findByIdAndUpdate(offer.jobPostingId, { status: 'filled' });
+
+      // إنشاء قائمة الإعداد
+      const onboarding = await OnboardingChecklist.create({
+        uuid: uuidv4(),
+        branchId: offer.branchId,
+        applicationId: offer.applicationId,
+        offerId: offer._id,
+        status: 'pending',
+        startDate: offer.proposedStartDate,
+        targetCompletionDate: new Date(
+          new Date(offer.proposedStartDate).setDate(
+            new Date(offer.proposedStartDate).getDate() + 30
+          )
+        ),
+        tasks: DEFAULT_ONBOARDING_TASKS,
+        completionPercentage: 0,
+      });
+
+      ok(res, {
+        data: updatedOffer,
+        onboarding,
+        message: 'تم قبول العرض وتفعيل سير عمل الإعداد',
+      });
+    } else {
+      ok(res, { data: updatedOffer, message: 'تم تسجيل رفض العرض' });
+    }
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// ─────────────────────────────────────────────
+// ONBOARDING
+// ─────────────────────────────────────────────
+router.get('/onboarding', async (req, res) => {
+  try {
+    const { status, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
+      OnboardingChecklist.find(filter)
+        .populate('applicationId', 'applicantName applicantEmail')
+        .skip(skip)
+        .limit(parseInt(limit))
+        .sort({ startDate: -1 })
+        .lean(),
+      OnboardingChecklist.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// تحديث مهمة إعداد
+router.patch('/onboarding/:id/task', async (req, res) => {
+  try {
+    const { taskId, status: taskStatus, notes } = req.body;
+    if (!taskId) return fail(res, 'taskId مطلوب');
+
+    const checklist = await OnboardingChecklist.findById(req.params.id);
+    if (!checklist) return fail(res, 'قائمة الإعداد غير موجودة', 404);
+
+    const tasks = checklist.tasks.map(t => {
+      if (t.taskId === taskId) {
+        return {
+          ...t,
+          status: taskStatus || t.status,
+          notes: notes || t.notes,
+          completedAt: taskStatus === 'completed' ? new Date() : t.completedAt,
+        };
+      }
+      return t;
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+
+    const completedCount = tasks.filter(t => t.status === 'completed').length;
+    const completionPercentage = Math.round((completedCount / tasks.length) * 100);
+    const overallStatus =
+      completionPercentage === 100
+        ? 'completed'
+        : completionPercentage > 0
+          ? 'in_progress'
+          : 'pending';
+
+    const doc = await OnboardingChecklist.findByIdAndUpdate(
+      req.params.id,
+      {
+        tasks,
+        completionPercentage,
+        status: overallStatus,
+        actualCompletionDate: overallStatus === 'completed' ? new Date() : null,
+      },
+      { new: true }
+    );
+
+    ok(res, { data: doc, message: 'تم تحديث المهمة بنجاح' });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.post('/interviews', async (req, res) => {
+// ─────────────────────────────────────────────
+// TALENT POOL
+// ─────────────────────────────────────────────
+router.get('/talent-pool', async (req, res) => {
   try {
-    const interview = await Interview.create({ ...req.body, createdBy: req.user?._id });
-    res.status(201).json({ success: true, data: interview });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const { status, isSaudi, skills, branchId, page = 1, limit = 15 } = req.query;
+    const filter = {};
+    if (branchId) filter.branchId = branchId;
+    if (status) filter.status = status;
+    if (isSaudi !== undefined) filter.isSaudi = isSaudi === 'true';
+    if (skills) filter.skills = { $in: skills.split(',') };
+    const { skip } = paginate(page, limit);
+    const [data, total] = await Promise.all([
+      TalentPool.find(filter).skip(skip).limit(parseInt(limit)).sort({ createdAt: -1 }).lean(),
+      TalentPool.countDocuments(filter),
+    ]);
+    ok(res, { data, pagination: { total, page: parseInt(page), limit: parseInt(limit) } });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 
-router.put('/interviews/:id', async (req, res) => {
+router.post('/talent-pool', async (req, res) => {
   try {
-    const interview = await Interview.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!interview) return res.status(404).json({ success: false, error: 'المقابلة غير موجودة' });
-    res.json({ success: true, data: interview });
-  } catch (error) {
-    res.status(400).json({ success: false, error: safeError(error) });
+    const required = ['fullName', 'email'];
+    const missing = required.filter(f => !req.body[f]);
+    if (missing.length) return fail(res, `الحقول المطلوبة: ${missing.join(', ')}`);
+    const doc = await TalentPool.create({ ...req.body, uuid: uuidv4() });
+    ok(res, { data: doc, message: 'تم إضافة المرشح لبنك المواهب بنجاح' }, 201);
+  } catch (err) {
+    fail(res, err.message, err.code === 11000 ? 409 : 400);
   }
 });
 
-router.patch('/interviews/:id/evaluate', async (req, res) => {
+// ─────────────────────────────────────────────
+// REPORTS
+// ─────────────────────────────────────────────
+
+// تقرير نطاقات والسعودة
+router.get('/reports/nitaqat', async (req, res) => {
   try {
-    const interview = await Interview.findById(req.params.id);
-    if (!interview) return res.status(404).json({ success: false, error: 'المقابلة غير موجودة' });
+    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    const filter = { status: 'hired', ...(branchId ? { branchId } : {}) };
 
-    interview.evaluation = req.body.evaluation;
-    interview.status = 'completed';
-    if (req.body.questions) interview.questions = req.body.questions;
-    if (req.body.notes) interview.notes = req.body.notes;
-
-    await interview.save();
-    res.json({ success: true, data: interview, message: 'تم حفظ التقييم' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
-  }
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-// DASHBOARD — لوحة تحكم التوظيف
-// ═══════════════════════════════════════════════════════════════════════════
-
-router.get('/dashboard', async (req, res) => {
-  try {
-    const [
-      openJobs,
-      totalApplications,
-      newApplicationsThisMonth,
-      hiredThisMonth,
-      upcomingInterviews,
-      applicationsByStage,
-      applicationsBySource,
-    ] = await Promise.all([
-      JobPosting.countDocuments({ status: 'open', isDeleted: { $ne: true } }),
-      JobApplication.countDocuments({ isDeleted: { $ne: true } }),
-      JobApplication.countDocuments({
-        isDeleted: { $ne: true },
-        createdAt: {
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
-      }),
-      JobApplication.countDocuments({
-        stage: 'hired',
-        isDeleted: { $ne: true },
-        updatedAt: {
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        },
-      }),
-      Interview.countDocuments({
-        status: { $in: ['scheduled', 'confirmed'] },
-        scheduledDate: { $gte: new Date() },
-      }),
-      JobApplication.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
-        { $group: { _id: '$stage', count: { $sum: 1 } } },
-      ]),
-      JobApplication.aggregate([
-        { $match: { isDeleted: { $ne: true } } },
-        { $group: { _id: '$source', count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
+    const [total, saudis] = await Promise.all([
+      JobApplication.countDocuments(filter),
+      JobApplication.countDocuments({ ...filter, isSaudi: true }),
     ]);
 
-    res.json({
-      success: true,
+    const saudiPercent = total > 0 ? Math.round((saudis / total) * 100 * 10) / 10 : 0;
+    let nitaqatBand;
+    if (saudiPercent >= 75) nitaqatBand = 'platinum';
+    else if (saudiPercent >= 50) nitaqatBand = 'green';
+    else if (saudiPercent >= 25) nitaqatBand = 'yellow';
+    else nitaqatBand = 'red';
+
+    ok(res, {
       data: {
-        openJobs,
-        totalApplications,
-        newApplicationsThisMonth,
-        hiredThisMonth,
-        upcomingInterviews,
-        pipeline: Object.fromEntries(applicationsByStage.map(s => [s._id, s.count])),
-        sources: applicationsBySource,
+        totalHired: total,
+        saudiHired: saudis,
+        nonSaudi: total - saudis,
+        saudiPercent,
+        nitaqatBand,
       },
     });
-  } catch (error) {
-    logger.error('[Recruitment] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+  } catch (err) {
+    fail(res, err.message, 500);
+  }
+});
+
+// تقرير تكاليف التوظيف
+router.get('/reports/cost', async (req, res) => {
+  try {
+    const branchId = req.query.branchId || req.headers['x-branch-id'];
+    const filter = branchId ? { branchId } : {};
+
+    const [totalPostings, filledPostings, totalApplications, totalHired, hiredApps] =
+      await Promise.all([
+        JobPosting.countDocuments(filter),
+        JobPosting.countDocuments({ ...filter, status: 'filled' }),
+        JobApplication.countDocuments(filter),
+        JobApplication.countDocuments({ ...filter, status: 'hired' }),
+        JobApplication.find({ ...filter, status: 'hired', hiredAt: { $ne: null } })
+          .select('createdAt hiredAt')
+          .lean(),
+      ]);
+
+    const avgTimeToHire =
+      hiredApps.length > 0
+        ? Math.round(
+            hiredApps.reduce((acc, a) => {
+              const days = a.hiredAt
+                ? Math.abs(new Date(a.hiredAt) - new Date(a.createdAt)) / 86400000
+                : 0;
+              return acc + days;
+            }, 0) / hiredApps.length
+          )
+        : 0;
+
+    ok(res, {
+      data: {
+        totalPostings,
+        filledPostings,
+        totalApplications,
+        totalHired,
+        avgTimeToHireDays: avgTimeToHire,
+        fillRate: totalPostings > 0 ? Math.round((filledPostings / totalPostings) * 100) : 0,
+      },
+    });
+  } catch (err) {
+    fail(res, err.message, 500);
   }
 });
 

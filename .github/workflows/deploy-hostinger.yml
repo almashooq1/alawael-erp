@@ -214,8 +214,93 @@ jobs:
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          # 1. Deploy to standard app dir
           rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
-          echo "✅ Frontend deployed"
+          echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/build/"
+
+          # 2. Diagnose: find where nginx actually serves files from
+          $SSH_CMD $SSH_TARGET << 'DIAG'
+            set -e
+            echo "=== NGINX CONFIG DIAGNOSIS ==="
+
+            # Find all nginx configs
+            echo "--- Active nginx config files ---"
+            nginx -T 2>/dev/null | grep -E "(root |alias |proxy_pass )" | head -30 || true
+
+            # Check common frontend paths
+            echo ""
+            echo "--- Checking common frontend paths ---"
+            for DIR in \
+              /home/alawael/app/frontend/build \
+              /home/alawael/frontend/build \
+              /home/alawael/public_html \
+              /var/www/html \
+              /var/www/alawael \
+              /usr/share/nginx/html \
+              /home/alawael/app/dist \
+              /home/alawael/dist; do
+              if [ -d "$DIR" ]; then
+                MAIN_JS=$(find "$DIR" -name "main.*.js" -path "*/static/js/*" 2>/dev/null | head -1)
+                IDX=$(find "$DIR" -name "index.html" -maxdepth 1 2>/dev/null | head -1)
+                echo "  EXISTS: $DIR (main.js: ${MAIN_JS:-NONE}, index: ${IDX:-NONE})"
+                if [ -n "$IDX" ]; then
+                  echo "    Last-Modified: $(stat -c '%y' "$IDX" 2>/dev/null || stat -f '%m' "$IDX" 2>/dev/null)"
+                  grep -o 'main\.[a-f0-9]*\.js' "$IDX" 2>/dev/null || true
+                fi
+              fi
+            done
+
+            # Check what port nginx frontend serves
+            echo ""
+            echo "--- Nginx server blocks (port 443) ---"
+            nginx -T 2>/dev/null | grep -A5 "listen 443" | head -20 || true
+
+            # Check if Docker is running frontend
+            echo ""
+            echo "--- Docker containers ---"
+            docker ps --format "{{.Names}}: {{.Image}} ({{.Ports}})" 2>/dev/null || echo "Docker not available or no containers"
+
+            # Check PM2 processes
+            echo ""
+            echo "--- PM2 processes ---"
+            pm2 list 2>/dev/null || echo "PM2 not available"
+          DIAG
+
+          echo "✅ Diagnosis complete"
+
+      - name: Fix frontend path if needed
+        if: needs.build-frontend.result == 'success'
+        run: |
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+
+          # Copy to ALL possible nginx serving directories
+          $SSH_CMD $SSH_TARGET << 'FIXPATH'
+            set -e
+            SRC="/home/alawael/app/frontend/build"
+
+            # Find any other directory that has an old index.html with main.*.js
+            for DIR in /home/alawael/public_html /var/www/html /var/www/alawael /usr/share/nginx/html /home/alawael/frontend/build; do
+              if [ -f "$DIR/index.html" ] && grep -q "main\." "$DIR/index.html" 2>/dev/null; then
+                echo "Found old frontend at: $DIR - UPDATING..."
+                cp -r "$SRC"/* "$DIR"/
+                echo "  Updated $DIR with new build"
+              fi
+            done
+
+            # Also check nginx root directives
+            ROOTS=$(nginx -T 2>/dev/null | grep -oP 'root\s+\K[^;]+' | sort -u)
+            for ROOT in $ROOTS; do
+              if [ -d "$ROOT" ] && [ "$ROOT" != "$SRC" ] && [ -f "$ROOT/index.html" ]; then
+                echo "Nginx root found: $ROOT - UPDATING..."
+                cp -r "$SRC"/* "$ROOT"/
+                echo "  Updated $ROOT with new build"
+              fi
+            done
+
+            echo "✅ Path fix complete"
+          FIXPATH
 
       - name: Restart services
         run: |

@@ -6,7 +6,11 @@
  * Import from here instead of defining these in each file.
  */
 
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+// Runtime detection: force relative URL on HTTPS to prevent mixed-content blocking
+const _isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+export const API_BASE_URL = _isHttps
+  ? '/api/v1'
+  : process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // Auto-detect socket/WS URLs from current origin in production
 const _detectOrigin = () =>

@@ -20,7 +20,7 @@ import {
 } from '../utils/tokenStorage';
 
 // تكوين قاعدة الـ API
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_V1_URL || process.env.REACT_APP_API_URL || '/api/v1';
 const API_TIMEOUT = parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 30000;
 
 // ─── Token Refresh State (singleton) ────────────────────────────────────────

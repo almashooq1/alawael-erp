@@ -219,88 +219,66 @@ jobs:
           rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
           echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/build/"
 
-          # 2. Diagnose: find where nginx actually serves files from
-          $SSH_CMD $SSH_TARGET << 'DIAG'
-            set -e
-            echo "=== NGINX CONFIG DIAGNOSIS ==="
-
-            # Find all nginx configs
-            echo "--- Active nginx config files ---"
-            nginx -T 2>/dev/null | grep -E "(root |alias |proxy_pass )" | head -30 || true
-
-            # Check common frontend paths
-            echo ""
-            echo "--- Checking common frontend paths ---"
-            for DIR in \
-              /home/alawael/app/frontend/build \
-              /home/alawael/frontend/build \
-              /home/alawael/public_html \
-              /var/www/html \
-              /var/www/alawael \
-              /usr/share/nginx/html \
-              /home/alawael/app/dist \
-              /home/alawael/dist; do
-              if [ -d "$DIR" ]; then
-                MAIN_JS=$(find "$DIR" -name "main.*.js" -path "*/static/js/*" 2>/dev/null | head -1)
-                IDX=$(find "$DIR" -name "index.html" -maxdepth 1 2>/dev/null | head -1)
-                echo "  EXISTS: $DIR (main.js: ${MAIN_JS:-NONE}, index: ${IDX:-NONE})"
-                if [ -n "$IDX" ]; then
-                  echo "    Last-Modified: $(stat -c '%y' "$IDX" 2>/dev/null || stat -f '%m' "$IDX" 2>/dev/null)"
-                  grep -o 'main\.[a-f0-9]*\.js' "$IDX" 2>/dev/null || true
-                fi
-              fi
-            done
-
-            # Check what port nginx frontend serves
-            echo ""
-            echo "--- Nginx server blocks (port 443) ---"
-            nginx -T 2>/dev/null | grep -A5 "listen 443" | head -20 || true
-
-            # Check if Docker is running frontend
-            echo ""
-            echo "--- Docker containers ---"
-            docker ps --format "{{.Names}}: {{.Image}} ({{.Ports}})" 2>/dev/null || echo "Docker not available or no containers"
-
-            # Check PM2 processes
-            echo ""
-            echo "--- PM2 processes ---"
-            pm2 list 2>/dev/null || echo "PM2 not available"
-          DIAG
-
-          echo "✅ Diagnosis complete"
-
-      - name: Fix frontend path if needed
-        if: needs.build-frontend.result == 'success'
-        run: |
-          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
-          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
-
-          # Copy to ALL possible nginx serving directories
-          $SSH_CMD $SSH_TARGET << 'FIXPATH'
+          # 2. Find and update ALL locations where frontend is served from
+          $SSH_CMD $SSH_TARGET << 'DEPLOY_FRONTEND'
             set -e
             SRC="/home/alawael/app/frontend/build"
+            echo "=== SMART FRONTEND DEPLOY ==="
 
-            # Find any other directory that has an old index.html with main.*.js
-            for DIR in /home/alawael/public_html /var/www/html /var/www/alawael /usr/share/nginx/html /home/alawael/frontend/build; do
-              if [ -f "$DIR/index.html" ] && grep -q "main\." "$DIR/index.html" 2>/dev/null; then
-                echo "Found old frontend at: $DIR - UPDATING..."
-                cp -r "$SRC"/* "$DIR"/
-                echo "  Updated $DIR with new build"
+            # A) Check if Docker frontend container is running
+            DOCKER_FRONTEND=$(docker ps --filter "name=frontend" --format "{{.Names}}" 2>/dev/null | head -1)
+            if [ -n "$DOCKER_FRONTEND" ]; then
+              echo "🐳 Docker frontend container found: $DOCKER_FRONTEND"
+              # Copy build files INTO the Docker container
+              docker cp "$SRC/." "$DOCKER_FRONTEND:/usr/share/nginx/html/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/usr/share/nginx/html/" || true
+              docker cp "$SRC/." "$DOCKER_FRONTEND:/app/build/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/app/build/" || true
+              docker cp "$SRC/." "$DOCKER_FRONTEND:/var/www/html/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/var/www/html/" || true
+              # Also try to find where nginx in the container serves from
+              CONTAINER_ROOT=$(docker exec "$DOCKER_FRONTEND" sh -c "cat /etc/nginx/conf.d/default.conf 2>/dev/null | grep 'root ' | head -1 | sed 's/.*root *//;s/;.*//' | tr -d ' '" 2>/dev/null || true)
+              if [ -n "$CONTAINER_ROOT" ] && [ "$CONTAINER_ROOT" != "/usr/share/nginx/html" ]; then
+                docker cp "$SRC/." "$DOCKER_FRONTEND:$CONTAINER_ROOT/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:$CONTAINER_ROOT/" || true
+              fi
+              echo "  Container root: ${CONTAINER_ROOT:-unknown}"
+            else
+              echo "🖥️ No Docker frontend container - using filesystem paths"
+            fi
+
+            # B) Find ALL index.html files on the system that reference main.*.js (React build)
+            echo ""
+            echo "--- Searching for React build index.html files ---"
+            find /home /var/www /usr/share/nginx 2>/dev/null -name "index.html" -exec grep -l "main\." {} \; 2>/dev/null | while read IDX; do
+              DIR=$(dirname "$IDX")
+              if [ "$DIR" != "$SRC" ]; then
+                echo "  Found React app at: $DIR"
+                cp -r "$SRC"/* "$DIR"/ 2>/dev/null && echo "    ✅ Updated $DIR" || echo "    ❌ Failed to update $DIR"
               fi
             done
 
-            # Also check nginx root directives
-            ROOTS=$(nginx -T 2>/dev/null | grep -oP 'root\s+\K[^;]+' | sort -u)
+            # C) Check nginx root directives
+            echo ""
+            echo "--- Checking nginx root paths ---"
+            ROOTS=$(nginx -T 2>/dev/null | grep -oP 'root\s+\K[^;]+' | sort -u || true)
             for ROOT in $ROOTS; do
-              if [ -d "$ROOT" ] && [ "$ROOT" != "$SRC" ] && [ -f "$ROOT/index.html" ]; then
-                echo "Nginx root found: $ROOT - UPDATING..."
-                cp -r "$SRC"/* "$ROOT"/
-                echo "  Updated $ROOT with new build"
+              if [ -d "$ROOT" ] && [ "$ROOT" != "$SRC" ]; then
+                echo "  Nginx root: $ROOT"
+                cp -r "$SRC"/* "$ROOT"/ 2>/dev/null && echo "    ✅ Updated $ROOT" || true
               fi
             done
 
-            echo "✅ Path fix complete"
-          FIXPATH
+            # D) Show what we found for debugging
+            echo ""
+            echo "--- Docker containers ---"
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}" 2>/dev/null || echo "No Docker"
+            echo ""
+            echo "--- PM2 processes ---"
+            pm2 list 2>/dev/null | head -10 || echo "No PM2"
+            echo ""
+            echo "--- New build hash ---"
+            grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" 2>/dev/null || echo "No hash found"
+
+            echo ""
+            echo "✅ Smart deploy complete"
+          DEPLOY_FRONTEND
 
       - name: Restart services
         run: |

@@ -83,4 +83,5 @@ EmploymentContractSchema.index({ endDate: 1 }); // للتنبيه عند قرب 
 
 module.exports =
   mongoose.models.EmploymentContract ||
+  mongoose.models.EmploymentContract ||
   mongoose.model('EmploymentContract', EmploymentContractSchema);

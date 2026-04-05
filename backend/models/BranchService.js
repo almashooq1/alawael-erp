@@ -34,4 +34,5 @@ const branchServiceSchema = new mongoose.Schema(
 branchServiceSchema.index({ branchId: 1, serviceCode: 1 }, { unique: true });
 branchServiceSchema.index({ branchId: 1, isActive: 1 });
 
-module.exports = mongoose.model('BranchService', branchServiceSchema);
+module.exports =
+  mongoose.models.BranchService || mongoose.model('BranchService', branchServiceSchema);

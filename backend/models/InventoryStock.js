@@ -260,12 +260,17 @@ const stockCountSchema = new mongoose.Schema(
 
 stockCountSchema.index({ warehouseId: 1, status: 1 });
 
-const InventoryStock = mongoose.model('InventoryStock', inventoryStockSchema);
-const InventoryTransaction = mongoose.model('InventoryTransaction', inventoryTransactionSchema);
-const Supplier = mongoose.model('Supplier', supplierSchema);
-const PurchaseOrder = mongoose.model('PurchaseOrder', purchaseOrderSchema);
-const Asset = mongoose.model('Asset', assetSchema);
-const StockCount = mongoose.model('StockCount', stockCountSchema);
+const InventoryStock =
+  mongoose.models.InventoryStock || mongoose.model('InventoryStock', inventoryStockSchema);
+const InventoryTransaction =
+  mongoose.models.InventoryTransaction ||
+  mongoose.models.InventoryTransaction ||
+  mongoose.model('InventoryTransaction', inventoryTransactionSchema);
+const Supplier = mongoose.models.Supplier || mongoose.model('Supplier', supplierSchema);
+const PurchaseOrder =
+  mongoose.models.PurchaseOrder || mongoose.model('PurchaseOrder', purchaseOrderSchema);
+const Asset = mongoose.models.Asset || mongoose.model('Asset', assetSchema);
+const StockCount = mongoose.models.StockCount || mongoose.model('StockCount', stockCountSchema);
 
 module.exports = {
   InventoryStock,

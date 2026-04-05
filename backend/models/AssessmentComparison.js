@@ -77,4 +77,5 @@ AssessmentComparisonSchema.index({ baselineAssessment: 1, currentAssessment: 1 }
 
 module.exports =
   mongoose.models.AssessmentComparison ||
+  mongoose.models.AssessmentComparison ||
   mongoose.model('AssessmentComparison', AssessmentComparisonSchema);

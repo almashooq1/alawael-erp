@@ -54,4 +54,5 @@ paymentWebhookSchema.index({ transactionId: 1 });
 paymentWebhookSchema.index({ status: 1, createdAt: -1 });
 paymentWebhookSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('PaymentWebhook', paymentWebhookSchema);
+module.exports =
+  mongoose.models.PaymentWebhook || mongoose.model('PaymentWebhook', paymentWebhookSchema);

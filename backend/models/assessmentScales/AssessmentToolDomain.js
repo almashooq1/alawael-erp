@@ -169,4 +169,5 @@ assessmentToolDomainSchema.statics.findChildren = function (parentId) {
 module.exports =
   mongoose.models.AssessmentToolDomain ||
   mongoose.models.AssessmentToolDomain ||
+  mongoose.models.AssessmentToolDomain ||
   mongoose.model('AssessmentToolDomain', assessmentToolDomainSchema);

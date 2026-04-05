@@ -49,4 +49,4 @@ cpdRecordSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CpdRecord', cpdRecordSchema);
+module.exports = mongoose.models.CpdRecord || mongoose.model('CpdRecord', cpdRecordSchema);

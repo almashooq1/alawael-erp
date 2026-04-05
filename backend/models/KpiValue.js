@@ -63,4 +63,4 @@ kpiValueSchema.index({
 kpiValueSchema.index({ periodDate: 1 });
 kpiValueSchema.index({ status: 1 });
 
-module.exports = mongoose.model('KpiValue', kpiValueSchema);
+module.exports = mongoose.models.KpiValue || mongoose.model('KpiValue', kpiValueSchema);

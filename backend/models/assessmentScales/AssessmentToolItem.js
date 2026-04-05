@@ -146,4 +146,5 @@ assessmentToolItemSchema.methods.isValidScore = function (score) {
 module.exports =
   mongoose.models.AssessmentToolItem ||
   mongoose.models.AssessmentToolItem ||
+  mongoose.models.AssessmentToolItem ||
   mongoose.model('AssessmentToolItem', assessmentToolItemSchema);

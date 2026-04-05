@@ -64,7 +64,8 @@ itemSchema.index({ barcode: 1 }, { sparse: true });
 itemSchema.index({ categoryId: 1, isActive: 1 });
 itemSchema.index({ reorderPoint: 1 });
 
-const ItemCategory = mongoose.model('ItemCategory', itemCategorySchema);
-const InventoryItem = mongoose.model('InventoryItem', itemSchema);
+const ItemCategory =
+  mongoose.models.ItemCategory || mongoose.model('ItemCategory', itemCategorySchema);
+const InventoryItem = mongoose.models.InventoryItem || mongoose.model('InventoryItem', itemSchema);
 
 module.exports = { ItemCategory, InventoryItem };

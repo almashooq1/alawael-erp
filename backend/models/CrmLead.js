@@ -184,4 +184,4 @@ crmLeadSchema.statics.calculateScore = function (data) {
   return Math.min(100, score);
 };
 
-module.exports = mongoose.model('CrmLead', crmLeadSchema);
+module.exports = mongoose.models.CrmLead || mongoose.model('CrmLead', crmLeadSchema);

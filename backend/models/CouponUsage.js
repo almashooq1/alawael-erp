@@ -29,4 +29,4 @@ couponUsageSchema.index({ couponId: 1, beneficiaryId: 1 });
 couponUsageSchema.index({ beneficiaryId: 1, usedAt: -1 });
 couponUsageSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('CouponUsage', couponUsageSchema);
+module.exports = mongoose.models.CouponUsage || mongoose.model('CouponUsage', couponUsageSchema);

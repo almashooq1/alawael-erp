@@ -151,4 +151,6 @@ paymentTransactionSchema.virtual('remainingRefund').get(function () {
   return this.amount - this.refundedAmount;
 });
 
-module.exports = mongoose.model('PaymentTransaction', paymentTransactionSchema);
+module.exports =
+  mongoose.models.PaymentTransaction ||
+  mongoose.model('PaymentTransaction', paymentTransactionSchema);

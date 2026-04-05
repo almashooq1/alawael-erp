@@ -28,4 +28,5 @@ const documentAccessLogSchema = new mongoose.Schema(
 documentAccessLogSchema.index({ documentId: 1, createdAt: -1 });
 documentAccessLogSchema.index({ userId: 1, createdAt: -1 });
 
-module.exports = mongoose.model('DocumentAccessLog', documentAccessLogSchema);
+module.exports =
+  mongoose.models.DocumentAccessLog || mongoose.model('DocumentAccessLog', documentAccessLogSchema);

@@ -77,4 +77,5 @@ dailyAttendanceSchema.index({ employeeId: 1, workDate: 1 });
 dailyAttendanceSchema.index({ status: 1 });
 dailyAttendanceSchema.index({ isProcessed: 1 });
 
-module.exports = mongoose.model('DailyAttendance', dailyAttendanceSchema);
+module.exports =
+  mongoose.models.DailyAttendance || mongoose.model('DailyAttendance', dailyAttendanceSchema);

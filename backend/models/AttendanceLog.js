@@ -58,4 +58,5 @@ attendanceLogSchema.index({ punchType: 1 });
 attendanceLogSchema.index({ deviceId: 1, punchTime: 1 });
 attendanceLogSchema.index({ isSynced: 1 });
 
-module.exports = mongoose.model('AttendanceLog', attendanceLogSchema);
+module.exports =
+  mongoose.models.AttendanceLog || mongoose.model('AttendanceLog', attendanceLogSchema);

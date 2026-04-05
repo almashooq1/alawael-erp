@@ -63,4 +63,6 @@ onboardingChecklistSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('OnboardingChecklist', onboardingChecklistSchema);
+module.exports =
+  mongoose.models.OnboardingChecklist ||
+  mongoose.model('OnboardingChecklist', onboardingChecklistSchema);

@@ -99,4 +99,5 @@ insuranceClaimSchema.index({ nphiesClaimId: 1 });
 insuranceClaimSchema.index({ status: 1, submittedAt: -1 });
 insuranceClaimSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('InsuranceClaim', insuranceClaimSchema);
+module.exports =
+  mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema);

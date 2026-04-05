@@ -112,4 +112,5 @@ assessmentDomainScoreSchema.methods.classifyPercentile = function (pct) {
 module.exports =
   mongoose.models.AssessmentDomainScore ||
   mongoose.models.AssessmentDomainScore ||
+  mongoose.models.AssessmentDomainScore ||
   mongoose.model('AssessmentDomainScore', assessmentDomainScoreSchema);

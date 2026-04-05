@@ -226,9 +226,15 @@ const ticketAutoAssignmentSchema = new mongoose.Schema(
 );
 
 module.exports = {
-  TicketEnhanced: mongoose.model('TicketEnhanced', ticketSchema),
-  TicketComment: mongoose.model('TicketComment', ticketCommentSchema),
-  TicketSlaConfig: mongoose.model('TicketSlaConfig', ticketSlaConfigSchema),
-  TicketEscalationRule: mongoose.model('TicketEscalationRule', ticketEscalationRuleSchema),
-  TicketAutoAssignment: mongoose.model('TicketAutoAssignment', ticketAutoAssignmentSchema),
+  TicketEnhanced: mongoose.models.TicketEnhanced || mongoose.model('TicketEnhanced', ticketSchema),
+  TicketComment:
+    mongoose.models.TicketComment || mongoose.model('TicketComment', ticketCommentSchema),
+  TicketSlaConfig:
+    mongoose.models.TicketSlaConfig || mongoose.model('TicketSlaConfig', ticketSlaConfigSchema),
+  TicketEscalationRule:
+    mongoose.models.TicketEscalationRule ||
+    mongoose.model('TicketEscalationRule', ticketEscalationRuleSchema),
+  TicketAutoAssignment:
+    mongoose.models.TicketAutoAssignment ||
+    mongoose.model('TicketAutoAssignment', ticketAutoAssignmentSchema),
 };

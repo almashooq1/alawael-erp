@@ -152,4 +152,5 @@ BranchPerformanceLogSchema.statics.getNetworkAggregates = function (startDate, e
 
 module.exports =
   mongoose.models.BranchPerformanceLog ||
+  mongoose.models.BranchPerformanceLog ||
   mongoose.model('BranchPerformanceLog', BranchPerformanceLogSchema);

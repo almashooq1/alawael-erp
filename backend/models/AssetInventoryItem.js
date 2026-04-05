@@ -44,4 +44,5 @@ assetInventoryItemSchema.index({ status: 1 });
 
 module.exports =
   mongoose.models.AssetInventoryItem ||
+  mongoose.models.AssetInventoryItem ||
   mongoose.model('AssetInventoryItem', assetInventoryItemSchema);

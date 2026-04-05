@@ -183,8 +183,11 @@ const asyncHandler = fn => (req, res, next) => {
 const uncaughtExceptionHandler = () => {
   process.on('uncaughtException', err => {
     logger.error('💥 UNCAUGHT EXCEPTION:', { message: err.message, stack: err.stack });
-    // Give time for logger to flush, then exit
-    setTimeout(() => process.exit(1), 1000);
+    // In production, exit immediately to avoid undefined state
+    // In development, log and continue (allows fixing errors without restart loops)
+    if (process.env.NODE_ENV === 'production') {
+      setTimeout(() => process.exit(1), 1000);
+    }
   });
 };
 

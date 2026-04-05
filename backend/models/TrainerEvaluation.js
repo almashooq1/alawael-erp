@@ -44,4 +44,5 @@ trainerEvaluationSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('TrainerEvaluation', trainerEvaluationSchema);
+module.exports =
+  mongoose.models.TrainerEvaluation || mongoose.model('TrainerEvaluation', trainerEvaluationSchema);

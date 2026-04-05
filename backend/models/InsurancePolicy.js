@@ -96,4 +96,5 @@ insurancePolicySchema.virtual('daysUntilExpiry').get(function () {
   return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
 });
 
-module.exports = mongoose.model('InsurancePolicy', insurancePolicySchema);
+module.exports =
+  mongoose.models.InsurancePolicy || mongoose.model('InsurancePolicy', insurancePolicySchema);

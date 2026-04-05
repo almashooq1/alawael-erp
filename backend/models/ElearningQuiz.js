@@ -43,4 +43,5 @@ elearningQuizSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ElearningQuiz', elearningQuizSchema);
+module.exports =
+  mongoose.models.ElearningQuiz || mongoose.model('ElearningQuiz', elearningQuizSchema);

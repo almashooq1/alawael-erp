@@ -63,4 +63,4 @@ clinicalRuleSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ClinicalRule', clinicalRuleSchema);
+module.exports = mongoose.models.ClinicalRule || mongoose.model('ClinicalRule', clinicalRuleSchema);

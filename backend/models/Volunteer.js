@@ -113,4 +113,4 @@ volunteerSchema.pre(/^find/, function () {
   }
 });
 
-module.exports = mongoose.model('Volunteer', volunteerSchema);
+module.exports = mongoose.models.Volunteer || mongoose.model('Volunteer', volunteerSchema);

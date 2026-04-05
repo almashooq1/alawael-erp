@@ -41,4 +41,5 @@ const broadcastMessageSchema = new mongoose.Schema(
 broadcastMessageSchema.index({ status: 1, scheduledAt: 1 });
 broadcastMessageSchema.index({ senderId: 1, createdAt: -1 });
 
-module.exports = mongoose.model('BroadcastMessage', broadcastMessageSchema);
+module.exports =
+  mongoose.models.BroadcastMessage || mongoose.model('BroadcastMessage', broadcastMessageSchema);

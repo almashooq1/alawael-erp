@@ -79,4 +79,5 @@ inventoryTransactionSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.InventoryTransaction ||
+  mongoose.models.InventoryTransaction ||
   mongoose.model('InventoryTransaction', inventoryTransactionSchema);

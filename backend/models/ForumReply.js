@@ -32,4 +32,4 @@ forumReplySchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ForumReply', forumReplySchema);
+module.exports = mongoose.models.ForumReply || mongoose.model('ForumReply', forumReplySchema);

@@ -26,4 +26,5 @@ const documentVersionSchema = new mongoose.Schema(
 
 documentVersionSchema.index({ documentId: 1, versionNumber: 1 }, { unique: true });
 
-module.exports = mongoose.model('DocumentVersion', documentVersionSchema);
+module.exports =
+  mongoose.models.DocumentVersion || mongoose.model('DocumentVersion', documentVersionSchema);

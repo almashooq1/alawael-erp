@@ -76,4 +76,5 @@ digitalWalletSchema.virtual('formattedBalance').get(function () {
   return `${this.balance.toFixed(2)} SAR`;
 });
 
-module.exports = mongoose.model('DigitalWallet', digitalWalletSchema);
+module.exports =
+  mongoose.models.DigitalWallet || mongoose.model('DigitalWallet', digitalWalletSchema);

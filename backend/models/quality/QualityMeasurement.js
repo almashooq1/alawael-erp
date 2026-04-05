@@ -72,4 +72,5 @@ qualityMeasurementSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.QualityMeasurement ||
+  mongoose.models.QualityMeasurement ||
   mongoose.model('QualityMeasurement', qualityMeasurementSchema);

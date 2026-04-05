@@ -60,4 +60,6 @@ volunteerTrainingSessionSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('VolunteerTrainingSession', volunteerTrainingSessionSchema);
+module.exports =
+  mongoose.models.VolunteerTrainingSession ||
+  mongoose.model('VolunteerTrainingSession', volunteerTrainingSessionSchema);

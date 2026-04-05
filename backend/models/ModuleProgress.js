@@ -46,4 +46,5 @@ moduleProgressSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ModuleProgress', moduleProgressSchema);
+module.exports =
+  mongoose.models.ModuleProgress || mongoose.model('ModuleProgress', moduleProgressSchema);

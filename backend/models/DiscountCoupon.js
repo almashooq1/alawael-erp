@@ -52,4 +52,5 @@ discountCouponSchema.index({ code: 1 });
 discountCouponSchema.index({ expiresAt: 1, isActive: 1 });
 discountCouponSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('DiscountCoupon', discountCouponSchema);
+module.exports =
+  mongoose.models.DiscountCoupon || mongoose.model('DiscountCoupon', discountCouponSchema);

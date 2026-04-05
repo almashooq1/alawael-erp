@@ -50,4 +50,5 @@ const overtimeRequestSchema = new Schema(
 overtimeRequestSchema.index({ employeeId: 1, overtimeDate: 1 });
 overtimeRequestSchema.index({ status: 1 });
 
-module.exports = mongoose.model('OvertimeRequest', overtimeRequestSchema);
+module.exports =
+  mongoose.models.OvertimeRequest || mongoose.model('OvertimeRequest', overtimeRequestSchema);

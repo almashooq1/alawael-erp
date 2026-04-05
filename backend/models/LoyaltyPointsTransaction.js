@@ -43,4 +43,6 @@ loyaltyPointsTransactionSchema.index({ type: 1 });
 loyaltyPointsTransactionSchema.index({ expiresAt: 1, type: 1 });
 loyaltyPointsTransactionSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('LoyaltyPointsTransaction', loyaltyPointsTransactionSchema);
+module.exports =
+  mongoose.models.LoyaltyPointsTransaction ||
+  mongoose.model('LoyaltyPointsTransaction', loyaltyPointsTransactionSchema);

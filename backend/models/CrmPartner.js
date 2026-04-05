@@ -60,4 +60,4 @@ crmPartnerSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CrmPartner', crmPartnerSchema);
+module.exports = mongoose.models.CrmPartner || mongoose.model('CrmPartner', crmPartnerSchema);

@@ -245,9 +245,13 @@ const parentNotificationSchema = new mongoose.Schema(
 parentNotificationSchema.index({ guardianId: 1, isRead: 1, createdAt: -1 });
 
 module.exports = {
-  ParentOtp: mongoose.model('ParentOtp', parentOtpSchema),
-  ParentDevice: mongoose.model('ParentDevice', parentDeviceSchema),
-  ParentMessage: mongoose.model('ParentMessage', parentMessageSchema),
-  ParentComplaint: mongoose.model('ParentComplaint', parentComplaintSchema),
-  ParentNotification: mongoose.model('ParentNotification', parentNotificationSchema),
+  ParentOtp: mongoose.models.ParentOtp || mongoose.model('ParentOtp', parentOtpSchema),
+  ParentDevice: mongoose.models.ParentDevice || mongoose.model('ParentDevice', parentDeviceSchema),
+  ParentMessage:
+    mongoose.models.ParentMessage || mongoose.model('ParentMessage', parentMessageSchema),
+  ParentComplaint:
+    mongoose.models.ParentComplaint || mongoose.model('ParentComplaint', parentComplaintSchema),
+  ParentNotification:
+    mongoose.models.ParentNotification ||
+    mongoose.model('ParentNotification', parentNotificationSchema),
 };

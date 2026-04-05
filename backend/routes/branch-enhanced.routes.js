@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const BranchEnhancedService = require('../services/branches/branch-enhanced.service');
-
-const svc = new BranchEnhancedService();
+const svc = require('../services/branches/branch-enhanced.service');
 
 // مقارنة أداء الفروع
 router.get('/compare', authenticate, async (req, res) => {

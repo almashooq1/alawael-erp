@@ -20,5 +20,6 @@ notificationTemplateAuditSchema.index({ action: 1 });
 const NotificationTemplateAudit =
   mongoose.models.NotificationTemplateAudit ||
   mongoose.models.NotificationTemplateAudit ||
+  mongoose.models.NotificationTemplateAudit ||
   mongoose.model('NotificationTemplateAudit', notificationTemplateAuditSchema);
 module.exports = NotificationTemplateAudit;

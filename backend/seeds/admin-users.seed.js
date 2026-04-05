@@ -19,7 +19,7 @@ async function hashPassword(plain) {
     return await bcrypt.hash(plain, 12);
   } catch {
     try {
-      const bcrypt = require('bcrypt');
+      const bcrypt = require('bcryptjs');
       return await bcrypt.hash(plain, 12);
     } catch {
       // fallback: SHA-256 (not for production use)

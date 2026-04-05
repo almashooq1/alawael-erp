@@ -37,4 +37,4 @@ learningPathSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('LearningPath', learningPathSchema);
+module.exports = mongoose.models.LearningPath || mongoose.model('LearningPath', learningPathSchema);

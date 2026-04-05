@@ -453,15 +453,22 @@ riskSchema.pre('save', function (next) {
 riskSchema.index({ branchId: 1, riskLevel: 1, status: 1 });
 
 // Exports
-const QualityStandard = mongoose.model('QualityStandard', qualityStandardSchema);
-const Checklist = mongoose.model('Checklist', checklistSchema);
-const ChecklistSubmission = mongoose.model('ChecklistSubmission', checklistSubmissionSchema);
-const Incident = mongoose.model('Incident', incidentSchema);
-const Complaint = mongoose.model('Complaint', complaintSchema);
-const SatisfactionSurvey = mongoose.model('SatisfactionSurvey', satisfactionSurveySchema);
-const Audit = mongoose.model('Audit', auditSchema);
-const ImprovementProject = mongoose.model('ImprovementProject', improvementProjectSchema);
-const Risk = mongoose.model('Risk', riskSchema);
+const QualityStandard =
+  mongoose.models.QualityStandard || mongoose.model('QualityStandard', qualityStandardSchema);
+const Checklist = mongoose.models.Checklist || mongoose.model('Checklist', checklistSchema);
+const ChecklistSubmission =
+  mongoose.models.ChecklistSubmission ||
+  mongoose.model('ChecklistSubmission', checklistSubmissionSchema);
+const Incident = mongoose.models.Incident || mongoose.model('Incident', incidentSchema);
+const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', complaintSchema);
+const SatisfactionSurvey =
+  mongoose.models.SatisfactionSurvey ||
+  mongoose.model('SatisfactionSurvey', satisfactionSurveySchema);
+const Audit = mongoose.models.Audit || mongoose.model('Audit', auditSchema);
+const ImprovementProject =
+  mongoose.models.ImprovementProject ||
+  mongoose.model('ImprovementProject', improvementProjectSchema);
+const Risk = mongoose.models.Risk || mongoose.model('Risk', riskSchema);
 
 module.exports = {
   QualityStandard,

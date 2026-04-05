@@ -50,4 +50,4 @@ workShiftSchema.index({ shiftType: 1 });
 workShiftSchema.index({ isActive: 1 });
 workShiftSchema.index({ code: 1 });
 
-module.exports = mongoose.model('WorkShift', workShiftSchema);
+module.exports = mongoose.models.WorkShift || mongoose.model('WorkShift', workShiftSchema);

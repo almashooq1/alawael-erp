@@ -7,15 +7,9 @@ const crypto = require('crypto');
 
 const logger = require('../../utils/logger');
 
-// Use in-memory User model when using mock DB
-let User;
-if (process.env.USE_MOCK_DB === 'true') {
-  logger.info('Auth routes using In-Memory User model');
-  User = require('../../models/User.memory');
-} else {
-  logger.info('Auth routes using MongoDB User model');
-  User = require('../../models/User');
-}
+// Always use MongoDB User model for auth
+const User = require('../../models/User');
+logger.info('Auth routes using MongoDB User model');
 const {
   authLimiter,
   passwordLimiter,

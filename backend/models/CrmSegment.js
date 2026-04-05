@@ -29,4 +29,4 @@ crmSegmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CrmSegment', crmSegmentSchema);
+module.exports = mongoose.models.CrmSegment || mongoose.model('CrmSegment', crmSegmentSchema);

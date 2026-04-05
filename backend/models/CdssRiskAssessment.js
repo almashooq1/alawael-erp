@@ -50,4 +50,6 @@ cdssRiskAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CdssRiskAssessment', cdssRiskAssessmentSchema);
+module.exports =
+  mongoose.models.CdssRiskAssessment ||
+  mongoose.model('CdssRiskAssessment', cdssRiskAssessmentSchema);

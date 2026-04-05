@@ -49,4 +49,5 @@ therapistAvailabilitySchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.TherapistAvailability ||
+  mongoose.models.TherapistAvailability ||
   mongoose.model('TherapistAvailability', therapistAvailabilitySchema);

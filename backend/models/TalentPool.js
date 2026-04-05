@@ -59,4 +59,4 @@ talentPoolSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('TalentPool', talentPoolSchema);
+module.exports = mongoose.models.TalentPool || mongoose.model('TalentPool', talentPoolSchema);

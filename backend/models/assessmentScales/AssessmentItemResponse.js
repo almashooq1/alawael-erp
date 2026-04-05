@@ -115,4 +115,5 @@ assessmentItemResponseSchema.statics.countAnswered = function (assessmentId) {
 module.exports =
   mongoose.models.AssessmentItemResponse ||
   mongoose.models.AssessmentItemResponse ||
+  mongoose.models.AssessmentItemResponse ||
   mongoose.model('AssessmentItemResponse', assessmentItemResponseSchema);

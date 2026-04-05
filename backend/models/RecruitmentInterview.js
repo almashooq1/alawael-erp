@@ -60,4 +60,6 @@ recruitmentInterviewSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('RecruitmentInterview', recruitmentInterviewSchema);
+module.exports =
+  mongoose.models.RecruitmentInterview ||
+  mongoose.model('RecruitmentInterview', recruitmentInterviewSchema);

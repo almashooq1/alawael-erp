@@ -57,4 +57,5 @@ communityReferralSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('CommunityReferral', communityReferralSchema);
+module.exports =
+  mongoose.models.CommunityReferral || mongoose.model('CommunityReferral', communityReferralSchema);

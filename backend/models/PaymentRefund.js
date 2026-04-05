@@ -53,4 +53,5 @@ paymentRefundSchema.index({ transactionId: 1 });
 paymentRefundSchema.index({ gatewayRefundId: 1 });
 paymentRefundSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('PaymentRefund', paymentRefundSchema);
+module.exports =
+  mongoose.models.PaymentRefund || mongoose.model('PaymentRefund', paymentRefundSchema);

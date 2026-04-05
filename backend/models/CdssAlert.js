@@ -65,4 +65,4 @@ cdssAlertSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CdssAlert', cdssAlertSchema);
+module.exports = mongoose.models.CdssAlert || mongoose.model('CdssAlert', cdssAlertSchema);

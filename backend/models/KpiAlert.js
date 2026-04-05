@@ -54,4 +54,4 @@ kpiAlertSchema.index({ status: 1, severity: 1 });
 kpiAlertSchema.index({ branchId: 1, status: 1 });
 kpiAlertSchema.index({ isRead: 1 });
 
-module.exports = mongoose.model('KpiAlert', kpiAlertSchema);
+module.exports = mongoose.models.KpiAlert || mongoose.model('KpiAlert', kpiAlertSchema);

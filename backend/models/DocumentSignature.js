@@ -40,4 +40,5 @@ const documentSignatureSchema = new mongoose.Schema(
 documentSignatureSchema.index({ documentId: 1, signOrder: 1 });
 documentSignatureSchema.index({ signerId: 1, status: 1 });
 
-module.exports = mongoose.model('DocumentSignature', documentSignatureSchema);
+module.exports =
+  mongoose.models.DocumentSignature || mongoose.model('DocumentSignature', documentSignatureSchema);

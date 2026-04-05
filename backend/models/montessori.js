@@ -157,5 +157,6 @@ module.exports = {
     mongoose.models.MontessoriProgram ||
     mongoose.models.MontessoriProgram ||
     mongoose.models.MontessoriProgram ||
+    mongoose.models.MontessoriProgram ||
     mongoose.model('MontessoriProgram', MontessoriProgramSchema),
 };

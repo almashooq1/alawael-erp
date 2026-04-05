@@ -392,6 +392,7 @@ module.exports = {
   InsuranceContract:
     mongoose.models.InsuranceContract ||
     mongoose.models.InsuranceContract ||
+    mongoose.models.InsuranceContract ||
     mongoose.model('InsuranceContract', InsuranceContractSchema),
   PreAuthorization:
     mongoose.models.PreAuthorization || mongoose.model('PreAuthorization', PreAuthorizationSchema),

@@ -34,4 +34,5 @@ discussionForumSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DiscussionForum', discussionForumSchema);
+module.exports =
+  mongoose.models.DiscussionForum || mongoose.model('DiscussionForum', discussionForumSchema);

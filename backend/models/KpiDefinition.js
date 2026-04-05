@@ -58,4 +58,5 @@ kpiDefinitionSchema.index({ categoryId: 1, isActive: 1 });
 kpiDefinitionSchema.index({ code: 1 });
 kpiDefinitionSchema.index({ showOnDashboard: 1 });
 
-module.exports = mongoose.model('KpiDefinition', kpiDefinitionSchema);
+module.exports =
+  mongoose.models.KpiDefinition || mongoose.model('KpiDefinition', kpiDefinitionSchema);

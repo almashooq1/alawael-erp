@@ -46,4 +46,4 @@ drugLibrarySchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DrugLibrary', drugLibrarySchema);
+module.exports = mongoose.models.DrugLibrary || mongoose.model('DrugLibrary', drugLibrarySchema);

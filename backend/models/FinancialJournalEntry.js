@@ -227,4 +227,5 @@ journalEntrySchema.path('credit').validate(function (value) {
 module.exports =
   mongoose.models.FinancialJournalEntry ||
   mongoose.models.FinancialJournalEntry ||
+  mongoose.models.FinancialJournalEntry ||
   mongoose.model('FinancialJournalEntry', journalEntrySchema);

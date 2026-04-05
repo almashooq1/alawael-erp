@@ -358,12 +358,20 @@ teleconsultationParticipantSchema.index({ teleconsultation: 1, participantType: 
 // ─── Exports ─────────────────────────────────────────────────────────────────
 
 module.exports = {
-  Teleconsultation: mongoose.model('Teleconsultation', teleconsultationSchema),
-  VirtualSession: mongoose.model('VirtualSession', virtualSessionSchema),
-  RemotePrescription: mongoose.model('RemotePrescription', remotePrescriptionSchema),
-  TelehealthWaitingRoom: mongoose.model('TelehealthWaitingRoom', telehealthWaitingRoomSchema),
-  SessionRecording: mongoose.model('SessionRecording', sessionRecordingSchema),
-  TelehealthDevice: mongoose.model('TelehealthDevice', telehealthDeviceSchema),
+  Teleconsultation:
+    mongoose.models.Teleconsultation || mongoose.model('Teleconsultation', teleconsultationSchema),
+  VirtualSession:
+    mongoose.models.VirtualSession || mongoose.model('VirtualSession', virtualSessionSchema),
+  RemotePrescription:
+    mongoose.models.RemotePrescription ||
+    mongoose.model('RemotePrescription', remotePrescriptionSchema),
+  TelehealthWaitingRoom:
+    mongoose.models.TelehealthWaitingRoom ||
+    mongoose.model('TelehealthWaitingRoom', telehealthWaitingRoomSchema),
+  SessionRecording:
+    mongoose.models.SessionRecording || mongoose.model('SessionRecording', sessionRecordingSchema),
+  TelehealthDevice:
+    mongoose.models.TelehealthDevice || mongoose.model('TelehealthDevice', telehealthDeviceSchema),
   ProviderAvailabilitySlot: mongoose.model(
     'ProviderAvailabilitySlot',
     providerAvailabilitySlotSchema

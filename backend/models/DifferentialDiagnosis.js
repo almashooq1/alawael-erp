@@ -40,4 +40,6 @@ differentialDiagnosisSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('DifferentialDiagnosis', differentialDiagnosisSchema);
+module.exports =
+  mongoose.models.DifferentialDiagnosis ||
+  mongoose.model('DifferentialDiagnosis', differentialDiagnosisSchema);

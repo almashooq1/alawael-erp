@@ -45,4 +45,5 @@ branchSettingSchema.methods.getParsedValue = function () {
   }
 };
 
-module.exports = mongoose.model('BranchSetting', branchSettingSchema);
+module.exports =
+  mongoose.models.BranchSetting || mongoose.model('BranchSetting', branchSettingSchema);

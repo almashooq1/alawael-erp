@@ -50,4 +50,6 @@ insuranceEligibilityCheckSchema.index({ beneficiaryId: 1, isEligible: 1 });
 insuranceEligibilityCheckSchema.index({ nphiesCheckId: 1 });
 insuranceEligibilityCheckSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('InsuranceEligibilityCheck', insuranceEligibilityCheckSchema);
+module.exports =
+  mongoose.models.InsuranceEligibilityCheck ||
+  mongoose.model('InsuranceEligibilityCheck', insuranceEligibilityCheckSchema);

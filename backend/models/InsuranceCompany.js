@@ -52,4 +52,5 @@ insuranceCompanySchema.index({ cchiCode: 1 });
 insuranceCompanySchema.index({ nphiesId: 1 });
 insuranceCompanySchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('InsuranceCompany', insuranceCompanySchema);
+module.exports =
+  mongoose.models.InsuranceCompany || mongoose.model('InsuranceCompany', insuranceCompanySchema);

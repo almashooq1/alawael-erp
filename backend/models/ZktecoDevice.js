@@ -50,4 +50,4 @@ zktecoDeviceSchema.index({ status: 1 });
 zktecoDeviceSchema.index({ ipAddress: 1 });
 zktecoDeviceSchema.index({ serialNumber: 1 });
 
-module.exports = mongoose.model('ZktecoDevice', zktecoDeviceSchema);
+module.exports = mongoose.models.ZktecoDevice || mongoose.model('ZktecoDevice', zktecoDeviceSchema);

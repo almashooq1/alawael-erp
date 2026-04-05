@@ -44,4 +44,6 @@ prescriptionValidationSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('PrescriptionValidation', prescriptionValidationSchema);
+module.exports =
+  mongoose.models.PrescriptionValidation ||
+  mongoose.model('PrescriptionValidation', prescriptionValidationSchema);

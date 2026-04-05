@@ -345,6 +345,7 @@ module.exports = {
   FamilyCommunication:
     mongoose.models.FamilyCommunication ||
     mongoose.models.FamilyCommunication ||
+    mongoose.models.FamilyCommunication ||
     mongoose.model('FamilyCommunication', familyCommunicationSchema),
   MedicalRecords:
     mongoose.models.MedicalRecords || mongoose.model('MedicalRecords', medicalRecordsSchema),

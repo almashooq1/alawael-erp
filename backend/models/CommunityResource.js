@@ -63,4 +63,5 @@ communityResourceSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('CommunityResource', communityResourceSchema);
+module.exports =
+  mongoose.models.CommunityResource || mongoose.model('CommunityResource', communityResourceSchema);

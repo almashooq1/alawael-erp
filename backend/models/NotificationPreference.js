@@ -33,4 +33,6 @@ const notificationPreferenceSchema = new mongoose.Schema(
 
 notificationPreferenceSchema.index({ userId: 1, category: 1 }, { unique: true });
 
-module.exports = mongoose.model('NotificationPreference', notificationPreferenceSchema);
+module.exports =
+  mongoose.models.NotificationPreference ||
+  mongoose.model('NotificationPreference', notificationPreferenceSchema);

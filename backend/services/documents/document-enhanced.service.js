@@ -8,7 +8,7 @@ const DocumentVersion = require('../../models/DocumentVersion');
 const DocumentSignature = require('../../models/DocumentSignature');
 const DocumentAccessLog = require('../../models/DocumentAccessLog');
 const DocumentShare = require('../../models/DocumentShare');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const logger = require('../../utils/logger');
 
 /**

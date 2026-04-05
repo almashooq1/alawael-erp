@@ -361,9 +361,12 @@ crmFeedbackSchema.pre('save', function (next) {
 });
 
 // ── Exports ───────────────────────────────────────────────────────────────
-const ComplaintCategory = mongoose.model('ComplaintCategory', complaintCategorySchema);
-const ComplaintSlaConfig = mongoose.model('ComplaintSlaConfig', complaintSlaConfigSchema);
-const ComplaintV2 = mongoose.model('ComplaintV2', complaintV2Schema);
-const CrmFeedback = mongoose.model('CrmFeedback', crmFeedbackSchema);
+const ComplaintCategory =
+  mongoose.models.ComplaintCategory || mongoose.model('ComplaintCategory', complaintCategorySchema);
+const ComplaintSlaConfig =
+  mongoose.models.ComplaintSlaConfig ||
+  mongoose.model('ComplaintSlaConfig', complaintSlaConfigSchema);
+const ComplaintV2 = mongoose.models.ComplaintV2 || mongoose.model('ComplaintV2', complaintV2Schema);
+const CrmFeedback = mongoose.models.CrmFeedback || mongoose.model('CrmFeedback', crmFeedbackSchema);
 
 module.exports = { ComplaintCategory, ComplaintSlaConfig, ComplaintV2, CrmFeedback };

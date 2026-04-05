@@ -52,4 +52,6 @@ rehabPlanSuggestionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('RehabPlanSuggestion', rehabPlanSuggestionSchema);
+module.exports =
+  mongoose.models.RehabPlanSuggestion ||
+  mongoose.model('RehabPlanSuggestion', rehabPlanSuggestionSchema);

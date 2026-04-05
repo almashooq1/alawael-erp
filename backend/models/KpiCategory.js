@@ -29,4 +29,4 @@ const kpiCategorySchema = new Schema(
 kpiCategorySchema.index({ code: 1 });
 kpiCategorySchema.index({ isActive: 1 });
 
-module.exports = mongoose.model('KpiCategory', kpiCategorySchema);
+module.exports = mongoose.models.KpiCategory || mongoose.model('KpiCategory', kpiCategorySchema);

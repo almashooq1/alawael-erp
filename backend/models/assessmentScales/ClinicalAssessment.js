@@ -339,4 +339,5 @@ clinicalAssessmentSchema.statics.getBeneficiaryTimeline = async function (benefi
 module.exports =
   mongoose.models.ClinicalAssessment ||
   mongoose.models.ClinicalAssessment ||
+  mongoose.models.ClinicalAssessment ||
   mongoose.model('ClinicalAssessment', clinicalAssessmentSchema);

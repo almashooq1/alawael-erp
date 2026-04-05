@@ -66,4 +66,5 @@ communityProgramSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('CommunityProgram', communityProgramSchema);
+module.exports =
+  mongoose.models.CommunityProgram || mongoose.model('CommunityProgram', communityProgramSchema);

@@ -64,4 +64,6 @@ paymentSubscriptionSchema.index({ beneficiaryId: 1, status: 1 });
 paymentSubscriptionSchema.index({ nextBillingDate: 1, status: 1 });
 paymentSubscriptionSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('PaymentSubscription', paymentSubscriptionSchema);
+module.exports =
+  mongoose.models.PaymentSubscription ||
+  mongoose.model('PaymentSubscription', paymentSubscriptionSchema);

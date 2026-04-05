@@ -45,4 +45,4 @@ const roomSchema = new mongoose.Schema(
 roomSchema.index({ branchId: 1, code: 1 }, { unique: true });
 roomSchema.index({ branchId: 1, status: 1 });
 
-module.exports = mongoose.model('Room', roomSchema);
+module.exports = mongoose.models.Room || mongoose.model('Room', roomSchema);

@@ -72,4 +72,5 @@ communityDonationSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('CommunityDonation', communityDonationSchema);
+module.exports =
+  mongoose.models.CommunityDonation || mongoose.model('CommunityDonation', communityDonationSchema);

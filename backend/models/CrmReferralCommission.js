@@ -35,4 +35,6 @@ crmReferralCommissionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CrmReferralCommission', crmReferralCommissionSchema);
+module.exports =
+  mongoose.models.CrmReferralCommission ||
+  mongoose.model('CrmReferralCommission', crmReferralCommissionSchema);

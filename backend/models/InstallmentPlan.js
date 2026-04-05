@@ -78,4 +78,5 @@ installmentPlanSchema.index({ provider: 1, status: 1 });
 installmentPlanSchema.index({ providerPlanId: 1 });
 installmentPlanSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('InstallmentPlan', installmentPlanSchema);
+module.exports =
+  mongoose.models.InstallmentPlan || mongoose.model('InstallmentPlan', installmentPlanSchema);

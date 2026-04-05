@@ -46,4 +46,5 @@ appointmentRecurrenceSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.AppointmentRecurrence ||
+  mongoose.models.AppointmentRecurrence ||
   mongoose.model('AppointmentRecurrence', appointmentRecurrenceSchema);

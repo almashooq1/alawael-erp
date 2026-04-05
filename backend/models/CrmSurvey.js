@@ -58,4 +58,4 @@ crmSurveySchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CrmSurvey', crmSurveySchema);
+module.exports = mongoose.models.CrmSurvey || mongoose.model('CrmSurvey', crmSurveySchema);

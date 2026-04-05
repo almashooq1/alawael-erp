@@ -79,4 +79,4 @@ jobPostingSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('JobPosting', jobPostingSchema);
+module.exports = mongoose.models.JobPosting || mongoose.model('JobPosting', jobPostingSchema);

@@ -59,4 +59,6 @@ volunteerAssignmentSchema.pre(/^find/, function () {
   if (this.getFilter().deletedAt === undefined) this.where({ deletedAt: null });
 });
 
-module.exports = mongoose.model('VolunteerAssignment', volunteerAssignmentSchema);
+module.exports =
+  mongoose.models.VolunteerAssignment ||
+  mongoose.model('VolunteerAssignment', volunteerAssignmentSchema);

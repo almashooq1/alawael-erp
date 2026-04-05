@@ -84,4 +84,6 @@ notificationTemplateSchema.methods.render = function (locale = 'ar', data = {}) 
   return { subject, body };
 };
 
-module.exports = mongoose.model('NotificationTemplate', notificationTemplateSchema);
+module.exports =
+  mongoose.models.NotificationTemplate ||
+  mongoose.model('NotificationTemplate', notificationTemplateSchema);

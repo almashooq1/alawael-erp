@@ -11,7 +11,7 @@
 
 require('express-async-errors'); // global async error catching — no more silent promise rejections
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 // Fallback: also load from project root if backend/.env not present
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { validateEnv } = require('./config/validateEnv');

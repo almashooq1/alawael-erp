@@ -68,4 +68,4 @@ crmCampaignSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CrmCampaign', crmCampaignSchema);
+module.exports = mongoose.models.CrmCampaign || mongoose.model('CrmCampaign', crmCampaignSchema);

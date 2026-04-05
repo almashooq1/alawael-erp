@@ -113,4 +113,5 @@ endOfServiceSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.EndOfServiceCalculation ||
+  mongoose.models.EndOfServiceCalculation ||
   mongoose.model('EndOfServiceCalculation', endOfServiceSchema);

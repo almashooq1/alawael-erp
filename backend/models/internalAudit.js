@@ -874,8 +874,10 @@ const SurpriseAudit =
 const NonConformanceReport =
   mongoose.models.NonConformanceReport ||
   mongoose.models.NonConformanceReport ||
+  mongoose.models.NonConformanceReport ||
   mongoose.model('NonConformanceReport', NonConformanceReportSchema);
 const CorrectivePreventiveAction =
+  mongoose.models.CorrectivePreventiveAction ||
   mongoose.models.CorrectivePreventiveAction ||
   mongoose.models.CorrectivePreventiveAction ||
   mongoose.model('CorrectivePreventiveAction', CorrectivePreventiveActionSchema);

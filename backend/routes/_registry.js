@@ -9,9 +9,22 @@
  *   mountAllRoutes(app, { authRateLimiter });
  */
 
+const express = require('express');
 const logger = require('../utils/logger');
 
 const { safeError } = require('../utils/safeError');
+
+// ─── Safe Require — returns empty router on failure ───────────────────────────
+function safeRequire(modulePath) {
+  try {
+    return require(modulePath);
+  } catch (err) {
+    logger.warn(`[safeRequire] Failed to load: ${modulePath} — ${err.message}`);
+    routeHealth.failed.push({ path: modulePath, module: modulePath, error: err.message });
+    return express.Router(); // return empty router so app.use() doesn't crash
+  }
+}
+
 // ─── Route Health Tracker ─────────────────────────────────────────────────────
 const routeHealth = {
   mounted: [],
@@ -29,335 +42,335 @@ const routeHealth = {
 // ─── Route Imports ───────────────────────────────────────────────────────────
 
 // Core API routes
-const authRoutes = require('../api/routes/auth.routes');
-const usersRoutes = require('../api/routes/users.routes');
-const modulesRoutes = require('../api/routes/modules.routes');
-const crmRoutes = require('../api/routes/crm.routes.advanced');
-const reportingRoutes = require('../api/routes/reporting.routes');
-const documentsRoutes = require('../api/routes/documents.routes');
-const notificationsRoutes = require('../routes/notifications.routes');
-const messagingRoutes = require('../routes/messaging.routes');
-const financeRoutes = require('../routes/finance.routes.unified');
-const financeAdvancedRoutes = require('../routes/finance.routes.advanced');
-const financeExtendedRoutes = require('../routes/finance.routes.extended');
-const financeProRoutes = require('../routes/finance.routes.pro');
-const financeEnterpriseRoutes = require('../routes/finance.routes.enterprise');
-const financeUltimateRoutes = require('../routes/finance.routes.ultimate');
-const financeEliteRoutes = require('../routes/finance.routes.elite');
-const integrationRoutes = require('../routes/integration.routes.minimal');
+const authRoutes = safeRequire('../api/routes/auth.routes');
+const usersRoutes = safeRequire('../api/routes/users.routes');
+const modulesRoutes = safeRequire('../api/routes/modules.routes');
+const crmRoutes = safeRequire('../api/routes/crm.routes.advanced');
+const reportingRoutes = safeRequire('../api/routes/reporting.routes');
+const documentsRoutes = safeRequire('../api/routes/documents.routes');
+const notificationsRoutes = safeRequire('../routes/notifications.routes');
+const messagingRoutes = safeRequire('../routes/messaging.routes');
+const financeRoutes = safeRequire('../routes/finance.routes.unified');
+const financeAdvancedRoutes = safeRequire('../routes/finance.routes.advanced');
+const financeExtendedRoutes = safeRequire('../routes/finance.routes.extended');
+const financeProRoutes = safeRequire('../routes/finance.routes.pro');
+const financeEnterpriseRoutes = safeRequire('../routes/finance.routes.enterprise');
+const financeUltimateRoutes = safeRequire('../routes/finance.routes.ultimate');
+const financeEliteRoutes = safeRequire('../routes/finance.routes.elite');
+const integrationRoutes = safeRequire('../routes/integration.routes.minimal');
 // NOTE: disability-rehabilitation (old .js) — الإصدار القديم. تمّ استبداله بـ disability-rehabilitation.routes.js
 //       (مثبّت لاحقاً عبر safeMount على /api/ و /api/v1/ معاً).
-const maintenanceRoutes = require('../routes/maintenance');
-const webhooksRoutes = require('../routes/webhooks');
-const assetRoutes = require('../routes/assets');
-const scheduleRoutes = require('../routes/schedules');
-const analyticsRoutes = require('../routes/analytics');
-const reportRoutes = require('../routes/reports');
+const maintenanceRoutes = safeRequire('../routes/maintenance');
+const webhooksRoutes = safeRequire('../routes/webhooks');
+const assetRoutes = safeRequire('../routes/assets');
+const scheduleRoutes = safeRequire('../routes/schedules');
+const analyticsRoutes = safeRequire('../routes/analytics');
+const reportRoutes = safeRequire('../routes/reports');
 
 // Existing route files
-const dashboardRoutes = require('../routes/dashboard');
-const searchRoutes = require('../routes/search');
-const validateRoutes = require('../routes/validate');
-const elearningRoutes = require('../routes/elearning');
-const orgBrandingRoutes = require('../routes/orgBranding');
+const dashboardRoutes = safeRequire('../routes/dashboard');
+const searchRoutes = safeRequire('../routes/search');
+const validateRoutes = safeRequire('../routes/validate');
+const elearningRoutes = safeRequire('../routes/elearning');
+const orgBrandingRoutes = safeRequire('../routes/orgBranding');
 
 // Real Mongoose CRUD routes (converted from frontend-api-stubs)
-const adminRouter = require('../routes/admin.real.routes');
-const accountRouter = require('../routes/account.real.routes');
-const paymentsRouter = require('../routes/payments.real.routes');
-const monitoringRouter = require('../routes/monitoring.real.routes');
-const aiPredictionsRouter = require('../routes/aiPredictions.real.routes');
-const aiAnalyticsRouter = require('../routes/ai-analytics.routes');
-const hrSystemRouter = require('../routes/hrSystem.real.routes');
-const integratedCareRouter = require('../routes/integratedCare.real.routes');
-const securityRouter = require('../routes/security.real.routes');
-const organizationRouter = require('../routes/organization.real.routes');
-const communicationsRouter = require('../routes/communications.real.routes');
-const aiCommRouter = require('../routes/aiCommunications.real.routes');
-const exportImportRouter = require('../routes/exportImport.real.routes');
-const exportsRouter = require('../routes/exports.real.routes');
-const studentReportsRouter = require('../routes/studentReports.real.routes');
-const rehabProgramsRouter = require('../routes/rehabPrograms.real.routes');
-const documentsSmartRouter = require('../routes/documentsSmart.real.routes');
-const studentsRouter = require('../routes/students.real.routes');
-const compensationRouter = require('../routes/compensation.real.routes');
-const disabilityRouter = require('../routes/disability.real.routes');
-const pmRouter = require('../routes/pm.real.routes');
-const analyticsExtraRouter = require('../routes/analyticsExtra.real.routes');
-const dashboardExtrasRouter = require('../routes/dashboardExtras.real.routes');
-const parentsRouter = require('../routes/parents.real.routes');
-const guardianPortalRouter = require('../routes/guardian.portal.routes');
+const adminRouter = safeRequire('../routes/admin.real.routes');
+const accountRouter = safeRequire('../routes/account.real.routes');
+const paymentsRouter = safeRequire('../routes/payments.real.routes');
+const monitoringRouter = safeRequire('../routes/monitoring.real.routes');
+const aiPredictionsRouter = safeRequire('../routes/aiPredictions.real.routes');
+const aiAnalyticsRouter = safeRequire('../routes/ai-analytics.routes');
+const hrSystemRouter = safeRequire('../routes/hrSystem.real.routes');
+const integratedCareRouter = safeRequire('../routes/integratedCare.real.routes');
+const securityRouter = safeRequire('../routes/security.real.routes');
+const organizationRouter = safeRequire('../routes/organization.real.routes');
+const communicationsRouter = safeRequire('../routes/communications.real.routes');
+const aiCommRouter = safeRequire('../routes/aiCommunications.real.routes');
+const exportImportRouter = safeRequire('../routes/exportImport.real.routes');
+const exportsRouter = safeRequire('../routes/exports.real.routes');
+const studentReportsRouter = safeRequire('../routes/studentReports.real.routes');
+const rehabProgramsRouter = safeRequire('../routes/rehabPrograms.real.routes');
+const documentsSmartRouter = safeRequire('../routes/documentsSmart.real.routes');
+const studentsRouter = safeRequire('../routes/students.real.routes');
+const compensationRouter = safeRequire('../routes/compensation.real.routes');
+const disabilityRouter = safeRequire('../routes/disability.real.routes');
+const pmRouter = safeRequire('../routes/pm.real.routes');
+const analyticsExtraRouter = safeRequire('../routes/analyticsExtra.real.routes');
+const dashboardExtrasRouter = safeRequire('../routes/dashboardExtras.real.routes');
+const parentsRouter = safeRequire('../routes/parents.real.routes');
+const guardianPortalRouter = safeRequire('../routes/guardian.portal.routes');
 
 // Previously Unmounted Route Files (CRUD-complete)
-const qiwaRoutes = require('../routes/qiwa.routes');
-const gosiRoutes = require('../routes/gosi.routes');
-const govIntegrationRoutes = require('../routes/governmentIntegration.routes');
-const disabilityCardRoutes = require('../routes/disabilityCard.routes');
-const ecommerceRoutes = require('../routes/ecommerce.routes');
-const { router: purchasingRoutes } = require('../routes/purchasing.routes.unified');
-const hrAdvancedRoutes = require('../routes/hr-advanced.routes');
-const communicationRoutes = require('../routes/communication.routes');
-const driversRoutes = require('../routes/drivers');
-const vehiclesRoutes = require('../routes/vehicles');
-const tripsRoutes = require('../routes/trips');
-const gpsRoutes = require('../routes/gps');
-const transportRoutesRouter = require('../routes/transportRoutes');
-const geofenceRoutes = require('../routes/geofences');
-const dispatchRoutes = require('../routes/dispatch');
-const fleetCostsRoutes = require('../routes/fleetCosts');
-const fleetTiresRoutes = require('../routes/fleetTires');
-const fleetSafetyRoutes = require('../routes/fleetSafety');
-const fleetFuelCardsRoutes = require('../routes/fleetFuelCards');
-const fleetInspectionsRoutes = require('../routes/fleetInspections');
-const driverTrainingRoutes = require('../routes/driverTraining');
-const vehicleInsuranceRoutes = require('../routes/vehicleInsurance');
-const fleetKPIRoutes = require('../routes/fleetKPI');
-const driverShiftsRoutes = require('../routes/driverShifts');
-const fleetComplianceRoutes = require('../routes/fleetCompliance');
-const trafficFinesRoutes = require('../routes/trafficFines');
-const fleetDocumentRoutes = require('../routes/fleetDocuments');
-const fleetPartRoutes = require('../routes/fleetParts');
-const cargoRoutes = require('../routes/cargo');
-const fleetReservationRoutes = require('../routes/fleetReservations');
-const vehicleAssignmentRoutes = require('../routes/vehicleAssignments');
-const fleetParkingRoutes = require('../routes/fleetParking');
-const fleetAlertRoutes = require('../routes/fleetAlerts');
-const driverLeaveRoutes = require('../routes/driverLeaves');
-const fleetFuelRoutes = require('../routes/fleetFuel');
-const fleetTollRoutes = require('../routes/fleetTolls');
-const fleetAccidentRoutes = require('../routes/fleetAccidents');
-const fleetWarrantyRoutes = require('../routes/fleetWarranties');
-const fleetRoutePlanRoutes = require('../routes/fleetRoutePlans');
-const fleetCommunicationRoutes = require('../routes/fleetCommunications');
-const fleetPenaltyRoutes = require('../routes/fleetPenalties');
-const fleetDisposalRoutes = require('../routes/fleetDisposals');
-const cmsRoutes = require('../routes/cms');
-const communityRoutes = require('../routes/community');
-const knowledgeRoutes = require('../routes/knowledge');
-const rbacAdvancedRoutes = require('../routes/rbac-advanced.routes');
-const licensesRoutes = require('../routes/licenses');
-const caseManagementRoutes = require('../routes/caseManagement');
-const internalAuditRoutes = require('../routes/internalAudit');
-const qualityRoutes = require('../routes/quality');
-const equipmentRoutes = require('../routes/equipment');
-const predictionsRoutes = require('../routes/predictions.routes');
-const projectsRoutes = require('../routes/projects.routes');
-const branchesRoutes = require('../routes/branches.routes');
-const beneficiaryPortalRoutes = require('../routes/beneficiaryPortal');
-const beneficiariesAdminRoutes = require('../routes/beneficiaries');
-const communityIntegrationRoutes = require('../routes/communityIntegration.routes');
-const { studentRoutes: studentMgmtRoutes } = require('../students');
+const qiwaRoutes = safeRequire('../routes/qiwa.routes');
+const gosiRoutes = safeRequire('../routes/gosi.routes');
+const govIntegrationRoutes = safeRequire('../routes/governmentIntegration.routes');
+const disabilityCardRoutes = safeRequire('../routes/disabilityCard.routes');
+const ecommerceRoutes = safeRequire('../routes/ecommerce.routes');
+const { router: purchasingRoutes } = safeRequire('../routes/purchasing.routes.unified');
+const hrAdvancedRoutes = safeRequire('../routes/hr-advanced.routes');
+const communicationRoutes = safeRequire('../routes/communication.routes');
+const driversRoutes = safeRequire('../routes/drivers');
+const vehiclesRoutes = safeRequire('../routes/vehicles');
+const tripsRoutes = safeRequire('../routes/trips');
+const gpsRoutes = safeRequire('../routes/gps');
+const transportRoutesRouter = safeRequire('../routes/transportRoutes');
+const geofenceRoutes = safeRequire('../routes/geofences');
+const dispatchRoutes = safeRequire('../routes/dispatch');
+const fleetCostsRoutes = safeRequire('../routes/fleetCosts');
+const fleetTiresRoutes = safeRequire('../routes/fleetTires');
+const fleetSafetyRoutes = safeRequire('../routes/fleetSafety');
+const fleetFuelCardsRoutes = safeRequire('../routes/fleetFuelCards');
+const fleetInspectionsRoutes = safeRequire('../routes/fleetInspections');
+const driverTrainingRoutes = safeRequire('../routes/driverTraining');
+const vehicleInsuranceRoutes = safeRequire('../routes/vehicleInsurance');
+const fleetKPIRoutes = safeRequire('../routes/fleetKPI');
+const driverShiftsRoutes = safeRequire('../routes/driverShifts');
+const fleetComplianceRoutes = safeRequire('../routes/fleetCompliance');
+const trafficFinesRoutes = safeRequire('../routes/trafficFines');
+const fleetDocumentRoutes = safeRequire('../routes/fleetDocuments');
+const fleetPartRoutes = safeRequire('../routes/fleetParts');
+const cargoRoutes = safeRequire('../routes/cargo');
+const fleetReservationRoutes = safeRequire('../routes/fleetReservations');
+const vehicleAssignmentRoutes = safeRequire('../routes/vehicleAssignments');
+const fleetParkingRoutes = safeRequire('../routes/fleetParking');
+const fleetAlertRoutes = safeRequire('../routes/fleetAlerts');
+const driverLeaveRoutes = safeRequire('../routes/driverLeaves');
+const fleetFuelRoutes = safeRequire('../routes/fleetFuel');
+const fleetTollRoutes = safeRequire('../routes/fleetTolls');
+const fleetAccidentRoutes = safeRequire('../routes/fleetAccidents');
+const fleetWarrantyRoutes = safeRequire('../routes/fleetWarranties');
+const fleetRoutePlanRoutes = safeRequire('../routes/fleetRoutePlans');
+const fleetCommunicationRoutes = safeRequire('../routes/fleetCommunications');
+const fleetPenaltyRoutes = safeRequire('../routes/fleetPenalties');
+const fleetDisposalRoutes = safeRequire('../routes/fleetDisposals');
+const cmsRoutes = safeRequire('../routes/cms');
+const communityRoutes = safeRequire('../routes/community');
+const knowledgeRoutes = safeRequire('../routes/knowledge');
+const rbacAdvancedRoutes = safeRequire('../routes/rbac-advanced.routes');
+const licensesRoutes = safeRequire('../routes/licenses');
+const caseManagementRoutes = safeRequire('../routes/caseManagement');
+const internalAuditRoutes = safeRequire('../routes/internalAudit');
+const qualityRoutes = safeRequire('../routes/quality');
+const equipmentRoutes = safeRequire('../routes/equipment');
+const predictionsRoutes = safeRequire('../routes/predictions.routes');
+const projectsRoutes = safeRequire('../routes/projects.routes');
+const branchesRoutes = safeRequire('../routes/branches.routes');
+const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
+const beneficiariesAdminRoutes = safeRequire('../routes/beneficiaries');
+const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.routes');
+const { studentRoutes: studentMgmtRoutes } = safeRequire('../students');
 
 // Wave 2: Fixed Route Files (16 additional CRUD routes)
-const civilDefenseRoutes = require('../routes/civilDefense.routes');
-const smartAttendanceRoutes = require('../routes/smart_attendance.routes');
-const compensationBenefitsRoutes = require('../routes/compensation-benefits.routes');
-const attendanceRoutes = require('../routes/attendance.routes');
-const gratuityRoutes = require('../routes/gratuity.routes');
-const { router: inventoryUnifiedRoutes } = require('../routes/inventory.routes.unified');
-const supplyChainRoutes = require('../routes/supplyChain.routes');
-const hrUnifiedRoutes = require('../routes/hr.routes.unified');
-const trafficAccidentRoutes = require('../routes/trafficAccidents');
-const mfaRoutes = require('../routes/mfa');
-const ssoRoutes = require('../routes/sso.routes');
-const rbacRoutes = require('../routes/rbac.routes');
-const rbacAdminRoutes = require('../routes/rbac.admin.routes');
-const montessoriRoutes = require('../routes/montessori');
-const montessoriAuthRoutes = require('../routes/montessoriAuth');
-const measurementsRoutes = require('../routes/measurements.routes');
-const assessmentRoutes = require('../routes/assessment.routes');
-const successionPlanningRoutes = require('../routes/successionPlanning');
-const mobileAppRoutes = require('../routes/mobileApp.routes');
-const zktecoRoutes = require('../routes/zkteco.routes');
+const civilDefenseRoutes = safeRequire('../routes/civilDefense.routes');
+const smartAttendanceRoutes = safeRequire('../routes/smart_attendance.routes');
+const compensationBenefitsRoutes = safeRequire('../routes/compensation-benefits.routes');
+const attendanceRoutes = safeRequire('../routes/attendance.routes');
+const gratuityRoutes = safeRequire('../routes/gratuity.routes');
+const { router: inventoryUnifiedRoutes } = safeRequire('../routes/inventory.routes.unified');
+const supplyChainRoutes = safeRequire('../routes/supplyChain.routes');
+const hrUnifiedRoutes = safeRequire('../routes/hr.routes.unified');
+const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
+const mfaRoutes = safeRequire('../routes/mfa');
+const ssoRoutes = safeRequire('../routes/sso.routes');
+const rbacRoutes = safeRequire('../routes/rbac.routes');
+const rbacAdminRoutes = safeRequire('../routes/rbac.admin.routes');
+const montessoriRoutes = safeRequire('../routes/montessori');
+const montessoriAuthRoutes = safeRequire('../routes/montessoriAuth');
+const measurementsRoutes = safeRequire('../routes/measurements.routes');
+const assessmentRoutes = safeRequire('../routes/assessment.routes');
+const successionPlanningRoutes = safeRequire('../routes/successionPlanning');
+const mobileAppRoutes = safeRequire('../routes/mobileApp.routes');
+const zktecoRoutes = safeRequire('../routes/zkteco.routes');
 
 // HR Attendance Engine (محرك الحضور الموحد)
-const hrAttendanceRoutes = require('../routes/hr-attendance.routes');
+const hrAttendanceRoutes = safeRequire('../routes/hr-attendance.routes');
 
 // Administrative Systems Routes (الأنظمة الإدارية)
-const strategicPlanningRoutes = require('../routes/strategicPlanning.routes');
-const complaintsRoutes = require('../routes/complaints.routes');
-const facilitiesRoutes = require('../routes/facilities.routes');
+const strategicPlanningRoutes = safeRequire('../routes/strategicPlanning.routes');
+const complaintsRoutes = safeRequire('../routes/complaints.routes');
+const facilitiesRoutes = safeRequire('../routes/facilities.routes');
 
 // Education System Routes (نظام التعليم)
-const academicYearRoutes = require('../routes/academicYear.routes');
-const subjectsRoutes = require('../routes/subjects.routes');
-const teachersRoutes = require('../routes/teachers.routes');
-const classroomsRoutes = require('../routes/classrooms.routes');
-const curriculumRoutes = require('../routes/curriculum.routes');
-const timetableRoutes = require('../routes/timetable.routes');
-const examsRoutes = require('../routes/exams.routes');
-const gradebookRoutes = require('../routes/gradebook.routes');
+const academicYearRoutes = safeRequire('../routes/academicYear.routes');
+const subjectsRoutes = safeRequire('../routes/subjects.routes');
+const teachersRoutes = safeRequire('../routes/teachers.routes');
+const classroomsRoutes = safeRequire('../routes/classrooms.routes');
+const curriculumRoutes = safeRequire('../routes/curriculum.routes');
+const timetableRoutes = safeRequire('../routes/timetable.routes');
+const examsRoutes = safeRequire('../routes/exams.routes');
+const gradebookRoutes = safeRequire('../routes/gradebook.routes');
 
 // Specialized Assessment Scales & Rehab Program Templates (مقاييس التقييم المتخصصة وبرامج التأهيل)
-const specializedScalesRoutes = require('../routes/specializedScales.routes');
-const rehabProgramTemplatesRoutes = require('../routes/rehabProgramTemplates.routes');
+const specializedScalesRoutes = safeRequire('../routes/specializedScales.routes');
+const rehabProgramTemplatesRoutes = safeRequire('../routes/rehabProgramTemplates.routes');
 
 // Document Advanced Services (خدمات المستندات المتقدمة)
-const documentAdvancedRoutes = require('../routes/documentAdvanced.routes');
+const documentAdvancedRoutes = safeRequire('../routes/documentAdvanced.routes');
 
 // Electronic Archive System (نظام الأرشفة الإلكتروني)
-const archiveRoutes = require('../archive/archive-routes');
+const archiveRoutes = safeRequire('../archive/archive-routes');
 
 // Form Templates System (نظام النماذج الجاهزة)
-const formTemplateRoutes = require('../routes/formTemplates.routes');
+const formTemplateRoutes = safeRequire('../routes/formTemplates.routes');
 
 // Insurance Management System (نظام إدارة التأمين)
-const insuranceRoutes = require('../routes/insurance.routes');
+const insuranceRoutes = safeRequire('../routes/insurance.routes');
 
 // Media Library System (نظام مكتبة الوسائط)
-const mediaRoutes = require('../routes/media.routes');
+const mediaRoutes = safeRequire('../routes/media.routes');
 
 // HR Insurance Integration (تكامل تأمين الموظفين الصحي)
-const hrInsuranceRoutes = require('../routes/hr-insurance.routes');
+const hrInsuranceRoutes = safeRequire('../routes/hr-insurance.routes');
 
 // Therapy Sessions System (نظام الجلسات العلاجية)
-const therapySessionsRoutes = require('../routes/therapy-sessions.routes');
+const therapySessionsRoutes = safeRequire('../routes/therapy-sessions.routes');
 
 // Therapy Sessions Analytics (تحليلات الجلسات العلاجية المتقدمة)
-const therapySessionsAnalyticsRoutes = require('../routes/therapy-sessions-analytics.routes');
+const therapySessionsAnalyticsRoutes = safeRequire('../routes/therapy-sessions-analytics.routes');
 
 // Employee Affairs System (نظام شؤون الموظفين)
-const employeeAffairsRoutes = require('../routes/employeeAffairs.routes');
-const employeeAffairsExpandedRoutes = require('../routes/employeeAffairs.expanded.routes');
-const employeeAffairsPhase2Routes = require('../routes/employeeAffairs.phase2.routes');
-const employeeAffairsPhase3Routes = require('../routes/employeeAffairs.phase3.routes');
+const employeeAffairsRoutes = safeRequire('../routes/employeeAffairs.routes');
+const employeeAffairsExpandedRoutes = safeRequire('../routes/employeeAffairs.expanded.routes');
+const employeeAffairsPhase2Routes = safeRequire('../routes/employeeAffairs.phase2.routes');
+const employeeAffairsPhase3Routes = safeRequire('../routes/employeeAffairs.phase3.routes');
 
 // HR Smart System — AI, Analytics, Onboarding, Documents (النظام الذكي لشؤون الموظفين)
-const hrSmartRoutes = require('../routes/hr/smart.routes');
+const hrSmartRoutes = safeRequire('../routes/hr/smart.routes');
 
 // WhatsApp Communication System (نظام الوتساب)
-const whatsappRoutes = require('../communication/whatsapp-routes');
-const whatsappEnhancedRoutes = require('../communication/whatsapp-enhanced-routes');
+const whatsappRoutes = safeRequire('../communication/whatsapp-routes');
+const whatsappEnhancedRoutes = safeRequire('../communication/whatsapp-enhanced-routes');
 
 // Administrative Communications System (نظام الاتصالات الإدارية)
-const adminCommRoutes = require('../communication/administrative-communications-routes');
-const adminCommEnhancedRoutes = require('../communication/admin-comm-enhanced-routes');
-const electronicDirectivesRoutes = require('../communication/electronic-directives-routes');
+const adminCommRoutes = safeRequire('../communication/administrative-communications-routes');
+const adminCommEnhancedRoutes = safeRequire('../communication/admin-comm-enhanced-routes');
+const electronicDirectivesRoutes = safeRequire('../communication/electronic-directives-routes');
 
 // Student Portal Extended Services (خدمات بوابة الطالب الموسّعة)
-const studentComplaintsRoutes = require('../routes/studentComplaints.routes');
-const studentCertificatesRoutes = require('../routes/studentCertificates.routes');
-const studentHealthTrackerRoutes = require('../routes/studentHealthTracker.routes');
-const studentRewardsStoreRoutes = require('../routes/studentRewardsStore.routes');
-const studentEventsRoutes = require('../routes/studentEvents.routes');
-const studentElearningRoutes = require('../routes/studentElearning.routes');
+const studentComplaintsRoutes = safeRequire('../routes/studentComplaints.routes');
+const studentCertificatesRoutes = safeRequire('../routes/studentCertificates.routes');
+const studentHealthTrackerRoutes = safeRequire('../routes/studentHealthTracker.routes');
+const studentRewardsStoreRoutes = safeRequire('../routes/studentRewardsStore.routes');
+const studentEventsRoutes = safeRequire('../routes/studentEvents.routes');
+const studentElearningRoutes = safeRequire('../routes/studentElearning.routes');
 
 // Saudi Government Integrations (التكاملات الحكومية السعودية)
-const mudadRoutes = require('../routes/mudad.routes');
-const taqatRoutes = require('../routes/taqat.routes');
+const mudadRoutes = safeRequire('../routes/mudad.routes');
+const taqatRoutes = safeRequire('../routes/taqat.routes');
 
 // Disability Authority & CBAHI (هيئة رعاية ذوي الإعاقة ومعايير سباهي)
-const disabilityAuthorityRoutes = require('../routes/disabilityAuthority.routes');
+const disabilityAuthorityRoutes = safeRequire('../routes/disabilityAuthority.routes');
 
 // Treatment Authorization (إذن العلاج والموافقة المسبقة)
-const treatmentAuthorizationRoutes = require('../routes/treatmentAuthorization.routes');
+const treatmentAuthorizationRoutes = safeRequire('../routes/treatmentAuthorization.routes');
 
 // Family Satisfaction Surveys (استبيانات رضا الأسر)
-const familySatisfactionRoutes = require('../routes/familySatisfaction.routes');
+const familySatisfactionRoutes = safeRequire('../routes/familySatisfaction.routes');
 
 // Noor Integration (نظام نور — وزارة التعليم)
-const noorRoutes = require('../routes/noor.routes');
+const noorRoutes = safeRequire('../routes/noor.routes');
 
 // Gap-Fix Routes (خطط الرعاية, إعدادات النظام, الضريبة, العمليات المالية)
-const carePlanRoutes = require('../routes/carePlan.routes');
-const systemSettingsRoutes = require('../routes/systemSettings.routes');
-const saudiTaxRoutes = require('../routes/saudiTax.routes');
-const advancedSettingsRoutes = require('../routes/advancedSettings.routes');
-const financeOperationsRoutes = require('../routes/financeOperations.routes');
+const carePlanRoutes = safeRequire('../routes/carePlan.routes');
+const systemSettingsRoutes = safeRequire('../routes/systemSettings.routes');
+const saudiTaxRoutes = safeRequire('../routes/saudiTax.routes');
+const advancedSettingsRoutes = safeRequire('../routes/advancedSettings.routes');
+const financeOperationsRoutes = safeRequire('../routes/financeOperations.routes');
 
 // Branch Management System — نظام إدارة الفروع مع RBAC متقدم (12 فرع + HQ)
-const branchManagementRoutes = require('../routes/branch.routes');
+const branchManagementRoutes = safeRequire('../routes/branch.routes');
 
 // ─── الميزات الناقصة المضافة — Missing Features Added ────────────────────────
 // النماذج الناقصة من prompt_02 (MedicalHistory, BeneficiaryTransfer, EmergencyContact, LeaveBalance, EmploymentContract, ChartOfAccounts, AssessmentComparison)
-const missingModelsRoutes = require('../routes/missing-models.routes');
+const missingModelsRoutes = safeRequire('../routes/missing-models.routes');
 
 // ─── prompt_04: وحدة إدارة المستفيدين — Beneficiary Management Module ─────────
-const guardiansRoutes = require('../routes/guardians.routes');
-const disabilityAssessmentsRoutes = require('../routes/disability-assessments.routes');
-const beneficiaryTransfersRoutes = require('../routes/beneficiary-transfers.routes');
+const guardiansRoutes = safeRequire('../routes/guardians.routes');
+const disabilityAssessmentsRoutes = safeRequire('../routes/disability-assessments.routes');
+const beneficiaryTransfersRoutes = safeRequire('../routes/beneficiary-transfers.routes');
 
 // مقيم (Muqeem) — وزارة الداخلية
-const muqeemRoutes = require('../routes/muqeem.routes');
+const muqeemRoutes = safeRequire('../routes/muqeem.routes');
 // مقيم الكامل (Muqeem Full) — إقامات + تأشيرات + نقل خدمات + تنبيهات ذكية (البرومبت 16)
-const muqeemFullRoutes = require('../routes/muqeem-full.routes');
+const muqeemFullRoutes = safeRequire('../routes/muqeem-full.routes');
 // GOSI Full — التأمينات الاجتماعية الكاملة + مكافأة نهاية الخدمة (البرومبت 17)
-const gosiFullRoutes = require('../routes/gosi-full.routes');
+const gosiFullRoutes = safeRequire('../routes/gosi-full.routes');
 // نطاقات + WPS + عقود قوى (البرومبت 18) — Nitaqat + WPS + Qiwa Contracts
-const nitaqatRoutes = require('../routes/nitaqat.routes');
+const nitaqatRoutes = safeRequire('../routes/nitaqat.routes');
 // حماية البيانات الشخصية PDPL (البرومبت 19)
-const pdplRoutes = require('../routes/pdpl.routes');
+const pdplRoutes = safeRequire('../routes/pdpl.routes');
 // ZATCA Phase 2 — الفوترة الإلكترونية المرحلة الثانية
-const zatcaPhase2Routes = require('../routes/zatca-phase2.routes');
+const zatcaPhase2Routes = safeRequire('../routes/zatca-phase2.routes');
 // NPHIES — المنصة الوطنية للمعلومات الصحية والتأمينية
-const nphiesRoutes = require('../routes/nphies.routes');
+const nphiesRoutes = safeRequire('../routes/nphies.routes');
 // Enhanced Audit — سجل التدقيق المحسّن
 const { router: enhancedAuditRouter } = require('../middleware/enhancedAudit.middleware');
 
 // ─── prompt_05: وحدة التأهيل والبرامج — Rehabilitation & Programs Module ────
-const rehabProgramsModuleRoutes = require('../routes/rehab-programs-module.routes');
+const rehabProgramsModuleRoutes = safeRequire('../routes/rehab-programs-module.routes');
 
 // ─── prompt_06: وحدة المقاييس والتقييمات السريرية — Assessment Scales & Clinical Assessments Module ────
-const assessmentScalesRoutes = require('../routes/assessment-scales.routes');
+const assessmentScalesRoutes = safeRequire('../routes/assessment-scales.routes');
 
 // ─── prompt_07: الوحدات التشغيلية — HR + Finance + Transport + Scheduling ────
-const hrModuleRoutes = require('../routes/hr-module.routes');
-const financeModuleRoutes = require('../routes/finance-module.routes');
-const transportModuleRoutes = require('../routes/transport-module.routes');
-const schedulingModuleRoutes = require('../routes/scheduling-module.routes');
+const hrModuleRoutes = safeRequire('../routes/hr-module.routes');
+const financeModuleRoutes = safeRequire('../routes/finance-module.routes');
+const transportModuleRoutes = safeRequire('../routes/transport-module.routes');
+const schedulingModuleRoutes = safeRequire('../routes/scheduling-module.routes');
 
 // ─── prompt_08: التواصل + الملفات + المخزون + الجودة ────────────────────────
-const communicationModuleRoutes = require('../routes/communication-module.routes');
-const filesModuleRoutes = require('../routes/files-module.routes');
-const inventoryModuleRoutes = require('../routes/inventory-module.routes');
-const qualityModuleRoutes = require('../routes/quality-module.routes');
+const communicationModuleRoutes = safeRequire('../routes/communication-module.routes');
+const filesModuleRoutes = safeRequire('../routes/files-module.routes');
+const inventoryModuleRoutes = safeRequire('../routes/inventory-module.routes');
+const qualityModuleRoutes = safeRequire('../routes/quality-module.routes');
 
 // ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────────
-const notificationEnhancedRoutes = require('../routes/notification-enhanced.routes');
-const documentEnhancedRoutes = require('../routes/document-enhanced.routes');
-const branchEnhancedRoutes = require('../routes/branch-enhanced.routes');
-const inventoryEnhancedRoutes = require('../routes/inventory-enhanced.routes');
-const qualityEnhancedRoutes = require('../routes/quality-enhanced.routes');
+const notificationEnhancedRoutes = safeRequire('../routes/notification-enhanced.routes');
+const documentEnhancedRoutes = safeRequire('../routes/document-enhanced.routes');
+const branchEnhancedRoutes = safeRequire('../routes/branch-enhanced.routes');
+const inventoryEnhancedRoutes = safeRequire('../routes/inventory-enhanced.routes');
+const qualityEnhancedRoutes = safeRequire('../routes/quality-enhanced.routes');
 
 // ─── prompt_09: التقارير والتحليلات — Reports & Analytics Module ─────────────
-const reportsAnalyticsModuleRoutes = require('../routes/reports-analytics-module.routes');
+const reportsAnalyticsModuleRoutes = safeRequire('../routes/reports-analytics-module.routes');
 
 // ─── prompt_21: بوابة ولي الأمر المحسّنة — Parent Portal Enhanced (PWA) ───────
-const parentPortalEnhancedRoutes = require('../routes/parent-portal-enhanced.routes');
+const parentPortalEnhancedRoutes = safeRequire('../routes/parent-portal-enhanced.routes');
 
 // ─── prompt_22: نظام التذاكر الشامل — Ticketing & Support System ──────────────
-const ticketingSystemRoutes = require('../routes/ticketing-system.routes');
+const ticketingSystemRoutes = safeRequire('../routes/ticketing-system.routes');
 
 // ─── prompt_23: سجل التدقيق الشامل المحسّن — Audit Trail Enhanced ─────────────
-const auditTrailEnhancedRoutes = require('../routes/audit-trail-enhanced.routes');
+const auditTrailEnhancedRoutes = safeRequire('../routes/audit-trail-enhanced.routes');
 
 // ─── prompt_24: نظام الإعدادات المركزي — Central Settings System ──────────────
-const centralSettingsRoutes = require('../routes/central-settings.routes');
+const centralSettingsRoutes = safeRequire('../routes/central-settings.routes');
 
 // ─── prompt_26: وحدة الطب عن بعد — Telehealth & Remote Consultation Module ────
-const telehealthRoutes = require('../routes/telehealth.routes');
+const telehealthRoutes = safeRequire('../routes/telehealth.routes');
 
 // ─── prompt_27: بوابة التحويلات الطبية — Medical Referral Portal ─────────────
-const referralPortalRoutes = require('../routes/referral.routes');
+const referralPortalRoutes = safeRequire('../routes/referral.routes');
 
 // ─── prompt_28: نظام IoT والأجهزة القابلة للارتداء — IoT & Wearables System ──
-const iotWearablesRoutes = require('../routes/iot-wearables.routes');
+const iotWearablesRoutes = safeRequire('../routes/iot-wearables.routes');
 
 // ─── prompt_29: نظام التأهيل بالألعاب المحسّن — Gamification Enhanced System ──
-const gamificationEnhancedRoutes = require('../routes/gamification-enhanced.routes');
+const gamificationEnhancedRoutes = safeRequire('../routes/gamification-enhanced.routes');
 
 // ─── prompt_30: CRM وإدارة علاقات العملاء — CRM Enhanced ─────────────────────
-const crmEnhancedRoutes = require('../routes/crm-enhanced.routes');
+const crmEnhancedRoutes = safeRequire('../routes/crm-enhanced.routes');
 
 // ─── prompt_31: نظام الشكاوى والملاحظات المحسّن — Complaints Enhanced ──────────
-const complaintsEnhancedRoutes = require('../routes/complaints-enhanced.routes');
+const complaintsEnhancedRoutes = safeRequire('../routes/complaints-enhanced.routes');
 
 // ─── prompt_19: CDSS + E-Learning Enhanced ────────────────────────────────
-const cdssRoutes = require('../routes/cdss.routes');
-const elearningEnhancedRoutes = require('../routes/elearning-enhanced.routes');
+const cdssRoutes = safeRequire('../routes/cdss.routes');
+const elearningEnhancedRoutes = safeRequire('../routes/elearning-enhanced.routes');
 
 // ─── Setup & Admin Init (محمي بـ SETUP_SECRET_KEY) ──────────────────────────
-const setupRoutes = require('../routes/setup.routes');
+const setupRoutes = safeRequire('../routes/setup.routes');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

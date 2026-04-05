@@ -48,4 +48,4 @@ kpiScorecardSchema.index({ branchId: 1, periodType: 1, periodYear: 1, periodNumb
 kpiScorecardSchema.index({ overallScore: 1 });
 kpiScorecardSchema.index({ rating: 1 });
 
-module.exports = mongoose.model('KpiScorecard', kpiScorecardSchema);
+module.exports = mongoose.models.KpiScorecard || mongoose.model('KpiScorecard', kpiScorecardSchema);

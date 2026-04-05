@@ -634,12 +634,15 @@ module.exports = {
   CompensationStructure:
     mongoose.models.CompensationStructure ||
     mongoose.models.CompensationStructure ||
+    mongoose.models.CompensationStructure ||
     mongoose.model('CompensationStructure', compensationStructureSchema),
   IndividualIncentive:
     mongoose.models.IndividualIncentive ||
     mongoose.models.IndividualIncentive ||
+    mongoose.models.IndividualIncentive ||
     mongoose.model('IndividualIncentive', individualIncentiveSchema),
   PerformancePenalty:
+    mongoose.models.PerformancePenalty ||
     mongoose.models.PerformancePenalty ||
     mongoose.models.PerformancePenalty ||
     mongoose.model('PerformancePenalty', performancePenaltySchema),

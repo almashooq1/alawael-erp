@@ -76,4 +76,5 @@ elearningCourseSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('ElearningCourse', elearningCourseSchema);
+module.exports =
+  mongoose.models.ElearningCourse || mongoose.model('ElearningCourse', elearningCourseSchema);

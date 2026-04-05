@@ -1029,8 +1029,10 @@ const AttendanceViaCameraSchema = new mongoose.Schema(
 const SmartAttendanceRecord =
   mongoose.models.SmartAttendanceRecord ||
   mongoose.models.SmartAttendanceRecord ||
+  mongoose.models.SmartAttendanceRecord ||
   mongoose.model('SmartAttendanceRecord', SmartAttendanceRecordSchema);
 const AttendanceBehaviorPattern =
+  mongoose.models.AttendanceBehaviorPattern ||
   mongoose.models.AttendanceBehaviorPattern ||
   mongoose.models.AttendanceBehaviorPattern ||
   mongoose.model('AttendanceBehaviorPattern', AttendanceBehaviorPatternSchema);
@@ -1039,16 +1041,20 @@ const AttendanceAppeal =
 const ParentNotificationPreferences =
   mongoose.models.ParentNotificationPreferences ||
   mongoose.models.ParentNotificationPreferences ||
+  mongoose.models.ParentNotificationPreferences ||
   mongoose.model('ParentNotificationPreferences', ParentNotificationPreferencesSchema);
 const BiometricEnrollment =
+  mongoose.models.BiometricEnrollment ||
   mongoose.models.BiometricEnrollment ||
   mongoose.models.BiometricEnrollment ||
   mongoose.model('BiometricEnrollment', BiometricEnrollmentSchema);
 const AttendanceAnomalyAlert =
   mongoose.models.AttendanceAnomalyAlert ||
   mongoose.models.AttendanceAnomalyAlert ||
+  mongoose.models.AttendanceAnomalyAlert ||
   mongoose.model('AttendanceAnomalyAlert', AttendanceAnomalyAlertSchema);
 const AttendanceSummaryReport =
+  mongoose.models.AttendanceSummaryReport ||
   mongoose.models.AttendanceSummaryReport ||
   mongoose.models.AttendanceSummaryReport ||
   mongoose.model('AttendanceSummaryReport', AttendanceSummaryReportSchema);
@@ -1059,10 +1065,12 @@ const BiometricDevice =
 const FaceRecognitionData =
   mongoose.models.FaceRecognitionData ||
   mongoose.models.FaceRecognitionData ||
+  mongoose.models.FaceRecognitionData ||
   mongoose.model('FaceRecognitionData', FaceRecognitionDataSchema);
 const FingerprintData =
   mongoose.models.FingerprintData || mongoose.model('FingerprintData', FingerprintDataSchema);
 const AttendanceViaCamera =
+  mongoose.models.AttendanceViaCamera ||
   mongoose.models.AttendanceViaCamera ||
   mongoose.models.AttendanceViaCamera ||
   mongoose.model('AttendanceViaCamera', AttendanceViaCameraSchema);

@@ -76,4 +76,6 @@ priorAuthorizationSchema.index({ nphiesAuthId: 1 });
 priorAuthorizationSchema.index({ validUntil: 1, status: 1 });
 priorAuthorizationSchema.index({ deletedAt: 1 });
 
-module.exports = mongoose.model('PriorAuthorization', priorAuthorizationSchema);
+module.exports =
+  mongoose.models.PriorAuthorization ||
+  mongoose.model('PriorAuthorization', priorAuthorizationSchema);

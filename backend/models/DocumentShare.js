@@ -42,4 +42,5 @@ documentShareSchema.index({ shareToken: 1 });
 documentShareSchema.index({ documentId: 1 });
 documentShareSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0, sparse: true });
 
-module.exports = mongoose.model('DocumentShare', documentShareSchema);
+module.exports =
+  mongoose.models.DocumentShare || mongoose.model('DocumentShare', documentShareSchema);

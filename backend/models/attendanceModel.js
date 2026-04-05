@@ -555,6 +555,7 @@ const LeaveBalance =
 const EmployeeAttendanceProfile =
   mongoose.models.EmployeeAttendanceProfile ||
   mongoose.models.EmployeeAttendanceProfile ||
+  mongoose.models.EmployeeAttendanceProfile ||
   mongoose.model('EmployeeAttendanceProfile', employeeAttendanceProfileSchema);
 const Absence = mongoose.models.Absence || mongoose.model('Absence', absenceSchema);
 const MonthlyReport =

@@ -40,4 +40,6 @@ const employeeShiftAssignmentSchema = new Schema(
 employeeShiftAssignmentSchema.index({ employeeId: 1, effectiveFrom: 1 });
 employeeShiftAssignmentSchema.index({ shiftId: 1, isActive: 1 });
 
-module.exports = mongoose.model('EmployeeShiftAssignment', employeeShiftAssignmentSchema);
+module.exports =
+  mongoose.models.EmployeeShiftAssignment ||
+  mongoose.model('EmployeeShiftAssignment', employeeShiftAssignmentSchema);

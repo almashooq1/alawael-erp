@@ -55,4 +55,4 @@ escalationSchema.index({ assignedTo: 1, status: 1 });
 escalationSchema.index({ escalatableType: 1, escalatableId: 1 });
 escalationSchema.index({ priority: 1, createdAt: -1 });
 
-module.exports = mongoose.model('Escalation', escalationSchema);
+module.exports = mongoose.models.Escalation || mongoose.model('Escalation', escalationSchema);

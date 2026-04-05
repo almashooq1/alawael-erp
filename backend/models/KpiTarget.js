@@ -54,4 +54,4 @@ kpiTargetSchema.index(
   { unique: true, sparse: true }
 );
 
-module.exports = mongoose.model('KpiTarget', kpiTargetSchema);
+module.exports = mongoose.models.KpiTarget || mongoose.model('KpiTarget', kpiTargetSchema);

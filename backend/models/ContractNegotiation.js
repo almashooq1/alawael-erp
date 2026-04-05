@@ -44,4 +44,5 @@ contractNegotiationSchema.index({ status: 1 });
 
 module.exports =
   mongoose.models.ContractNegotiation ||
+  mongoose.models.ContractNegotiation ||
   mongoose.model('ContractNegotiation', contractNegotiationSchema);

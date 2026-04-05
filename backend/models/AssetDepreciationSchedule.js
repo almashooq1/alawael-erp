@@ -39,4 +39,5 @@ assetDepreciationScheduleSchema.index({ status: 1 });
 
 module.exports =
   mongoose.models.AssetDepreciationSchedule ||
+  mongoose.models.AssetDepreciationSchedule ||
   mongoose.model('AssetDepreciationSchedule', assetDepreciationScheduleSchema);

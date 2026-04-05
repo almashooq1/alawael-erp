@@ -42,4 +42,5 @@ cdssDecisionLogSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CdssDecisionLog', cdssDecisionLogSchema);
+module.exports =
+  mongoose.models.CdssDecisionLog || mongoose.model('CdssDecisionLog', cdssDecisionLogSchema);

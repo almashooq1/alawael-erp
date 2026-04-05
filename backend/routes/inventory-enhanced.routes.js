@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const InventoryEnhancedService = require('../services/inventory/inventory-enhanced.service');
-
-const svc = new InventoryEnhancedService();
+const svc = require('../services/inventory/inventory-enhanced.service');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, async (req, res) => {

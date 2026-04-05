@@ -48,4 +48,4 @@ quizAttemptSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('QuizAttempt', quizAttemptSchema);
+module.exports = mongoose.models.QuizAttempt || mongoose.model('QuizAttempt', quizAttemptSchema);

@@ -65,4 +65,5 @@ employmentContractSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.EmploymentContract ||
+  mongoose.models.EmploymentContract ||
   mongoose.model('EmploymentContract', employmentContractSchema);

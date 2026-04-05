@@ -101,6 +101,7 @@ priorAuthorizationSchema.virtual('remainingSessions').get(function () {
 
 const PriorAuthorization =
   mongoose.models.PriorAuthorization ||
+  mongoose.models.PriorAuthorization ||
   mongoose.model('PriorAuthorization', priorAuthorizationSchema);
 
 module.exports = PriorAuthorization;

@@ -42,4 +42,6 @@ trainingComplianceSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('TrainingCompliance', trainingComplianceSchema);
+module.exports =
+  mongoose.models.TrainingCompliance ||
+  mongoose.model('TrainingCompliance', trainingComplianceSchema);

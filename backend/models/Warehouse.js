@@ -22,4 +22,4 @@ const warehouseSchema = new mongoose.Schema(
 
 warehouseSchema.index({ branchId: 1, isActive: 1 });
 
-module.exports = mongoose.model('Warehouse', warehouseSchema);
+module.exports = mongoose.models.Warehouse || mongoose.model('Warehouse', warehouseSchema);

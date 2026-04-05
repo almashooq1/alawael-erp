@@ -54,4 +54,5 @@ courseEnrollmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('CourseEnrollment', courseEnrollmentSchema);
+module.exports =
+  mongoose.models.CourseEnrollment || mongoose.model('CourseEnrollment', courseEnrollmentSchema);

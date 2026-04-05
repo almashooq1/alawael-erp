@@ -39,4 +39,6 @@ const attendancePolicySchema = new Schema(
 attendancePolicySchema.index({ isDefault: 1 });
 attendancePolicySchema.index({ isActive: 1 });
 
-module.exports = mongoose.model('AttendancePolicyModel', attendancePolicySchema);
+module.exports =
+  mongoose.models.AttendancePolicyModel ||
+  mongoose.model('AttendancePolicyModel', attendancePolicySchema);

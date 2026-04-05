@@ -254,10 +254,19 @@ fhirIntegrationLogSchema.index({ createdAt: -1 });
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 module.exports = {
-  ReferringFacility: mongoose.model('ReferringFacility', referringFacilitySchema),
-  Referral: mongoose.model('Referral', referralSchema),
-  ReferralDocument: mongoose.model('ReferralDocument', referralDocumentSchema),
-  ReferralCommunication: mongoose.model('ReferralCommunication', referralCommunicationSchema),
-  ReferralAssessment: mongoose.model('ReferralAssessment', referralAssessmentSchema),
-  FhirIntegrationLog: mongoose.model('FhirIntegrationLog', fhirIntegrationLogSchema),
+  ReferringFacility:
+    mongoose.models.ReferringFacility ||
+    mongoose.model('ReferringFacility', referringFacilitySchema),
+  Referral: mongoose.models.Referral || mongoose.model('Referral', referralSchema),
+  ReferralDocument:
+    mongoose.models.ReferralDocument || mongoose.model('ReferralDocument', referralDocumentSchema),
+  ReferralCommunication:
+    mongoose.models.ReferralCommunication ||
+    mongoose.model('ReferralCommunication', referralCommunicationSchema),
+  ReferralAssessment:
+    mongoose.models.ReferralAssessment ||
+    mongoose.model('ReferralAssessment', referralAssessmentSchema),
+  FhirIntegrationLog:
+    mongoose.models.FhirIntegrationLog ||
+    mongoose.model('FhirIntegrationLog', fhirIntegrationLogSchema),
 };

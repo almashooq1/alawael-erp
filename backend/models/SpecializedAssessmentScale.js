@@ -330,8 +330,10 @@ ScaleResultSchema.index({ status: 1 });
 const SpecializedAssessmentScale =
   mongoose.models.SpecializedAssessmentScale ||
   mongoose.models.SpecializedAssessmentScale ||
+  mongoose.models.SpecializedAssessmentScale ||
   mongoose.model('SpecializedAssessmentScale', SpecializedAssessmentScaleSchema);
 const SpecializedScaleResult =
+  mongoose.models.SpecializedScaleResult ||
   mongoose.models.SpecializedScaleResult ||
   mongoose.models.SpecializedScaleResult ||
   mongoose.model('SpecializedScaleResult', ScaleResultSchema);

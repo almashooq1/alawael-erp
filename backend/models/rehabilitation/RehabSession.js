@@ -81,6 +81,7 @@ sessionGoalProgressSchema.virtual('trials_summary').get(function () {
 const SessionGoalProgress =
   mongoose.models.SessionGoalProgress ||
   mongoose.models.SessionGoalProgress ||
+  mongoose.models.SessionGoalProgress ||
   mongoose.model('SessionGoalProgress', sessionGoalProgressSchema);
 
 // ══════════════════════════════════════════════════════════════

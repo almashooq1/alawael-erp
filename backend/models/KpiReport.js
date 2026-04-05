@@ -48,4 +48,4 @@ kpiReportSchema.index({ reportType: 1, status: 1 });
 kpiReportSchema.index({ periodFrom: 1 });
 kpiReportSchema.index({ branchId: 1, reportType: 1 });
 
-module.exports = mongoose.model('KpiReport', kpiReportSchema);
+module.exports = mongoose.models.KpiReport || mongoose.model('KpiReport', kpiReportSchema);

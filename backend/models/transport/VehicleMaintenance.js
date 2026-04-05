@@ -67,4 +67,5 @@ vehicleMaintenanceSchema.index({ deleted_at: 1 });
 
 module.exports =
   mongoose.models.VehicleMaintenance ||
+  mongoose.models.VehicleMaintenance ||
   mongoose.model('VehicleMaintenance', vehicleMaintenanceSchema);

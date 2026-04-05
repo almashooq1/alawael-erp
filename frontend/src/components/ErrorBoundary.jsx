@@ -22,7 +22,7 @@ class ErrorBoundary extends React.Component {
       error: null,
       errorInfo: null,
       errorCount: 0,
-      showDetails: false,
+      showDetails: true,
       retryCountdown: 0,
     };
     this._retryTimer = null;
@@ -138,7 +138,8 @@ class ErrorBoundary extends React.Component {
               </Button>
             </Box>
 
-            {process.env.NODE_ENV !== 'production' && (
+            {/* Always show error details for debugging */}
+            {true && (
               <>
                 <Button
                   variant="text"

@@ -280,6 +280,72 @@ jobs:
             echo "✅ Smart deploy complete"
           DEPLOY_FRONTEND
 
+      - name: Ensure nginx serves correct frontend path
+        if: needs.build-frontend.result == 'success'
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'NGINX_FIX'
+            set -e
+            FRONTEND_ROOT="/home/alawael/app/frontend/build"
+
+            echo "=== Current nginx config ==="
+            nginx -T 2>/dev/null | head -100
+            echo "=== END ==="
+
+            # Find which nginx config file serves the frontend
+            # Check sites-enabled, conf.d, or main nginx.conf
+            NGINX_CONF=""
+            for f in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
+              if [ -f "$f" ] && grep -q "443\|server_name.*alawael\|server_name.*alaweal" "$f" 2>/dev/null; then
+                NGINX_CONF="$f"
+                echo "Found nginx config: $f"
+                break
+              fi
+            done
+
+            if [ -z "$NGINX_CONF" ]; then
+              NGINX_CONF="/etc/nginx/sites-enabled/default"
+              echo "Using default: $NGINX_CONF"
+            fi
+
+            echo "Current config:"
+            cat "$NGINX_CONF" 2>/dev/null | head -50
+
+            # Check what root is configured
+            CURRENT_ROOT=$(grep -oP 'root\s+\K[^;]+' "$NGINX_CONF" 2>/dev/null | head -1 | tr -d ' ' || true)
+            echo "Current root: ${CURRENT_ROOT:-NOT FOUND}"
+
+            if [ -n "$CURRENT_ROOT" ] && [ "$CURRENT_ROOT" != "$FRONTEND_ROOT" ]; then
+              echo "Root mismatch! Copying files from $FRONTEND_ROOT to $CURRENT_ROOT"
+              mkdir -p "$CURRENT_ROOT"
+              cp -r "$FRONTEND_ROOT"/* "$CURRENT_ROOT"/ 2>/dev/null || true
+              echo "Files copied to $CURRENT_ROOT"
+            fi
+
+            # Also add root to config if missing
+            if [ -z "$CURRENT_ROOT" ] && [ -f "$NGINX_CONF" ]; then
+              echo "No root directive found. Adding root..."
+              sed -i "0,/location \/ {/s|location / {|location / {\n        root $FRONTEND_ROOT;\n        try_files \$uri \$uri/ /index.html;|" "$NGINX_CONF" 2>/dev/null || true
+            fi
+
+            # Verify files exist
+            echo ""
+            echo "Files at $FRONTEND_ROOT:"
+            ls -la "$FRONTEND_ROOT/index.html" 2>/dev/null || echo "  NO index.html!"
+            ls -la "$FRONTEND_ROOT/static/js/" 2>/dev/null | head -5 || echo "  NO static/js!"
+            echo "Hash in index.html:"
+            grep -o 'main\.[a-f0-9]*\.js' "$FRONTEND_ROOT/index.html" 2>/dev/null || echo "  NO hash!"
+
+            if [ -n "$CURRENT_ROOT" ] && [ "$CURRENT_ROOT" != "$FRONTEND_ROOT" ]; then
+              echo ""
+              echo "Files at $CURRENT_ROOT:"
+              ls -la "$CURRENT_ROOT/index.html" 2>/dev/null || echo "  NO index.html!"
+              echo "Hash in served index.html:"
+              grep -o 'main\.[a-f0-9]*\.js' "$CURRENT_ROOT/index.html" 2>/dev/null || echo "  NO hash!"
+            fi
+
+            echo "✅ Nginx fix complete"
+          NGINX_FIX
+
       - name: Restart services
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'

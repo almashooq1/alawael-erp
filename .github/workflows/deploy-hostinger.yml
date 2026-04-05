@@ -209,7 +209,7 @@ jobs:
           $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
           echo "✅ Backend deployed"
 
-      - name: Deploy frontend
+      - name: Deploy frontend and find nginx root
         if: needs.build-frontend.result == 'success'
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
@@ -219,132 +219,142 @@ jobs:
           rsync -avz --delete -e "$SSH_CMD" frontend/build/ $SSH_TARGET:${{ env.APP_DIR }}/frontend/build/
           echo "✅ Frontend deployed to ${{ env.APP_DIR }}/frontend/build/"
 
-          # 2. Find and update ALL locations where frontend is served from
+          # 2. AGGRESSIVE: Find actual nginx root, copy everywhere, save diagnostics
           $SSH_CMD $SSH_TARGET << 'DEPLOY_FRONTEND'
-            set -e
             SRC="/home/alawael/app/frontend/build"
-            echo "=== SMART FRONTEND DEPLOY ==="
+            DIAG="/tmp/deploy-diag.txt"
+            echo "=== DEPLOY DIAGNOSTICS $(date) ===" > "$DIAG"
 
-            # A) Check if Docker frontend container is running
-            DOCKER_FRONTEND=$(docker ps --filter "name=frontend" --format "{{.Names}}" 2>/dev/null | head -1)
-            if [ -n "$DOCKER_FRONTEND" ]; then
-              echo "🐳 Docker frontend container found: $DOCKER_FRONTEND"
-              # Copy build files INTO the Docker container
-              docker cp "$SRC/." "$DOCKER_FRONTEND:/usr/share/nginx/html/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/usr/share/nginx/html/" || true
-              docker cp "$SRC/." "$DOCKER_FRONTEND:/app/build/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/app/build/" || true
-              docker cp "$SRC/." "$DOCKER_FRONTEND:/var/www/html/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:/var/www/html/" || true
-              # Also try to find where nginx in the container serves from
-              CONTAINER_ROOT=$(docker exec "$DOCKER_FRONTEND" sh -c "cat /etc/nginx/conf.d/default.conf 2>/dev/null | grep 'root ' | head -1 | sed 's/.*root *//;s/;.*//' | tr -d ' '" 2>/dev/null || true)
-              if [ -n "$CONTAINER_ROOT" ] && [ "$CONTAINER_ROOT" != "/usr/share/nginx/html" ]; then
-                docker cp "$SRC/." "$DOCKER_FRONTEND:$CONTAINER_ROOT/" 2>/dev/null && echo "  ✅ Copied to $DOCKER_FRONTEND:$CONTAINER_ROOT/" || true
-              fi
-              echo "  Container root: ${CONTAINER_ROOT:-unknown}"
-            else
-              echo "🖥️ No Docker frontend container - using filesystem paths"
+            # --- 1. Full nginx config dump ---
+            echo "" >> "$DIAG"
+            echo "=== NGINX -T (full) ===" >> "$DIAG"
+            nginx -T >> "$DIAG" 2>&1 || sudo nginx -T >> "$DIAG" 2>&1 || echo "nginx -T FAILED" >> "$DIAG"
+
+            # --- 2. Extract ALL root directives using awk (no grep -P needed) ---
+            echo "" >> "$DIAG"
+            echo "=== NGINX ROOT DIRECTIVES ===" >> "$DIAG"
+            ROOTS=$(nginx -T 2>/dev/null | awk '/^\s*root\s/{gsub(/;/,""); print $2}' | sort -u)
+            if [ -z "$ROOTS" ]; then
+              ROOTS=$(sudo nginx -T 2>/dev/null | awk '/^\s*root\s/{gsub(/;/,""); print $2}' | sort -u)
             fi
+            echo "Found roots: $ROOTS" >> "$DIAG"
+            echo "Found roots: $ROOTS"
 
-            # B) Find ALL index.html files on the system that reference main.*.js (React build)
-            echo ""
-            echo "--- Searching for React build index.html files ---"
-            find /home /var/www /usr/share/nginx 2>/dev/null -name "index.html" -exec grep -l "main\." {} \; 2>/dev/null | while read IDX; do
-              DIR=$(dirname "$IDX")
-              if [ "$DIR" != "$SRC" ]; then
-                echo "  Found React app at: $DIR"
-                cp -r "$SRC"/* "$DIR"/ 2>/dev/null && echo "    ✅ Updated $DIR" || echo "    ❌ Failed to update $DIR"
+            # --- 3. Find ALL index.html with size ~1336 bytes (the served file) ---
+            echo "" >> "$DIAG"
+            echo "=== FIND index.html (size 1200-1500 bytes) ===" >> "$DIAG"
+            find / -name "index.html" -size +1200c -size -1500c 2>/dev/null | head -30 >> "$DIAG"
+            echo "" >> "$DIAG"
+            echo "=== FIND ALL React index.html ===" >> "$DIAG"
+            find / -name "index.html" 2>/dev/null | xargs grep -l "main\." 2>/dev/null | head -30 >> "$DIAG"
+
+            # --- 4. List ALL nginx config files ---
+            echo "" >> "$DIAG"
+            echo "=== NGINX CONFIG FILES ===" >> "$DIAG"
+            ls -la /etc/nginx/sites-enabled/ >> "$DIAG" 2>&1
+            ls -la /etc/nginx/conf.d/ >> "$DIAG" 2>&1
+            echo "" >> "$DIAG"
+            for f in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
+              if [ -f "$f" ]; then
+                echo "--- FILE: $f ---" >> "$DIAG"
+                cat "$f" >> "$DIAG" 2>&1
+                echo "" >> "$DIAG"
               fi
             done
 
-            # C) Check nginx root directives
-            echo ""
-            echo "--- Checking nginx root paths ---"
-            ROOTS=$(nginx -T 2>/dev/null | grep -oP 'root\s+\K[^;]+' | sort -u || true)
+            # --- 5. Check Docker ---
+            echo "" >> "$DIAG"
+            echo "=== DOCKER ===" >> "$DIAG"
+            docker ps -a >> "$DIAG" 2>&1 || echo "No Docker" >> "$DIAG"
+            echo "" >> "$DIAG"
+            echo "=== PM2 ===" >> "$DIAG"
+            pm2 list >> "$DIAG" 2>&1 || echo "No PM2" >> "$DIAG"
+
+            # --- 6. Check what port 80/443 is listening ---
+            echo "" >> "$DIAG"
+            echo "=== LISTENING PORTS ===" >> "$DIAG"
+            ss -tlnp | grep -E ':(80|443|8080|8888|3000|5000)\s' >> "$DIAG" 2>&1 || netstat -tlnp 2>/dev/null | grep -E ':(80|443|8080|8888|3000|5000)\s' >> "$DIAG" 2>&1
+
+            # --- 7. Source build info ---
+            echo "" >> "$DIAG"
+            echo "=== SOURCE BUILD ===" >> "$DIAG"
+            ls -la "$SRC/index.html" >> "$DIAG" 2>&1
+            grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" >> "$DIAG" 2>&1
+            wc -c "$SRC/index.html" >> "$DIAG" 2>&1
+
+            # === NOW COPY TO EVERY POSSIBLE LOCATION ===
+            echo "" >> "$DIAG"
+            echo "=== COPY OPERATIONS ===" >> "$DIAG"
+
+            # Copy to all nginx roots
             for ROOT in $ROOTS; do
               if [ -d "$ROOT" ] && [ "$ROOT" != "$SRC" ]; then
-                echo "  Nginx root: $ROOT"
-                cp -r "$SRC"/* "$ROOT"/ 2>/dev/null && echo "    ✅ Updated $ROOT" || true
+                echo "Copying to nginx root: $ROOT" | tee -a "$DIAG"
+                cp -rf "$SRC"/* "$ROOT"/ 2>&1 | tee -a "$DIAG" || echo "  FAILED to copy to $ROOT" | tee -a "$DIAG"
+                ls -la "$ROOT/index.html" >> "$DIAG" 2>&1
+                grep -o 'main\.[a-f0-9]*\.js' "$ROOT/index.html" >> "$DIAG" 2>&1
               fi
             done
 
-            # D) Show what we found for debugging
-            echo ""
-            echo "--- Docker containers ---"
-            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Ports}}" 2>/dev/null || echo "No Docker"
-            echo ""
-            echo "--- PM2 processes ---"
-            pm2 list 2>/dev/null | head -10 || echo "No PM2"
-            echo ""
-            echo "--- New build hash ---"
-            grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" 2>/dev/null || echo "No hash found"
+            # Copy to ALL React index.html locations found
+            find / -name "index.html" 2>/dev/null | xargs grep -l "main\." 2>/dev/null | while read IDX; do
+              DIR=$(dirname "$IDX")
+              if [ "$DIR" != "$SRC" ]; then
+                echo "Copying to found React dir: $DIR" | tee -a "$DIAG"
+                cp -rf "$SRC"/* "$DIR"/ 2>&1 | tee -a "$DIAG" || echo "  FAILED to copy to $DIR" | tee -a "$DIAG"
+              fi
+            done
 
-            echo ""
-            echo "✅ Smart deploy complete"
+            # Common paths
+            for P in /var/www/html /var/www/alawael /var/www/alaweal /usr/share/nginx/html /var/www/app /var/www/erp /srv/www /opt/app/frontend/build; do
+              if [ -d "$P" ] && [ "$P" != "$SRC" ]; then
+                echo "Copying to common path: $P" | tee -a "$DIAG"
+                cp -rf "$SRC"/* "$P"/ 2>&1 | tee -a "$DIAG" || true
+              fi
+            done
+
+            # Docker containers
+            for CONTAINER in $(docker ps --format "{{.Names}}" 2>/dev/null); do
+              echo "Trying Docker container: $CONTAINER" | tee -a "$DIAG"
+              docker cp "$SRC/." "$CONTAINER:/usr/share/nginx/html/" 2>/dev/null && echo "  Copied to $CONTAINER:/usr/share/nginx/html/" | tee -a "$DIAG" || true
+              docker cp "$SRC/." "$CONTAINER:/var/www/html/" 2>/dev/null && echo "  Copied to $CONTAINER:/var/www/html/" | tee -a "$DIAG" || true
+              docker cp "$SRC/." "$CONTAINER:/app/build/" 2>/dev/null && echo "  Copied to $CONTAINER:/app/build/" | tee -a "$DIAG" || true
+            done
+
+            # --- 8. Write marker to check if root was found ---
+            echo "deploy_time=$(date -u +%Y%m%d_%H%M%S)" > "$SRC/deploy-marker.txt"
+            for ROOT in $ROOTS; do
+              [ -d "$ROOT" ] && cp "$SRC/deploy-marker.txt" "$ROOT/deploy-marker.txt" 2>/dev/null || true
+            done
+
+            echo "" >> "$DIAG"
+            echo "=== FINAL VERIFICATION ===" >> "$DIAG"
+            echo "New build hash in source:" >> "$DIAG"
+            grep -o 'main\.[a-f0-9]*\.js' "$SRC/index.html" >> "$DIAG" 2>&1
+            echo "Done at $(date)" >> "$DIAG"
+            echo "✅ Deploy complete"
+            cat "$DIAG"
           DEPLOY_FRONTEND
 
-      - name: Ensure nginx serves correct frontend path
+      - name: Download diagnostics
         if: needs.build-frontend.result == 'success'
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'NGINX_FIX'
-            set -e
-            FRONTEND_ROOT="/home/alawael/app/frontend/build"
+          SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
+          SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          mkdir -p /tmp/deploy-diag
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "$SSH_TARGET:/tmp/deploy-diag.txt" /tmp/deploy-diag/deploy-diag.txt 2>/dev/null || echo "Could not download diag"
+          # Also get the nginx config files directly
+          $SSH_CMD $SSH_TARGET "cat /etc/nginx/sites-enabled/* 2>/dev/null; echo '===CONF.D==='; cat /etc/nginx/conf.d/*.conf 2>/dev/null" > /tmp/deploy-diag/nginx-configs.txt 2>&1 || true
+          $SSH_CMD $SSH_TARGET "nginx -T 2>/dev/null || sudo nginx -T 2>/dev/null" > /tmp/deploy-diag/nginx-full.txt 2>&1 || true
+          echo "✅ Diagnostics downloaded"
 
-            echo "=== Current nginx config ==="
-            nginx -T 2>/dev/null | head -100
-            echo "=== END ==="
-
-            # Find which nginx config file serves the frontend
-            # Check sites-enabled, conf.d, or main nginx.conf
-            NGINX_CONF=""
-            for f in /etc/nginx/sites-enabled/* /etc/nginx/conf.d/*.conf; do
-              if [ -f "$f" ] && grep -q "443\|server_name.*alawael\|server_name.*alaweal" "$f" 2>/dev/null; then
-                NGINX_CONF="$f"
-                echo "Found nginx config: $f"
-                break
-              fi
-            done
-
-            if [ -z "$NGINX_CONF" ]; then
-              NGINX_CONF="/etc/nginx/sites-enabled/default"
-              echo "Using default: $NGINX_CONF"
-            fi
-
-            echo "Current config:"
-            cat "$NGINX_CONF" 2>/dev/null | head -50
-
-            # Check what root is configured
-            CURRENT_ROOT=$(grep -oP 'root\s+\K[^;]+' "$NGINX_CONF" 2>/dev/null | head -1 | tr -d ' ' || true)
-            echo "Current root: ${CURRENT_ROOT:-NOT FOUND}"
-
-            if [ -n "$CURRENT_ROOT" ] && [ "$CURRENT_ROOT" != "$FRONTEND_ROOT" ]; then
-              echo "Root mismatch! Copying files from $FRONTEND_ROOT to $CURRENT_ROOT"
-              mkdir -p "$CURRENT_ROOT"
-              cp -r "$FRONTEND_ROOT"/* "$CURRENT_ROOT"/ 2>/dev/null || true
-              echo "Files copied to $CURRENT_ROOT"
-            fi
-
-            # Also add root to config if missing
-            if [ -z "$CURRENT_ROOT" ] && [ -f "$NGINX_CONF" ]; then
-              echo "No root directive found. Adding root..."
-              sed -i "0,/location \/ {/s|location / {|location / {\n        root $FRONTEND_ROOT;\n        try_files \$uri \$uri/ /index.html;|" "$NGINX_CONF" 2>/dev/null || true
-            fi
-
-            # Verify files exist
-            echo ""
-            echo "Files at $FRONTEND_ROOT:"
-            ls -la "$FRONTEND_ROOT/index.html" 2>/dev/null || echo "  NO index.html!"
-            ls -la "$FRONTEND_ROOT/static/js/" 2>/dev/null | head -5 || echo "  NO static/js!"
-            echo "Hash in index.html:"
-            grep -o 'main\.[a-f0-9]*\.js' "$FRONTEND_ROOT/index.html" 2>/dev/null || echo "  NO hash!"
-
-            if [ -n "$CURRENT_ROOT" ] && [ "$CURRENT_ROOT" != "$FRONTEND_ROOT" ]; then
-              echo ""
-              echo "Files at $CURRENT_ROOT:"
-              ls -la "$CURRENT_ROOT/index.html" 2>/dev/null || echo "  NO index.html!"
-              echo "Hash in served index.html:"
-              grep -o 'main\.[a-f0-9]*\.js' "$CURRENT_ROOT/index.html" 2>/dev/null || echo "  NO hash!"
-            fi
-
-            echo "✅ Nginx fix complete"
-          NGINX_FIX
+      - name: Upload diagnostics artifact
+        if: needs.build-frontend.result == 'success'
+        uses: actions/upload-artifact@v7
+        with:
+          name: deploy-diagnostics-${{ github.sha }}
+          path: /tmp/deploy-diag/
+          retention-days: 3
 
       - name: Restart services
         run: |

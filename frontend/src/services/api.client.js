@@ -20,7 +20,11 @@ import {
 } from '../utils/tokenStorage';
 
 // تكوين قاعدة الـ API
-const API_BASE_URL = process.env.REACT_APP_API_V1_URL || process.env.REACT_APP_API_URL || '/api/v1';
+// Runtime detection: force relative /api/v1 on production (HTTPS) to avoid mixed-content
+const _isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+const API_BASE_URL = _isSecure
+  ? '/api/v1'
+  : process.env.REACT_APP_API_V1_URL || process.env.REACT_APP_API_URL || '/api/v1';
 const API_TIMEOUT = parseInt(process.env.REACT_APP_API_TIMEOUT, 10) || 30000;
 
 // ─── Token Refresh State (singleton) ────────────────────────────────────────

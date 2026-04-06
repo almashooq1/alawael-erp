@@ -312,7 +312,9 @@ router.get('/dashboard', async (req, res) => {
       })
         .sort({ date: 1 })
         .lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch next appointment for dashboard', { error: e.message });
+    }
 
     res.json({
       success: true,
@@ -443,7 +445,12 @@ router.get('/children/:id/sessions', async (req, res) => {
         .limit(limit)
         .populate('specialistId', 'nameAr nameEn specialty')
         .lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch sessions for child', {
+        childId: req.params.id,
+        error: e.message,
+      });
+    }
 
     res.json({
       success: true,
@@ -479,7 +486,9 @@ router.get('/children/:id/progress', async (req, res) => {
       const BenProgress = require('../models/BeneficiaryProgress');
       const data = await BenProgress.findOne({ beneficiaryId: req.params.id }).lean();
       if (data) progressData = data;
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch progress data', { childId: req.params.id, error: e.message });
+    }
 
     res.json({ success: true, data: progressData });
   } catch (err) {
@@ -508,7 +517,9 @@ router.get('/appointments', async (req, res) => {
         .sort({ date: upcoming === 'true' ? 1 : -1 })
         .limit(50)
         .lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch appointments', { error: e.message });
+    }
     res.json({ success: true, data: appointments });
   } catch (err) {
     logger.error('parent appointments error:', err);
@@ -578,7 +589,12 @@ router.put('/appointments/:id/cancel', async (req, res) => {
         { new: true }
       );
       updated = !!appt;
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to cancel appointment', {
+        appointmentId: req.params.id,
+        error: e.message,
+      });
+    }
     res.json({
       success: true,
       message: updated ? 'تم إلغاء الموعد' : 'لم يتم العثور على الموعد',
@@ -610,7 +626,9 @@ router.get('/transport/live', async (req, res) => {
           'vehiclePlate driverName driverPhone currentLocation status estimatedArrival passengers'
         )
         .lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch live transport data', { error: e.message });
+    }
     res.json({ success: true, data: trips });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في جلب بيانات النقل' });
@@ -640,7 +658,9 @@ router.get('/invoices', async (req, res) => {
         .skip(skip)
         .limit(limit)
         .lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch invoices', { error: e.message });
+    }
     res.json({ success: true, data: invoices, pagination: { page, limit, total } });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الفواتير' });
@@ -657,7 +677,9 @@ router.get('/invoices/:id', async (req, res) => {
     try {
       const PortalPayment = require('../models/PortalPayment');
       invoice = await PortalPayment.findOne({ _id: req.params.id, guardianId }).lean();
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch invoice detail', { invoiceId: req.params.id, error: e.message });
+    }
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
     res.json({ success: true, data: invoice });
   } catch (err) {
@@ -754,7 +776,9 @@ router.post('/messages', async (req, res) => {
           subject: message.subject,
         });
       }
-    } catch {}
+    } catch (e) {
+      logger.debug('Socket.IO staff notification skipped', { error: e.message });
+    }
 
     res.status(201).json({ success: true, message: 'تم إرسال الرسالة بنجاح', data: message });
   } catch (err) {
@@ -804,7 +828,9 @@ router.get('/notifications', async (req, res) => {
         .limit(limit)
         .lean();
       unreadCount = await PortalNotification.countDocuments({ ...query, isRead: false });
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to fetch notifications', { error: e.message });
+    }
     res.json({ success: true, data: notifications, unreadCount });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في جلب الإشعارات' });
@@ -831,7 +857,9 @@ router.put('/notifications/mark-read', async (req, res) => {
           { isRead: true, readAt: new Date() }
         );
       }
-    } catch {}
+    } catch (e) {
+      logger.warn('Failed to mark notifications as read', { error: e.message });
+    }
     res.json({ success: true, message: 'تم التعليم كمقروء' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'خطأ في التحديث' });

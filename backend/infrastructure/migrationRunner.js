@@ -381,6 +381,32 @@ function mountMigrationRoutes(app) {
   const router = express.Router();
   const runner = new MigrationRunner();
 
+  // 🔒 Security: Block migration routes in production and require admin auth
+  router.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production' && process.env.ALLOW_MIGRATIONS !== 'true') {
+      return res
+        .status(403)
+        .json({ success: false, error: 'Migration API is disabled in production' });
+    }
+    // Require admin authentication
+    try {
+      const { requireAuth, requireAdmin } = require('../middleware/auth');
+      requireAuth(req, res, err => {
+        if (err) return res.status(401).json({ success: false, error: 'Authentication required' });
+        requireAdmin(req, res, err2 => {
+          if (err2) return res.status(403).json({ success: false, error: 'Admin access required' });
+          next();
+        });
+      });
+    } catch {
+      // If auth middleware not available, block in production
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ success: false, error: 'Auth middleware unavailable' });
+      }
+      next();
+    }
+  });
+
   router.get('/status', async (_req, res) => {
     try {
       const status = await runner.status();

@@ -272,4 +272,56 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🔴 الجولة 5: تأمين مسارات حرجة وإصلاح أخطاء صامتة
+
+### 14. تأمين Migration API Routes — إصلاح حرج 🔴
+
+**المشكلة:** مسارات `/api/v2/migrations` (status/up/down) كانت متاحة لأي شخص **بدون أي مصادقة**، مما يتيح:
+
+- عرض حالة الترحيلات
+- تطبيق ترحيلات جديدة على قاعدة البيانات
+- **التراجع عن ترحيلات** (حذف بيانات/indexes)
+
+**الإصلاح (`backend/infrastructure/migrationRunner.js`):**
+
+- ✅ حظر في Production ما لم يكن `ALLOW_MIGRATIONS=true`
+- ✅ إضافة `requireAuth` + `requireAdmin` middleware
+- ✅ Fallback: حظر كامل في Production إذا لم يتوفر auth middleware
+
+### 15. إصلاح 11 Empty Catch Block في بوابة ولي الأمر 🟠
+
+**المشكلة:** 11 كتلة `catch {}` فارغة في `parentPortal.routes.js` تبتلع أخطاء قاعدة البيانات بصمت:
+
+- فشل جلب المواعيد/الجلسات/التقدم/الفواتير/الإشعارات/النقل — كلها تُرجع مصفوفات فارغة بدون أي تسجيل
+
+**الإصلاح (`backend/routes/parentPortal.routes.js`):**
+
+- ✅ إضافة `logger.warn()` مع context مناسب في كل catch block
+- ✅ استخدام `logger.debug()` للعمليات غير الحرجة (Socket.IO notifications)
+
+| الموقع                    | التغيير                                              |
+| :------------------------ | :--------------------------------------------------- |
+| Dashboard nextAppointment | `logger.warn('Failed to fetch next appointment...')` |
+| Children sessions         | `logger.warn('Failed to fetch sessions...')`         |
+| Children progress         | `logger.warn('Failed to fetch progress...')`         |
+| Appointments list         | `logger.warn('Failed to fetch appointments...')`     |
+| Cancel appointment        | `logger.warn('Failed to cancel appointment...')`     |
+| Transport live            | `logger.warn('Failed to fetch live transport...')`   |
+| Invoices list             | `logger.warn('Failed to fetch invoices...')`         |
+| Invoice detail            | `logger.warn('Failed to fetch invoice detail...')`   |
+| Socket.IO emit            | `logger.debug('Socket.IO staff notification...')`    |
+| Notifications list        | `logger.warn('Failed to fetch notifications...')`    |
+| Notifications mark-read   | `logger.warn('Failed to mark notifications...')`     |
+
+### 16. إصلاح ثغرة أمنية في التبعيات 🟡
+
+**المشكلة:** ثغرة عالية الخطورة في مكتبة `lodash` (Prototype Pollution).
+
+**الإصلاح:**
+
+- ✅ تشغيل `npm audit fix` — تحديث الحزمة المتأثرة
+- ✅ النتيجة: **0 ثغرات** في `npm audit`
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

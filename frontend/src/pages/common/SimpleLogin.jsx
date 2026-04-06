@@ -10,7 +10,6 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -94,7 +93,7 @@ function FloatingBlob({ size, top, left, right, bottom, opacity, delay, color })
         animation: `blobFloat ${4 + delay * 0.8}s ease-in-out infinite alternate`,
         '@keyframes blobFloat': {
           from: { transform: 'translate(0, 0) scale(1)' },
-          to:   { transform: `translate(${delay % 2 === 0 ? '-12px' : '12px'}, -16px) scale(1.06)` },
+          to: { transform: `translate(${delay % 2 === 0 ? '-12px' : '12px'}, -16px) scale(1.06)` },
         },
         animationDelay: `${delay}s`,
         pointerEvents: 'none',
@@ -106,18 +105,17 @@ function FloatingBlob({ size, top, left, right, bottom, opacity, delay, color })
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function SimpleLogin() {
-  const theme     = useTheme();
-  const isMobile  = useMediaQuery(theme.breakpoints.down('md'));
-  const navigate  = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { login } = useAuth() || {};
   const showSnackbar = useSnackbar?.();
 
-  const [form, setForm]         = useState({ email: '', password: '' });
-  const [showPwd, setShowPwd]   = useState(false);
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [showPwd, setShowPwd] = useState(false);
   const [remember, setRemember] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
-  const [mounted, setMounted]   = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
   useEffect(() => {
@@ -128,12 +126,12 @@ export default function SimpleLogin() {
     return () => clearTimeout(t);
   }, []);
 
-  const handleChange = (e) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const handleChange = e => {
+    setForm(f => ({ ...f, [e.target.name]: e.target.value }));
     if (error) setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!form.email || !form.password) {
       setError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
@@ -145,10 +143,16 @@ export default function SimpleLogin() {
       const result = await login?.(form.email, form.password);
       if (result?.success) {
         showSnackbar?.('مرحباً بك في نظام مراكز الأوائل', 'success');
-        navigate('/dashboard', { replace: true });
+        // Navigation is handled automatically by AppRoutes when currentUser changes
+        return;
       } else {
         const msg = result?.error || '';
-        if (msg.includes('Invalid') || msg.includes('credentials') || msg.includes('password') || msg.includes('غير صحيح')) {
+        if (
+          msg.includes('Invalid') ||
+          msg.includes('credentials') ||
+          msg.includes('password') ||
+          msg.includes('غير صحيح')
+        ) {
           setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
         } else if (msg.includes('network') || msg.includes('Network') || msg.includes('الاتصال')) {
           setError('تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت');
@@ -165,10 +169,10 @@ export default function SimpleLogin() {
   };
 
   // Shared input styles
-  const inputSx = (fieldName) => ({
+  const inputSx = fieldName => ({
     borderRadius: '12px',
     backgroundColor: focusedField === fieldName ? '#FFFFFF' : '#F8FAFC',
-    border: `1.5px solid ${focusedField === fieldName ? '#6366F1' : (error ? '#F43F5E' : '#E2E8F0')}`,
+    border: `1.5px solid ${focusedField === fieldName ? '#6366F1' : error ? '#F43F5E' : '#E2E8F0'}`,
     boxShadow: focusedField === fieldName ? `0 0 0 3px ${alpha('#6366F1', 0.12)}` : 'none',
     transition: 'all 0.2s ease',
     '& fieldset': { border: 'none' },
@@ -195,7 +199,8 @@ export default function SimpleLogin() {
             flex: '0 0 56%',
             position: 'relative',
             overflow: 'hidden',
-            background: 'linear-gradient(145deg, #060D1F 0%, #0D1B40 25%, #1A1060 55%, #2D0A5E 80%, #3B0764 100%)',
+            background:
+              'linear-gradient(145deg, #060D1F 0%, #0D1B40 25%, #1A1060 55%, #2D0A5E 80%, #3B0764 100%)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -204,18 +209,54 @@ export default function SimpleLogin() {
           }}
         >
           {/* Animated blobs */}
-          <FloatingBlob size={420} top="-120px" right="-100px" opacity={0.5} delay={0}   color="rgba(79,70,229,0.25)" />
-          <FloatingBlob size={320} bottom="-80px" left="-80px"  opacity={0.45} delay={1.2} color="rgba(109,40,217,0.22)" />
-          <FloatingBlob size={220} top="38%"   right="8%"     opacity={0.35} delay={2.4} color="rgba(245,158,11,0.1)" />
-          <FloatingBlob size={160} top="12%"   left="15%"     opacity={0.25} delay={0.6} color="rgba(16,185,129,0.12)" />
-          <FloatingBlob size={100} bottom="20%" right="25%"   opacity={0.2}  delay={1.8} color="rgba(14,165,233,0.15)" />
+          <FloatingBlob
+            size={420}
+            top="-120px"
+            right="-100px"
+            opacity={0.5}
+            delay={0}
+            color="rgba(79,70,229,0.25)"
+          />
+          <FloatingBlob
+            size={320}
+            bottom="-80px"
+            left="-80px"
+            opacity={0.45}
+            delay={1.2}
+            color="rgba(109,40,217,0.22)"
+          />
+          <FloatingBlob
+            size={220}
+            top="38%"
+            right="8%"
+            opacity={0.35}
+            delay={2.4}
+            color="rgba(245,158,11,0.1)"
+          />
+          <FloatingBlob
+            size={160}
+            top="12%"
+            left="15%"
+            opacity={0.25}
+            delay={0.6}
+            color="rgba(16,185,129,0.12)"
+          />
+          <FloatingBlob
+            size={100}
+            bottom="20%"
+            right="25%"
+            opacity={0.2}
+            delay={1.8}
+            color="rgba(14,165,233,0.15)"
+          />
 
           {/* Dot mesh grid */}
           <Box
             sx={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
+              backgroundImage:
+                'radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)',
               backgroundSize: '32px 32px',
               pointerEvents: 'none',
             }}
@@ -226,7 +267,8 @@ export default function SimpleLogin() {
             sx={{
               position: 'absolute',
               inset: 0,
-              backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(255,255,255,0.015) 50%)',
+              backgroundImage:
+                'linear-gradient(0deg, transparent 50%, rgba(255,255,255,0.015) 50%)',
               backgroundSize: '100% 4px',
               pointerEvents: 'none',
             }}
@@ -247,7 +289,6 @@ export default function SimpleLogin() {
 
           <Fade in={mounted} timeout={900}>
             <Box sx={{ position: 'relative', zIndex: 1, maxWidth: 460, width: '100%' }}>
-
               {/* Logo */}
               <Slide in={mounted} direction="down" timeout={600}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
@@ -260,29 +301,56 @@ export default function SimpleLogin() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      boxShadow: '0 8px 32px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      boxShadow:
+                        '0 8px 32px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.2)',
                       border: '1px solid rgba(255,255,255,0.12)',
                       position: 'relative',
                       overflow: 'hidden',
                       '&::before': {
                         content: '""',
                         position: 'absolute',
-                        top: 0, left: 0, right: 0,
+                        top: 0,
+                        left: 0,
+                        right: 0,
                         height: '50%',
                         background: 'rgba(255,255,255,0.08)',
                         borderRadius: '16px 16px 0 0',
                       },
                     }}
                   >
-                    <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.5rem', fontFamily: 'Cairo', position: 'relative' }}>
+                    <Typography
+                      sx={{
+                        color: '#FFFFFF',
+                        fontWeight: 800,
+                        fontSize: '1.5rem',
+                        fontFamily: 'Cairo',
+                        position: 'relative',
+                      }}
+                    >
                       أ
                     </Typography>
                   </Box>
                   <Box>
-                    <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.3rem', lineHeight: 1.2, fontFamily: 'Cairo', letterSpacing: '-0.01em' }}>
+                    <Typography
+                      sx={{
+                        color: '#FFFFFF',
+                        fontWeight: 800,
+                        fontSize: '1.3rem',
+                        lineHeight: 1.2,
+                        fontFamily: 'Cairo',
+                        letterSpacing: '-0.01em',
+                      }}
+                    >
                       مراكز الأوائل
                     </Typography>
-                    <Typography sx={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.78rem', letterSpacing: '0.04em', mt: 0.2 }}>
+                    <Typography
+                      sx={{
+                        color: 'rgba(255,255,255,0.42)',
+                        fontSize: '0.78rem',
+                        letterSpacing: '0.04em',
+                        mt: 0.2,
+                      }}
+                    >
                       نظام الإدارة المتكامل
                     </Typography>
                   </Box>
@@ -315,7 +383,15 @@ export default function SimpleLogin() {
                 </Box>
               </Typography>
 
-              <Typography sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.9375rem', lineHeight: 1.75, mb: 5, maxWidth: 380 }}>
+              <Typography
+                sx={{
+                  color: 'rgba(255,255,255,0.5)',
+                  fontSize: '0.9375rem',
+                  lineHeight: 1.75,
+                  mb: 5,
+                  maxWidth: 380,
+                }}
+              >
                 منصة شاملة لإدارة المستفيدين، الموارد البشرية، والخدمات المالية وفق رؤية 2030
               </Typography>
 
@@ -358,10 +434,24 @@ export default function SimpleLogin() {
                         {f.icon}
                       </Box>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.88)', fontWeight: 600, fontSize: '0.875rem', mb: 0.2, lineHeight: 1.3 }}>
+                        <Typography
+                          sx={{
+                            color: 'rgba(255,255,255,0.88)',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                            mb: 0.2,
+                            lineHeight: 1.3,
+                          }}
+                        >
                           {f.title}
                         </Typography>
-                        <Typography sx={{ color: 'rgba(255,255,255,0.42)', fontSize: '0.78rem', lineHeight: 1.5 }}>
+                        <Typography
+                          sx={{
+                            color: 'rgba(255,255,255,0.42)',
+                            fontSize: '0.78rem',
+                            lineHeight: 1.5,
+                          }}
+                        >
                           {f.desc}
                         </Typography>
                       </Box>
@@ -391,13 +481,23 @@ export default function SimpleLogin() {
                         flex: 1,
                         py: 1.75,
                         textAlign: 'center',
-                        borderRight: i < STATS.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                        borderRight:
+                          i < STATS.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
                       }}
                     >
-                      <Typography sx={{ color: '#FFFFFF', fontWeight: 800, fontSize: '1.25rem', fontFamily: 'Cairo' }}>
+                      <Typography
+                        sx={{
+                          color: '#FFFFFF',
+                          fontWeight: 800,
+                          fontSize: '1.25rem',
+                          fontFamily: 'Cairo',
+                        }}
+                      >
                         {s.value}
                       </Typography>
-                      <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', mt: 0.2 }}>
+                      <Typography
+                        sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', mt: 0.2 }}
+                      >
                         {s.label}
                       </Typography>
                     </Box>
@@ -421,7 +521,14 @@ export default function SimpleLogin() {
                   }}
                 >
                   <ShieldIcon sx={{ fontSize: 14, color: '#34D399' }} />
-                  <Typography sx={{ color: '#6EE7B7', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.02em' }}>
+                  <Typography
+                    sx={{
+                      color: '#6EE7B7',
+                      fontSize: '0.72rem',
+                      fontWeight: 600,
+                      letterSpacing: '0.02em',
+                    }}
+                  >
                     نظام آمن ومعتمد • ISO 27001 • رؤية 2030
                   </Typography>
                 </Box>
@@ -450,14 +557,24 @@ export default function SimpleLogin() {
           sx={{
             position: 'absolute',
             inset: 0,
-            backgroundImage: 'radial-gradient(circle at 20% 20%, rgba(99,102,241,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139,92,246,0.04) 0%, transparent 50%)',
+            backgroundImage:
+              'radial-gradient(circle at 20% 20%, rgba(99,102,241,0.04) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(139,92,246,0.04) 0%, transparent 50%)',
             pointerEvents: 'none',
           }}
         />
 
         {/* Mobile logo */}
         {isMobile && (
-          <Box sx={{ position: 'absolute', top: 24, right: 24, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 24,
+              right: 24,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1.5,
+            }}
+          >
             <Box
               sx={{
                 width: 42,
@@ -470,24 +587,44 @@ export default function SimpleLogin() {
                 boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
               }}
             >
-              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem' }}>أ</Typography>
+              <Typography sx={{ color: '#fff', fontWeight: 800, fontSize: '1.15rem' }}>
+                أ
+              </Typography>
             </Box>
             <Box>
-              <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#0F172A' }}>مراكز الأوائل</Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: '#94A3B8' }}>نظام الإدارة المتكامل</Typography>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.95rem', color: '#0F172A' }}>
+                مراكز الأوائل
+              </Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: '#94A3B8' }}>
+                نظام الإدارة المتكامل
+              </Typography>
             </Box>
           </Box>
         )}
 
         <Fade in={mounted} timeout={500}>
           <Box sx={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
-
             {/* Welcome header */}
             <Box sx={{ mb: 4.5 }}>
               {!isMobile && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                  <Box sx={{ width: 28, height: 3, borderRadius: 2, background: 'linear-gradient(90deg, #6366F1, #8B5CF6)' }} />
-                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#6366F1', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 3,
+                      borderRadius: 2,
+                      background: 'linear-gradient(90deg, #6366F1, #8B5CF6)',
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      color: '#6366F1',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
                     نظام مراكز الأوائل
                   </Typography>
                 </Box>
@@ -531,10 +668,19 @@ export default function SimpleLogin() {
 
             {/* Form */}
             <Box component="form" onSubmit={handleSubmit} noValidate>
-
               {/* Email */}
               <Box sx={{ mb: 2.5 }}>
-                <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#374151', mb: 0.875, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography
+                  sx={{
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: '#374151',
+                    mb: 0.875,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                  }}
+                >
                   البريد الإلكتروني
                 </Typography>
                 <TextField
@@ -552,7 +698,13 @@ export default function SimpleLogin() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Email sx={{ fontSize: 17, color: focusedField === 'email' ? '#6366F1' : '#CBD5E1', transition: 'color 0.2s' }} />
+                        <Email
+                          sx={{
+                            fontSize: 17,
+                            color: focusedField === 'email' ? '#6366F1' : '#CBD5E1',
+                            transition: 'color 0.2s',
+                          }}
+                        />
                       </InputAdornment>
                     ),
                     sx: inputSx('email'),
@@ -562,7 +714,14 @@ export default function SimpleLogin() {
 
               {/* Password */}
               <Box sx={{ mb: 1.5 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.875 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 0.875,
+                  }}
+                >
                   <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, color: '#374151' }}>
                     كلمة المرور
                   </Typography>
@@ -595,22 +754,35 @@ export default function SimpleLogin() {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Lock sx={{ fontSize: 17, color: focusedField === 'password' ? '#6366F1' : '#CBD5E1', transition: 'color 0.2s' }} />
+                        <Lock
+                          sx={{
+                            fontSize: 17,
+                            color: focusedField === 'password' ? '#6366F1' : '#CBD5E1',
+                            transition: 'color 0.2s',
+                          }}
+                        />
                       </InputAdornment>
                     ),
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          onClick={() => setShowPwd((v) => !v)}
+                          onClick={() => setShowPwd(v => !v)}
                           edge="end"
                           size="small"
                           sx={{
                             color: '#CBD5E1',
                             borderRadius: '8px',
-                            '&:hover': { color: '#6366F1', backgroundColor: alpha('#6366F1', 0.08) },
+                            '&:hover': {
+                              color: '#6366F1',
+                              backgroundColor: alpha('#6366F1', 0.08),
+                            },
                           }}
                         >
-                          {showPwd ? <VisibilityOff sx={{ fontSize: 17 }} /> : <Visibility sx={{ fontSize: 17 }} />}
+                          {showPwd ? (
+                            <VisibilityOff sx={{ fontSize: 17 }} />
+                          ) : (
+                            <Visibility sx={{ fontSize: 17 }} />
+                          )}
                         </IconButton>
                       </InputAdornment>
                     ),
@@ -624,7 +796,7 @@ export default function SimpleLogin() {
                 control={
                   <Checkbox
                     checked={remember}
-                    onChange={(e) => setRemember(e.target.checked)}
+                    onChange={e => setRemember(e.target.checked)}
                     size="small"
                     sx={{
                       color: '#E2E8F0',
@@ -664,20 +836,29 @@ export default function SimpleLogin() {
                   position: 'relative',
                   overflow: 'hidden',
                   transition: 'all 0.25s ease',
-                  '&::before': !loading ? {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0, left: 0, right: 0,
-                    height: '50%',
-                    background: 'rgba(255,255,255,0.08)',
-                    borderRadius: '13px 13px 0 0',
-                  } : {},
-                  '&:hover': !loading ? {
-                    background: 'linear-gradient(135deg, #4338CA 0%, #5B21B6 100%)',
-                    boxShadow: '0 8px 28px rgba(99,102,241,0.5)',
-                    transform: 'translateY(-2px)',
-                  } : {},
-                  '&:active': { transform: 'translateY(0)', boxShadow: '0 2px 12px rgba(99,102,241,0.35)' },
+                  '&::before': !loading
+                    ? {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '50%',
+                        background: 'rgba(255,255,255,0.08)',
+                        borderRadius: '13px 13px 0 0',
+                      }
+                    : {},
+                  '&:hover': !loading
+                    ? {
+                        background: 'linear-gradient(135deg, #4338CA 0%, #5B21B6 100%)',
+                        boxShadow: '0 8px 28px rgba(99,102,241,0.5)',
+                        transform: 'translateY(-2px)',
+                      }
+                    : {},
+                  '&:active': {
+                    transform: 'translateY(0)',
+                    boxShadow: '0 2px 12px rgba(99,102,241,0.35)',
+                  },
                   '&.Mui-disabled': {
                     background: '#F1F5F9',
                     boxShadow: 'none',
@@ -691,7 +872,9 @@ export default function SimpleLogin() {
                     <span>جارٍ تسجيل الدخول...</span>
                   </Box>
                 ) : (
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}
+                  >
                     <LoginIcon sx={{ fontSize: 18 }} />
                     تسجيل الدخول
                   </Box>
@@ -707,7 +890,10 @@ export default function SimpleLogin() {
                 '& .MuiDivider-wrapper': { px: 2 },
               }}
             >
-              <Typography variant="caption" sx={{ color: '#CBD5E1', fontSize: '0.75rem', fontWeight: 500 }}>
+              <Typography
+                variant="caption"
+                sx={{ color: '#CBD5E1', fontSize: '0.75rem', fontWeight: 500 }}
+              >
                 نظام مراكز الأوائل
               </Typography>
             </Divider>
@@ -718,12 +904,15 @@ export default function SimpleLogin() {
                 sx={{
                   p: 2,
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.04) 100%)',
+                  background:
+                    'linear-gradient(135deg, rgba(99,102,241,0.04) 0%, rgba(139,92,246,0.04) 100%)',
                   border: `1px solid ${alpha('#6366F1', 0.12)}`,
                   textAlign: 'center',
                 }}
               >
-                <Typography sx={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 700, mb: 0.75 }}>
+                <Typography
+                  sx={{ fontSize: '0.75rem', color: '#6366F1', fontWeight: 700, mb: 0.75 }}
+                >
                   🔧 بيئة التطوير
                 </Typography>
                 <Box
@@ -737,11 +926,15 @@ export default function SimpleLogin() {
                     backgroundColor: alpha('#6366F1', 0.08),
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
+                  <Typography
+                    sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}
+                  >
                     admin@alawael.com.sa
                   </Typography>
                   <Box sx={{ width: 1, height: 12, backgroundColor: alpha('#6366F1', 0.25) }} />
-                  <Typography sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}>
+                  <Typography
+                    sx={{ fontSize: '0.72rem', color: '#6366F1', fontFamily: 'monospace' }}
+                  >
                     Admin@2026
                   </Typography>
                 </Box>

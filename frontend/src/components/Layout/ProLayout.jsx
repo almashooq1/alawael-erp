@@ -11,15 +11,54 @@
  * - Subtle content area background
  */
 
-import { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Box, useTheme, useMediaQuery, Fade } from '@mui/material';
+import { Box, useTheme, useMediaQuery, Fade, Typography } from '@mui/material';
 import ProSidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
 import ProHeader from './ProHeader';
 import { DashboardSkeleton } from '../ui/LoadingSkeleton';
 import RouteErrorBoundary from '../shared/RouteErrorBoundary';
 import WatermarkBackground from '../shared/WatermarkBackground';
 import { useThemeMode } from '../../contexts/ThemeContext';
+
+// Error boundary specifically for sidebar — prevents sidebar crash from taking down the whole app
+class SidebarErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error('[SidebarErrorBoundary]', error, info?.componentStack);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <Box
+          sx={{
+            width: this.props.width || 72,
+            height: '100vh',
+            background: '#0A1628',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: 2,
+          }}
+        >
+          <Typography
+            sx={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', textAlign: 'center' }}
+          >
+            ⚠️
+          </Typography>
+        </Box>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const SIDEBAR_STATE_KEY = 'alawael-sidebar-collapsed';
 
@@ -49,15 +88,11 @@ const ProLayout = () => {
     setMobileOpen(false);
   }, [location.pathname]);
 
-  const handleToggleCollapse = () => setSidebarCollapsed((prev) => !prev);
-  const handleToggleMobile = () => setMobileOpen((prev) => !prev);
+  const handleToggleCollapse = () => setSidebarCollapsed(prev => !prev);
+  const handleToggleMobile = () => setMobileOpen(prev => !prev);
   const handleCloseMobile = () => setMobileOpen(false);
 
-  const currentSidebarWidth = isMobile
-    ? 0
-    : sidebarCollapsed
-    ? SIDEBAR_COLLAPSED
-    : SIDEBAR_WIDTH;
+  const currentSidebarWidth = isMobile ? 0 : sidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH;
 
   return (
     <Box
@@ -84,12 +119,14 @@ const ProLayout = () => {
       <WatermarkBackground zIndex={0} />
 
       {/* Sidebar */}
-      <ProSidebar
-        open={mobileOpen}
-        onClose={handleCloseMobile}
-        collapsed={sidebarCollapsed}
-        onToggleCollapse={handleToggleCollapse}
-      />
+      <SidebarErrorBoundary width={currentSidebarWidth}>
+        <ProSidebar
+          open={mobileOpen}
+          onClose={handleCloseMobile}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+        />
+      </SidebarErrorBoundary>
 
       {/* Main Content */}
       <Box
@@ -140,7 +177,7 @@ const ProLayout = () => {
                     animation: 'contentSlideIn 0.3s ease',
                     '@keyframes contentSlideIn': {
                       from: { opacity: 0, transform: 'translateY(8px)' },
-                      to:   { opacity: 1, transform: 'translateY(0)' },
+                      to: { opacity: 1, transform: 'translateY(0)' },
                     },
                   }}
                 >

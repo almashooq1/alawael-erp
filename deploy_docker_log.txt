@@ -1,0 +1,28 @@
+Connected!
+
+[1] Checking Docker frontend container...
+  Container has index.html: /usr/share/nginx/html/index.html
+  OLD hash in container: main.8308a2cb.js
+
+[2] Copying new build into Docker container...
+  Copy result:  
+
+[3] Verifying new hash in container...
+  NEW hash in container: main.72642842.js
+
+[4] Reloading nginx inside container...
+  Reload: 2026/04/05 16:02:10 [notice] 54817#54817: signal process started 
+
+[5] Reloading system nginx...
+  System nginx:  
+
+[6] Verifying live site...
+  Docker port 3004 hash: main.72642842.js
+  HTTPS headers: HTTP/1.1 200 OK
+Server: nginx/1.24.0 (Ubuntu)
+Date: Sun, 05 Apr 2026 16:02:12 GMT
+Content-Type: text/html
+Content-Length: 1912
+  HTTPS hash: main.72642842.js
+
+=== DEPLOY TO DOCKER COMPLETE ===

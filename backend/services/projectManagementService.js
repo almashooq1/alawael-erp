@@ -74,7 +74,7 @@ class ProjectManagementService {
 
   listProjects() {
     if (useMock) return Array.from(this.projects.values());
-    return Project.find({});
+    return Project.find({}).limit(500);
   }
 
   deleteProject(id) {
@@ -452,7 +452,7 @@ class ProjectManagementService {
   // --- Additional DB-friendly methods ---
   async getProjects() {
     if (useMock) return this.listProjects();
-    return Project.find({}).populate('manager', 'fullName').populate('team', 'fullName');
+    return Project.find({}).populate('manager', 'fullName').populate('team', 'fullName').limit(500);
   }
 
   async getProjectTasks(projectId) {

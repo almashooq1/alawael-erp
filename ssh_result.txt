@@ -1,0 +1,9 @@
+Starting SSH test...
+SSH CONNECTED!
+STDOUT: OK
+root
+srv995033
+ 15:23:56 up 3 days,  2:26,  3 users,  load average: 10.50, 12.49, 13.09
+
+STDERR: 
+Done.

@@ -500,7 +500,7 @@ class AIPredictionsService {
 
   async recommendModelUpdate() {
     try {
-      const recentPredictions = await Prediction.find({});
+      const recentPredictions = await Prediction.find({}).sort({ createdAt: -1 }).limit(100);
       const needsUpdate = recentPredictions && recentPredictions.length > 20;
 
       return {

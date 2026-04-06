@@ -12,6 +12,7 @@ import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import { ToastProvider } from './components/ui/NotificationToast';
 import { lazyWithRetry } from './utils/lazyLoader';
 import ProLayout from './components/Layout/ProLayout';
+import logger from './utils/logger';
 
 // Route Modules
 import {
@@ -205,7 +206,7 @@ function safeRoutes(fn, name) {
   try {
     return fn();
   } catch (err) {
-    console.error('[Route Error] ' + name + ':', err);
+    logger.error('[Route Error] ' + name + ':', err);
     return null;
   }
 }

@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import api from '../services/api';
 import { getToken, setToken, setRefreshToken, clearAuthData } from '../utils/tokenStorage';
+import logger from '../utils/logger';
 
 const AuthContext = createContext();
 
@@ -44,7 +45,7 @@ export function AuthProvider({ children }) {
       if (status === 401) {
         logout();
       } else {
-        console.warn('fetchUser failed (non-auth error, keeping session):', err?.message || err);
+        logger.warn('fetchUser failed (non-auth error, keeping session):', err?.message || err);
       }
     } finally {
       setLoading(false);
@@ -100,7 +101,7 @@ export function AuthProvider({ children }) {
 
       return { success: true };
     } catch (err) {
-      console.error('Login error:', err);
+      logger.error('Login error:', err);
       let errorMessage;
 
       if (!err?.status && (err?.message === 'Network Error' || err?.code === 'ERR_NETWORK')) {

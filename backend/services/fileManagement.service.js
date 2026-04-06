@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { _exec } = require('child_process');
+// Removed: const { _exec } = require('child_process') — dead import, never used
 
 class FileManagementService {
   constructor() {
@@ -38,6 +38,21 @@ class FileManagementService {
       'application/x-rar-compressed',
     ];
     this.initializeStorage();
+  }
+
+  /**
+   * Sanitize filename to prevent path traversal attacks.
+   * Strips directory components (../, ..\, /) and null bytes.
+   */
+  sanitizeFilename(filename) {
+    if (!filename || typeof filename !== 'string') {
+      throw new Error('Invalid filename');
+    }
+    const sanitized = path.basename(filename).replace(/\0/g, '');
+    if (!sanitized || sanitized === '.' || sanitized === '..') {
+      throw new Error('Invalid filename');
+    }
+    return sanitized;
   }
 
   /**
@@ -128,6 +143,7 @@ class FileManagementService {
    * Get file metadata
    */
   async getFileMetadata(userId, filename) {
+    filename = this.sanitizeFilename(filename);
     const userDir = this.getUserUploadDir(userId);
     const filepath = path.join(userDir, filename);
 
@@ -266,6 +282,8 @@ class FileManagementService {
    * Move file to different location
    */
   moveFile(userId, filename, newLocation) {
+    filename = this.sanitizeFilename(filename);
+    newLocation = this.sanitizeFilename(newLocation);
     const userDir = this.getUserUploadDir(userId);
     const sourcePath = path.join(userDir, filename);
     const destPath = path.join(userDir, newLocation, filename);
@@ -290,6 +308,8 @@ class FileManagementService {
    * Copy file
    */
   copyFile(userId, filename, newFilename) {
+    filename = this.sanitizeFilename(filename);
+    newFilename = this.sanitizeFilename(newFilename);
     const userDir = this.getUserUploadDir(userId);
     const sourcePath = path.join(userDir, filename);
     const destPath = path.join(userDir, newFilename);
@@ -312,6 +332,8 @@ class FileManagementService {
    * Rename file
    */
   renameFile(userId, oldFilename, newFilename) {
+    oldFilename = this.sanitizeFilename(oldFilename);
+    newFilename = this.sanitizeFilename(newFilename);
     const userDir = this.getUserUploadDir(userId);
     const oldPath = path.join(userDir, oldFilename);
     const newPath = path.join(userDir, newFilename);
@@ -338,6 +360,7 @@ class FileManagementService {
    * Delete file
    */
   deleteFile(userId, filename) {
+    filename = this.sanitizeFilename(filename);
     const userDir = this.getUserUploadDir(userId);
     const filepath = path.join(userDir, filename);
 
@@ -362,6 +385,7 @@ class FileManagementService {
     const failed = [];
 
     filenames.forEach(filename => {
+      filename = this.sanitizeFilename(filename);
       const filepath = path.join(userDir, filename);
 
       try {
@@ -522,6 +546,7 @@ class FileManagementService {
    * Restore from backup
    */
   restoreFromBackup(userId, backupName) {
+    backupName = this.sanitizeFilename(backupName);
     const backupPath = path.join(this.uploadDir, '_backups', backupName);
     const userDir = this.ensureUserDir(userId);
 

@@ -549,4 +549,48 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🛡️ الجولة 12 — إصلاح ثغرة Path Traversal + تحسين Frontend Logger + ترحيل Console
+
+### 12.1 إصلاح ثغرة Path Traversal في File Management Service 🔴
+
+**المشكلة:** `fileManagement.service.js` كان يقبل أسماء ملفات مثل `../../etc/passwd` مباشرة في عمليات القراءة/الحذف/النسخ/النقل، مما يتيح الوصول لملفات خارج مجلد المستخدم.
+
+**الإصلاح:**
+
+- ✅ إنشاء method `sanitizeFilename()` — يستخدم `path.basename()` + إزالة null bytes
+- ✅ تطبيق على 8 دوال: `getFileMetadata`, `moveFile` (filename + newLocation), `copyFile`, `renameFile`, `deleteFile`, `deleteMultipleFiles`, `restoreFromBackup`
+- ✅ إزالة dead import: `const { _exec } = require('child_process')`
+
+### 12.2 تحسين Frontend Logger — كتم الإنتاج 🟡
+
+**المشكلة:** `frontend/src/utils/logger.js` كان يعرض `warn` و `error` في console الإنتاج، مما يكشف تفاصيل أخطاء داخلية للمستخدمين.
+
+**الإصلاح (`frontend/src/utils/logger.js`):**
+
+- ✅ `warn`: تغيير من always-visible إلى dev-only (`isDev ? console.warn : noop`)
+- ✅ `error`: console.error في dev فقط + Sentry always (يُرسل للمراقبة بدون كشف في console)
+
+### 12.3 ترحيل ملفات Frontend الأساسية إلى Logger المركزي 🟡
+
+**المشكلة:** 4 ملفات أساسية في Frontend تستخدم `console.error/warn` مباشرة بدلاً من Logger المركزي.
+
+| الملف | التغيير |
+| :--- | :--- |
+| `frontend/src/App.js` | `console.error` → `logger.error` (RTL cache fallback) |
+| `frontend/src/AuthenticatedShell.js` | `console.error` → `logger.error` (Route error wrapper) |
+| `frontend/src/contexts/AuthContext.js` | `console.warn` → `logger.warn` + `console.error` → `logger.error` |
+| `frontend/src/contexts/SocketContext.js` | `console.warn` → dev-only guard (`NODE_ENV !== 'production'`) |
+| `frontend/src/services/auth.service.js` | `catch(err =>` → `catch(_err =>` (ESLint unused-vars fix) |
+
+### 12.4 ملخص الجولة 12
+
+| المقياس | القيمة |
+| :--- | :--- |
+| ثغرات Path Traversal مُصلحة | **8 دوال** |
+| Dead imports مُزالة | **1** (`child_process`) |
+| Frontend console leaks مُصلحة | **5 ملفات** |
+| Logger dev-only تحسينات | **warn + error** |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

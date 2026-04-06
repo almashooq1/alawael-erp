@@ -4,9 +4,7 @@
  */
 
 import apiClient from './api.client';
-import {  getToken,
-  getUserData,  clearAuthData,
-} from 'utils/tokenStorage';
+import { getToken, getUserData, clearAuthData } from 'utils/tokenStorage';
 import { getPortal, removePortal } from 'utils/storageService';
 
 const authService = {
@@ -18,12 +16,12 @@ const authService = {
     try {
       const token = getToken();
       if (token) {
-        await apiClient.post('/auth/logout').catch(err => {
-          console.warn('Logout API call failed, continuing with local cleanup:', err.message);
+        await apiClient.post('/auth/logout').catch(_err => {
+          // Logout API call failed — continuing with local cleanup
         });
       }
-    } catch (err) {
-      console.warn('Logout error, clearing local state:', err.message);
+    } catch (_err) {
+      // Logout error — clearing local state silently
     }
     clearAuthData();
     removePortal();

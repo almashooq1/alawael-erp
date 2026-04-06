@@ -11,6 +11,7 @@ import { SnackbarProvider } from './contexts/SnackbarContext';
 import { ThemeModeProvider, useThemeMode } from './contexts/ThemeContext';
 import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
+import logger from './utils/logger';
 
 // Pages — lightweight, eagerly loaded for login
 import Login from './pages/common/SimpleLogin';
@@ -30,7 +31,7 @@ function createRtlCache() {
       prepend: true,
     });
   } catch (e) {
-    console.error('Failed to create RTL cache, using default:', e);
+    logger.error('Failed to create RTL cache, using default:', e);
     return createCache({ key: 'mui' });
   }
 }

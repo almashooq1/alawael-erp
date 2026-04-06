@@ -124,7 +124,9 @@ export const useSocketEmit = () => {
       if (socket && socket.connected) {
         socket.emit(eventName, data);
       } else {
-        console.warn('Socket not connected. Event not sent:', eventName);
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('Socket not connected. Event not sent:', eventName);
+        }
       }
     },
     [socket]

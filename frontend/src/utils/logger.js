@@ -16,12 +16,14 @@ const logger = {
   /** Informational: only in development */
   log: isDev ? console.log.bind(console) : noop,
 
-  /** Warnings: always visible */
-  warn: console.warn.bind(console),
+  /** Warnings: dev-only (no leaks in production) */
+  warn: isDev ? console.warn.bind(console) : noop,
 
-  /** Errors: always visible + Sentry integration */
+  /** Errors: dev console + always Sentry */
   error: (...args) => {
-    console.error(...args);
+    if (isDev) {
+      console.error(...args);
+    }
     // Report to Sentry if it's an Error object
     try {
       const { captureException } = require('./sentry');

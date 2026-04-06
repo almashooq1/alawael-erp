@@ -12,6 +12,7 @@ const InsurancePolicy = require('../models/InsurancePolicy');
 const InsuranceClaim = require('../models/InsuranceClaim');
 const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
+const escapeRegex = require('../utils/escapeRegex');
 
 class SmartInsuranceService {
   // ── فحص الأهلية التأمينية ──────────────────────────────────────────────────
@@ -480,7 +481,7 @@ class SmartInsuranceService {
       query.createdAt = { ...query.createdAt, $lte: new Date(filters.dateTo) };
     }
     if (filters.search) {
-      const re = new RegExp(filters.search, 'i');
+      const re = new RegExp(escapeRegex(filters.search), 'i');
       if (model === 'claims') query.$or = [{ claimNumber: re }];
       if (model === 'policies') query.$or = [{ policyNumber: re }, { memberId: re }];
     }

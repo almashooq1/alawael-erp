@@ -19,6 +19,7 @@ const Cheque = require('../models/Cheque');
 const BankReconciliation = require('../models/BankReconciliation');
 const CreditNote = require('../models/CreditNote');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ─── Helper: Standard list with pagination ───────────────────────────────────
 const paginate = async (Model, filter, query, populateFields = '') => {
@@ -53,8 +54,8 @@ class FinanceOperationsService {
     if (query.beneficiary) filter.beneficiary = query.beneficiary;
     if (query.search) {
       filter.$or = [
-        { invoiceNumber: new RegExp(query.search, 'i') },
-        { notes: new RegExp(query.search, 'i') },
+        { invoiceNumber: new RegExp(escapeRegex(query.search), 'i') },
+        { notes: new RegExp(escapeRegex(query.search), 'i') },
       ];
     }
     return paginate(Invoice, filter, query, 'beneficiary issuer');
@@ -147,8 +148,8 @@ class FinanceOperationsService {
     if (query.status) filter.status = query.status;
     if (query.search) {
       filter.$or = [
-        { entryNumber: new RegExp(query.search, 'i') },
-        { description: new RegExp(query.search, 'i') },
+        { entryNumber: new RegExp(escapeRegex(query.search), 'i') },
+        { description: new RegExp(escapeRegex(query.search), 'i') },
       ];
     }
     return paginate(JournalEntry, filter, query);
@@ -246,8 +247,8 @@ class FinanceOperationsService {
     if (query.status) filter.status = query.status;
     if (query.search) {
       filter.$or = [
-        { chequeNumber: new RegExp(query.search, 'i') },
-        { payeeName: new RegExp(query.search, 'i') },
+        { chequeNumber: new RegExp(escapeRegex(query.search), 'i') },
+        { payeeName: new RegExp(escapeRegex(query.search), 'i') },
       ];
     }
     return paginate(Cheque, filter, query);
@@ -322,7 +323,7 @@ class FinanceOperationsService {
     const filter = {};
     if (query.status) filter.status = query.status;
     if (query.search) {
-      filter.$or = [{ creditNoteNumber: new RegExp(query.search, 'i') }];
+      filter.$or = [{ creditNoteNumber: new RegExp(escapeRegex(query.search), 'i') }];
     }
     return paginate(CreditNote, filter, query);
   }

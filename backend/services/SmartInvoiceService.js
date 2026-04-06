@@ -13,6 +13,7 @@
 
 const SmartInvoice = require('../models/SmartInvoice');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 class SmartInvoiceService {
   /**
@@ -177,9 +178,9 @@ class SmartInvoiceService {
 
       if (searchText) {
         query.$or = [
-          { invoiceNumber: new RegExp(searchText, 'i') },
-          { 'customer.name': new RegExp(searchText, 'i') },
-          { 'customer.email': new RegExp(searchText, 'i') },
+          { invoiceNumber: new RegExp(escapeRegex(searchText), 'i') },
+          { 'customer.name': new RegExp(escapeRegex(searchText), 'i') },
+          { 'customer.email': new RegExp(escapeRegex(searchText), 'i') },
         ];
       }
 

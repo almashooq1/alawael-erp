@@ -8,6 +8,7 @@ const TrafficAccidentReport = require('../models/TrafficAccidentReport');
 const Driver = require('../models/Driver');
 const Vehicle = require('../models/Vehicle');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');
 
@@ -654,7 +655,7 @@ class TrafficAccidentService {
    */
   async searchReports(searchTerm, filters = {}, page = 1, limit = 20) {
     try {
-      const searchRegex = new RegExp(searchTerm, 'i');
+      const searchRegex = new RegExp(escapeRegex(searchTerm), 'i');
 
       const query = {
         archived: false,

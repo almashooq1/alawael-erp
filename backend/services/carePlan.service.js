@@ -7,6 +7,7 @@
 
 const CarePlan = require('../models/CarePlan');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 class CarePlanService {
   /* ────────────────────────── CREATE ─────────────────────────── */
@@ -59,8 +60,8 @@ class CarePlanService {
     if (beneficiary) filter.beneficiary = beneficiary;
     if (search) {
       filter.$or = [
-        { planNumber: new RegExp(search, 'i') },
-        { 'educational.domains.academic.notes': new RegExp(search, 'i') },
+        { planNumber: new RegExp(escapeRegex(search), 'i') },
+        { 'educational.domains.academic.notes': new RegExp(escapeRegex(search), 'i') },
       ];
     }
 

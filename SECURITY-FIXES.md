@@ -684,6 +684,34 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🔴 الجولة 16 — القضاء على ثغرات ReDoS المتبقية في Services (15 إصلاح عبر 6 ملفات)
+
+### 16.1 تطبيق escapeRegex() على كل استعلامات البحث غير المحمية في Services 🔴
+
+**المشكلة:** 6 ملفات services تستخدم `new RegExp(userInput, 'i')` مباشرة بدون تنظيف المدخلات، مما يتيح هجمات ReDoS (Regular Expression Denial of Service) عبر أنماط regex خبيثة مثل `(a+)+$`.
+
+**الملفات المُصلحة:**
+
+| الملف | الاستبدالات | الحقول المتأثرة |
+| :--- | :---: | :--- |
+| `financeOperations.service.js` | **7** | invoiceNumber, notes, entryNumber, description, chequeNumber, payeeName, creditNoteNumber |
+| `SmartInvoiceService.js` | **3** | invoiceNumber, customer.name, customer.email |
+| `carePlan.service.js` | **2** | planNumber, educational.domains.academic.notes |
+| `smartInsurance.service.js` | **1** | claimNumber, policyNumber, memberId |
+| `trafficAccidentService.js` | **1** | reportNumber, accidentInfo.description, location.city, plateNumber |
+| `treatmentAuthorization.service.js` | **1** | authorizationNumber, beneficiaryName, nationalId, policyNumber |
+| **المجموع** | **15** | |
+
+### 16.2 ملخص الجولة 16
+
+| المقياس | القيمة |
+| :--- | :--- |
+| ثغرات ReDoS مُصلحة | **15** عبر **6 ملفات** |
+| الإجمالي التراكمي (جولة 14+16) | **21 ثغرة ReDoS** (6 routes + 15 services) |
+| نتيجة: `new RegExp(userInput)` بدون escapeRegex | **0** ✅ |
+
+---
+
 ## 🔒 الجولة 15 — توحيد إدارة التوكنات: إزالة كل تجاوزات localStorage المباشرة
 
 ### 15.1 استبدال localStorage.getItem('token'/'authToken') بـ tokenStorage.getToken() في 6 ملفات 🔴

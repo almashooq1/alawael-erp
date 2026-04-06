@@ -4,6 +4,7 @@
  */
 
 const { TreatmentAuthorization } = require('../models/treatmentAuthorization.model');
+const escapeRegex = require('../utils/escapeRegex');
 
 class TreatmentAuthorizationService {
   /**
@@ -55,7 +56,7 @@ class TreatmentAuthorizationService {
 
     // بحث بالنص
     if (filters.search) {
-      const rx = new RegExp(filters.search, 'i');
+      const rx = new RegExp(escapeRegex(filters.search), 'i');
       query.$or = [
         { authorizationNumber: rx },
         { beneficiaryName: rx },

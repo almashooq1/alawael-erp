@@ -9,6 +9,7 @@ const { getIntelligenceEngine } = require('./intelligence-engine');
 const { SmartAutomation } = require('./smart-automation');
 const { AdvancedAnalytics } = require('./advanced-analytics');
 const { SmartUIEngine } = require('./smart-ui-engine');
+const logger = require('../utils/logger');
 
 class SmartSystemIntegration {
   constructor() {
@@ -23,14 +24,10 @@ class SmartSystemIntegration {
    * 🚀 Initialize Complete Smart System
    */
   async initialize() {
-    console.log('\n');
-    console.log('╔════════════════════════════════════════════════════╗');
-    console.log('║      🧠 INTELLIGENT SYSTEM INITIALIZATION 🧠       ║');
-    console.log('╚════════════════════════════════════════════════════╝');
-    console.log('');
+    logger.info('═══ INTELLIGENT SYSTEM INITIALIZATION ═══');
 
     try {
-      console.log('⏳ Initializing subsystems...\n');
+      logger.info('Initializing subsystems...');
 
       // Initialize all subsystems
       const results = await Promise.all([
@@ -42,16 +39,16 @@ class SmartSystemIntegration {
 
       if (results.every(r => r)) {
         this.status = 'ready';
-        console.log('\n✅ All systems initialized successfully\n');
+        logger.info('All systems initialized successfully');
         return true;
       } else {
         this.status = 'error';
-        console.log('\n❌ Some systems failed to initialize\n');
+        logger.warn('Some systems failed to initialize');
         return false;
       }
     } catch (error) {
       this.status = 'error';
-      console.error('❌ Initialization failed:', error);
+      logger.error(`Initialization failed: ${error.message}`);
       return false;
     }
   }

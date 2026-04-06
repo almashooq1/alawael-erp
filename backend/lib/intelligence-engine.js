@@ -6,6 +6,8 @@
  * Status: Production Ready
  */
 
+const logger = require('../utils/logger');
+
 class IntelligenceEngine {
   constructor() {
     this.predictiveModels = new Map();
@@ -19,7 +21,7 @@ class IntelligenceEngine {
    * 🎯 Initialize Intelligence Systems
    */
   async initialize() {
-    console.log('🧠 Initializing Intelligence Engine...');
+    logger.info('Initializing Intelligence Engine...');
 
     try {
       await this.anomalyDetector.initialize();
@@ -27,10 +29,10 @@ class IntelligenceEngine {
       await this.patternAnalyzer.initialize();
       await this.learningSystem.initialize();
 
-      console.log('✅ Intelligence Engine Ready');
+      logger.info('Intelligence Engine Ready');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize Intelligence Engine:', error.message);
+      logger.error(`Failed to initialize Intelligence Engine: ${error.message}`);
       return false;
     }
   }

@@ -28,8 +28,9 @@ const mongoose = require('mongoose');
 //  HELPERS
 // =====================================================================
 
-const log = msg => console.log(`  [INDEX] ${msg}`);
-const warn = msg => console.warn(`  [INDEX WARN] ${msg}`);
+const logger = require('../../utils/logger');
+const log = msg => logger.info(`[INDEX] ${msg}`);
+const warn = msg => logger.warn(`[INDEX WARN] ${msg}`);
 
 /**
  * إنشاء فهرس بأمان - يتجاهل إذا كان موجوداً مسبقاً
@@ -820,7 +821,7 @@ async function createWaitlistIndexes(db) {
 //  MAIN EXPORT: CREATE ALL CORE INDEXES
 // =====================================================================
 async function createAllCoreIndexes(db) {
-  console.log('\n📊 Creating core database indexes...\n');
+  logger.info('📊 Creating core database indexes...');
   const start = Date.now();
 
   const indexFunctions = [
@@ -853,18 +854,19 @@ async function createAllCoreIndexes(db) {
       await fn(db);
       results.success.push(fn.name);
     } catch (err) {
-      console.error(`❌ Failed: ${fn.name}: ${err.message}`);
+      logger.error(`❌ Failed: ${fn.name}: ${err.message}`);
       results.failed.push({ name: fn.name, error: err.message });
     }
   }
 
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);
-  console.log(`\n✅ Core indexes completed in ${elapsed}s`);
-  console.log(`   Success: ${results.success.length} | Failed: ${results.failed.length}`);
+  logger.info(
+    `✅ Core indexes completed in ${elapsed}s — Success: ${results.success.length} | Failed: ${results.failed.length}`
+  );
 
   if (results.failed.length > 0) {
-    console.warn('⚠️  Failed index creations:');
-    results.failed.forEach(f => console.warn(`   - ${f.name}: ${f.error}`));
+    logger.warn('⚠️  Failed index creations:');
+    results.failed.forEach(f => logger.warn(`   - ${f.name}: ${f.error}`));
   }
 
   return results;

@@ -11,6 +11,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const logger = require('../../utils/logger');
 
 // Counter Schema
 const CounterSchema = new mongoose.Schema(
@@ -274,7 +275,7 @@ async function initializeCounters() {
     await Counter.bulkWrite(ops, { ordered: false });
   }
 
-  console.log(`  ✔ counters: ${ops.length} counters initialized`);
+  logger.info(`counters: ${ops.length} counters initialized`);
 }
 
 /**
@@ -320,7 +321,7 @@ async function checkAndResetCounters() {
           updatedAt: new Date(),
         },
       });
-      console.log(`  ↻ counter reset: ${counter._id}`);
+      logger.info(`counter reset: ${counter._id}`);
     }
   }
 }
@@ -354,7 +355,7 @@ function autoNumberPlugin(schema, options = {}) {
       try {
         this[field] = await getNextNumber(counter, options);
       } catch (err) {
-        console.error(`[counter] failed to assign ${field}:`, err.message);
+        logger.error(`[counter] failed to assign ${field}: ${err.message}`);
       }
     }
     next();

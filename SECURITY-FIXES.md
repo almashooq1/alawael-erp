@@ -948,4 +948,52 @@ return arr.join('');
 
 ---
 
+## 🟡 الجولة 22 — ترحيل console.log/error/warn → Winston Logger في database/ و lib/
+
+### 22.1 المشكلة: تسريب معلومات عبر console في بيئة الإنتاج 🟡
+
+**المشكلة:** ملفات الإنتاج في `backend/database/` و `backend/lib/` تستخدم `console.log/error/warn` مباشرة بدلاً من Winston logger الموحد. هذا يسبب:
+- عدم التحكم في مستويات السجلات (log levels)
+- فقدان البيانات الوصفية (metadata) مثل timestamps وservice name
+- عدم إمكانية التوجيه لملفات السجل أو خدمات المراقبة
+- تسريب رموز emoji ورسائل تشغيلية للـ stdout في الإنتاج
+
+### 22.2 الملفات المُصلحة (7 ملفات، ~25 عبارة console)
+
+| الملف | عبارات console مُستبدلة | الإصلاح |
+| :--- | :---: | :--- |
+| `database/indexes/core-indexes.js` | **~8** | ✅ أُضيف `require('../../utils/logger')` + استبدال كل console.log/error/warn بـ logger.info/error/warn |
+| `database/utils/counter.js` | **3** | ✅ `console.log` → `logger.info` في initializeCounters + checkAndResetCounters، `console.error` → `logger.error` في autoNumberPlugin |
+| `database/plugins/mongoose-plugins.js` | **1** | ✅ `console.log('✔ Mongoose global plugins registered')` → `logger.info(...)` |
+| `lib/advanced-analytics.js` | **3** | ✅ أُضيف `require('../utils/logger')` + استبدال initialize() logs |
+| `lib/smart-ui-engine.js` | **5** | ✅ أُضيف `require('../utils/logger')` + استبدال في SmartUIEngine + PersonalizationEngine + AdaptiveUI |
+| `lib/intelligence-engine.js` | **3** | ✅ أُضيف `require('../utils/logger')` + استبدال في initialize() |
+| `lib/smart-integration.js` | **9** | ✅ أُضيف `require('../utils/logger')` + استبدال banner + subsystem init + error logs |
+| **المجموع** | **~32** | |
+
+### 22.3 نمط الإصلاح
+
+```javascript
+// قبل — console مباشر (غير مُهيكل)
+console.log('📊 Initializing Advanced Analytics...');
+console.error('❌ Failed to initialize:', error);
+
+// بعد — Winston logger (مُهيكل + مستويات + metadata)
+const logger = require('../utils/logger');
+logger.info('Initializing Advanced Analytics...');
+logger.error(`Failed to initialize: ${error.message}`);
+```
+
+### 22.4 ملخص الجولة 22
+
+| المقياس | القيمة |
+| :--- | :--- |
+| عبارات console مُستبدلة | **~32** عبر **7 ملفات** |
+| ملفات أُضيف لها `require('logger')` | **7** |
+| المجلدات المُغطاة | `database/indexes/`, `database/utils/`, `database/plugins/`, `lib/` |
+| نتيجة: console في هذه الملفات | **0** ✅ |
+| التوافقية | Winston logger الموحد مع timestamps + log levels + file rotation |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

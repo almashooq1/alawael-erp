@@ -5,6 +5,8 @@
  * Date: January 22, 2026
  */
 
+const logger = require('../utils/logger');
+
 class SmartUIEngine {
   constructor() {
     this.userProfiles = new Map();
@@ -14,14 +16,14 @@ class SmartUIEngine {
   }
 
   async initialize() {
-    console.log('🎨 Initializing Smart UI Engine...');
+    logger.info('Initializing Smart UI Engine...');
     try {
       await this.personalizationEngine.initialize();
       await this.adaptiveUI.initialize();
-      console.log('✅ Smart UI Engine Ready');
+      logger.info('Smart UI Engine Ready');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize UI Engine:', error);
+      logger.error(`Failed to initialize UI Engine: ${error.message}`);
       return false;
     }
   }
@@ -247,7 +249,7 @@ class PersonalizationEngine {
   }
 
   async initialize() {
-    console.log('🎯 Personalizing user experience...');
+    logger.info('Personalizing user experience...');
   }
 
   async recordBehavior(userId, action, metadata) {
@@ -304,7 +306,7 @@ class PersonalizationEngine {
  */
 class AdaptiveUI {
   async initialize() {
-    console.log('🔌 Initializing adaptive UI system...');
+    logger.info('Initializing adaptive UI system...');
   }
 
   async adaptToUserBehavior(userId, metrics) {

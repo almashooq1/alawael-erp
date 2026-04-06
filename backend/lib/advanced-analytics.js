@@ -5,6 +5,8 @@
  * Date: January 22, 2026
  */
 
+const logger = require('../utils/logger');
+
 class AdvancedAnalytics {
   constructor() {
     this.dataCollector = new DataCollector();
@@ -15,14 +17,14 @@ class AdvancedAnalytics {
   }
 
   async initialize() {
-    console.log('📊 Initializing Advanced Analytics...');
+    logger.info('Initializing Advanced Analytics...');
     try {
       await this.dataCollector.initialize();
       await this.setupDefaultMetrics();
-      console.log('✅ Advanced Analytics Ready');
+      logger.info('Advanced Analytics Ready');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize Analytics:', error);
+      logger.error(`Failed to initialize Analytics: ${error.message}`);
       return false;
     }
   }

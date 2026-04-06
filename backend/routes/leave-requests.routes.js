@@ -7,6 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // 🔒 All leave request routes require authentication
@@ -42,7 +43,7 @@ router.get('/', async (req, res) => {
     });
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -69,7 +70,7 @@ router.get('/:id', async (req, res) => {
     if (!request) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     res.json({ success: true, data: request });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -103,7 +104,7 @@ router.delete('/:id', async (req, res) => {
     await request.save();
     res.json({ success: true, message: 'تم إلغاء الطلب' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -150,7 +151,7 @@ router.get('/balance/check', async (req, res) => {
     const balances = await LeaveBalance.find({ employeeId, year });
     res.json({ success: true, data: balances });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -166,7 +167,7 @@ router.post('/balance/initialize', async (req, res) => {
     );
     res.json({ success: true, message: 'تم تهيئة الأرصدة السنوية بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -182,7 +183,7 @@ router.get('/balance/all', async (req, res) => {
     const balances = await LeaveBalance.find(query).populate('employeeId', 'name nameAr');
     res.json({ success: true, data: balances });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -195,7 +196,7 @@ router.get('/stats/summary', async (req, res) => {
     const stats = await leaveService.getStats(branchId);
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

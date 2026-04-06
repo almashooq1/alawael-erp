@@ -19,13 +19,14 @@ const LeaveBalance = require('../models/LeaveBalance');
 const EmploymentContract = require('../models/EmploymentContract');
 const ChartOfAccounts = require('../models/ChartOfAccounts');
 const AssessmentComparison = require('../models/AssessmentComparison');
+const safeError = require('../utils/safeError');
 
 // ─── Helper: standard response ───────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
 const fail = (res, msg, status = 400) => res.status(status).json({ success: false, message: msg });
 const serverError = (res, err) => {
   logger.error(err.message, { stack: err.stack });
-  return res.status(500).json({ success: false, message: err.message });
+  return safeError(res, err);
 };
 
 // ═══════════════════════════════════════════════════════════════════════════════

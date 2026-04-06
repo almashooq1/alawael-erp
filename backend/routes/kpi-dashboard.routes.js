@@ -7,6 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // 🔒 All KPI Dashboard routes require authentication
@@ -33,7 +34,7 @@ router.get('/categories', async (req, res) => {
     const categories = await KpiCategory.find(query).sort({ sortOrder: 1 });
     res.json({ success: true, data: categories });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -64,7 +65,7 @@ router.delete('/categories/:id', async (req, res) => {
     await KpiCategory.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -85,7 +86,7 @@ router.get('/definitions', async (req, res) => {
       .sort({ sortOrder: 1 });
     res.json({ success: true, data: definitions });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -118,7 +119,7 @@ router.delete('/definitions/:id', async (req, res) => {
     await KpiDefinition.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -133,7 +134,7 @@ router.get('/dashboard', async (req, res) => {
     const data = await kpiService.getDashboardData(branchId, periodType);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -150,7 +151,7 @@ router.get('/year-over-year/:code', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -171,7 +172,7 @@ router.get('/branch-benchmark', async (req, res) => {
 
     res.json({ success: true, data: scorecards });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -187,7 +188,7 @@ router.post('/calculate', async (req, res) => {
     const results = await kpiService.calculateAll(branchId, periodType, y, p);
     res.json({ success: true, message: `تم حساب ${results.length} مؤشر`, count: results.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -208,7 +209,7 @@ router.get('/targets', async (req, res) => {
       .sort({ periodYear: -1, periodNumber: -1 });
     res.json({ success: true, data: targets });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -276,7 +277,7 @@ router.get('/values', async (req, res) => {
       .limit(100);
     res.json({ success: true, data: values });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -308,7 +309,7 @@ router.get('/alerts', async (req, res) => {
       pages: Math.ceil(total / parseInt(perPage)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -328,7 +329,7 @@ router.put('/alerts/:id/acknowledge', async (req, res) => {
     if (!alert) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
     res.json({ success: true, data: alert });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -351,7 +352,7 @@ router.get('/scorecards', async (req, res) => {
       .limit(50);
     res.json({ success: true, data: scorecards });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -365,7 +366,7 @@ router.post('/scorecards/generate', async (req, res) => {
     const scorecard = await kpiService.generateScorecard(branchId, periodType, y, p);
     res.json({ success: true, data: scorecard });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -389,7 +390,7 @@ router.get('/stats', async (req, res) => {
       data: { totalKpis, activeKpis, activeAlerts, criticalAlerts },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

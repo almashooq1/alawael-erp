@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const muqeemService = require('../services/muqeem.service');
 const { authenticateToken } = require('../middleware/auth.middleware');
+const safeError = require('../utils/safeError');
 const requireAuth = authenticateToken;
 
 // ─── الاستعلام عن إقامة موظف ───────────────────────────────────────────────
@@ -31,7 +32,7 @@ router.get('/residence/:iqamaNumber', requireAuth, async (req, res) => {
     }
     return res.json({ success: true, data: result.data });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -51,7 +52,7 @@ router.get('/workers', requireAuth, async (req, res) => {
     }
     return res.json({ success: true, data: result.data });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -71,7 +72,7 @@ router.get('/expiring', requireAuth, async (req, res) => {
     }
     return res.json({ success: true, data: result.data });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -94,7 +95,7 @@ router.post('/residence/renew', requireAuth, async (req, res) => {
     }
     return res.json({ success: true, message: 'تم تجديد الإقامة بنجاح', data: result.data });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -125,7 +126,7 @@ router.post('/visa/exit-reentry', requireAuth, async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -152,7 +153,7 @@ router.post('/visa/final-exit', requireAuth, async (req, res) => {
       data: result.data,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -177,7 +178,7 @@ router.post('/worker/change-occupation', requireAuth, async (req, res) => {
     }
     return res.json({ success: true, message: 'تم تغيير المهنة بنجاح', data: result.data });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 

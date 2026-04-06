@@ -12,6 +12,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const WorkShift = require('../models/WorkShift');
 const OvertimeRequest = require('../models/OvertimeRequest');
 const Employee = require('../models/Employee');
+const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. جداول الدوام — Work Shifts CRUD
@@ -51,7 +52,7 @@ router.get('/', authenticate, async (req, res) => {
       meta: { total, page: Number(page), limit: Number(limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/:id', authenticate, async (req, res) => {
     if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
     res.json({ success: true, data: shift });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -112,7 +113,7 @@ router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
     );
     res.json({ success: true, message: 'تم حذف جدول الدوام بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -152,7 +153,7 @@ router.get(
         meta: { total, page: Number(page), limit: Number(limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -230,7 +231,7 @@ router.get('/assignments/:employeeId/current', authenticate, async (req, res) =>
       data: { shift: employee.currentShiftId, history: employee.shiftHistory },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -273,7 +274,7 @@ router.get('/overtime/list', authenticate, async (req, res) => {
       meta: { total, page: Number(page), limit: Number(limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -325,7 +326,7 @@ router.post(
           .json({ success: false, message: 'الطلب غير موجود أو ليس في حالة انتظار' });
       res.json({ success: true, message: 'تم اعتماد الوقت الإضافي', data: overtime });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -357,7 +358,7 @@ router.post(
           .json({ success: false, message: 'الطلب غير موجود أو ليس في حالة انتظار' });
       res.json({ success: true, message: 'تم رفض طلب الوقت الإضافي', data: overtime });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -416,7 +417,7 @@ router.get('/overtime/summary', authenticate, authorize(['admin', 'hr']), async 
 
     res.json({ success: true, data: summary, period: { year: y, month: m } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

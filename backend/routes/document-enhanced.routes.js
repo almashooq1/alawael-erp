@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const docService = require('../services/documents/document-enhanced.service');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // ============================================================
 // البحث في المستندات
@@ -15,7 +16,7 @@ router.get('/search', authenticate, async (req, res) => {
     const result = await docService.searchDocuments(q, filters, Number(page), Number(limit));
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -28,7 +29,7 @@ router.get('/:id/versions', authenticate, async (req, res) => {
     const versions = await docService.getVersions(req.params.id);
     res.json({ success: true, data: versions });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -110,7 +111,7 @@ router.get('/:id/access-log', authenticate, async (req, res) => {
     const logs = await docService.getAccessLog(req.params.id, req.query);
     res.json({ success: true, data: logs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -122,7 +123,7 @@ router.post('/retention/apply', authenticate, async (req, res) => {
     const processed = await docService.applyRetentionPolicies();
     res.json({ success: true, data: { processed } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

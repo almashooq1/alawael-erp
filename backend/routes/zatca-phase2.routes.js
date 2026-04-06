@@ -23,6 +23,7 @@ const express = require('express');
 const router = express.Router();
 const zatcaService = require('../services/zatca-phase2.service');
 const { authenticateToken } = require('../middleware/auth.middleware');
+const safeError = require('../utils/safeError');
 const requireAuth = authenticateToken;
 
 // ─── 1. Onboarding — تسجيل الفرع ─────────────────────────────────────────
@@ -42,7 +43,7 @@ router.post('/onboarding', requireAuth, async (req, res) => {
     const result = await zatcaService.performOnboarding(branchId, orgData, otp);
     return res.status(result.success ? 200 : 400).json(result);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -60,7 +61,7 @@ router.post('/production-csid', requireAuth, async (req, res) => {
     const result = await zatcaService.obtainProductionCsid(branchId);
     return res.status(result.success ? 200 : 400).json(result);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/credential-status/:branchId', requireAuth, async (req, res) => {
     const result = await zatcaService.getCredentialStatus(req.params.branchId);
     return res.json({ success: true, data: result });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -125,7 +126,7 @@ router.post('/invoice/process', requireAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -142,7 +143,7 @@ router.post('/invoice/build-xml', requireAuth, async (req, res) => {
     const qrCode = zatcaService.generateQrCode(invoiceData);
     return res.json({ success: true, data: { xml, hash, qrCode } });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -186,7 +187,7 @@ router.post('/invoice/qr', requireAuth, async (req, res) => {
     );
     return res.json({ success: true, data: { qrCode } });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -204,7 +205,7 @@ router.post('/invoice/qr/decode', requireAuth, (req, res) => {
     const result = zatcaService.decodeQrCode(qrCode);
     return res.json(result);
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -231,7 +232,7 @@ router.post('/invoice/report', requireAuth, async (req, res) => {
       error: result.error,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -254,7 +255,7 @@ router.post('/invoice/clear', requireAuth, async (req, res) => {
       error: result.error,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -276,7 +277,7 @@ router.post('/compliance/check', requireAuth, async (req, res) => {
       error: result.error,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -294,7 +295,7 @@ router.post('/vat/calculate', requireAuth, (req, res) => {
     const result = zatcaService.calculateVat(parseFloat(amount), rate ? parseFloat(rate) : 15);
     return res.json({ success: true, data: result });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -316,7 +317,7 @@ router.post('/vat/validate', requireAuth, (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -338,7 +339,7 @@ router.get('/cpt-codes', requireAuth, (req, res) => {
       total: list.length,
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 
@@ -387,7 +388,7 @@ router.get('/status', requireAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    return res.status(500).json({ success: false, message: err.message });
+    return safeError(res, err);
   }
 });
 

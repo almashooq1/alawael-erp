@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const svc = require('../services/inventory/inventory-enhanced.service');
+const safeError = require('../utils/safeError');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, async (req, res) => {
@@ -9,7 +10,7 @@ router.get('/alerts/reorder', authenticate, async (req, res) => {
     const data = await svc.getReorderAlerts();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -18,7 +19,7 @@ router.get('/alerts/expiring', authenticate, async (req, res) => {
     const data = await svc.getExpiringItems(req.query.days ? Number(req.query.days) : 30);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -43,7 +44,7 @@ router.get('/items', authenticate, async (req, res) => {
     const total = await InventoryItem.countDocuments(filter);
     res.json({ success: true, data: items, total, page: Number(page) });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -69,7 +70,7 @@ router.get('/items/:itemId', authenticate, async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data: item });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -97,7 +98,7 @@ router.get('/items/:itemId/stock', authenticate, async (req, res) => {
     const stock = await InventoryStock.find({ itemId: req.params.itemId }).populate('warehouseId');
     res.json({ success: true, data: stock });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -109,7 +110,7 @@ router.get('/items/:itemId/transactions', authenticate, async (req, res) => {
       .limit(50);
     res.json({ success: true, data: transactions });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -120,7 +121,7 @@ router.get('/categories', authenticate, async (req, res) => {
     const categories = await ItemCategory.find({ isActive: true }).sort({ nameAr: 1 });
     res.json({ success: true, data: categories });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -141,7 +142,7 @@ router.get('/warehouses', authenticate, async (req, res) => {
     const warehouses = await Warehouse.find({ isActive: true }).populate('branchId');
     res.json({ success: true, data: warehouses });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -162,7 +163,7 @@ router.get('/suppliers', authenticate, async (req, res) => {
     const suppliers = await Supplier.find({ isActive: true }).sort({ nameAr: 1 });
     res.json({ success: true, data: suppliers });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -276,7 +277,7 @@ router.get('/purchase-orders', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: orders });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -298,7 +299,7 @@ router.get('/purchase-orders/:poId', authenticate, async (req, res) => {
     if (!po) return res.status(404).json({ success: false, message: 'أمر الشراء غير موجود' });
     res.json({ success: true, data: po });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -347,7 +348,7 @@ router.get('/assets', authenticate, async (req, res) => {
     const assets = await Asset.find(filter).populate('branchId warehouseId assignedTo');
     res.json({ success: true, data: assets });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -373,7 +374,7 @@ router.get('/assets/:assetId', authenticate, async (req, res) => {
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -400,7 +401,7 @@ router.get('/assets/:assetId/depreciation', authenticate, async (req, res) => {
     const data = svc.calculateDepreciation(asset);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -432,7 +433,7 @@ router.get('/stock-counts', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: counts });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

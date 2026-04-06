@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // 🔒 All biometric attendance routes require authentication
 router.use(authenticate);
@@ -42,7 +43,7 @@ router.get('/devices', async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: devices });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -53,7 +54,7 @@ router.get('/devices/:id', async (req, res) => {
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
     res.json({ success: true, data: device });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -88,7 +89,7 @@ router.delete('/devices/:id', async (req, res) => {
     await ZktecoDevice.findByIdAndUpdate(req.params.id, { deletedAt: new Date(), isActive: false });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -105,7 +106,7 @@ router.post('/devices/:id/ping', async (req, res) => {
       device: { id: device._id, name: device.name, status: device.status },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -120,7 +121,7 @@ router.post('/devices/:id/sync', async (req, res) => {
 
     res.json({ success: true, message: `تمت المزامنة: ${result.processed} سجل`, data: result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -137,7 +138,7 @@ router.post('/devices/:id/enroll', async (req, res) => {
     const success = await zktecoSdk.enrollEmployee(device, employee);
     res.json({ success, message: success ? 'تم تسجيل الموظف بنجاح' : 'فشل التسجيل' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -147,7 +148,7 @@ router.post('/devices/push-data', async (req, res) => {
     await zktecoSdk.handlePushData(req.body);
     res.json({ success: true, status: 'ok' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -157,7 +158,7 @@ router.get('/devices/health-check', async (req, res) => {
     const results = await zktecoSdk.healthCheck();
     res.json({ success: true, data: results });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -177,7 +178,7 @@ router.get('/shifts', async (req, res) => {
     const shifts = await WorkShift.find(query).sort({ createdAt: -1 });
     res.json({ success: true, data: shifts });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -212,7 +213,7 @@ router.delete('/shifts/:id', async (req, res) => {
     await WorkShift.findByIdAndUpdate(req.params.id, { deletedAt: new Date(), isActive: false });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -285,7 +286,7 @@ router.get('/logs', async (req, res) => {
       pages: Math.ceil(total / parseInt(perPage)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -337,7 +338,7 @@ router.get('/daily', async (req, res) => {
     });
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -357,7 +358,7 @@ router.get('/live-monitor', async (req, res) => {
 
     res.json({ success: true, data: { stats, recentLogs } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -373,7 +374,7 @@ router.get('/monthly-report', async (req, res) => {
     const report = await attendanceProcessing.generateMonthlyReport(branchId, y, m);
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -437,7 +438,7 @@ router.post('/mobile-checkin', async (req, res) => {
       daily,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -471,7 +472,7 @@ router.get('/overtime', async (req, res) => {
       pages: Math.ceil(total / parseInt(perPage)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -496,7 +497,7 @@ router.put('/overtime/:id/approve', async (req, res) => {
     if (!overtime) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
     res.json({ success: true, data: overtime });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -512,7 +513,7 @@ router.get('/policies', async (req, res) => {
     const policies = await AttendancePolicyModel.find(query).sort({ isDefault: -1, createdAt: -1 });
     res.json({ success: true, data: policies });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -552,7 +553,7 @@ router.get('/stats', async (req, res) => {
     const stats = await attendanceProcessing.getStats(branchId);
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

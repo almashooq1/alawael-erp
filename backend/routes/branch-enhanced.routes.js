@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const svc = require('../services/branches/branch-enhanced.service');
+const safeError = require('../utils/safeError');
 
 // مقارنة أداء الفروع
 router.get('/compare', authenticate, async (req, res) => {
@@ -11,7 +12,7 @@ router.get('/compare', authenticate, async (req, res) => {
     const data = await svc.compareBranches(ids, period || 'month');
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -22,7 +23,7 @@ router.get('/', authenticate, async (req, res) => {
     const branches = await Branch.find({ isActive: true }).select('-__v');
     res.json({ success: true, data: branches });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -46,7 +47,7 @@ router.get('/:branchId', authenticate, async (req, res) => {
     if (!branch) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
     res.json({ success: true, data: branch });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/:branchId/dashboard', authenticate, async (req, res) => {
     const data = await svc.compareBranches([req.params.branchId], period || 'month');
     res.json({ success: true, data: data[0] || {} });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -85,7 +86,7 @@ router.get('/:branchId/settings', authenticate, async (req, res) => {
     const settings = await BranchSetting.find({ branchId: req.params.branchId });
     res.json({ success: true, data: settings });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -120,7 +121,7 @@ router.get('/:branchId/rooms', authenticate, async (req, res) => {
     const rooms = await Room.find({ branchId: req.params.branchId, isActive: true });
     res.json({ success: true, data: rooms });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -183,7 +184,7 @@ router.get('/:branchId/services', authenticate, async (req, res) => {
     const services = await BranchService.find({ branchId: req.params.branchId, isActive: true });
     res.json({ success: true, data: services });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -230,7 +231,7 @@ router.get('/transfers', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: transfers });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

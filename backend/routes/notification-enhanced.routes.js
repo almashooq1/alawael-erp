@@ -4,6 +4,7 @@ const express = require('express');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // ============================================================
 // قوالب الإشعارات — تستخدم النموذج مباشرةً
@@ -21,7 +22,7 @@ router.get('/templates', authenticate, async (req, res) => {
       .limit(100);
     res.json({ success: true, data: templates });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -45,7 +46,7 @@ router.get('/templates/:id', authenticate, async (req, res) => {
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -101,7 +102,7 @@ router.get('/', authenticate, async (req, res) => {
     const result = await svc.getNotifications(req.user._id, req.query);
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -109,7 +110,7 @@ router.post('/mark-all-read', authenticate, async (req, res) => {
   try {
     res.json({ success: true, message: 'تم تعيين جميع الإشعارات كمقروءة' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -130,7 +131,7 @@ router.get('/preferences', authenticate, async (req, res) => {
     const prefs = await NotificationPreference.find({ userId: req.user._id });
     res.json({ success: true, data: prefs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -163,7 +164,7 @@ router.get('/broadcasts', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: broadcasts });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -188,7 +189,7 @@ router.get('/broadcasts/:id', authenticate, async (req, res) => {
     if (!broadcast) return res.status(404).json({ success: false, message: 'الرسالة غير موجودة' });
     res.json({ success: true, data: broadcast });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -234,7 +235,7 @@ router.get('/escalations', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: escalations });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -286,7 +287,7 @@ router.get('/escalations/:id', authenticate, async (req, res) => {
     if (!escalation) return res.status(404).json({ success: false, message: 'التصعيد غير موجود' });
     res.json({ success: true, data: escalation });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

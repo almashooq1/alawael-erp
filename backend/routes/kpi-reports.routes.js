@@ -7,6 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // 🔒 All KPI Reports routes require authentication
@@ -43,7 +44,7 @@ router.get('/', async (req, res) => {
       pages: Math.ceil(total / parseInt(perPage)),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -54,7 +55,7 @@ router.get('/:id', async (req, res) => {
     if (!report) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -129,7 +130,7 @@ router.post('/generate', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -152,7 +153,7 @@ router.get('/:id/download', async (req, res) => {
       downloadCount: report.downloadCount + 1,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -162,7 +163,7 @@ router.delete('/:id', async (req, res) => {
     await KpiReport.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -181,7 +182,7 @@ router.get('/stats/summary', async (req, res) => {
 
     res.json({ success: true, data: { total, ready, generating, failed } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

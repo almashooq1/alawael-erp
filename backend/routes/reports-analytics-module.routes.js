@@ -58,6 +58,7 @@ const { authenticate } = require('../middleware/auth');
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
+const safeError = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════════════════
 //  مساعدات داخلية
@@ -139,7 +140,7 @@ router.get('/templates', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -152,7 +153,7 @@ router.get('/templates/:id', authenticate, async (req, res) => {
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -201,7 +202,7 @@ router.delete('/templates/:id', authenticate, async (req, res) => {
     await template.softDelete(req.user?._id);
     res.json({ success: true, message: 'تم حذف القالب' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -271,7 +272,7 @@ router.post('/jobs', authenticate, async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -313,7 +314,7 @@ router.get('/jobs', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -327,7 +328,7 @@ router.get('/jobs/:id', authenticate, async (req, res) => {
     if (!job) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data: job });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -361,7 +362,7 @@ router.get('/jobs/:id/download', authenticate, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="report-${job.job_number}.${ext}"`);
     fs.createReadStream(filePath).pipe(res);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -374,7 +375,7 @@ router.delete('/jobs/:id', authenticate, async (req, res) => {
     await job.save();
     res.json({ success: true, message: 'تم حذف التقرير' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -413,7 +414,7 @@ router.get('/schedules', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -457,7 +458,7 @@ router.patch('/schedules/:id/toggle', authenticate, async (req, res) => {
       message: schedule.is_active ? 'تم تفعيل الجدولة' : 'تم إيقاف الجدولة',
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -471,7 +472,7 @@ router.delete('/schedules/:id', authenticate, async (req, res) => {
     await schedule.save();
     res.json({ success: true, message: 'تم حذف الجدولة' });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -570,7 +571,7 @@ router.get('/analytics/executive', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -658,7 +659,7 @@ router.get('/analytics/beneficiaries', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -780,7 +781,7 @@ router.get('/analytics/clinical', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -923,7 +924,7 @@ router.get('/analytics/financial', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1016,7 +1017,7 @@ router.get('/analytics/hr', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1118,7 +1119,7 @@ router.get('/analytics/operational', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1212,7 +1213,7 @@ router.get('/analytics/quality', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1292,7 +1293,7 @@ router.get('/built-in/beneficiary-list', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1362,7 +1363,7 @@ router.get('/built-in/beneficiary-progress', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1445,7 +1446,7 @@ router.get('/built-in/assessments-summary', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1519,7 +1520,7 @@ router.get('/built-in/sessions-log', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1596,7 +1597,7 @@ router.get('/built-in/attendance', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1680,7 +1681,7 @@ router.get('/built-in/financial-summary', authenticate, async (req, res) => {
       data: { invoices, payments, expenses },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1727,7 +1728,7 @@ router.get('/built-in/hr-headcount', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1801,7 +1802,7 @@ router.get('/built-in/inventory-status', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1875,7 +1876,7 @@ router.get('/built-in/quality-indicators', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -1936,7 +1937,7 @@ router.get('/stats', authenticate, async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

@@ -443,4 +443,41 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🛡️ الجولة 10 — ترحيل safeError شاملة: القضاء على كل تسريبات err.message (183 endpoint)
+
+### 10.1 تطبيق safeError على 16 ملف routes متبقٍ (183 إصلاح)
+
+**المشكلة:** بعد الجولة 9 (53 إصلاح)، بقيت **183 endpoint** في 16 ملف routes تُسرّب `err.message` مباشرة للمستخدمين عبر `res.status(500).json({ success: false, message: err.message })`.
+
+**الإصلاح:** تطبيق `safeError(res, err)` تلقائياً على جميع الملفات المتبقية + إضافة import لكل ملف:
+
+| الملف                                | الاستبدالات | نوع البيانات                            |
+| :----------------------------------- | :---------: | :-------------------------------------- |
+| `reports-analytics-module.routes.js` |     28      | تقارير، تحليلات، dashboards             |
+| `biometric-attendance.routes.js`     |     19      | أجهزة بيومترية، حضور                    |
+| `quality-enhanced.routes.js`         |     17      | جودة، تدقيق، تقييم أداء                 |
+| `kpi-dashboard.routes.js`            |     15      | مؤشرات أداء، أهداف، بطاقات أداء         |
+| `inventory-enhanced.routes.js`       |     15      | مخزون، مستودعات، حركات                  |
+| `zatca-phase2.routes.js`             |     14      | ⚠️ فوترة إلكترونية ZATCA، بيانات ضريبية |
+| `telehealth.routes.js`               |     13      | جلسات طب عن بعد، مواعيد                 |
+| `referral.routes.js`                 |     11      | إحالات، تحويلات طبية                    |
+| `notification-enhanced.routes.js`    |      9      | إشعارات، تنبيهات                        |
+| `work-shifts.routes.js`              |      9      | نوبات عمل، جداول                        |
+| `branch-enhanced.routes.js`          |      8      | فروع، أقسام                             |
+| `leave-requests.routes.js`           |      7      | إجازات موظفين                           |
+| `muqeem.routes.js`                   |      7      | خدمات مقيم، بيانات إقامات               |
+| `kpi-reports.routes.js`              |      6      | تقارير KPI                              |
+| `document-enhanced.routes.js`        |      4      | مستندات، وثائق                          |
+| `missing-models.routes.js`           |      1      | نماذج بيانات                            |
+| **المجموع**                          |   **183**   |                                         |
+
+### 10.2 النتيجة النهائية
+
+- ✅ **صفر تسريبات `err.message`** في كل ملفات routes + controllers
+- ✅ **الإجمالي التراكمي (الجولة 9+10): 236 endpoint** محمية من تسريب الأخطاء
+- ✅ كل خطأ 500 في Production يُرجع فقط: `"حدث خطأ داخلي"`
+- ✅ كل خطأ يُسجّل بالكامل (message + stack) عبر Winston logger
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

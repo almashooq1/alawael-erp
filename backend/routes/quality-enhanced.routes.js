@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const QualityEnhancedService = require('../services/quality/quality-enhanced.service');
+const safeError = require('../utils/safeError');
 
 const svc = new QualityEnhancedService();
 
@@ -11,7 +12,7 @@ router.get('/dashboard/:branchId', authenticate, async (req, res) => {
     const data = await svc.getQualityDashboard(req.params.branchId, req.query.period || 'month');
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -26,7 +27,7 @@ router.get('/standards', authenticate, async (req, res) => {
     const standards = await QualityStandard.find(filter).sort({ code: 1 });
     res.json({ success: true, data: standards });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/checklists', authenticate, async (req, res) => {
     const checklists = await Checklist.find(filter).sort({ titleAr: 1 });
     res.json({ success: true, data: checklists });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -126,7 +127,7 @@ router.get('/checklist-submissions', authenticate, async (req, res) => {
       .limit(50);
     res.json({ success: true, data: submissions });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -157,7 +158,7 @@ router.get('/incidents', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: incidents });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -179,7 +180,7 @@ router.get('/incidents/:incidentId', authenticate, async (req, res) => {
     if (!incident) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -260,7 +261,7 @@ router.get('/complaints', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: complaints });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -282,7 +283,7 @@ router.get('/complaints/:complaintId', authenticate, async (req, res) => {
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, data: complaint });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -325,7 +326,7 @@ router.get('/surveys', authenticate, async (req, res) => {
     const surveys = await SatisfactionSurvey.find(filter).sort({ createdAt: -1 }).limit(100);
     res.json({ success: true, data: surveys });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -346,7 +347,7 @@ router.get('/surveys/nps/:branchId', authenticate, async (req, res) => {
     const data = await svc.calculateNps(req.params.branchId, from, to);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -363,7 +364,7 @@ router.get('/audits', authenticate, async (req, res) => {
     const audits = await Audit.find(filter).sort({ plannedDate: -1 });
     res.json({ success: true, data: audits });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -392,7 +393,7 @@ router.get('/audits/:auditId', authenticate, async (req, res) => {
     if (!audit) return res.status(404).json({ success: false, message: 'التدقيق غير موجود' });
     res.json({ success: true, data: audit });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -425,7 +426,7 @@ router.get('/improvements', authenticate, async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: projects });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -450,7 +451,7 @@ router.get('/improvements/:projectId', authenticate, async (req, res) => {
     if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -494,7 +495,7 @@ router.get('/risks', authenticate, async (req, res) => {
     const risks = await Risk.find(filter).populate('ownerId').sort({ riskScore: -1 });
     res.json({ success: true, data: risks });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -531,7 +532,7 @@ router.get('/risks/matrix/:branchId', authenticate, async (req, res) => {
     });
     res.json({ success: true, data: { risks, matrix } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -542,7 +543,7 @@ router.get('/risks/:riskId', authenticate, async (req, res) => {
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

@@ -32,6 +32,7 @@ const {
 } = require('../services/telehealthService');
 
 const { v4: uuidv4 } = require('uuid');
+const safeError = require('../utils/safeError');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
@@ -49,7 +50,7 @@ router.get('/stats', async (req, res) => {
     const stats = await getDashboardStats(branchId);
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -74,7 +75,7 @@ router.get('/consultations', async (req, res) => {
     }
     if (providerId) filter.provider = providerId;
 
-    let query = Teleconsultation.find(filter)
+    const query = Teleconsultation.find(filter)
       .populate('beneficiary', 'name nationalId phone')
       .populate('provider', 'name specialty')
       .sort({ scheduledAt: -1 });
@@ -108,7 +109,7 @@ router.get('/consultations', async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -183,7 +184,7 @@ router.get('/consultations/:id', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -290,7 +291,7 @@ router.post('/consultations/:id/adjust-quality', async (req, res) => {
     const settings = await detectAndAdjustQuality(req.params.id, Number(bandwidthKbps));
     res.json({ success: true, data: settings });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -320,7 +321,7 @@ router.get('/waiting-room/:consultationId', async (req, res) => {
 
     res.json({ success: true, data: { consultation, waitingRoom, queueLength } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -366,7 +367,7 @@ router.get('/provider/queue', async (req, res) => {
     const queue = await getProviderQueue(branchId, providerId);
     res.json({ success: true, data: queue });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -410,7 +411,7 @@ router.get('/prescriptions/:id', async (req, res) => {
     }
     res.json({ success: true, data: prescription });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -469,7 +470,7 @@ router.get('/prescriptions/verify/:uuid', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -499,7 +500,7 @@ router.get('/availability-slots', async (req, res) => {
 
     res.json({ success: true, data: slots });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -556,7 +557,7 @@ router.get('/availability-slots/:id', async (req, res) => {
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -612,7 +613,7 @@ router.get('/providers/:providerId/availability', async (req, res) => {
       .lean();
     res.json({ success: true, data: slots });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -636,7 +637,7 @@ router.get('/devices', async (req, res) => {
       .lean();
     res.json({ success: true, data: devices });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -758,7 +759,7 @@ router.get('/recordings/:consultationId', async (req, res) => {
     }
     res.json({ success: true, data: recording });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 

@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const safeError = require('../utils/safeError');
 
 const {
   Referral,
@@ -73,7 +74,7 @@ router.get(
       const analytics = await getAnalytics(branchId, req.query);
       res.json({ success: true, data: analytics });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -108,7 +109,7 @@ router.get('/facilities', async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -138,7 +139,7 @@ router.get('/facilities/:id', async (req, res) => {
     if (!facility) return res.status(404).json({ success: false, message: 'الجهة غير موجودة' });
     res.json({ success: true, data: facility });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -229,7 +230,7 @@ router.get('/', async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -284,7 +285,7 @@ router.get('/:id', async (req, res) => {
       data: { ...referral, documents, communications, assessment },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -394,7 +395,7 @@ router.post(
         res.json({ success: false, message: 'لا يوجد معالج متاح بالتخصص المطلوب' });
       }
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -413,7 +414,7 @@ router.post(
       const result = await recalculatePriority(req.params.id);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );
@@ -431,7 +432,7 @@ router.get('/:id/communications', async (req, res) => {
       .lean();
     res.json({ success: true, data: comms });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -480,7 +481,7 @@ router.get('/:id/documents', async (req, res) => {
     const docs = await ReferralDocument.find({ referral: req.params.id }).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -552,7 +553,7 @@ router.get('/:id/assessment', async (req, res) => {
       .lean();
     res.json({ success: true, data: assessment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err);
   }
 });
 
@@ -641,7 +642,7 @@ router.get(
 
       res.json({ success: true, data: logs, total, page: Number(page) });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err);
     }
   }
 );

@@ -682,4 +682,34 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+---
+
+## 🔒 الجولة 15 — توحيد إدارة التوكنات: إزالة كل تجاوزات localStorage المباشرة
+
+### 15.1 استبدال localStorage.getItem('token'/'authToken') بـ tokenStorage.getToken() في 6 ملفات 🔴
+
+**المشكلة:** 6 ملفات في Frontend تتجاوز أداة `tokenStorage` المركزية وتستخدم `localStorage.getItem('token')` أو `localStorage.getItem('authToken')` مباشرة. هذا يكسر أي منطق مركزي لإدارة التوكنات (تحقق، تحديث، انتهاء صلاحية).
+
+**الملفات المُصلحة:**
+
+| الملف | التغيير |
+| :--- | :--- |
+| `frontend/src/services/branchApi.service.js` | إزالة `const getToken = () => localStorage.getItem('token')` المحلي + إضافة `import { getToken } from '../utils/tokenStorage'` |
+| `frontend/src/services/importExportPro.service.js` | إزالة fallback `localStorage.getItem('authToken')` الزائد (يستورد getToken أصلاً) |
+| `frontend/src/pages/HQDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()` |
+| `frontend/src/pages/BranchDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()` |
+| `frontend/src/pages/RehabDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` بـ `getToken()` في `apiCall()` |
+| `frontend/src/pages/ParentPortal/ParentPortalManagement.jsx` | إضافة import + استبدال 2× `localStorage.getItem('token')` بـ `getToken()` |
+
+### 15.2 ملخص الجولة 15
+
+| المقياس | القيمة |
+| :--- | :--- |
+| تجاوزات localStorage مُصلحة | **8 استخدام** عبر **6 ملفات** |
+| الإجمالي التراكمي (جولة 14+15) | **9 تجاوزات** (SocketContext + 6 ملفات جديدة) |
+| نتيجة: localStorage.getItem('token') في Frontend | **0** ✅ |
+| نتيجة: localStorage.getItem('authToken') في Frontend | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

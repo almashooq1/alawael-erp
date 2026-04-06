@@ -136,7 +136,7 @@ const importExportProService = {
   // ─── SSE PROGRESS STREAMING ───
   streamProgress: (jobId, { onProgress, onDone, onError } = {}) => {
     const baseURL = apiClient.defaults?.baseURL || '';
-    const token = getToken() || localStorage.getItem('authToken') || '';
+    const token = getToken() || '';
     const url = `${baseURL}${BASE}/progress/${jobId}`;
 
     // Use fetch with Authorization header instead of EventSource to avoid token in URL

@@ -23,6 +23,7 @@ import {
   FiberManualRecord, Bolt, LocalHospital, BarChart,
   KeyboardArrowDown, KeyboardArrowUp, Star,
 } from '@mui/icons-material';
+import { getToken } from '../utils/tokenStorage';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ const SESSION_LABELS = {
 // ─── API ──────────────────────────────────────────────────────────────────────
 const authHeaders = () => ({
   'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+  Authorization: `Bearer ${getToken() || ''}`,
 });
 const apiFetch = async (url) => {
   const res = await fetch(url, { headers: authHeaders() });

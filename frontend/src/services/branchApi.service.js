@@ -11,14 +11,14 @@
  * - Abort controller support
  */
 
+import { getToken } from '../utils/tokenStorage';
+
 const API_BASE = '/api/branch-management';
 const DEFAULT_CACHE_TTL = 2 * 60 * 1000; // 2 minutes
 
 // ─── Cache Store ──────────────────────────────────────────────────────────────
 const cache = new Map();
 const pendingRequests = new Map();
-
-const getToken = () => localStorage.getItem('token') || '';
 
 // ─── Core Fetch Wrapper ───────────────────────────────────────────────────────
 async function apiFetch(url, options = {}, cacheKey = null, cacheTTL = DEFAULT_CACHE_TTL) {

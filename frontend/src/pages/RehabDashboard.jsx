@@ -17,11 +17,12 @@ import {
   MedicalServices, PlayArrow,
 } from '@mui/icons-material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getToken } from '../utils/tokenStorage';
 
 // ─── API ──────────────────────────────────────────────────────────────────────
 const API_BASE = '/api/rehab-plans';
 const apiCall = async (path, options = {}) => {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const token = getToken() || sessionStorage.getItem('token');
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     ...options,
@@ -202,7 +203,7 @@ function RehabDashboardInner() {
   const [newGoal, setNewGoal] = useState({ domain: 'motorSkills', goalText: '', measurableTarget: '', measurementTool: '', targetWeek: 6, priority: 'medium' });
   const [newSession, setNewSession] = useState({ date: '', sessionType: 'in_person', duration: 60, clinicalNotes: '', painLevelPre: 5, painLevelPost: 3 });
 
-  const therapistId = localStorage.getItem('userId') || 'demo-therapist';
+  const therapistId = getToken('userId') || localStorage.getItem('userId') || 'demo-therapist';
   const show = (msg, severity = 'info') => setSnack({ open: true, msg, severity });
 
   const fetchDashboard = useCallback(async () => {

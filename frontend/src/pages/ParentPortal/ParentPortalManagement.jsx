@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { getToken } from '../../utils/tokenStorage';
 import {
   Box,
   Typography,
@@ -153,7 +154,7 @@ function UpdateComplaintDialog({ complaint, open, onClose, onUpdated }) {
       await axios.put(
         `${API_BASE}/parent-portal/admin/complaints/${complaint._id}`,
         { status, resolution, response: response || undefined },
-        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+        { headers: { Authorization: `Bearer ${getToken()}` } }
       );
       onUpdated();
       onClose();
@@ -265,7 +266,7 @@ export default function ParentPortalManagement() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const authHeader = { Authorization: `Bearer ${localStorage.getItem('token')}` };
+  const authHeader = { Authorization: `Bearer ${getToken()}` };
 
   // ─── جلب الإحصائيات ───────────────────────────────────────────────────────
   const fetchStats = useCallback(async () => {

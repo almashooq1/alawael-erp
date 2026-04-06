@@ -22,6 +22,7 @@ import {
   Select, MenuItem, Tabs, Tab, Skeleton,
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getToken } from '../utils/tokenStorage';
 
 /* ── New Premium Components ───────────────────────────── */
 import LiveMetricsTicker  from 'components/dashboard/LiveMetricsTicker';
@@ -54,7 +55,7 @@ const API_BASE = '/api/branch-management';
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+  Authorization: `Bearer ${getToken() || ''}`,
 });
 
 const apiFetch = async (url) => {

@@ -1,13 +1,12 @@
 /**
- * create-admin.js — الحل الجذري الكامل لإنشاء/إعادة تعيين مدير النظام
+ * create-admin.js — سكربت CLI لإنشاء حساب مدير النظام
  *
  * الاستخدام:
- *   node backend/create-admin.js   (من مجلد root)
- *   node create-admin.js           (من مجلد backend)
+ *   ADMIN_PASSWORD=MySecurePass123 node backend/create-admin.js
+ *   node create-admin.js   (من مجلد backend — يقرأ من .env)
  *
- * يعمل بطريقتين:
- *  1. عبر Mongoose مع تجاوز كل pre-save hooks
- *  2. مباشرة عبر MongoDB native driver كـ fallback
+ * ⚠️  يتطلب ADMIN_PASSWORD من متغيرات البيئة (بدون fallback مشفر)
+ * ⚠️  يُنشئ حساب جديد فقط — لا يكتب فوق حساب موجود
  */
 'use strict';
 
@@ -26,25 +25,34 @@ const bcrypt = require('bcryptjs');
 const MONGODB_URI =
   process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/alawael-erp';
 
-// ─── بيانات المدير الموحّدة ───────────────────────────────────────────────────
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@2026';
-const ADMIN_FULLNAME = process.env.ADMIN_FULL_NAME || 'عبدالله بن سعود المطيري';
-
-// الإيميلات القديمة للحذف (لا تشمل الإيميل الرئيسي)
-const LEGACY_EMAILS_TO_DELETE = [
-  'admin@alawael.org',
-  'admin@rehab-center.sa',
-  'admin@example.com',
-  'admin@alaweal.org',
-];
+// ─── بيانات المدير ───────────────────────────────────────────────────────────
+const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_FULLNAME = process.env.ADMIN_FULL_NAME || 'مدير النظام';
 
 async function createAdmin() {
+  // ─── التحقق من وجود كلمة المرور ────────────────────────────────────────
+  if (!ADMIN_PASSWORD) {
+    console.error('');
+    console.error('❌ خطأ: ADMIN_PASSWORD غير محدد في متغيرات البيئة');
+    console.error('');
+    console.error('الاستخدام:');
+    console.error('  ADMIN_PASSWORD=YourSecurePass123 node backend/create-admin.js');
+    console.error('  أو أضف ADMIN_PASSWORD في ملف .env');
+    console.error('');
+    process.exit(1);
+  }
+
+  if (ADMIN_PASSWORD.length < 8) {
+    console.error('❌ خطأ: ADMIN_PASSWORD يجب أن يكون 8 أحرف على الأقل');
+    process.exit(1);
+  }
+
   console.log('\n══════════════════════════════════════════════');
-  console.log('🔧 إصلاح حساب المدير — الحل الجذري الكامل');
+  console.log('🔧 إنشاء حساب مدير النظام');
   console.log('══════════════════════════════════════════════');
   console.log('🔌 URI:', MONGODB_URI.replace(/:([^:@]{1,}?)@/, ':***@'));
-  console.log('📧 Target Email:', ADMIN_EMAIL);
+  console.log('📧 Email:', ADMIN_EMAIL);
   console.log('');
 
   await mongoose.connect(MONGODB_URI, {
@@ -53,108 +61,58 @@ async function createAdmin() {
   });
   console.log('✅ MongoDB متصل');
 
-  // ─── تشفير كلمة المرور بـ bcrypt (12 rounds) ──────────────────────────────
-  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
-  console.log('🔐 Hash generated:', hashedPassword.substring(0, 20) + '...');
+  const db = mongoose.connection.db;
+  const collection = db.collection('users');
 
-  // ─── التحقق من صحة الـ hash قبل الحفظ ────────────────────────────────────
+  // ─── التحقق من وجود حساب أدمن ─────────────────────────────────────────
+  const existingAdmin = await collection.findOne({ email: ADMIN_EMAIL });
+  if (existingAdmin) {
+    console.log('');
+    console.log(`✅ حساب المدير موجود بالفعل: ${ADMIN_EMAIL}`);
+    console.log('   لا حاجة لإنشاء حساب جديد.');
+    console.log('   إذا نسيت كلمة المرور، استخدم خاصية "نسيت كلمة المرور" في التطبيق.');
+    console.log('');
+    await mongoose.disconnect();
+    process.exit(0);
+  }
+
+  // ─── تشفير كلمة المرور بـ bcrypt (12 rounds) ──────────────────────────
+  const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
+
+  // ─── التحقق من صحة الـ hash قبل الحفظ ─────────────────────────────────
   const verifyOk = await bcrypt.compare(ADMIN_PASSWORD, hashedPassword);
   if (!verifyOk) {
     throw new Error('❌ CRITICAL: bcrypt hash verification failed! Aborting.');
   }
-  console.log('✅ Hash verification passed');
+  console.log('✅ تم تشفير كلمة المرور والتحقق منها');
 
-  const db = mongoose.connection.db;
-  const collection = db.collection('users');
-
-  // ─── حذف جميع الحسابات القديمة / المتعارضة ─────────────────────────────
-  const deleteResult = await collection.deleteMany({
-    email: { $in: LEGACY_EMAILS_TO_DELETE },
-  });
-  if (deleteResult.deletedCount > 0) {
-    console.log(`🗑️  حُذفت ${deleteResult.deletedCount} حسابات قديمة متعارضة`);
-  }
-
-  // ─── upsert المدير الرئيسي مباشرة عبر native driver ─────────────────────
-  // (تجاوز كل Mongoose middleware/hooks/validators)
+  // ─── إنشاء المدير ─────────────────────────────────────────────────────
   const now = new Date();
-  const result = await collection.findOneAndUpdate(
-    { email: ADMIN_EMAIL },
-    {
-      $set: {
-        email: ADMIN_EMAIL,
-        password: hashedPassword,
-        fullName: ADMIN_FULLNAME,
-        role: 'admin',
-        isActive: true,
-        emailVerified: true,
-        failedLoginAttempts: 0,
-        tokenVersion: 0,
-        customPermissions: [],
-        deniedPermissions: [],
-        updatedAt: now,
-        requirePasswordChange: false,
-      },
-      $unset: {
-        lockUntil: '',
-        resetPasswordToken: '',
-        resetPasswordExpires: '',
-      },
-      $setOnInsert: {
-        createdAt: now,
-        loginHistory: [],
-        passwordHistory: [],
-      },
-    },
-    {
-      upsert: true,
-      returnDocument: 'after',
-    }
-  );
-
-  const savedUser = result?.value || result;
-  const action = result?.lastErrorObject?.updatedExisting === false ? 'created' : 'updated';
-  console.log(`✅ Admin ${action} successfully`);
-  if (savedUser?._id) {
-    console.log('   ID:', savedUser._id.toString());
-  }
-
-  // ─── التحقق النهائي: قراءة من قاعدة البيانات والتأكد ─────────────────────
-  console.log('\n🔍 التحقق النهائي من قاعدة البيانات...');
-  const verified = await collection.findOne({ email: ADMIN_EMAIL });
-
-  if (!verified) {
-    throw new Error('❌ CRITICAL: Admin not found after upsert!');
-  }
-  if (!verified.password) {
-    throw new Error('❌ CRITICAL: Admin has no password after upsert!');
-  }
-
-  const finalCheck = await bcrypt.compare(ADMIN_PASSWORD, verified.password);
-  if (!finalCheck) {
-    throw new Error('❌ CRITICAL: Password verification failed after upsert!');
-  }
-
-  if (!verified.isActive) {
-    await collection.updateOne({ email: ADMIN_EMAIL }, { $set: { isActive: true } });
-    console.log('⚠️  isActive was false — fixed');
-  }
-
-  if (verified.lockUntil) {
-    await collection.updateOne({ email: ADMIN_EMAIL }, { $unset: { lockUntil: '' } });
-    console.log('⚠️  Account was locked — unlocked');
-  }
+  await collection.insertOne({
+    email: ADMIN_EMAIL,
+    password: hashedPassword,
+    fullName: ADMIN_FULLNAME,
+    role: 'admin',
+    isActive: true,
+    emailVerified: true,
+    failedLoginAttempts: 0,
+    tokenVersion: 0,
+    customPermissions: [],
+    deniedPermissions: [],
+    requirePasswordChange: true,
+    loginHistory: [],
+    passwordHistory: [],
+    createdAt: now,
+    updatedAt: now,
+  });
 
   console.log('');
   console.log('═══════════════════════════════════════════════════');
-  console.log('✅ الإصلاح الجذري اكتمل بنجاح 100%');
+  console.log('✅ تم إنشاء حساب المدير بنجاح');
   console.log('');
-  console.log('🔑 بيانات تسجيل الدخول:');
-  console.log('   البريد الإلكتروني: ' + ADMIN_EMAIL);
-  console.log('   كلمة المرور:       ' + ADMIN_PASSWORD);
-  console.log('   الدور:             ' + verified.role);
-  console.log('   الحالة:            ' + (verified.isActive ? '✅ مفعّل' : '❌ معطّل'));
-  console.log('   قفل الحساب:        ' + (verified.lockUntil ? '🔒 مقفل' : '🔓 مفتوح'));
+  console.log('📧 البريد الإلكتروني: ' + ADMIN_EMAIL);
+  console.log('🔑 كلمة المرور:       (كما حددتها في ADMIN_PASSWORD)');
+  console.log('⚠️  يجب تغيير كلمة المرور عند أول تسجيل دخول');
   console.log('═══════════════════════════════════════════════════');
   console.log('');
 
@@ -164,7 +122,6 @@ async function createAdmin() {
 }
 
 createAdmin().catch(err => {
-  console.error('\n❌ خطأ فادح:', err.message);
-  console.error(err.stack);
+  console.error('\n❌ خطأ:', err.message);
   process.exit(1);
 });

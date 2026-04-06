@@ -339,7 +339,12 @@ async function seedAdminUser(db) {
     return;
   }
 
-  const passwordHash = await bcrypt.hash('Admin@2026', 12);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    log('ADMIN_PASSWORD env var not set — skipping super admin creation', 'warning');
+    return;
+  }
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
   await col.insertOne({
     email: 'admin@alawael.com.sa',
     phone: '0501234567',
@@ -349,11 +354,12 @@ async function seedAdminUser(db) {
     branch: 'RUH-MAIN',
     employeeRef: 'ADMIN-001',
     isActive: true,
+    requirePasswordChange: true,
     metadata: { isComprehensiveSeed: true, seededAt: now },
     createdAt: now,
     updatedAt: now,
   });
-  log('Super admin created: admin@alawael.com.sa / Admin@2026', 'success');
+  log('Super admin created: admin@alawael.com.sa (password change required)', 'success');
 }
 
 // ─── Down (حذف البيانات) ───────────────────────────────────────────────────────
@@ -494,16 +500,17 @@ async function main() {
     });
     console.log('  └─────────────────────────┴──────────┘');
 
-    console.log('\n  🔑 بيانات الدخول:');
-    console.log('  ┌───────────────────────────────────────────────────────┐');
-    console.log('  │ الدور            │ البريد الإلكتروني         │ كلمة المرور  │');
-    console.log('  ├──────────────────┼───────────────────────────┼──────────────┤');
-    console.log('  │ مدير النظام      │ admin@alawael.com.sa       │ Admin@2026   │');
-    console.log('  │ مدير فرع الرياض  │ ahmed.omari@alawael.com.sa │ Alawael@2026 │');
-    console.log('  │ أخصائي نطق       │ noura.qahtani@alawael.com.sa│ Alawael@2026│');
-    console.log('  │ استقبال          │ maha.rajhi@alawael.com.sa  │ Alawael@2026 │');
-    console.log('  │ محاسب            │ adel.namri@alawael.com.sa  │ Alawael@2026 │');
-    console.log('  └──────────────────────────────────────────────────────┘');
+    console.log('\n  🔑 حسابات تسجيل الدخول:');
+    console.log('  ┌─────────────────────────────────────────────┐');
+    console.log('  │ مدير النظام:    admin@alawael.com.sa         │');
+    console.log('  │ مدير الفرع:     ahmed.omari@alawael.com.sa   │');
+    console.log('  │ أخصائي نطق:     noura.qahtani@alawael.com.sa │');
+    console.log('  │ استقبال:        maha.rajhi@alawael.com.sa    │');
+    console.log('  │ محاسب:          adel.namri@alawael.com.sa    │');
+    console.log('  ├─────────────────────────────────────────────┤');
+    console.log('  │ ⚠️  كلمات المرور مأخوذة من ADMIN_PASSWORD   │');
+    console.log('  │ ⚠️  يجب تغييرها فوراً بعد أول تسجيل دخول    │');
+    console.log('  └─────────────────────────────────────────────┘');
 
     console.log(`\n  ⏱️  Completed in ${elapsed}s`);
   } catch (err) {

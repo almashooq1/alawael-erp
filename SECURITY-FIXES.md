@@ -147,6 +147,29 @@
 
 ---
 
+## 🔵 إصلاحات الجولة الثالثة
+
+### 12. إزالة كلمات المرور المشفرة من 5 ملفات 🔴
+
+**المشكلة:** كلمات مرور مشفرة (Admin@2026, Admin@123456) في ملفات تُستخدم مباشرة.
+
+**الإصلاح:**
+
+- ✅ `setup.routes.js`: إعادة كتابة — POST فقط، محظور في Production، بدون fallback
+- ✅ `create-admin.js`: يتطلب ADMIN_PASSWORD من env، لا يطبع كلمة المرور
+- ✅ `seedDatabase.js`: يتطلب ADMIN_PASSWORD من env، requirePasswordChange: true
+- ✅ `run-comprehensive-seeds.js`: إزالة hardcoded password + جدول كلمات المرور
+- ✅ `00-DatabaseSeeder.js`: إزالة طباعة كلمات المرور
+
+### 13. إضافة خطوة اختبارات في CI/CD 🟡
+
+**الإصلاح:**
+
+- ✅ إضافة job `test` (npm test + npm audit) قبل build/deploy
+- ✅ يمكن تخطيه عبر `skip_tests` في workflow_dispatch
+
+---
+
 ## ⚠️ مشاكل معلقة تحتاج اهتمام (Backlog)
 
 ### P1 — يجب معالجتها قريباً

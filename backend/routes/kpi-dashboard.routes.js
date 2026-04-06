@@ -6,7 +6,11 @@
 'use strict';
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 const router = express.Router();
+
+// 🔒 All KPI Dashboard routes require authentication
+router.use(authenticate);
 
 const KpiDefinition = require('../models/KpiDefinition');
 const KpiCategory = require('../models/KpiCategory');

@@ -12,8 +12,12 @@
  */
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 const mongoose = require('mongoose');
+
+// 🔒 All scheduling routes require authentication
+router.use(authenticate);
 
 // ─── Models ──────────────────────────────────────────────────────────────────
 const Appointment = require('../models/scheduling/Appointment');

@@ -36,8 +36,12 @@
  */
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
+
+// 🔒 All CDSS routes require authentication
+router.use(authenticate);
 
 const ClinicalRule = require('../models/ClinicalRule');
 const DrugLibrary = require('../models/DrugLibrary');

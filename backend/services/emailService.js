@@ -32,7 +32,7 @@ const emailTemplates = {
         <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <h3>بيانات دخولك:</h3>
           <p><strong>البريد الإلكتروني:</strong> ${user.email}</p>
-          <p><strong>الرابط:</strong> <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}">http://localhost:3000</a></p>
+          <p><strong>الرابط:</strong> <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}">${process.env.FRONTEND_URL || 'http://localhost:3000'}</a></p>
         </div>
 
         <p>يمكنك الآن تسجيل الدخول واستخدام جميع مزايا النظام.</p>

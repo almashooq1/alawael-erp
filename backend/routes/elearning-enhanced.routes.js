@@ -37,8 +37,12 @@
  */
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 
 const router = express.Router();
+
+// 🔒 All e-learning routes require authentication
+router.use(authenticate);
 
 const ElearningCourse = require('../models/ElearningCourse');
 const CourseModule = require('../models/CourseModule');

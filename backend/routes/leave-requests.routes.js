@@ -6,7 +6,11 @@
 'use strict';
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 const router = express.Router();
+
+// 🔒 All leave request routes require authentication
+router.use(authenticate);
 
 const LeaveBalance = require('../models/LeaveBalance');
 const leaveService = require('../services/leaveManagement.service');

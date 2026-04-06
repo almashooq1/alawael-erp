@@ -32,9 +32,13 @@
 'use strict';
 
 const express = require('express');
+const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+
+// 🔒 All volunteer routes require authentication
+router.use(authenticate);
 
 // Models
 const Volunteer = require('../models/Volunteer');

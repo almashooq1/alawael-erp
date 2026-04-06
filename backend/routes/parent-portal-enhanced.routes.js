@@ -46,6 +46,7 @@
 
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
@@ -62,11 +63,9 @@ const {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+// Generate secure 6-digit OTP using CSPRNG
 function generateOtp() {
-  if (process.env.NODE_ENV === 'production') {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  }
-  return '123456'; // بيئة التطوير
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 function maskPhone(phone) {
@@ -183,7 +182,7 @@ router.post('/verify-otp', async (req, res) => {
     // إنشاء JWT (يحمل phone كـ guardianPhone)
     const token = jwt.sign(
       { guardianPhone: phone, role: 'guardian', type: 'parent_portal' },
-      process.env.JWT_SECRET || 'rehab-secret',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 

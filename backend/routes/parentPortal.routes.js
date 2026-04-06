@@ -204,7 +204,7 @@ router.post('/auth/verify-otp', async (req, res) => {
         role: 'guardian',
         type: 'parent_portal',
       },
-      process.env.JWT_SECRET || 'parent_portal_secret',
+      process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
 

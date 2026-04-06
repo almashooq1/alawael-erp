@@ -1135,4 +1135,55 @@ try {
 
 ---
 
+---
+
+## 🔴 الجولة 26 — إزالة JWT Secret Fallbacks الضعيفة + إصلاح OTP غير آمن في بوابة ولي الأمر
+
+### 26.1 إزالة JWT Secret Fallback الضعيف في parentPortal.routes.js 🔴
+
+**المشكلة:** `jwt.sign()` كان يستخدم `process.env.JWT_SECRET || 'parent_portal_secret'` — إذا لم يكن `JWT_SECRET` مُعرّفاً، يُستخدم مفتاح ثابت يمكن لأي مهاجم استخدامه لتزوير JWT tokens.
+
+**الإصلاح (`backend/routes/parentPortal.routes.js`):**
+- ✅ إزالة `|| 'parent_portal_secret'` — الآن يستخدم `process.env.JWT_SECRET` فقط
+- ✅ سيرمي خطأ إذا لم يكن JWT_SECRET مُعرّفاً (fail-closed)
+
+### 26.2 إصلاح 3 مشاكل في parent-portal-enhanced.routes.js 🔴🔴
+
+**المشكلة A — JWT Secret Fallback ضعيف (حرج):**
+`process.env.JWT_SECRET || 'rehab-secret'` — مفتاح ثابت ضعيف يُستخدم كبديل.
+
+**المشكلة B — Math.random() لتوليد OTP (عالي):**
+`Math.floor(100000 + Math.random() * 900000)` — غير آمن تشفيرياً، قابل للتنبؤ.
+
+**المشكلة C — كود OTP ثابت '123456' في بيئة التطوير (حرج):**
+`return '123456'` — أي شخص يعرف هذا الكود يمكنه تسجيل الدخول.
+
+**الإصلاح (`backend/routes/parent-portal-enhanced.routes.js`):**
+- ✅ إضافة `const crypto = require('crypto')`
+- ✅ إعادة كتابة `generateOtp()` — `crypto.randomInt(100000, 1000000)` بدلاً من Math.random + hardcoded '123456'
+- ✅ إزالة `|| 'rehab-secret'` من JWT sign — الآن `process.env.JWT_SECRET` فقط
+
+### 26.3 تدقيق أمني إضافي — نتائج نظيفة ✅
+
+| الفحص | النتيجة |
+| :--- | :--- |
+| setTimeout memory leaks | **آمن** (داخل Promises منتظرة) ✅ |
+| Object.assign مع req.body | **2 فقط** (محمية بـ Mongoose schema) ✅ |
+| Open redirects | **0** ✅ |
+| process.exit() في كود الإنتاج | **0** (فقط في scripts/seeds/CLI) ✅ |
+| File write بمسارات غير محكومة | **0** ✅ |
+| JWT_SECRET fallbacks في ملفات اختبار | **مقبول** (tests فقط) ✅ |
+
+### 26.4 ملخص الجولة 26
+
+| المقياس | القيمة |
+| :--- | :--- |
+| JWT Secret Fallbacks مُزالة | **2** (`parentPortal.routes.js` + `parent-portal-enhanced.routes.js`) |
+| Math.random() → CSPRNG | **1** (`parent-portal-enhanced.routes.js`) |
+| OTP ثابت '123456' مُزال | **1** (`parent-portal-enhanced.routes.js`) |
+| ملفات معدلة | **2** |
+| نتيجة: JWT fallbacks ضعيفة في routes الإنتاج | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

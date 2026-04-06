@@ -5,6 +5,7 @@
  */
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const speakeasy = require('speakeasy');
 const User = require('../models/User');
 const Session = require('../models/Session');
 const SecurityLog = require('../models/securityLog.model');
@@ -99,8 +100,8 @@ class SecurityService {
     const user = await User.findById(userId).select('+mfa.secret');
     if (!user) throw new Error('المستخدم غير موجود');
 
-    // Verify the token (dev: accept 123456)
-    const isValid = token === '123456' || this._verifyTotp(secret || user.mfa?.secret, token);
+    // Verify the TOTP token using speakeasy
+    const isValid = this._verifyTotp(secret || user.mfa?.secret, token);
     if (!isValid) throw new Error('رمز التحقق غير صحيح');
 
     const backupCodes = this._generateBackupCodes(8);
@@ -626,10 +627,13 @@ class SecurityService {
      ───────────────────────────────────────────────────────────────── */
 
   _verifyTotp(secret, token) {
-    // Simple time-based verification for prototype
-    // In production, use speakeasy/otplib
     if (!secret || !token) return false;
-    return token === '123456'; // Dev fallback
+    return speakeasy.totp.verify({
+      secret,
+      encoding: 'hex',
+      token: String(token),
+      window: 2, // Allow 2 time-step tolerance (±60 seconds)
+    });
   }
 
   _generateBackupCodes(count = 8) {

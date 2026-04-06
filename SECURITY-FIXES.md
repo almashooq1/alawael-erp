@@ -1042,4 +1042,53 @@ try {
 
 ---
 
+## 🔴 الجولة 24 — إزالة تجاوزات أمنية في الإنتاج (Dev Bypass Removal + CSPRNG + AES Encryption)
+
+### 24.1 إزالة تجاوز 2FA بكود ثابت '123456' في securityService.js 🔴🔴
+
+**المشكلة:** دالتان في `securityService.js` كانتا تقبلان كود `'123456'` كبديل عن أي رمز TOTP حقيقي — **في جميع البيئات بما فيها الإنتاج**:
+- `enableMfa()`: كانت تحتوي على `token === '123456' || this._verifyTotp(...)` — أي مهاجم يمكنه تفعيل MFA بكود ثابت
+- `_verifyTotp()`: كانت تُرجع `token === '123456'` دائماً (TOTP verification وهمي بالكامل)
+
+**الإصلاح (`backend/services/securityService.js`):**
+- ✅ إضافة `require('speakeasy')` — مكتبة TOTP المتاحة في المشروع
+- ✅ إزالة `token === '123456'` من `enableMfa()` — الآن يعتمد فقط على `_verifyTotp()`
+- ✅ إعادة كتابة `_verifyTotp()` بالكامل — يستخدم `speakeasy.totp.verify()` مع encoding hex و window ±60 ثانية
+- ✅ لا يوجد أي fallback أو bypass — التحقق حقيقي 100%
+
+### 24.2 إزالة OTP ثابت + Math.random() في parentPortal.routes.js 🔴
+
+**المشكلة:** دالة `generateOtp()` في بوابة ولي الأمر:
+- في dev/test: كانت تُرجع `'123456'` دائماً — أي شخص يعرف هذا الكود يمكنه تسجيل الدخول
+- في production: كانت تستخدم `Math.random()` (غير آمن تشفيرياً)
+
+**الإصلاح (`backend/routes/parentPortal.routes.js`):**
+- ✅ إضافة `require('crypto')`
+- ✅ إزالة الشرط `NODE_ENV === 'development'` والقيمة الثابتة `'123456'`
+- ✅ استبدال `Math.random()` بـ `crypto.randomInt(100000, 1000000)` — CSPRNG
+
+### 24.3 استبدال تشفير Base64 الوهمي بـ AES-256-GCM في smartCameraManager.service.js 🟠
+
+**المشكلة:** دالة `encryptCredentials()` كانت تُسمى "encrypt" لكنها تستخدم `Buffer.toString('base64')` فقط — وهو ترميز وليس تشفير. أي شخص لديه وصول لقاعدة البيانات يمكنه فك الترميز فوراً بـ `atob()`.
+
+**الإصلاح (`backend/services/smartCameraManager.service.js`):**
+- ✅ إضافة `require('crypto')`
+- ✅ إعادة كتابة `encryptCredentials()` — AES-256-GCM مع IV عشوائي + authTag
+- ✅ إضافة `decryptCredentials()` جديدة — لفك التشفير عند الحاجة
+- ✅ مفتاح التشفير من `DEVICE_ENCRYPTION_KEY` → `JWT_SECRET` → fallback
+- ✅ الخرج: `iv:authTag:encryptedData` (hex format)
+
+### 24.4 ملخص الجولة 24
+
+| المقياس | القيمة |
+| :--- | :--- |
+| تجاوزات 2FA بكود ثابت مُزالة | **3** (enableMfa + _verifyTotp + generateOtp) |
+| Math.random() مُستبدلة بـ CSPRNG | **1** (parentPortal OTP) |
+| تشفير وهمي مُستبدل بـ AES-256-GCM | **1** (camera credentials) |
+| مكتبات مُفعّلة | **1** (speakeasy — كانت مثبتة لكن غير مستخدمة) |
+| ملفات معدلة | **3** (`securityService.js` + `parentPortal.routes.js` + `smartCameraManager.service.js`) |
+| نتيجة: `'123456'` bypass في كود الإنتاج | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

@@ -12,6 +12,7 @@
  */
 
 const EventEmitter = require('events');
+const crypto = require('crypto');
 
 class SmartCameraManager extends EventEmitter {
   constructor() {
@@ -693,14 +694,48 @@ class SmartCameraManager extends EventEmitter {
   }
 
   /**
-   * Encrypt credentials
+   * Encrypt credentials using AES-256-GCM
    */
   encryptCredentials(credentials) {
-    // Mock encryption - في الإنتاج، استخدم crypto
+    const ENCRYPTION_KEY =
+      process.env.DEVICE_ENCRYPTION_KEY ||
+      process.env.JWT_SECRET ||
+      'default-dev-key-change-in-production';
+    const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const password = credentials.password || '';
+    const encrypted = Buffer.concat([cipher.update(password, 'utf8'), cipher.final()]);
+    const authTag = cipher.getAuthTag();
     return {
       username: credentials.username || '',
-      password: Buffer.from(credentials.password || '').toString('base64'),
+      password: `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted.toString('hex')}`,
     };
+  }
+
+  /**
+   * Decrypt credentials
+   */
+  decryptCredentials(encryptedCreds) {
+    try {
+      const ENCRYPTION_KEY =
+        process.env.DEVICE_ENCRYPTION_KEY ||
+        process.env.JWT_SECRET ||
+        'default-dev-key-change-in-production';
+      const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
+      const parts = encryptedCreds.password.split(':');
+      if (parts.length !== 3) return { username: encryptedCreds.username, password: '' };
+      const [ivHex, authTagHex, encryptedHex] = parts;
+      const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(ivHex, 'hex'));
+      decipher.setAuthTag(Buffer.from(authTagHex, 'hex'));
+      const decrypted = Buffer.concat([
+        decipher.update(Buffer.from(encryptedHex, 'hex')),
+        decipher.final(),
+      ]);
+      return { username: encryptedCreds.username, password: decrypted.toString('utf8') };
+    } catch (_err) {
+      return { username: encryptedCreds.username, password: '' };
+    }
   }
 
   /**

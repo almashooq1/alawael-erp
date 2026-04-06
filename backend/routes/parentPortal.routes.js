@@ -42,6 +42,7 @@
  *  DELETE /api/parent-portal/devices/:token       — إلغاء تسجيل جهاز
  */
 
+const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
@@ -65,12 +66,9 @@ function isGuardianOrStaff(req, guardianId) {
   return String(req.user._id || req.user.id) === String(guardianId);
 }
 
-// OTP في بيئة التطوير دائماً 123456
+// Generate secure 6-digit OTP using CSPRNG
 function generateOtp() {
-  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') {
-    return '123456';
-  }
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

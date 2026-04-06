@@ -20,6 +20,7 @@ import { DashboardSkeleton } from '../ui/LoadingSkeleton';
 import RouteErrorBoundary from '../shared/RouteErrorBoundary';
 import WatermarkBackground from '../shared/WatermarkBackground';
 import { useThemeMode } from '../../contexts/ThemeContext';
+import logger from '../../utils/logger';
 
 // Error boundary specifically for sidebar — prevents sidebar crash from taking down the whole app
 class SidebarErrorBoundary extends React.Component {
@@ -31,7 +32,7 @@ class SidebarErrorBoundary extends React.Component {
     return { hasError: true };
   }
   componentDidCatch(error, info) {
-    console.error('[SidebarErrorBoundary]', error, info?.componentStack);
+    logger.error('[SidebarErrorBoundary]', error, info?.componentStack);
   }
   render() {
     if (this.state.hasError) {

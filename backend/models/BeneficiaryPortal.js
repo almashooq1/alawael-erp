@@ -47,13 +47,13 @@ const beneficiarySchema = new mongoose.Schema(
     ],
 
     // Security
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     accountStatus: { type: String, enum: ['active', 'inactive', 'suspended'], default: 'active' },
     lastLoginDate: Date,
     loginAttempts: { type: Number, default: 0 },
-    passwordResetToken: String,
+    passwordResetToken: { type: String, select: false },
     passwordResetExpires: Date,
-    twoFactorSecret: String,
+    twoFactorSecret: { type: String, select: false },
     twoFactorEnabled: { type: Boolean, default: false },
 
     // Preferences

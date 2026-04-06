@@ -96,7 +96,7 @@ const SystemSettingsSchema = new mongoose.Schema(
       fromEmail: { type: String, default: '' },
       fromName: { type: String, default: 'نظام الأوائل' },
       username: { type: String, default: '' },
-      password: { type: String, default: '' },
+      password: { type: String, default: '', select: false },
       enableSSL: { type: Boolean, default: true },
       enableTLS: { type: Boolean, default: true },
       maxRetrySend: { type: Number, default: 3 },
@@ -121,16 +121,16 @@ const SystemSettingsSchema = new mongoose.Schema(
 
     /* ── Integrations ──────────────────── */
     integrations: {
-      googleMapsApiKey: { type: String, default: '' },
+      googleMapsApiKey: { type: String, default: '', select: false },
       smsGateway: { type: String, enum: ['none', 'twilio', 'unifonic', 'mobily'], default: 'none' },
-      smsApiKey: { type: String, default: '' },
-      whatsappApiKey: { type: String, default: '' },
+      smsApiKey: { type: String, default: '', select: false },
+      whatsappApiKey: { type: String, default: '', select: false },
       paymentGateway: {
         type: String,
         enum: ['none', 'moyasar', 'hyperpay', 'tap', 'stripe'],
         default: 'none',
       },
-      paymentApiKey: { type: String, default: '' },
+      paymentApiKey: { type: String, default: '', select: false },
       enableWebhooks: { type: Boolean, default: false },
       webhookUrl: { type: String, default: '' },
       enableApi: { type: Boolean, default: true },
@@ -186,4 +186,5 @@ SystemSettingsSchema.methods.recordChange = function (userId, section, changes) 
   }
 };
 
-module.exports = mongoose.models.SystemSettings || mongoose.model('SystemSettings', SystemSettingsSchema);
+module.exports =
+  mongoose.models.SystemSettings || mongoose.model('SystemSettings', SystemSettingsSchema);

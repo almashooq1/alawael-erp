@@ -44,6 +44,7 @@ const cameraSchema = new mongoose.Schema(
       password: {
         type: String,
         required: true,
+        select: false,
         // يجب تشفير كلمة المرور قبل الحفظ
       },
       deviceId: String, // معرف الجهاز من Hikvision

@@ -593,4 +593,40 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🔴 الجولة 13 — حماية البيانات الحساسة في Mongoose Models + ترحيل Console
+
+### 13.1 إضافة `select: false` لحقول كلمات المرور والأسرار في 6 نماذج 🔴🔴
+
+**المشكلة:** 6 نماذج Mongoose تحتوي على حقول حساسة (كلمات مرور، مفاتيح API، أسرار 2FA) بدون `select: false`، مما يعني أنها تُرجع **تلقائياً في كل استعلام** `.find()` و `.findOne()`.
+
+**مقارنة:** نموذج `User.js` الرئيسي يستخدم `select: false` بشكل صحيح — لكن النماذج الأخرى لا تفعل.
+
+| النموذج | الحقول المحمية | الخطورة |
+| :--- | :--- | :--- |
+| `BeneficiaryPortal.js` | `password`, `passwordResetToken`, `twoFactorSecret` | 🔴 حرج |
+| `SystemSettings.js` | `email.password`, `googleMapsApiKey`, `smsApiKey`, `whatsappApiKey`, `paymentApiKey` | 🔴 حرج |
+| `WorkflowEnhanced.js` | `secretKey`, `auth.token`, `auth.password`, `auth.apiKeyValue` | 🔴 حرج |
+| `Camera.js` | `hikvision.password` | 🔴 حرج |
+| `VirtualSession.js` | `password` (meeting) | 🟡 متوسط |
+| `ImportExportJob.js` | `exportOptions.password` | 🟡 متوسط |
+
+**الإصلاح:**
+- ✅ إضافة `select: false` لـ **16 حقل حساس** عبر 6 نماذج
+- ✅ الحقول لن تُرجع إلا عند طلبها صراحة بـ `.select('+password')`
+
+### 13.2 إصلاح آخر console.error في Frontend 🟡
+
+**الملف:** `frontend/src/components/Layout/ProLayout.jsx`
+- ✅ `console.error('[SidebarErrorBoundary]')` → `logger.error('[SidebarErrorBoundary]')`
+
+### 13.3 ملخص الجولة 13
+
+| المقياس | القيمة |
+| :--- | :--- |
+| حقول حساسة محمية بـ `select: false` | **16 حقل** عبر **6 نماذج** |
+| نماذج مُصلحة | **6** (BeneficiaryPortal, SystemSettings, WorkflowEnhanced, Camera, VirtualSession, ImportExportJob) |
+| Frontend console leaks | **+1 ملف** (ProLayout.jsx) |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

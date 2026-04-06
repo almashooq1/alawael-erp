@@ -244,7 +244,7 @@ const WorkflowWebhookSchema = new Schema(
     url: { type: String, required: true },
     method: { type: String, enum: ['POST', 'PUT', 'PATCH'], default: 'POST' },
     headers: { type: Map, of: String },
-    secretKey: { type: String }, // For HMAC signature
+    secretKey: { type: String, select: false }, // For HMAC signature
     contentType: {
       type: String,
       enum: ['application/json', 'application/x-www-form-urlencoded'],
@@ -254,11 +254,11 @@ const WorkflowWebhookSchema = new Schema(
     // Authentication
     auth: {
       type: { type: String, enum: ['none', 'bearer', 'basic', 'api_key'] },
-      token: { type: String },
+      token: { type: String, select: false },
       username: { type: String },
-      password: { type: String },
+      password: { type: String, select: false },
       apiKeyHeader: { type: String },
-      apiKeyValue: { type: String },
+      apiKeyValue: { type: String, select: false },
     },
 
     // Retry
@@ -467,14 +467,16 @@ const WorkflowFavorite =
   mongoose.models.WorkflowFavorite || mongoose.model('WorkflowFavorite', WorkflowFavoriteSchema);
 const WorkflowDelegation =
   mongoose.models.WorkflowDelegation ||
-  mongoose.models.WorkflowDelegation || mongoose.model('WorkflowDelegation', WorkflowDelegationSchema);
+  mongoose.models.WorkflowDelegation ||
+  mongoose.model('WorkflowDelegation', WorkflowDelegationSchema);
 const WorkflowReminder =
   mongoose.models.WorkflowReminder || mongoose.model('WorkflowReminder', WorkflowReminderSchema);
 const WorkflowWebhook =
   mongoose.models.WorkflowWebhook || mongoose.model('WorkflowWebhook', WorkflowWebhookSchema);
 const WorkflowSavedReport =
   mongoose.models.WorkflowSavedReport ||
-  mongoose.models.WorkflowSavedReport || mongoose.model('WorkflowSavedReport', WorkflowSavedReportSchema);
+  mongoose.models.WorkflowSavedReport ||
+  mongoose.model('WorkflowSavedReport', WorkflowSavedReportSchema);
 const WorkflowTag = mongoose.models.WorkflowTag || mongoose.model('WorkflowTag', WorkflowTagSchema);
 const WorkflowVersion =
   mongoose.models.WorkflowVersion || mongoose.model('WorkflowVersion', WorkflowVersionSchema);

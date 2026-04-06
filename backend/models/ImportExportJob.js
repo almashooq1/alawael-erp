@@ -153,7 +153,7 @@ const importExportJobSchema = new mongoose.Schema(
       encoding: { type: String, default: 'utf-8' },
       delimiter: { type: String, default: ',' }, // for CSV
       compression: { type: Boolean, default: false },
-      password: { type: String }, // encrypted, for protected exports
+      password: { type: String, select: false }, // encrypted, for protected exports
       watermark: { type: String },
       branding: {
         logo: { type: Boolean, default: true },
@@ -347,4 +347,5 @@ importExportJobSchema.statics.getDashboardStats = async function (userId, dateRa
   ]);
 };
 
-module.exports = mongoose.models.ImportExportJob || mongoose.model('ImportExportJob', importExportJobSchema);
+module.exports =
+  mongoose.models.ImportExportJob || mongoose.model('ImportExportJob', importExportJobSchema);

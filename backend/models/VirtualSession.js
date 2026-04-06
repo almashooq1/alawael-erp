@@ -55,7 +55,7 @@ const virtualSessionSchema = new mongoose.Schema(
       type: String,
       required: [true, 'رابط الاجتماع مطلوب'],
     },
-    password: String,
+    password: { type: String, select: false },
     platform: {
       type: String,
       enum: ['zoom', 'teams', 'jitsi', 'google_meet', 'youtube_live'],
@@ -207,4 +207,5 @@ virtualSessionSchema.statics.getByCategory = function (category) {
     .populate('instructor', 'name email');
 };
 
-module.exports = mongoose.models.VirtualSession || mongoose.model('VirtualSession', virtualSessionSchema);
+module.exports =
+  mongoose.models.VirtualSession || mongoose.model('VirtualSession', virtualSessionSchema);

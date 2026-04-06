@@ -6,6 +6,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import io from 'socket.io-client';
+import { getToken } from '../utils/tokenStorage';
 
 // Create Socket Context
 const SocketContext = createContext(null);
@@ -33,7 +34,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     // Only establish socket connection if user is authenticated
-    const token = localStorage.getItem('authToken');
+    const token = getToken();
     if (!token) {
       return;
     }

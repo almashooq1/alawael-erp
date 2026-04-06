@@ -3,6 +3,7 @@
 const router = require('express').Router();
 const walletService = require('../services/digitalWallet.service');
 const { authenticate, authorize } = require('../middleware/auth');
+const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -163,7 +164,7 @@ router.get(
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.per_page) || 15;
     const query = { deletedAt: null };
-    if (req.query.search) query.code = new RegExp(req.query.search, 'i');
+    if (req.query.search) query.code = new RegExp(escapeRegex(req.query.search), 'i');
     const [docs, total] = await Promise.all([
       DiscountCoupon.find(query)
         .sort({ createdAt: -1 })

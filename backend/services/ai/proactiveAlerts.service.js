@@ -458,10 +458,14 @@ async function checkDropoutRisk(branchId) {
     const Session = (() => {
       try {
         return require('../../models/DailySession');
-      } catch (_) {}
+      } catch (_err) {
+        logger.debug('DailySession model not available, trying fallback', { error: _err.message });
+      }
       try {
         return require('../../models/DisabilitySession');
-      } catch (_) {}
+      } catch (_err) {
+        logger.debug('DisabilitySession model not available', { error: _err.message });
+      }
       return null;
     })();
 

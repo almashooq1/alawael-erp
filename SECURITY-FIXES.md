@@ -629,4 +629,57 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🛡️ الجولة 14 — إصلاح tokenStorage + ObjectId Validation + ReDoS Prevention + Empty Catch Blocks
+
+### 14.1 إصلاح تجاوز tokenStorage في SocketContext 🔴
+
+**المشكلة:** `frontend/src/contexts/SocketContext.js` كان يستخدم `localStorage.getItem('authToken')` مباشرة بدلاً من أداة `tokenStorage` المركزية (`getToken()`). هذا يتجاوز أي منطق مركزي لإدارة التوكنات.
+
+**الإصلاح:**
+- ✅ إضافة `import { getToken } from '../utils/tokenStorage'`
+- ✅ استبدال `localStorage.getItem('authToken')` بـ `getToken()`
+
+### 14.2 إنشاء validateObjectId Middleware 🔴
+
+**المشكلة:** 576+ route تستخدم `findById(req.params.id)` بدون التحقق من صحة ObjectId، مما يتسبب في CastError يسرّب تفاصيل داخلية.
+
+**الإصلاح:**
+- ✅ إنشاء `backend/middleware/validateObjectId.js` — middleware مشترك
+- ✅ يتحقق من `mongoose.isValidObjectId()` ويُرجع 400 إذا كان غير صالح
+- ✅ يدعم أي اسم parameter (`id`, `userId`, `commentId`, etc.)
+- ✅ رسالة خطأ ثنائية اللغة (عربي/إنجليزي)
+
+### 14.3 إصلاح ثغرات ReDoS في البحث 🔴
+
+**المشكلة:** 6 استخدامات لـ `new RegExp(req.query.search, 'i')` بدون تنظيف المدخلات، مما يتيح هجمات ReDoS (Regular Expression Denial of Service) عبر أنماط regex خبيثة.
+
+**الإصلاح:**
+- ✅ إنشاء `backend/utils/escapeRegex.js` — أداة مركزية لتنظيف مدخلات RegExp
+- ✅ تطبيق `escapeRegex()` على جميع الاستخدامات:
+
+| الملف | الاستبدالات |
+| :--- | :--- |
+| `digital-wallet.routes.js` | 1 (حقل `code`) |
+| `smart-insurance.routes.js` | 5 (حقول `name`, `nameAr`, `code`, `policyNumber`, `memberId`) |
+| **المجموع** | **6** |
+
+### 14.4 إصلاح Empty Catch Blocks في ProactiveAlerts 🟡
+
+**المشكلة:** `backend/services/ai/proactiveAlerts.service.js` يحتوي على catch blocks فارغة تبتلع أخطاء require() بصمت.
+
+**الإصلاح:**
+- ✅ إضافة `logger.debug()` لـ 2 catch blocks في `checkDropoutRisk()` (DailySession + DisabilitySession fallback)
+
+### 14.5 ملخص الجولة 14
+
+| المقياس | القيمة |
+| :--- | :--- |
+| ثغرات ReDoS مُصلحة | **6** عبر **2 ملف** |
+| أدوات جديدة | **2** (`escapeRegex.js` + `validateObjectId.js`) |
+| tokenStorage bypasses مُصلحة | **1** (SocketContext.js) |
+| Empty catch blocks مُصلحة | **2** (proactiveAlerts.service.js) |
+| ملفات معدلة | **4** + **2 ملف جديد** |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

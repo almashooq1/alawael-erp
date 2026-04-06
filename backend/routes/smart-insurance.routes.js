@@ -38,6 +38,7 @@ const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck')
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -77,9 +78,9 @@ router.get(
     if (req.query.active === 'true') query.isActive = true;
     if (req.query.search) {
       query.$or = [
-        { name: new RegExp(req.query.search, 'i') },
-        { nameAr: new RegExp(req.query.search, 'i') },
-        { code: new RegExp(req.query.search, 'i') },
+        { name: new RegExp(escapeRegex(req.query.search), 'i') },
+        { nameAr: new RegExp(escapeRegex(req.query.search), 'i') },
+        { code: new RegExp(escapeRegex(req.query.search), 'i') },
       ];
     }
     const companies = await InsuranceCompany.find(query).sort({ nameAr: 1 }).lean();
@@ -175,8 +176,8 @@ router.get(
     if (req.query.company_id) query.insuranceCompanyId = req.query.company_id;
     if (req.query.search) {
       query.$or = [
-        { policyNumber: new RegExp(req.query.search, 'i') },
-        { memberId: new RegExp(req.query.search, 'i') },
+        { policyNumber: new RegExp(escapeRegex(req.query.search), 'i') },
+        { memberId: new RegExp(escapeRegex(req.query.search), 'i') },
       ];
     }
 

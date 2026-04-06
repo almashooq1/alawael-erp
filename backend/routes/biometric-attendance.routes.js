@@ -7,6 +7,11 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const logger = require('../utils/logger');
+
+// 🔒 All biometric attendance routes require authentication
+router.use(authenticate);
 
 const ZktecoDevice = require('../models/ZktecoDevice');
 const AttendanceLog = require('../models/AttendanceLog');

@@ -11,6 +11,11 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const logger = require('../utils/logger');
+
+// 🔒 All gamification routes require authentication
+router.use(authenticate);
 
 const {
   GamificationEnhancedService,

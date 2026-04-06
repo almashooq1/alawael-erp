@@ -11,6 +11,11 @@
 
 const express = require('express');
 const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const logger = require('../utils/logger');
+
+// 🔒 All IoT/wearables routes require authentication
+router.use(authenticate);
 
 const {
   IotWearablesService,

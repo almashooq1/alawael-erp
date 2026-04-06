@@ -15,6 +15,11 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const { authenticate, requireAdmin } = require('../middleware/auth');
+const logger = require('../utils/logger');
+
+// 🔒 All finance routes require authentication
+router.use(authenticate);
 
 // ─── Models ─────────────────────────────────────────────────────────────────
 const ChartOfAccount = require('../models/finance/ChartOfAccount');

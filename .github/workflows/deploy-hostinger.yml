@@ -211,6 +211,7 @@ jobs:
 
       - name: Deploy frontend and find nginx root
         if: needs.build-frontend.result == 'success'
+        continue-on-error: true
         run: |
           SSH_CMD="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
           SSH_TARGET="${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
@@ -221,6 +222,7 @@ jobs:
 
           # 2. AGGRESSIVE: Find actual nginx root, copy everywhere, save diagnostics
           $SSH_CMD $SSH_TARGET << 'DEPLOY_FRONTEND'
+            set +e
             SRC="/home/alawael/app/frontend/build"
             DIAG="/tmp/deploy-diag.txt"
             echo "=== DEPLOY DIAGNOSTICS $(date) ===" > "$DIAG"

@@ -1,11 +1,14 @@
 /**
- * ensureAdmin.js — الحل الجذري لضمان وجود مستخدم admin
+ * ensureAdmin.js — ضمان وجود مستخدم admin عند أول تشغيل فقط
  *
  * يُشغَّل تلقائياً من server.js بعد connectDB().
  * يستخدم MongoDB native driver مباشرة (تجاوز كل Mongoose hooks/validators).
  *
- * البريد: admin@alawael.com.sa
- * كلمة المرور: Admin@2026
+ * ⚠️  SECURITY RULES:
+ *   1. Creates admin ONLY if no admin exists (never overwrites existing)
+ *   2. Requires ADMIN_PASSWORD from environment (no hardcoded fallback)
+ *   3. Forces requirePasswordChange: true on first creation
+ *   4. Never logs sensitive credentials
  */
 'use strict';
 
@@ -14,16 +17,7 @@ const mongoose = require('mongoose');
 const logger = require('./logger');
 
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@2026';
 const ADMIN_FULL_NAME = process.env.ADMIN_FULL_NAME || 'مدير النظام';
-
-// الإيميلات القديمة للحذف فقط (لا تشمل admin@alawael.com الذي هو الرئيسي)
-const LEGACY_EMAILS = [
-  'admin@alawael.org',
-  'admin@rehab-center.sa',
-  'admin@example.com',
-  'admin@alaweal.org',
-];
 
 async function ensureAdmin() {
   try {
@@ -38,6 +32,33 @@ async function ensureAdmin() {
 
     const collection = mongoose.connection.db.collection('users');
 
+    // ─── Check if ANY admin already exists ─────────────────────────────────
+    const existingAdmin = await collection.findOne({
+      $or: [{ email: ADMIN_EMAIL }, { role: 'admin', isActive: true }],
+    });
+
+    if (existingAdmin) {
+      logger.info(
+        `[ensureAdmin] ✅ Admin account exists (${existingAdmin.email}) — no changes made`
+      );
+      return; // ⚠️ NEVER overwrite existing admin
+    }
+
+    // ─── Admin doesn't exist — create one ──────────────────────────────────
+    const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+    if (!ADMIN_PASSWORD) {
+      logger.warn(
+        '[ensureAdmin] ⚠️  No admin exists and ADMIN_PASSWORD env var is not set. ' +
+          'Set ADMIN_PASSWORD in .env to create the initial admin account.'
+      );
+      return;
+    }
+
+    if (ADMIN_PASSWORD.length < 8) {
+      logger.error('[ensureAdmin] ❌ ADMIN_PASSWORD must be at least 8 characters');
+      return;
+    }
+
     // ─── تشفير كلمة المرور ──────────────────────────────────────────────────
     const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 12);
 
@@ -48,75 +69,38 @@ async function ensureAdmin() {
       return;
     }
 
-    // ─── حذف الحسابات القديمة المتعارضة ────────────────────────────────────
-    const del = await collection.deleteMany({
-      email: { $in: LEGACY_EMAILS },
-    });
-    if (del.deletedCount > 0) {
-      logger.info(`[ensureAdmin] 🗑️  Removed ${del.deletedCount} legacy admin account(s)`);
-    }
-
-    // ─── upsert مباشر عبر native driver (تجاوز Mongoose تماماً) ────────────
+    // ─── إنشاء حساب المدير (insert فقط — لا update) ──────────────────────
     const now = new Date();
-    const result = await collection.findOneAndUpdate(
-      { email: ADMIN_EMAIL },
-      {
-        $set: {
-          email: ADMIN_EMAIL,
-          password: hashedPassword,
-          fullName: ADMIN_FULL_NAME,
-          role: 'admin',
-          isActive: true,
-          emailVerified: true,
-          failedLoginAttempts: 0,
-          tokenVersion: 0,
-          customPermissions: [],
-          deniedPermissions: [],
-          updatedAt: now,
-          requirePasswordChange: false,
-        },
-        $unset: {
-          lockUntil: '',
-          resetPasswordToken: '',
-          resetPasswordExpires: '',
-        },
-        $setOnInsert: {
-          createdAt: now,
-          loginHistory: [],
-          passwordHistory: [],
-        },
-      },
-      { upsert: true, returnDocument: 'after' }
+    await collection.insertOne({
+      email: ADMIN_EMAIL,
+      password: hashedPassword,
+      fullName: ADMIN_FULL_NAME,
+      role: 'admin',
+      isActive: true,
+      emailVerified: true,
+      failedLoginAttempts: 0,
+      tokenVersion: 0,
+      customPermissions: [],
+      deniedPermissions: [],
+      requirePasswordChange: true, // ⚠️ Force password change on first login
+      createdAt: now,
+      updatedAt: now,
+      loginHistory: [],
+      passwordHistory: [],
+    });
+
+    logger.info(`[ensureAdmin] ✅ Initial admin account created — email: ${ADMIN_EMAIL}`);
+    logger.info(
+      '[ensureAdmin]    ⚠️  requirePasswordChange: true — admin must change password on first login'
     );
-
-    const wasNew = result?.lastErrorObject?.updatedExisting === false;
-    logger.info(`[ensureAdmin] ✅ Admin ${wasNew ? 'created' : 'updated'} — email: ${ADMIN_EMAIL}`);
-
-    // ─── التحقق النهائي من قاعدة البيانات ──────────────────────────────────
-    const verified = await collection.findOne({ email: ADMIN_EMAIL });
-
-    if (!verified || !verified.password) {
-      logger.error(
-        '[ensureAdmin] ❌ Post-upsert verification FAILED — admin not found or no password!'
-      );
-      return;
-    }
-
-    const finalOk = await bcrypt.compare(ADMIN_PASSWORD, verified.password);
-    if (!finalOk) {
-      logger.error('[ensureAdmin] ❌ Post-upsert password check FAILED — hash mismatch!');
-      return;
-    }
-
-    logger.info('[ensureAdmin] ✅ Final verification passed — login credentials confirmed');
-    logger.info(`[ensureAdmin]    Email:  ${ADMIN_EMAIL}`);
-    logger.info(`[ensureAdmin]    Role:   ${verified.role}`);
-    logger.info(`[ensureAdmin]    Active: ${verified.isActive}`);
-    logger.info(`[ensureAdmin]    Locked: ${verified.lockUntil ? '🔒 YES' : '🔓 NO'}`);
   } catch (err) {
+    // Duplicate key error (admin was created between our check and insert)
+    if (err.code === 11000) {
+      logger.info('[ensureAdmin] ✅ Admin account already exists (concurrent creation)');
+      return;
+    }
     // لا نُوقف السيرفر بسبب هذا الخطأ — لكن نسجّله بوضوح
-    logger.error('[ensureAdmin] ❌ FATAL ERROR:', err.message);
-    logger.error('[ensureAdmin]', err.stack);
+    logger.error('[ensureAdmin] ❌ Error:', err.message);
   }
 }
 

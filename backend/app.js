@@ -472,18 +472,31 @@ const { globalValidation } = require('./middleware/globalValidation');
 app.use('/api', globalValidation());
 
 // ─── Emergency Admin Reset (guaranteed — before route registry) ─────────────
-// URL: GET /api/_init?key=alawael-init-2026
+// URL: POST /api/_init (POST only for safety — never GET for state-changing ops)
 // يستخدم native MongoDB driver مباشرة — تجاوز كل Mongoose hooks
-app.get('/api/_init', async (req, res) => {
-  const SECRET = process.env.SETUP_SECRET_KEY || 'alawael-init-2026';
-  const key = req.query.key || req.headers['x-init-key'] || req.body?.secretKey;
-  if (key !== SECRET) {
+// ⚠️  SECURITY: Disabled in production unless ALLOW_ADMIN_INIT=true
+app.post('/api/_init', async (req, res) => {
+  // Block in production unless explicitly allowed
+  if (isProd && process.env.ALLOW_ADMIN_INIT !== 'true') {
+    return res.status(403).json({ success: false, message: 'Disabled in production' });
+  }
+
+  const SECRET = process.env.SETUP_SECRET_KEY;
+  if (!SECRET) {
+    return res.status(500).json({ success: false, message: 'SETUP_SECRET_KEY not configured' });
+  }
+
+  const key = req.headers['x-init-key'] || req.body?.secretKey;
+  if (!key || key !== SECRET) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
   try {
     const bcrypt = require('bcryptjs');
     const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
-    const password = process.env.ADMIN_PASSWORD || 'Admin@2026';
+    const password = process.env.ADMIN_PASSWORD;
+    if (!password) {
+      return res.status(500).json({ success: false, message: 'ADMIN_PASSWORD not configured' });
+    }
 
     const hash = await bcrypt.hash(password, 12);
     const verifyOk = await bcrypt.compare(password, hash);
@@ -505,7 +518,7 @@ app.get('/api/_init', async (req, res) => {
           failedLoginAttempts: 0,
           tokenVersion: 0,
           updatedAt: now,
-          requirePasswordChange: false,
+          requirePasswordChange: true, // Force password change on first login
         },
         $unset: { lockUntil: '', resetPasswordToken: '', resetPasswordExpires: '' },
         $setOnInsert: {
@@ -520,76 +533,62 @@ app.get('/api/_init', async (req, res) => {
 
     const wasNew = result?.lastErrorObject?.updatedExisting === false;
 
-    // Final verification
-    const check = await collection.findOne({ email });
-    const loginOk = check && check.password && (await bcrypt.compare(password, check.password));
-
+    // ⚠️ Never return the password in the response
     return res.json({
       success: true,
       action: wasNew ? 'created' : 'updated',
       email,
-      password,
-      loginVerified: loginOk,
-      isActive: check?.isActive,
-      role: check?.role,
+      requirePasswordChange: true,
     });
   } catch (err) {
     logger.error('[/api/_init] Error:', err.message);
-    return res.status(500).json({ success: false, error: err.message });
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 
 // ─── Admin Diagnostic Endpoint ───────────────────────────────────────────────
-// URL: GET /api/_diag?key=alawael-init-2026
+// URL: GET /api/_diag (header: X-Init-Key)
 // يُظهر حالة حساب المدير دون تعديل — للتشخيص فقط
+// ⚠️  SECURITY: Disabled in production. Never expose password hashes or internal state.
 app.get('/api/_diag', async (req, res) => {
-  const SECRET = process.env.SETUP_SECRET_KEY || 'alawael-init-2026';
-  const key = req.query.key || req.headers['x-init-key'];
-  if (key !== SECRET) {
+  // Block in production entirely
+  if (isProd) {
+    return res.status(403).json({ success: false, message: 'Disabled in production' });
+  }
+
+  const SECRET = process.env.SETUP_SECRET_KEY;
+  if (!SECRET) {
+    return res.status(500).json({ success: false, message: 'SETUP_SECRET_KEY not configured' });
+  }
+
+  const key = req.headers['x-init-key'];
+  if (!key || key !== SECRET) {
     return res.status(401).json({ success: false, message: 'Unauthorized' });
   }
   try {
-    const bcrypt = require('bcryptjs');
     const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
-    const password = process.env.ADMIN_PASSWORD || 'Admin@2026';
     const collection = mongoose.connection.db.collection('users');
 
     const user = await collection.findOne({ email });
-    const allAdmins = await collection.find({ role: 'admin' }).toArray();
-
-    let passwordValid = false;
-    if (user && user.password) {
-      try {
-        passwordValid = await bcrypt.compare(password, user.password);
-      } catch {}
-    }
+    const adminCount = await collection.countDocuments({ role: 'admin' });
 
     return res.json({
       success: true,
       targetEmail: email,
       userFound: !!user,
-      userId: user?._id?.toString(),
       role: user?.role,
       isActive: user?.isActive,
       hasPassword: !!user?.password,
-      passwordHashPrefix: user?.password?.substring(0, 10),
-      passwordValid,
+      // ⚠️ Never expose passwordHashPrefix or passwordValid
       failedLoginAttempts: user?.failedLoginAttempts,
       isLocked: !!(user?.lockUntil && user.lockUntil > new Date()),
-      lockUntil: user?.lockUntil,
-      allAdmins: allAdmins.map(a => ({
-        email: a.email,
-        role: a.role,
-        isActive: a.isActive,
-        hasPassword: !!a.password,
-        failedAttempts: a.failedLoginAttempts,
-        locked: !!(a.lockUntil && a.lockUntil > new Date()),
-      })),
+      totalAdmins: adminCount,
       mongoState: mongoose.connection.readyState,
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
-    return res.status(500).json({ success: false, error: err.message });
+    logger.error('[/api/_diag] Error:', err.message);
+    return res.status(500).json({ success: false, error: 'Internal server error' });
   }
 });
 

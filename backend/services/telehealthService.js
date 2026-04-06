@@ -7,6 +7,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 const {
   Teleconsultation,
@@ -82,7 +83,7 @@ async function scheduleConsultation(data) {
   // Sync with external platforms if needed
   if (data.platformSource && data.platformSource !== 'internal') {
     await syncWithSaudiPlatform(consultation, data.platformSource).catch(err =>
-      console.error('[Telehealth] Platform sync error:', err.message)
+      logger.error('[Telehealth] Platform sync error:', err.message)
     );
   }
 
@@ -365,7 +366,7 @@ async function sendToWasfaty(prescription) {
   const apiKey = process.env.WASFATY_API_KEY || '';
 
   if (!apiKey) {
-    console.warn('[Wasfaty] API key not configured — skipping');
+    logger.warn('[Wasfaty] API key not configured — skipping');
     return { success: false, error: 'Wasfaty API key not configured' };
   }
 

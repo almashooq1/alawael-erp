@@ -11,20 +11,31 @@ yarn.lock
 .node_repl_history
 
 # ───────────────────────────────────────────────────────────────
-# 2. Environment & Secrets
+# 2. Environment & Secrets  ⚠️  CRITICAL — never commit secrets
 # ───────────────────────────────────────────────────────────────
+# Root & any nested .env files (covers all subdirectories)
 .env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+!.env.example
+!.env.production.template
+
+# Legacy explicit entries (kept for safety)
 .env.local
 .env.*.local
 .env.docker
 .env.production
 deploy/**/.env*
 !deploy/**/.env*.example
+
+# Sensitive files
 **/find-password*
 **/generate-hash*
 **/register.json
 **/login.json
-intelligent-agent/backend/.env
 _archived/security-debris/
 
 # ───────────────────────────────────────────────────────────────
@@ -163,6 +174,12 @@ _*.tmp
 __*.txt
 
 # ───────────────────────────────────────────────────────────────
+# 11b. Root-level Python debug/deploy scripts (~250 files)
+# These are dev-only diagnostic scripts, NOT part of the app
+# ───────────────────────────────────────────────────────────────
+/*.py
+
+# ───────────────────────────────────────────────────────────────
 # 12. Session Reports & Audit Files
 # ───────────────────────────────────────────────────────────────
 AUDIT_REPORT.md
@@ -237,15 +254,15 @@ run3_*.json
 runs*.json
 deploy_logs*.txt
 deploy_logs*.zip
-  
-# Diagnostic/utility scripts  
-check_duplicates.js  
-check_status.js  
-project_health_report.js  
-check_remaining.js  
-backend/check_app.js  
-backend/check_routes.js  
-backend/trace_indexes.js  
-backend/fix_last4.js  
-backend/fix_indexes_v2.js  
-backend/fix_duplicate_models.js  
+
+# Diagnostic/utility scripts
+check_duplicates.js
+check_status.js
+project_health_report.js
+check_remaining.js
+backend/check_app.js
+backend/check_routes.js
+backend/trace_indexes.js
+backend/fix_last4.js
+backend/fix_indexes_v2.js
+backend/fix_duplicate_models.js

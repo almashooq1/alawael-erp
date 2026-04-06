@@ -146,7 +146,7 @@ jobs:
       (needs.build-frontend.result == 'success' || needs.build-frontend.result == 'skipped')
     timeout-minutes: 20
     environment:
-      name: VPS_USER
+      name: production
       url: https://alaweal.org
     steps:
       - uses: actions/checkout@v6
@@ -178,20 +178,12 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-          # Debug: verify key format
-          echo "Key file size: $(wc -c < ~/.ssh/deploy_key) bytes"
-          echo "Key type: $(head -1 ~/.ssh/deploy_key)"
-          echo "VPS_USER length: ${#VPS_USER_VAL} chars"
-          echo "VPS_HOST length: ${#VPS_HOST_VAL} chars"
+          # Test connection (no verbose output to avoid leaking info)
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo '✅ SSH test connection successful'" || {
-            echo "❌ SSH test failed, trying with verbose..."
-            ssh -vvv -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo test" 2>&1 | tail -30
+            echo "❌ SSH connection failed. Check VPS_HOST, VPS_USER, and VPS_SSH_KEY secrets."
             exit 1
           }
           echo "✅ SSH configured"
-        env:
-          VPS_USER_VAL: ${{ secrets.VPS_USER }}
-          VPS_HOST_VAL: ${{ secrets.VPS_HOST }}
 
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'
@@ -377,7 +369,7 @@ jobs:
           sleep 15
           for i in 1 2 3 4 5; do
             HEALTH=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-              "curl -sf http://127.0.0.1:5000/api/health 2>/dev/null" || echo "")
+              "curl -sf http://127.0.0.1:3001/health 2>/dev/null || curl -sf http://127.0.0.1:5000/health 2>/dev/null" || echo "")
             if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
               echo "✅ Health check PASSED (attempt $i)"
               exit 0

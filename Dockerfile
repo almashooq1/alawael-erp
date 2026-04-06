@@ -51,13 +51,13 @@ COPY --chown=nodejs:nodejs backend/ .
 RUN mkdir -p logs uploads temp .cache && \
     chown -R nodejs:nodejs logs uploads temp .cache
 
-# Set environment
+# Set environment (no secrets here — use .env or orchestrator secrets)
 ENV NODE_ENV=production \
     PORT=3001 \
     LOG_DIR=/app/logs \
     NODE_OPTIONS="--max-old-space-size=1024 --enable-source-maps" \
-    # Graceful shutdown timeout (ms)
-    SHUTDOWN_TIMEOUT=15000
+    SHUTDOWN_TIMEOUT=15000 \
+    NPM_CONFIG_LOGLEVEL=warn
 
 # Expose port
 EXPOSE 3001
@@ -66,7 +66,7 @@ EXPOSE 3001
 USER nodejs
 
 # Health check — accepts both 200 (healthy) and degraded states
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD curl -sf http://localhost:3001/health || exit 1
 
 # Use tini as init system for proper signal handling

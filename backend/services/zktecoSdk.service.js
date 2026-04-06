@@ -5,6 +5,7 @@
 'use strict';
 
 const net = require('net');
+const logger = require('../utils/logger');
 const ZktecoDevice = require('../models/ZktecoDevice');
 const AttendanceLog = require('../models/AttendanceLog');
 
@@ -78,13 +79,13 @@ async function connect(device) {
     });
 
     if (!online) {
-      console.warn(`[ZKTeco] Device offline: ${device.serialNumber}`);
+      logger.warn(`[ZKTeco] Device offline: ${device.serialNumber}`);
     }
 
     return online;
   } catch (err) {
     await ZktecoDevice.findByIdAndUpdate(device._id, { status: 'error' });
-    console.error(`[ZKTeco] Connect error: ${err.message}`);
+    logger.error(`[ZKTeco] Connect error: ${err.message}`);
     return false;
   }
 }
@@ -199,7 +200,7 @@ async function processAttendanceRecord(device, record) {
   });
 
   if (!employee) {
-    console.warn(
+    logger.warn(
       `[ZKTeco] Employee not found for userId=${record.userId} device=${device.serialNumber}`
     );
     return null;
@@ -260,10 +261,10 @@ async function pullAttendanceLogs(device, sinceDate = null) {
 
     await ZktecoDevice.findByIdAndUpdate(device._id, { lastSyncAt: new Date() });
 
-    console.log(`[ZKTeco] Pulled ${processed.length} logs from ${device.serialNumber}`);
+    logger.info(`[ZKTeco] Pulled ${processed.length} logs from ${device.serialNumber}`);
     return processed;
   } catch (err) {
-    console.error(`[ZKTeco] Pull failed for ${device.serialNumber}:`, err.message);
+    logger.error(`[ZKTeco] Pull failed for ${device.serialNumber}:`, err.message);
     return [];
   }
 }
@@ -275,7 +276,7 @@ async function handlePushData(data) {
   const device = await ZktecoDevice.findOne({ serialNumber: data.serialNumber });
 
   if (!device) {
-    console.warn(`[ZKTeco] Unknown device push: ${data.serialNumber}`);
+    logger.warn(`[ZKTeco] Unknown device push: ${data.serialNumber}`);
     return;
   }
 
@@ -320,12 +321,12 @@ async function enrollEmployee(device, employee) {
 
     if (success) {
       await ZktecoDevice.findByIdAndUpdate(device._id, { $inc: { enrolledCount: 1 } });
-      console.log(`[ZKTeco] Enrolled employee ${employee._id} on ${device.serialNumber}`);
+      logger.info(`[ZKTeco] Enrolled employee ${employee._id} on ${device.serialNumber}`);
     }
 
     return success;
   } catch (err) {
-    console.error(`[ZKTeco] Enroll failed:`, err.message);
+    logger.error(`[ZKTeco] Enroll failed:`, err.message);
     return false;
   }
 }
@@ -352,7 +353,7 @@ async function removeEmployee(device, employee) {
 
     return success;
   } catch (err) {
-    console.error(`[ZKTeco] Remove employee failed:`, err.message);
+    logger.error(`[ZKTeco] Remove employee failed:`, err.message);
     return false;
   }
 }

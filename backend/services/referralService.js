@@ -7,6 +7,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 const {
   Referral,
@@ -126,7 +127,7 @@ async function receiveReferral(data) {
 
   // Attempt auto-assignment
   await attemptAutoAssignment(referral).catch(err =>
-    console.error('[Referral] Auto-assignment error:', err.message)
+    logger.error('[Referral] Auto-assignment error:', err.message)
   );
 
   // Update facility stats
@@ -235,7 +236,7 @@ async function reviewReferral(referralId, reviewerId, reviewData) {
 
   // Notify referring facility
   await notifyReferringFacility(referral, decision).catch(err =>
-    console.error('[Referral] Notification error:', err.message)
+    logger.error('[Referral] Notification error:', err.message)
   );
 
   return await Referral.findById(referralId)
@@ -289,10 +290,10 @@ async function sendCommunication(referralId, senderId, messageData) {
   // Send via channel
   if (communication.channel === 'email' && referral.referringPhysicianEmail) {
     // Email sending placeholder — integrate with nodemailer/SendGrid
-    console.info(`[Referral] Email queued to ${referral.referringPhysicianEmail}`);
+    logger.info(`[Referral] Email queued to ${referral.referringPhysicianEmail}`);
   } else if (communication.channel === 'sms' && referral.referringPhysicianPhone) {
     // SMS sending placeholder
-    console.info(`[Referral] SMS queued to ${referral.referringPhysicianPhone}`);
+    logger.info(`[Referral] SMS queued to ${referral.referringPhysicianPhone}`);
   }
 
   return communication;
@@ -464,7 +465,7 @@ async function notifyReferringFacility(referral, decision) {
   });
 
   // Placeholder: actual email sending via nodemailer/SendGrid
-  console.info(`[Referral] Notification email queued to ${referral.referringPhysicianEmail}`);
+  logger.info(`[Referral] Notification email queued to ${referral.referringPhysicianEmail}`);
 }
 
 // ─── Recalculate Priority ─────────────────────────────────────────────────────

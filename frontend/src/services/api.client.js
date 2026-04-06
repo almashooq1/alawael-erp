@@ -146,8 +146,9 @@ apiClient.interceptors.response.use(
     // Track timing
     const duration = response.config.metadata ? Date.now() - response.config.metadata.startTime : 0;
 
-    // Log slow requests in development
+    // Log slow requests in development only
     if (process.env.NODE_ENV === 'development' && duration > 3000) {
+      // eslint-disable-next-line no-console
       console.warn(`⏱️ Slow API call: ${response.config.url} (${duration}ms)`);
     }
 
@@ -176,7 +177,9 @@ apiClient.interceptors.response.use(
       config._retryCount++;
       const retryDelay = RETRY_DELAY_BASE * Math.pow(2, config._retryCount - 1);
 
+      // Retry logging — development only
       if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
         console.info(
           `🔄 Retrying ${config.url} (attempt ${config._retryCount}/${MAX_RETRIES}) in ${retryDelay}ms`
         );
@@ -265,20 +268,23 @@ apiClient.interceptors.response.use(
       }
     }
 
-    if (error.response?.status === 403) {
-      // ممنوع الوصول
-      console.error('Access Forbidden:', errorData);
-    }
+    // Log errors only in development to avoid leaking info in production
+    if (process.env.NODE_ENV === 'development') {
+      if (error.response?.status === 403) {
+        // eslint-disable-next-line no-console
+        console.error('Access Forbidden:', errorData);
+      }
 
-    if (error.response?.status === 429) {
-      // Rate limited — extract retry-after header
-      const retryAfter = error.response.headers?.['retry-after'];
-      console.warn(`Rate limited. Retry after: ${retryAfter || 'unknown'} seconds`);
-    }
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.headers?.['retry-after'];
+        // eslint-disable-next-line no-console
+        console.warn(`Rate limited. Retry after: ${retryAfter || 'unknown'} seconds`);
+      }
 
-    if (error.response?.status >= 500) {
-      // خطأ في الخادم
-      console.error('Server Error:', errorData);
+      if (error.response?.status >= 500) {
+        // eslint-disable-next-line no-console
+        console.error('Server Error:', errorData);
+      }
     }
 
     return Promise.reject({

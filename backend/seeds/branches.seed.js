@@ -402,9 +402,7 @@ const BRANCHES_DATA = [
 
 // ─── Seed Function ─────────────────────────────────────────────────────────────
 async function seedBranches() {
-  const mongoUri =
-    process.env.MONGODB_URI ||
-    'mongodb://admin:adminpassword@localhost:27017/alawael_erp?authSource=admin';
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael_erp';
 
   try {
     await mongoose.connect(mongoUri);

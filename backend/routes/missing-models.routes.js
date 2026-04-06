@@ -8,6 +8,7 @@
 
 const express = require('express');
 const router = express.Router();
+const logger = require('../utils/logger');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const requireAuth = authenticateToken;
 
@@ -23,7 +24,7 @@ const AssessmentComparison = require('../models/AssessmentComparison');
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
 const fail = (res, msg, status = 400) => res.status(status).json({ success: false, message: msg });
 const serverError = (res, err) => {
-  console.error(err);
+  logger.error(err.message, { stack: err.stack });
   return res.status(500).json({ success: false, message: err.message });
 };
 

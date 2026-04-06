@@ -382,4 +382,33 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🟡 الجولة 8 — ترحيل Logger + إصلاح Hardcoded URLs + إزالة بيانات اعتماد مكشوفة
+
+### 8.1 ترحيل console.error → Logger (production logging)
+
+**المشكلة:** ملفان في الإنتاج يستخدمان `console.error` بدلاً من Winston logger:
+
+| الملف                                | المشكلة                                          | الإصلاح                                                                                   |
+| :----------------------------------- | :----------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| `finance-module.routes.js` (سطر 434) | `console.error('Invoice journal entry failed:')` | ✅ `logger.error(...)`                                                                    |
+| `missing-models.routes.js` (سطر 26)  | `console.error(err)` — يسرّب stack trace كامل    | ✅ `logger.error(err.message, { stack: err.stack })` + إضافة `require('../utils/logger')` |
+
+### 8.2 إصلاح Hardcoded localhost في خدمات الإنتاج
+
+| الملف                          | المشكلة                                     | الإصلاح                                                                          |
+| :----------------------------- | :------------------------------------------ | :------------------------------------------------------------------------------- |
+| `HealthCheck.js` (سطر 162-166) | 5 endpoints بـ `http://localhost:3000` ثابت | ✅ `process.env.BACKEND_URL \|\| http://localhost:${process.env.PORT \|\| 3001}` |
+| `smsService.js` (سطر 111)      | `localhost:3000` بدون بروتوكول `http://`    | ✅ `process.env.FRONTEND_URL \|\| 'http://localhost:3000'`                       |
+
+### 8.3 إزالة بيانات اعتماد MongoDB مكشوفة في Seeds
+
+**المشكلة:** ملفان يحتويان على `mongodb://admin:adminpassword@localhost:27017` — كلمة مرور واضحة في الكود:
+
+| الملف                                        | الإصلاح                                                                   |
+| :------------------------------------------- | :------------------------------------------------------------------------ |
+| `seeds/run-comprehensive-seeds.js` (سطر 404) | ✅ `process.env.MONGODB_URI \|\| 'mongodb://localhost:27017/alawael_erp'` |
+| `seeds/branches.seed.js` (سطر 407)           | ✅ `process.env.MONGODB_URI \|\| 'mongodb://localhost:27017/alawael_erp'` |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

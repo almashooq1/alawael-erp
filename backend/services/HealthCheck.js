@@ -158,12 +158,13 @@ class HealthCheckService {
    */
 
   async checkEndpointHealth() {
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`;
     const endpoints = [
-      { name: 'auth', url: 'http://localhost:3000/api/auth/health' },
-      { name: 'users', url: 'http://localhost:3000/api/users/health' },
-      { name: 'products', url: 'http://localhost:3000/api/products/health' },
-      { name: 'orders', url: 'http://localhost:3000/api/orders/health' },
-      { name: 'accounting', url: 'http://localhost:3000/api/accounting/health' },
+      { name: 'auth', url: `${baseUrl}/api/auth/health` },
+      { name: 'users', url: `${baseUrl}/api/users/health` },
+      { name: 'products', url: `${baseUrl}/api/products/health` },
+      { name: 'orders', url: `${baseUrl}/api/orders/health` },
+      { name: 'accounting', url: `${baseUrl}/api/accounting/health` },
     ];
 
     const results = {};

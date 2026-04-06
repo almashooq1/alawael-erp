@@ -399,9 +399,7 @@ async function main() {
   const isDown = process.argv.includes('--down');
   const isForce = process.argv.includes('--force');
 
-  const mongoUri =
-    process.env.MONGODB_URI ||
-    'mongodb://admin:adminpassword@localhost:27017/alawael_erp?authSource=admin';
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/alawael_erp';
 
   logHeader('🏗️  Al-Awael ERP — Comprehensive Seed Runner');
   console.log(`  📡 MongoDB: ${mongoUri.replace(/:([^:@]+)@/, ':***@')}`);

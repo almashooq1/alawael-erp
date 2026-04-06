@@ -431,7 +431,7 @@ router.post(
       await accountingService.createInvoiceEntry(invoice, req.user?._id);
     } catch (err) {
       // لا نوقف إنشاء الفاتورة إذا فشل القيد
-      console.error('Invoice journal entry failed:', err.message);
+      logger.error('Invoice journal entry failed:', err.message);
     }
 
     res.status(201).json({ success: true, data: invoice, message: 'تم إنشاء الفاتورة بنجاح' });

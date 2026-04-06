@@ -108,7 +108,7 @@ const smsTemplates = {
     `تذكير: لديك موعد في ${appointmentDate} الساعة ${time}. - نظام الأوائل ERP`,
 
   reportNotification: reportTitle =>
-    `التقرير "${reportTitle}" جاهز للعرض. اضغط للعرض: ${process.env.FRONTEND_URL || 'localhost:3000'}`,
+    `التقرير "${reportTitle}" جاهز للعرض. اضغط للعرض: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`,
 
   customMessage: message => message,
 };

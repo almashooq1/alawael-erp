@@ -90,7 +90,7 @@ class PaymentGatewayService {
       return {
         success: true,
         paymentId: 'pay_mock_' + Date.now(),
-        redirectUrl: 'http://localhost:3000/mock-success',
+        redirectUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/mock-success`,
       };
 
     try {

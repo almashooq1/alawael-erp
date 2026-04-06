@@ -822,4 +822,45 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🛡️ الجولة 19 — تسجيل Graceful Shutdown Hooks + إصلاح Hardcoded URLs + ترحيل Console
+
+### 19.1 تسجيل Graceful Shutdown Hooks للـ Schedulers 🟠
+
+**المشكلة:** في الجولة 18 أضفنا `stopScheduler()` و `stopSlaScheduler()` لإيقاف intervals عند الإغلاق، لكن لم تُسجّل كـ shutdown hooks في `gracefulShutdown.js`. عند إيقاف السيرفر (SIGTERM/SIGINT)، كانت الـ intervals تستمر بالعمل ولا تُنظّف.
+
+**الإصلاح (`backend/app.js`):**
+- ✅ إضافة `registerShutdownHook` للاستيراد من `gracefulShutdown.js`
+- ✅ `registerShutdownHook('AI Scheduler', stopScheduler)` — قبل بدء الـ setTimeout
+- ✅ `registerShutdownHook('SLA Scheduler', stopSlaScheduler)` — قبل بدء الـ setTimeout
+- ✅ عند SIGTERM/SIGINT: يُنفّذ `clearInterval()` تلقائياً عبر hooks
+
+### 19.2 إصلاح Hardcoded localhost في خدمتين 🟡
+
+**المشكلة:** خدمتان تستخدمان `http://localhost` بشكل ثابت في الكود، مما يفشل في الإنتاج.
+
+| الملف | المشكلة | الإصلاح |
+| :--- | :--- | :--- |
+| `telehealth.service.js` (سطر 450) | `http://localhost:3001/api/telehealth/mock-room/${roomId}` | ✅ `${process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`}/api/telehealth/mock-room/${roomId}` |
+| `payment-gateway.service.js` (سطر 93) | `http://localhost:3000/mock-success` | ✅ `${process.env.FRONTEND_URL \|\| 'http://localhost:3000'}/mock-success` |
+
+### 19.3 ترحيل console.log/error → Logger في Smart Automation 🟡
+
+**المشكلة:** `backend/lib/smart-automation.js` يحتوي على 7 عبارات `console.log/error` بدلاً من Winston logger.
+
+**الإصلاح:**
+- ✅ إضافة `const logger = require('../utils/logger')`
+- ✅ استبدال 4× `console.log` → `logger.info`
+- ✅ استبدال 3× `console.error` → `logger.error` (مع metadata منظمة)
+
+### 19.4 ملخص الجولة 19
+
+| المقياس | القيمة |
+| :--- | :--- |
+| Shutdown hooks مُسجّلة | **2** (AI Scheduler + SLA Scheduler) |
+| Hardcoded localhost مُصلحة | **2** (telehealth + payment-gateway) |
+| Console → Logger ترحيل | **7 عبارات** في **1 ملف** |
+| ملفات معدلة | **4** (`app.js` + `telehealth.service.js` + `payment-gateway.service.js` + `smart-automation.js`) |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

@@ -38,7 +38,7 @@ if (isTestEnv) {
 
 // ─── Utilities & Config ──────────────────────────────────────────────────────
 const logger = require('./utils/logger');
-const { shutdownMiddleware } = require('./utils/gracefulShutdown');
+const { shutdownMiddleware, registerShutdownHook } = require('./utils/gracefulShutdown');
 const {
   errorHandler,
   notFoundHandler,
@@ -607,7 +607,9 @@ try {
 // ─── AI Scheduler — جدولة فحوصات الذكاء الاصطناعي اليومية (البرومبت 20) ──────
 if (!isTestEnv) {
   try {
-    const { startScheduler } = require('./services/ai/aiScheduler');
+    const { startScheduler, stopScheduler } = require('./services/ai/aiScheduler');
+    // تسجيل hook الإيقاف السلس — حتى لو لم يبدأ بعد (setTimeout)
+    registerShutdownHook('AI Scheduler', stopScheduler);
     // تأخير 30 ثانية بعد البدء للسماح لقاعدة البيانات بالاتصال
     const aiSchedulerTimer = setTimeout(() => {
       startScheduler();
@@ -624,7 +626,9 @@ if (!isTestEnv) {
 // ─── SLA Scheduler — جدولة فحص SLA تذاكر الدعم الفني (البرومبت 22) ───────────
 if (!isTestEnv) {
   try {
-    const { startSlaScheduler } = require('./services/ticketSlaScheduler');
+    const { startSlaScheduler, stopSlaScheduler } = require('./services/ticketSlaScheduler');
+    // تسجيل hook الإيقاف السلس
+    registerShutdownHook('SLA Scheduler', stopSlaScheduler);
     // تأخير 35 ثانية لضمان اتصال قاعدة البيانات
     setTimeout(() => {
       startSlaScheduler();

@@ -447,7 +447,8 @@ class TelehealthService extends EventEmitter {
       return `https://${process.env.JITSI_DOMAIN || 'meet.jit.si'}/${roomId}`;
     }
     if (this.videoProvider === 'mock') {
-      return `http://localhost:3001/api/telehealth/mock-room/${roomId}`;
+      const backendUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`;
+      return `${backendUrl}/api/telehealth/mock-room/${roomId}`;
     }
     return `agora://room/${roomId}`;
   }

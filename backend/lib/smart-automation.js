@@ -5,6 +5,8 @@
  * Date: January 22, 2026
  */
 
+const logger = require('../utils/logger');
+
 class SmartAutomation {
   constructor() {
     this.workflows = new Map();
@@ -15,15 +17,15 @@ class SmartAutomation {
   }
 
   async initialize() {
-    console.log('🤖 Initializing Smart Automation...');
+    logger.info('🤖 Initializing Smart Automation...');
     try {
       await this.setupDefaultWorkflows();
       await this.setupDefaultTriggers();
       await this.startScheduler();
-      console.log('✅ Smart Automation Ready');
+      logger.info('✅ Smart Automation Ready');
       return true;
     } catch (error) {
-      console.error('❌ Failed to initialize Smart Automation:', error);
+      logger.error('❌ Failed to initialize Smart Automation:', { error: error.message });
       return false;
     }
   }
@@ -67,7 +69,7 @@ class SmartAutomation {
       workflow.executions++;
       return result;
     } catch (error) {
-      console.error(`Workflow execution failed: ${error.message}`);
+      logger.error(`Workflow execution failed: ${error.message}`);
       throw error;
     }
   }
@@ -87,7 +89,7 @@ class SmartAutomation {
     };
 
     this.triggers.set(trigger.id, trigger);
-    console.log(`✅ Trigger created: ${triggerName}`);
+    logger.info(`✅ Trigger created: ${triggerName}`);
     return trigger;
   }
 
@@ -104,7 +106,7 @@ class SmartAutomation {
           triggeredActions.push(await this.executeAction(trigger.action, context));
         }
       } catch (error) {
-        console.error(`Error evaluating trigger ${trigger.name}:`, error.message);
+        logger.error(`Error evaluating trigger ${trigger.name}:`, { error: error.message });
       }
     }
 
@@ -307,7 +309,7 @@ class WorkflowScheduler {
 
   async start() {
     this.status = 'running';
-    console.log('📅 Workflow Scheduler started');
+    logger.info('📅 Workflow Scheduler started');
   }
 
   getScheduledCount() {

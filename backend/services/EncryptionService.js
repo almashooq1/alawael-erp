@@ -246,7 +246,7 @@ class EncryptionService {
 
   // Generate Verification Code
   generateVerificationCode(length = 6) {
-    const code = Math.random().toString(10).substr(2, length).padEnd(length, '0');
+    const code = Array.from({ length }, () => crypto.randomInt(10)).join('');
     return code;
   }
 

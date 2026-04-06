@@ -75,7 +75,7 @@ class TwoFactorAuthService {
 
   // Generate SMS OTP
   generateSmsOTP() {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     return {
@@ -133,7 +133,7 @@ class TwoFactorAuthService {
 
   // Generate Email OTP
   generateEmailOTP() {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     return {
@@ -154,14 +154,14 @@ class TwoFactorAuthService {
               <h2 style="color: #333;">تحقق من هويتك</h2>
               <p style="color: #666;">مرحباً ${userName}،</p>
               <p style="color: #666;">رمز التحقق الخاص بك هو:</p>
-              
+
               <div style="background-color: #f0f0f0; padding: 20px; border-radius: 5px; text-align: center; margin: 20px 0;">
                 <h1 style="color: #007bff; letter-spacing: 5px; margin: 0;">${otp}</h1>
               </div>
-              
+
               <p style="color: #999; font-size: 12px;">ينتهي صلاح هذا الرمز في 10 دقائق</p>
               <p style="color: #666;">إذا لم تطلب هذا الرمز، يرجى تجاهل هذه الرسالة.</p>
-              
+
               <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">
               <p style="color: #999; font-size: 12px;">نظام إدارة المؤسسات (ERP)</p>
             </div>

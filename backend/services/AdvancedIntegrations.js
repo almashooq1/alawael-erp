@@ -5,6 +5,7 @@
  * Google Maps, SMS, Email, Payment Processing, Push Notifications
  */
 
+const crypto = require('crypto');
 const axios = require('../utils/httpClient');
 const logger = require('../utils/logger.js');
 
@@ -270,7 +271,7 @@ class SMSService {
    * Send Verification Code
    */
   async sendVerificationCode(phoneNumber) {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = crypto.randomInt(100000, 1000000).toString();
     const message = `Your ERP verification code is: ${code}. Valid for 10 minutes.`;
 
     const result = await this.sendSMS(phoneNumber, message);

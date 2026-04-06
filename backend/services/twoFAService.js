@@ -21,7 +21,7 @@ class TwoFAService {
     const chars = '0123456789';
     let otp = '';
     for (let i = 0; i < length; i++) {
-      otp += chars.charAt(Math.floor(Math.random() * chars.length));
+      otp += chars.charAt(crypto.randomInt(chars.length));
     }
     return otp;
   }

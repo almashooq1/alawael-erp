@@ -920,4 +920,32 @@ return arr.join('');
 
 ---
 
+## 🔴 الجولة 21 — استبدال Math.random() في خدمات 2FA/Password الإضافية (الموجة الثانية)
+
+### 21.1 استكمال إصلاح CSPRNG في خدمات المصادقة الثنائية وكلمات المرور 🔴🔴
+
+**المشكلة:** بعد الجولة 20 (7 ملفات)، تم اكتشاف **6 ملفات إضافية** تستخدم `Math.random()` لتوليد OTP وكلمات مرور — نفس الثغرة الحرجة.
+
+| الملف | المشكلة | عدد الإصلاحات | الإصلاح |
+| :--- | :--- | :---: | :--- |
+| `passwordSecurity.service.js` | 5× character selection + biased shuffle | **6** | ✅ `crypto.randomInt()` + Fisher-Yates |
+| `TwoFactorAuth.js` | 2× OTP 6-digit generation | **2** | ✅ `crypto.randomInt(100000, 1000000)` |
+| `twoFAService.js` | 1× OTP character selection | **1** | ✅ `crypto.randomInt(chars.length)` |
+| `enhanced2FA.service.js` | 1× SMS 2FA code generation | **1** | ✅ `crypto.randomInt(100000, 1000000)` |
+| `EncryptionService.js` | 1× verification code generation | **1** | ✅ `Array.from({length}, () => crypto.randomInt(10))` |
+| `AdvancedIntegrations.js` | 1× SMS verification code | **1** | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')` |
+| **المجموع** | | **12** | |
+
+### 21.2 ملخص الجولة 21
+
+| المقياس | القيمة |
+| :--- | :--- |
+| استخدامات Math.random() مُستبدلة | **12** عبر **6 ملفات** |
+| ملفات أُضيف لها `require('crypto')` | **1** (AdvancedIntegrations.js) |
+| ملفات كانت تستورد crypto أصلاً | **5** |
+| الإجمالي التراكمي (جولة 20+21) | **23 إصلاح** عبر **13 ملف** |
+| نتيجة: `Math.random()` في خدمات OTP/2FA/Password | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

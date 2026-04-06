@@ -307,7 +307,7 @@ class Enhanced2FAService {
       }
 
       // Generate 6-digit code
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const code = crypto.randomInt(100000, 1000000).toString();
 
       // Store code temporarily (5 minutes expiration)
       user.mfa = user.mfa || {};

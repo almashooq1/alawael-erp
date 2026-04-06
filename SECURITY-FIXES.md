@@ -411,4 +411,36 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🔴 الجولة 9 — حماية رسائل الأخطاء من التسريب في الإنتاج (Error Message Leakage)
+
+### 9.1 إنشاء `safeError` utility — حماية مركزية
+
+**المشكلة:** 53 endpoint في 6 ملفات تُرسل `err.message` مباشرة للمستخدم في response الـ 500، مما يكشف:
+
+- تفاصيل schema قاعدة البيانات
+- مسارات الملفات الداخلية
+- معلومات عن التقنيات المستخدمة
+- تفاصيل أخطاء Mongoose/JWT
+
+**الإصلاح:** إنشاء `backend/utils/safeError.js`:
+
+- ✅ في **Production**: يُرجع "حدث خطأ داخلي" فقط
+- ✅ في **Development**: يُرجع `err.message` للمطور
+- ✅ يسجّل الخطأ الكامل (message + stack) عبر Winston logger
+- ✅ يدعم context اختياري لتسهيل التتبع
+
+### 9.2 تطبيق safeError على 6 ملفات routes (53 إصلاح)
+
+| الملف                            | الاستبدالات | نوع البيانات               |
+| :------------------------------- | :---------: | :------------------------- |
+| `hr-module.routes.js`            |      9      | بيانات موظفين، رواتب، عقود |
+| `files-module.routes.js`         |     11      | ملفات ووثائق               |
+| `communication-module.routes.js` |     18      | إعلانات، رسائل، إشعارات    |
+| `assessment-scales.routes.js`    |     12      | تقييمات سريرية، مقاييس     |
+| `advancedSettings.routes.js`     |      2      | إعدادات النظام             |
+| `ai-analytics.routes.js`         |      1      | تحليلات AI                 |
+| **المجموع**                      |   **53**    |                            |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

@@ -1,31 +1,33 @@
 /**
- * Safe Error Utility
- * ===================
- * Prevents leaking internal error details to clients in production.
- * In development, returns the actual error message for debugging.
- * In production, returns a generic Arabic message.
+ * Production-safe error response helper
+ * يمنع تسريب رسائل الأخطاء الداخلية في بيئة الإنتاج
  *
- * Usage:
- *   const { safeError } = require('../utils/safeError');
- *   catch (error) {
- *     res.status(500).json({ success: false, message: 'خطأ', error: safeError(error) });
- *   }
+ * في Production: يُرجع رسالة عامة "حدث خطأ داخلي"
+ * في Development: يُرجع err.message للتسهيل على المطور
  */
 
-const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+'use strict';
+
+const logger = require('./logger');
+
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const GENERIC_MESSAGE = 'حدث خطأ داخلي';
 
 /**
- * Returns error message only in development; generic message in production.
- * @param {Error|string} error - The error object or message
- * @param {string} [fallback='حدث خطأ داخلي'] - Fallback message for production
- * @returns {string|undefined} Error detail string (dev) or undefined (prod)
+ * Send a production-safe 500 error response
+ * @param {import('express').Response} res - Express response
+ * @param {Error} err - The caught error
+ * @param {string} [context] - Optional context for logging (e.g. route name)
  */
-function safeError(error, fallback) {
-  if (isDev) {
-    return typeof error === 'string' ? error : error?.message || fallback || 'حدث خطأ داخلي';
-  }
-  // In production, return undefined so the field is omitted from JSON
-  return undefined;
+function safeError(res, err, context) {
+  const logMeta = { stack: err.stack };
+  if (context) logMeta.context = context;
+
+  logger.error(err.message, logMeta);
+
+  const message = IS_PRODUCTION ? GENERIC_MESSAGE : err.message;
+
+  return res.status(500).json({ success: false, error: message });
 }
 
-module.exports = { safeError };
+module.exports = safeError;

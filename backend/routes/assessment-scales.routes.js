@@ -15,6 +15,7 @@
 'use strict';
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -109,7 +110,7 @@ router.get('/tools', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -121,7 +122,7 @@ router.get('/tools/stats', async (req, res) => {
     const stats = await ToolLibraryService.getLibraryStats();
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -139,7 +140,7 @@ router.get('/tools/suitable', async (req, res) => {
     );
     res.json({ success: true, data: tools });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -152,7 +153,7 @@ router.get('/tools/:id', async (req, res) => {
     if (!tool) return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
     res.json({ success: true, data: tool });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -299,7 +300,7 @@ router.get('/clinical', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -314,7 +315,7 @@ router.get('/clinical/stats', async (req, res) => {
     const stats = await ClinicalAssessment.getStats(filters);
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -326,7 +327,7 @@ router.get('/clinical/beneficiary/:beneficiaryId/timeline', async (req, res) => 
     const timeline = await ClinicalAssessment.getBeneficiaryTimeline(req.params.beneficiaryId);
     res.json({ success: true, data: timeline });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -343,7 +344,7 @@ router.get('/clinical/beneficiary/:beneficiaryId/chart', async (req, res) => {
     );
     res.json({ success: true, data: chartData });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -390,7 +391,7 @@ router.get('/clinical/:id', async (req, res) => {
 
     res.json({ success: true, data: { ...assessment, domain_scores: domainScores, report } });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -438,7 +439,7 @@ router.get('/clinical/:id/administer', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -611,7 +612,7 @@ router.get('/clinical/:id/report', async (req, res) => {
     if (!report) return res.status(404).json({ success: false, error: 'لم يُولَّد تقرير بعد' });
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -663,7 +664,7 @@ router.get('/clinical/:id/domain-scores', async (req, res) => {
       .lean();
     res.json({ success: true, data: scores });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 

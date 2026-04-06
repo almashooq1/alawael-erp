@@ -6,6 +6,7 @@
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -919,7 +920,7 @@ async function buildFinancialPrediction(branchId) {
 // Error handler
 router.use((err, req, res, _next) => {
   logger.error('AI Analytics route error', { error: err.message, stack: err.stack });
-  res.status(500).json({ message: 'خطأ في الخادم', error: err.message });
+  safeError(res, err);
 });
 
 module.exports = router;

@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const settingsService = require('../services/settingsService');
 const { GlobalSetting } = require('../models/BranchSetting');
@@ -143,7 +144,7 @@ router.put('/', requireAdmin, async (req, res) => {
     });
   } catch (err) {
     logger.error('[AdvancedSettings] PUT / error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الحفظ', error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -268,7 +269,7 @@ router.post('/custom', requireAdmin, async (req, res) => {
     });
   } catch (err) {
     logger.error('[AdvancedSettings] POST /custom error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الإضافة', error: err.message });
+    safeError(res, err);
   }
 });
 

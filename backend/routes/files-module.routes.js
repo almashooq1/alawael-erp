@@ -11,6 +11,7 @@
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -34,7 +35,7 @@ router.get('/folders', async (req, res) => {
     const folders = await FileFolder.find(filter).sort({ name_ar: 1 });
     res.json({ success: true, data: folders });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -62,7 +63,7 @@ router.get('/folders/:id', async (req, res) => {
     if (!folder) return res.status(404).json({ success: false, error: 'المجلد غير موجود' });
     res.json({ success: true, data: folder });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -75,7 +76,7 @@ router.get('/folders/:id/contents', async (req, res) => {
     ]);
     res.json({ success: true, data: { subfolders, files } });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -102,7 +103,7 @@ router.delete('/folders/:id', async (req, res) => {
     await FileFolder.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف المجلد' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -144,7 +145,7 @@ router.get('/files', async (req, res) => {
       pagination: { page: Number(page), total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -176,7 +177,7 @@ router.get('/files/expiring', async (req, res) => {
       .sort({ expiry_date: 1 });
     res.json({ success: true, data: files, count: files.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -192,7 +193,7 @@ router.get('/files/reference/:type/:id', async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: files, count: files.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -211,7 +212,7 @@ router.get('/files/:id', async (req, res) => {
     });
     res.json({ success: true, data: file });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -242,7 +243,7 @@ router.get('/files/:id/download', async (req, res) => {
     // في الإنتاج: يُعيد مسار الملف أو رابط مؤقت
     res.json({ success: true, data: { file_path: file.file_path, file_name: file.original_name } });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -284,7 +285,7 @@ router.post('/files/:id/archive', async (req, res) => {
     );
     res.json({ success: true, data: file, message: 'تم أرشفة الملف' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -294,7 +295,7 @@ router.delete('/files/:id', async (req, res) => {
     await FileRecord.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف الملف' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 

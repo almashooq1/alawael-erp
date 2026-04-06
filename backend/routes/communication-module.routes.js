@@ -12,6 +12,7 @@
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -62,7 +63,7 @@ router.get('/announcements', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -88,7 +89,7 @@ router.get('/announcements/:id', async (req, res) => {
     await Announcement.findByIdAndUpdate(req.params.id, { $inc: { views_count: 1 } });
     res.json({ success: true, data: ann });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -113,7 +114,7 @@ router.delete('/announcements/:id', async (req, res) => {
     await Announcement.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف الإعلان' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -127,7 +128,7 @@ router.post('/announcements/:id/publish', async (req, res) => {
     );
     res.json({ success: true, data: ann, message: 'تم نشر الإعلان' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -137,7 +138,7 @@ router.post('/announcements/:id/read', async (req, res) => {
     await Announcement.findByIdAndUpdate(req.params.id, { $inc: { reads_count: 1 } });
     res.json({ success: true, message: 'تم تسجيل القراءة' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -177,7 +178,7 @@ router.get('/messages/inbox', async (req, res) => {
       pagination: { page: Number(page), total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -206,7 +207,7 @@ router.get('/messages/sent', async (req, res) => {
       pagination: { page: Number(page), total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -244,7 +245,7 @@ router.get('/messages/:id', async (req, res) => {
     if (!message) return res.status(404).json({ success: false, error: 'الرسالة غير موجودة' });
     res.json({ success: true, data: message });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -257,7 +258,7 @@ router.post('/messages/:id/mark-read', async (req, res) => {
     );
     res.json({ success: true, message: 'تم تعليم الرسالة كمقروءة' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -294,7 +295,7 @@ router.delete('/messages/:id', async (req, res) => {
     );
     res.json({ success: true, message: 'تم حذف الرسالة من صندوقك' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -330,7 +331,7 @@ router.get('/notifications', async (req, res) => {
       pagination: { page: Number(page), total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -344,7 +345,7 @@ router.get('/notifications/unread-count', async (req, res) => {
     });
     res.json({ success: true, unread_count: count });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -354,7 +355,7 @@ router.put('/notifications/:id/read', async (req, res) => {
     await NotificationLog.findByIdAndUpdate(req.params.id, { status: 'read', read_at: new Date() });
     res.json({ success: true, message: 'تم تعليم الإشعار كمقروء' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -367,7 +368,7 @@ router.put('/notifications/read-all', async (req, res) => {
     );
     res.json({ success: true, message: 'تم تعليم كل الإشعارات كمقروءة' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -377,7 +378,7 @@ router.delete('/notifications/:id', async (req, res) => {
     await NotificationLog.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف الإشعار' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -405,7 +406,7 @@ router.get('/contacts', async (req, res) => {
       pagination: { page: Number(page), total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -430,7 +431,7 @@ router.get('/contacts/:id', async (req, res) => {
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, data: contact });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -455,7 +456,7 @@ router.delete('/contacts/:id', async (req, res) => {
     await ContactDirectory.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ success: true, message: 'تم حذف جهة الاتصال' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err);
   }
 });
 

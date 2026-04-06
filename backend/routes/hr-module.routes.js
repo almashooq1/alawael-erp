@@ -1,4 +1,5 @@
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const Employee = require('../models/HR/Employee');
@@ -48,7 +49,7 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
       .sort({ hire_date: -1 });
     res.json({ data: employees, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -69,7 +70,7 @@ router.get('/employees/:id', authenticate, authorize('hr.view'), async (req, res
     if (!emp) return res.status(404).json({ error: 'الموظف غير موجود' });
     res.json({ data: emp });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -92,7 +93,7 @@ router.delete('/employees/:id', authenticate, authorize('hr.delete'), async (req
     await Employee.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ message: 'تم حذف الموظف بنجاح' });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -142,7 +143,7 @@ router.get('/payroll', authenticate, authorize('hr.payroll'), async (req, res) =
       .sort({ year: -1, month: -1 });
     res.json({ data: records, total });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -194,7 +195,7 @@ router.get('/leaves', authenticate, authorize('hr.view'), async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ data: leaves, total });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -240,7 +241,7 @@ router.get('/leave-balance/:employee_id', authenticate, async (req, res) => {
     const balance = await LeaveBalance.getOrCreate(req.params.employee_id, +year);
     res.json({ data: balance });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -274,7 +275,7 @@ router.get('/attendance', authenticate, authorize('hr.view'), async (req, res) =
       .sort({ date: -1 });
     res.json({ data: records, total });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -315,7 +316,7 @@ router.get('/alerts/expiring-documents', authenticate, authorize('hr.view'), asy
     );
     res.json({ data: alerts });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 
@@ -327,7 +328,7 @@ router.get('/alerts/probation-ending', authenticate, authorize('hr.view'), async
     );
     res.json({ data: employees });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    safeError(res, err);
   }
 });
 

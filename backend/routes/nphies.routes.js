@@ -9,6 +9,7 @@ const router = express.Router();
 const nphiesService = require('../services/nphies.service');
 const { authenticateToken } = require('../middleware/auth');
 const { checkPermission } = require('../middleware/permissions');
+const logger = require('../utils/logger');
 
 // =========================================================================
 // 1. التحقق من الأهلية — Eligibility Verification
@@ -51,7 +52,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Eligibility Error:', error.message);
+      logger.error('NPHIES Eligibility Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل التحقق من الأهلية',
@@ -111,7 +112,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Prior Auth Error:', error.message);
+      logger.error('NPHIES Prior Auth Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل طلب الموافقة المسبقة',
@@ -171,7 +172,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Claim Submit Error:', error.message);
+      logger.error('NPHIES Claim Submit Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل تقديم المطالبة',
@@ -209,7 +210,7 @@ router.get(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Claim Status Error:', error.message);
+      logger.error('NPHIES Claim Status Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل الاستعلام عن حالة المطالبة',
@@ -240,7 +241,7 @@ router.delete(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Claim Cancel Error:', error.message);
+      logger.error('NPHIES Claim Cancel Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل إلغاء المطالبة',
@@ -290,7 +291,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Communication Error:', error.message);
+      logger.error('NPHIES Communication Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل إرسال الرد',
@@ -331,7 +332,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      console.error('NPHIES Payment Reconciliation Error:', error.message);
+      logger.error('NPHIES Payment Reconciliation Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل استرجاع بيانات التسوية',
@@ -371,7 +372,7 @@ router.get('/cpt-codes', authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('NPHIES CPT Codes Error:', error.message);
+    logger.error('NPHIES CPT Codes Error:', { error: error.message });
     return res.status(500).json({
       success: false,
       message: 'فشل استرجاع رموز CPT',
@@ -404,7 +405,7 @@ router.get('/cpt-codes/:code', authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('NPHIES CPT Code Lookup Error:', error.message);
+    logger.error('NPHIES CPT Code Lookup Error:', { error: error.message });
     return res.status(500).json({
       success: false,
       message: 'فشل استرجاع بيانات رمز CPT',
@@ -431,7 +432,7 @@ router.get('/status', authenticateToken, async (req, res) => {
       data: status,
     });
   } catch (error) {
-    console.error('NPHIES Status Error:', error.message);
+    logger.error('NPHIES Status Error:', { error: error.message });
     return res.status(500).json({
       success: false,
       message: 'فشل استرجاع حالة الخدمة',
@@ -489,7 +490,7 @@ router.post(
         data: bundle,
       });
     } catch (error) {
-      console.error('NPHIES Bundle Builder Error:', error.message);
+      logger.error('NPHIES Bundle Builder Error:', { error: error.message });
       return res.status(500).json({
         success: false,
         message: 'فشل بناء FHIR Bundle',

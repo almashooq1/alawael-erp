@@ -232,4 +232,44 @@ git commit -m "🔒 security: remove tracked .env files, harden endpoints, impro
 
 ---
 
+## 🟡 الجولة 4: توحيد نظام السجلات في ملفات الإنتاج
+
+### 9. استبدال console.log/error/warn بـ Winston Logger في 6 ملفات إنتاج
+
+**المشكلة:** ملفات إنتاج أساسية تستخدم `console.log/error/warn` بدلاً من نظام السجلات الموحد (Winston)، مما يعني:
+
+- عدم تسجيل السجلات في ملفات
+- عدم وجود مستويات سجلات (info/warn/error)
+- عدم وجود metadata منظمة
+- صعوبة التتبع في الإنتاج
+
+**الملفات المعدلة (29 عبارة console → logger):**
+
+| الملف                                          | العبارات | التغييرات                                                    |
+| ---------------------------------------------- | -------- | ------------------------------------------------------------ |
+| `database/cache/cache-service.js`              | 10       | إضافة `logger` + استبدال جميع console statements             |
+| `routes/nphies.routes.js`                      | 11       | إضافة `logger` + استبدال 11 console.error في route handlers  |
+| `services/attendanceProcessing.service.js`     | 4        | إضافة `logger` + استبدال console.log/error                   |
+| `controllers/rehabilitationPlan.controller.js` | 2        | إضافة `logger` + استبدال console.warn/error                  |
+| `config/database.js`                           | 1        | استبدال console.warn → logger.warn (كان يستخدم logger أصلاً) |
+| `services/kpiCalculation.service.js`           | 1        | إضافة `logger` + استبدال console.error                       |
+
+**النمط الموحد:**
+
+```javascript
+// قبل
+console.error('NPHIES Error:', error.message);
+
+// بعد
+logger.error('NPHIES Error:', { error: error.message });
+```
+
+**الملفات المتجاوزة (مقبولة):**
+
+- `infrastructure/migrationRunner.js` — يستخدم logger مع fallback + CLI output
+- `database/health/db-health.js` — CLI runner فقط يستخدم console
+- `services/realtime.service.js` — ✅ يستخدم logger أصلاً
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

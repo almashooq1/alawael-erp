@@ -15,6 +15,7 @@
 'use strict';
 
 const Redis = require('ioredis');
+const logger = require('../../utils/logger');
 
 // ══════════════════════════════════════════════════════════════════
 // TTL Configuration (seconds)
@@ -105,18 +106,18 @@ class CacheService {
 
       this.client.on('connect', () => {
         this.connected = true;
-        console.log('✅ [Cache] Redis connected');
+        logger.info('[Cache] Redis connected');
       });
 
       this.client.on('error', err => {
         this.connected = false;
         this.stats.errors++;
-        console.error('❌ [Cache] Redis error:', err.message);
+        logger.error('[Cache] Redis error:', { error: err.message });
       });
 
       this.client.on('close', () => {
         this.connected = false;
-        console.warn('⚠️  [Cache] Redis connection closed');
+        logger.warn('[Cache] Redis connection closed');
       });
 
       await this.client.connect();
@@ -125,7 +126,7 @@ class CacheService {
 
       return this;
     } catch (err) {
-      console.error('❌ [Cache] Failed to connect to Redis:', err.message);
+      logger.error('[Cache] Failed to connect to Redis:', { error: err.message });
       this.connected = false;
       return this;
     }
@@ -159,7 +160,7 @@ class CacheService {
       return JSON.parse(data);
     } catch (err) {
       this.stats.errors++;
-      console.error(`[Cache] GET error for key "${key}":`, err.message);
+      logger.error(`[Cache] GET error for key "${key}":`, { error: err.message });
       return null;
     }
   }
@@ -184,7 +185,7 @@ class CacheService {
       return true;
     } catch (err) {
       this.stats.errors++;
-      console.error(`[Cache] SET error for key "${key}":`, err.message);
+      logger.error(`[Cache] SET error for key "${key}":`, { error: err.message });
       return false;
     }
   }
@@ -634,11 +635,11 @@ class CacheService {
    */
   async warmup(warmupConfigs = []) {
     if (!this.connected) {
-      console.warn('[Cache] Skipping warmup - Redis not connected');
+      logger.warn('[Cache] Skipping warmup - Redis not connected');
       return;
     }
 
-    console.log(`[Cache] Starting warmup for ${warmupConfigs.length} keys...`);
+    logger.info(`[Cache] Starting warmup for ${warmupConfigs.length} keys...`);
     let warmed = 0;
 
     for (const config of warmupConfigs) {
@@ -652,11 +653,11 @@ class CacheService {
           }
         }
       } catch (err) {
-        console.warn(`[Cache] Warmup failed for key "${config.key}":`, err.message);
+        logger.warn(`[Cache] Warmup failed for key "${config.key}":`, { error: err.message });
       }
     }
 
-    console.log(`✅ [Cache] Warmup complete: ${warmed}/${warmupConfigs.length} keys cached`);
+    logger.info(`[Cache] Warmup complete: ${warmed}/${warmupConfigs.length} keys cached`);
   }
 
   // ────────────────────────────────────────────────────────────────

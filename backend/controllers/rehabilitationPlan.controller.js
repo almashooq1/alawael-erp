@@ -8,6 +8,8 @@
 
 'use strict';
 
+const logger = require('../utils/logger');
+
 // ── استيراد الخدمات الأساسية ──────────────────────────────────────────────
 let IndividualizedRehabilitationPlanService,
   AIAssessmentService,
@@ -37,7 +39,7 @@ try {
   const _sched = require('../rehabilitation-services/smart-scheduling-service');
   SmartSchedulingService = _sched.SmartSchedulingService || _sched;
 } catch (err) {
-  console.warn('[RehabPlanController] بعض الخدمات غير متاحة — وضع مستقل:', err.message);
+  logger.warn('[RehabPlanController] بعض الخدمات غير متاحة — وضع مستقل:', { error: err.message });
 }
 
 // ── إنشاء مثيلات الخدمات ─────────────────────────────────────────────────
@@ -192,7 +194,7 @@ exports.createPlan = async (req, res) => {
         : null,
     });
   } catch (err) {
-    console.error('[createPlan]', err);
+    logger.error('[createPlan]', { error: err.message, stack: err.stack });
     return respond(res, 500, false, 'خطأ داخلي في إنشاء الخطة', { error: err.message });
   }
 };

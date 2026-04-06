@@ -9,6 +9,7 @@ const KpiValue = require('../models/KpiValue');
 const KpiTarget = require('../models/KpiTarget');
 const KpiAlert = require('../models/KpiAlert');
 const KpiScorecard = require('../models/KpiScorecard');
+const logger = require('../utils/logger');
 
 // ─── مساعدات الفترة الزمنية ────────────────────────────────────────────────
 
@@ -278,7 +279,7 @@ async function calculateAll(branchId, periodType, year, period) {
       const val = await calculateSingle(def, branchId, periodType, year, period);
       results.push(val);
     } catch (err) {
-      console.error(`[KPI] Error calculating ${def.code}:`, err.message);
+      logger.error(`[KPI] Error calculating ${def.code}:`, { error: err.message });
     }
   }
 

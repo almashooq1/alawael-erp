@@ -10,6 +10,7 @@ const WorkShift = require('../models/WorkShift');
 const EmployeeShiftAssignment = require('../models/EmployeeShiftAssignment');
 const LeaveRequest = require('../models/LeaveRequest');
 const AttendancePolicyModel = require('../models/AttendancePolicyModel');
+const logger = require('../utils/logger');
 
 // ─── مساعدات ──────────────────────────────────────────────────────────────────
 
@@ -218,14 +219,14 @@ async function checkAndNotify(daily, employee) {
 
     if (daily.status === 'late' && policy.notifyManagerOnLate) {
       // يمكن استخدام نظام الإشعارات الموجود هنا
-      console.log(`[Attendance] Employee ${employee._id} arrived late (${daily.lateMinutes} min)`);
+      logger.info(`[Attendance] Employee ${employee._id} arrived late (${daily.lateMinutes} min)`);
     }
 
     if (daily.status === 'absent' && policy.notifyManagerOnAbsence) {
-      console.log(`[Attendance] Employee ${employee._id} is absent on ${daily.workDate}`);
+      logger.info(`[Attendance] Employee ${employee._id} is absent on ${daily.workDate}`);
     }
   } catch (err) {
-    console.error('[Attendance] Notify error:', err.message);
+    logger.error('[Attendance] Notify error:', { error: err.message });
   }
 }
 
@@ -245,7 +246,7 @@ async function processBatch(logs) {
     } catch (err) {
       results.failed++;
       results.errors.push(err.message);
-      console.error('[Attendance] Batch error:', err.message);
+      logger.error('[Attendance] Batch error:', { error: err.message });
     }
   }
 

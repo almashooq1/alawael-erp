@@ -31,7 +31,8 @@ class VideoCalendarIntegrationService {
     this.googleClientId = process.env.GOOGLE_CLIENT_ID;
     this.googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
     this.googleRedirectUri =
-      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/auth/google/callback';
+      process.env.GOOGLE_REDIRECT_URI ||
+      `${process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`}/auth/google/callback`;
 
     // Initialize Google Calendar
     if (this.googleEnabled) {

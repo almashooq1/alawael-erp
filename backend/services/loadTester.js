@@ -11,7 +11,10 @@ const EventEmitter = require('events');
 const logger = require('../utils/logger');
 
 class LoadTester extends EventEmitter {
-  constructor(baseURL = 'http://localhost:3001', options = {}) {
+  constructor(
+    baseURL = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 3001}`,
+    options = {}
+  ) {
     super();
     this.baseURL = baseURL;
     this.options = {

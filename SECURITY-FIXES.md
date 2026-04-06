@@ -1091,4 +1091,48 @@ try {
 
 ---
 
+## 🟡 الجولة 25 — إصلاح Hardcoded URLs + توحيد المنافذ + تأمين SSO Service
+
+### 25.1 إصلاح Hardcoded localhost بدون Environment Variables 🟠
+
+**المشكلة:** 3 ملفات إنتاج تستخدم `http://localhost` بشكل ثابت بدون أي env var fallback، مما يفشل تماماً في بيئة الإنتاج.
+
+| الملف | المشكلة | الإصلاح |
+| :--- | :--- | :--- |
+| `loadTester.js` | `constructor(baseURL = 'http://localhost:3001')` بدون env var | ✅ `process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`` |
+| `video-calendar-integrations.service.js` | `'http://localhost:3001/auth/google/callback'` ثابت | ✅ `process.env.GOOGLE_REDIRECT_URI \|\| \`${BACKEND_URL}/auth/google/callback\`` |
+| `generators.js` | `generateQRCode(comm, baseUrl = 'http://localhost:3002')` | ✅ `process.env.FRONTEND_URL \|\| 'http://localhost:3000'` |
+
+### 25.2 توحيد منافذ WebSocket CORS (3002 → 3000) 🟡
+
+**المشكلة:** ملفا WebSocket يستخدمان `localhost:3002` كـ CORS origin fallback، بينما Frontend يعمل على port 3000 (CRA default). هذا يسبب **رفض اتصال WebSocket** في بيئة التطوير المحلية إذا لم يكن `FRONTEND_URL` مُعرّفاً.
+
+| الملف | التغيير |
+| :--- | :--- |
+| `websocket.js` | `'http://localhost:3002'` → `'http://localhost:3000'` |
+| `websocket.service.js` | `'http://localhost:3002'` → `'http://localhost:3000'` |
+
+### 25.3 تأمين SSO Service — منع التشغيل بدون JWT_SECRET 🔴
+
+**المشكلة:** `sso.service.js` كان يُسجّل خطأ عند عدم وجود `JWT_SECRET` في الإنتاج لكن **يستمر بالعمل** مع `this.JWT_SECRET = undefined`. هذا يعني:
+- كل عمليات توقيع JWT تفشل بصمت
+- كل عمليات التحقق من التوكنات تفشل بصمت
+- خدمة SSO تبدو تعمل لكنها معطلة فعلياً
+
+**الإصلاح (`backend/services/sso.service.js`):**
+- ✅ إضافة `throw new Error()` بعد `logger.error()` — الآن يتوقف التشغيل فوراً بدلاً من العمل في حالة معطلة
+- ✅ الرسالة: `'JWT_SECRET must be configured via environment variable for SSO service'`
+- ✅ في بيئة test: يبقى الـ fallback `'test-sso-secret-key'` كما هو (مقبول للاختبارات)
+
+### 25.4 ملخص الجولة 25
+
+| المقياس | القيمة |
+| :--- | :--- |
+| Hardcoded URLs مُصلحة (بدون env var) | **3** (`loadTester` + `video-calendar` + `generators`) |
+| منافذ غير متسقة مُصلحة | **2** (`websocket.js` + `websocket.service.js`: 3002→3000) |
+| Fail-open → Fail-closed | **1** (`sso.service.js`: undefined JWT_SECRET → throw) |
+| ملفات معدلة | **6** |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

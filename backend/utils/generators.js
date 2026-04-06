@@ -15,7 +15,10 @@ const logger = require('./logger');
  * @param {String} baseUrl - URL الأساسي للنظام
  * @returns {Promise<String>} - Data URL للـ QR Code
  */
-async function generateQRCode(communication, baseUrl = 'http://localhost:3002') {
+async function generateQRCode(
+  communication,
+  baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000'
+) {
   try {
     const trackingUrl = `${baseUrl}/communications-system/track/${communication._id}`;
 

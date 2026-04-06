@@ -15,7 +15,7 @@ const connectedUsers = new Map(); // userId -> socketId
 function initializeWebSocket(server) {
   io = socketIO(server, {
     cors: {
-      origin: process.env.FRONTEND_URL || 'http://localhost:3002',
+      origin: process.env.FRONTEND_URL || 'http://localhost:3000',
       methods: ['GET', 'POST'],
       credentials: true,
     },

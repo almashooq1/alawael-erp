@@ -37,6 +37,7 @@ class SSOService {
 
     if (!process.env.JWT_SECRET && process.env.NODE_ENV !== 'test') {
       logger.error('CRITICAL: JWT_SECRET environment variable is not set for SSO service!');
+      throw new Error('JWT_SECRET must be configured via environment variable for SSO service');
     }
     this.JWT_SECRET =
       process.env.JWT_SECRET ||

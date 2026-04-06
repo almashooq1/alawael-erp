@@ -863,4 +863,61 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🔴 الجولة 20 — استبدال Math.random() بـ crypto.randomInt() في توليد OTP وكلمات المرور (CSPRNG)
+
+### 20.1 ثغرة حرجة: استخدام Math.random() لتوليد أكواد أمنية 🔴🔴
+
+**المشكلة:** `Math.random()` ليست آمنة تشفيرياً (NOT cryptographically secure) — مخرجاتها **قابلة للتنبؤ**. كانت تُستخدم في:
+- توليد أكواد OTP (رموز التحقق)
+- توليد كلمات المرور
+- توليد أرقام مرجعية
+- توليد معرّفات cache فريدة
+
+مهاجم يمكنه **تخمين أكواد OTP** أو **كلمات المرور المُولّدة** عبر تحليل مخرجات `Math.random()` السابقة.
+
+### 20.2 الإصلاح: ترحيل إلى crypto.randomInt() — CSPRNG
+
+**البديل:** `crypto.randomInt()` من Node.js built-in — يستخدم مولّد أرقام عشوائية آمن تشفيرياً (Cryptographically Secure Pseudo-Random Number Generator).
+
+| الملف | المشكلة | الإصلاح |
+| :--- | :--- | :--- |
+| `backend/auth/otp-service.js` | `Math.floor(Math.random() * digits.length)` لتوليد OTP | ✅ `crypto.randomInt(digits.length)` |
+| `backend/communication/email-verification-service.js` | `Math.floor(Math.random() * 10)` لتوليد رمز تحقق | ✅ `crypto.randomInt(10)` |
+| `backend/communication/sms-service.js` | `Math.floor(Math.random() * digits.length)` لتوليد OTP SMS | ✅ `crypto.randomInt(digits.length)` |
+| `backend/communication/whatsapp-routes.js` | `Math.floor(100000 + Math.random() * 900000)` لرمز 6 أرقام | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')` |
+| `backend/utils/security.js` | 6× `Math.random()` لتوليد كلمات مرور + Fisher-Yates shuffle | ✅ `crypto.randomInt()` لكل الحالات + shuffle آمن تشفيرياً |
+| `backend/database/cache/cache-service.js` | `Math.random().toString(36).slice(2)` لمعرّف cache | ✅ `crypto.randomBytes(8).toString('hex')` + إضافة `require('crypto')` |
+| `backend/communication/electronic-directives-service.js` | `Math.floor(Math.random() * 9999)` لرقم تسلسلي | ✅ `crypto.randomInt(9999)` + إضافة `require('crypto')` |
+
+### 20.3 تفصيل إصلاح security.js (الأكثر تعقيداً)
+
+```javascript
+// قبل — غير آمن تشفيرياً
+const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+password += upper[Math.floor(Math.random() * upper.length)];
+// ... shuffle باستخدام .sort(() => Math.random() - 0.5) — متحيز!
+
+// بعد — آمن تشفيرياً
+password += upper[crypto.randomInt(upper.length)];
+// Fisher-Yates shuffle (cryptographically secure)
+const arr = password.split('');
+for (let i = arr.length - 1; i > 0; i--) {
+  const j = crypto.randomInt(i + 1);
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+}
+return arr.join('');
+```
+
+### 20.4 ملخص الجولة 20
+
+| المقياس | القيمة |
+| :--- | :--- |
+| استخدامات Math.random() مُستبدلة | **11** عبر **7 ملفات** |
+| ملفات أُضيف لها `require('crypto')` | **3** (whatsapp-routes, cache-service, electronic-directives-service) |
+| ملفات كانت تستورد crypto أصلاً | **4** (otp-service, email-verification, sms-service, security.js) |
+| نتيجة: `Math.random()` في كود أمني | **0** ✅ |
+| خوارزمية الخلط | **Fisher-Yates (غير متحيزة + آمنة تشفيرياً)** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

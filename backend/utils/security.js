@@ -32,22 +32,24 @@ const generateRandomPassword = (length = 16) => {
 
   let password = '';
 
-  // Ensure at least one character from each category
-  password += uppercase[Math.floor(Math.random() * uppercase.length)];
-  password += lowercase[Math.floor(Math.random() * lowercase.length)];
-  password += numbers[Math.floor(Math.random() * numbers.length)];
-  password += special[Math.floor(Math.random() * special.length)];
+  // Ensure at least one character from each category (cryptographically secure)
+  password += uppercase[crypto.randomInt(uppercase.length)];
+  password += lowercase[crypto.randomInt(lowercase.length)];
+  password += numbers[crypto.randomInt(numbers.length)];
+  password += special[crypto.randomInt(special.length)];
 
   // Fill the rest randomly
   for (let i = password.length; i < length; i++) {
-    password += all[Math.floor(Math.random() * all.length)];
+    password += all[crypto.randomInt(all.length)];
   }
 
-  // Shuffle the password
-  return password
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  // Fisher-Yates shuffle (cryptographically secure)
+  const arr = password.split('');
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr.join('');
 };
 
 /**

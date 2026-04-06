@@ -4,6 +4,7 @@
  * Advanced directive management system for administrative communications
  */
 
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const logger = require('../utils/logger');
@@ -291,9 +292,7 @@ class ElectronicDirectivesService {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const sequence = Math.floor(Math.random() * 9999)
-      .toString()
-      .padStart(4, '0');
+    const sequence = crypto.randomInt(9999).toString().padStart(4, '0');
     return `${code}-${year}${month}-${sequence}`;
   }
 

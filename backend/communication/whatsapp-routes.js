@@ -27,6 +27,7 @@ const otpLimiter = rateLimiter.otpLimiter || rateLimiter.apiLimiter || rateLimit
 const bulkLimiter = rateLimiter.bulkLimiter || rateLimiter.apiLimiter || rateLimiter.generalLimiter;
 
 const { authenticate, authorize } = require('../middleware/advancedAuth');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 const {
   WhatsAppIntegrationService,
@@ -563,7 +564,7 @@ router.post('/otp/send', otpLimiter, async (req, res) => {
     }
 
     // Generate OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expiry = 5; // 5 minutes
 
     // Store OTP in database

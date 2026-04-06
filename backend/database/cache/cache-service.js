@@ -15,6 +15,7 @@
 'use strict';
 
 const Redis = require('ioredis');
+const crypto = require('crypto');
 const logger = require('../../utils/logger');
 
 // ══════════════════════════════════════════════════════════════════
@@ -468,7 +469,7 @@ class CacheService {
   async acquireLock(resource, ttlMs = 5000) {
     if (!this.connected) return null;
 
-    const token = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const token = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
     const key = `${PREFIX.lock}${resource}`;
 
     try {

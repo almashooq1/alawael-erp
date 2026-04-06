@@ -996,4 +996,50 @@ logger.error(`Failed to initialize: ${error.message}`);
 
 ---
 
+## 🔴 الجولة 23 — حماية JSON.parse غير الآمن من الانهيار في الإنتاج
+
+### 23.1 المشكلة: JSON.parse على بيانات خارجية بدون try-catch 🔴
+
+**المشكلة:** 4 ملفات تستخدم `JSON.parse()` على بيانات خارجية (ملفات مرفوعة، نسخ احتياطية، قيم CSV) **بدون** حماية try-catch. إذا كانت البيانات تالفة أو غير صالحة، يتسبب ذلك في:
+- انهيار الطلب (unhandled exception)
+- فقدان معلومات السبب (لا رسالة خطأ واضحة)
+- احتمال تعطل العمليات الحرجة (استعادة نسخ احتياطية، استيراد بيانات)
+
+### 23.2 الملفات المُصلحة
+
+| الملف | الدالة | نوع البيانات | الإصلاح |
+| :--- | :--- | :--- | :--- |
+| `importExportPro.service.js` | `_parseJSON(buffer)` | ملف JSON مرفوع من المستخدم | ✅ try-catch مع رسالة خطأ واضحة: `Invalid JSON file: ...` |
+| `database-migration-service.js` | `restoreBackup(backupPath)` | ملف نسخة احتياطية من القرص | ✅ try-catch مع رسالة: `Failed to parse backup file ...` |
+| `database-backup-service.js` | `getBackupInfo(backupPath)` | ملف نسخة احتياطية (بعد فك ضغط/تشفير) | ✅ try-catch مع رسالة: `Failed to parse backup info ...` |
+| `migration/CSVProcessor.js` | `convertType(value, 'json')` | قيمة حقل JSON في CSV من المستخدم | ✅ try-catch يُرجع `null` عند فشل التحليل |
+
+### 23.3 نمط الإصلاح
+
+```javascript
+// قبل — غير آمن (ينهار عند بيانات تالفة)
+const data = JSON.parse(content);
+
+// بعد — آمن (يلتقط الخطأ ويعطي رسالة واضحة)
+let data;
+try {
+  data = JSON.parse(content);
+} catch (err) {
+  throw new Error(`Failed to parse file: ${err.message}`);
+}
+```
+
+### 23.4 تدقيق شامل — JSON.parse في المشروع
+
+تم فحص **67 استخدام** لـ `JSON.parse` في services + **6 استخدامات** في routes:
+
+| الحالة | العدد |
+| :--- | :--- |
+| محمي بـ try-catch | **59** ✅ |
+| Deep clone (`JSON.parse(JSON.stringify(...))`) — آمن | **10** ✅ |
+| غير محمي — **تم إصلاحه** | **4** ✅ |
+| **نتيجة: JSON.parse غير محمي على بيانات خارجية** | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

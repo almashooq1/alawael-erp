@@ -2936,7 +2936,12 @@ class ImportExportProService {
    */
   _parseJSON(buffer) {
     const content = buffer.toString('utf-8');
-    const parsed = JSON.parse(content);
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (err) {
+      throw new Error(`Invalid JSON file: ${err.message}`);
+    }
 
     // Handle both array and { data: [] } formats
     if (Array.isArray(parsed)) return parsed;

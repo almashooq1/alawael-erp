@@ -353,7 +353,12 @@ module.exports = {
 
   // استعادة نسخة احتياطية
   async restoreBackup(backupPath) {
-    const backupData = JSON.parse(await fs.readFile(backupPath, 'utf8'));
+    let backupData;
+    try {
+      backupData = JSON.parse(await fs.readFile(backupPath, 'utf8'));
+    } catch (err) {
+      throw new Error(`Failed to parse backup file ${backupPath}: ${err.message}`);
+    }
 
     for (const [collectionName, documents] of Object.entries(backupData.collections)) {
       const collection = this.connection.db.collection(collectionName);

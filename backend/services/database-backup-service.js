@@ -363,7 +363,12 @@ class DatabaseBackupService extends EventEmitter {
       content = this.decrypt(content.toString());
     }
 
-    const data = typeof content === 'string' ? JSON.parse(content) : content;
+    let data;
+    try {
+      data = typeof content === 'string' ? JSON.parse(content) : content;
+    } catch (err) {
+      throw new Error(`Failed to parse backup info for ${backupPath}: ${err.message}`);
+    }
 
     return {
       path: backupPath,

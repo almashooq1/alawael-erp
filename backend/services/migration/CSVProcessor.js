@@ -244,7 +244,11 @@ class CSVProcessor {
       case 'date':
         return new Date(value).toISOString();
       case 'json':
-        return JSON.parse(value);
+        try {
+          return JSON.parse(value);
+        } catch {
+          return null;
+        }
       default:
         return value;
     }

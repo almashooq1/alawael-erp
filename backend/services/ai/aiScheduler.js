@@ -252,6 +252,8 @@ async function runAllScheduledTasks() {
  * بدء تشغيل الجدولة
  * يفحص كل ساعة ما إذا كان يجب تشغيل المهام
  */
+let _schedulerInterval = null;
+
 function startScheduler() {
   if (schedulerStarted) {
     logger.warn('[AI-Scheduler] Scheduler already running');
@@ -267,7 +269,7 @@ function startScheduler() {
   );
 
   // فحص كل ساعة (3600000 ms)
-  setInterval(
+  _schedulerInterval = setInterval(
     () => {
       runAllScheduledTasks().catch(err =>
         logger.error('[AI-Scheduler] Scheduled run failed', { error: err.message })
@@ -275,6 +277,18 @@ function startScheduler() {
     },
     60 * 60 * 1000
   );
+}
+
+/**
+ * إيقاف الـ Scheduler — للاستخدام عند graceful shutdown
+ */
+function stopScheduler() {
+  if (_schedulerInterval) {
+    clearInterval(_schedulerInterval);
+    _schedulerInterval = null;
+    schedulerStarted = false;
+    logger.info('[AI-Scheduler] Scheduler stopped');
+  }
 }
 
 /**
@@ -296,6 +310,7 @@ async function manualRun(branchId = null) {
 
 module.exports = {
   startScheduler,
+  stopScheduler,
   manualRun,
   runDailyChecks,
   validateExpiredPredictions,

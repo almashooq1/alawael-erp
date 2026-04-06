@@ -41,11 +41,10 @@ class InMemoryUser {
     return !!(this.lockUntil && new Date(this.lockUntil) > Date.now());
   }
 
-  toObject() {
-    return {
+  toObject({ includePassword = false } = {}) {
+    const obj = {
       _id: this._id,
       email: this.email,
-      password: this.password,
       fullName: this.fullName,
       role: this.role,
       lastLogin: this.lastLogin,
@@ -55,6 +54,11 @@ class InMemoryUser {
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };
+    // Only include password when explicitly requested (e.g. for persistence)
+    if (includePassword) {
+      obj.password = this.password;
+    }
+    return obj;
   }
 
   async save() {
@@ -64,9 +68,9 @@ class InMemoryUser {
     const index = users.findIndex(u => u._id === this._id);
 
     if (index >= 0) {
-      users[index] = this.toObject();
+      users[index] = this.toObject({ includePassword: true });
     } else {
-      users.push(this.toObject());
+      users.push(this.toObject({ includePassword: true }));
     }
 
     data.users = users;

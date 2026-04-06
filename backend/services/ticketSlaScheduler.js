@@ -11,6 +11,7 @@
 const logger = require('../utils/logger');
 
 let schedulerStarted = false;
+let _slaInterval = null;
 
 // ─── SLA Config الافتراضية (بالساعات) ────────────────────────────────────────
 const SLA_CONFIG = {
@@ -323,7 +324,7 @@ function startSlaScheduler() {
   }, 5000); // انتظار 5 ثواني لاكتمال اتصال قاعدة البيانات
 
   // تشغيل كل 15 دقيقة
-  setInterval(
+  _slaInterval = setInterval(
     () => {
       runSlaChecks().catch(err =>
         logger.error('[SLA-Scheduler] Scheduled run failed', { error: err.message })
@@ -331,6 +332,18 @@ function startSlaScheduler() {
     },
     15 * 60 * 1000 // 15 دقيقة
   );
+}
+
+/**
+ * إيقاف الـ SLA Scheduler — للاستخدام عند graceful shutdown
+ */
+function stopSlaScheduler() {
+  if (_slaInterval) {
+    clearInterval(_slaInterval);
+    _slaInterval = null;
+    schedulerStarted = false;
+    logger.info('[SLA-Scheduler] Scheduler stopped');
+  }
 }
 
 /**
@@ -343,6 +356,7 @@ async function manualSlaRun() {
 
 module.exports = {
   startSlaScheduler,
+  stopSlaScheduler,
   manualSlaRun,
   runSlaChecks,
   calculateSlaDeadlines,

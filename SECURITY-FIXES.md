@@ -778,4 +778,48 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+---
+
+## 🛡️ الجولة 18 — إصلاح تسريب كلمة المرور في User.memory.js + إصلاح تسرب الذاكرة في Schedulers
+
+### 18.1 إصلاح تسريب كلمة المرور في `User.memory.js` — `toObject()` 🔴
+
+**المشكلة:** دالة `toObject()` في `InMemoryUser` كانت تُرجع حقل `password` **تلقائياً** في كل استدعاء، على عكس نموذج `User.js` الأصلي الذي يستخدم `select: false`. أي كود يستدعي `.toObject()` سيحصل على كلمة المرور.
+
+**الإصلاح (`backend/models/User.memory.js`):**
+- ✅ تغيير `toObject()` لإزالة `password` من النتيجة الافتراضية
+- ✅ إضافة parameter `{ includePassword: true }` للحالات التي تحتاج كلمة المرور (مثل الحفظ في DB)
+- ✅ تحديث `save()` لاستخدام `toObject({ includePassword: true })` عند الحفظ فقط
+- ✅ `toJSON()` كان يحذف password أصلاً — لم يتغير
+
+### 18.2 إصلاح تسرب الذاكرة في AI Scheduler 🟡
+
+**المشكلة:** `backend/services/ai/aiScheduler.js` يستخدم `setInterval()` بدون تخزين الـ ID وبدون `clearInterval()`. الـ interval يعمل للأبد ولا يمكن إيقافه عند graceful shutdown أو في الاختبارات.
+
+**الإصلاح:**
+- ✅ تخزين interval ID في `_schedulerInterval`
+- ✅ إضافة `stopScheduler()` function مع `clearInterval()`
+- ✅ إضافة `stopScheduler` إلى `module.exports`
+
+### 18.3 إصلاح تسرب الذاكرة في SLA Scheduler 🟡
+
+**المشكلة:** `backend/services/ticketSlaScheduler.js` نفس المشكلة — `setInterval()` بدون cleanup.
+
+**الإصلاح:**
+- ✅ إضافة `let _slaInterval = null` في أعلى الملف
+- ✅ تخزين interval ID في `_slaInterval`
+- ✅ إضافة `stopSlaScheduler()` function مع `clearInterval()`
+- ✅ إضافة `stopSlaScheduler` إلى `module.exports`
+
+### 18.4 ملخص الجولة 18
+
+| المقياس | القيمة |
+| :--- | :--- |
+| تسريبات كلمة المرور مُصلحة | **1** (`User.memory.js toObject()`) |
+| تسرب ذاكرة (setInterval) مُصلح | **2** (`aiScheduler.js` + `ticketSlaScheduler.js`) |
+| دوال graceful shutdown جديدة | **2** (`stopScheduler` + `stopSlaScheduler`) |
+| ملفات معدلة | **3** |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

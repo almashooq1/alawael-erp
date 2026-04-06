@@ -66,9 +66,32 @@ router.post('/medical-history', requireAuth, async (req, res) => {
 // PATCH /medical-history/:beneficiaryId — تحديث جزئي
 router.patch('/medical-history/:beneficiaryId', requireAuth, async (req, res) => {
   try {
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const allowedFields = [
+      'diagnoses',
+      'chronicConditions',
+      'allergies',
+      'medications',
+      'surgeries',
+      'familyHistory',
+      'immunizations',
+      'bloodType',
+      'disabilities',
+      'notes',
+      'lastCheckupDate',
+      'nextCheckupDate',
+      'currentTreatmentPlan',
+      'emergencyMedicalInfo',
+    ];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    updates.recordedBy = req.user?._id || req.user?.id;
+
     const record = await MedicalHistory.findOneAndUpdate(
       { beneficiary: req.params.beneficiaryId },
-      { $set: req.body },
+      { $set: updates },
       { new: true, runValidators: true }
     );
     if (!record) return fail(res, 'السجل غير موجود', 404);

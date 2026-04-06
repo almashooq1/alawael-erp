@@ -1186,4 +1186,54 @@ try {
 
 ---
 
+## 🔒 الجولة 27 — حماية SSRF + منع Mass Assignment
+
+### 27.1 حماية SSRF — Server-Side Request Forgery
+
+**المشكلة:** عدة نقاط في التطبيق تسمح بإرسال طلبات HTTP صادرة لعناوين يحددها المستخدم (webhooks)، مما يُعرّض الخوادم الداخلية والبنية التحتية للخطر.
+
+**الإصلاح — أداة جديدة `backend/utils/validateUrl.js`:**
+- ✅ حجب IPs الداخلية (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16)
+- ✅ حجب hostnames سحابية (metadata.google.internal, instance-data, localhost)
+- ✅ حجب المنافذ الحساسة (27017 MongoDB, 6379 Redis, 5432 PostgreSQL...)
+- ✅ حجب بروتوكولات غير HTTP (file://, ftp://, gopher://)
+- ✅ حجب حيل hex IP و numeric-only hostnames
+- ✅ حجب نطاقات .localhost, .local, .internal
+
+**الملفات المحمية:**
+
+| الملف | النقطة | الإصلاح |
+| :--- | :--- | :--- |
+| `backend/routes/workflowEnhanced.routes.js` | POST/PUT/test webhooks (3 endpoints) | validateOutboundUrl قبل الحفظ/الإرسال |
+| `backend/notifications/notification-center.js` | webhook provider axios.post | validateOutboundUrl + timeout 10s |
+
+### 27.2 منع Mass Assignment — `$set: req.body`
+
+**المشكلة:** 6 ملفات تستخدم `{ $set: req.body }` مباشرة في عمليات التحديث، مما يسمح للمهاجم بتعديل حقول حساسة (مثل `role`, `isAdmin`, `createdBy`, `status`) عبر إضافة حقول غير متوقعة في الطلب.
+
+**الإصلاح — Whitelist Pattern:**
+لكل endpoint تم تحديد قائمة بيضاء بالحقول المسموح تعديلها فقط:
+
+| الملف | Endpoint | الحقول الحساسة المحمية |
+| :--- | :--- | :--- |
+| `backend/routes/media.routes.js` | PUT /albums/:id | createdBy, mediaCount, totalSize, slug |
+| `backend/routes/missing-models.routes.js` | PATCH /medical-history/:id | beneficiary, _id, createdAt |
+| `backend/routes/studentHealthTracker.routes.js` | PUT /:studentId/:id | studentId, recordedBy, alerts, _id |
+| `backend/hr/saudi-hr-routes.js` | PUT /employees/:id | status, role, createdBy, employeeId |
+| `backend/controllers/branch.controller.js` | PUT /branches/:code | code, _id, createdAt, staff_count |
+| `backend/controllers/research.controller.js` | updateExport | auditTrail, createdBy, _id |
+
+### 27.3 ملخص الجولة 27
+
+| المقياس | القيمة |
+| :--- | :--- |
+| أداة SSRF جديدة | **1** (`backend/utils/validateUrl.js`) |
+| نقاط SSRF محمية | **4** (3 webhook endpoints + 1 notification provider) |
+| نقاط Mass Assignment مُصلحة | **6** ملفات |
+| إجمالي الملفات المعدلة | **9** |
+| نتيجة: `$set: req.body` في كود الإنتاج | **0** ✅ |
+| نتيجة: طلبات HTTP صادرة غير محمية | **0** ✅ |
+
+---
+
 _تقرير أُعد بواسطة تحليل أمني شامل للمشروع._

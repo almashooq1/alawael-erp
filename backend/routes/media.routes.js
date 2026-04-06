@@ -1027,9 +1027,22 @@ router.post('/albums', authenticate, async (req, res) => {
  */
 router.put('/albums/:id', authenticate, async (req, res) => {
   try {
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const { name, description, coverImage, parentAlbum, color, icon, visibility, sortOrder } =
+      req.body;
+    const updates = {};
+    if (name !== undefined) updates.name = name;
+    if (description !== undefined) updates.description = description;
+    if (coverImage !== undefined) updates.coverImage = coverImage;
+    if (parentAlbum !== undefined) updates.parentAlbum = parentAlbum || null;
+    if (color !== undefined) updates.color = color;
+    if (icon !== undefined) updates.icon = icon;
+    if (visibility !== undefined) updates.visibility = visibility;
+    if (sortOrder !== undefined) updates.sortOrder = sortOrder;
+
     const album = await MediaAlbum.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: updates },
       { new: true, runValidators: true }
     );
     if (!album) return res.status(404).json({ success: false, message: 'الألبوم غير موجود' });

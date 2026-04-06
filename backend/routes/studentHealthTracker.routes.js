@@ -332,10 +332,34 @@ router.get('/:studentId/summary', async (req, res) => {
 // PUT /:id — تحديث سجل صحي
 router.put('/:studentId/:id', async (req, res) => {
   try {
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const allowedFields = [
+      'type',
+      'vitalSigns',
+      'generalCondition',
+      'symptoms',
+      'medications',
+      'allergies',
+      'vaccinations',
+      'moodTracking',
+      'nutritionLog',
+      'physicalActivity',
+      'doctorNotes',
+      'followUpRequired',
+      'followUpDate',
+      'followUpNotes',
+      'attachments',
+      'date',
+    ];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
     const record = await HealthRecord.findOneAndUpdate(
       { _id: req.params.id, studentId: req.params.studentId },
-      { $set: req.body },
-      { new: true }
+      { $set: updates },
+      { new: true, runValidators: true }
     );
     if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: record, message: 'تم تحديث السجل الصحي' });

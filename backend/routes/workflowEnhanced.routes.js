@@ -43,6 +43,7 @@ const {
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
+const { validateOutboundUrl } = require('../utils/validateUrl');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -648,6 +649,15 @@ router.get('/webhooks/:id', authMiddleware, async (req, res) => {
 /** Create webhook */
 router.post('/webhooks', authMiddleware, async (req, res) => {
   try {
+    // SSRF protection: validate webhook URL
+    if (req.body.url) {
+      const urlCheck = validateOutboundUrl(req.body.url);
+      if (!urlCheck.valid) {
+        return res
+          .status(422)
+          .json({ success: false, message: `رابط غير مسموح: ${urlCheck.reason}` });
+      }
+    }
     const wh = await WorkflowWebhook.create({
       ...req.body,
       createdBy: uid(req),
@@ -661,6 +671,15 @@ router.post('/webhooks', authMiddleware, async (req, res) => {
 /** Update webhook */
 router.put('/webhooks/:id', authMiddleware, async (req, res) => {
   try {
+    // SSRF protection: validate webhook URL if being updated
+    if (req.body.url) {
+      const urlCheck = validateOutboundUrl(req.body.url);
+      if (!urlCheck.valid) {
+        return res
+          .status(422)
+          .json({ success: false, message: `رابط غير مسموح: ${urlCheck.reason}` });
+      }
+    }
     const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });
@@ -684,6 +703,14 @@ router.post('/webhooks/:id/test', authMiddleware, async (req, res) => {
   try {
     const wh = await WorkflowWebhook.findById(req.params.id);
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
+
+    // SSRF protection: validate stored webhook URL before making request
+    const urlCheck = validateOutboundUrl(wh.url);
+    if (!urlCheck.valid) {
+      return res
+        .status(422)
+        .json({ success: false, message: `رابط غير مسموح: ${urlCheck.reason}` });
+    }
 
     // Send test payload
     const testPayload = {

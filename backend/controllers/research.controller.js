@@ -360,9 +360,29 @@ const createExport = async (req, res) => {
 
 const updateExport = async (req, res) => {
   try {
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const allowedFields = [
+      'title',
+      'description',
+      'dataScope',
+      'format',
+      'filters',
+      'fields',
+      'anonymization',
+      'compliance',
+      'schedule',
+      'destination',
+      'status',
+      'notes',
+    ];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
     const exp = await researchService.updateExport(
       req.params.id,
-      { $set: req.body },
+      { $set: updates },
       req.user._id || req.user.id
     );
     if (!exp) return res.status(404).json({ success: false, message: 'التصدير غير موجود' });

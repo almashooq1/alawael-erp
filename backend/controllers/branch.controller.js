@@ -72,9 +72,32 @@ exports.createBranch = async (req, res) => {
 // [4] PUT /api/branches/:branch_code — Update branch
 exports.updateBranch = async (req, res) => {
   try {
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const allowedFields = [
+      'nameAr',
+      'nameEn',
+      'type',
+      'region',
+      'city',
+      'address',
+      'phone',
+      'email',
+      'manager',
+      'capacity',
+      'operatingHours',
+      'licenseNumber',
+      'licenseExpiry',
+      'status',
+      'coordinates',
+    ];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
     const branch = await Branch.findOneAndUpdate(
       { code: req.params.branch_code.toUpperCase() },
-      { $set: req.body },
+      { $set: updates },
       { new: true, runValidators: true }
     );
     if (!branch) return fail(res, 'Branch not found', 404);

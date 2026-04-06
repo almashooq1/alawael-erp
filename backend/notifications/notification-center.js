@@ -6,6 +6,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { validateOutboundUrl } = require('../utils/validateUrl');
 
 /**
  * Notification Configuration
@@ -290,8 +291,17 @@ class NotificationCenter {
     // Webhook provider
     this.registerProvider('webhook', async notification => {
       if (notification.data?.webhookUrl) {
+        // SSRF protection: validate webhook URL before making outbound request
+        const urlCheck = validateOutboundUrl(notification.data.webhookUrl);
+        if (!urlCheck.valid) {
+          logger.warn('Webhook URL blocked by SSRF protection', {
+            url: notification.data.webhookUrl,
+            reason: urlCheck.reason,
+          });
+          return { delivered: false, channel: 'webhook', reason: urlCheck.reason };
+        }
         const axios = require('axios');
-        await axios.post(notification.data.webhookUrl, notification);
+        await axios.post(notification.data.webhookUrl, notification, { timeout: 10000 });
       }
       return { delivered: true, channel: 'webhook' };
     });

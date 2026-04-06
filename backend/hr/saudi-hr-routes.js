@@ -113,10 +113,44 @@ router.post('/employees', authMiddleware, checkPermission('hr.create'), async (r
  */
 router.put('/employees/:id', authMiddleware, checkPermission('hr.edit'), async (req, res) => {
   try {
-    req.body.updatedBy = req.user.id;
+    // ── Mass-assignment protection: whitelist allowed fields ──
+    const allowedFields = [
+      'firstNameAr',
+      'lastNameAr',
+      'firstNameEn',
+      'lastNameEn',
+      'email',
+      'phone',
+      'mobile',
+      'department',
+      'branch',
+      'jobTitle',
+      'jobTitleAr',
+      'nationality',
+      'nationalId',
+      'iqamaNumber',
+      'gender',
+      'dateOfBirth',
+      'maritalStatus',
+      'address',
+      'bankName',
+      'iban',
+      'salary',
+      'allowances',
+      'contractType',
+      'startDate',
+      'endDate',
+      'emergencyContact',
+      'notes',
+    ];
+    const updates = { updatedBy: req.user.id };
+    for (const key of allowedFields) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+
     const employee = await Employee.findByIdAndUpdate(
       req.params.id,
-      { $set: req.body },
+      { $set: updates },
       { new: true, runValidators: true }
     );
 

@@ -257,6 +257,10 @@ const hppProtection = (req, _res, next) => {
 };
 app.use(hppProtection);
 
+// ─── Pagination Cap (prevent DoS via ?limit=999999) ─────────────────────────
+const capPagination = require('./middleware/capPagination');
+app.use(capPagination());
+
 // ─── CSRF Protection ────────────────────────────────────────────────────────
 app.use(csrfProtection);
 

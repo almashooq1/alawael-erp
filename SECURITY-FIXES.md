@@ -684,6 +684,44 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ---
 
+## 🛡️ الجولة 17 — حماية من DoS عبر Pagination + أداة صفحات آمنة
+
+### 17.1 إنشاء capPagination Middleware — حماية شاملة 🔴
+
+**المشكلة:** 33+ endpoint تستخدم `parseInt(req.query.limit)` بدون حد أقصى (cap). مهاجم يمكنه إرسال `?limit=999999` لتحميل كل السجلات وإسقاط الخادم (DoS).
+
+**الملفات المتأثرة (بدون cap):** `parentPortal.routes.js`(6)، `early-intervention.routes.js`(6)، `smart-insurance.routes.js`(4)، `payment-transactions.routes.js`(3)، `digital-wallet.routes.js`(2)، `community.js`(1)، `admin.real.routes.js`(1)، `rbac-advanced.routes.js`(1).
+
+**الإصلاح:**
+- ✅ إنشاء `backend/middleware/capPagination.js` — middleware عام يُطبّق على **كل** الطلبات
+- ✅ يحدّ `limit`/`per_page`/`pageSize` بحد أقصى **200** سجل
+- ✅ يُصحّح `page` السالبة أو غير الرقمية إلى 1
+- ✅ تركيب في `app.js` بعد HPP Protection — قبل أي route handler
+- ✅ إنشاء `backend/utils/safePagination.js` — أداة مساعدة للاستخدام المباشر في services
+
+### 17.2 تدقيق أمني شامل — نتائج ممتازة ✅
+
+| الفحص | النتيجة |
+| :--- | :--- |
+| Empty catch blocks (إنتاج) | **0** ✅ (5 فقط في tests — مقبول) |
+| `.find({})` بدون `.limit()` | **0** ✅ |
+| `eval()` خطير | **0** ✅ (Redis EVAL + method call فقط) |
+| `exec()`/`spawn()` بدون تنظيف | **0** ✅ (mongodump ثابت فقط) |
+| `$where` injection | **0** ✅ (محمي بـ validation middleware) |
+| `dangerouslySetInnerHTML` (XSS) | **0** ✅ |
+| NoSQL injection (`.find(req.body)`) | **0** ✅ |
+| Uncapped pagination | **0** ✅ (capPagination middleware شامل) |
+
+### 17.3 ملخص الجولة 17
+
+| المقياس | القيمة |
+| :--- | :--- |
+| أدوات جديدة | **2** (`capPagination.js` middleware + `safePagination.js` utility) |
+| Endpoints محمية من DoS عبر pagination | **كل الـ API** (middleware عام) |
+| ملفات معدلة | **1** (`app.js`) + **2 ملف جديد** |
+
+---
+
 ## 🔴 الجولة 16 — القضاء على ثغرات ReDoS المتبقية في Services (15 إصلاح عبر 6 ملفات)
 
 ### 16.1 تطبيق escapeRegex() على كل استعلامات البحث غير المحمية في Services 🔴

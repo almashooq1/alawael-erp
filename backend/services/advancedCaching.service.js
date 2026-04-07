@@ -145,7 +145,13 @@ class AdvancedCachingService {
       try {
         let cursor = '0';
         do {
-          const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `*${CACHE_PREFIX}*`, 'COUNT', 500);
+          const [nextCursor, keys] = await redis.scan(
+            cursor,
+            'MATCH',
+            `*${CACHE_PREFIX}*`,
+            'COUNT',
+            500
+          );
           cursor = nextCursor;
           redisKeyCount += keys.length;
         } while (cursor !== '0');
@@ -174,7 +180,13 @@ class AdvancedCachingService {
         // Only clear our prefixed keys, not all Redis data
         let cursor = '0';
         do {
-          const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', `*${CACHE_PREFIX}*`, 'COUNT', 500);
+          const [nextCursor, keys] = await redis.scan(
+            cursor,
+            'MATCH',
+            `*${CACHE_PREFIX}*`,
+            'COUNT',
+            500
+          );
           cursor = nextCursor;
           if (keys.length > 0) {
             await redis.del(...keys);

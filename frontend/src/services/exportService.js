@@ -1,9 +1,24 @@
 // ⚡ Heavy libraries loaded on-demand (not at import time)
 // ExcelJS (~300KB), jsPDF (~250KB), html2canvas (~40KB) are only loaded when actually exporting
 let _ExcelJS, _jsPDF, _html2canvas;
-const loadExcelJS = async () => { if (!_ExcelJS) { _ExcelJS = (await import(/* webpackChunkName: "exceljs" */ 'exceljs')).default; } return _ExcelJS; };
-const loadJsPDF = async () => { if (!_jsPDF) { _jsPDF = (await import(/* webpackChunkName: "jspdf" */ 'jspdf')).jsPDF; } return _jsPDF; };
-const loadHtml2Canvas = async () => { if (!_html2canvas) { _html2canvas = (await import(/* webpackChunkName: "html2canvas" */ 'html2canvas')).default; } return _html2canvas; };
+const loadExcelJS = async () => {
+  if (!_ExcelJS) {
+    _ExcelJS = (await import(/* webpackChunkName: "exceljs" */ 'exceljs')).default;
+  }
+  return _ExcelJS;
+};
+const loadJsPDF = async () => {
+  if (!_jsPDF) {
+    _jsPDF = (await import(/* webpackChunkName: "jspdf" */ 'jspdf')).jsPDF;
+  }
+  return _jsPDF;
+};
+const loadHtml2Canvas = async () => {
+  if (!_html2canvas) {
+    _html2canvas = (await import(/* webpackChunkName: "html2canvas" */ 'html2canvas')).default;
+  }
+  return _html2canvas;
+};
 
 import logger from 'utils/logger';
 import { brandColors, surfaceColors } from 'theme/palette';

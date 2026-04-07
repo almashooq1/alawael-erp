@@ -1,17 +1,9 @@
+/**
+ * Home — الصفحة الرئيسية (Tailwind)
+ * Dashboard home with KPIs, quick alerts, module grid
+ */
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Divider,
-  Stack,
-  Chip,
-  IconButton,
-  Alert,
-} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import {
   TrendingUp as TrendingUpIcon,
   Shield as ShieldIcon,
@@ -22,112 +14,230 @@ import {
   QueryStats as QueryStatsIcon,
   SupportAgent as SupportAgentIcon,
   ArrowForward as ArrowForwardIcon,
-  ErrorOutline as ErrorOutlineIcon,
   Home as HomeIcon,
+  ErrorOutline as ErrorOutlineIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import moduleMocks from 'data/moduleMocks';
-import Sparkline from 'components/Sparkline';
 import { useRealTimeKPIs } from 'contexts/SocketContext';
 import { dashboardAPI } from 'services/api';
-import { gradients, statusColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
+/* ─── Module groups ──────────────────────────────────────────────────────── */
 const moduleGroups = [
   {
     title: 'التشغيل والقياس',
-    color: 'primary',
+    accent: 'green',
     items: [
-      { title: 'لوحة التشغيل', path: '/dashboard', icon: <AccountTreeIcon /> },
-      { title: 'التقارير والتحليلات', path: '/reports', icon: <QueryStatsIcon /> },
-      { title: 'النشاط اللحظي', path: '/activity', icon: <TrendingUpIcon /> },
+      { title: 'لوحة التشغيل', path: '/dashboard', icon: <AccountTreeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'التقارير والتحليلات', path: '/reports', icon: <QueryStatsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'النشاط اللحظي', path: '/activity', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الأعمال والمالية',
-    color: 'secondary',
+    accent: 'amber',
     items: [
-      { title: 'إدارة علاقات العملاء (CRM)', path: '/crm', icon: <GroupsIcon /> },
-      { title: 'المالية والمحاسبة', path: '/finance', icon: <TrendingUpIcon /> },
-      { title: 'المشتريات والمخزون', path: '/procurement', icon: <SupportAgentIcon /> },
+      { title: 'إدارة علاقات العملاء', path: '/crm', icon: <GroupsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'المالية والمحاسبة', path: '/finance', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
+      { title: 'المشتريات والمخزون', path: '/procurement', icon: <SupportAgentIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الموارد والفرق',
-    color: 'primary',
+    accent: 'green',
     items: [
-      { title: 'الموارد البشرية', path: '/hr', icon: <GroupsIcon /> },
-      { title: 'الحضور والإجازات', path: '/attendance', icon: <AccessTimeIcon /> },
-      { title: 'الرواتب', path: '/payroll', icon: <TrendingUpIcon /> },
+      { title: 'الموارد البشرية', path: '/hr', icon: <GroupsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الحضور والإجازات', path: '/attendance', icon: <AccessTimeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الرواتب', path: '/payroll', icon: <TrendingUpIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'التعلم والرعاية',
-    color: 'secondary',
+    accent: 'amber',
     items: [
-      { title: 'التعلم الإلكتروني', path: '/elearning', icon: <ScienceIcon /> },
-      { title: 'الجلسات والمواعيد', path: '/sessions', icon: <AccessTimeIcon /> },
-      { title: 'إعادة التأهيل والعلاج', path: '/rehab', icon: <SupportAgentIcon /> },
+      { title: 'التعلم الإلكتروني', path: '/elearning', icon: <ScienceIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الجلسات والمواعيد', path: '/sessions', icon: <AccessTimeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'إعادة التأهيل والعلاج', path: '/rehab', icon: <SupportAgentIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الأمن والتشغيل',
-    color: 'primary',
+    accent: 'green',
     items: [
-      { title: 'الأمن والحماية', path: '/security', icon: <ShieldIcon /> },
-      { title: 'المراقبة والكاميرات', path: '/surveillance', icon: <ShieldIcon /> },
-      { title: 'الصيانة والتشغيل', path: '/operations', icon: <SupportAgentIcon /> },
+      { title: 'الأمن والحماية', path: '/security', icon: <ShieldIcon sx={{ fontSize: 20 }} /> },
+      { title: 'المراقبة والكاميرات', path: '/surveillance', icon: <ShieldIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الصيانة والتشغيل', path: '/operations', icon: <SupportAgentIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الميزات المؤسسية الاحترافية',
-    color: 'secondary',
+    accent: 'amber',
     items: [
-      { title: 'التدقيق والامتثال', path: '/audit-compliance', icon: <ShieldIcon /> },
-      { title: 'مولد التقارير', path: '/report-builder', icon: <QueryStatsIcon /> },
-      { title: 'التقويم الموحد', path: '/calendar-hub', icon: <AccessTimeIcon /> },
-      { title: 'CRM المتقدم', path: '/crm-pro', icon: <GroupsIcon /> },
-      { title: 'المستودعات الذكية', path: '/warehouse-intelligence', icon: <AccountTreeIcon /> },
-      { title: 'إدارة المشاريع', path: '/project-management', icon: <ScienceIcon /> },
-      { title: 'الاستيراد والتصدير', path: '/import-export', icon: <ScienceIcon /> },
+      { title: 'التدقيق والامتثال', path: '/audit-compliance', icon: <ShieldIcon sx={{ fontSize: 20 }} /> },
+      { title: 'مولد التقارير', path: '/report-builder', icon: <QueryStatsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'التقويم الموحد', path: '/calendar-hub', icon: <AccessTimeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'CRM المتقدم', path: '/crm-pro', icon: <GroupsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'المستودعات الذكية', path: '/warehouse-intelligence', icon: <AccountTreeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'إدارة المشاريع', path: '/project-management', icon: <ScienceIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الاستيراد والتصدير', path: '/import-export', icon: <ScienceIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الميزات المؤسسية المتقدمة',
-    color: 'primary',
+    accent: 'green',
     items: [
-      { title: 'التوظيف واستقطاب المواهب', path: '/talent-acquisition', icon: <GroupsIcon /> },
-      { title: 'إدارة المرافق والعقارات', path: '/facility-management', icon: <AccountTreeIcon /> },
-      { title: 'إدارة علاقات الموردين', path: '/vendor-management', icon: <SupportAgentIcon /> },
-      { title: 'خدمات تقنية المعلومات', path: '/itsm', icon: <ScienceIcon /> },
-      { title: 'السلامة والصحة المهنية', path: '/ehs-safety', icon: <ShieldIcon /> },
-      { title: 'التخطيط الاستراتيجي', path: '/strategic-planning', icon: <QueryStatsIcon /> },
+      { title: 'التوظيف واستقطاب المواهب', path: '/talent-acquisition', icon: <GroupsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'إدارة المرافق والعقارات', path: '/facility-management', icon: <AccountTreeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'إدارة علاقات الموردين', path: '/vendor-management', icon: <SupportAgentIcon sx={{ fontSize: 20 }} /> },
+      { title: 'خدمات تقنية المعلومات', path: '/itsm', icon: <ScienceIcon sx={{ fontSize: 20 }} /> },
+      { title: 'السلامة والصحة المهنية', path: '/ehs-safety', icon: <ShieldIcon sx={{ fontSize: 20 }} /> },
+      { title: 'التخطيط الاستراتيجي', path: '/strategic-planning', icon: <QueryStatsIcon sx={{ fontSize: 20 }} /> },
     ],
   },
   {
     title: 'الحلول المؤسسية الفائقة',
-    color: 'secondary',
+    accent: 'amber',
     items: [
-      { title: 'الشؤون القانونية', path: '/legal-management', icon: <ShieldIcon /> },
-      { title: 'الحوكمة المؤسسية', path: '/corporate-governance', icon: <AccountTreeIcon /> },
-      { title: 'استمرارية الأعمال', path: '/business-continuity', icon: <ScienceIcon /> },
-      { title: 'تجربة العملاء', path: '/customer-experience', icon: <SupportAgentIcon /> },
-      { title: 'الاستدامة والطاقة', path: '/sustainability', icon: <QueryStatsIcon /> },
-      { title: 'التحول الرقمي', path: '/digital-transformation', icon: <GroupsIcon /> },
+      { title: 'الشؤون القانونية', path: '/legal-management', icon: <ShieldIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الحوكمة المؤسسية', path: '/corporate-governance', icon: <AccountTreeIcon sx={{ fontSize: 20 }} /> },
+      { title: 'استمرارية الأعمال', path: '/business-continuity', icon: <ScienceIcon sx={{ fontSize: 20 }} /> },
+      { title: 'تجربة العملاء', path: '/customer-experience', icon: <SupportAgentIcon sx={{ fontSize: 20 }} /> },
+      { title: 'الاستدامة والطاقة', path: '/sustainability', icon: <QueryStatsIcon sx={{ fontSize: 20 }} /> },
+      { title: 'التحول الرقمي', path: '/digital-transformation', icon: <GroupsIcon sx={{ fontSize: 20 }} /> },
     ],
   },
 ];
 
+/* ─── KPI Card ───────────────────────────────────────────────────────────── */
+function KPICard({ kpi, navigate }) {
+  const toneColor =
+    kpi.tone === 'error'
+      ? 'text-red-500'
+      : kpi.tone === 'warning'
+      ? 'text-amber-500'
+      : 'text-emerald-500';
+
+  const toneBg =
+    kpi.tone === 'error'
+      ? 'bg-red-500/10'
+      : kpi.tone === 'warning'
+      ? 'bg-amber-500/10'
+      : 'bg-green-600/10';
+
+  return (
+    <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-shadow duration-300 relative overflow-hidden group">
+      {/* Top accent */}
+      <div
+        className="absolute top-0 left-0 right-0 h-1 opacity-60"
+        style={{ background: 'linear-gradient(90deg, #1B5E20, #4CAF50, #66BB6A)' }}
+      />
+
+      {/* Icon */}
+      <div
+        className={`absolute top-3 left-3 w-10 h-10 rounded-xl flex items-center justify-center text-white ${toneBg}`}
+        style={{ background: 'linear-gradient(135deg, #1B5E20, #2e7d32)' }}
+      >
+        {kpi.icon}
+      </div>
+
+      <div className="pt-4">
+        <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold mb-2">
+          {kpi.label}
+        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-3xl font-bold text-slate-800">{kpi.value}</span>
+        </div>
+        <p className={`text-sm mt-1 font-medium ${toneColor}`}>{kpi.trend}</p>
+        {kpi.path && (
+          <button
+            onClick={() => navigate(kpi.path)}
+            className="mt-3 text-green-700 text-sm font-semibold bg-transparent border-none cursor-pointer flex items-center gap-1 hover:gap-2 transition-all duration-200 font-cairo p-0"
+          >
+            فتح
+            <ArrowForwardIcon sx={{ fontSize: 14 }} className="-scale-x-100" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Alert Card ─────────────────────────────────────────────────────────── */
+function AlertCard({ alert, navigate }) {
+  return (
+    <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 bg-white hover:bg-slate-50/50 transition-colors group">
+      <div>
+        <p className="text-sm font-semibold text-slate-800 m-0">{alert.title}</p>
+        <p className="text-xs text-slate-500 mt-0.5 m-0">{alert.status}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        {alert.amount && (
+          <span className="px-2 py-0.5 text-xs font-semibold border border-green-600/20 text-green-700 rounded-full bg-green-50">
+            {alert.amount}
+          </span>
+        )}
+        <button
+          onClick={() => navigate(alert.path)}
+          className="w-8 h-8 rounded-lg bg-green-50 text-green-700 border-none cursor-pointer flex items-center justify-center hover:bg-green-100 transition-colors"
+        >
+          <ArrowForwardIcon sx={{ fontSize: 16 }} className="-scale-x-100" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Module Group Card ──────────────────────────────────────────────────── */
+function ModuleGroupCard({ group, navigate }) {
+  const isGreen = group.accent === 'green';
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="p-5">
+        <span
+          className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 ${
+            isGreen
+              ? 'bg-green-50 text-green-700 border border-green-200'
+              : 'bg-amber-50 text-amber-700 border border-amber-200'
+          }`}
+        >
+          {group.title}
+        </span>
+        <div className="space-y-2">
+          {group.items.map((item) => (
+            <button
+              key={item.title}
+              onClick={() => navigate(item.path)}
+              className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold border cursor-pointer font-cairo transition-all duration-200 ${
+                isGreen
+                  ? 'border-green-100 text-green-800 bg-green-50/50 hover:bg-green-100/70 hover:border-green-200'
+                  : 'border-amber-100 text-amber-800 bg-amber-50/50 hover:bg-amber-100/70 hover:border-amber-200'
+              }`}
+            >
+              <span className="flex items-center gap-3">
+                <span className={isGreen ? 'text-green-600' : 'text-amber-600'}>
+                  {item.icon}
+                </span>
+                {item.title}
+              </span>
+              <ArrowForwardIcon sx={{ fontSize: 16 }} className="-scale-x-100 opacity-40" />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main Component ─────────────────────────────────────────────────────── */
 const Home = () => {
   const navigate = useNavigate();
   const showSnackbar = useSnackbar();
   const [error, setError] = useState(null);
 
-  // Real-time KPI subscriptions for different modules
-  const { kpis: reportsKPIs, lastUpdate: reportsLastUpdate } = useRealTimeKPIs('reports');
-  const { kpis: financeKPIs, lastUpdate: financeLastUpdate } = useRealTimeKPIs('finance');
-  const { kpis: hrKPIs, lastUpdate: hrLastUpdate } = useRealTimeKPIs('hr');
-  const { kpis: securityKPIs, lastUpdate: securityLastUpdate } = useRealTimeKPIs('security');
+  const { kpis: reportsKPIs } = useRealTimeKPIs('reports');
+  const { kpis: financeKPIs } = useRealTimeKPIs('finance');
+  const { kpis: hrKPIs } = useRealTimeKPIs('hr');
+  const { kpis: securityKPIs } = useRealTimeKPIs('security');
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -135,39 +245,26 @@ const Home = () => {
         await dashboardAPI.getSummary();
         setError(null);
       } catch (_err) {
-        // Fall back to mock data silently - real-time KPIs via socket will still work
         showSnackbar('حدث خطأ أثناء تحميل بيانات الصفحة الرئيسية', 'error');
         setError(null);
       }
     };
-
     fetchHomeData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const kpis = useMemo(() => {
-    // Use real-time KPIs if available, otherwise fall back to mock data
-    const getKPIWithRealTime = (mockKPI, realtimeKPIs, moduleIcon) => {
-      if (realtimeKPIs && realtimeKPIs.length > 0) {
-        // Merge real-time data with mock template
-        return {
-          ...realtimeKPIs[0],
-          icon: moduleIcon,
-          path: mockKPI.path,
-        };
+    const getKPI = (mockKPI, realtimeKPIs, icon) => {
+      if (realtimeKPIs?.length > 0) {
+        return { ...realtimeKPIs[0], icon, path: mockKPI.path };
       }
-      return {
-        ...mockKPI,
-        icon: moduleIcon,
-        path: mockKPI.path,
-      };
+      return { ...mockKPI, icon, path: mockKPI.path };
     };
-
     return [
-      getKPIWithRealTime(moduleMocks.reports.kpis[0], reportsKPIs, <QueryStatsIcon />),
-      getKPIWithRealTime(moduleMocks.finance.kpis[0], financeKPIs, <TrendingUpIcon />),
-      getKPIWithRealTime(moduleMocks.hr.kpis[0], hrKPIs, <AccessTimeIcon />),
-      getKPIWithRealTime(moduleMocks.security.kpis[0], securityKPIs, <ShieldIcon />),
+      getKPI(moduleMocks.reports.kpis[0], reportsKPIs, <QueryStatsIcon sx={{ fontSize: 22 }} className="text-white" />),
+      getKPI(moduleMocks.finance.kpis[0], financeKPIs, <TrendingUpIcon sx={{ fontSize: 22 }} className="text-white" />),
+      getKPI(moduleMocks.hr.kpis[0], hrKPIs, <AccessTimeIcon sx={{ fontSize: 22 }} className="text-white" />),
+      getKPI(moduleMocks.security.kpis[0], securityKPIs, <ShieldIcon sx={{ fontSize: 22 }} className="text-white" />),
     ];
   }, [reportsKPIs, financeKPIs, hrKPIs, securityKPIs]);
 
@@ -182,274 +279,138 @@ const Home = () => {
   );
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header */}
-      <Box sx={{ background: gradients.primary, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <HomeIcon sx={{ fontSize: 40 }} />
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-              الصفحة الرئيسية
-            </Typography>
-            <Typography variant="body2">
+    <div className="space-y-6">
+      {/* Hero Header */}
+      <div
+        className="rounded-2xl p-6 text-white relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 50%, #388E3C 100%)' }}
+      >
+        <div
+          className="absolute -top-10 -left-10 w-40 h-40 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.3), transparent)' }}
+        />
+        <div className="flex items-center gap-4 relative z-10">
+          <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <HomeIcon sx={{ fontSize: 30 }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold m-0">الصفحة الرئيسية</h1>
+            <p className="text-white/80 text-sm mt-1 m-0">
               مرحباً بك في نظام مراكز الأوائل للرعاية النهارية
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+            </p>
+          </div>
+        </div>
+      </div>
 
+      {/* Error */}
       {error && (
-        <Alert severity="error" icon={<ErrorOutlineIcon />}>
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          <ErrorOutlineIcon sx={{ fontSize: 20 }} />
           {error} - يتم استخدام البيانات التجريبية
-        </Alert>
+        </div>
       )}
 
-      <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Box>
-            <Chip label="تحكم موحّد" color="primary" variant="outlined" sx={{ mb: 1 }} />
-            <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
-              كل الأنظمة في لوحة واحدة
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
-              تنقّل سريع بين التشغيل، الأعمال، الموارد، التعلم، والأمن. استخدم الروابط السريعة أدناه
-              للوصول إلى كل نظام أو ابدأ من التقارير الموحدة.
-            </Typography>
-            <Stack direction="row" spacing={1.5} sx={{ mt: 2, flexWrap: 'wrap' }}>
-              <Button
-                variant="contained"
-                onClick={() => navigate('/reports')}
-                endIcon={<ArrowForwardIcon />}
-              >
-                التقارير الذكية
-              </Button>
-              <Button variant="outlined" color="secondary" onClick={() => navigate('/crm')}>
-                افتح CRM
-              </Button>
-              <Button variant="outlined" onClick={() => navigate('/security')}>
-                مركز الأمان
-              </Button>
-            </Stack>
-          </Box>
-        </Stack>
-      </Card>
-
-      <Grid container spacing={2} sx={{ mb: 1 }}>
-        <Grid item xs={12}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              مؤشرات الأداء الرئيسية
-            </Typography>
-            {(reportsLastUpdate || financeLastUpdate || hrLastUpdate || securityLastUpdate) && (
-              <Chip
-                label={`آخر تحديث: ${new Date().toLocaleTimeString('ar-SA')}`}
-                size="small"
-                variant="outlined"
-                color="primary"
-              />
-            )}
-          </Stack>
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={2}>
-        {kpis.map(kpi => (
-          <Grid item xs={12} sm={6} md={3} key={kpi.label}>
-            <Card sx={{ p: 2, position: 'relative', overflow: 'hidden' }}>
-              <IconButton
-                aria-label="إجراء"
-                size="small"
-                sx={{
-                  position: 'absolute',
-                  top: 12,
-                  left: 12,
-                  bgcolor: 'primary.main',
-                  color: '#fff',
-                }}
-              >
-                {kpi.icon}
-              </IconButton>
-              <CardContent sx={{ pt: 4 }}>
-                <Typography variant="overline" color="text.secondary">
-                  {kpi.label}
-                </Typography>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  sx={{ mt: 1 }}
-                >
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {kpi.value}
-                  </Typography>
-                  {kpi.chartData && (
-                    <Sparkline
-                      data={kpi.chartData}
-                      color={
-                        kpi.tone === 'error'
-                          ? statusColors.redMid
-                          : kpi.tone === 'warning'
-                            ? statusColors.orangeMid
-                            : statusColors.tealMid
-                      }
-                      width={70}
-                      height={28}
-                    />
-                  )}
-                </Stack>
-                <Typography
-                  variant="body2"
-                  color={
-                    kpi.tone === 'error'
-                      ? 'error.main'
-                      : kpi.tone === 'warning'
-                        ? 'warning.main'
-                        : 'success.main'
-                  }
-                >
-                  {kpi.trend}
-                </Typography>
-                {kpi.path && (
-                  <Button
-                    size="small"
-                    variant="text"
-                    sx={{ mt: 1 }}
-                    onClick={() => navigate(kpi.path)}
-                    endIcon={<ArrowForwardIcon fontSize="small" />}
-                  >
-                    فتح
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-              تنبيهات سريعة
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              مزيج من الأمن، المالية، والرعاية لمراجعة عاجلة.
-            </Typography>
-          </Box>
-          <Button
-            variant="text"
-            endIcon={<ArrowForwardIcon />}
+      {/* Quick Control Card */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200 mb-3">
+          تحكم موحّد
+        </span>
+        <h2 className="text-2xl font-bold text-slate-800 mb-2 mt-0">
+          كل الأنظمة في لوحة واحدة
+        </h2>
+        <p className="text-slate-500 text-sm max-w-2xl mb-4">
+          تنقّل سريع بين التشغيل، الأعمال، الموارد، التعلم، والأمن. استخدم الروابط السريعة أدناه
+          للوصول إلى كل نظام أو ابدأ من التقارير الموحدة.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <button
             onClick={() => navigate('/reports')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white border-none cursor-pointer flex items-center gap-2 transition-all duration-200 hover:shadow-lg font-cairo"
+            style={{ background: 'linear-gradient(135deg, #1B5E20, #2e7d32)' }}
+          >
+            التقارير الذكية
+            <ArrowForwardIcon sx={{ fontSize: 16 }} className="-scale-x-100" />
+          </button>
+          <button
+            onClick={() => navigate('/crm')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-amber-700 bg-transparent border-2 border-amber-300 cursor-pointer transition-all duration-200 hover:bg-amber-50 font-cairo"
+          >
+            افتح CRM
+          </button>
+          <button
+            onClick={() => navigate('/security')}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-green-700 bg-transparent border-2 border-green-300 cursor-pointer transition-all duration-200 hover:bg-green-50 font-cairo"
+          >
+            مركز الأمان
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Section */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-slate-800 m-0">مؤشرات الأداء الرئيسية</h3>
+          <span className="text-xs text-slate-400 bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
+            آخر تحديث: {new Date().toLocaleTimeString('ar-SA')}
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((kpi) => (
+            <KPICard key={kpi.label} kpi={kpi} navigate={navigate} />
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Alerts */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 m-0">تنبيهات سريعة</h3>
+            <p className="text-sm text-slate-500 mt-1 m-0">
+              مزيج من الأمن، المالية، والرعاية لمراجعة عاجلة.
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/reports')}
+            className="text-sm font-semibold text-green-700 bg-transparent border-none cursor-pointer flex items-center gap-1 hover:gap-2 transition-all duration-200 font-cairo self-start"
           >
             عرض التفاصيل
-          </Button>
-        </Stack>
-        <Divider sx={{ my: 2 }} />
-        <Grid container spacing={1.5}>
+            <ArrowForwardIcon sx={{ fontSize: 14 }} className="-scale-x-100" />
+          </button>
+        </div>
+        <div className="h-px bg-slate-100 mb-4" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {alerts.map((alert, idx) => (
-            <Grid item xs={12} md={6} key={`${alert.title}-${idx}`}>
-              <Card variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
-                <Stack direction="row" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      {alert.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {alert.status}
-                    </Typography>
-                  </Box>
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    {alert.amount && (
-                      <Chip label={alert.amount} size="small" color="primary" variant="outlined" />
-                    )}
-                    <IconButton
-                      aria-label="التالي"
-                      size="small"
-                      color="primary"
-                      onClick={() => navigate(alert.path)}
-                    >
-                      <ArrowForwardIcon fontSize="small" />
-                    </IconButton>
-                  </Stack>
-                </Stack>
-              </Card>
-            </Grid>
+            <AlertCard key={`${alert.title}-${idx}`} alert={alert} navigate={navigate} />
           ))}
-        </Grid>
-      </Card>
+        </div>
+      </div>
 
-      <Card sx={{ p: { xs: 2, md: 3 }, borderRadius: 3 }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 0.5 }}>
-              الأنظمة المتاحة
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
+      {/* Module Grid */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-slate-800 m-0">الأنظمة المتاحة</h3>
+            <p className="text-sm text-slate-500 mt-1 m-0">
               اختر النظام للوصول السريع إلى أهم الصفحات والإجراءات.
-            </Typography>
-          </Box>
-          <Button
-            variant="text"
-            endIcon={<ArrowForwardIcon />}
+            </p>
+          </div>
+          <button
             onClick={() => navigate('/reports')}
+            className="text-sm font-semibold text-green-700 bg-transparent border-none cursor-pointer flex items-center gap-1 hover:gap-2 transition-all duration-200 font-cairo self-start"
           >
             عرض التقارير الموحدة
-          </Button>
-        </Stack>
-        <Divider sx={{ my: 2 }} />
-        <Grid container spacing={2}>
-          {moduleGroups.map(group => (
-            <Grid item xs={12} md={6} key={group.title}>
-              <Card variant="outlined" sx={{ height: '100%', borderRadius: 2 }}>
-                <CardContent>
-                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
-                    <Chip
-                      label={group.title}
-                      color={group.color === 'primary' ? 'primary' : 'secondary'}
-                      variant="outlined"
-                    />
-                  </Stack>
-                  <Grid container spacing={1.5}>
-                    {group.items.map(item => (
-                      <Grid item xs={12} key={item.title}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          color={group.color === 'primary' ? 'primary' : 'secondary'}
-                          startIcon={item.icon}
-                          onClick={() => navigate(item.path)}
-                          sx={{ justifyContent: 'space-between', borderRadius: 2 }}
-                        >
-                          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                            {item.title}
-                          </Typography>
-                          <ArrowForwardIcon fontSize="small" />
-                        </Button>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </CardContent>
-              </Card>
-            </Grid>
+            <ArrowForwardIcon sx={{ fontSize: 14 }} className="-scale-x-100" />
+          </button>
+        </div>
+        <div className="h-px bg-slate-100 mb-4" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {moduleGroups.map((group) => (
+            <ModuleGroupCard key={group.title} group={group} navigate={navigate} />
           ))}
-        </Grid>
-      </Card>
-    </Box>
+        </div>
+      </div>
+    </div>
   );
 };
 

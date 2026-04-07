@@ -1,50 +1,12 @@
 /**
- * SidebarNavList — قائمة التنقل الاحترافية المحسّنة
- *
- * Premium dark sidebar navigation with:
- * - Section headers with refined dividers
- * - Active state with gradient background + accent line (RTL)
- * - Collapsible parent items with smooth animated children
- * - Tooltip in collapsed mode
- * - Notification badges
- * - Polished micro-interactions
+ * SidebarNavList — قائمة التنقل الاحترافية (Tailwind)
+ * Section titles, parent items (expandable), child items, collapsed tooltips
  */
-
 import { useState, useCallback, useMemo, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Box,
-  List,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Collapse,
-  Typography,
-  Tooltip,
-  Badge,
-} from '@mui/material';
-import {
-  ExpandMore as ExpandMoreIcon,
-} from '@mui/icons-material';
+import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 
-// ─── Style tokens ─────────────────────────────────────────────────────────────
-const SB = {
-  ACTIVE_BG:        'rgba(99,102,241,0.15)',
-  ACTIVE_BG_HOVER:  'rgba(99,102,241,0.2)',
-  ACTIVE_BORDER:    '#6366F1',
-  HOVER_BG:         'rgba(255,255,255,0.045)',
-  TEXT:             'rgba(255,255,255,0.65)',
-  TEXT_ACTIVE:      '#FFFFFF',
-  TEXT_MUTED:       'rgba(255,255,255,0.28)',
-  ICON:             'rgba(255,255,255,0.42)',
-  ICON_ACTIVE:      '#A5B4FC',
-  CHILD_DOT:        'rgba(255,255,255,0.2)',
-  CHILD_DOT_ACT:    '#818CF8',
-  CHILD_TEXT:       'rgba(255,255,255,0.55)',
-  CHILD_TEXT_ACT:   'rgba(255,255,255,0.95)',
-};
-
-// ─── Child nav item ───────────────────────────────────────────────────────────
+/* ─── Child nav item ─────────────────────────────────────────────────────── */
 const ChildNavItem = memo(function ChildNavItem({ item, collapsed }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,94 +15,61 @@ const ChildNavItem = memo(function ChildNavItem({ item, collapsed }) {
     location.pathname === item.path ||
     (item.path && item.path !== '/' && location.pathname.startsWith(item.path));
 
+  const badgeColor =
+    item.badgeColor === 'success'
+      ? 'bg-emerald-500/[0.18] text-emerald-300'
+      : item.badgeColor === 'warning'
+      ? 'bg-amber-500/[0.18] text-amber-300'
+      : 'bg-rose-500/[0.18] text-rose-300';
+
   return (
-    <Tooltip
-      title={collapsed ? item.label : ''}
-      placement="left"
-      disableHoverListener={!collapsed}
-      arrow
+    <button
+      onClick={() => item.path && navigate(item.path)}
+      title={collapsed ? item.label : undefined}
+      className={`w-[calc(100%-10px)] mx-[5px] mb-0.5 flex items-center gap-2.5 rounded-lg min-h-[34px] border-none font-cairo cursor-pointer transition-all duration-150 ${
+        collapsed ? 'px-3' : 'pr-5 pl-3'
+      } py-1.5 ${
+        isActive
+          ? 'bg-green-700/[0.12] hover:bg-green-700/[0.17]'
+          : 'bg-transparent hover:bg-white/[0.04]'
+      }`}
     >
-      <ListItemButton
-        onClick={() => item.path && navigate(item.path)}
-        sx={{
-          mx: 1.25,
-          mb: 0.35,
-          pl: collapsed ? '12px' : '20px',
-          pr: collapsed ? '12px' : '12px',
-          py: '6px',
-          borderRadius: '8px',
-          minHeight: 34,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1.25,
-          backgroundColor: isActive ? 'rgba(99,102,241,0.1)' : 'transparent',
-          transition: 'all 0.15s ease',
-          '&:hover': {
-            backgroundColor: isActive ? 'rgba(99,102,241,0.14)' : 'rgba(255,255,255,0.04)',
-          },
-        }}
-      >
-        {/* Animated bullet */}
-        <Box
-          sx={{
-            width: isActive ? 7 : 5,
-            height: isActive ? 7 : 5,
-            borderRadius: '50%',
-            flexShrink: 0,
-            backgroundColor: isActive ? '#818CF8' : 'rgba(255,255,255,0.2)',
-            boxShadow: isActive ? '0 0 6px rgba(129,140,248,0.7)' : 'none',
-            transition: 'all 0.2s ease',
-          }}
-        />
+      {/* Bullet */}
+      <span
+        className={`rounded-full flex-shrink-0 transition-all duration-200 ${
+          isActive
+            ? 'w-[7px] h-[7px] bg-green-400'
+            : 'w-[5px] h-[5px] bg-white/20'
+        }`}
+        style={isActive ? { boxShadow: '0 0 6px rgba(102,187,106,0.7)' } : undefined}
+      />
 
-        {!collapsed && (
-          <>
-            <Typography
-              sx={{
-                fontSize: '0.8125rem',
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? SB.CHILD_TEXT_ACT : SB.CHILD_TEXT,
-                flex: 1,
-                lineHeight: 1.4,
-                transition: 'all 0.15s',
-                letterSpacing: isActive ? '-0.01em' : 'normal',
-              }}
+      {!collapsed && (
+        <>
+          <span
+            className={`text-[0.8125rem] flex-1 text-right leading-relaxed transition-all duration-150 ${
+              isActive
+                ? 'font-semibold text-white/95 -tracking-tight'
+                : 'font-normal text-white/55'
+            }`}
+          >
+            {item.label}
+          </span>
+
+          {item.badge && (
+            <span
+              className={`px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none ${badgeColor}`}
             >
-              {item.label}
-            </Typography>
-
-            {item.badge && (
-              <Box
-                sx={{
-                  px: 0.75,
-                  py: 0.1,
-                  borderRadius: '100px',
-                  backgroundColor: item.badgeColor === 'success'
-                    ? 'rgba(16,185,129,0.18)'
-                    : item.badgeColor === 'warning'
-                    ? 'rgba(245,158,11,0.18)'
-                    : 'rgba(244,63,94,0.18)',
-                  color: item.badgeColor === 'success'
-                    ? '#6EE7B7'
-                    : item.badgeColor === 'warning'
-                    ? '#FCD34D'
-                    : '#FDA4AF',
-                  fontSize: '0.6rem',
-                  fontWeight: 700,
-                  lineHeight: 1.6,
-                }}
-              >
-                {item.badge}
-              </Box>
-            )}
-          </>
-        )}
-      </ListItemButton>
-    </Tooltip>
+              {item.badge}
+            </span>
+          )}
+        </>
+      )}
+    </button>
   );
 });
 
-// ─── Parent nav item ──────────────────────────────────────────────────────────
+/* ─── Parent nav item ────────────────────────────────────────────────────── */
 const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -150,314 +79,230 @@ const NavItem = memo(function NavItem({ item, collapsed, depth = 0 }) {
   const isActive =
     location.pathname === item.path ||
     (item.path && item.path !== '/' && location.pathname.startsWith(item.path));
-  const isChildActive = hasChildren && item.children.some(
-    (c) => location.pathname === c.path || (c.path && location.pathname.startsWith(c.path))
-  );
+  const isChildActive =
+    hasChildren &&
+    item.children.some(
+      (c) =>
+        location.pathname === c.path ||
+        (c.path && location.pathname.startsWith(c.path))
+    );
 
   const handleClick = useCallback(() => {
-    if (hasChildren) {
-      setOpen((o) => !o);
-    } else if (item.path) {
-      navigate(item.path);
-    }
+    if (hasChildren) setOpen((o) => !o);
+    else if (item.path) navigate(item.path);
   }, [hasChildren, item.path, navigate]);
 
-  // Delegate child items to ChildNavItem
-  if (depth > 0) {
-    return <ChildNavItem item={item} collapsed={collapsed} />;
-  }
+  // Child items delegate to ChildNavItem
+  if (depth > 0) return <ChildNavItem item={item} collapsed={collapsed} />;
 
   const isHighlighted = isActive || isChildActive;
+  const isExpanded = open || isChildActive;
+
+  const badgeColor =
+    item.badgeColor === 'success'
+      ? 'bg-emerald-500/[0.15] text-emerald-300'
+      : item.badgeColor === 'warning'
+      ? 'bg-amber-500/[0.15] text-amber-300'
+      : 'bg-rose-500/[0.15] text-rose-300';
 
   const buttonContent = (
-    <ListItemButton
+    <button
       onClick={handleClick}
-      sx={{
-        mx: 1,
-        mb: 0.35,
-        pl: collapsed ? '12px' : '14px',
-        pr: collapsed ? '12px' : '10px',
-        py: collapsed ? '10px' : '9px',
-        borderRadius: '10px',
-        minHeight: 42,
-        display: 'flex',
-        alignItems: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        backgroundColor: isHighlighted ? SB.ACTIVE_BG : 'transparent',
-        // Active accent bar (RTL start side)
-        '&::before': isHighlighted
-          ? {
-              content: '""',
-              position: 'absolute',
-              insetInlineStart: 0,
-              top: '18%',
-              height: '64%',
-              width: '3px',
-              borderRadius: '0 3px 3px 0',
-              background: 'linear-gradient(180deg, #818CF8 0%, #6366F1 100%)',
-              boxShadow: '0 0 10px rgba(99,102,241,0.7)',
-            }
-          : {},
-        // Right-to-left border
-        transition: 'background-color 0.18s ease',
-        '&:hover': {
-          backgroundColor: isHighlighted ? SB.ACTIVE_BG_HOVER : SB.HOVER_BG,
-          '& .nav-icon': { color: isHighlighted ? SB.ICON_ACTIVE : 'rgba(255,255,255,0.7)' },
-          '& .nav-label': { color: isHighlighted ? '#FFFFFF' : 'rgba(255,255,255,0.85)' },
-        },
-      }}
+      title={collapsed ? item.label : undefined}
+      className={`w-[calc(100%-8px)] mx-1 mb-0.5 flex items-center relative overflow-hidden rounded-[10px] min-h-[42px] border-none font-cairo cursor-pointer transition-colors duration-200 ${
+        collapsed ? 'px-3 py-2.5 justify-center' : 'pr-3.5 pl-2.5 py-2'
+      } ${
+        isHighlighted
+          ? 'bg-green-700/[0.15] hover:bg-green-700/20'
+          : 'bg-transparent hover:bg-white/[0.045]'
+      }`}
     >
-      {/* Icon */}
-      <ListItemIcon
-        className="nav-icon"
-        sx={{
-          minWidth: 0,
-          marginInlineEnd: collapsed ? 0 : '12px',
-          color: isHighlighted ? SB.ICON_ACTIVE : SB.ICON,
-          transition: 'color 0.18s ease',
-          '& svg': { fontSize: 19 },
-          flexShrink: 0,
-          justifyContent: 'center',
-          display: 'flex',
-        }}
-      >
-        {item.badge && !collapsed ? (
-          <Badge
-            badgeContent={item.badge}
-            color={item.badgeColor || 'error'}
-            sx={{
-              '& .MuiBadge-badge': {
-                fontSize: '0.55rem',
-                height: 15,
-                minWidth: 15,
-                top: -3,
-                insetInlineEnd: -3,
-                boxShadow: '0 0 0 1.5px #0A1628',
-              },
-            }}
-          >
-            {item.icon}
-          </Badge>
-        ) : (
-          item.icon
-        )}
-      </ListItemIcon>
+      {/* Active accent bar (RTL start side) */}
+      {isHighlighted && (
+        <span
+          className="absolute top-[18%] h-[64%] w-[3px] rounded-l-[3px]"
+          style={{
+            insetInlineStart: 0,
+            background: 'linear-gradient(180deg, #66BB6A 0%, #2E7D32 100%)',
+            boxShadow: '0 0 10px rgba(46,125,50,0.7)',
+          }}
+        />
+      )}
 
-      {/* Label */}
+      {/* Icon */}
+      <span
+        className={`flex-shrink-0 flex items-center justify-center transition-colors duration-200 ${
+          collapsed ? '' : 'ml-3'
+        } ${isHighlighted ? 'text-green-400' : 'text-white/40'} [&_svg]:text-[19px]`}
+        style={{ marginInlineEnd: collapsed ? 0 : 12 }}
+      >
+        {item.icon}
+      </span>
+
+      {/* Label + Expand arrow + Badge */}
       {!collapsed && (
         <>
-          <ListItemText
-            primary={item.label}
-            className="nav-label"
-            sx={{
-              m: 0,
-              '& .MuiTypography-root': {
-                fontSize: '0.875rem',
-                fontWeight: isHighlighted ? 600 : 400,
-                color: isHighlighted ? SB.TEXT_ACTIVE : SB.TEXT,
-                lineHeight: 1.4,
-                transition: 'all 0.18s ease',
-                letterSpacing: isHighlighted ? '-0.01em' : 'normal',
-              },
-            }}
-          />
+          <span
+            className={`flex-1 text-right text-[0.875rem] leading-relaxed transition-all duration-200 ${
+              isHighlighted
+                ? 'font-semibold text-white -tracking-tight'
+                : 'font-normal text-white/65 group-hover:text-white/85'
+            }`}
+          >
+            {item.label}
+          </span>
 
-          {/* Expand icon for parents */}
           {hasChildren && (
             <ExpandMoreIcon
-              sx={{
-                fontSize: 15,
-                color: isHighlighted ? 'rgba(165,180,252,0.6)' : SB.TEXT_MUTED,
-                transition: 'transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
-                transform: (open || isChildActive) ? 'rotate(180deg)' : 'rotate(0deg)',
-                flexShrink: 0,
-                ml: 0.5,
-              }}
+              sx={{ fontSize: 15 }}
+              className={`flex-shrink-0 mr-1 transition-transform duration-300 ${
+                isHighlighted ? 'text-green-300/60' : 'text-white/25'
+              } ${isExpanded ? 'rotate-180' : 'rotate-0'}`}
             />
           )}
 
-          {/* Badge pill (for leaf items) */}
           {item.badge && !hasChildren && (
-            <Box
-              sx={{
-                marginInlineStart: 1,
-                px: 0.75,
-                py: 0.15,
-                borderRadius: '100px',
-                backgroundColor: item.badgeColor === 'success'
-                  ? 'rgba(16,185,129,0.15)'
-                  : item.badgeColor === 'warning'
-                  ? 'rgba(245,158,11,0.15)'
-                  : 'rgba(244,63,94,0.15)',
-                color: item.badgeColor === 'success'
-                  ? '#6EE7B7'
-                  : item.badgeColor === 'warning'
-                  ? '#FCD34D'
-                  : '#FDA4AF',
-                fontSize: '0.6rem',
-                fontWeight: 700,
-                lineHeight: 1.6,
-                minWidth: 18,
-                textAlign: 'center',
-              }}
+            <span
+              className={`mr-2 px-1.5 py-0.5 rounded-full text-[0.6rem] font-bold leading-none min-w-[18px] text-center ${badgeColor}`}
             >
               {item.badge}
-            </Box>
+            </span>
           )}
         </>
       )}
-    </ListItemButton>
+    </button>
   );
 
   return (
     <>
-      {collapsed ? (
-        <Tooltip title={item.label} placement="left" arrow>
-          {buttonContent}
-        </Tooltip>
-      ) : (
-        buttonContent
-      )}
+      {buttonContent}
 
-      {/* Children */}
+      {/* Children — CSS transition collapse */}
       {hasChildren && !collapsed && (
-        <Collapse
-          in={open || isChildActive}
-          timeout={240}
-          unmountOnExit
-          sx={{
-            // Indent line for children
-            '& > .MuiCollapse-wrapper': {
-              position: 'relative',
-              '&::before': {
-                content: '""',
-                position: 'absolute',
-                insetInlineStart: '28px',
-                top: 4,
-                bottom: 8,
-                width: '1px',
-                background: 'linear-gradient(180deg, rgba(99,102,241,0.4) 0%, rgba(99,102,241,0.1) 100%)',
-              },
-            },
+        <div
+          className="overflow-hidden transition-all duration-300 ease-in-out relative"
+          style={{
+            maxHeight: isExpanded ? `${item.children.length * 42 + 16}px` : '0px',
+            opacity: isExpanded ? 1 : 0,
           }}
         >
-          <List disablePadding sx={{ mb: 0.5 }}>
+          {/* Indent guide line */}
+          <div
+            className="absolute top-1 bottom-2 w-px"
+            style={{
+              insetInlineStart: 28,
+              background:
+                'linear-gradient(180deg, rgba(46,125,50,0.4) 0%, rgba(46,125,50,0.1) 100%)',
+            }}
+          />
+          <div className="mb-1">
             {item.children.map((child) => (
-              <NavItem key={child.id || child.path} item={child} collapsed={collapsed} depth={1} />
+              <NavItem
+                key={child.id || child.path}
+                item={child}
+                collapsed={collapsed}
+                depth={1}
+              />
             ))}
-          </List>
-        </Collapse>
+          </div>
+        </div>
       )}
     </>
   );
 });
 
-// ─── Section title ────────────────────────────────────────────────────────────
+/* ─── Section title ──────────────────────────────────────────────────────── */
 function SectionTitle({ label, collapsed }) {
   if (collapsed) {
     return (
-      <Box
-        sx={{
-          mx: 2.5,
-          my: 1.25,
-          height: '1px',
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 40%, rgba(255,255,255,0.08) 60%, transparent 100%)',
+      <div
+        className="mx-5 my-3 h-px"
+        style={{
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 40%, rgba(255,255,255,0.08) 60%, transparent 100%)',
         }}
       />
     );
   }
 
   return (
-    <Box sx={{ px: 2.75, pt: 2.25, pb: 0.75, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-      <Box
-        sx={{
-          height: '1px',
-          width: 16,
-          background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.5))',
-          flexShrink: 0,
+    <div className="px-5 pt-5 pb-2 flex items-center gap-3">
+      <div
+        className="h-px w-4 flex-shrink-0"
+        style={{
+          background: 'linear-gradient(90deg, transparent, rgba(46,125,50,0.5))',
         }}
       />
-      <Typography
-        sx={{
-          fontSize: '0.625rem',
-          fontWeight: 700,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          color: 'rgba(255,255,255,0.25)',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          flex: 1,
-        }}
-      >
+      <span className="text-[0.625rem] font-bold tracking-widest uppercase text-white/25 select-none whitespace-nowrap flex-1">
         {label}
-      </Typography>
-      <Box
-        sx={{
-          height: '1px',
-          flex: 1,
+      </span>
+      <div
+        className="h-px flex-1"
+        style={{
           background: 'linear-gradient(90deg, rgba(255,255,255,0.07), transparent)',
         }}
       />
-    </Box>
+    </div>
   );
 }
 
-// ─── Build nav groups from flat array ─────────────────────────────────────────
+/* ─── Build nav groups from flat array ───────────────────────────────────── */
 function buildNavGroups(items) {
   const groups = [];
   let currentGroup = { title: '', items: [] };
 
   for (const item of items) {
     if (item.type === 'divider') {
-      if (currentGroup.items.length > 0) {
-        groups.push(currentGroup);
-      }
+      if (currentGroup.items.length > 0) groups.push(currentGroup);
       currentGroup = { title: item.label || '', items: [] };
     } else {
       currentGroup.items.push(item);
     }
   }
-  if (currentGroup.items.length > 0) {
-    groups.push(currentGroup);
-  }
-
+  if (currentGroup.items.length > 0) groups.push(currentGroup);
   return groups;
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+/* ─── Main export ────────────────────────────────────────────────────────── */
 export default memo(function SidebarNavList({ items = [], collapsed }) {
   const navGroups = useMemo(() => buildNavGroups(items), [items]);
 
   return (
-    <Box
-      component="nav"
-      sx={{
-        flex: 1,
-        overflow: 'hidden auto',
-        py: 1,
-        // Custom scrollbar
-        '&::-webkit-scrollbar': { width: '3px' },
-        '&::-webkit-scrollbar-track': { background: 'transparent' },
-        '&::-webkit-scrollbar-thumb': {
-          background: 'rgba(99,102,241,0.25)',
-          borderRadius: '3px',
-          '&:hover': { background: 'rgba(99,102,241,0.45)' },
-        },
+    <nav
+      className="flex-1 overflow-x-hidden overflow-y-auto py-2 scrollbar-thin"
+      style={{
         scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(99,102,241,0.25) transparent',
+        scrollbarColor: 'rgba(46,125,50,0.25) transparent',
       }}
     >
-      {navGroups.map((group, groupIdx) => (
-        <Box key={groupIdx}>
-          {group.title && <SectionTitle label={group.title} collapsed={collapsed} />}
-          <List disablePadding>
+      <style>{`
+        nav.scrollbar-thin::-webkit-scrollbar { width: 3px; }
+        nav.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+        nav.scrollbar-thin::-webkit-scrollbar-thumb {
+          background: rgba(46,125,50,0.25);
+          border-radius: 3px;
+        }
+        nav.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+          background: rgba(46,125,50,0.45);
+        }
+      `}</style>
+      {navGroups.map((group, idx) => (
+        <div key={idx}>
+          {group.title && (
+            <SectionTitle label={group.title} collapsed={collapsed} />
+          )}
+          <div>
             {group.items.map((item) => (
-              <NavItem key={item.id || item.path} item={item} collapsed={collapsed} depth={0} />
+              <NavItem
+                key={item.id || item.path}
+                item={item}
+                collapsed={collapsed}
+                depth={0}
+              />
             ))}
-          </List>
-        </Box>
+          </div>
+        </div>
       ))}
-    </Box>
+    </nav>
   );
 });

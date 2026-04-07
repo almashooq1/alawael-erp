@@ -1,106 +1,44 @@
 /**
- * SidebarSearch — Search/filter input for navigation items (محسّن)
- * بحث محسّن في قائمة التنقل الجانبية
+ * SidebarSearch — بحث في قائمة التنقل (Tailwind)
  */
-import { Box, InputBase, IconButton, Tooltip } from '@mui/material';
 import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
 
 const SidebarSearch = ({ collapsed, isMobile, searchQuery, onSearchChange, onClear }) => {
   if (collapsed && !isMobile) {
-    // Show just an icon when collapsed
     return (
-      <Box sx={{ px: 1.25, py: 1.25, display: 'flex', justifyContent: 'center' }}>
-        <Tooltip title="بحث في القائمة" placement="left" arrow>
-          <Box
-            sx={{
-              width: 38,
-              height: 38,
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.07)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                backgroundColor: 'rgba(99,102,241,0.15)',
-                borderColor: 'rgba(99,102,241,0.35)',
-              },
-            }}
-          >
-            <SearchIcon sx={{ fontSize: 16, color: 'rgba(255,255,255,0.4)' }} />
-          </Box>
-        </Tooltip>
-      </Box>
+      <div className="px-3 py-3 flex justify-center">
+        <div
+          className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center bg-white/5 border border-white/[0.07] cursor-pointer transition-all duration-200 hover:bg-green-800/20 hover:border-green-600/40"
+          title="بحث في القائمة"
+        >
+          <SearchIcon sx={{ fontSize: 16, color: 'rgba(255,255,255,0.4)' }} />
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box sx={{ px: 2, py: 1.25 }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.75,
-          px: 1.25,
-          py: 0.6,
-          borderRadius: '10px',
-          backgroundColor: 'rgba(255,255,255,0.055)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          transition: 'all 0.2s ease',
-          '&:focus-within': {
-            backgroundColor: 'rgba(99,102,241,0.12)',
-            borderColor: 'rgba(99,102,241,0.45)',
-            boxShadow: '0 0 0 3px rgba(99,102,241,0.1)',
-          },
-        }}
-      >
-        <SearchIcon
-          sx={{
-            fontSize: 15,
-            color: 'rgba(255,255,255,0.35)',
-            flexShrink: 0,
-            transition: 'color 0.2s',
-            '.MuiBox-root:focus-within &': { color: 'rgba(99,102,241,0.8)' },
-          }}
-        />
-        <InputBase
+    <div className="px-4 py-3">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-[10px] bg-white/[0.055] border border-white/[0.07] transition-all duration-200 focus-within:bg-green-900/20 focus-within:border-green-600/50 focus-within:shadow-[0_0_0_3px_rgba(46,125,50,0.12)]">
+        <SearchIcon sx={{ fontSize: 15 }} className="text-white/35 flex-shrink-0" />
+        <input
+          type="text"
           placeholder="ابحث في القائمة..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          sx={{
-            flex: 1,
-            fontSize: '0.7875rem',
-            color: 'rgba(255,255,255,0.82)',
-            '& input': { p: 0 },
-            '& input::placeholder': {
-              color: 'rgba(255,255,255,0.28)',
-              opacity: 1,
-              fontSize: '0.7875rem',
-            },
-          }}
+          className="flex-1 bg-transparent border-none outline-none text-[0.79rem] text-white/80 placeholder:text-white/25 placeholder:text-[0.79rem] p-0 font-cairo"
         />
         {searchQuery && (
-          <IconButton
-            size="small"
-            aria-label="مسح البحث"
+          <button
             onClick={onClear}
-            sx={{
-              p: 0.25,
-              borderRadius: '5px',
-              color: 'rgba(255,255,255,0.35)',
-              '&:hover': {
-                color: 'rgba(255,255,255,0.8)',
-                backgroundColor: 'rgba(255,255,255,0.08)',
-              },
-            }}
+            aria-label="مسح البحث"
+            className="p-0.5 rounded text-white/35 hover:text-white/80 hover:bg-white/[0.08] transition-all cursor-pointer bg-transparent border-none"
           >
             <CloseIcon sx={{ fontSize: 13 }} />
-          </IconButton>
+          </button>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

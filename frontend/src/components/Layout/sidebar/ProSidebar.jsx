@@ -1,17 +1,7 @@
 /**
- * Professional Sidebar Navigation — AlAwael ERP (Orchestrator)
- * قائمة جانبية احترافية مع تنقل متعدد المستويات
- *
- * Features:
- * - Collapsible sidebar with smooth animations
- * - Multi-level nested navigation
- * - Role-based menu filtering
- * - Active route highlighting with breadcrumb tracking
- * - Search/filter menu items
- * - Keyboard navigation support
- * - Responsive (overlay on mobile, pinned on desktop)
+ * ProSidebar — القائمة الجانبية الاحترافية (Tailwind)
+ * Mobile: overlay drawer from right | Desktop: fixed pinned sidebar
  */
-import { Box, Drawer } from '@mui/material';
 import { SIDEBAR_WIDTH } from './sidebarConstants';
 import useSidebarNav from './useSidebarNav';
 import SidebarBrand from './SidebarBrand';
@@ -22,30 +12,18 @@ import SidebarUserFooter from './SidebarUserFooter';
 const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
   const nav = useSidebarNav({ collapsed, onClose });
 
-  // Resolved sidebar background — use gradient if available, fallback to solid + paper
-  const sidebarBg =
-    nav.theme.custom?.sidebar?.backgroundGradient ||
-    nav.theme.custom?.sidebar?.background ||
-    '#0A1628';
-
   const sidebarContent = (
-    <Box
-      sx={{
+    <div
+      className="h-full flex flex-col text-white overflow-hidden transition-all duration-300"
+      style={{
         width: nav.width,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        background: sidebarBg,
-        color: '#FFFFFF',
-        transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
-        overflow: 'hidden',
+        background: 'linear-gradient(180deg, #0A1628 0%, #0D1B2A 50%, #0A1628 100%)',
       }}
     >
       <SidebarBrand
         collapsed={collapsed}
         isMobile={nav.isMobile}
         onToggleCollapse={onToggleCollapse}
-        theme={nav.theme}
       />
 
       <SidebarSearch
@@ -54,70 +32,59 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
         searchQuery={nav.searchQuery}
         onSearchChange={nav.setSearchQuery}
         onClear={() => nav.setSearchQuery('')}
-        theme={nav.theme}
       />
 
-      <SidebarNavList
-        items={nav.searchFilteredNav}
-        collapsed={collapsed}
-      />
+      <SidebarNavList items={nav.searchFilteredNav} collapsed={collapsed} />
 
-      <SidebarUserFooter
-        collapsed={collapsed}
-        isMobile={nav.isMobile}
-        currentUser={nav.currentUser}
-        onNavigate={nav.handleNavigate}
-        theme={nav.theme}
-      />
-    </Box>
+      <SidebarUserFooter collapsed={collapsed} isMobile={nav.isMobile} />
+    </div>
   );
 
-  // Mobile: Temporary overlay drawer
+  // ── Mobile: overlay drawer ──
   if (nav.isMobile) {
     return (
-      <Drawer
-        open={open}
-        onClose={onClose}
-        anchor="right"
-        sx={{ '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, border: 'none' } }}
-        ModalProps={{ keepMounted: true }}
-      >
-        {sidebarContent}
-      </Drawer>
+      <>
+        {/* Backdrop */}
+        {open && (
+          <div
+            className="fixed inset-0 bg-black/50 z-[1200] transition-opacity duration-300"
+            onClick={onClose}
+          />
+        )}
+        {/* Drawer from right (RTL) */}
+        <div
+          className={`fixed top-0 h-full z-[1250] transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+            open ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          style={{ width: SIDEBAR_WIDTH, insetInlineStart: 0 }}
+        >
+          {sidebarContent}
+        </div>
+      </>
     );
   }
 
-  // Desktop: Permanent sidebar
+  // ── Desktop: fixed sidebar ──
   return (
-    <Box
-      component="nav"
-      sx={{
+    <nav
+      className="flex-shrink-0 relative transition-all duration-300"
+      style={{
         width: nav.width,
         minWidth: nav.width,
-        flexShrink: 0,
-        position: 'relative',
-        zIndex: (nav.theme.zIndex?.drawer || 1200) + 1,
-        transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
+        zIndex: 1201,
       }}
     >
-      <Box
-        sx={{
-          position: 'fixed',
-          top: 0,
-          insetInlineStart: 0,
+      <div
+        className="fixed top-0 h-screen overflow-hidden transition-all duration-300"
+        style={{
           width: nav.width,
-          height: '100vh',
-          overflowX: 'hidden',
-          overflowY: 'hidden',
-          transition: nav.theme.custom?.transition?.medium || 'all 0.3s ease',
-        boxShadow: nav.theme.palette.mode === 'dark'
-            ? '4px 0 24px rgba(0,0,0,0.4)'
-            : '4px 0 24px rgba(0,0,0,0.08)',
+          insetInlineStart: 0,
+          boxShadow: '4px 0 24px rgba(0,0,0,0.15)',
         }}
       >
         {sidebarContent}
-      </Box>
-    </Box>
+      </div>
+    </nav>
   );
 };
 

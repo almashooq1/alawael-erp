@@ -1,24 +1,10 @@
 /**
- * ProHeader — الهيدر الاحترافي المحسّن
- *
- * Premium glassmorphism header with:
- * - Refined glassmorphism effect
- * - Breadcrumb navigation
- * - Global search (Cmd+K)
- * - Live notifications panel
- * - Language & theme toggles
- * - User avatar menu
- * - Mobile hamburger
+ * ProHeader — الهيدر الاحترافي (Tailwind)
+ * Glassmorphism header: breadcrumbs, search, notifications, user menu
  */
-
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  AppBar, Toolbar, Box, IconButton, Avatar, Badge, Tooltip,
-  Menu, MenuItem, Divider, Typography, InputBase, Popover,
-  List, ListItem, ListItemAvatar, ListItemText, Chip, Button,
-  useTheme, useMediaQuery, Fade, alpha,
-} from '@mui/material';
+import { useTheme, useMediaQuery } from '@mui/material';
 import {
   Menu as MenuIcon,
   Search as SearchIcon,
@@ -41,147 +27,93 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 
-// ─── Static breadcrumb map ────────────────────────────────────────────────────
+/* ─── Breadcrumb map ─────────────────────────────────────────────────────── */
 const routeLabels = {
-  '/':              'الرئيسية',
-  '/dashboard':     'لوحة القيادة',
+  '/': 'الرئيسية',
+  '/dashboard': 'لوحة القيادة',
   '/beneficiaries': 'المستفيدون',
-  '/hr':            'الموارد البشرية',
-  '/finance':       'المالية',
-  '/rehab':         'التأهيل',
-  '/documents':     'الوثائق',
-  '/reports':       'التقارير',
-  '/settings':      'الإعدادات',
-  '/admin':         'إدارة النظام',
+  '/hr': 'الموارد البشرية',
+  '/finance': 'المالية',
+  '/rehab': 'التأهيل',
+  '/documents': 'الوثائق',
+  '/reports': 'التقارير',
+  '/settings': 'الإعدادات',
+  '/admin': 'إدارة النظام',
 };
-
 const getLabel = (seg) =>
   routeLabels[`/${seg}`] || seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-// ─── Mock notifications ───────────────────────────────────────────────────────
+/* ─── Mock notifications ─────────────────────────────────────────────────── */
 const MOCK_NOTIFS = [
-  {
-    id: 1,
-    type: 'success',
-    title: 'تم قبول المستفيد',
-    body: 'تم قبول طلب تسجيل أحمد المطيري بنجاح',
-    time: 'منذ 5 دقائق',
-    read: false,
-  },
-  {
-    id: 2,
-    type: 'warning',
-    title: 'موعد قريب',
-    body: 'جلسة تأهيل السيد خالد العمري بعد ساعة',
-    time: 'منذ 20 دقيقة',
-    read: false,
-  },
-  {
-    id: 3,
-    type: 'info',
-    title: 'تقرير شهري جاهز',
-    body: 'تم إنشاء تقرير إحصاءات مارس 2026',
-    time: 'منذ ساعة',
-    read: true,
-  },
-  {
-    id: 4,
-    type: 'success',
-    title: 'راتب شهر مارس',
-    body: 'تمت معالجة مسير الرواتب لـ 48 موظف',
-    time: 'منذ 3 ساعات',
-    read: true,
-  },
+  { id: 1, type: 'success', title: 'تم قبول المستفيد', body: 'تم قبول طلب تسجيل أحمد المطيري بنجاح', time: 'منذ 5 دقائق', read: false },
+  { id: 2, type: 'warning', title: 'موعد قريب', body: 'جلسة تأهيل السيد خالد العمري بعد ساعة', time: 'منذ 20 دقيقة', read: false },
+  { id: 3, type: 'info', title: 'تقرير شهري جاهز', body: 'تم إنشاء تقرير إحصاءات مارس 2026', time: 'منذ ساعة', read: true },
+  { id: 4, type: 'success', title: 'راتب شهر مارس', body: 'تمت معالجة مسير الرواتب لـ 48 موظف', time: 'منذ 3 ساعات', read: true },
 ];
 
 const NOTIF_ICONS = {
-  success: <CheckCircleOutlined sx={{ fontSize: 18, color: '#10B981' }} />,
-  warning: <WarningAmberOutlined sx={{ fontSize: 18, color: '#F59E0B' }} />,
-  info:    <InfoOutlined sx={{ fontSize: 18, color: '#0EA5E9' }} />,
+  success: <CheckCircleOutlined sx={{ fontSize: 18 }} className="text-emerald-500" />,
+  warning: <WarningAmberOutlined sx={{ fontSize: 18 }} className="text-amber-500" />,
+  info: <InfoOutlined sx={{ fontSize: 18 }} className="text-sky-500" />,
 };
+const NOTIF_BG = { success: 'bg-emerald-50', warning: 'bg-amber-50', info: 'bg-sky-50' };
+const NOTIF_RING = { success: 'border-emerald-500/20', warning: 'border-amber-500/20', info: 'border-sky-500/20' };
 
-const NOTIF_COLORS = {
-  success: { bg: '#ECFDF5', ring: '#10B981' },
-  warning: { bg: '#FFFBEB', ring: '#F59E0B' },
-  info:    { bg: '#F0F9FF', ring: '#0EA5E9' },
-};
-
-// ─── Icon Button محسّن ────────────────────────────────────────────────────────
-function HeaderIconBtn({ children, tooltip, onClick, sx = {}, badgeContent, ...rest }) {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+/* ─── Reusable header icon button ────────────────────────────────────────── */
+function HBtn({ children, title, onClick, badge, className = '' }) {
   return (
-    <Tooltip title={tooltip} arrow>
-      <IconButton
-        size="small"
-        onClick={onClick}
-        {...rest}
-        sx={{
-          width: 38,
-          height: 38,
-          borderRadius: '10px',
-          color: isDark ? 'rgba(255,255,255,0.65)' : '#64748B',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : alpha('#6366F1', 0.08),
-            color: isDark ? '#FFFFFF' : '#6366F1',
-            transform: 'translateY(-1px)',
-          },
-          '&:active': { transform: 'translateY(0)' },
-          ...sx,
-        }}
-      >
-        {badgeContent !== undefined ? (
-          <Badge
-            badgeContent={badgeContent}
-            color="error"
-            sx={{
-              '& .MuiBadge-badge': {
-                fontSize: '0.6rem',
-                minWidth: 17,
-                height: 17,
-                top: 1,
-                right: 1,
-                boxShadow: '0 0 0 2px ' + (isDark ? '#0F172A' : '#FFFFFF'),
-              },
-            }}
-          >
-            {children}
-          </Badge>
-        ) : children}
-      </IconButton>
-    </Tooltip>
+    <button
+      title={title}
+      onClick={onClick}
+      className={`relative w-[38px] h-[38px] rounded-[10px] flex items-center justify-center border-none cursor-pointer transition-all duration-200 bg-transparent text-slate-500 dark:text-white/60 hover:bg-green-600/[0.08] hover:text-green-700 dark:hover:bg-white/[0.08] dark:hover:text-white hover:-translate-y-px active:translate-y-0 ${className}`}
+    >
+      {children}
+      {badge > 0 && (
+        <span className="absolute top-[3px] right-[3px] min-w-[17px] h-[17px] rounded-full bg-red-500 text-white text-[0.6rem] flex items-center justify-center font-bold shadow-[0_0_0_2px_white] dark:shadow-[0_0_0_2px_#0F172A]">
+          {badge}
+        </span>
+      )}
+    </button>
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+/* ─── Main component ─────────────────────────────────────────────────────── */
 export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode: _themeMode, onToggleTheme }) {
-  const theme   = useTheme();
+  const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logout } = useAuth() || {};
 
-  // Search
+  const isDark = theme.palette.mode === 'dark';
+  const sb = theme.custom?.sidebar || {};
+  const HEADER_HEIGHT = 64;
+
+  // State
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef(null);
-
-  // Notifications
-  const [notifAnchor, setNotifAnchor] = useState(null);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [notifs, setNotifs] = useState(MOCK_NOTIFS);
-  const unreadCount = notifs.filter((n) => !n.read).length;
-
-  // User menu
-  const [userAnchor, setUserAnchor] = useState(null);
-
-  // Fullscreen
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
 
-  // Language (demo)
-  const [_lang, setLang] = useState('ar');
+  const notifRef = useRef(null);
+  const userRef = useRef(null);
+  const searchRef = useRef(null);
 
-  // ── Breadcrumbs ─────────────────────────────────────────────────────────────
+  const unreadCount = notifs.filter((n) => !n.read).length;
+
+  // Close menus on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (notifRef.current && !notifRef.current.contains(e.target)) setNotifOpen(false);
+      if (userRef.current && !userRef.current.contains(e.target)) setUserMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Breadcrumbs
   const crumbs = location.pathname
     .split('/')
     .filter(Boolean)
@@ -191,7 +123,7 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
       isLast: idx === arr.length - 1,
     }));
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // Handlers
   const handleMarkAllRead = useCallback(() => {
     setNotifs((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
@@ -207,8 +139,8 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
   }, []);
 
   const handleLogout = useCallback(async () => {
-    setUserAnchor(null);
-    try { await logout?.(); } catch (_) {}
+    setUserMenuOpen(false);
+    try { await logout?.(); } catch (_) { /* ignore */ }
     navigate('/login');
   }, [logout, navigate]);
 
@@ -216,699 +148,439 @@ export default function ProHeader({ onToggleSidebar, sidebarCollapsed, themeMode
   const displayRole = currentUser?.role || 'مدير';
   const avatarLetter = displayName.charAt(0) || 'م';
 
-  const collapsed = sidebarCollapsed;
-  const isDark = theme.palette.mode === 'dark';
-  const sb = theme.custom?.sidebar || {};
-  const HEADER_HEIGHT = theme.custom?.header?.height || 64;
+  const headerWidthStyle = isMobile
+    ? { width: '100%' }
+    : { width: `calc(100% - ${sidebarCollapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px)` };
 
-  // ─────────────────────────────────────────────────────────────────────────
   return (
-    <AppBar
-      position="fixed"
-      elevation={0}
-      sx={{
-        width: { md: `calc(100% - ${collapsed ? (sb.collapsedWidth || 72) : (sb.width || 280)}px)` },
+    <header
+      className={`fixed top-0 z-[1100] transition-all duration-300 ${
+        isDark ? 'text-white' : 'text-slate-900'
+      }`}
+      style={{
+        ...headerWidthStyle,
         height: HEADER_HEIGHT,
-        zIndex: theme.zIndex.appBar || 1100,
-        background: isDark
-          ? 'rgba(10, 15, 30, 0.88)'
-          : 'rgba(255, 255, 255, 0.88)',
+        background: isDark ? 'rgba(10,15,30,0.88)' : 'rgba(255,255,255,0.88)',
         backdropFilter: 'blur(20px) saturate(200%)',
         WebkitBackdropFilter: 'blur(20px) saturate(200%)',
-        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
+        borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(46,125,50,0.08)'}`,
         boxShadow: isDark
           ? '0 1px 0 rgba(255,255,255,0.04), 0 4px 24px rgba(0,0,0,0.3)'
-          : '0 1px 0 rgba(99,102,241,0.06), 0 4px 24px rgba(99,102,241,0.06)',
-        color: isDark ? '#FFFFFF' : 'text.primary',
-        transition: theme.transitions.create(['width', 'margin'], {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
+          : '0 1px 0 rgba(46,125,50,0.06), 0 4px 24px rgba(46,125,50,0.06)',
       }}
     >
-      {/* Accent line at top */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: 2,
-          background: 'linear-gradient(90deg, #6366F1 0%, #8B5CF6 50%, #0EA5E9 100%)',
-          opacity: 0.7,
-        }}
+      {/* Top accent line */}
+      <div
+        className="absolute top-0 left-0 right-0 h-[2px] opacity-70"
+        style={{ background: 'linear-gradient(90deg, #1B5E20 0%, #4CAF50 50%, #66BB6A 100%)' }}
       />
 
-      <Toolbar
-        sx={{
-          height: HEADER_HEIGHT,
-          minHeight: `${HEADER_HEIGHT}px !important`,
-          px: { xs: 1.5, md: 3 },
-          gap: 0.5,
-          pt: '2px',
-        }}
+      <div
+        className="flex items-center h-full gap-1 px-3 md:px-6"
+        style={{ paddingTop: 2 }}
       >
-        {/* ── Mobile menu button ──────────────────────────────────────────── */}
+        {/* Mobile menu button */}
         {isMobile && (
-          <HeaderIconBtn tooltip="القائمة" onClick={onToggleSidebar} sx={{ marginInlineEnd: 1 }}>
+          <HBtn title="القائمة" onClick={onToggleSidebar} className="ml-2">
             <MenuIcon sx={{ fontSize: 20 }} />
-          </HeaderIconBtn>
+          </HBtn>
         )}
 
-        {/* ── Breadcrumbs ─────────────────────────────────────────────────── */}
+        {/* Breadcrumbs */}
         {!searchOpen && (
-          <Box
-            sx={{
-              display: { xs: 'none', sm: 'flex' },
-              alignItems: 'center',
-              gap: 0.5,
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {/* Home icon */}
-            <Tooltip title="الرئيسية" arrow>
-              <IconButton
-                size="small"
-                onClick={() => navigate('/dashboard')}
-                sx={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: '8px',
-                  color: crumbs.length === 0 ? '#6366F1' : (isDark ? 'rgba(255,255,255,0.5)' : '#94A3B8'),
-                  transition: 'all 0.2s',
-                  '&:hover': {
-                    backgroundColor: alpha('#6366F1', 0.08),
-                    color: '#6366F1',
-                  },
-                }}
-              >
-                <HomeIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
+          <div className="hidden sm:flex items-center gap-1 flex-1 min-w-0">
+            <button
+              onClick={() => navigate('/dashboard')}
+              title="الرئيسية"
+              className={`w-[30px] h-[30px] rounded-lg flex items-center justify-center border-none cursor-pointer bg-transparent transition-all duration-200 ${
+                crumbs.length === 0
+                  ? 'text-green-700'
+                  : isDark ? 'text-white/50' : 'text-slate-400'
+              } hover:bg-green-600/[0.08] hover:text-green-700`}
+            >
+              <HomeIcon sx={{ fontSize: 16 }} />
+            </button>
 
             {crumbs.map((crumb) => (
-              <Box key={crumb.path} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <div key={crumb.path} className="flex items-center gap-1">
                 <NavigateNext
-                  sx={{
-                    fontSize: 14,
-                    color: isDark ? 'rgba(255,255,255,0.2)' : '#CBD5E1',
-                    transform: 'scaleX(-1)',
-                  }}
+                  sx={{ fontSize: 14 }}
+                  className={`${isDark ? 'text-white/20' : 'text-slate-300'} -scale-x-100`}
                 />
-                <Typography
-                  component={crumb.isLast ? 'span' : 'button'}
-                  onClick={!crumb.isLast ? () => navigate(crumb.path) : undefined}
-                  sx={{
-                    fontSize: '0.8125rem',
-                    fontWeight: crumb.isLast ? 600 : 400,
-                    color: crumb.isLast
-                      ? (isDark ? '#F1F5F9' : '#1E293B')
-                      : (isDark ? 'rgba(255,255,255,0.45)' : '#94A3B8'),
-                    cursor: crumb.isLast ? 'default' : 'pointer',
-                    background: 'none',
-                    border: 'none',
-                    fontFamily: 'inherit',
-                    p: 0,
-                    px: crumb.isLast ? '6px' : '4px',
-                    py: '2px',
-                    borderRadius: '6px',
-                    textDecoration: 'none',
-                    '&:hover': !crumb.isLast ? {
-                      color: '#6366F1',
-                      backgroundColor: alpha('#6366F1', 0.06),
-                    } : {},
-                    transition: 'all 0.15s',
-                    maxWidth: 140,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {crumb.label}
-                </Typography>
-              </Box>
+                {crumb.isLast ? (
+                  <span
+                    className={`text-[0.8125rem] font-semibold px-1.5 py-0.5 rounded-md max-w-[140px] truncate ${
+                      isDark ? 'text-slate-100' : 'text-slate-800'
+                    }`}
+                  >
+                    {crumb.label}
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => navigate(crumb.path)}
+                    className={`text-[0.8125rem] font-normal px-1 py-0.5 rounded-md bg-transparent border-none cursor-pointer font-cairo max-w-[140px] truncate transition-all duration-150 ${
+                      isDark ? 'text-white/45' : 'text-slate-400'
+                    } hover:text-green-700 hover:bg-green-600/[0.06]`}
+                  >
+                    {crumb.label}
+                  </button>
+                )}
+              </div>
             ))}
 
             {crumbs.length === 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.75,
-                  px: 1.25,
-                  py: 0.5,
-                  borderRadius: '8px',
-                  backgroundColor: alpha('#6366F1', 0.08),
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: '50%',
-                    backgroundColor: '#6366F1',
-                  }}
-                />
-                <Typography variant="body2" sx={{ color: '#6366F1', fontWeight: 600, fontSize: '0.8125rem' }}>
-                  لوحة القيادة
-                </Typography>
-              </Box>
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-green-600/[0.08]">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-700" />
+                <span className="text-green-700 font-semibold text-[0.8125rem]">لوحة القيادة</span>
+              </div>
             )}
-          </Box>
+          </div>
         )}
 
-        {/* ── Search bar (expanded) ────────────────────────────────────────── */}
+        {/* Search bar (expanded) */}
         {searchOpen && (
-          <Fade in={searchOpen}>
-            <Box
-              sx={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                backgroundColor: isDark ? 'rgba(99,102,241,0.1)' : alpha('#6366F1', 0.05),
-                borderRadius: '12px',
-                border: `1.5px solid ${alpha('#6366F1', 0.35)}`,
-                px: 1.5,
-                gap: 1,
-                height: 42,
-                boxShadow: `0 0 0 4px ${alpha('#6366F1', 0.08)}`,
-                transition: 'all 0.2s',
+          <div
+            className={`flex-1 flex items-center gap-2 px-3 h-[42px] rounded-xl border-[1.5px] transition-all duration-200 ${
+              isDark
+                ? 'bg-green-700/10 border-green-600/40'
+                : 'bg-green-50/50 border-green-500/35'
+            }`}
+            style={{ boxShadow: '0 0 0 4px rgba(46,125,50,0.08)' }}
+          >
+            <SearchIcon sx={{ fontSize: 18 }} className="text-green-700 flex-shrink-0" />
+            <input
+              autoFocus
+              ref={searchRef}
+              placeholder="ابحث في النظام... (اضغط ESC للإغلاق)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); }
               }}
+              className={`flex-1 bg-transparent border-none outline-none text-sm p-0 font-cairo ${
+                isDark ? 'text-slate-100' : 'text-slate-800'
+              } placeholder:text-slate-400`}
+            />
+            <button
+              onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+              className={`p-1 rounded-md border-none cursor-pointer bg-transparent transition-colors ${
+                isDark ? 'text-white/40' : 'text-slate-400'
+              } hover:bg-green-600/10 hover:text-green-700`}
             >
-              <SearchIcon sx={{ fontSize: 18, color: '#6366F1', flexShrink: 0 }} />
-              <InputBase
-                autoFocus
-                ref={searchRef}
-                placeholder="ابحث في النظام... (اضغط ESC للإغلاق)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); } }}
-                sx={{
-                  flex: 1,
-                  fontSize: '0.875rem',
-                  '& input': { padding: 0, color: isDark ? '#F1F5F9' : '#1E293B' },
-                }}
-              />
-              <IconButton
-                size="small"
-                onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                sx={{
-                  p: 0.5,
-                  borderRadius: '6px',
-                  color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
-                  '&:hover': { backgroundColor: alpha('#6366F1', 0.1), color: '#6366F1' },
-                }}
-              >
-                <CloseOutlined sx={{ fontSize: 15 }} />
-              </IconButton>
-            </Box>
-          </Fade>
+              <CloseOutlined sx={{ fontSize: 15 }} />
+            </button>
+          </div>
         )}
 
-        <Box sx={{ flexGrow: 1 }} />
+        <div className="flex-grow" />
 
-        {/* ── Action buttons ───────────────────────────────────────────────── */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-
+        {/* Action buttons */}
+        <div className="flex items-center gap-1">
           {/* Search trigger */}
           {!searchOpen && (
-            <Tooltip title="بحث (Ctrl+K)" arrow>
-              <Box
-                onClick={() => setSearchOpen(true)}
-                sx={{
-                  display: { xs: 'none', sm: 'flex' },
-                  alignItems: 'center',
-                  gap: 0.75,
-                  cursor: 'pointer',
-                  px: 1.25,
-                  py: 0.75,
-                  borderRadius: '10px',
-                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
-                  color: isDark ? 'rgba(255,255,255,0.45)' : '#94A3B8',
-                  fontSize: '0.8125rem',
-                  transition: 'all 0.2s',
-                  height: 36,
-                  '&:hover': {
-                    backgroundColor: alpha('#6366F1', 0.06),
-                    borderColor: alpha('#6366F1', 0.3),
-                    color: '#6366F1',
-                  },
-                }}
+            <button
+              onClick={() => setSearchOpen(true)}
+              title="بحث (Ctrl+K)"
+              className={`hidden sm:flex items-center gap-1.5 cursor-pointer px-2.5 py-1.5 rounded-[10px] h-9 border bg-transparent transition-all duration-200 font-cairo ${
+                isDark
+                  ? 'border-white/10 text-white/45'
+                  : 'border-slate-200 text-slate-400'
+              } hover:bg-green-600/[0.06] hover:border-green-600/30 hover:text-green-700`}
+            >
+              <SearchIcon sx={{ fontSize: 15 }} />
+              <span className="hidden md:inline text-[0.8rem]">بحث...</span>
+              <span
+                className={`hidden lg:flex items-center px-1.5 py-0.5 rounded text-[0.6rem] font-mono border ${
+                  isDark
+                    ? 'bg-white/[0.08] border-white/10 text-white/40'
+                    : 'bg-slate-100 border-slate-200 text-slate-400'
+                }`}
               >
-                <SearchIcon sx={{ fontSize: 15 }} />
-                <Typography sx={{ fontSize: '0.8rem', color: 'inherit', display: { md: 'block', xs: 'none' } }}>
-                  بحث...
-                </Typography>
-                <Box
-                  sx={{
-                    display: { lg: 'flex', xs: 'none' },
-                    alignItems: 'center',
-                    px: 0.75,
-                    py: 0.2,
-                    borderRadius: '5px',
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9',
-                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'}`,
-                    fontSize: '0.6rem',
-                    fontFamily: 'monospace',
-                    color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  ⌘K
-                </Box>
-              </Box>
-            </Tooltip>
+                ⌘K
+              </span>
+            </button>
           )}
 
           {/* Language toggle */}
-          <HeaderIconBtn tooltip="تغيير اللغة" onClick={() => setLang((l) => (l === 'ar' ? 'en' : 'ar'))}>
+          <HBtn title="تغيير اللغة" onClick={() => {}}>
             <LanguageOutlined sx={{ fontSize: 19 }} />
-          </HeaderIconBtn>
+          </HBtn>
 
           {/* Theme toggle */}
-          <HeaderIconBtn
-            tooltip={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}
+          <HBtn
+            title={isDark ? 'الوضع النهاري' : 'الوضع الليلي'}
             onClick={onToggleTheme}
-            sx={isDark ? { '&:hover': { color: '#F59E0B !important' } } : {}}
           >
             {isDark ? (
-              <LightModeOutlined sx={{ fontSize: 19, color: '#F59E0B' }} />
+              <LightModeOutlined sx={{ fontSize: 19 }} className="text-amber-400" />
             ) : (
               <DarkModeOutlined sx={{ fontSize: 19 }} />
             )}
-          </HeaderIconBtn>
+          </HBtn>
 
           {/* Fullscreen */}
-          <HeaderIconBtn
-            tooltip={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}
+          <HBtn
+            title={fullscreen ? 'خروج من ملء الشاشة' : 'ملء الشاشة'}
             onClick={handleToggleFullscreen}
-            sx={{ display: { xs: 'none', md: 'flex' } }}
+            className="hidden md:flex"
           >
             {fullscreen ? (
               <FullscreenExitOutlined sx={{ fontSize: 19 }} />
             ) : (
               <FullscreenOutlined sx={{ fontSize: 19 }} />
             )}
-          </HeaderIconBtn>
+          </HBtn>
 
-          {/* Notifications */}
-          <HeaderIconBtn
-            tooltip="الإشعارات"
-            onClick={(e) => setNotifAnchor(e.currentTarget)}
-            badgeContent={unreadCount || undefined}
-          >
-            <NotificationsOutlined sx={{ fontSize: 19 }} />
-          </HeaderIconBtn>
+          {/* ── Notifications ──────────────────────────────────────────── */}
+          <div className="relative" ref={notifRef}>
+            <HBtn
+              title="الإشعارات"
+              onClick={() => setNotifOpen((v) => !v)}
+              badge={unreadCount}
+            >
+              <NotificationsOutlined sx={{ fontSize: 19 }} />
+            </HBtn>
+
+            {notifOpen && (
+              <div
+                className={`absolute top-full mt-3 w-[370px] max-h-[500px] rounded-2xl border overflow-hidden flex flex-col z-50 ${
+                  isDark
+                    ? 'border-white/[0.08]'
+                    : 'border-green-600/10'
+                }`}
+                style={{
+                  insetInlineStart: 0,
+                  backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+                  boxShadow: isDark
+                    ? '0 20px 60px rgba(0,0,0,0.5)'
+                    : '0 20px 60px rgba(46,125,50,0.12), 0 4px 16px rgba(0,0,0,0.06)',
+                }}
+              >
+                {/* Header */}
+                <div
+                  className={`px-5 py-4 flex items-center justify-between border-b ${
+                    isDark
+                      ? 'border-white/[0.07]'
+                      : 'border-green-600/[0.08]'
+                  }`}
+                  style={{
+                    background: isDark
+                      ? 'linear-gradient(135deg, rgba(46,125,50,0.15) 0%, rgba(76,175,80,0.1) 100%)'
+                      : 'linear-gradient(135deg, rgba(46,125,50,0.06) 0%, rgba(76,175,80,0.04) 100%)',
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-9 h-9 rounded-[10px] flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(135deg, #1B5E20, #4CAF50)',
+                        boxShadow: '0 4px 12px rgba(46,125,50,0.3)',
+                      }}
+                    >
+                      <NotificationsOutlined sx={{ fontSize: 18 }} className="text-white" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm m-0">الإشعارات</p>
+                      {unreadCount > 0 && (
+                        <p className={`text-[0.7rem] m-0 ${isDark ? 'text-white/50' : 'text-slate-400'}`}>
+                          {unreadCount} إشعار جديد
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      onClick={handleMarkAllRead}
+                      className="text-xs px-2.5 py-1 rounded-lg text-green-700 font-semibold bg-transparent border-none cursor-pointer hover:bg-green-600/[0.08] transition-colors font-cairo"
+                    >
+                      تحديد الكل
+                    </button>
+                  )}
+                </div>
+
+                {/* List */}
+                <div className="overflow-auto flex-1 py-2">
+                  {notifs.map((n, idx) => (
+                    <div
+                      key={n.id}
+                      onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
+                      className={`flex items-start gap-3 px-5 py-3 cursor-pointer relative transition-colors ${
+                        !n.read
+                          ? isDark ? 'bg-green-700/[0.06]' : 'bg-green-50/50'
+                          : 'bg-transparent'
+                      } hover:${isDark ? 'bg-white/[0.04]' : 'bg-slate-50'} ${
+                        idx < notifs.length - 1
+                          ? isDark ? 'border-b border-white/[0.04]' : 'border-b border-slate-100'
+                          : ''
+                      }`}
+                    >
+                      {!n.read && (
+                        <span
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-[7px] h-[7px] rounded-full bg-green-600"
+                          style={{ boxShadow: '0 0 6px rgba(46,125,50,0.5)' }}
+                        />
+                      )}
+                      <div
+                        className={`w-[38px] h-[38px] rounded-full flex-shrink-0 flex items-center justify-center border-[1.5px] ${NOTIF_BG[n.type]} ${NOTIF_RING[n.type]}`}
+                      >
+                        {NOTIF_ICONS[n.type]}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-[0.84rem] leading-relaxed m-0 ${n.read ? 'font-normal' : 'font-semibold'}`}>
+                          {n.title}
+                        </p>
+                        <p className={`text-xs mt-0.5 m-0 ${isDark ? 'text-white/50' : 'text-slate-500'}`}>
+                          {n.body}
+                        </p>
+                        <p className={`text-[0.68rem] mt-1 m-0 ${isDark ? 'text-white/30' : 'text-slate-400'}`}>
+                          {n.time}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className={`px-5 py-3 border-t ${isDark ? 'border-white/[0.07]' : 'border-slate-100'}`}>
+                  <button
+                    onClick={() => { setNotifOpen(false); navigate('/notifications'); }}
+                    className={`w-full py-2 rounded-[10px] text-[0.8125rem] font-semibold border cursor-pointer bg-transparent transition-colors font-cairo ${
+                      isDark
+                        ? 'border-green-600/30 text-green-500 hover:border-green-500 hover:bg-green-600/[0.05]'
+                        : 'border-green-600/25 text-green-700 hover:border-green-700 hover:bg-green-600/[0.05]'
+                    }`}
+                  >
+                    عرض كل الإشعارات
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Divider */}
-          <Box
-            sx={{
-              width: '1px',
-              height: 28,
+          <div
+            className="w-px h-7 mx-1.5"
+            style={{
               background: isDark
                 ? 'linear-gradient(180deg, transparent, rgba(255,255,255,0.12), transparent)'
                 : 'linear-gradient(180deg, transparent, #E2E8F0, transparent)',
-              mx: 0.75,
             }}
           />
 
-          {/* User menu trigger */}
-          <Box
-            onClick={(e) => setUserAnchor(e.currentTarget)}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              cursor: 'pointer',
-              px: 1,
-              py: 0.5,
-              borderRadius: '12px',
-              border: `1px solid transparent`,
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : alpha('#6366F1', 0.05),
-                borderColor: isDark ? 'rgba(255,255,255,0.1)' : alpha('#6366F1', 0.15),
-                '& .user-arrow': { transform: userAnchor ? 'rotate(180deg)' : 'rotate(0deg) translateY(-1px)' },
-              },
-            }}
-          >
-            <Avatar
-              sx={{
-                width: 33,
-                height: 33,
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                boxShadow: '0 2px 8px rgba(99,102,241,0.4)',
-                border: '2px solid rgba(255,255,255,0.9)',
-              }}
+          {/* ── User menu ──────────────────────────────────────────────── */}
+          <div className="relative" ref={userRef}>
+            <button
+              onClick={() => setUserMenuOpen((v) => !v)}
+              className={`flex items-center gap-2 px-2 py-1 rounded-xl border border-transparent bg-transparent cursor-pointer transition-all duration-200 ${
+                isDark
+                  ? 'hover:bg-white/[0.06] hover:border-white/10'
+                  : 'hover:bg-green-600/[0.05] hover:border-green-600/15'
+              }`}
             >
-              {avatarLetter}
-            </Avatar>
-            <Box sx={{ display: { xs: 'none', md: 'block' }, textAlign: 'right', minWidth: 0 }}>
-              <Typography
-                sx={{
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
-                  lineHeight: 1.2,
-                  color: isDark ? '#F1F5F9' : '#1E293B',
-                  maxWidth: 110,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
+              <div
+                className="w-[33px] h-[33px] rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white/90"
+                style={{
+                  background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 100%)',
+                  boxShadow: '0 2px 8px rgba(46,125,50,0.4)',
                 }}
               >
-                {displayName}
-              </Typography>
-              <Typography
-                sx={{
-                  fontSize: '0.7rem',
-                  color: isDark ? 'rgba(255,255,255,0.4)' : '#94A3B8',
-                  lineHeight: 1.2,
+                {avatarLetter}
+              </div>
+              <div className="hidden md:block text-right min-w-0">
+                <p
+                  className={`text-[0.8125rem] font-semibold leading-tight max-w-[110px] truncate m-0 ${
+                    isDark ? 'text-slate-100' : 'text-slate-800'
+                  }`}
+                >
+                  {displayName}
+                </p>
+                <p className={`text-[0.7rem] leading-tight m-0 ${isDark ? 'text-white/40' : 'text-slate-400'}`}>
+                  {displayRole}
+                </p>
+              </div>
+              <KeyboardArrowDown
+                sx={{ fontSize: 15 }}
+                className={`hidden md:block transition-transform duration-200 ${
+                  isDark ? 'text-white/35' : 'text-slate-300'
+                } ${userMenuOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {userMenuOpen && (
+              <div
+                className={`absolute top-full mt-3 w-[230px] rounded-2xl border overflow-hidden z-50 ${
+                  isDark ? 'border-white/[0.08]' : 'border-green-600/10'
+                }`}
+                style={{
+                  insetInlineStart: 0,
+                  backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+                  boxShadow: isDark
+                    ? '0 20px 60px rgba(0,0,0,0.5)'
+                    : '0 20px 60px rgba(46,125,50,0.12), 0 4px 16px rgba(0,0,0,0.06)',
                 }}
               >
-                {displayRole}
-              </Typography>
-            </Box>
-            <KeyboardArrowDown
-              className="user-arrow"
-              sx={{
-                fontSize: 15,
-                color: isDark ? 'rgba(255,255,255,0.35)' : '#CBD5E1',
-                display: { xs: 'none', md: 'block' },
-                transition: 'transform 0.2s ease',
-                transform: userAnchor ? 'rotate(180deg)' : 'none',
-              }}
-            />
-          </Box>
-        </Box>
-      </Toolbar>
-
-      {/* ── Notifications Popover ──────────────────────────────────────────── */}
-      <Popover
-        open={Boolean(notifAnchor)}
-        anchorEl={notifAnchor}
-        onClose={() => setNotifAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        TransitionComponent={Fade}
-        slotProps={{
-          paper: {
-            elevation: 0,
-            sx: {
-              width: 370,
-              maxHeight: 500,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-              mt: 1.5,
-              borderRadius: '16px',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(99,102,241,0.1)'}`,
-              boxShadow: isDark
-                ? '0 20px 60px rgba(0,0,0,0.5)'
-                : '0 20px 60px rgba(99,102,241,0.12), 0 4px 16px rgba(0,0,0,0.06)',
-            },
-          },
-        }}
-      >
-        {/* Header */}
-        <Box
-          sx={{
-            px: 2.5,
-            py: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            background: isDark
-              ? 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)'
-              : 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)',
-            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: '10px',
-                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 12px rgba(99,102,241,0.3)',
-              }}
-            >
-              <NotificationsOutlined sx={{ fontSize: 18, color: '#FFFFFF' }} />
-            </Box>
-            <Box>
-              <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.2 }}>
-                الإشعارات
-              </Typography>
-              {unreadCount > 0 && (
-                <Typography sx={{ fontSize: '0.7rem', color: isDark ? 'rgba(255,255,255,0.5)' : '#94A3B8' }}>
-                  {unreadCount} إشعار جديد
-                </Typography>
-              )}
-            </Box>
-          </Box>
-          {unreadCount > 0 && (
-            <Button
-              size="small"
-              onClick={handleMarkAllRead}
-              sx={{
-                fontSize: '0.75rem',
-                px: 1.25,
-                py: 0.5,
-                borderRadius: '8px',
-                color: '#6366F1',
-                fontWeight: 600,
-                '&:hover': { backgroundColor: alpha('#6366F1', 0.08) },
-              }}
-            >
-              تحديد الكل
-            </Button>
-          )}
-        </Box>
-
-        {/* List */}
-        <List sx={{ overflow: 'auto', py: 1, flex: 1 }}>
-          {notifs.map((n, idx) => (
-            <ListItem
-              key={n.id}
-              alignItems="flex-start"
-              onClick={() => setNotifs((prev) => prev.map((x) => x.id === n.id ? { ...x, read: true } : x))}
-              sx={{
-                px: 2.5,
-                py: 1.5,
-                cursor: 'pointer',
-                position: 'relative',
-                backgroundColor: !n.read
-                  ? isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.03)'
-                  : 'transparent',
-                borderBottom: idx < notifs.length - 1
-                  ? `1px solid ${isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC'}`
-                  : 'none',
-                transition: 'background-color 0.15s',
-                '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#F8FAFC',
-                },
-              }}
-            >
-              {/* Unread indicator */}
-              {!n.read && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    right: 10,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: 7,
-                    height: 7,
-                    borderRadius: '50%',
-                    backgroundColor: '#6366F1',
-                    boxShadow: '0 0 6px rgba(99,102,241,0.5)',
-                  }}
-                />
-              )}
-              <ListItemAvatar sx={{ minWidth: 46 }}>
-                <Avatar
-                  sx={{
-                    width: 38,
-                    height: 38,
-                    backgroundColor: NOTIF_COLORS[n.type].bg,
-                    border: `1.5px solid ${NOTIF_COLORS[n.type].ring}22`,
+                {/* User info header */}
+                <div
+                  className={`px-5 py-4 mb-1 flex items-center gap-3 border-b ${
+                    isDark ? 'border-white/[0.07]' : 'border-green-600/[0.08]'
+                  }`}
+                  style={{
+                    background: isDark
+                      ? 'linear-gradient(135deg, rgba(46,125,50,0.15) 0%, rgba(76,175,80,0.1) 100%)'
+                      : 'linear-gradient(135deg, rgba(46,125,50,0.06) 0%, rgba(76,175,80,0.04) 100%)',
                   }}
                 >
-                  {NOTIF_ICONS[n.type]}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <Typography variant="body2" fontWeight={n.read ? 400 : 600} sx={{ lineHeight: 1.4, fontSize: '0.8375rem' }}>
-                    {n.title}
-                  </Typography>
-                }
-                secondary={
-                  <Box>
-                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.25, lineHeight: 1.5 }}>
-                      {n.body}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        mt: 0.5,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 0.4,
-                        color: isDark ? 'rgba(255,255,255,0.3)' : '#CBD5E1',
-                        fontSize: '0.68rem',
-                      }}
-                    >
-                      {n.time}
-                    </Typography>
-                  </Box>
-                }
-              />
-            </ListItem>
-          ))}
-        </List>
+                  <div
+                    className="w-[42px] h-[42px] rounded-full flex items-center justify-center text-white font-bold border-2 border-white/90"
+                    style={{
+                      background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 100%)',
+                      boxShadow: '0 4px 12px rgba(46,125,50,0.4)',
+                    }}
+                  >
+                    {avatarLetter}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm truncate m-0">{displayName}</p>
+                    <span className="inline-block mt-0.5 px-2 py-px rounded text-[0.65rem] font-semibold bg-green-600/10 text-green-700 dark:text-green-400 border border-green-600/20">
+                      {displayRole}
+                    </span>
+                  </div>
+                </div>
 
-        {/* Footer */}
-        <Box
-          sx={{
-            px: 2.5,
-            py: 1.5,
-            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9'}`,
-          }}
-        >
-          <Button
-            size="small"
-            fullWidth
-            variant="outlined"
-            onClick={() => { setNotifAnchor(null); navigate('/notifications'); }}
-            sx={{
-              fontSize: '0.8125rem',
-              borderRadius: '10px',
-              py: 0.75,
-              borderColor: isDark ? 'rgba(99,102,241,0.3)' : alpha('#6366F1', 0.25),
-              color: '#6366F1',
-              fontWeight: 600,
-              '&:hover': {
-                borderColor: '#6366F1',
-                backgroundColor: alpha('#6366F1', 0.05),
-              },
-            }}
-          >
-            عرض كل الإشعارات
-          </Button>
-        </Box>
-      </Popover>
+                <button
+                  onClick={() => { setUserMenuOpen(false); navigate('/profile'); }}
+                  className={`w-[calc(100%-8px)] mx-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-transparent border-none cursor-pointer font-cairo transition-colors ${
+                    isDark ? 'text-white/70 hover:bg-white/[0.06]' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <AccountCircleOutlined sx={{ fontSize: 17 }} className={isDark ? 'text-white/50' : 'text-slate-400'} />
+                  الملف الشخصي
+                </button>
 
-      {/* ── User Menu ─────────────────────────────────────────────────────── */}
-      <Menu
-        anchorEl={userAnchor}
-        open={Boolean(userAnchor)}
-        onClose={() => setUserAnchor(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-        TransitionComponent={Fade}
-        slotProps={{
-          paper: {
-            elevation: 0,
-            sx: {
-              width: 230,
-              mt: 1.5,
-              borderRadius: '16px',
-              border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(99,102,241,0.1)'}`,
-              boxShadow: isDark
-                ? '0 20px 60px rgba(0,0,0,0.5)'
-                : '0 20px 60px rgba(99,102,241,0.12), 0 4px 16px rgba(0,0,0,0.06)',
-              overflow: 'hidden',
-            },
-          },
-        }}
-      >
-        {/* User info header */}
-        <Box
-          sx={{
-            px: 2.5,
-            py: 2,
-            mb: 0.5,
-            background: isDark
-              ? 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.1) 100%)'
-              : 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, rgba(139,92,246,0.04) 100%)',
-            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(99,102,241,0.08)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1.5,
-          }}
-        >
-          <Avatar
-            sx={{
-              width: 42,
-              height: 42,
-              fontSize: '1rem',
-              fontWeight: 700,
-              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-              boxShadow: '0 4px 12px rgba(99,102,241,0.4)',
-              border: '2px solid rgba(255,255,255,0.9)',
-            }}
-          >
-            {avatarLetter}
-          </Avatar>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="subtitle2" fontWeight={700} noWrap>{displayName}</Typography>
-            <Chip
-              label={displayRole}
-              size="small"
-              sx={{
-                height: 18,
-                fontSize: '0.65rem',
-                fontWeight: 600,
-                backgroundColor: alpha('#6366F1', 0.1),
-                color: '#6366F1',
-                border: `1px solid ${alpha('#6366F1', 0.2)}`,
-                '& .MuiChip-label': { px: 1 },
-              }}
-            />
-          </Box>
-        </Box>
+                <button
+                  onClick={() => { setUserMenuOpen(false); navigate('/settings'); }}
+                  className={`w-[calc(100%-8px)] mx-1 mb-1 flex items-center gap-3 px-3 py-2 rounded-lg text-sm bg-transparent border-none cursor-pointer font-cairo transition-colors ${
+                    isDark ? 'text-white/70 hover:bg-white/[0.06]' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <SettingsOutlined sx={{ fontSize: 17 }} className={isDark ? 'text-white/50' : 'text-slate-400'} />
+                  الإعدادات
+                </button>
 
-        <MenuItem
-          onClick={() => { setUserAnchor(null); navigate('/profile'); }}
-          sx={{ mx: 1, borderRadius: '8px', mb: 0.25, px: 1.5 }}
-        >
-          <AccountCircleOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5, color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }} />
-          <Typography variant="body2">الملف الشخصي</Typography>
-        </MenuItem>
+                <div className={`mx-2 h-px ${isDark ? 'bg-white/[0.07]' : 'bg-slate-200'}`} />
 
-        <MenuItem
-          onClick={() => { setUserAnchor(null); navigate('/settings'); }}
-          sx={{ mx: 1, borderRadius: '8px', mb: 0.5, px: 1.5 }}
-        >
-          <SettingsOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5, color: isDark ? 'rgba(255,255,255,0.5)' : '#64748B' }} />
-          <Typography variant="body2">الإعدادات</Typography>
-        </MenuItem>
-
-        <Divider sx={{ mx: 1 }} />
-
-        <MenuItem
-          onClick={handleLogout}
-          sx={{
-            mx: 1,
-            mt: 0.5,
-            mb: 1,
-            borderRadius: '8px',
-            px: 1.5,
-            color: '#F43F5E',
-            '&:hover': { backgroundColor: alpha('#F43F5E', 0.07) },
-          }}
-        >
-          <LogoutOutlined sx={{ fontSize: 17, marginInlineEnd: 1.5 }} />
-          <Typography variant="body2" fontWeight={600}>تسجيل الخروج</Typography>
-        </MenuItem>
-      </Menu>
-    </AppBar>
+                <button
+                  onClick={handleLogout}
+                  className="w-[calc(100%-8px)] mx-1 mt-1 mb-2 flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-rose-500 bg-transparent border-none cursor-pointer font-cairo transition-colors hover:bg-rose-500/[0.07]"
+                >
+                  <LogoutOutlined sx={{ fontSize: 17 }} />
+                  <span className="font-semibold">تسجيل الخروج</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

@@ -16,11 +16,22 @@ const MAX_PAGE_LIMIT = 100;
 
 /* ━━━ Sort Whitelist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const ADMIN_SAFE_SORTS = new Set([
-  'createdAt', '-createdAt', 'updatedAt', '-updatedAt',
-  'title', '-title', 'status', '-status', 'priority', '-priority',
-  'department', '-department', 'effectiveDate', '-effectiveDate',
+  'createdAt',
+  '-createdAt',
+  'updatedAt',
+  '-updatedAt',
+  'title',
+  '-title',
+  'status',
+  '-status',
+  'priority',
+  '-priority',
+  'department',
+  '-department',
+  'effectiveDate',
+  '-effectiveDate',
 ]);
-const safeSortOf = (raw) => ADMIN_SAFE_SORTS.has(raw) ? raw : '-createdAt';
+const safeSortOf = raw => (ADMIN_SAFE_SORTS.has(raw) ? raw : '-createdAt');
 
 /* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 router.use(authenticate);

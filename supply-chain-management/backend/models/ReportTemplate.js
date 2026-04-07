@@ -27,15 +27,7 @@ const ReportTemplateSchema = new mongoose.Schema(
     // Template Category
     category: {
       type: String,
-      enum: [
-        'sales',
-        'financial',
-        'inventory',
-        'customer',
-        'supply_chain',
-        'performance',
-        'custom',
-      ],
+      enum: ['sales', 'financial', 'inventory', 'customer', 'supply_chain', 'performance', 'custom'],
       required: true,
     },
 
@@ -296,7 +288,7 @@ const ReportTemplateSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Indexes
@@ -368,9 +360,7 @@ ReportTemplateSchema.methods.addMetric = function (metric) {
 };
 
 ReportTemplateSchema.methods.removeMetric = function (metricCode) {
-  this.reportConfiguration.metrics = this.reportConfiguration.metrics.filter(
-    m => m.metricCode !== metricCode
-  );
+  this.reportConfiguration.metrics = this.reportConfiguration.metrics.filter(m => m.metricCode !== metricCode);
   return this.save();
 };
 

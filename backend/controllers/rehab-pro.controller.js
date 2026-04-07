@@ -48,7 +48,16 @@ function buildCRUD(Model, label) {
 
     getAll: async (req, res) => {
       try {
-        const ALLOWED_SORTS = new Set(['createdAt', '-createdAt', 'updatedAt', '-updatedAt', 'status', '-status', 'beneficiary', '-beneficiary']);
+        const ALLOWED_SORTS = new Set([
+          'createdAt',
+          '-createdAt',
+          'updatedAt',
+          '-updatedAt',
+          'status',
+          '-status',
+          'beneficiary',
+          '-beneficiary',
+        ]);
         const { page = 1, limit = 25, status, beneficiary, sort = '-createdAt' } = req.query;
         const safeSort = ALLOWED_SORTS.has(sort) ? sort : '-createdAt';
         const filter = {};

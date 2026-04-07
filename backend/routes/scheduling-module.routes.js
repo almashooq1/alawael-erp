@@ -476,7 +476,10 @@ router.post(
       return res.json({ success: true, data: existing, message: 'تم تحديث جدول التوفر' });
     }
 
-    const availability = new TherapistAvailability({ ...stripUpdateMeta(req.body), created_by: req.user?._id });
+    const availability = new TherapistAvailability({
+      ...stripUpdateMeta(req.body),
+      created_by: req.user?._id,
+    });
     await availability.save();
     res.status(201).json({ success: true, data: availability, message: 'تم إنشاء جدول التوفر' });
   })

@@ -17,10 +17,18 @@ mongoose.plugin(schema => {
 // ==================== GLOBAL MASS-ASSIGNMENT GUARD (Round 33) ====================
 // Strip privileged / internal fields from every update operation
 const MASS_ASSIGN_BLACKLIST = new Set([
-  '__proto__', 'constructor', 'prototype',
-  '_id', '__v',
-  'role', 'roles', 'isAdmin', 'isSuperAdmin',
-  'permissions', 'password', 'passwordHash',
+  '__proto__',
+  'constructor',
+  'prototype',
+  '_id',
+  '__v',
+  'role',
+  'roles',
+  'isAdmin',
+  'isSuperAdmin',
+  'permissions',
+  'password',
+  'passwordHash',
 ]);
 
 function stripBlacklisted(obj) {
@@ -44,6 +52,14 @@ mongoose.plugin(schema => {
     const update = this.getUpdate();
     if (update) stripBlacklisted(update);
   });
+});
+
+// ==================== GLOBAL TIMESTAMPS (Round 34) ====================
+// Ensure every schema gets createdAt/updatedAt auto-managed
+mongoose.plugin(schema => {
+  if (!schema.options.timestamps) {
+    schema.set('timestamps', true);
+  }
 });
 
 // ==================== CONNECTION RETRY CONFIGURATION ====================

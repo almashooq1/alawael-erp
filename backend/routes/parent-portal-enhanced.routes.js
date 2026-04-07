@@ -183,7 +183,7 @@ router.post('/verify-otp', async (req, res) => {
     const token = jwt.sign(
       { guardianPhone: phone, role: 'guardian', type: 'parent_portal' },
       process.env.JWT_SECRET,
-      { expiresIn: '30d' }
+      { expiresIn: '7d' }
     );
 
     // تسجيل الجهاز إذا أرسل deviceToken

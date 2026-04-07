@@ -95,3 +95,9 @@ temp/
 # OS
 Thumbs.db
 .DS_Store
+
+# Temporary/debug scripts (not needed in Docker image)
+*.py
+_*.js
+_*.txt
+_*.ps1

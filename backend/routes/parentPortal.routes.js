@@ -48,6 +48,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -195,7 +196,6 @@ router.post('/auth/verify-otp', async (req, res) => {
     }
 
     // إنشاء JWT للجلسة
-    const jwt = require('jsonwebtoken');
     const token = jwt.sign(
       {
         id: guardian._id,
@@ -205,7 +205,7 @@ router.post('/auth/verify-otp', async (req, res) => {
         type: 'parent_portal',
       },
       process.env.JWT_SECRET,
-      { expiresIn: '30d' }
+      { expiresIn: '7d' }
     );
 
     // تسجيل الجهاز للإشعارات

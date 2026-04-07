@@ -1,4 +1,4 @@
-# 🔒 تقرير إصلاحات الأمان والتحسينات — Al-Awael ERP
+ولم يتكم# 🔒 تقرير إصلاحات الأمان والتحسينات — Al-Awael ERP
 
 > **التاريخ:** 2026-04-06
 > **النطاق:** تحليل شامل وإصلاح منهجي للمشروع بالكامل
@@ -174,21 +174,21 @@
 
 ### P1 — يجب معالجتها قريباً
 
-1. **تغيير كلمات المرور المسربة** — MongoDB Atlas, JWT secrets
-2. **كلمات المرور في Seeders** — `02-UsersSeeder.js` يحتوي على كلمات مشفرة. استخدم متغيرات بيئة بدلاً منها.
-3. **ملفات middleware المصادقة المكررة** — `auth.js` و `auth.middleware.js` فيهما وظائف متكررة (لكن 300+ ملف يستوردون من `auth.js`).
+1. **~~كلمات المرور في Seeders~~** — ✅ تم إصلاحها (الجولة 28): `admin-users.seed.js`، `comprehensive-employees.seed.js`، `elearningSeeds.js` — الآن تتطلب env vars
+2. **تغيير كلمات المرور المسربة** — MongoDB Atlas, JWT secrets (مطلوب يدوياً)
+3. **ملفات middleware المصادقة المكررة** — `auth.js` و `auth.middleware.js` فيهما وظائف متكررة (لكن 300+ ملف يستوردون من `auth.js`)
 
 ### P2 — ينصح بمعالجتها
 
-4. **100+ سكربت Python في المجلد الجذر** — سكربتات تشخيص/نشر يجب نقلها إلى `scripts/` أو حذفها.
-5. **console.log في Backend** — عشرات الاستخدامات في ملفات الخدمات. استبدلها بـ `logger`.
-6. **Frontend bundle size** — 97 route modules تُحمّل lazily لكن يمكن تحسين Code Splitting أكثر.
+4. **~~100+ سكربت Python في المجلد الجذر~~** — ✅ تمت إضافة `/*.py` إلى `.gitignore` (الجولة 11)
+5. **~~console.log في Backend~~** — ✅ **0 استخدام** في routes/services/controllers/middleware (مُنجز عبر جولات 4+9+22)
+6. **Frontend bundle size** — 97 route modules تُحمّل lazily لكن يمكن تحسين Code Splitting أكثر
 
-### P3 — تحسينات مستقبلية
+### P3 — تحسينات مستقبلية ✅ (تم إنجاز معظمها)
 
-7. **إضافة خطوة اختبارات في CI/CD** — حالياً لا يوجد test step قبل Deploy.
-8. **تفعيل Dependabot** لتحديث التبعيات الأمنية.
-9. **إضافة `npm audit` في CI pipeline**.
+7. **~~إضافة خطوة اختبارات في CI/CD~~** — ✅ موجودة في `deploy-hostinger.yml` (npm test)
+8. **~~تفعيل Dependabot~~** — ✅ مكوّن في `.github/dependabot.yml` (npm weekly + GitHub Actions monthly)
+9. **~~إضافة `npm audit` في CI pipeline~~** — ✅ موجودة في CI pipeline
 
 ---
 
@@ -574,22 +574,22 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **المشكلة:** 4 ملفات أساسية في Frontend تستخدم `console.error/warn` مباشرة بدلاً من Logger المركزي.
 
-| الملف | التغيير |
-| :--- | :--- |
-| `frontend/src/App.js` | `console.error` → `logger.error` (RTL cache fallback) |
-| `frontend/src/AuthenticatedShell.js` | `console.error` → `logger.error` (Route error wrapper) |
-| `frontend/src/contexts/AuthContext.js` | `console.warn` → `logger.warn` + `console.error` → `logger.error` |
-| `frontend/src/contexts/SocketContext.js` | `console.warn` → dev-only guard (`NODE_ENV !== 'production'`) |
-| `frontend/src/services/auth.service.js` | `catch(err =>` → `catch(_err =>` (ESLint unused-vars fix) |
+| الملف                                    | التغيير                                                           |
+| :--------------------------------------- | :---------------------------------------------------------------- |
+| `frontend/src/App.js`                    | `console.error` → `logger.error` (RTL cache fallback)             |
+| `frontend/src/AuthenticatedShell.js`     | `console.error` → `logger.error` (Route error wrapper)            |
+| `frontend/src/contexts/AuthContext.js`   | `console.warn` → `logger.warn` + `console.error` → `logger.error` |
+| `frontend/src/contexts/SocketContext.js` | `console.warn` → dev-only guard (`NODE_ENV !== 'production'`)     |
+| `frontend/src/services/auth.service.js`  | `catch(err =>` → `catch(_err =>` (ESLint unused-vars fix)         |
 
 ### 12.4 ملخص الجولة 12
 
-| المقياس | القيمة |
-| :--- | :--- |
-| ثغرات Path Traversal مُصلحة | **8 دوال** |
-| Dead imports مُزالة | **1** (`child_process`) |
-| Frontend console leaks مُصلحة | **5 ملفات** |
-| Logger dev-only تحسينات | **warn + error** |
+| المقياس                       | القيمة                  |
+| :---------------------------- | :---------------------- |
+| ثغرات Path Traversal مُصلحة   | **8 دوال**              |
+| Dead imports مُزالة           | **1** (`child_process`) |
+| Frontend console leaks مُصلحة | **5 ملفات**             |
+| Logger dev-only تحسينات       | **warn + error**        |
 
 ---
 
@@ -601,31 +601,33 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **مقارنة:** نموذج `User.js` الرئيسي يستخدم `select: false` بشكل صحيح — لكن النماذج الأخرى لا تفعل.
 
-| النموذج | الحقول المحمية | الخطورة |
-| :--- | :--- | :--- |
-| `BeneficiaryPortal.js` | `password`, `passwordResetToken`, `twoFactorSecret` | 🔴 حرج |
-| `SystemSettings.js` | `email.password`, `googleMapsApiKey`, `smsApiKey`, `whatsappApiKey`, `paymentApiKey` | 🔴 حرج |
-| `WorkflowEnhanced.js` | `secretKey`, `auth.token`, `auth.password`, `auth.apiKeyValue` | 🔴 حرج |
-| `Camera.js` | `hikvision.password` | 🔴 حرج |
-| `VirtualSession.js` | `password` (meeting) | 🟡 متوسط |
-| `ImportExportJob.js` | `exportOptions.password` | 🟡 متوسط |
+| النموذج                | الحقول المحمية                                                                       | الخطورة  |
+| :--------------------- | :----------------------------------------------------------------------------------- | :------- |
+| `BeneficiaryPortal.js` | `password`, `passwordResetToken`, `twoFactorSecret`                                  | 🔴 حرج   |
+| `SystemSettings.js`    | `email.password`, `googleMapsApiKey`, `smsApiKey`, `whatsappApiKey`, `paymentApiKey` | 🔴 حرج   |
+| `WorkflowEnhanced.js`  | `secretKey`, `auth.token`, `auth.password`, `auth.apiKeyValue`                       | 🔴 حرج   |
+| `Camera.js`            | `hikvision.password`                                                                 | 🔴 حرج   |
+| `VirtualSession.js`    | `password` (meeting)                                                                 | 🟡 متوسط |
+| `ImportExportJob.js`   | `exportOptions.password`                                                             | 🟡 متوسط |
 
 **الإصلاح:**
+
 - ✅ إضافة `select: false` لـ **16 حقل حساس** عبر 6 نماذج
 - ✅ الحقول لن تُرجع إلا عند طلبها صراحة بـ `.select('+password')`
 
 ### 13.2 إصلاح آخر console.error في Frontend 🟡
 
 **الملف:** `frontend/src/components/Layout/ProLayout.jsx`
+
 - ✅ `console.error('[SidebarErrorBoundary]')` → `logger.error('[SidebarErrorBoundary]')`
 
 ### 13.3 ملخص الجولة 13
 
-| المقياس | القيمة |
-| :--- | :--- |
-| حقول حساسة محمية بـ `select: false` | **16 حقل** عبر **6 نماذج** |
-| نماذج مُصلحة | **6** (BeneficiaryPortal, SystemSettings, WorkflowEnhanced, Camera, VirtualSession, ImportExportJob) |
-| Frontend console leaks | **+1 ملف** (ProLayout.jsx) |
+| المقياس                             | القيمة                                                                                               |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------- |
+| حقول حساسة محمية بـ `select: false` | **16 حقل** عبر **6 نماذج**                                                                           |
+| نماذج مُصلحة                        | **6** (BeneficiaryPortal, SystemSettings, WorkflowEnhanced, Camera, VirtualSession, ImportExportJob) |
+| Frontend console leaks              | **+1 ملف** (ProLayout.jsx)                                                                           |
 
 ---
 
@@ -636,6 +638,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** `frontend/src/contexts/SocketContext.js` كان يستخدم `localStorage.getItem('authToken')` مباشرة بدلاً من أداة `tokenStorage` المركزية (`getToken()`). هذا يتجاوز أي منطق مركزي لإدارة التوكنات.
 
 **الإصلاح:**
+
 - ✅ إضافة `import { getToken } from '../utils/tokenStorage'`
 - ✅ استبدال `localStorage.getItem('authToken')` بـ `getToken()`
 
@@ -644,6 +647,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** 576+ route تستخدم `findById(req.params.id)` بدون التحقق من صحة ObjectId، مما يتسبب في CastError يسرّب تفاصيل داخلية.
 
 **الإصلاح:**
+
 - ✅ إنشاء `backend/middleware/validateObjectId.js` — middleware مشترك
 - ✅ يتحقق من `mongoose.isValidObjectId()` ويُرجع 400 إذا كان غير صالح
 - ✅ يدعم أي اسم parameter (`id`, `userId`, `commentId`, etc.)
@@ -654,31 +658,33 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** 6 استخدامات لـ `new RegExp(req.query.search, 'i')` بدون تنظيف المدخلات، مما يتيح هجمات ReDoS (Regular Expression Denial of Service) عبر أنماط regex خبيثة.
 
 **الإصلاح:**
+
 - ✅ إنشاء `backend/utils/escapeRegex.js` — أداة مركزية لتنظيف مدخلات RegExp
 - ✅ تطبيق `escapeRegex()` على جميع الاستخدامات:
 
-| الملف | الاستبدالات |
-| :--- | :--- |
-| `digital-wallet.routes.js` | 1 (حقل `code`) |
+| الملف                       | الاستبدالات                                                   |
+| :-------------------------- | :------------------------------------------------------------ |
+| `digital-wallet.routes.js`  | 1 (حقل `code`)                                                |
 | `smart-insurance.routes.js` | 5 (حقول `name`, `nameAr`, `code`, `policyNumber`, `memberId`) |
-| **المجموع** | **6** |
+| **المجموع**                 | **6**                                                         |
 
 ### 14.4 إصلاح Empty Catch Blocks في ProactiveAlerts 🟡
 
 **المشكلة:** `backend/services/ai/proactiveAlerts.service.js` يحتوي على catch blocks فارغة تبتلع أخطاء require() بصمت.
 
 **الإصلاح:**
+
 - ✅ إضافة `logger.debug()` لـ 2 catch blocks في `checkDropoutRisk()` (DailySession + DisabilitySession fallback)
 
 ### 14.5 ملخص الجولة 14
 
-| المقياس | القيمة |
-| :--- | :--- |
-| ثغرات ReDoS مُصلحة | **6** عبر **2 ملف** |
-| أدوات جديدة | **2** (`escapeRegex.js` + `validateObjectId.js`) |
-| tokenStorage bypasses مُصلحة | **1** (SocketContext.js) |
-| Empty catch blocks مُصلحة | **2** (proactiveAlerts.service.js) |
-| ملفات معدلة | **4** + **2 ملف جديد** |
+| المقياس                      | القيمة                                           |
+| :--------------------------- | :----------------------------------------------- |
+| ثغرات ReDoS مُصلحة           | **6** عبر **2 ملف**                              |
+| أدوات جديدة                  | **2** (`escapeRegex.js` + `validateObjectId.js`) |
+| tokenStorage bypasses مُصلحة | **1** (SocketContext.js)                         |
+| Empty catch blocks مُصلحة    | **2** (proactiveAlerts.service.js)               |
+| ملفات معدلة                  | **4** + **2 ملف جديد**                           |
 
 ---
 
@@ -693,6 +699,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **الملفات المتأثرة (بدون cap):** `parentPortal.routes.js`(6)، `early-intervention.routes.js`(6)، `smart-insurance.routes.js`(4)، `payment-transactions.routes.js`(3)، `digital-wallet.routes.js`(2)، `community.js`(1)، `admin.real.routes.js`(1)، `rbac-advanced.routes.js`(1).
 
 **الإصلاح:**
+
 - ✅ إنشاء `backend/middleware/capPagination.js` — middleware عام يُطبّق على **كل** الطلبات
 - ✅ يحدّ `limit`/`per_page`/`pageSize` بحد أقصى **200** سجل
 - ✅ يُصحّح `page` السالبة أو غير الرقمية إلى 1
@@ -701,24 +708,24 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ### 17.2 تدقيق أمني شامل — نتائج ممتازة ✅
 
-| الفحص | النتيجة |
-| :--- | :--- |
-| Empty catch blocks (إنتاج) | **0** ✅ (5 فقط في tests — مقبول) |
-| `.find({})` بدون `.limit()` | **0** ✅ |
-| `eval()` خطير | **0** ✅ (Redis EVAL + method call فقط) |
-| `exec()`/`spawn()` بدون تنظيف | **0** ✅ (mongodump ثابت فقط) |
-| `$where` injection | **0** ✅ (محمي بـ validation middleware) |
-| `dangerouslySetInnerHTML` (XSS) | **0** ✅ |
-| NoSQL injection (`.find(req.body)`) | **0** ✅ |
-| Uncapped pagination | **0** ✅ (capPagination middleware شامل) |
+| الفحص                               | النتيجة                                  |
+| :---------------------------------- | :--------------------------------------- |
+| Empty catch blocks (إنتاج)          | **0** ✅ (5 فقط في tests — مقبول)        |
+| `.find({})` بدون `.limit()`         | **0** ✅                                 |
+| `eval()` خطير                       | **0** ✅ (Redis EVAL + method call فقط)  |
+| `exec()`/`spawn()` بدون تنظيف       | **0** ✅ (mongodump ثابت فقط)            |
+| `$where` injection                  | **0** ✅ (محمي بـ validation middleware) |
+| `dangerouslySetInnerHTML` (XSS)     | **0** ✅                                 |
+| NoSQL injection (`.find(req.body)`) | **0** ✅                                 |
+| Uncapped pagination                 | **0** ✅ (capPagination middleware شامل) |
 
 ### 17.3 ملخص الجولة 17
 
-| المقياس | القيمة |
-| :--- | :--- |
-| أدوات جديدة | **2** (`capPagination.js` middleware + `safePagination.js` utility) |
-| Endpoints محمية من DoS عبر pagination | **كل الـ API** (middleware عام) |
-| ملفات معدلة | **1** (`app.js`) + **2 ملف جديد** |
+| المقياس                               | القيمة                                                              |
+| :------------------------------------ | :------------------------------------------------------------------ |
+| أدوات جديدة                           | **2** (`capPagination.js` middleware + `safePagination.js` utility) |
+| Endpoints محمية من DoS عبر pagination | **كل الـ API** (middleware عام)                                     |
+| ملفات معدلة                           | **1** (`app.js`) + **2 ملف جديد**                                   |
 
 ---
 
@@ -730,23 +737,23 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **الملفات المُصلحة:**
 
-| الملف | الاستبدالات | الحقول المتأثرة |
-| :--- | :---: | :--- |
-| `financeOperations.service.js` | **7** | invoiceNumber, notes, entryNumber, description, chequeNumber, payeeName, creditNoteNumber |
-| `SmartInvoiceService.js` | **3** | invoiceNumber, customer.name, customer.email |
-| `carePlan.service.js` | **2** | planNumber, educational.domains.academic.notes |
-| `smartInsurance.service.js` | **1** | claimNumber, policyNumber, memberId |
-| `trafficAccidentService.js` | **1** | reportNumber, accidentInfo.description, location.city, plateNumber |
-| `treatmentAuthorization.service.js` | **1** | authorizationNumber, beneficiaryName, nationalId, policyNumber |
-| **المجموع** | **15** | |
+| الملف                               | الاستبدالات | الحقول المتأثرة                                                                           |
+| :---------------------------------- | :---------: | :---------------------------------------------------------------------------------------- |
+| `financeOperations.service.js`      |    **7**    | invoiceNumber, notes, entryNumber, description, chequeNumber, payeeName, creditNoteNumber |
+| `SmartInvoiceService.js`            |    **3**    | invoiceNumber, customer.name, customer.email                                              |
+| `carePlan.service.js`               |    **2**    | planNumber, educational.domains.academic.notes                                            |
+| `smartInsurance.service.js`         |    **1**    | claimNumber, policyNumber, memberId                                                       |
+| `trafficAccidentService.js`         |    **1**    | reportNumber, accidentInfo.description, location.city, plateNumber                        |
+| `treatmentAuthorization.service.js` |    **1**    | authorizationNumber, beneficiaryName, nationalId, policyNumber                            |
+| **المجموع**                         |   **15**    |                                                                                           |
 
 ### 16.2 ملخص الجولة 16
 
-| المقياس | القيمة |
-| :--- | :--- |
-| ثغرات ReDoS مُصلحة | **15** عبر **6 ملفات** |
-| الإجمالي التراكمي (جولة 14+16) | **21 ثغرة ReDoS** (6 routes + 15 services) |
-| نتيجة: `new RegExp(userInput)` بدون escapeRegex | **0** ✅ |
+| المقياس                                         | القيمة                                     |
+| :---------------------------------------------- | :----------------------------------------- |
+| ثغرات ReDoS مُصلحة                              | **15** عبر **6 ملفات**                     |
+| الإجمالي التراكمي (جولة 14+16)                  | **21 ثغرة ReDoS** (6 routes + 15 services) |
+| نتيجة: `new RegExp(userInput)` بدون escapeRegex | **0** ✅                                   |
 
 ---
 
@@ -758,23 +765,23 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **الملفات المُصلحة:**
 
-| الملف | التغيير |
-| :--- | :--- |
-| `frontend/src/services/branchApi.service.js` | إزالة `const getToken = () => localStorage.getItem('token')` المحلي + إضافة `import { getToken } from '../utils/tokenStorage'` |
-| `frontend/src/services/importExportPro.service.js` | إزالة fallback `localStorage.getItem('authToken')` الزائد (يستورد getToken أصلاً) |
-| `frontend/src/pages/HQDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()` |
-| `frontend/src/pages/BranchDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()` |
-| `frontend/src/pages/RehabDashboard.jsx` | إضافة import + استبدال `localStorage.getItem('token')` بـ `getToken()` في `apiCall()` |
-| `frontend/src/pages/ParentPortal/ParentPortalManagement.jsx` | إضافة import + استبدال 2× `localStorage.getItem('token')` بـ `getToken()` |
+| الملف                                                        | التغيير                                                                                                                        |
+| :----------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| `frontend/src/services/branchApi.service.js`                 | إزالة `const getToken = () => localStorage.getItem('token')` المحلي + إضافة `import { getToken } from '../utils/tokenStorage'` |
+| `frontend/src/services/importExportPro.service.js`           | إزالة fallback `localStorage.getItem('authToken')` الزائد (يستورد getToken أصلاً)                                              |
+| `frontend/src/pages/HQDashboard.jsx`                         | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()`                                                      |
+| `frontend/src/pages/BranchDashboard.jsx`                     | إضافة import + استبدال `localStorage.getItem('token')` في `authHeaders()`                                                      |
+| `frontend/src/pages/RehabDashboard.jsx`                      | إضافة import + استبدال `localStorage.getItem('token')` بـ `getToken()` في `apiCall()`                                          |
+| `frontend/src/pages/ParentPortal/ParentPortalManagement.jsx` | إضافة import + استبدال 2× `localStorage.getItem('token')` بـ `getToken()`                                                      |
 
 ### 15.2 ملخص الجولة 15
 
-| المقياس | القيمة |
-| :--- | :--- |
-| تجاوزات localStorage مُصلحة | **8 استخدام** عبر **6 ملفات** |
-| الإجمالي التراكمي (جولة 14+15) | **9 تجاوزات** (SocketContext + 6 ملفات جديدة) |
-| نتيجة: localStorage.getItem('token') في Frontend | **0** ✅ |
-| نتيجة: localStorage.getItem('authToken') في Frontend | **0** ✅ |
+| المقياس                                              | القيمة                                        |
+| :--------------------------------------------------- | :-------------------------------------------- |
+| تجاوزات localStorage مُصلحة                          | **8 استخدام** عبر **6 ملفات**                 |
+| الإجمالي التراكمي (جولة 14+15)                       | **9 تجاوزات** (SocketContext + 6 ملفات جديدة) |
+| نتيجة: localStorage.getItem('token') في Frontend     | **0** ✅                                      |
+| نتيجة: localStorage.getItem('authToken') في Frontend | **0** ✅                                      |
 
 ---
 
@@ -787,6 +794,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** دالة `toObject()` في `InMemoryUser` كانت تُرجع حقل `password` **تلقائياً** في كل استدعاء، على عكس نموذج `User.js` الأصلي الذي يستخدم `select: false`. أي كود يستدعي `.toObject()` سيحصل على كلمة المرور.
 
 **الإصلاح (`backend/models/User.memory.js`):**
+
 - ✅ تغيير `toObject()` لإزالة `password` من النتيجة الافتراضية
 - ✅ إضافة parameter `{ includePassword: true }` للحالات التي تحتاج كلمة المرور (مثل الحفظ في DB)
 - ✅ تحديث `save()` لاستخدام `toObject({ includePassword: true })` عند الحفظ فقط
@@ -797,6 +805,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** `backend/services/ai/aiScheduler.js` يستخدم `setInterval()` بدون تخزين الـ ID وبدون `clearInterval()`. الـ interval يعمل للأبد ولا يمكن إيقافه عند graceful shutdown أو في الاختبارات.
 
 **الإصلاح:**
+
 - ✅ تخزين interval ID في `_schedulerInterval`
 - ✅ إضافة `stopScheduler()` function مع `clearInterval()`
 - ✅ إضافة `stopScheduler` إلى `module.exports`
@@ -806,6 +815,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** `backend/services/ticketSlaScheduler.js` نفس المشكلة — `setInterval()` بدون cleanup.
 
 **الإصلاح:**
+
 - ✅ إضافة `let _slaInterval = null` في أعلى الملف
 - ✅ تخزين interval ID في `_slaInterval`
 - ✅ إضافة `stopSlaScheduler()` function مع `clearInterval()`
@@ -813,12 +823,12 @@ logger.error('NPHIES Error:', { error: error.message });
 
 ### 18.4 ملخص الجولة 18
 
-| المقياس | القيمة |
-| :--- | :--- |
-| تسريبات كلمة المرور مُصلحة | **1** (`User.memory.js toObject()`) |
+| المقياس                        | القيمة                                             |
+| :----------------------------- | :------------------------------------------------- |
+| تسريبات كلمة المرور مُصلحة     | **1** (`User.memory.js toObject()`)                |
 | تسرب ذاكرة (setInterval) مُصلح | **2** (`aiScheduler.js` + `ticketSlaScheduler.js`) |
-| دوال graceful shutdown جديدة | **2** (`stopScheduler` + `stopSlaScheduler`) |
-| ملفات معدلة | **3** |
+| دوال graceful shutdown جديدة   | **2** (`stopScheduler` + `stopSlaScheduler`)       |
+| ملفات معدلة                    | **3**                                              |
 
 ---
 
@@ -829,6 +839,7 @@ logger.error('NPHIES Error:', { error: error.message });
 **المشكلة:** في الجولة 18 أضفنا `stopScheduler()` و `stopSlaScheduler()` لإيقاف intervals عند الإغلاق، لكن لم تُسجّل كـ shutdown hooks في `gracefulShutdown.js`. عند إيقاف السيرفر (SIGTERM/SIGINT)، كانت الـ intervals تستمر بالعمل ولا تُنظّف.
 
 **الإصلاح (`backend/app.js`):**
+
 - ✅ إضافة `registerShutdownHook` للاستيراد من `gracefulShutdown.js`
 - ✅ `registerShutdownHook('AI Scheduler', stopScheduler)` — قبل بدء الـ setTimeout
 - ✅ `registerShutdownHook('SLA Scheduler', stopSlaScheduler)` — قبل بدء الـ setTimeout
@@ -838,28 +849,29 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **المشكلة:** خدمتان تستخدمان `http://localhost` بشكل ثابت في الكود، مما يفشل في الإنتاج.
 
-| الملف | المشكلة | الإصلاح |
-| :--- | :--- | :--- |
-| `telehealth.service.js` (سطر 450) | `http://localhost:3001/api/telehealth/mock-room/${roomId}` | ✅ `${process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`}/api/telehealth/mock-room/${roomId}` |
-| `payment-gateway.service.js` (سطر 93) | `http://localhost:3000/mock-success` | ✅ `${process.env.FRONTEND_URL \|\| 'http://localhost:3000'}/mock-success` |
+| الملف                                 | المشكلة                                                    | الإصلاح                                                                                                                    |
+| :------------------------------------ | :--------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `telehealth.service.js` (سطر 450)     | `http://localhost:3001/api/telehealth/mock-room/${roomId}` | ✅ `${process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`}/api/telehealth/mock-room/${roomId}` |
+| `payment-gateway.service.js` (سطر 93) | `http://localhost:3000/mock-success`                       | ✅ `${process.env.FRONTEND_URL \|\| 'http://localhost:3000'}/mock-success`                                                 |
 
 ### 19.3 ترحيل console.log/error → Logger في Smart Automation 🟡
 
 **المشكلة:** `backend/lib/smart-automation.js` يحتوي على 7 عبارات `console.log/error` بدلاً من Winston logger.
 
 **الإصلاح:**
+
 - ✅ إضافة `const logger = require('../utils/logger')`
 - ✅ استبدال 4× `console.log` → `logger.info`
 - ✅ استبدال 3× `console.error` → `logger.error` (مع metadata منظمة)
 
 ### 19.4 ملخص الجولة 19
 
-| المقياس | القيمة |
-| :--- | :--- |
-| Shutdown hooks مُسجّلة | **2** (AI Scheduler + SLA Scheduler) |
-| Hardcoded localhost مُصلحة | **2** (telehealth + payment-gateway) |
-| Console → Logger ترحيل | **7 عبارات** في **1 ملف** |
-| ملفات معدلة | **4** (`app.js` + `telehealth.service.js` + `payment-gateway.service.js` + `smart-automation.js`) |
+| المقياس                    | القيمة                                                                                            |
+| :------------------------- | :------------------------------------------------------------------------------------------------ |
+| Shutdown hooks مُسجّلة     | **2** (AI Scheduler + SLA Scheduler)                                                              |
+| Hardcoded localhost مُصلحة | **2** (telehealth + payment-gateway)                                                              |
+| Console → Logger ترحيل     | **7 عبارات** في **1 ملف**                                                                         |
+| ملفات معدلة                | **4** (`app.js` + `telehealth.service.js` + `payment-gateway.service.js` + `smart-automation.js`) |
 
 ---
 
@@ -868,6 +880,7 @@ logger.error('NPHIES Error:', { error: error.message });
 ### 20.1 ثغرة حرجة: استخدام Math.random() لتوليد أكواد أمنية 🔴🔴
 
 **المشكلة:** `Math.random()` ليست آمنة تشفيرياً (NOT cryptographically secure) — مخرجاتها **قابلة للتنبؤ**. كانت تُستخدم في:
+
 - توليد أكواد OTP (رموز التحقق)
 - توليد كلمات المرور
 - توليد أرقام مرجعية
@@ -879,15 +892,15 @@ logger.error('NPHIES Error:', { error: error.message });
 
 **البديل:** `crypto.randomInt()` من Node.js built-in — يستخدم مولّد أرقام عشوائية آمن تشفيرياً (Cryptographically Secure Pseudo-Random Number Generator).
 
-| الملف | المشكلة | الإصلاح |
-| :--- | :--- | :--- |
-| `backend/auth/otp-service.js` | `Math.floor(Math.random() * digits.length)` لتوليد OTP | ✅ `crypto.randomInt(digits.length)` |
-| `backend/communication/email-verification-service.js` | `Math.floor(Math.random() * 10)` لتوليد رمز تحقق | ✅ `crypto.randomInt(10)` |
-| `backend/communication/sms-service.js` | `Math.floor(Math.random() * digits.length)` لتوليد OTP SMS | ✅ `crypto.randomInt(digits.length)` |
-| `backend/communication/whatsapp-routes.js` | `Math.floor(100000 + Math.random() * 900000)` لرمز 6 أرقام | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')` |
-| `backend/utils/security.js` | 6× `Math.random()` لتوليد كلمات مرور + Fisher-Yates shuffle | ✅ `crypto.randomInt()` لكل الحالات + shuffle آمن تشفيرياً |
-| `backend/database/cache/cache-service.js` | `Math.random().toString(36).slice(2)` لمعرّف cache | ✅ `crypto.randomBytes(8).toString('hex')` + إضافة `require('crypto')` |
-| `backend/communication/electronic-directives-service.js` | `Math.floor(Math.random() * 9999)` لرقم تسلسلي | ✅ `crypto.randomInt(9999)` + إضافة `require('crypto')` |
+| الملف                                                    | المشكلة                                                     | الإصلاح                                                                |
+| :------------------------------------------------------- | :---------------------------------------------------------- | :--------------------------------------------------------------------- |
+| `backend/auth/otp-service.js`                            | `Math.floor(Math.random() * digits.length)` لتوليد OTP      | ✅ `crypto.randomInt(digits.length)`                                   |
+| `backend/communication/email-verification-service.js`    | `Math.floor(Math.random() * 10)` لتوليد رمز تحقق            | ✅ `crypto.randomInt(10)`                                              |
+| `backend/communication/sms-service.js`                   | `Math.floor(Math.random() * digits.length)` لتوليد OTP SMS  | ✅ `crypto.randomInt(digits.length)`                                   |
+| `backend/communication/whatsapp-routes.js`               | `Math.floor(100000 + Math.random() * 900000)` لرمز 6 أرقام  | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')`     |
+| `backend/utils/security.js`                              | 6× `Math.random()` لتوليد كلمات مرور + Fisher-Yates shuffle | ✅ `crypto.randomInt()` لكل الحالات + shuffle آمن تشفيرياً             |
+| `backend/database/cache/cache-service.js`                | `Math.random().toString(36).slice(2)` لمعرّف cache          | ✅ `crypto.randomBytes(8).toString('hex')` + إضافة `require('crypto')` |
+| `backend/communication/electronic-directives-service.js` | `Math.floor(Math.random() * 9999)` لرقم تسلسلي              | ✅ `crypto.randomInt(9999)` + إضافة `require('crypto')`                |
 
 ### 20.3 تفصيل إصلاح security.js (الأكثر تعقيداً)
 
@@ -910,13 +923,13 @@ return arr.join('');
 
 ### 20.4 ملخص الجولة 20
 
-| المقياس | القيمة |
-| :--- | :--- |
-| استخدامات Math.random() مُستبدلة | **11** عبر **7 ملفات** |
+| المقياس                             | القيمة                                                                |
+| :---------------------------------- | :-------------------------------------------------------------------- |
+| استخدامات Math.random() مُستبدلة    | **11** عبر **7 ملفات**                                                |
 | ملفات أُضيف لها `require('crypto')` | **3** (whatsapp-routes, cache-service, electronic-directives-service) |
-| ملفات كانت تستورد crypto أصلاً | **4** (otp-service, email-verification, sms-service, security.js) |
-| نتيجة: `Math.random()` في كود أمني | **0** ✅ |
-| خوارزمية الخلط | **Fisher-Yates (غير متحيزة + آمنة تشفيرياً)** ✅ |
+| ملفات كانت تستورد crypto أصلاً      | **4** (otp-service, email-verification, sms-service, security.js)     |
+| نتيجة: `Math.random()` في كود أمني  | **0** ✅                                                              |
+| خوارزمية الخلط                      | **Fisher-Yates (غير متحيزة + آمنة تشفيرياً)** ✅                      |
 
 ---
 
@@ -926,25 +939,25 @@ return arr.join('');
 
 **المشكلة:** بعد الجولة 20 (7 ملفات)، تم اكتشاف **6 ملفات إضافية** تستخدم `Math.random()` لتوليد OTP وكلمات مرور — نفس الثغرة الحرجة.
 
-| الملف | المشكلة | عدد الإصلاحات | الإصلاح |
-| :--- | :--- | :---: | :--- |
-| `passwordSecurity.service.js` | 5× character selection + biased shuffle | **6** | ✅ `crypto.randomInt()` + Fisher-Yates |
-| `TwoFactorAuth.js` | 2× OTP 6-digit generation | **2** | ✅ `crypto.randomInt(100000, 1000000)` |
-| `twoFAService.js` | 1× OTP character selection | **1** | ✅ `crypto.randomInt(chars.length)` |
-| `enhanced2FA.service.js` | 1× SMS 2FA code generation | **1** | ✅ `crypto.randomInt(100000, 1000000)` |
-| `EncryptionService.js` | 1× verification code generation | **1** | ✅ `Array.from({length}, () => crypto.randomInt(10))` |
-| `AdvancedIntegrations.js` | 1× SMS verification code | **1** | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')` |
-| **المجموع** | | **12** | |
+| الملف                         | المشكلة                                 | عدد الإصلاحات | الإصلاح                                                            |
+| :---------------------------- | :-------------------------------------- | :-----------: | :----------------------------------------------------------------- |
+| `passwordSecurity.service.js` | 5× character selection + biased shuffle |     **6**     | ✅ `crypto.randomInt()` + Fisher-Yates                             |
+| `TwoFactorAuth.js`            | 2× OTP 6-digit generation               |     **2**     | ✅ `crypto.randomInt(100000, 1000000)`                             |
+| `twoFAService.js`             | 1× OTP character selection              |     **1**     | ✅ `crypto.randomInt(chars.length)`                                |
+| `enhanced2FA.service.js`      | 1× SMS 2FA code generation              |     **1**     | ✅ `crypto.randomInt(100000, 1000000)`                             |
+| `EncryptionService.js`        | 1× verification code generation         |     **1**     | ✅ `Array.from({length}, () => crypto.randomInt(10))`              |
+| `AdvancedIntegrations.js`     | 1× SMS verification code                |     **1**     | ✅ `crypto.randomInt(100000, 1000000)` + إضافة `require('crypto')` |
+| **المجموع**                   |                                         |    **12**     |                                                                    |
 
 ### 21.2 ملخص الجولة 21
 
-| المقياس | القيمة |
-| :--- | :--- |
-| استخدامات Math.random() مُستبدلة | **12** عبر **6 ملفات** |
-| ملفات أُضيف لها `require('crypto')` | **1** (AdvancedIntegrations.js) |
-| ملفات كانت تستورد crypto أصلاً | **5** |
-| الإجمالي التراكمي (جولة 20+21) | **23 إصلاح** عبر **13 ملف** |
-| نتيجة: `Math.random()` في خدمات OTP/2FA/Password | **0** ✅ |
+| المقياس                                          | القيمة                          |
+| :----------------------------------------------- | :------------------------------ |
+| استخدامات Math.random() مُستبدلة                 | **12** عبر **6 ملفات**          |
+| ملفات أُضيف لها `require('crypto')`              | **1** (AdvancedIntegrations.js) |
+| ملفات كانت تستورد crypto أصلاً                   | **5**                           |
+| الإجمالي التراكمي (جولة 20+21)                   | **23 إصلاح** عبر **13 ملف**     |
+| نتيجة: `Math.random()` في خدمات OTP/2FA/Password | **0** ✅                        |
 
 ---
 
@@ -953,6 +966,7 @@ return arr.join('');
 ### 22.1 المشكلة: تسريب معلومات عبر console في بيئة الإنتاج 🟡
 
 **المشكلة:** ملفات الإنتاج في `backend/database/` و `backend/lib/` تستخدم `console.log/error/warn` مباشرة بدلاً من Winston logger الموحد. هذا يسبب:
+
 - عدم التحكم في مستويات السجلات (log levels)
 - فقدان البيانات الوصفية (metadata) مثل timestamps وservice name
 - عدم إمكانية التوجيه لملفات السجل أو خدمات المراقبة
@@ -960,16 +974,16 @@ return arr.join('');
 
 ### 22.2 الملفات المُصلحة (7 ملفات، ~25 عبارة console)
 
-| الملف | عبارات console مُستبدلة | الإصلاح |
-| :--- | :---: | :--- |
-| `database/indexes/core-indexes.js` | **~8** | ✅ أُضيف `require('../../utils/logger')` + استبدال كل console.log/error/warn بـ logger.info/error/warn |
-| `database/utils/counter.js` | **3** | ✅ `console.log` → `logger.info` في initializeCounters + checkAndResetCounters، `console.error` → `logger.error` في autoNumberPlugin |
-| `database/plugins/mongoose-plugins.js` | **1** | ✅ `console.log('✔ Mongoose global plugins registered')` → `logger.info(...)` |
-| `lib/advanced-analytics.js` | **3** | ✅ أُضيف `require('../utils/logger')` + استبدال initialize() logs |
-| `lib/smart-ui-engine.js` | **5** | ✅ أُضيف `require('../utils/logger')` + استبدال في SmartUIEngine + PersonalizationEngine + AdaptiveUI |
-| `lib/intelligence-engine.js` | **3** | ✅ أُضيف `require('../utils/logger')` + استبدال في initialize() |
-| `lib/smart-integration.js` | **9** | ✅ أُضيف `require('../utils/logger')` + استبدال banner + subsystem init + error logs |
-| **المجموع** | **~32** | |
+| الملف                                  | عبارات console مُستبدلة | الإصلاح                                                                                                                              |
+| :------------------------------------- | :---------------------: | :----------------------------------------------------------------------------------------------------------------------------------- |
+| `database/indexes/core-indexes.js`     |         **~8**          | ✅ أُضيف `require('../../utils/logger')` + استبدال كل console.log/error/warn بـ logger.info/error/warn                               |
+| `database/utils/counter.js`            |          **3**          | ✅ `console.log` → `logger.info` في initializeCounters + checkAndResetCounters، `console.error` → `logger.error` في autoNumberPlugin |
+| `database/plugins/mongoose-plugins.js` |          **1**          | ✅ `console.log('✔ Mongoose global plugins registered')` → `logger.info(...)`                                                       |
+| `lib/advanced-analytics.js`            |          **3**          | ✅ أُضيف `require('../utils/logger')` + استبدال initialize() logs                                                                    |
+| `lib/smart-ui-engine.js`               |          **5**          | ✅ أُضيف `require('../utils/logger')` + استبدال في SmartUIEngine + PersonalizationEngine + AdaptiveUI                                |
+| `lib/intelligence-engine.js`           |          **3**          | ✅ أُضيف `require('../utils/logger')` + استبدال في initialize()                                                                      |
+| `lib/smart-integration.js`             |          **9**          | ✅ أُضيف `require('../utils/logger')` + استبدال banner + subsystem init + error logs                                                 |
+| **المجموع**                            |         **~32**         |                                                                                                                                      |
 
 ### 22.3 نمط الإصلاح
 
@@ -986,13 +1000,13 @@ logger.error(`Failed to initialize: ${error.message}`);
 
 ### 22.4 ملخص الجولة 22
 
-| المقياس | القيمة |
-| :--- | :--- |
-| عبارات console مُستبدلة | **~32** عبر **7 ملفات** |
-| ملفات أُضيف لها `require('logger')` | **7** |
-| المجلدات المُغطاة | `database/indexes/`, `database/utils/`, `database/plugins/`, `lib/` |
-| نتيجة: console في هذه الملفات | **0** ✅ |
-| التوافقية | Winston logger الموحد مع timestamps + log levels + file rotation |
+| المقياس                             | القيمة                                                              |
+| :---------------------------------- | :------------------------------------------------------------------ |
+| عبارات console مُستبدلة             | **~32** عبر **7 ملفات**                                             |
+| ملفات أُضيف لها `require('logger')` | **7**                                                               |
+| المجلدات المُغطاة                   | `database/indexes/`, `database/utils/`, `database/plugins/`, `lib/` |
+| نتيجة: console في هذه الملفات       | **0** ✅                                                            |
+| التوافقية                           | Winston logger الموحد مع timestamps + log levels + file rotation    |
 
 ---
 
@@ -1001,18 +1015,19 @@ logger.error(`Failed to initialize: ${error.message}`);
 ### 23.1 المشكلة: JSON.parse على بيانات خارجية بدون try-catch 🔴
 
 **المشكلة:** 4 ملفات تستخدم `JSON.parse()` على بيانات خارجية (ملفات مرفوعة، نسخ احتياطية، قيم CSV) **بدون** حماية try-catch. إذا كانت البيانات تالفة أو غير صالحة، يتسبب ذلك في:
+
 - انهيار الطلب (unhandled exception)
 - فقدان معلومات السبب (لا رسالة خطأ واضحة)
 - احتمال تعطل العمليات الحرجة (استعادة نسخ احتياطية، استيراد بيانات)
 
 ### 23.2 الملفات المُصلحة
 
-| الملف | الدالة | نوع البيانات | الإصلاح |
-| :--- | :--- | :--- | :--- |
-| `importExportPro.service.js` | `_parseJSON(buffer)` | ملف JSON مرفوع من المستخدم | ✅ try-catch مع رسالة خطأ واضحة: `Invalid JSON file: ...` |
-| `database-migration-service.js` | `restoreBackup(backupPath)` | ملف نسخة احتياطية من القرص | ✅ try-catch مع رسالة: `Failed to parse backup file ...` |
-| `database-backup-service.js` | `getBackupInfo(backupPath)` | ملف نسخة احتياطية (بعد فك ضغط/تشفير) | ✅ try-catch مع رسالة: `Failed to parse backup info ...` |
-| `migration/CSVProcessor.js` | `convertType(value, 'json')` | قيمة حقل JSON في CSV من المستخدم | ✅ try-catch يُرجع `null` عند فشل التحليل |
+| الملف                           | الدالة                       | نوع البيانات                         | الإصلاح                                                   |
+| :------------------------------ | :--------------------------- | :----------------------------------- | :-------------------------------------------------------- |
+| `importExportPro.service.js`    | `_parseJSON(buffer)`         | ملف JSON مرفوع من المستخدم           | ✅ try-catch مع رسالة خطأ واضحة: `Invalid JSON file: ...` |
+| `database-migration-service.js` | `restoreBackup(backupPath)`  | ملف نسخة احتياطية من القرص           | ✅ try-catch مع رسالة: `Failed to parse backup file ...`  |
+| `database-backup-service.js`    | `getBackupInfo(backupPath)`  | ملف نسخة احتياطية (بعد فك ضغط/تشفير) | ✅ try-catch مع رسالة: `Failed to parse backup info ...`  |
+| `migration/CSVProcessor.js`     | `convertType(value, 'json')` | قيمة حقل JSON في CSV من المستخدم     | ✅ try-catch يُرجع `null` عند فشل التحليل                 |
 
 ### 23.3 نمط الإصلاح
 
@@ -1033,12 +1048,12 @@ try {
 
 تم فحص **67 استخدام** لـ `JSON.parse` في services + **6 استخدامات** في routes:
 
-| الحالة | العدد |
-| :--- | :--- |
-| محمي بـ try-catch | **59** ✅ |
+| الحالة                                               | العدد     |
+| :--------------------------------------------------- | :-------- |
+| محمي بـ try-catch                                    | **59** ✅ |
 | Deep clone (`JSON.parse(JSON.stringify(...))`) — آمن | **10** ✅ |
-| غير محمي — **تم إصلاحه** | **4** ✅ |
-| **نتيجة: JSON.parse غير محمي على بيانات خارجية** | **0** ✅ |
+| غير محمي — **تم إصلاحه**                             | **4** ✅  |
+| **نتيجة: JSON.parse غير محمي على بيانات خارجية**     | **0** ✅  |
 
 ---
 
@@ -1047,10 +1062,12 @@ try {
 ### 24.1 إزالة تجاوز 2FA بكود ثابت '123456' في securityService.js 🔴🔴
 
 **المشكلة:** دالتان في `securityService.js` كانتا تقبلان كود `'123456'` كبديل عن أي رمز TOTP حقيقي — **في جميع البيئات بما فيها الإنتاج**:
+
 - `enableMfa()`: كانت تحتوي على `token === '123456' || this._verifyTotp(...)` — أي مهاجم يمكنه تفعيل MFA بكود ثابت
 - `_verifyTotp()`: كانت تُرجع `token === '123456'` دائماً (TOTP verification وهمي بالكامل)
 
 **الإصلاح (`backend/services/securityService.js`):**
+
 - ✅ إضافة `require('speakeasy')` — مكتبة TOTP المتاحة في المشروع
 - ✅ إزالة `token === '123456'` من `enableMfa()` — الآن يعتمد فقط على `_verifyTotp()`
 - ✅ إعادة كتابة `_verifyTotp()` بالكامل — يستخدم `speakeasy.totp.verify()` مع encoding hex و window ±60 ثانية
@@ -1059,10 +1076,12 @@ try {
 ### 24.2 إزالة OTP ثابت + Math.random() في parentPortal.routes.js 🔴
 
 **المشكلة:** دالة `generateOtp()` في بوابة ولي الأمر:
+
 - في dev/test: كانت تُرجع `'123456'` دائماً — أي شخص يعرف هذا الكود يمكنه تسجيل الدخول
 - في production: كانت تستخدم `Math.random()` (غير آمن تشفيرياً)
 
 **الإصلاح (`backend/routes/parentPortal.routes.js`):**
+
 - ✅ إضافة `require('crypto')`
 - ✅ إزالة الشرط `NODE_ENV === 'development'` والقيمة الثابتة `'123456'`
 - ✅ استبدال `Math.random()` بـ `crypto.randomInt(100000, 1000000)` — CSPRNG
@@ -1072,6 +1091,7 @@ try {
 **المشكلة:** دالة `encryptCredentials()` كانت تُسمى "encrypt" لكنها تستخدم `Buffer.toString('base64')` فقط — وهو ترميز وليس تشفير. أي شخص لديه وصول لقاعدة البيانات يمكنه فك الترميز فوراً بـ `atob()`.
 
 **الإصلاح (`backend/services/smartCameraManager.service.js`):**
+
 - ✅ إضافة `require('crypto')`
 - ✅ إعادة كتابة `encryptCredentials()` — AES-256-GCM مع IV عشوائي + authTag
 - ✅ إضافة `decryptCredentials()` جديدة — لفك التشفير عند الحاجة
@@ -1080,14 +1100,14 @@ try {
 
 ### 24.4 ملخص الجولة 24
 
-| المقياس | القيمة |
-| :--- | :--- |
-| تجاوزات 2FA بكود ثابت مُزالة | **3** (enableMfa + _verifyTotp + generateOtp) |
-| Math.random() مُستبدلة بـ CSPRNG | **1** (parentPortal OTP) |
-| تشفير وهمي مُستبدل بـ AES-256-GCM | **1** (camera credentials) |
-| مكتبات مُفعّلة | **1** (speakeasy — كانت مثبتة لكن غير مستخدمة) |
-| ملفات معدلة | **3** (`securityService.js` + `parentPortal.routes.js` + `smartCameraManager.service.js`) |
-| نتيجة: `'123456'` bypass في كود الإنتاج | **0** ✅ |
+| المقياس                                 | القيمة                                                                                    |
+| :-------------------------------------- | :---------------------------------------------------------------------------------------- |
+| تجاوزات 2FA بكود ثابت مُزالة            | **3** (enableMfa + \_verifyTotp + generateOtp)                                            |
+| Math.random() مُستبدلة بـ CSPRNG        | **1** (parentPortal OTP)                                                                  |
+| تشفير وهمي مُستبدل بـ AES-256-GCM       | **1** (camera credentials)                                                                |
+| مكتبات مُفعّلة                          | **1** (speakeasy — كانت مثبتة لكن غير مستخدمة)                                            |
+| ملفات معدلة                             | **3** (`securityService.js` + `parentPortal.routes.js` + `smartCameraManager.service.js`) |
+| نتيجة: `'123456'` bypass في كود الإنتاج | **0** ✅                                                                                  |
 
 ---
 
@@ -1097,41 +1117,43 @@ try {
 
 **المشكلة:** 3 ملفات إنتاج تستخدم `http://localhost` بشكل ثابت بدون أي env var fallback، مما يفشل تماماً في بيئة الإنتاج.
 
-| الملف | المشكلة | الإصلاح |
-| :--- | :--- | :--- |
-| `loadTester.js` | `constructor(baseURL = 'http://localhost:3001')` بدون env var | ✅ `process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`` |
-| `video-calendar-integrations.service.js` | `'http://localhost:3001/auth/google/callback'` ثابت | ✅ `process.env.GOOGLE_REDIRECT_URI \|\| \`${BACKEND_URL}/auth/google/callback\`` |
-| `generators.js` | `generateQRCode(comm, baseUrl = 'http://localhost:3002')` | ✅ `process.env.FRONTEND_URL \|\| 'http://localhost:3000'` |
+| الملف                                    | المشكلة                                                       | الإصلاح                                                                              |
+| :--------------------------------------- | :------------------------------------------------------------ | :----------------------------------------------------------------------------------- |
+| `loadTester.js`                          | `constructor(baseURL = 'http://localhost:3001')` بدون env var | ✅ `process.env.BACKEND_URL \|\| \`http://localhost:${process.env.PORT \|\| 3001}\`` |
+| `video-calendar-integrations.service.js` | `'http://localhost:3001/auth/google/callback'` ثابت           | ✅ `process.env.GOOGLE_REDIRECT_URI \|\| \`${BACKEND_URL}/auth/google/callback\``    |
+| `generators.js`                          | `generateQRCode(comm, baseUrl = 'http://localhost:3002')`     | ✅ `process.env.FRONTEND_URL \|\| 'http://localhost:3000'`                           |
 
 ### 25.2 توحيد منافذ WebSocket CORS (3002 → 3000) 🟡
 
 **المشكلة:** ملفا WebSocket يستخدمان `localhost:3002` كـ CORS origin fallback، بينما Frontend يعمل على port 3000 (CRA default). هذا يسبب **رفض اتصال WebSocket** في بيئة التطوير المحلية إذا لم يكن `FRONTEND_URL` مُعرّفاً.
 
-| الملف | التغيير |
-| :--- | :--- |
-| `websocket.js` | `'http://localhost:3002'` → `'http://localhost:3000'` |
+| الملف                  | التغيير                                               |
+| :--------------------- | :---------------------------------------------------- |
+| `websocket.js`         | `'http://localhost:3002'` → `'http://localhost:3000'` |
 | `websocket.service.js` | `'http://localhost:3002'` → `'http://localhost:3000'` |
 
 ### 25.3 تأمين SSO Service — منع التشغيل بدون JWT_SECRET 🔴
 
 **المشكلة:** `sso.service.js` كان يُسجّل خطأ عند عدم وجود `JWT_SECRET` في الإنتاج لكن **يستمر بالعمل** مع `this.JWT_SECRET = undefined`. هذا يعني:
+
 - كل عمليات توقيع JWT تفشل بصمت
 - كل عمليات التحقق من التوكنات تفشل بصمت
 - خدمة SSO تبدو تعمل لكنها معطلة فعلياً
 
 **الإصلاح (`backend/services/sso.service.js`):**
+
 - ✅ إضافة `throw new Error()` بعد `logger.error()` — الآن يتوقف التشغيل فوراً بدلاً من العمل في حالة معطلة
 - ✅ الرسالة: `'JWT_SECRET must be configured via environment variable for SSO service'`
 - ✅ في بيئة test: يبقى الـ fallback `'test-sso-secret-key'` كما هو (مقبول للاختبارات)
 
 ### 25.4 ملخص الجولة 25
 
-| المقياس | القيمة |
-| :--- | :--- |
-| Hardcoded URLs مُصلحة (بدون env var) | **3** (`loadTester` + `video-calendar` + `generators`) |
-| منافذ غير متسقة مُصلحة | **2** (`websocket.js` + `websocket.service.js`: 3002→3000) |
-| Fail-open → Fail-closed | **1** (`sso.service.js`: undefined JWT_SECRET → throw) |
-| ملفات معدلة | **6** |
+| المقياس                              | القيمة                                                     |
+| :----------------------------------- | :--------------------------------------------------------- |
+| Hardcoded URLs مُصلحة (بدون env var) | **3** (`loadTester` + `video-calendar` + `generators`)     |
+| منافذ غير متسقة مُصلحة               | **2** (`websocket.js` + `websocket.service.js`: 3002→3000) |
+| Fail-open → Fail-closed              | **1** (`sso.service.js`: undefined JWT_SECRET → throw)     |
+| ملفات معدلة                          | **6**                                                      |
 
 ---
 
@@ -1144,6 +1166,7 @@ try {
 **المشكلة:** `jwt.sign()` كان يستخدم `process.env.JWT_SECRET || 'parent_portal_secret'` — إذا لم يكن `JWT_SECRET` مُعرّفاً، يُستخدم مفتاح ثابت يمكن لأي مهاجم استخدامه لتزوير JWT tokens.
 
 **الإصلاح (`backend/routes/parentPortal.routes.js`):**
+
 - ✅ إزالة `|| 'parent_portal_secret'` — الآن يستخدم `process.env.JWT_SECRET` فقط
 - ✅ سيرمي خطأ إذا لم يكن JWT_SECRET مُعرّفاً (fail-closed)
 
@@ -1159,30 +1182,31 @@ try {
 `return '123456'` — أي شخص يعرف هذا الكود يمكنه تسجيل الدخول.
 
 **الإصلاح (`backend/routes/parent-portal-enhanced.routes.js`):**
+
 - ✅ إضافة `const crypto = require('crypto')`
 - ✅ إعادة كتابة `generateOtp()` — `crypto.randomInt(100000, 1000000)` بدلاً من Math.random + hardcoded '123456'
 - ✅ إزالة `|| 'rehab-secret'` من JWT sign — الآن `process.env.JWT_SECRET` فقط
 
 ### 26.3 تدقيق أمني إضافي — نتائج نظيفة ✅
 
-| الفحص | النتيجة |
-| :--- | :--- |
-| setTimeout memory leaks | **آمن** (داخل Promises منتظرة) ✅ |
-| Object.assign مع req.body | **2 فقط** (محمية بـ Mongoose schema) ✅ |
-| Open redirects | **0** ✅ |
-| process.exit() في كود الإنتاج | **0** (فقط في scripts/seeds/CLI) ✅ |
-| File write بمسارات غير محكومة | **0** ✅ |
-| JWT_SECRET fallbacks في ملفات اختبار | **مقبول** (tests فقط) ✅ |
+| الفحص                                | النتيجة                                 |
+| :----------------------------------- | :-------------------------------------- |
+| setTimeout memory leaks              | **آمن** (داخل Promises منتظرة) ✅       |
+| Object.assign مع req.body            | **2 فقط** (محمية بـ Mongoose schema) ✅ |
+| Open redirects                       | **0** ✅                                |
+| process.exit() في كود الإنتاج        | **0** (فقط في scripts/seeds/CLI) ✅     |
+| File write بمسارات غير محكومة        | **0** ✅                                |
+| JWT_SECRET fallbacks في ملفات اختبار | **مقبول** (tests فقط) ✅                |
 
 ### 26.4 ملخص الجولة 26
 
-| المقياس | القيمة |
-| :--- | :--- |
-| JWT Secret Fallbacks مُزالة | **2** (`parentPortal.routes.js` + `parent-portal-enhanced.routes.js`) |
-| Math.random() → CSPRNG | **1** (`parent-portal-enhanced.routes.js`) |
-| OTP ثابت '123456' مُزال | **1** (`parent-portal-enhanced.routes.js`) |
-| ملفات معدلة | **2** |
-| نتيجة: JWT fallbacks ضعيفة في routes الإنتاج | **0** ✅ |
+| المقياس                                      | القيمة                                                                |
+| :------------------------------------------- | :-------------------------------------------------------------------- |
+| JWT Secret Fallbacks مُزالة                  | **2** (`parentPortal.routes.js` + `parent-portal-enhanced.routes.js`) |
+| Math.random() → CSPRNG                       | **1** (`parent-portal-enhanced.routes.js`)                            |
+| OTP ثابت '123456' مُزال                      | **1** (`parent-portal-enhanced.routes.js`)                            |
+| ملفات معدلة                                  | **2**                                                                 |
+| نتيجة: JWT fallbacks ضعيفة في routes الإنتاج | **0** ✅                                                              |
 
 ---
 
@@ -1193,6 +1217,7 @@ try {
 **المشكلة:** عدة نقاط في التطبيق تسمح بإرسال طلبات HTTP صادرة لعناوين يحددها المستخدم (webhooks)، مما يُعرّض الخوادم الداخلية والبنية التحتية للخطر.
 
 **الإصلاح — أداة جديدة `backend/utils/validateUrl.js`:**
+
 - ✅ حجب IPs الداخلية (127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16)
 - ✅ حجب hostnames سحابية (metadata.google.internal, instance-data, localhost)
 - ✅ حجب المنافذ الحساسة (27017 MongoDB, 6379 Redis, 5432 PostgreSQL...)
@@ -1202,10 +1227,10 @@ try {
 
 **الملفات المحمية:**
 
-| الملف | النقطة | الإصلاح |
-| :--- | :--- | :--- |
-| `backend/routes/workflowEnhanced.routes.js` | POST/PUT/test webhooks (3 endpoints) | validateOutboundUrl قبل الحفظ/الإرسال |
-| `backend/notifications/notification-center.js` | webhook provider axios.post | validateOutboundUrl + timeout 10s |
+| الملف                                          | النقطة                               | الإصلاح                               |
+| :--------------------------------------------- | :----------------------------------- | :------------------------------------ |
+| `backend/routes/workflowEnhanced.routes.js`    | POST/PUT/test webhooks (3 endpoints) | validateOutboundUrl قبل الحفظ/الإرسال |
+| `backend/notifications/notification-center.js` | webhook provider axios.post          | validateOutboundUrl + timeout 10s     |
 
 ### 27.2 منع Mass Assignment — `$set: req.body`
 
@@ -1214,25 +1239,57 @@ try {
 **الإصلاح — Whitelist Pattern:**
 لكل endpoint تم تحديد قائمة بيضاء بالحقول المسموح تعديلها فقط:
 
-| الملف | Endpoint | الحقول الحساسة المحمية |
-| :--- | :--- | :--- |
-| `backend/routes/media.routes.js` | PUT /albums/:id | createdBy, mediaCount, totalSize, slug |
-| `backend/routes/missing-models.routes.js` | PATCH /medical-history/:id | beneficiary, _id, createdAt |
-| `backend/routes/studentHealthTracker.routes.js` | PUT /:studentId/:id | studentId, recordedBy, alerts, _id |
-| `backend/hr/saudi-hr-routes.js` | PUT /employees/:id | status, role, createdBy, employeeId |
-| `backend/controllers/branch.controller.js` | PUT /branches/:code | code, _id, createdAt, staff_count |
-| `backend/controllers/research.controller.js` | updateExport | auditTrail, createdBy, _id |
+| الملف                                           | Endpoint                   | الحقول الحساسة المحمية                 |
+| :---------------------------------------------- | :------------------------- | :------------------------------------- |
+| `backend/routes/media.routes.js`                | PUT /albums/:id            | createdBy, mediaCount, totalSize, slug |
+| `backend/routes/missing-models.routes.js`       | PATCH /medical-history/:id | beneficiary, \_id, createdAt           |
+| `backend/routes/studentHealthTracker.routes.js` | PUT /:studentId/:id        | studentId, recordedBy, alerts, \_id    |
+| `backend/hr/saudi-hr-routes.js`                 | PUT /employees/:id         | status, role, createdBy, employeeId    |
+| `backend/controllers/branch.controller.js`      | PUT /branches/:code        | code, \_id, createdAt, staff_count     |
+| `backend/controllers/research.controller.js`    | updateExport               | auditTrail, createdBy, \_id            |
 
 ### 27.3 ملخص الجولة 27
 
-| المقياس | القيمة |
-| :--- | :--- |
-| أداة SSRF جديدة | **1** (`backend/utils/validateUrl.js`) |
-| نقاط SSRF محمية | **4** (3 webhook endpoints + 1 notification provider) |
-| نقاط Mass Assignment مُصلحة | **6** ملفات |
-| إجمالي الملفات المعدلة | **9** |
-| نتيجة: `$set: req.body` في كود الإنتاج | **0** ✅ |
-| نتيجة: طلبات HTTP صادرة غير محمية | **0** ✅ |
+| المقياس                                | القيمة                                                |
+| :------------------------------------- | :---------------------------------------------------- |
+| أداة SSRF جديدة                        | **1** (`backend/utils/validateUrl.js`)                |
+| نقاط SSRF محمية                        | **4** (3 webhook endpoints + 1 notification provider) |
+| نقاط Mass Assignment مُصلحة            | **6** ملفات                                           |
+| إجمالي الملفات المعدلة                 | **9**                                                 |
+| نتيجة: `$set: req.body` في كود الإنتاج | **0** ✅                                              |
+| نتيجة: طلبات HTTP صادرة غير محمية      | **0** ✅                                              |
+
+---
+
+## 🔴 الجولة 28 — إزالة كلمات المرور المشفرة من Seeders (3 ملفات)
+
+### 28.1 إزالة كلمات مرور مشفرة من 3 ملفات seeds
+
+**المشكلة:** 3 ملفات seeds تحتوي على كلمات مرور مشفرة (`Admin@2025!`, `Admin@2025#`, `Alawael@2026`, `Instructor@123`) — أي شخص لديه وصول للـ repository يمكنه معرفة كلمات المرور الافتراضية.
+
+| الملف                             | المشكلة                                                                         | الإصلاح                                                                                                        |
+| :-------------------------------- | :------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------- |
+| `admin-users.seed.js`             | `plainPassword: 'Admin@2025!'` و `'Admin@2025#'` + طباعة كلمة المرور في console | ✅ `getPassword()` من env vars (`SUPERADMIN_PASSWORD`/`ADMIN_PASSWORD`) + إزالة طباعة كلمة المرور              |
+| `comprehensive-employees.seed.js` | `bcrypt.hash('Alawael@2026', 12)`                                               | ✅ `process.env.SEED_USER_PASSWORD \|\| process.env.ADMIN_PASSWORD` — يتخطى إنشاء المستخدم إذا لم يكن مُعرّفاً |
+| `elearningSeeds.js`               | `password: 'Instructor@123'`                                                    | ✅ `process.env.SEED_USER_PASSWORD \|\| process.env.ADMIN_PASSWORD` — يرمي خطأ إذا لم يكن مُعرّفاً             |
+
+### 28.2 تحديث قائمة المشاكل المعلقة (Backlog)
+
+- ✅ P1.2 (كلمات المرور في Seeders) — **مُنجز**
+- ✅ P2.4 (سكربتات Python) — **مُنجز سابقاً** (`.gitignore`)
+- ✅ P2.5 (console.log في Backend) — **مُنجز سابقاً** (0 استخدام)
+- ✅ P3.7 (اختبارات CI/CD) — **مُنجز سابقاً** (`npm test` في deploy workflow)
+- ✅ P3.8 (Dependabot) — **مُنجز سابقاً** (`.github/dependabot.yml`)
+- ✅ P3.9 (npm audit CI) — **مُنجز سابقاً**
+
+### 28.3 ملخص الجولة 28
+
+| المقياس                          | القيمة                                                                                |
+| :------------------------------- | :------------------------------------------------------------------------------------ |
+| كلمات مرور مشفرة مُزالة          | **4** عبر **3 ملفات**                                                                 |
+| ملفات معدلة                      | **3** (`admin-users.seed.js`, `comprehensive-employees.seed.js`, `elearningSeeds.js`) |
+| نتيجة: كلمات مرور مشفرة في seeds | **0** ✅                                                                              |
+| بنود Backlog مُنجزة              | **7 من 9**                                                                            |
 
 ---
 

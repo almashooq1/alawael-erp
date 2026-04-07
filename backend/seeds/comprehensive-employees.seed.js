@@ -964,7 +964,14 @@ async function seed(connection) {
     // إنشاء حساب مستخدم مرتبط بالموظف
     const userExists = await usersCol.findOne({ email: emp.contact.email });
     if (!userExists) {
-      const passwordHash = await bcrypt.hash('Alawael@2026', 12);
+      const seedPassword = process.env.SEED_USER_PASSWORD || process.env.ADMIN_PASSWORD;
+      if (!seedPassword) {
+        console.log(
+          `  ⏭  Skipping user account for ${emp.contact.email} — SEED_USER_PASSWORD not set`
+        );
+        continue;
+      }
+      const passwordHash = await bcrypt.hash(seedPassword, 12);
       await usersCol.insertOne({
         email: emp.contact.email,
         phone: emp.contact.phone,

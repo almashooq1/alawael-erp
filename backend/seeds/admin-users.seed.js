@@ -28,11 +28,22 @@ async function hashPassword(plain) {
   }
 }
 
+function getAdminPassword(envKey, fallbackEnvKey) {
+  const pw = process.env[envKey] || process.env[fallbackEnvKey] || process.env.ADMIN_PASSWORD;
+  if (!pw) {
+    throw new Error(
+      `❌ ${envKey} (or ADMIN_PASSWORD) environment variable is required for seeding admin users.\n` +
+        `   Set it via: export ${envKey}="YourSecurePassword123!"`
+    );
+  }
+  return pw;
+}
+
 const adminUsers = [
   {
     username: 'superadmin',
     email: 'superadmin@alawael.com.sa',
-    plainPassword: 'Admin@2025!',
+    getPassword: () => getAdminPassword('SUPERADMIN_PASSWORD', 'ADMIN_PASSWORD'),
     profile: {
       firstName: { ar: 'مدير', en: 'Super' },
       lastName: { ar: 'النظام', en: 'Admin' },
@@ -45,7 +56,7 @@ const adminUsers = [
   {
     username: 'admin',
     email: 'admin@alawael.com.sa',
-    plainPassword: 'Admin@2025#',
+    getPassword: () => getAdminPassword('ADMIN_PASSWORD', 'ADMIN_PASSWORD'),
     profile: {
       firstName: { ar: 'مدير', en: 'Admin' },
       lastName: { ar: 'النظام', en: 'User' },
@@ -72,7 +83,7 @@ async function seed(connection) {
       continue;
     }
 
-    const hashedPassword = await hashPassword(u.plainPassword);
+    const hashedPassword = await hashPassword(u.getPassword());
     const now = new Date();
 
     await col.insertOne({
@@ -105,9 +116,7 @@ async function seed(connection) {
   }
 
   if (created > 0) {
-    console.log(`\n  ⚠️  IMPORTANT: Change default passwords immediately!`);
-    console.log(`     superadmin: ${adminUsers[0].plainPassword}`);
-    console.log(`     admin:      ${adminUsers[1].plainPassword}\n`);
+    console.log(`\n  ⚠️  IMPORTANT: Change default passwords immediately after first login!`);
   }
 
   console.log(`  ✔ admin-users: ${created} created, ${skipped} skipped`);

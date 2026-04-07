@@ -540,10 +540,16 @@ async function seedELearningData() {
     let instructor = await User.findOne({ email: 'instructor@alawael.com' });
 
     if (!instructor) {
+      const instructorPassword = process.env.SEED_USER_PASSWORD || process.env.ADMIN_PASSWORD;
+      if (!instructorPassword) {
+        throw new Error(
+          'SEED_USER_PASSWORD or ADMIN_PASSWORD environment variable is required for creating instructor user'
+        );
+      }
       instructor = await User.create({
         name: 'د. أحمد المدرب',
         email: 'instructor@alawael.com',
-        password: 'Instructor@123',
+        password: instructorPassword,
         role: 'instructor',
       });
     }

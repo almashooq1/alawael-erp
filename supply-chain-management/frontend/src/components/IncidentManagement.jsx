@@ -37,7 +37,6 @@ const IncidentManagement = () => {
         },
       });
       setIncidents(response.data.data);
-      console.log('✅ Incidents loaded:', response.data.data.length);
     } catch (error) {
       console.error('❌ Error fetching incidents:', error.message);
     } finally {
@@ -106,7 +105,6 @@ const IncidentManagement = () => {
             },
           }
         );
-        console.log('✅ Incident updated:', response.data);
       } else {
         // إنشاء جديد
         const response = await axios.post(`${API_BASE}/incidents`, formData, {
@@ -114,7 +112,6 @@ const IncidentManagement = () => {
             Authorization: `Bearer ${sessionStorage.getItem('token')}`,
           },
         });
-        console.log('✅ Incident created:', response.data);
       }
 
       // إعادة جلب البيانات
@@ -136,7 +133,6 @@ const IncidentManagement = () => {
           Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         },
       });
-      console.log('✅ Incident deleted');
       await fetchIncidents();
     } catch (error) {
       console.error('❌ Error deleting incident:', error.message);

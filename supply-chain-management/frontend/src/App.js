@@ -12,6 +12,7 @@ import Notification from './components/Notification';
 import Dashboard from './components/Dashboard';
 import BarcodeManager from './components/BarcodeManager';
 import apiClient from './utils/api';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -66,6 +67,7 @@ function App() {
   }
 
   return (
+    <ErrorBoundary>
     <div style={{ padding: 24 }}>
       <Notification message={notif.message} type={notif.type} onClose={() => setNotif({ message: '', type: 'info' })} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -162,6 +164,7 @@ function App() {
 
       {activeTab === 'audit' && <AuditLog user={user} />}
     </div>
+    </ErrorBoundary>
   );
 }
 

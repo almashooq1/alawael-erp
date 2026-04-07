@@ -74,6 +74,7 @@ const {
 const securityHeaders = require('./middleware/securityHeaders');
 const csrfProtection = require('./middleware/csrfProtection');
 const { jsonDepthLimiter, validateSecurityConfig } = require('./middleware/securityHardening');
+const sanitizeErrorResponse = require('./middleware/sanitizeErrorResponse');
 
 // Run security config audit at startup (logs warnings for risky settings)
 validateSecurityConfig();
@@ -173,6 +174,7 @@ app.use(requestLoggerMiddleware); // attach req.log (child logger with requestId
 
 // ─── Security Middleware (MUST be first) ──────────────────────────────────────
 app.use(securityHeaders); // Helmet with hardened CSP + Permissions-Policy
+app.use(sanitizeErrorResponse); // Strip internal error details in production
 app.use(suspiciousActivityDetector);
 app.use(mongoSanitizeMiddleware);
 app.use(shutdownMiddleware);

@@ -285,15 +285,13 @@ const CashFlowDashboard = () => {
 
       message.success('تم محاكاة السيناريو');
       // معالجة النتائج
-      console.log('Simulation result:', response.data);
     } catch (error) {
       message.error('فشلت المحاكاة');
     }
   };
 
   const handleDrillDown = dataPoint => {
-    // فتح تفاصيل نقطة البيانات
-    console.log('Drill down:', dataPoint);
+    // TODO: drill-down detail navigation
   };
 
   // ===== Effects =====

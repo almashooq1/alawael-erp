@@ -329,28 +329,38 @@ router.put('/users/:id', async (req, res) => {
   }
 });
 
-// DELETE /users/:id — delete user
+// DELETE /users/:id — soft-delete (تعطيل المستخدم بدلاً من الحذف النهائي)
 router.delete('/users/:id', async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(req.params.id);
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false, deactivatedAt: new Date(), deactivatedBy: req.user?._id },
+      { new: true }
+    );
     if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
-    res.json({ success: true, message: 'تم حذف المستخدم' });
+    logger.info(`User soft-deleted: ${user._id} by ${req.user?._id}`);
+    res.json({ success: true, message: 'تم تعطيل المستخدم' });
   } catch (err) {
     logger.error('Admin delete user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المستخدم' });
+    res.status(500).json({ success: false, message: 'خطأ في تعطيل المستخدم' });
   }
 });
 
-// DELETE /payments/:id — delete payment
+// DELETE /payments/:id — soft-delete (إلغاء المدفوعة بدلاً من الحذف النهائي)
 router.delete('/payments/:id', async (req, res) => {
   try {
     const Payment = require('../models/Payment');
-    const payment = await Payment.findByIdAndDelete(req.params.id);
+    const payment = await Payment.findByIdAndUpdate(
+      req.params.id,
+      { status: 'cancelled', cancelledAt: new Date(), cancelledBy: req.user?._id },
+      { new: true }
+    );
     if (!payment) return res.status(404).json({ success: false, message: 'المدفوعة غير موجودة' });
-    res.json({ success: true, message: 'تم حذف المدفوعة' });
+    logger.info(`Payment soft-deleted: ${payment._id} by ${req.user?._id}`);
+    res.json({ success: true, message: 'تم إلغاء المدفوعة' });
   } catch (err) {
     logger.error('Admin delete payment error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المدفوعة' });
+    res.status(500).json({ success: false, message: 'خطأ في إلغاء المدفوعة' });
   }
 });
 

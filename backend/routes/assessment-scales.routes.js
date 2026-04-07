@@ -370,7 +370,7 @@ router.post('/clinical', async (req, res) => {
 router.get('/clinical/:id', async (req, res) => {
   try {
     const assessment = await ClinicalAssessment.findById(req.params.id)
-      .populate('tool_id')
+      .populate('tool_id', 'name_ar name_en abbreviation category code scoring_system version')
       .populate('beneficiary_id', 'full_name_ar file_number date_of_birth disability_type')
       .populate('assessor_id', 'name')
       .populate('branch_id', 'name_ar')

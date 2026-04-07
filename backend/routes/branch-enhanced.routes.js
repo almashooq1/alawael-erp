@@ -227,8 +227,13 @@ router.get('/transfers', authenticate, async (req, res) => {
   try {
     const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
     const transfers = await BeneficiaryTransfer.find()
-      .populate('beneficiaryId fromBranchId toBranchId requestedBy approvedBy')
-      .sort({ createdAt: -1 });
+      .populate('beneficiaryId', 'full_name_ar file_number')
+      .populate('fromBranchId', 'name nameAr')
+      .populate('toBranchId', 'name nameAr')
+      .populate('requestedBy', 'name email')
+      .populate('approvedBy', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(200);
     res.json({ success: true, data: transfers });
   } catch (err) {
     safeError(res, err);

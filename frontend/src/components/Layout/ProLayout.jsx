@@ -69,7 +69,7 @@ const ProLayout = () => {
       <div className="flex flex-row min-h-screen relative" style={{ backgroundColor: isDark ? '#0B1120' : '#F5F7FA' }}>
         {/* Decorative mesh gradients */}
         <div className="fixed inset-0 pointer-events-none z-0">
-          <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-[0.04]" 
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-[0.04]"
             style={{ background: 'radial-gradient(circle, rgba(46,125,50,0.4), transparent 70%)', filter: 'blur(60px)' }} />
           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03]"
             style={{ background: 'radial-gradient(circle, rgba(76,175,80,0.3), transparent 70%)', filter: 'blur(60px)' }} />
@@ -78,7 +78,7 @@ const ProLayout = () => {
               style={{ background: 'radial-gradient(circle, #4CAF50, transparent 60%)', filter: 'blur(80px)' }} />
           )}
         </div>
-        
+
         {/* Noise texture */}
         {isDark && <div className="fixed inset-0 bg-noise opacity-30 pointer-events-none z-0" />}
 
@@ -94,7 +94,7 @@ const ProLayout = () => {
         <main className="flex-grow flex flex-col min-h-screen relative z-[1] transition-all duration-300" style={{ width: `calc(100% - ${currentSidebarWidth}px)` }}>
           <ProHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={handleToggleMobile} themeMode={themeMode} onToggleTheme={toggleTheme} />
 
-          <div 
+          <div
             className="flex-1 overflow-auto px-4 sm:px-5 md:px-7 pb-10 scrollbar-thin"
             style={{ paddingTop: 84 }}
           >

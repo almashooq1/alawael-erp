@@ -16,10 +16,10 @@ export default function SidebarBrand({ collapsed, onToggleCollapse }) {
     >
       {/* Background glow */}
       <div className="absolute inset-0 bg-gradient-to-br from-green-900/30 via-transparent to-transparent" />
-      
+
       {/* Bottom border gradient */}
       <div className="absolute bottom-0 left-[8%] w-[84%] h-px bg-gradient-to-r from-transparent via-green-500/40 to-transparent" />
-      
+
       {/* Shimmer effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.03] to-transparent animate-shimmer bg-[length:200%_100%]" />
 

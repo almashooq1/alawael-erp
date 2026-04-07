@@ -19,16 +19,16 @@ const ProSidebar = ({ open, onClose, collapsed, onToggleCollapse }) => {
     >
       {/* Base background */}
       <div className="absolute inset-0 bg-gradient-navy" />
-      
+
       {/* Subtle noise texture overlay */}
       <div className="absolute inset-0 bg-noise opacity-40 pointer-events-none" />
-      
+
       {/* Ambient green glow at top */}
       <div
         className="absolute -top-20 left-1/2 -translate-x-1/2 w-60 h-60 rounded-full pointer-events-none opacity-[0.07]"
         style={{ background: 'radial-gradient(circle, #4CAF50, transparent 70%)' }}
       />
-      
+
       {/* Ambient glow at bottom */}
       <div
         className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 h-48 rounded-full pointer-events-none opacity-[0.04]"

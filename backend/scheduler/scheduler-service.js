@@ -504,7 +504,9 @@ class SchedulerService {
 
     // Wait for running jobs
     while (this.runningJobs.size > 0) {
-      await new Promise(resolve => { setTimeout(resolve, 1000); });
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      });
     }
 
     this.isRunning = false;

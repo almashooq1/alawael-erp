@@ -27,7 +27,7 @@ router.get('/', requireAuth, async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
     const [data, total] = await Promise.all([
-      TherapyProgram.find(filter).sort({ department: 1, name: 1 }).skip(skip).limit(Number(limit)),
+      TherapyProgram.find(filter).sort({ department: 1, name: 1 }).skip(skip).limit(Number(limit)).lean(),
       TherapyProgram.countDocuments(filter),
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });

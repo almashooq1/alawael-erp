@@ -470,8 +470,12 @@ class OTPService {
       };
     }
 
-    // التحقق من صحة OTP
-    if (otpRecord.otp !== otp) {
+    // التحقق من صحة OTP — timing-safe comparison to prevent timing attacks
+    const storedBuf = Buffer.from(String(otpRecord.otp), 'utf8');
+    const providedBuf = Buffer.from(String(otp), 'utf8');
+    const otpMatch = storedBuf.length === providedBuf.length &&
+      crypto.timingSafeEqual(storedBuf, providedBuf);
+    if (!otpMatch) {
       // زيادة عدد المحاولات
       otpRecord.attempts++;
       otpRecord.updatedAt = new Date();

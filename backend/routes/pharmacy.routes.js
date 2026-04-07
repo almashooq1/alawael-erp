@@ -349,12 +349,22 @@ router.post('/dispensing', async (req, res) => {
       });
     }
 
-    // Deduct from inventory
+    // Deduct from inventory — atomic guard prevents stock going negative
     for (const item of dispensing.items) {
       if (item.batch) {
-        await PharmacyInventory.findByIdAndUpdate(item.batch, {
-          $inc: { quantity: -item.quantityDispensed },
-        });
+        const updated = await PharmacyInventory.findOneAndUpdate(
+          { _id: item.batch, quantity: { $gte: item.quantityDispensed } },
+          { $inc: { quantity: -item.quantityDispensed } },
+          { new: true }
+        );
+        if (!updated) {
+          // Rollback dispensing record on insufficient stock
+          await Dispensing.findByIdAndUpdate(dispensing._id, { status: 'failed' });
+          return res.status(409).json({
+            success: false,
+            message: `الكمية غير كافية في الدفعة ${item.batch}`,
+          });
+        }
       }
     }
 
@@ -412,7 +422,8 @@ router.get('/inventory', async (req, res) => {
         .populate('medication', 'name code category')
         .sort({ expiryDate: 1 })
         .limit(parseInt(limit))
-        .skip(skip),
+        .skip(skip)
+        .lean(),
       PharmacyInventory.countDocuments(filter),
     ]);
     res.json({ success: true, data: batches, total, page: parseInt(page), limit: parseInt(limit) });
@@ -437,9 +448,19 @@ router.post('/inventory', async (req, res) => {
   }
 });
 
+// ── Allowed fields for inventory update (prevent mass-assignment) ──
+const INVENTORY_UPDATE_FIELDS = [
+  'batchNumber', 'quantity', 'unitPrice', 'expiryDate', 'status',
+  'supplier', 'notes', 'storageLocation', 'minimumStock',
+];
+
 router.put('/inventory/:id', async (req, res) => {
   try {
-    const batch = await PharmacyInventory.findByIdAndUpdate(req.params.id, req.body, {
+    const updates = {};
+    for (const key of INVENTORY_UPDATE_FIELDS) {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    }
+    const batch = await PharmacyInventory.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     });

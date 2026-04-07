@@ -23,4 +23,9 @@ const shipmentSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// فهارس لتسريع الاستعلامات
+shipmentSchema.index({ status: 1 });
+shipmentSchema.index({ order: 1 });
+shipmentSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Shipment', shipmentSchema);

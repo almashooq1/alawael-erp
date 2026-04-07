@@ -26,4 +26,10 @@ const orderSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// فهارس لتسريع الاستعلامات
+orderSchema.index({ status: 1 });
+orderSchema.index({ supplier: 1 });
+orderSchema.index({ orderDate: -1 });
+orderSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Order', orderSchema);

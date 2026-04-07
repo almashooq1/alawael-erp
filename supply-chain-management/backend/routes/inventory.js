@@ -26,7 +26,8 @@ router.get('/', authMiddleware, async (req, res) => {
 // Create inventory record
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const inventory = new Inventory(req.body);
+    const { product, quantity, location, status, notes, minQuantity, maxQuantity, warehouse, productName, minimumLevel, maximumLevel, reorderPoint, supplier, cost } = req.body;
+    const inventory = new Inventory({ product, quantity, location, status, notes, minQuantity, maxQuantity, warehouse, productName, minimumLevel, maximumLevel, reorderPoint, supplier, cost });
     await inventory.save();
     await logAction({
       user: req.user,

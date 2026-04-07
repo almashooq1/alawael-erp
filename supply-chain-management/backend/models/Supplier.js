@@ -20,4 +20,8 @@ const supplierSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// فهارس
+supplierSchema.index({ status: 1 });
+supplierSchema.index({ rating: -1 });
+
 module.exports = mongoose.model('Supplier', supplierSchema);

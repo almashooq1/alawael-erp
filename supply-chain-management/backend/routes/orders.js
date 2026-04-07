@@ -27,7 +27,8 @@ router.get('/', authMiddleware, async (req, res) => {
 // Create order
 router.post('/', authMiddleware, async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const { number, supplier, supplierId, products, status, total, orderDate, date, deliveryDate, notes } = req.body;
+    const order = new Order({ number, supplier, supplierId, products, status, total, orderDate, date, deliveryDate, notes });
     await order.save();
     await logAction({
       user: req.user,

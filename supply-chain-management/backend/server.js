@@ -22,6 +22,8 @@ const notificationsRoutes = require('./routes/notifications');
 const reportingRoutes = require('./routes/reporting');
 // Phase 7: Machine Learning & Advanced Analytics Routes
 const mlRoutes = require('./routes/ml');
+// Auth middleware for route protection
+const { authMiddleware } = require('./middleware/auth');
 
 dotenv.config();
 
@@ -784,28 +786,28 @@ app.delete('/api/shipments/:id', (req, res) => {
 });
 
 // Audit Logs endpoint
-app.get('/api/audit-logs', (req, res) => {
+app.get('/api/audit-logs', authMiddleware, (req, res) => {
   res.json({ success: true, data: auditLogs });
 });
 
 // Mount Phase 3: Advanced Document Management Routes
-app.use('/api/documents-advanced', documentsAdvancedRoutes);
+app.use('/api/documents-advanced', authMiddleware, documentsAdvancedRoutes);
 
 // Mount Phase 3 Extension: Real-Time Messaging Routes
-app.use('/api/messaging', messagingRoutes);
+app.use('/api/messaging', authMiddleware, messagingRoutes);
 
 // Mount Phase 4: Financial Intelligence System Routes
-app.use('/api/financial', financialRoutes);
+app.use('/api/financial', authMiddleware, financialRoutes);
 
 // Mount Phase 5: Smart Notifications Framework Routes
-app.use('/api/notifications', notificationsRoutes);
+app.use('/api/notifications', authMiddleware, notificationsRoutes);
 
 // Mount Phase 6: Advanced Reporting Engine Routes
-app.use('/api/reporting', reportingRoutes);
+app.use('/api/reporting', authMiddleware, reportingRoutes);
 
 // Mount Phase 7: Machine Learning & Advanced Analytics Routes
-app.use('/api/ml', mlRoutes);
-app.use('/api/analytics', mlRoutes);
+app.use('/api/ml', authMiddleware, mlRoutes);
+app.use('/api/analytics', authMiddleware, mlRoutes);
 
 // Catch-all for other routes
 app.get('*', (req, res) => {

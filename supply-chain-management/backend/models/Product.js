@@ -15,4 +15,8 @@ const productSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// فهارس لتسريع الاستعلامات
+productSchema.index({ supplier: 1, status: 1 });
+productSchema.index({ status: 1 });
+
 module.exports = mongoose.model('Product', productSchema);

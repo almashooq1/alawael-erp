@@ -19,6 +19,10 @@ router.post('/:id/review', authMiddleware, async (req, res) => {
     if (supplier.reviews.some(r => r.user?.toString() === req.user._id.toString())) {
       return res.status(400).json({ error: 'لقد قمت بتقييم هذا المورد مسبقاً' });
     }
+    // حد أقصى للمراجعات — حماية من تضخم المستند
+    if (supplier.reviews.length >= 500) {
+      return res.status(400).json({ error: 'تم الوصول للحد الأقصى للمراجعات' });
+    }
     supplier.reviews.push({ user: req.user._id, rating, comment });
     // تحديث متوسط التقييم
     supplier.rating = supplier.reviews.reduce((acc, r) => acc + r.rating, 0) / supplier.reviews.length;

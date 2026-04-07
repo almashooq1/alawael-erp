@@ -19,4 +19,8 @@ const inventorySchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+// فهارس
+inventorySchema.index({ product: 1 });
+inventorySchema.index({ status: 1 });
+
 module.exports = mongoose.model('Inventory', inventorySchema);

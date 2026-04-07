@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const svc = require('../services/inventory/inventory-enhanced.service');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, async (req, res) => {
@@ -55,7 +56,7 @@ router.post(
   async (req, res) => {
     try {
       const { InventoryItem } = require('../models/InventoryItem');
-      const item = await InventoryItem.create(req.body);
+      const item = await InventoryItem.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: item });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -82,7 +83,7 @@ router.put(
   async (req, res) => {
     try {
       const { InventoryItem } = require('../models/InventoryItem');
-      const item = await InventoryItem.findByIdAndUpdate(req.params.itemId, req.body, {
+      const item = await InventoryItem.findByIdAndUpdate(req.params.itemId, stripUpdateMeta(req.body), {
         new: true,
       });
       if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
@@ -129,7 +130,7 @@ router.get('/categories', authenticate, async (req, res) => {
 router.post('/categories', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const { ItemCategory } = require('../models/InventoryItem');
-    const cat = await ItemCategory.create(req.body);
+    const cat = await ItemCategory.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: cat });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -150,7 +151,7 @@ router.get('/warehouses', authenticate, async (req, res) => {
 router.post('/warehouses', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const Warehouse = require('../models/Warehouse');
-    const warehouse = await Warehouse.create(req.body);
+    const warehouse = await Warehouse.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: warehouse });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -175,7 +176,7 @@ router.post(
   async (req, res) => {
     try {
       const { Supplier } = require('../models/InventoryStock');
-      const supplier = await Supplier.create(req.body);
+      const supplier = await Supplier.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: supplier });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -190,7 +191,7 @@ router.put(
   async (req, res) => {
     try {
       const { Supplier } = require('../models/InventoryStock');
-      const supplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      const supplier = await Supplier.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
       res.json({ success: true, data: supplier });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -360,7 +361,7 @@ router.post(
   async (req, res) => {
     try {
       const { Asset } = require('../models/InventoryStock');
-      const asset = await Asset.create(req.body);
+      const asset = await Asset.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: asset });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -386,7 +387,7 @@ router.put(
   async (req, res) => {
     try {
       const { Asset } = require('../models/InventoryStock');
-      const asset = await Asset.findByIdAndUpdate(req.params.assetId, req.body, { new: true });
+      const asset = await Asset.findByIdAndUpdate(req.params.assetId, stripUpdateMeta(req.body), { new: true });
       res.json({ success: true, data: asset });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

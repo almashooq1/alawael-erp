@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const svc = require('../services/branches/branch-enhanced.service');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // مقارنة أداء الفروع
 router.get('/compare', authenticate, async (req, res) => {
@@ -31,7 +32,7 @@ router.get('/', authenticate, async (req, res) => {
 router.post('/', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const Branch = require('../models/Branch');
-    const branch = await Branch.create(req.body);
+    const branch = await Branch.create(stripUpdateMeta(req.body));
     await svc.initializeSettings(branch._id);
     res.status(201).json({ success: true, data: branch });
   } catch (err) {
@@ -59,7 +60,7 @@ router.put(
   async (req, res) => {
     try {
       const Branch = require('../models/Branch');
-      const branch = await Branch.findByIdAndUpdate(req.params.branchId, req.body, { new: true });
+      const branch = await Branch.findByIdAndUpdate(req.params.branchId, stripUpdateMeta(req.body), { new: true });
       if (!branch) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
       res.json({ success: true, data: branch });
     } catch (err) {

@@ -2,6 +2,7 @@ const express = require('express');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const Employee = require('../models/HR/Employee');
 const EmploymentContract = require('../models/HR/EmploymentContract');
 const PayrollRecord = require('../models/HR/PayrollRecord');
@@ -48,7 +49,8 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
       .populate('branch_id', 'name_ar')
       .skip((page - 1) * limit)
       .limit(+limit)
-      .sort({ hire_date: -1 });
+      .sort({ hire_date: -1 })
+      .lean();
     res.json({ data: employees, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
     safeError(res, err);
@@ -57,7 +59,7 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
 
 router.post('/employees', authenticate, authorize('hr.create'), async (req, res) => {
   try {
-    const employee = await Employee.create({ ...req.body, created_by: req.user._id });
+    const employee = await Employee.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
     res.status(201).json({ data: employee });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -80,7 +82,7 @@ router.put('/employees/:id', authenticate, authorize('hr.edit'), async (req, res
   try {
     const emp = await Employee.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      req.body,
+      stripUpdateMeta(req.body),
       { new: true }
     );
     if (!emp) return res.status(404).json({ error: 'الموظف غير موجود' });
@@ -250,7 +252,7 @@ router.get('/leave-balance/:employee_id', authenticate, async (req, res) => {
 // ===== الحضور =====
 router.post('/attendance', authenticate, async (req, res) => {
   try {
-    const record = await AttendanceRecord.create({ ...req.body, approved_by: req.user._id });
+    const record = await AttendanceRecord.create({ ...stripUpdateMeta(req.body), approved_by: req.user._id });
     res.status(201).json({ data: record });
   } catch (err) {
     res.status(400).json({ error: err.message });

@@ -1144,7 +1144,7 @@ router.get('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res
 
 router.post('/warehouse-intel/warehouses', authenticateToken, async (req, res) => {
   try {
-    const wh = await Warehouse.create(req.body);
+    const wh = await Warehouse.create(pick(req.body, FIELDS.warehouse));
     res.status(201).json(wh);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1190,7 +1190,7 @@ router.get('/warehouse-intel/bins', authenticateToken, async (req, res) => {
 
 router.post('/warehouse-intel/bins', authenticateToken, async (req, res) => {
   try {
-    const bin = await WarehouseBin.create(req.body);
+    const bin = await WarehouseBin.create(pick(req.body, FIELDS.bin));
     res.status(201).json(bin);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });

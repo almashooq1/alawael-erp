@@ -17,6 +17,9 @@ import logger from './utils/logger';
 import Login from './pages/common/SimpleLogin';
 import Register from './pages/Register';
 
+// Landing page — lazy loaded
+const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
+
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
   import('./AuthenticatedShell').catch(() => ({ default: () => null }))
@@ -74,6 +77,15 @@ function AppRoutes() {
 
   return (
     <Routes>
+      {/* Landing page — public */}
+      <Route
+        path="/"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <LandingPage />
+          </Suspense>
+        }
+      />
       {/* Public Routes — lightweight, load instantly */}
       <Route
         path="/login"

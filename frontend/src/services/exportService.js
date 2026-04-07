@@ -1,3 +1,8 @@
+import logger from 'utils/logger';
+import { brandColors, surfaceColors } from 'theme/palette';
+import { getOrgBranding } from 'utils/storageService';
+import { triggerBlobDownload } from 'utils/downloadHelper';
+
 // ⚡ Heavy libraries loaded on-demand (not at import time)
 // ExcelJS (~300KB), jsPDF (~250KB), html2canvas (~40KB) are only loaded when actually exporting
 let _ExcelJS, _jsPDF, _html2canvas;
@@ -19,11 +24,6 @@ const loadHtml2Canvas = async () => {
   }
   return _html2canvas;
 };
-
-import logger from 'utils/logger';
-import { brandColors, surfaceColors } from 'theme/palette';
-import { getOrgBranding } from 'utils/storageService';
-import { triggerBlobDownload } from 'utils/downloadHelper';
 
 // إعدادات التخصيص المؤسسي (شعار/ألوان)
 const getBranding = () => {

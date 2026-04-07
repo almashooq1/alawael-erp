@@ -5,12 +5,18 @@ const logger = require('../utils/logger');
 
 /* ── Field whitelists (prevent mass-assignment) ──────────────────────── */
 const PERF_REVIEW_FIELDS = [
-  'employeeId', 'period', 'department', 'rating', 'score',
-  'strengths', 'improvements', 'goals', 'comments', 'reviewDate',
+  'employeeId',
+  'period',
+  'department',
+  'rating',
+  'score',
+  'strengths',
+  'improvements',
+  'goals',
+  'comments',
+  'reviewDate',
 ];
-const LEAVE_FIELDS = [
-  'type', 'startDate', 'endDate', 'reason', 'department', 'attachments',
-];
+const LEAVE_FIELDS = ['type', 'startDate', 'endDate', 'reason', 'department', 'attachments'];
 
 function pick(src, fields) {
   const out = {};
@@ -96,9 +102,7 @@ router.post('/attendance/checkout', async (req, res) => {
     const userRole = req.user?.role;
     const isPrivileged = ['admin', 'super_admin', 'hr_manager'].includes(userRole);
     // Only privileged users may check out other employees
-    const targetEmpId = (isPrivileged && req.body.employeeId)
-      ? req.body.employeeId
-      : req.user?.id;
+    const targetEmpId = isPrivileged && req.body.employeeId ? req.body.employeeId : req.user?.id;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const record = await Attendance.findOneAndUpdate(
@@ -135,17 +139,21 @@ router.get('/performance-reviews', async (req, res) => {
 });
 
 // POST /performance-reviews — require manager+ & whitelist fields
-router.post('/performance-reviews', authorize(['admin', 'hr_manager', 'manager']), async (req, res) => {
-  try {
-    const PerformanceEvaluation = require('../models/HR/PerformanceEvaluation');
-    const fields = pick(req.body, PERF_REVIEW_FIELDS);
-    const review = await PerformanceEvaluation.create({ ...fields, evaluator: req.user?.id });
-    res.status(201).json({ success: true, data: review, message: 'تم إنشاء تقييم الأداء' });
-  } catch (err) {
-    logger.error('HR create performance-review error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم الأداء' });
+router.post(
+  '/performance-reviews',
+  authorize(['admin', 'hr_manager', 'manager']),
+  async (req, res) => {
+    try {
+      const PerformanceEvaluation = require('../models/HR/PerformanceEvaluation');
+      const fields = pick(req.body, PERF_REVIEW_FIELDS);
+      const review = await PerformanceEvaluation.create({ ...fields, evaluator: req.user?.id });
+      res.status(201).json({ success: true, data: review, message: 'تم إنشاء تقييم الأداء' });
+    } catch (err) {
+      logger.error('HR create performance-review error:', err);
+      res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم الأداء' });
+    }
   }
-});
+);
 
 // POST /leaves
 router.post('/leaves', async (req, res) => {

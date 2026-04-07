@@ -12,8 +12,19 @@ const logger = require('../../utils/logger');
  * معالجة أحداث الاشتراك في لوحة القيادة
  */
 function dashboardHandler(socket, io, activeSubscriptions) {
+  // Helper: clear all stored intervals for this socket
+  function clearSocketIntervals() {
+    if (socket.intervals) {
+      socket.intervals.forEach(id => clearInterval(id));
+      socket.intervals = [];
+    }
+  }
+
   // Subscribe to dashboard updates
   socket.on('dashboard:subscribe', () => {
+    // Clear any previous intervals to prevent leaks on re-subscribe
+    clearSocketIntervals();
+
     socket.join('dashboard');
 
     // Store subscription
@@ -65,6 +76,9 @@ function dashboardHandler(socket, io, activeSubscriptions) {
   // Unsubscribe from dashboard
   socket.on('dashboard:unsubscribe', () => {
     socket.leave('dashboard');
+
+    // Clear intervals to prevent dangling timers
+    clearSocketIntervals();
 
     const sub = activeSubscriptions.get(socket.id);
     if (sub && sub.type === 'dashboard') {

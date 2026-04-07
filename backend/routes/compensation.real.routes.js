@@ -26,8 +26,15 @@ router.get('/incentives', async (req, res) => {
 
 // ── Allowed fields for incentive creation (prevent mass-assignment) ──
 const INCENTIVE_FIELDS = [
-  'employeeId', 'type', 'amount', 'currency', 'reason',
-  'description', 'department', 'period', 'effectiveDate',
+  'employeeId',
+  'type',
+  'amount',
+  'currency',
+  'reason',
+  'description',
+  'department',
+  'period',
+  'effectiveDate',
 ];
 
 function pickFields(src, allowedFields) {
@@ -47,7 +54,11 @@ router.post('/incentives', authorize(['admin', 'manager']), async (req, res) => 
         return res.status(400).json({ success: false, message: 'المبلغ يجب أن يكون رقماً موجباً' });
       }
     }
-    const incentive = await IndividualIncentive.create({ ...fields, status: 'pending', createdBy: req.user?.id });
+    const incentive = await IndividualIncentive.create({
+      ...fields,
+      status: 'pending',
+      createdBy: req.user?.id,
+    });
     res.status(201).json({ success: true, data: incentive, message: 'تم إنشاء الحافز' });
   } catch (err) {
     logger.error('Compensation create error:', err);
@@ -59,7 +70,11 @@ router.post('/incentives', authorize(['admin', 'manager']), async (req, res) => 
 router.put('/incentives/:id/approve', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
-    const item = await IndividualIncentive.findByIdAndUpdate(req.params.id, { status: 'approved', approvedBy: req.user?.id, approvedAt: new Date() }, { new: true }).lean();
+    const item = await IndividualIncentive.findByIdAndUpdate(
+      req.params.id,
+      { status: 'approved', approvedBy: req.user?.id, approvedAt: new Date() },
+      { new: true }
+    ).lean();
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم اعتماد الحافز' });
   } catch (err) {
@@ -72,7 +87,11 @@ router.put('/incentives/:id/approve', authorize(['admin', 'manager']), async (re
 router.put('/incentives/:id/mark-paid', authorize(['admin']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
-    const item = await IndividualIncentive.findByIdAndUpdate(req.params.id, { status: 'paid', paidAt: new Date() }, { new: true }).lean();
+    const item = await IndividualIncentive.findByIdAndUpdate(
+      req.params.id,
+      { status: 'paid', paidAt: new Date() },
+      { new: true }
+    ).lean();
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم صرف الحافز' });
   } catch (err) {

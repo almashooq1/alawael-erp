@@ -1,4 +1,5 @@
 import express from 'express';
+import { authMiddleware } from '../middleware/auth.js';
 import Supplier from '../models/Supplier.js';
 import Product from '../models/Product.js';
 import Inventory from '../models/Inventory.js';
@@ -6,6 +7,9 @@ import Order from '../models/Order.js';
 import Shipment from '../models/Shipment.js';
 
 const router = express.Router();
+
+// 🔒 All dashboard routes require authentication
+router.use(authMiddleware);
 
 // إحصائيات سريعة للنظام
 router.get('/stats', async (_req, res) => {

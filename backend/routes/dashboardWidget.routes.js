@@ -214,6 +214,6 @@ router.get('/stats', protect, dashboardController.getStats);
  * GET /api/dashboard/health
  * فحص الصحة
  */
-router.get('/health', dashboardController.healthCheck);
+router.get('/health', protect, dashboardController.healthCheck);
 
 module.exports = router;

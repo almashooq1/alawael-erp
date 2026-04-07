@@ -12,12 +12,23 @@ const logger = require('../../utils/logger');
  * معالجة أحداث الاشتراك في الوحدات
  */
 function moduleHandler(socket, io, activeSubscriptions) {
+  // Helper: clear all stored intervals for this socket
+  function clearSocketIntervals() {
+    if (socket.intervals) {
+      socket.intervals.forEach(id => clearInterval(id));
+      socket.intervals = [];
+    }
+  }
+
   // Subscribe to module KPIs
   socket.on('module:subscribe', ({ moduleKey }) => {
     if (!moduleKey) {
       socket.emit('error', { message: 'Module key is required' });
       return;
     }
+
+    // Clear any previous intervals to prevent leaks on re-subscribe
+    clearSocketIntervals();
 
     const room = `module:${moduleKey}`;
     socket.join(room);
@@ -75,6 +86,9 @@ function moduleHandler(socket, io, activeSubscriptions) {
   // Unsubscribe from module
   socket.on('module:unsubscribe', ({ moduleKey }) => {
     if (!moduleKey) return;
+
+    // Clear intervals to prevent dangling timers
+    clearSocketIntervals();
 
     const room = `module:${moduleKey}`;
     socket.leave(room);

@@ -168,10 +168,23 @@ router.post(
  */
 router.get('/correspondence', async (req, res) => {
   try {
+    // Safe-parse user-controlled sort param — return 400 on invalid JSON
+    let sort = { createdAt: -1 };
+    if (req.query.sort) {
+      try {
+        sort = JSON.parse(req.query.sort);
+      } catch (_parseErr) {
+        return res.status(400).json({
+          success: false,
+          message: 'معامل الترتيب (sort) غير صالح — يجب أن يكون JSON',
+        });
+      }
+    }
+
     const result = await intelligentCommService.search(req.query, {
       page: req.query.page,
       limit: req.query.limit,
-      sort: req.query.sort ? JSON.parse(req.query.sort) : { createdAt: -1 },
+      sort,
       fields: req.query.fields,
     });
 

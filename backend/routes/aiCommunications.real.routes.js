@@ -37,6 +37,7 @@ router.get('/emails', async (req, res) => {
 router.get('/conversations/:id/messages', async (req, res) => {
   try {
     const Message = require('../models/message.model');
+const { stripUpdateMeta } = require('../utils/sanitize');
     const data = await Message.find({ conversationId: req.params.id }).sort({ createdAt: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
@@ -49,7 +50,7 @@ router.get('/conversations/:id/messages', async (req, res) => {
 router.post('/send-message', async (req, res) => {
   try {
     const Message = require('../models/message.model');
-    const msg = await Message.create({ ...req.body, senderId: req.user?.id });
+    const msg = await Message.create({ ...stripUpdateMeta(req.body), senderId: req.user?.id });
     res.status(201).json({ success: true, data: msg, message: 'تم إرسال الرسالة' });
   } catch (err) {
     logger.error('Send message error:', err);
@@ -61,7 +62,7 @@ router.post('/send-message', async (req, res) => {
 router.post('/emails/send', async (req, res) => {
   try {
     const Communication = require('../models/Communication');
-    const email = await Communication.create({ ...req.body, type: 'email', from: req.user?.id, direction: 'outgoing' });
+    const email = await Communication.create({ ...stripUpdateMeta(req.body), type: 'email', from: req.user?.id, direction: 'outgoing' });
     res.status(201).json({ success: true, data: email, message: 'تم إرسال البريد' });
   } catch (err) {
     logger.error('Send email error:', err);

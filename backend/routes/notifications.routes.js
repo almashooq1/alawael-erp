@@ -8,6 +8,7 @@ const router = express.Router();
 const NotificationsService = require('../services/notifications.service');
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
 const validateObjectId = require('../middleware/validateObjectId');
@@ -290,7 +291,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (notificationModel) {
-      const updated = await notificationModel.findByIdAndUpdate(id, req.body, {
+      const updated = await notificationModel.findByIdAndUpdate(id, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

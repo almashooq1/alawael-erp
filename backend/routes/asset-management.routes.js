@@ -29,6 +29,7 @@ const AssetTransfer = require('../models/AssetTransfer');
 const ResourceBooking = require('../models/ResourceBooking');
 const AssetInventory = require('../models/AssetInventory');
 const AssetInventoryItem = require('../models/AssetInventoryItem');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const MAX_LIMIT = 100;
@@ -78,7 +79,7 @@ router.post('/categories', authorize(['admin', 'manager']), async (req, res) => 
     if (!nameAr || !code)
       return res.status(400).json({ success: false, message: 'الاسم والكود مطلوبان' });
     const category = await AssetCategory.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       code: code.toUpperCase(),
       createdBy: req.user?.id,
     });
@@ -96,7 +97,7 @@ router.put('/categories/:id', authorize(['admin', 'manager']), async (req, res) 
   try {
     const category = await AssetCategory.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user?.id },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
       { new: true, runValidators: true }
     ).lean();
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
@@ -181,7 +182,7 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
     const { name, category } = req.body;
     if (!name || !category)
       return res.status(400).json({ success: false, message: 'الاسم والفئة مطلوبان' });
-    const asset = await Asset.create({ ...req.body, createdBy: req.user?.id });
+    const asset = await Asset.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data: asset, message: 'تم إضافة الأصل' });
   } catch (err) {
     logger.error('assets create error', err);
@@ -206,7 +207,7 @@ router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const asset = await Asset.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedAt: new Date() },
+      { ...stripUpdateMeta(req.body), updatedAt: new Date() },
       { new: true, runValidators: true }
     ).lean();
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
@@ -290,7 +291,7 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
       return res.status(400).json({ success: false, message: 'البيانات الأساسية مطلوبة' });
     }
     const schedule = await AssetDepreciationSchedule.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?.id,
     });
     res.status(201).json({ success: true, data: schedule, message: 'تم إنشاء جدول الإهلاك' });
@@ -372,7 +373,7 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
     }
     const workOrderNumber = genCode('WO');
     const workOrder = await MaintenanceWorkOrder.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       workOrderNumber,
       status: 'pending',
       createdBy: req.user?.id,
@@ -408,7 +409,7 @@ router.put('/work-orders/:id', authorize(['admin', 'manager', 'technician']), as
   try {
     const wo = await MaintenanceWorkOrder.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user?.id },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?.id },
       { new: true, runValidators: true }
     ).lean();
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
@@ -508,7 +509,7 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
     }
     const transferNumber = genCode('TR');
     const transfer = await AssetTransfer.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       transferNumber,
       status: 'pending',
       requestedBy: req.user?.id,
@@ -622,7 +623,7 @@ router.post('/bookings', async (req, res) => {
     }
     const bookingNumber = genCode('BK');
     const booking = await ResourceBooking.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       bookingNumber,
       bookedBy: req.user?.id,
       createdBy: req.user?.id,
@@ -684,7 +685,7 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
       return res.status(400).json({ success: false, message: 'العنوان والتاريخ مطلوبان' });
     const inventoryNumber = genCode('INV');
     const inventory = await AssetInventory.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       inventoryNumber,
       conductedBy: req.body.conductedBy || req.user?.id,
       createdBy: req.user?.id,

@@ -6,6 +6,7 @@ const router = express.Router();
 const CMSService = require('../services/cmsService');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const { authenticate, _authorize } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ============ PAGES ============
 
@@ -157,7 +158,7 @@ router.put('/posts/:postId', authenticate, (req, res, next) => {
     const { postId } = req.params;
     const result = CMSService.updatePost
       ? CMSService.updatePost(postId, req.body)
-      : { id: postId, ...req.body, updatedAt: new Date() };
+      : { id: postId, ...stripUpdateMeta(req.body), updatedAt: new Date() };
     return res.status(200).json(new ApiResponse(200, result, 'Post updated'));
   } catch (error) {
     return next(new ApiError(500, 'Failed to update post', ['حدث خطأ في الخادم']));
@@ -183,7 +184,7 @@ router.put('/categories/:categoryId', authenticate, (req, res, next) => {
     const { categoryId } = req.params;
     const result = CMSService.updateCategory
       ? CMSService.updateCategory(categoryId, req.body)
-      : { id: categoryId, ...req.body, updatedAt: new Date() };
+      : { id: categoryId, ...stripUpdateMeta(req.body), updatedAt: new Date() };
     return res.status(200).json(new ApiResponse(200, result, 'Category updated'));
   } catch (error) {
     return next(new ApiError(500, 'Failed to update category', ['حدث خطأ في الخادم']));

@@ -18,6 +18,7 @@ const { authenticate } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { stripUpdateMeta } = require('../utils/sanitize');
 // All beneficiary routes require authentication + branch scope
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -538,7 +539,7 @@ router.post('/', async (req, res) => {
  */
 router.put('/:id', validateObjectId('id'), async (req, res) => {
   try {
-    const updateData = { ...req.body };
+    const updateData = { ...stripUpdateMeta(req.body) };
 
     // Don't allow password update via this route
     delete updateData.password;

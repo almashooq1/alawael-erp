@@ -158,7 +158,7 @@ router.post('/controls/:id/test-result', async (req, res) => {
     const control = await InternalControl.findById(req.params.id);
     if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
 
-    control.testResults.push({ ...req.body, tester: req.user?._id, testDate: new Date() });
+    control.testResults.push({ ...stripUpdateMeta(req.body), tester: req.user?._id, testDate: new Date() });
     control.lastTestDate = new Date();
     control.lastTestResult = req.body.result;
     await control.save();
@@ -242,7 +242,7 @@ router.post('/items/:id/evidence', async (req, res) => {
     const item = await ComplianceItem.findById(req.params.id);
     if (!item) return res.status(404).json({ success: false, error: 'البند غير موجود' });
 
-    item.evidence.push({ ...req.body, uploadedAt: new Date() });
+    item.evidence.push({ ...stripUpdateMeta(req.body), uploadedAt: new Date() });
     await item.save();
 
     res.json({ success: true, data: item, message: 'تم إضافة الإثبات' });
@@ -295,7 +295,7 @@ router.post('/logs', async (req, res) => {
   try {
     if (!ComplianceLog)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const log = await ComplianceLog.create(req.body);
+    const log = await ComplianceLog.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: log });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });

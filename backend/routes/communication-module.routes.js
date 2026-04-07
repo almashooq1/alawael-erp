@@ -22,6 +22,7 @@ const InternalMessage = require('../models/communication/InternalMessage');
 const NotificationLog = require('../models/communication/NotificationLog');
 const ContactDirectory = require('../models/communication/ContactDirectory');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 router.use(authenticate);
@@ -71,7 +72,7 @@ router.get('/announcements', async (req, res) => {
 // POST /announcements
 router.post('/announcements', async (req, res) => {
   try {
-    const announcement = await Announcement.create({ ...req.body, created_by: req.user._id });
+    const announcement = await Announcement.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
     res.status(201).json({ success: true, data: announcement });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
@@ -99,7 +100,7 @@ router.put('/announcements/:id', async (req, res) => {
   try {
     const ann = await Announcement.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
-      { ...req.body, updated_by: req.user._id },
+      { ...stripUpdateMeta(req.body), updated_by: req.user._id },
       { new: true, runValidators: true }
     );
     if (!ann) return res.status(404).json({ success: false, error: 'الإعلان غير موجود' });
@@ -415,7 +416,7 @@ router.get('/contacts', async (req, res) => {
 router.post('/contacts', async (req, res) => {
   try {
     const contact = await ContactDirectory.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       created_by: req.user._id,
       branch_id: req.user.branch_id,
     });

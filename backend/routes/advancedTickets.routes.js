@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const AdvancedTicket = require('../models/AdvancedTicket');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -86,7 +87,7 @@ router.post('/', async (req, res) => {
 // ─── Update ticket ───────────────────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
-    const updates = { ...req.body };
+    const updates = { ...stripUpdateMeta(req.body) };
     if (updates.status === 'resolved' || updates.status === 'closed') {
       updates['sla.resolvedAt'] = new Date();
     }

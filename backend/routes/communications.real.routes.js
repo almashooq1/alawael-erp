@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Communication = require('../models/Communication');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -55,7 +56,7 @@ router.get('/therapist', async (req, res) => {
 // POST /
 router.post('/', async (req, res) => {
   try {
-    const comm = await Communication.create({ ...req.body, from: req.user?.id });
+    const comm = await Communication.create({ ...stripUpdateMeta(req.body), from: req.user?.id });
     res.status(201).json({ success: true, data: comm, message: 'تم إرسال المراسلة' });
   } catch (err) {
     logger.error('Communication create error:', err);

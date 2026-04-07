@@ -38,6 +38,7 @@
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const { escapeRegex } = require('../utils/sanitize');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -139,7 +140,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const rule = await ClinicalRule.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       branchId,
       createdBy: req.user?._id,
     });
@@ -162,7 +163,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const rule = await ClinicalRule.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
-      { ...req.body, updatedBy: req.user?._id },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { new: true, runValidators: true }
     );
     if (!rule) return res.status(404).json({ message: 'القاعدة السريرية غير موجودة' });
@@ -407,7 +408,7 @@ router.post(
   authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
-    const drug = await DrugLibrary.create({ ...req.body, branchId, createdBy: req.user?._id });
+    const drug = await DrugLibrary.create({ ...stripUpdateMeta(req.body), branchId, createdBy: req.user?._id });
     res.status(201).json({ message: 'تم إضافة الدواء بنجاح', data: drug });
   })
 );
@@ -427,7 +428,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const drug = await DrugLibrary.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
-      { ...req.body, updatedBy: req.user?._id },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?._id },
       { new: true, runValidators: true }
     );
     if (!drug) return res.status(404).json({ message: 'الدواء غير موجود' });
@@ -515,7 +516,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const assessment = await CdssRiskAssessment.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       branchId,
       assessedBy: req.user?._id,
       createdBy: req.user?._id,
@@ -711,7 +712,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const diagnosis = await DifferentialDiagnosis.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       branchId,
       requestedBy: req.user?._id,
       createdBy: req.user?._id,

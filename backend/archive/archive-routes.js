@@ -31,11 +31,16 @@ const upload = multer({
     const ext = path.extname(file.originalname).substring(1).toLowerCase();
     // MIME allowlist to prevent extension-spoofing (Round 38)
     const mimeAllowlist = [
-      'application/pdf', 'image/jpeg', 'image/png', 'image/gif',
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel', 'text/plain', 'text/csv',
+      'application/vnd.ms-excel',
+      'text/plain',
+      'text/csv',
     ];
     if (archiveConfig.storage.allowedTypes.includes(ext) && mimeAllowlist.includes(file.mimetype)) {
       cb(null, true);

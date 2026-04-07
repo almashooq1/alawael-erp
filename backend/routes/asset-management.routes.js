@@ -18,6 +18,7 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const escapeRegex = require('../utils/escapeRegex');
 
 // Models
 const AssetCategory = require('../models/AssetCategory');
@@ -156,9 +157,10 @@ router.get('/assets', async (req, res) => {
     if (category) filter.category = category;
     if (branchId) filter.location = { $regex: branchId, $options: 'i' };
     if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search, 'i')] } },
+        { name: { $regex: safe, $options: 'i' } },
+        { tags: { $in: [new RegExp(safe, 'i')] } },
       ];
     }
     const limit = clamp(rawLimit);

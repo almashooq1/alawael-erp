@@ -36,7 +36,8 @@
  */
 
 const express = require('express');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 
 const router = express.Router();
 
@@ -111,12 +112,14 @@ router.get(
     if (category) filter.category = category;
     if (severity) filter.severity = severity;
     if (isActive !== undefined) filter.isActive = isActive === 'true';
-    if (search)
+    if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { name: new RegExp(search, 'i') },
-        { nameAr: new RegExp(search, 'i') },
-        { code: new RegExp(search, 'i') },
+        { name: new RegExp(safe, 'i') },
+        { nameAr: new RegExp(safe, 'i') },
+        { code: new RegExp(safe, 'i') },
       ];
+    }
 
     const [rules, total] = await Promise.all([
       ClinicalRule.find(filter)
@@ -132,6 +135,7 @@ router.get(
 
 router.post(
   '/rules',
+  authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const rule = await ClinicalRule.create({
@@ -154,6 +158,7 @@ router.get(
 
 router.put(
   '/rules/:id',
+  authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const rule = await ClinicalRule.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
@@ -167,6 +172,7 @@ router.put(
 
 router.delete(
   '/rules/:id',
+  authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     const rule = await ClinicalRule.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
@@ -374,13 +380,15 @@ router.get(
     const filter = { branchId, isActive: true, deletedAt: null };
     if (drugClass) filter.drugClass = drugClass;
     if (isControlled !== undefined) filter.isControlled = isControlled === 'true';
-    if (search)
+    if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { genericName: new RegExp(search, 'i') },
-        { genericNameAr: new RegExp(search, 'i') },
-        { brandNames: new RegExp(search, 'i') },
-        { code: new RegExp(search, 'i') },
+        { genericName: new RegExp(safe, 'i') },
+        { genericNameAr: new RegExp(safe, 'i') },
+        { brandNames: new RegExp(safe, 'i') },
+        { code: new RegExp(safe, 'i') },
       ];
+    }
 
     const [drugs, total] = await Promise.all([
       DrugLibrary.find(filter)
@@ -396,6 +404,7 @@ router.get(
 
 router.post(
   '/drugs',
+  authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
     const drug = await DrugLibrary.create({ ...req.body, branchId, createdBy: req.user?._id });
@@ -414,6 +423,7 @@ router.get(
 
 router.put(
   '/drugs/:id',
+  authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const drug = await DrugLibrary.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },
@@ -427,6 +437,7 @@ router.put(
 
 router.delete(
   '/drugs/:id',
+  authorize(['admin', 'manager']),
   asyncHandler(async (req, res) => {
     const drug = await DrugLibrary.findOneAndUpdate(
       { _id: req.params.id, deletedAt: null },

@@ -51,7 +51,9 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowed = ['.pdf', '.jpg', '.jpeg', '.png', '.docx', '.doc', '.xlsx'];
     const allowedMime = [
-      'application/pdf', 'image/jpeg', 'image/png',
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/msword',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

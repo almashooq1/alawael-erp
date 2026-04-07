@@ -307,7 +307,8 @@ SupplierSchema.statics = {
    * البحث عن موردين بكلمات مفتاحية
    */
   async searchSuppliers(keyword, filters = {}) {
-    const searchRegex = new RegExp(keyword, 'i');
+    const safe = String(keyword).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const searchRegex = new RegExp(safe, 'i');
     const query = {
       ...filters,
       $or: [

@@ -24,6 +24,7 @@ const mongoose = require('mongoose');
 const Guardian = require('../models/Guardian');
 const Beneficiary = require('../models/Beneficiary');
 const { authenticateToken } = require('../middleware/auth.middleware');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -56,13 +57,14 @@ router.get('/search', async (req, res) => {
     const search = q.trim();
     const isDigits = /^\d+$/.test(search);
 
+    const safe = escapeRegex(search);
     const filter = isDigits
-      ? { $or: [{ idNumber: new RegExp(search) }, { phone: new RegExp(search) }] }
+      ? { $or: [{ idNumber: new RegExp(safe) }, { phone: new RegExp(safe) }] }
       : {
           $or: [
-            { firstName_ar: new RegExp(search, 'i') },
-            { lastName_ar: new RegExp(search, 'i') },
-            { name_ar: new RegExp(search, 'i') },
+            { firstName_ar: new RegExp(safe, 'i') },
+            { lastName_ar: new RegExp(safe, 'i') },
+            { name_ar: new RegExp(safe, 'i') },
           ],
         };
 

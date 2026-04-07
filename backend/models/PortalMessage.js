@@ -213,10 +213,11 @@ PortalMessageSchema.statics.getConversation = function (userId, otherUserId) {
 };
 
 PortalMessageSchema.statics.searchMessages = function (userId, userModel, query) {
+  const safe = String(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return this.find({
     toId: userId,
     toModel: userModel,
-    $or: [{ subject: new RegExp(query, 'i') }, { message: new RegExp(query, 'i') }],
+    $or: [{ subject: new RegExp(safe, 'i') }, { message: new RegExp(safe, 'i') }],
     deletedAt: null,
   }).sort({ createdAt: -1 });
 };

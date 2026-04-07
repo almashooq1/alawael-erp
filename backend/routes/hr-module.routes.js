@@ -35,12 +35,14 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
     if (department) query.department = department;
     if (specialization) query.specialization = specialization;
     if (status) query.status = status;
-    if (search)
+    if (search) {
+      const safe = escapeRegex(String(search));
       query.$or = [
-        { full_name_ar: new RegExp(search, 'i') },
-        { employee_number: new RegExp(search, 'i') },
-        { national_id: new RegExp(search, 'i') },
+        { full_name_ar: new RegExp(safe, 'i') },
+        { employee_number: new RegExp(safe, 'i') },
+        { national_id: new RegExp(safe, 'i') },
       ];
+    }
     const total = await Employee.countDocuments(query);
     const employees = await Employee.find(query)
       .populate('branch_id', 'name_ar')

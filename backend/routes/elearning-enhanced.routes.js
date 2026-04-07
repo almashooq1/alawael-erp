@@ -106,12 +106,14 @@ router.get(
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (isMandatory !== undefined) filter.isMandatory = isMandatory === 'true';
-    if (search)
+    if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { title: new RegExp(search, 'i') },
-        { titleAr: new RegExp(search, 'i') },
-        { code: new RegExp(search, 'i') },
+        { title: new RegExp(safe, 'i') },
+        { titleAr: new RegExp(safe, 'i') },
+        { code: new RegExp(safe, 'i') },
       ];
+    }
 
     const [courses, total] = await Promise.all([
       ElearningCourse.find(filter)

@@ -487,15 +487,19 @@ router.post(
 
       await movement.save();
 
-      // تحديث المخزون
-      product.currentStock += quantity;
-      product.availableStock = product.currentStock - product.reservedStock;
-      product.costPrice = unitCost || product.costPrice;
-      await product.save();
+      // تحديث المخزون — atomic $inc to prevent race conditions
+      const updatedProduct = await Product.findOneAndUpdate(
+        { _id: productId, organization: req.user.organization },
+        {
+          $inc: { currentStock: quantity, availableStock: quantity },
+          $set: { costPrice: unitCost || product.costPrice },
+        },
+        { new: true }
+      );
 
       res.status(201).json({
         success: true,
-        data: { movement, product },
+        data: { movement, product: updatedProduct },
         message: 'تم إضافة المخزون بنجاح',
       });
     } catch (error) {
@@ -552,14 +556,30 @@ router.post(
 
       await movement.save();
 
-      // تحديث المخزون
-      product.currentStock -= quantity;
-      product.availableStock = product.currentStock - product.reservedStock;
-      await product.save();
+      // تحديث المخزون — atomic $inc to prevent race conditions
+      // Use negative $inc and guard availableStock >= 0 at the query level
+      const updatedProduct = await Product.findOneAndUpdate(
+        {
+          _id: productId,
+          organization: req.user.organization,
+          availableStock: { $gte: quantity },
+        },
+        { $inc: { currentStock: -quantity, availableStock: -quantity } },
+        { new: true }
+      );
+
+      if (!updatedProduct) {
+        // Rollback the movement record if stock was concurrently depleted
+        await StockMovement.deleteOne({ _id: movement._id });
+        return res.status(409).json({
+          success: false,
+          message: 'تم تعديل المخزون بواسطة عملية أخرى، يرجى المحاولة مرة أخرى',
+        });
+      }
 
       res.status(201).json({
         success: true,
-        data: { movement, product },
+        data: { movement, product: updatedProduct },
         message: 'تم صرف المخزون بنجاح',
       });
     } catch (error) {

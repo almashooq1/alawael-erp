@@ -4,6 +4,7 @@
  */
 
 const mongoose = require('mongoose');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ============================================================
 // Schema تعريف نموذج بنك الأهداف
@@ -1450,12 +1451,14 @@ class GoalsBankService {
         query.targetPopulation = {
           $in: Array.isArray(targetPopulation) ? targetPopulation : [targetPopulation],
         };
-      if (search)
+      if (search) {
+        const safe = escapeRegex(String(search));
         query.$or = [
-          { titleAr: { $regex: search, $options: 'i' } },
-          { titleEn: { $regex: search, $options: 'i' } },
-          { tags: { $in: [new RegExp(search, 'i')] } },
+          { titleAr: { $regex: safe, $options: 'i' } },
+          { titleEn: { $regex: safe, $options: 'i' } },
+          { tags: { $in: [new RegExp(safe, 'i')] } },
         ];
+      }
 
       const skip = (page - 1) * limit;
       const [goals, total] = await Promise.all([

@@ -36,6 +36,7 @@ const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+const escapeRegex = require('../utils/escapeRegex');
 
 // 🔒 All volunteer routes require authentication
 router.use(authenticate);
@@ -99,11 +100,12 @@ router.get('/', async (req, res) => {
     if (status) filter.status = status;
     if (category) filter.category = category;
     if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { firstName: new RegExp(search, 'i') },
-        { lastName: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') },
-        { nationalId: new RegExp(search, 'i') },
+        { firstName: new RegExp(safe, 'i') },
+        { lastName: new RegExp(safe, 'i') },
+        { email: new RegExp(safe, 'i') },
+        { nationalId: new RegExp(safe, 'i') },
       ];
     }
 

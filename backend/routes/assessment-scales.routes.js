@@ -16,6 +16,7 @@
 
 const express = require('express');
 const safeError = require('../utils/safeError');
+const { escapeRegex } = require('../utils/sanitize');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -75,7 +76,7 @@ router.get('/tools', async (req, res) => {
     if (specialization) filter.specializations = specialization;
 
     if (search) {
-      const rx = new RegExp(search, 'i');
+      const rx = new RegExp(escapeRegex(String(search)), 'i');
       filter.$or = [{ name_ar: rx }, { name_en: rx }, { abbreviation: rx }, { code: rx }];
     }
 
@@ -273,7 +274,7 @@ router.get('/clinical', async (req, res) => {
       if (date_to) filter.assessment_date.$lte = new Date(date_to);
     }
     if (search) {
-      filter.$or = [{ assessment_number: new RegExp(search, 'i') }];
+      filter.$or = [{ assessment_number: new RegExp(escapeRegex(String(search)), 'i') }];
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);

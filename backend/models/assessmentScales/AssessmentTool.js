@@ -205,7 +205,8 @@ assessmentToolSchema.statics.findForAge = function (ageMonths) {
  * البحث النصي
  */
 assessmentToolSchema.statics.searchByText = function (term) {
-  const regex = new RegExp(term, 'i');
+  const safe = String(term).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(safe, 'i');
   return this.find({
     is_active: true,
     is_deleted: { $ne: true },

@@ -34,6 +34,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { escapeRegex } = require('../utils/sanitize');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
@@ -116,7 +117,8 @@ router.get('/programs', async (req, res) => {
     if (status) filter.status = status;
     if (programType) filter.programType = programType;
     if (search) {
-      filter.$or = [{ name: new RegExp(search, 'i') }, { nameAr: new RegExp(search, 'i') }];
+      const safe = escapeRegex(String(search));
+      filter.$or = [{ name: new RegExp(safe, 'i') }, { nameAr: new RegExp(safe, 'i') }];
     }
     const { skip } = paginate(page, limit);
     const [data, total] = await Promise.all([
@@ -340,15 +342,16 @@ router.get('/resources', async (req, res) => {
     const filter = { isActive: true };
     if (branchId) filter.branchId = branchId;
     if (resourceType) filter.resourceType = resourceType;
-    if (city) filter.city = new RegExp(city, 'i');
+    if (city) filter.city = new RegExp(escapeRegex(String(city)), 'i');
     if (isFree !== undefined) filter.isFree = isFree === 'true';
     if (isDisabilitySpecific !== undefined)
       filter.isDisabilitySpecific = isDisabilitySpecific === 'true';
     if (search) {
+      const safe = escapeRegex(String(search));
       filter.$or = [
-        { resourceName: new RegExp(search, 'i') },
-        { resourceNameAr: new RegExp(search, 'i') },
-        { description: new RegExp(search, 'i') },
+        { resourceName: new RegExp(safe, 'i') },
+        { resourceNameAr: new RegExp(safe, 'i') },
+        { description: new RegExp(safe, 'i') },
       ];
     }
     const { skip } = paginate(page, limit);

@@ -5,6 +5,7 @@
  */
 
 const civilDefenseService = require('../services/civilDefenseIntegration.service');
+const escapeRegex = require('../utils/escapeRegex');
 const {
   SafetyCertificate,
   SafetyAudit,
@@ -1198,17 +1199,19 @@ class CivilDefenseController {
     try {
       const { query, facilityId } = req.body;
 
+      const safeQuery = escapeRegex(String(query || ''));
+
       const certificates = await SafetyCertificate.find({
         facilityId,
         $or: [
-          { certificateId: new RegExp(query, 'i') },
-          { referenceNumber: new RegExp(query, 'i') },
+          { certificateId: new RegExp(safeQuery, 'i') },
+          { referenceNumber: new RegExp(safeQuery, 'i') },
         ],
       });
 
       const audits = await SafetyAudit.find({
         facilityId,
-        $or: [{ auditId: new RegExp(query, 'i') }, { 'inspector.name': new RegExp(query, 'i') }],
+        $or: [{ auditId: new RegExp(safeQuery, 'i') }, { 'inspector.name': new RegExp(safeQuery, 'i') }],
       });
 
       res.json({

@@ -84,6 +84,7 @@ const {
 } = require('../services/rehabilitation/RehabService');
 
 const { authenticateToken } = require('../middleware/auth.middleware');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -112,7 +113,8 @@ router.get('/programs', async (req, res) => {
     if (program_type) filter.program_type = program_type;
     if (status) filter.status = status;
     if (search) {
-      filter.$or = [{ name_ar: new RegExp(search, 'i') }, { name_en: new RegExp(search, 'i') }];
+      const safe = escapeRegex(String(search));
+      filter.$or = [{ name_ar: new RegExp(safe, 'i') }, { name_en: new RegExp(safe, 'i') }];
     }
 
     const pageNum = Math.max(1, parseInt(page));

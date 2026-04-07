@@ -36,6 +36,7 @@ const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+const escapeRegex = require('../utils/escapeRegex');
 
 // 🔒 All recruitment routes require authentication
 router.use(authenticate);
@@ -124,10 +125,11 @@ router.get('/postings', async (req, res) => {
     const filter = {};
     if (branchId) filter.branchId = branchId;
     if (status) filter.status = status;
-    if (department) filter.department = new RegExp(department, 'i');
+    if (department) filter.department = new RegExp(escapeRegex(String(department)), 'i');
     if (employmentType) filter.employmentType = employmentType;
     if (search) {
-      filter.$or = [{ title: new RegExp(search, 'i') }, { titleAr: new RegExp(search, 'i') }];
+      const safe = escapeRegex(String(search));
+      filter.$or = [{ title: new RegExp(safe, 'i') }, { titleAr: new RegExp(safe, 'i') }];
     }
     const { skip } = paginate(page, limit);
     const [data, total] = await Promise.all([

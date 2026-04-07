@@ -436,7 +436,8 @@ ContractSchema.statics = {
    * البحث عن العقود
    */
   async searchContracts(keyword, filters = {}) {
-    const searchRegex = new RegExp(keyword, 'i');
+    const safe = String(keyword).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const searchRegex = new RegExp(safe, 'i');
     const query = {
       ...filters,
       $or: [

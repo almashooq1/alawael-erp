@@ -52,10 +52,17 @@ class DigitalWalletService {
     if (amount <= 0) throw new Error('مبلغ الشحن يجب أن يكون أكبر من صفر');
 
     const balanceBefore = wallet.balance;
-    wallet.balance += amount;
-    wallet.totalToppedUp += amount;
-    wallet.updatedBy = userId;
-    await wallet.save();
+
+    // Atomic $inc to prevent race conditions on concurrent top-ups (Round 39)
+    const updated = await DigitalWallet.findOneAndUpdate(
+      { _id: wallet._id, isBlocked: false, deletedAt: null },
+      {
+        $inc: { balance: amount, totalToppedUp: amount },
+        $set: { updatedBy: userId },
+      },
+      { new: true }
+    );
+    if (!updated) throw new Error('فشل شحن المحفظة — يرجى المحاولة مرة أخرى');
 
     const tx = await WalletTransaction.create({
       branchId: wallet.branchId,
@@ -66,14 +73,14 @@ class DigitalWalletService {
       subType: 'topup',
       amount,
       balanceBefore,
-      balanceAfter: wallet.balance,
+      balanceAfter: updated.balance,
       description: `شحن من ${source}`,
       status: 'completed',
       metadata,
       createdBy: userId,
     });
 
-    return { transaction: tx, wallet };
+    return { transaction: tx, wallet: updated };
   }
 
   /**
@@ -112,21 +119,37 @@ class DigitalWalletService {
     }
 
     const balanceBefore = wallet.balance;
-    wallet.balance -= amount;
-    wallet.totalSpent += amount;
-    wallet.updatedBy = userId;
-    await wallet.save();
+
+    // Atomic debit — prevent double-spend race condition
+    const updated = await DigitalWallet.findOneAndUpdate(
+      {
+        _id: walletId,
+        deletedAt: null,
+        isBlocked: false,
+        // Guard: balance - frozenBalance >= amount
+        $expr: { $gte: [{ $subtract: ['$balance', '$frozenBalance'] }, amount] },
+      },
+      {
+        $inc: { balance: -amount, totalSpent: amount },
+        $set: { updatedBy: userId },
+      },
+      { new: true }
+    );
+
+    if (!updated) {
+      throw new Error('فشل الخصم: الرصيد غير كافٍ أو المحفظة محجوبة (عملية متزامنة)');
+    }
 
     const tx = await WalletTransaction.create({
-      branchId: wallet.branchId,
+      branchId: updated.branchId,
       referenceNumber: `TXN-WLT-${Date.now()}-${Math.floor(Math.random() * 9999)}`,
       uuid: uuidv4(),
-      walletId: wallet._id,
+      walletId: updated._id,
       type: 'debit',
       subType: 'payment',
       amount,
       balanceBefore,
-      balanceAfter: wallet.balance,
+      balanceAfter: updated.balance,
       description,
       relatedType,
       relatedId,
@@ -138,7 +161,7 @@ class DigitalWalletService {
     const earnedPoints = Math.floor(amount / 10);
     if (earnedPoints > 0) {
       await this.addLoyaltyPoints(
-        wallet,
+        updated,
         earnedPoints,
         'payment',
         'WalletTransaction',
@@ -148,7 +171,7 @@ class DigitalWalletService {
       await WalletTransaction.findByIdAndUpdate(tx._id, { loyaltyPointsEarned: earnedPoints });
     }
 
-    return { transaction: tx, wallet };
+    return { transaction: tx, wallet: updated };
   }
 
   /**

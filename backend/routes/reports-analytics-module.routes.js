@@ -346,7 +346,14 @@ router.get('/jobs/:id/download', authenticate, async (req, res) => {
 
     const path = require('path');
     const fs = require('fs');
-    const filePath = path.join(__dirname, '..', job.file_path);
+    const { pipeline } = require('stream');
+
+    // Path-traversal guard: resolve and verify containment
+    const reportsDir = path.resolve(__dirname, '..', 'generated_reports');
+    const filePath = path.resolve(reportsDir, path.basename(job.file_path));
+    if (!filePath.startsWith(reportsDir)) {
+      return res.status(400).json({ success: false, message: 'مسار الملف غير صالح' });
+    }
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
     }
@@ -360,7 +367,11 @@ router.get('/jobs/:id/download', authenticate, async (req, res) => {
     };
     res.setHeader('Content-Type', mimeTypes[ext] || 'application/octet-stream');
     res.setHeader('Content-Disposition', `attachment; filename="report-${job.job_number}.${ext}"`);
-    fs.createReadStream(filePath).pipe(res);
+    pipeline(fs.createReadStream(filePath), res, err => {
+      if (err && !res.headersSent) {
+        res.status(500).json({ success: false, message: 'خطأ في قراءة الملف' });
+      }
+    });
   } catch (err) {
     safeError(res, err);
   }

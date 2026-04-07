@@ -611,19 +611,66 @@ router.get('/reports/best-candidates', authMiddleware, async (req, res) => {
 // GET - تقرير مؤشرات المخاطر
 router.get('/reports/risk-assessment', authMiddleware, async (req, res) => {
   try {
-    const plans = await SuccessionPlan.find();
+    // Aggregation pipeline بدلاً من جلب كل المستندات — أداء أفضل
+    const result = await SuccessionPlan.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalPositions: { $sum: 1 },
+          criticalRisk: { $sum: { $cond: [{ $eq: ['$riskLevel', 'critical'] }, 1, 0] } },
+          highRisk: { $sum: { $cond: [{ $eq: ['$riskLevel', 'high'] }, 1, 0] } },
+          mediumRisk: { $sum: { $cond: [{ $eq: ['$riskLevel', 'medium'] }, 1, 0] } },
+          lowRisk: { $sum: { $cond: [{ $eq: ['$riskLevel', 'low'] }, 1, 0] } },
+          noSuccessors: {
+            $sum: {
+              $cond: [
+                {
+                  $or: [
+                    { $eq: [{ $ifNull: ['$successors', []] }, []] },
+                    { $eq: [{ $size: { $ifNull: ['$successors', []] } }, 0] },
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+          readySuccessors: {
+            $sum: {
+              $cond: [
+                {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input: { $ifNull: ['$successors', []] },
+                          as: 's',
+                          cond: { $eq: ['$$s.readinessLevel', 'ready_now'] },
+                        },
+                      },
+                    },
+                    0,
+                  ],
+                },
+                1,
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
 
-    const riskAssessment = {
-      totalPositions: plans.length,
-      criticalRisk: plans.filter(p => p.riskLevel === 'critical').length,
-      highRisk: plans.filter(p => p.riskLevel === 'high').length,
-      mediumRisk: plans.filter(p => p.riskLevel === 'medium').length,
-      lowRisk: plans.filter(p => p.riskLevel === 'low').length,
-      noSuccessors: plans.filter(p => !p.successors || p.successors.length === 0).length,
-      readySuccessors: plans.filter(
-        p => p.successors && p.successors.some(s => s.readinessLevel === 'ready_now')
-      ).length,
+    const riskAssessment = result[0] || {
+      totalPositions: 0,
+      criticalRisk: 0,
+      highRisk: 0,
+      mediumRisk: 0,
+      lowRisk: 0,
+      noSuccessors: 0,
+      readySuccessors: 0,
     };
+    delete riskAssessment._id;
 
     res.json({
       success: true,

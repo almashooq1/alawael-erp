@@ -21,7 +21,11 @@ const {
 } = require('../models/BeneficiaryPortal');
 const { jwtSecret } = require('../config/secrets');
 const { paginate } = require('../utils/paginate');
-const { loginLimiter, registerLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
+const {
+  loginLimiter,
+  registerLimiter,
+  sensitiveOperationLimiter,
+} = require('../middleware/rateLimiter');
 
 // ==================== ROOT ENDPOINT ====================
 router.get('/', (req, res) => {
@@ -613,44 +617,49 @@ router.put('/profile', authenticateBeneficiary, async (req, res) => {
 });
 
 // Change Password
-router.post('/profile/change-password', authenticateBeneficiary, sensitiveOperationLimiter, async (req, res) => {
-  try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
+router.post(
+  '/profile/change-password',
+  authenticateBeneficiary,
+  sensitiveOperationLimiter,
+  async (req, res) => {
+    try {
+      const { currentPassword, newPassword, confirmPassword } = req.body;
 
-    if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
-      return res.status(400).json({ success: false, message: 'Invalid password data' });
-    }
+      if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
+        return res.status(400).json({ success: false, message: 'Invalid password data' });
+      }
 
-    // Password strength validation
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(newPassword)) {
-      return res.status(400).json({
-        success: false,
-        message:
-          'Password must be at least 8 characters with uppercase, lowercase, number and special character',
+      // Password strength validation
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'Password must be at least 8 characters with uppercase, lowercase, number and special character',
+        });
+      }
+
+      const beneficiary = await Beneficiary.findById(req.beneficiaryId).select('+password');
+
+      // Verify current password using bcrypt
+      const isValid = await beneficiary.comparePassword(currentPassword);
+      if (!isValid) {
+        return res.status(401).json({ success: false, message: 'Current password is incorrect' });
+      }
+
+      // Update password (pre-save hook will hash it)
+      beneficiary.password = newPassword;
+      await beneficiary.save();
+
+      res.json({
+        success: true,
+        message: 'Password changed successfully',
       });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Failed to change password' });
     }
-
-    const beneficiary = await Beneficiary.findById(req.beneficiaryId).select('+password');
-
-    // Verify current password using bcrypt
-    const isValid = await beneficiary.comparePassword(currentPassword);
-    if (!isValid) {
-      return res.status(401).json({ success: false, message: 'Current password is incorrect' });
-    }
-
-    // Update password (pre-save hook will hash it)
-    beneficiary.password = newPassword;
-    await beneficiary.save();
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully',
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to change password' });
   }
-});
+);
 
 // ==================== DOCUMENT ROUTES ====================
 

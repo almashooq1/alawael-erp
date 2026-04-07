@@ -815,7 +815,12 @@ router.get('/file/:filename', authenticate, (req, res) => {
           'Content-Length': chunkSize,
           'Content-Type': contentType,
         });
-        fs.createReadStream(filePath, { start, end }).pipe(res);
+        const { pipeline } = require('stream');
+        pipeline(fs.createReadStream(filePath, { start, end }), res, err => {
+          if (err && !res.headersSent) {
+            res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });
+          }
+        });
         return;
       }
     }
@@ -824,7 +829,12 @@ router.get('/file/:filename', authenticate, (req, res) => {
     res.setHeader('Content-Length', stat.size);
     res.setHeader('Cache-Control', 'public, max-age=86400');
     res.setHeader('X-Content-Type-Options', 'nosniff');
-    fs.createReadStream(filePath).pipe(res);
+    const { pipeline: pipe2 } = require('stream');
+    pipe2(fs.createReadStream(filePath), res, err => {
+      if (err && !res.headersSent) {
+        res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });
+      }
+    });
   } catch (error) {
     logger.error('GET /media/file/:filename error:', error);
     res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });

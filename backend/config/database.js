@@ -14,6 +14,38 @@ mongoose.plugin(schema => {
   });
 });
 
+// ==================== GLOBAL MASS-ASSIGNMENT GUARD (Round 33) ====================
+// Strip privileged / internal fields from every update operation
+const MASS_ASSIGN_BLACKLIST = new Set([
+  '__proto__', 'constructor', 'prototype',
+  '_id', '__v',
+  'role', 'roles', 'isAdmin', 'isSuperAdmin',
+  'permissions', 'password', 'passwordHash',
+]);
+
+function stripBlacklisted(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  for (const key of MASS_ASSIGN_BLACKLIST) {
+    delete obj[key];
+  }
+  // Also strip from $set / $unset operators
+  if (obj.$set) {
+    for (const key of MASS_ASSIGN_BLACKLIST) delete obj.$set[key];
+  }
+  if (obj.$unset) {
+    for (const key of MASS_ASSIGN_BLACKLIST) delete obj.$unset[key];
+  }
+  return obj;
+}
+
+mongoose.plugin(schema => {
+  // Intercept findOneAndUpdate, updateOne, updateMany
+  schema.pre(/^(findOneAnd|update)/, function () {
+    const update = this.getUpdate();
+    if (update) stripBlacklisted(update);
+  });
+});
+
 // ==================== CONNECTION RETRY CONFIGURATION ====================
 // Configuration for exponential backoff retry strategy
 const RETRY_CONFIG = {

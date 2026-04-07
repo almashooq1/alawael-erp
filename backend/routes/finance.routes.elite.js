@@ -67,7 +67,7 @@ router.get(
     if (severity) filter.severity = severity;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      RiskRegister.find(filter).sort({ riskScore: -1 }).skip(skip).limit(Number(limit)),
+      RiskRegister.find(filter).sort({ riskScore: -1 }).skip(skip).limit(Number(limit)).lean(),
       RiskRegister.countDocuments(filter),
     ]);
     res.json({
@@ -210,7 +210,7 @@ router.get(
     if (type) filter.dashboardType = type;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      DashboardConfig.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(Number(limit)),
+      DashboardConfig.find(filter).sort({ updatedAt: -1 }).skip(skip).limit(Number(limit)).lean(),
       DashboardConfig.countDocuments(filter),
     ]);
     res.json({
@@ -361,7 +361,7 @@ router.get(
     if (status) filter.status = status;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      TreasuryOperation.find(filter).sort({ tradeDate: -1 }).skip(skip).limit(Number(limit)),
+      TreasuryOperation.find(filter).sort({ tradeDate: -1 }).skip(skip).limit(Number(limit)).lean(),
       TreasuryOperation.countDocuments(filter),
     ]);
     res.json({
@@ -523,7 +523,7 @@ router.get(
     if (status) filter.status = status;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      DebtInstrument.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      DebtInstrument.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
       DebtInstrument.countDocuments(filter),
     ]);
     res.json({
@@ -722,7 +722,7 @@ router.get(
     if (year) filter['period.fiscalYear'] = Number(year);
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      CostAllocation.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      CostAllocation.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
       CostAllocation.countDocuments(filter),
     ]);
     res.json({
@@ -870,7 +870,7 @@ router.get(
     if (status) filter.status = status;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      FinancialWorkflow.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      FinancialWorkflow.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
       FinancialWorkflow.countDocuments(filter),
     ]);
     res.json({
@@ -977,7 +977,7 @@ router.get(
         .populate('workflow')
         .sort({ submittedDate: -1 })
         .skip(skip)
-        .limit(Number(limit)),
+        .limit(Number(limit)).lean(),
       WorkflowInstance.countDocuments(filter),
     ]);
     res.json({
@@ -1041,7 +1041,7 @@ router.get(
     if (year) filter.fiscalYear = Number(year);
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      TaxPlanningStrategy.find(filter).sort({ fiscalYear: -1 }).skip(skip).limit(Number(limit)),
+      TaxPlanningStrategy.find(filter).sort({ fiscalYear: -1 }).skip(skip).limit(Number(limit)).lean(),
       TaxPlanningStrategy.countDocuments(filter),
     ]);
     res.json({
@@ -1180,7 +1180,7 @@ router.get(
     if (priority) filter.priority = priority;
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
-      AuditEngagement.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      AuditEngagement.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)).lean(),
       AuditEngagement.countDocuments(filter),
     ]);
     res.json({

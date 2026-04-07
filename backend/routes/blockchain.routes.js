@@ -401,6 +401,7 @@ router.get('/dashboard', async (_req, res) => {
         { $match: { isDeleted: { $ne: true } } },
         { $group: { _id: '$category', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
+        { $limit: 50 },
       ]),
       BlockchainCertificate.find({ isDeleted: { $ne: true } })
         .sort({ createdAt: -1 })

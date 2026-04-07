@@ -246,7 +246,9 @@ router.get('/', async (req, res) => {
     const safePage = Math.max(1, parseInt(page) || 1);
     const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
     const skip = (safePage - 1) * safeLimit;
-    const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+    const ESTAMP_SAFE_SORTS = new Set(['createdAt', 'name_ar', 'name_en', 'stampId', 'status', 'department', 'stampType']);
+    const safeSortBy = ESTAMP_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
+    const sort = { [safeSortBy]: sortOrder === 'asc' ? 1 : -1 };
 
     const [stamps, totalCount] = await Promise.all([
       EStamp.find(filter)

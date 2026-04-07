@@ -30,7 +30,7 @@ router.get('/items', async (req, res) => {
 
     const skip = (Number(page) - 1) * Number(limit);
     const [items, total] = await Promise.all([
-      InventoryItem.find(filter).sort({ name_ar: 1 }).skip(skip).limit(Number(limit)),
+      InventoryItem.find(filter).sort({ name_ar: 1 }).skip(skip).limit(Number(limit)).lean(),
       InventoryItem.countDocuments(filter),
     ]);
     res.json({ items, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });

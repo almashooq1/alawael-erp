@@ -221,7 +221,9 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(perPage);
-    const sort = { [sortBy]: sortDir === 'asc' ? 1 : -1 };
+    const TICKET_SAFE_SORTS = new Set(['createdAt', 'priority', 'status', 'ticketNumber', 'subject', 'updatedAt', 'type']);
+    const safeSortBy = TICKET_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
+    const sort = { [safeSortBy]: sortDir === 'asc' ? 1 : -1 };
 
     const [data, total] = await Promise.all([
       TicketEnhanced.find(filter)

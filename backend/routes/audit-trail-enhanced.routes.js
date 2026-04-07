@@ -186,7 +186,9 @@ router.get('/', requireAuditor, async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(perPage);
-    const sort = { [sortBy]: sortDir === 'asc' ? 1 : -1 };
+    const AUDIT_SAFE_SORTS = new Set(['createdAt', 'action', 'module', 'userName', 'ipAddress', 'auditableType']);
+    const safeSortBy = AUDIT_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
+    const sort = { [safeSortBy]: sortDir === 'asc' ? 1 : -1 };
 
     const [data, total] = await Promise.all([
       AuditLog.find(filter).sort(sort).skip(skip).limit(Number(perPage)).lean(),

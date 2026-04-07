@@ -123,14 +123,17 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const sort = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+    const INSURANCE_SAFE_SORTS = new Set(['createdAt', 'employeeName', 'policyNumber', 'status', 'expiryDate', 'coverageClass', 'insuranceCompany']);
+    const safeSortBy = INSURANCE_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
+    const sort = { [safeSortBy]: sortOrder === 'asc' ? 1 : -1 };
 
     const [policies, total] = await Promise.all([
       EmployeeInsurance.find(filter)
         .populate('employee', 'firstName lastName employeeId department position')
         .sort(sort)
         .skip(skip)
-        .limit(parseInt(limit)),
+        .limit(parseInt(limit))
+        .lean(),
       EmployeeInsurance.countDocuments(filter),
     ]);
 

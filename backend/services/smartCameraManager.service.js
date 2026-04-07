@@ -697,10 +697,8 @@ class SmartCameraManager extends EventEmitter {
    * Encrypt credentials using AES-256-GCM
    */
   encryptCredentials(credentials) {
-    const ENCRYPTION_KEY =
-      process.env.DEVICE_ENCRYPTION_KEY ||
-      process.env.JWT_SECRET ||
-      'default-dev-key-change-in-production';
+    const ENCRYPTION_KEY = process.env.DEVICE_ENCRYPTION_KEY || process.env.JWT_SECRET;
+    if (!ENCRYPTION_KEY) throw new Error('DEVICE_ENCRYPTION_KEY or JWT_SECRET must be set');
     const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
     const iv = crypto.randomBytes(12);
     const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
@@ -718,10 +716,8 @@ class SmartCameraManager extends EventEmitter {
    */
   decryptCredentials(encryptedCreds) {
     try {
-      const ENCRYPTION_KEY =
-        process.env.DEVICE_ENCRYPTION_KEY ||
-        process.env.JWT_SECRET ||
-        'default-dev-key-change-in-production';
+      const ENCRYPTION_KEY = process.env.DEVICE_ENCRYPTION_KEY || process.env.JWT_SECRET;
+      if (!ENCRYPTION_KEY) throw new Error('DEVICE_ENCRYPTION_KEY or JWT_SECRET must be set');
       const key = crypto.createHash('sha256').update(ENCRYPTION_KEY).digest();
       const parts = encryptedCreds.password.split(':');
       if (parts.length !== 3) return { username: encryptedCreds.username, password: '' };

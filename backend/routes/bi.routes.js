@@ -60,6 +60,7 @@ router.get('/executive', async (req, res) => {
     if (Account) {
       const balanceSummary = await Account.aggregate([
         { $group: { _id: '$accountType', totalBalance: { $sum: '$balance' }, count: { $sum: 1 } } },
+        { $limit: 100 },
       ]);
       data.finance = { accounts: balanceSummary };
     }

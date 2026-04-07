@@ -8,7 +8,10 @@ const _fs = require('fs').promises;
 const logger = require('../utils/logger');
 
 // Signing secret – falls back to JWT_SECRET so every deployment has one
-const SIGNING_SECRET = process.env.ESIGN_SECRET || process.env.JWT_SECRET || '';
+const SIGNING_SECRET = process.env.ESIGN_SECRET || process.env.JWT_SECRET;
+if (!SIGNING_SECRET) {
+  throw new Error('ESIGN_SECRET or JWT_SECRET must be configured for e-signature service');
+}
 
 class ESignatureService {
   /**

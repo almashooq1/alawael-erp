@@ -49,6 +49,7 @@ const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/secrets');
 
 // ──────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -221,8 +222,8 @@ router.post('/auth/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
         role: 'guardian',
         type: 'parent_portal',
       },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      jwtSecret,
+      { expiresIn: '24h' }
     );
 
     // تسجيل الجهاز للإشعارات

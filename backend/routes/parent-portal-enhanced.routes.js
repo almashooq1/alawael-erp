@@ -51,6 +51,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { jwtSecret } = require('../config/secrets');
 
 // Models
 const {
@@ -199,8 +200,8 @@ router.post('/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
     // إنشاء JWT (يحمل phone كـ guardianPhone)
     const token = jwt.sign(
       { guardianPhone: phone, role: 'guardian', type: 'parent_portal' },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      jwtSecret,
+      { expiresIn: '24h' }
     );
 
     // تسجيل الجهاز إذا أرسل deviceToken

@@ -10,7 +10,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const {
   AssessmentTool,
   BeneficiaryAssessment,
@@ -97,7 +97,7 @@ function buildCrud(Model, modelName, opts = {}) {
   // POST /
   sub.post('/', requireAuth, async (req, res) => {
     try {
-      const doc = await Model.create(req.body);
+      const doc = await Model.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       logger.error(`${modelName} POST / error:`, err);
@@ -108,7 +108,7 @@ function buildCrud(Model, modelName, opts = {}) {
   // PUT /:id
   sub.put('/:id', requireAuth, async (req, res) => {
     try {
-      const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+      const doc = await Model.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

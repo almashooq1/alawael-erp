@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const QualityEnhancedService = require('../services/quality/quality-enhanced.service');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const svc = new QualityEnhancedService();
 
@@ -38,7 +39,7 @@ router.post(
   async (req, res) => {
     try {
       const { QualityStandard } = require('../models/QualityModels');
-      const standard = await QualityStandard.create(req.body);
+      const standard = await QualityStandard.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: standard });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -53,7 +54,7 @@ router.put(
   async (req, res) => {
     try {
       const { QualityStandard } = require('../models/QualityModels');
-      const standard = await QualityStandard.findByIdAndUpdate(req.params.id, req.body, {
+      const standard = await QualityStandard.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
       });
       res.json({ success: true, data: standard });
@@ -86,7 +87,7 @@ router.post(
   async (req, res) => {
     try {
       const { Checklist } = require('../models/QualityModels');
-      const checklist = await Checklist.create(req.body);
+      const checklist = await Checklist.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: checklist });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -101,7 +102,7 @@ router.put(
   async (req, res) => {
     try {
       const { Checklist } = require('../models/QualityModels');
-      const checklist = await Checklist.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      const checklist = await Checklist.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
       res.json({ success: true, data: checklist });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -187,7 +188,7 @@ router.get('/incidents/:incidentId', authenticate, async (req, res) => {
 router.put('/incidents/:incidentId', authenticate, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const incident = await Incident.findByIdAndUpdate(req.params.incidentId, req.body, {
+    const incident = await Incident.findByIdAndUpdate(req.params.incidentId, stripUpdateMeta(req.body), {
       new: true,
     });
     res.json({ success: true, data: incident });
@@ -297,7 +298,7 @@ router.get('/complaints/:complaintId', authenticate, async (req, res) => {
 router.put('/complaints/:complaintId', authenticate, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
-    const complaint = await Complaint.findByIdAndUpdate(req.params.complaintId, req.body, {
+    const complaint = await Complaint.findByIdAndUpdate(req.params.complaintId, stripUpdateMeta(req.body), {
       new: true,
     });
     res.json({ success: true, data: complaint });
@@ -341,7 +342,7 @@ router.post('/surveys', async (req, res) => {
   // بدون مصادقة - يمكن للمستفيدين/الأولياء الإجابة
   try {
     const { SatisfactionSurvey } = require('../models/QualityModels');
-    const survey = await SatisfactionSurvey.create(req.body);
+    const survey = await SatisfactionSurvey.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: survey });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -411,7 +412,7 @@ router.put(
   async (req, res) => {
     try {
       const { Audit } = require('../models/QualityModels');
-      const audit = await Audit.findByIdAndUpdate(req.params.auditId, req.body, { new: true });
+      const audit = await Audit.findByIdAndUpdate(req.params.auditId, stripUpdateMeta(req.body), { new: true });
       res.json({ success: true, data: audit });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -465,7 +466,7 @@ router.get('/improvements/:projectId', authenticate, async (req, res) => {
 router.put('/improvements/:projectId', authenticate, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
-    const project = await ImprovementProject.findByIdAndUpdate(req.params.projectId, req.body, {
+    const project = await ImprovementProject.findByIdAndUpdate(req.params.projectId, stripUpdateMeta(req.body), {
       new: true,
     });
     res.json({ success: true, data: project });
@@ -563,7 +564,7 @@ router.put('/risks/:riskId', authenticate, async (req, res) => {
       const impact = req.body.impact || existing.impact;
       req.body.riskLevel = svc.assessRiskLevel(likelihood, impact);
     }
-    const risk = await Risk.findByIdAndUpdate(req.params.riskId, req.body, { new: true });
+    const risk = await Risk.findByIdAndUpdate(req.params.riskId, stripUpdateMeta(req.body), { new: true });
     res.json({ success: true, data: risk });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

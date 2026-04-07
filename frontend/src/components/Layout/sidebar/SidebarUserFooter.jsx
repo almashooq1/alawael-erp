@@ -1,6 +1,6 @@
 /**
- * SidebarUserFooter — تذييل معلومات المستخدم (Tailwind)
- * Avatar + name/role + options menu (profile, settings, logout)
+ * SidebarUserFooter — تذييل المستخدم (Enhanced)
+ * Glass card avatar + animated online badge + floating menu
  */
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import {
   LogoutOutlined,
   MoreVert as MoreIcon,
   AccountCircleOutlined,
+  KeyboardArrowUp,
 } from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 
@@ -23,7 +24,6 @@ export default function SidebarUserFooter({ collapsed }) {
   const displayEmail = currentUser?.email || '';
   const avatarLetter = displayName.charAt(0) || 'م';
 
-  // Close menu on outside click
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e) => {
@@ -41,134 +41,117 @@ export default function SidebarUserFooter({ collapsed }) {
 
   return (
     <>
-      {/* Gradient separator */}
-      <div
-        className="mx-4 h-px"
-        style={{
-          background:
-            'linear-gradient(90deg, transparent 0%, rgba(46,125,50,0.35) 40%, rgba(76,175,80,0.35) 60%, transparent 100%)',
-        }}
-      />
+      {/* Separator gradient */}
+      <div className="mx-4 h-px bg-gradient-to-r from-transparent via-green-500/25 to-transparent" />
 
       <div
-        className={`flex items-center min-h-[64px] border-t border-white/[0.04] transition-all duration-300 ${
+        className={`flex items-center min-h-[68px] transition-all duration-300 ${
           collapsed ? 'justify-center p-3 gap-0' : 'justify-start p-4 gap-3'
         }`}
-        style={{
-          background:
-            'linear-gradient(135deg, rgba(10,22,40,0.4) 0%, rgba(15,23,42,0.6) 100%)',
-        }}
+        style={{ background: 'linear-gradient(135deg, rgba(10,22,40,0.5) 0%, rgba(13,27,42,0.7) 100%)' }}
       >
-        {/* Avatar */}
-        <div
-          className="relative flex-shrink-0"
-          title={collapsed ? `${displayName} — ${displayRole}` : undefined}
-        >
+        {/* Avatar with animated ring */}
+        <div className="relative flex-shrink-0 group" title={collapsed ? `${displayName} — ${displayRole}` : undefined}>
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white/10 transition-all duration-200 hover:scale-105"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold border-2 border-white/10 transition-all duration-300 group-hover:scale-105 group-hover:border-green-500/40"
             style={{
-              background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 100%)',
-              boxShadow: '0 2px 10px rgba(46,125,50,0.45)',
+              background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 60%, #43A047 100%)',
+              boxShadow: '0 4px 16px rgba(46,125,50,0.4)',
             }}
           >
             {avatarLetter}
           </div>
-          {/* Online dot */}
-          <span
-            className="absolute bottom-[1px] left-[1px] w-[9px] h-[9px] rounded-full bg-emerald-500 border-[1.5px] border-[#0A1628]"
-            style={{ boxShadow: '0 0 6px rgba(16,185,129,0.6)' }}
-          />
+          {/* Animated online indicator */}
+          <span className="absolute bottom-0 left-0">
+            <span className="absolute inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-40 animate-ping" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 border-2 border-navy-900"
+              style={{ boxShadow: '0 0 8px rgba(16,185,129,0.5)' }}
+            />
+          </span>
         </div>
 
-        {/* User info — hidden when collapsed */}
+        {/* User info */}
         {!collapsed && (
           <>
             <div className="flex-1 min-w-0">
-              <p className="text-white/90 font-semibold text-[0.8125rem] leading-tight truncate m-0">
+              <p className="text-white/90 font-semibold text-[0.82rem] leading-tight truncate m-0">
                 {displayName}
               </p>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="px-1.5 py-px rounded bg-green-700/[0.2] border border-green-600/25 text-green-300/90 text-[0.64rem] font-semibold tracking-wide inline-flex">
-                  {displayRole}
-                </span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="badge-green text-[0.6rem]">{displayRole}</span>
               </div>
             </div>
 
-            {/* More options */}
+            {/* Options button */}
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
                 title="خيارات"
-                className="flex-shrink-0 w-7 h-7 rounded-lg border border-white/[0.06] flex items-center justify-center text-white/35 bg-transparent cursor-pointer hover:text-white/85 hover:bg-green-800/20 hover:border-green-600/35 transition-all duration-200"
+                className={`flex-shrink-0 w-8 h-8 rounded-[10px] border border-white/[0.06] flex items-center justify-center bg-white/[0.03] cursor-pointer transition-all duration-200 hover:bg-white/[0.08] hover:border-green-500/30 hover:text-white active:scale-95 ${
+                  menuOpen ? 'text-white bg-white/[0.08] border-green-500/30' : 'text-white/30'
+                }`}
               >
-                <MoreIcon sx={{ fontSize: 16 }} />
+                {menuOpen ? (
+                  <KeyboardArrowUp sx={{ fontSize: 16 }} />
+                ) : (
+                  <MoreIcon sx={{ fontSize: 15 }} />
+                )}
               </button>
 
-              {/* Dropdown Menu */}
+              {/* Floating menu */}
               {menuOpen && (
                 <div
-                  className="absolute bottom-full mb-2 left-0 w-[210px] rounded-[14px] border border-white/[0.09] overflow-hidden z-50 animate-fade-in"
+                  className="absolute bottom-full mb-3 left-0 w-[220px] rounded-2xl border border-white/[0.08] overflow-hidden z-[9999] animate-scale-in origin-bottom-left"
                   style={{
-                    backgroundColor: '#0D1E38',
-                    boxShadow:
-                      '0 -8px 32px rgba(0,0,0,0.6), 0 4px 16px rgba(0,0,0,0.4)',
+                    backgroundColor: '#0C1829',
+                    boxShadow: '0 -12px 48px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3)',
                   }}
                 >
-                  {/* User header */}
-                  <div
-                    className="px-4 py-3 border-b border-white/[0.07] flex items-center gap-3"
-                    style={{
-                      background:
-                        'linear-gradient(135deg, rgba(46,125,50,0.15) 0%, rgba(76,175,80,0.1) 100%)',
-                    }}
-                  >
+                  {/* User header in menu */}
+                  <div className="px-4 py-3.5 flex items-center gap-3 bg-gradient-to-r from-green-900/20 via-green-800/10 to-transparent border-b border-white/[0.06]">
                     <div
-                      className="w-[34px] h-[34px] rounded-full flex items-center justify-center text-white text-sm font-bold"
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold"
                       style={{
-                        background: 'linear-gradient(135deg, #1B5E20 0%, #2e7d32 100%)',
-                        boxShadow: '0 2px 8px rgba(46,125,50,0.4)',
+                        background: 'linear-gradient(135deg, #1B5E20, #2e7d32)',
+                        boxShadow: '0 2px 10px rgba(46,125,50,0.35)',
                       }}
                     >
                       {avatarLetter}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-[0.8125rem] font-semibold text-white truncate m-0">
-                        {displayName}
-                      </p>
+                      <p className="text-[0.8rem] font-bold text-white truncate m-0">{displayName}</p>
                       {displayEmail && (
-                        <p className="text-[0.67rem] text-white/[0.38] mt-0.5 truncate m-0">
-                          {displayEmail}
-                        </p>
+                        <p className="text-[0.65rem] text-white/30 mt-0.5 truncate m-0">{displayEmail}</p>
                       )}
                     </div>
                   </div>
 
-                  <div className="p-1.5">
+                  <div className="p-1.5 space-y-0.5">
                     <button
                       onClick={() => { setMenuOpen(false); navigate('/profile'); }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[0.8125rem] text-white/70 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[0.8rem] text-white/60 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-all duration-150"
                     >
-                      <AccountCircleOutlined sx={{ fontSize: 17 }} />
+                      <AccountCircleOutlined sx={{ fontSize: 17 }} className="text-white/40" />
                       الملف الشخصي
                     </button>
                     <button
                       onClick={() => { setMenuOpen(false); navigate('/settings'); }}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[0.8125rem] text-white/70 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[0.8rem] text-white/60 bg-transparent border-none cursor-pointer font-cairo hover:bg-white/[0.06] hover:text-white transition-all duration-150"
                     >
-                      <SettingsOutlined sx={{ fontSize: 17 }} />
+                      <SettingsOutlined sx={{ fontSize: 17 }} className="text-white/40" />
                       الإعدادات
                     </button>
                   </div>
 
-                  <div className="mx-1.5 h-px bg-white/[0.07]" />
+                  <div className="mx-3 h-px bg-white/[0.06]" />
 
                   <div className="p-1.5">
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[0.8125rem] text-rose-300 bg-transparent border-none cursor-pointer font-cairo hover:bg-rose-500/10 hover:text-rose-200 transition-colors"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[0.8rem] text-rose-400 bg-transparent border-none cursor-pointer font-cairo hover:bg-rose-500/10 hover:text-rose-300 transition-all duration-150"
                     >
                       <LogoutOutlined sx={{ fontSize: 17 }} />
-                      تسجيل الخروج
+                      <span className="font-semibold">تسجيل الخروج</span>
                     </button>
                   </div>
                 </div>

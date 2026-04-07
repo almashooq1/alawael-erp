@@ -1,7 +1,6 @@
 /**
- * ProLayout — التخطيط الاحترافي (Tailwind)
- * Sidebar + Header + Content area
- * Sidebar collapse persisted in localStorage
+ * ProLayout — التخطيط الاحترافي (Enhanced)
+ * Premium layout with mesh gradients, noise texture, smooth transitions
  */
 import React, { useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -29,15 +28,8 @@ class SidebarErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div
-          className="flex flex-col items-center justify-center p-4"
-          style={{
-            width: this.props.width || 72,
-            height: '100vh',
-            background: '#0A1628',
-          }}
-        >
-          <span className="text-white/50 text-xs">⚠️</span>
+        <div className="flex flex-col items-center justify-center p-4" style={{ width: this.props.width || 72, height: '100vh', background: '#0A1628' }}>
+          <span className="text-white/40 text-xs">⚠️</span>
         </div>
       );
     }
@@ -55,103 +47,60 @@ const ProLayout = () => {
   const isDark = theme.palette.mode === 'dark';
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(SIDEBAR_STATE_KEY)) || false;
-    } catch {
-      return false;
-    }
+    try { return JSON.parse(localStorage.getItem(SIDEBAR_STATE_KEY)) || false; }
+    catch { return false; }
   });
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Persist collapse state
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify(sidebarCollapsed));
   }, [sidebarCollapsed]);
 
-  // Close mobile drawer on route change
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
   const handleToggleCollapse = () => setSidebarCollapsed((prev) => !prev);
   const handleToggleMobile = () => setMobileOpen((prev) => !prev);
   const handleCloseMobile = () => setMobileOpen(false);
 
-  const currentSidebarWidth = isMobile
-    ? 0
-    : sidebarCollapsed
-    ? SIDEBAR_COLLAPSED
-    : SIDEBAR_WIDTH;
+  const currentSidebarWidth = isMobile ? 0 : sidebarCollapsed ? SIDEBAR_COLLAPSED : SIDEBAR_WIDTH;
 
   return (
     <div id="tailwind-scope" dir="rtl" className="font-cairo">
-      <div
-        className="flex flex-row min-h-screen relative"
-        style={{
-          backgroundColor: isDark ? '#0B1120' : '#F4F6FA',
-        }}
-      >
-        {/* Subtle radial gradient background */}
-        <div
-          className="fixed inset-0 pointer-events-none z-0"
-          style={{
-            backgroundImage: isDark
-              ? 'radial-gradient(ellipse at 0% 0%, rgba(46,125,50,0.06) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(76,175,80,0.04) 0%, transparent 50%)'
-              : 'radial-gradient(ellipse at 0% 0%, rgba(46,125,50,0.03) 0%, transparent 50%), radial-gradient(ellipse at 100% 100%, rgba(76,175,80,0.02) 0%, transparent 50%)',
-          }}
-        />
+      <div className="flex flex-row min-h-screen relative" style={{ backgroundColor: isDark ? '#0B1120' : '#F5F7FA' }}>
+        {/* Decorative mesh gradients */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full opacity-[0.04]" 
+            style={{ background: 'radial-gradient(circle, rgba(46,125,50,0.4), transparent 70%)', filter: 'blur(60px)' }} />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full opacity-[0.03]"
+            style={{ background: 'radial-gradient(circle, rgba(76,175,80,0.3), transparent 70%)', filter: 'blur(60px)' }} />
+          {isDark && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full opacity-[0.02]"
+              style={{ background: 'radial-gradient(circle, #4CAF50, transparent 60%)', filter: 'blur(80px)' }} />
+          )}
+        </div>
+        
+        {/* Noise texture */}
+        {isDark && <div className="fixed inset-0 bg-noise opacity-30 pointer-events-none z-0" />}
 
         {/* Watermark */}
         <WatermarkBackground zIndex={0} />
 
         {/* Sidebar */}
         <SidebarErrorBoundary width={currentSidebarWidth}>
-          <ProSidebar
-            open={mobileOpen}
-            onClose={handleCloseMobile}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={handleToggleCollapse}
-          />
+          <ProSidebar open={mobileOpen} onClose={handleCloseMobile} collapsed={sidebarCollapsed} onToggleCollapse={handleToggleCollapse} />
         </SidebarErrorBoundary>
 
-        {/* Main Content */}
-        <main
-          className="flex-grow flex flex-col min-h-screen relative z-[1] transition-all duration-300"
-          style={{ width: `calc(100% - ${currentSidebarWidth}px)` }}
-        >
-          {/* Header */}
-          <ProHeader
-            sidebarCollapsed={sidebarCollapsed}
-            onToggleSidebar={handleToggleMobile}
-            themeMode={themeMode}
-            onToggleTheme={toggleTheme}
-          />
+        {/* Main */}
+        <main className="flex-grow flex flex-col min-h-screen relative z-[1] transition-all duration-300" style={{ width: `calc(100% - ${currentSidebarWidth}px)` }}>
+          <ProHeader sidebarCollapsed={sidebarCollapsed} onToggleSidebar={handleToggleMobile} themeMode={themeMode} onToggleTheme={toggleTheme} />
 
-          {/* Content Area */}
-          <div
-            className="flex-1 overflow-auto px-4 sm:px-6 md:px-7 pb-8"
-            style={{
-              paddingTop: `${64 + 20}px`,
-              scrollbarWidth: 'thin',
-              scrollbarColor: isDark
-                ? 'rgba(255,255,255,0.1) transparent'
-                : 'rgba(46,125,50,0.2) transparent',
-            }}
+          <div 
+            className="flex-1 overflow-auto px-4 sm:px-5 md:px-7 pb-10 scrollbar-thin"
+            style={{ paddingTop: 84 }}
           >
             <Suspense fallback={<DashboardSkeleton />}>
               <RouteErrorBoundary locationKey={location.key}>
-                <div
-                  className="w-full"
-                  style={{
-                    animation: 'contentSlideIn 0.3s ease',
-                  }}
-                >
-                  <style>{`
-                    @keyframes contentSlideIn {
-                      from { opacity: 0; transform: translateY(8px); }
-                      to { opacity: 1; transform: translateY(0); }
-                    }
-                  `}</style>
+                <div className="w-full animate-fade-in-up" style={{ animationDuration: '0.35s' }}>
                   <Outlet />
                 </div>
               </RouteErrorBoundary>

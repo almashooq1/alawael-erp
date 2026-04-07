@@ -33,7 +33,7 @@ const upload = multer({
     const allowedExtensions = ['.xlsx', '.xls', '.csv', '.json', '.xml', '.docx'];
     const ext = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
 
-    if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(ext)) {
+    if (allowedTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
       cb(null, true);
     } else {
       cb(

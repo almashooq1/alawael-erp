@@ -68,102 +68,102 @@ function App() {
 
   return (
     <ErrorBoundary>
-    <div style={{ padding: 24 }}>
-      <Notification message={notif.message} type={notif.type} onClose={() => setNotif({ message: '', type: 'info' })} />
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Supply Chain Management</h1>
-        <div>
-          <span style={{ marginInlineEnd: 12 }}>
-            مرحباً، {user.username} ({user.role})
-          </span>
+      <div style={{ padding: 24 }}>
+        <Notification message={notif.message} type={notif.type} onClose={() => setNotif({ message: '', type: 'info' })} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h1>Supply Chain Management</h1>
+          <div>
+            <span style={{ marginInlineEnd: 12 }}>
+              مرحباً، {user.username} ({user.role})
+            </span>
+            <button
+              onClick={() => {
+                sessionStorage.removeItem('token');
+                window.location.reload();
+              }}
+            >
+              تسجيل الخروج
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div style={{ marginBottom: 24, borderBottom: '2px solid #ddd', display: 'flex', gap: 16 }}>
           <button
-            onClick={() => {
-              sessionStorage.removeItem('token');
-              window.location.reload();
+            onClick={() => setActiveTab('dashboard')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'dashboard' ? '#1976d2' : 'transparent',
+              color: activeTab === 'dashboard' ? 'white' : '#666',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 16,
+              fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal',
             }}
           >
-            تسجيل الخروج
+            لوحة التحكم
+          </button>
+          <button
+            onClick={() => setActiveTab('barcode')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'barcode' ? '#1976d2' : 'transparent',
+              color: activeTab === 'barcode' ? 'white' : '#666',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 16,
+              fontWeight: activeTab === 'barcode' ? 'bold' : 'normal',
+            }}
+          >
+            🔷 الباركود و QR Code
+          </button>
+          <button
+            onClick={() => setActiveTab('items')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'items' ? '#1976d2' : 'transparent',
+              color: activeTab === 'items' ? 'white' : '#666',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 16,
+              fontWeight: activeTab === 'items' ? 'bold' : 'normal',
+            }}
+          >
+            المخزون و الطلبات
+          </button>
+          <button
+            onClick={() => setActiveTab('audit')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'audit' ? '#1976d2' : 'transparent',
+              color: activeTab === 'audit' ? 'white' : '#666',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 16,
+              fontWeight: activeTab === 'audit' ? 'bold' : 'normal',
+            }}
+          >
+            سجل التدقيق
           </button>
         </div>
+
+        {/* Tab Content */}
+        {activeTab === 'dashboard' && <Dashboard />}
+
+        {activeTab === 'barcode' && <BarcodeManager />}
+
+        {activeTab === 'items' && (
+          <>
+            <SupplierList user={user} notify={showNotification} />
+            <ProductList user={user} notify={showNotification} />
+            <InventoryList user={user} notify={showNotification} />
+            <OrderList user={user} notify={showNotification} />
+            <ShipmentList user={user} notify={showNotification} />
+          </>
+        )}
+
+        {activeTab === 'audit' && <AuditLog user={user} />}
       </div>
-
-      {/* Navigation Tabs */}
-      <div style={{ marginBottom: 24, borderBottom: '2px solid #ddd', display: 'flex', gap: 16 }}>
-        <button
-          onClick={() => setActiveTab('dashboard')}
-          style={{
-            padding: '12px 24px',
-            background: activeTab === 'dashboard' ? '#1976d2' : 'transparent',
-            color: activeTab === 'dashboard' ? 'white' : '#666',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal',
-          }}
-        >
-          لوحة التحكم
-        </button>
-        <button
-          onClick={() => setActiveTab('barcode')}
-          style={{
-            padding: '12px 24px',
-            background: activeTab === 'barcode' ? '#1976d2' : 'transparent',
-            color: activeTab === 'barcode' ? 'white' : '#666',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: activeTab === 'barcode' ? 'bold' : 'normal',
-          }}
-        >
-          🔷 الباركود و QR Code
-        </button>
-        <button
-          onClick={() => setActiveTab('items')}
-          style={{
-            padding: '12px 24px',
-            background: activeTab === 'items' ? '#1976d2' : 'transparent',
-            color: activeTab === 'items' ? 'white' : '#666',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: activeTab === 'items' ? 'bold' : 'normal',
-          }}
-        >
-          المخزون و الطلبات
-        </button>
-        <button
-          onClick={() => setActiveTab('audit')}
-          style={{
-            padding: '12px 24px',
-            background: activeTab === 'audit' ? '#1976d2' : 'transparent',
-            color: activeTab === 'audit' ? 'white' : '#666',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: 16,
-            fontWeight: activeTab === 'audit' ? 'bold' : 'normal',
-          }}
-        >
-          سجل التدقيق
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === 'dashboard' && <Dashboard />}
-
-      {activeTab === 'barcode' && <BarcodeManager />}
-
-      {activeTab === 'items' && (
-        <>
-          <SupplierList user={user} notify={showNotification} />
-          <ProductList user={user} notify={showNotification} />
-          <InventoryList user={user} notify={showNotification} />
-          <OrderList user={user} notify={showNotification} />
-          <ShipmentList user={user} notify={showNotification} />
-        </>
-      )}
-
-      {activeTab === 'audit' && <AuditLog user={user} />}
-    </div>
     </ErrorBoundary>
   );
 }

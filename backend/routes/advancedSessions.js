@@ -136,13 +136,11 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const session = await AdvancedSession.model
-      .findById(req.params.id)
-      .populate([
-        { path: 'beneficiaryId', select: 'name email full_name_ar file_number' },
-        { path: 'programId', select: 'name' },
-        { path: 'specialistId', select: 'name email' },
-      ]);
+    const session = await AdvancedSession.model.findById(req.params.id).populate([
+      { path: 'beneficiaryId', select: 'name email full_name_ar file_number' },
+      { path: 'programId', select: 'name' },
+      { path: 'specialistId', select: 'name email' },
+    ]);
 
     if (!session) {
       return res.error('الجلسة غير موجودة', 'Session not found', 404);
@@ -350,13 +348,11 @@ router.post('/:id/reschedule', authorize(['admin', 'manager', 'specialist']), as
  */
 router.get('/:id/report', async (req, res) => {
   try {
-    const session = await AdvancedSession.model
-      .findById(req.params.id)
-      .populate([
-        { path: 'beneficiaryId', select: 'name email full_name_ar file_number' },
-        { path: 'programId', select: 'name' },
-        { path: 'specialistId', select: 'name email' },
-      ]);
+    const session = await AdvancedSession.model.findById(req.params.id).populate([
+      { path: 'beneficiaryId', select: 'name email full_name_ar file_number' },
+      { path: 'programId', select: 'name' },
+      { path: 'specialistId', select: 'name email' },
+    ]);
 
     if (!session) {
       return res.error('الجلسة غير موجودة', 'Session not found', 404);

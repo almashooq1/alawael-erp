@@ -598,6 +598,21 @@ app.get('/api/_diag', async (req, res) => {
   }
 });
 
+// ─── Global ObjectId Param Validation (Round 38) ────────────────────────────
+// Validates every :id param across ALL routes — catches malformed IDs
+// before they reach Mongoose and trigger CastError / info-leak.
+const mongoose_paramCheck = require('mongoose');
+app.param('id', (req, res, next, value) => {
+  if (value && !mongoose_paramCheck.isValidObjectId(value)) {
+    return res.status(400).json({
+      success: false,
+      message: 'معرّف غير صالح',
+      message_en: 'Invalid id format',
+    });
+  }
+  next();
+});
+
 // ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
 try {
   mountAllRoutes(app, { authRateLimiter });

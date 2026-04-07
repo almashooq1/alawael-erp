@@ -11,15 +11,16 @@ const logger = require('../../utils/logger');
  * معالجة أحداث الإشعارات
  */
 function notificationHandler(socket, io, activeSubscriptions) {
-  // Subscribe to notifications
-  socket.on('notification:subscribe', ({ userId }) => {
-    const room = userId ? `notifications:${userId}` : 'notifications';
+  // Subscribe to notifications — always use verified socket.userId (Round 38)
+  socket.on('notification:subscribe', () => {
+    const verifiedUserId = socket.userId;
+    const room = verifiedUserId ? `notifications:${verifiedUserId}` : 'notifications';
     socket.join(room);
 
     // Store subscription
     activeSubscriptions.set(socket.id, {
       type: 'notification',
-      userId: userId || socket.userId,
+      userId: verifiedUserId,
       subscribedAt: new Date(),
     });
 
@@ -46,9 +47,13 @@ function notificationHandler(socket, io, activeSubscriptions) {
     socket.emit('notification:unsubscribed');
   });
 
-  // Send notification to specific user or broadcast
+  // Send notification — restrict target to own room or broadcast (Round 38)
   socket.on('notification:send', data => {
-    const { userId, type, title, message, priority, metadata } = data;
+    const { type, title, message, priority, metadata } = data;
+    const verifiedUserId = socket.userId;
+
+    // Only admins may broadcast; regular users send to their own room only
+    const isAdmin = socket.userRole === 'admin' || socket.userRole === 'superadmin';
 
     const notification = {
       id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -61,12 +66,17 @@ function notificationHandler(socket, io, activeSubscriptions) {
       read: false,
     };
 
-    if (userId) {
-      // Send to specific user
-      io.to(`notifications:${userId}`).emit('notification:new', notification);
-      logger.info(`[Notification] Sent to user ${userId}`);
+    if (isAdmin && data.userId) {
+      // Admin can send to a specific user
+      io.to(`notifications:${data.userId}`).emit('notification:new', notification);
+      logger.info(`[Notification] Admin ${verifiedUserId} sent to user ${data.userId}`);
+    } else if (verifiedUserId) {
+      // Regular user: send only to own room
+      io.to(`notifications:${verifiedUserId}`).emit('notification:new', notification);
+      logger.info(`[Notification] Sent to user ${verifiedUserId}`);
     } else {
-      // Broadcast to all subscribed clients
+      // Broadcast to all subscribed clients (admin only)
+      if (!isAdmin) return;
       io.to('notifications').emit('notification:new', notification);
       logger.info('[Notification] Broadcast to all clients');
     }
@@ -90,9 +100,10 @@ function notificationHandler(socket, io, activeSubscriptions) {
     });
   });
 
-  // Mark all notifications as read
-  socket.on('notification:mark-all-read', ({ userId }) => {
-    const targetRoom = userId ? `notifications:${userId}` : socket.id;
+  // Mark all notifications as read — use verified socket.userId (Round 38)
+  socket.on('notification:mark-all-read', () => {
+    const verifiedUserId = socket.userId;
+    const targetRoom = verifiedUserId ? `notifications:${verifiedUserId}` : socket.id;
 
     logger.info(`[Notification] Marked all as read for: ${targetRoom}`);
 
@@ -101,8 +112,8 @@ function notificationHandler(socket, io, activeSubscriptions) {
     });
   });
 
-  // Get unread count
-  socket.on('notification:get-unread-count', ({ userId }) => {
+  // Get unread count — use verified socket.userId (Round 38)
+  socket.on('notification:get-unread-count', () => {
     // This would normally query the database
     // For now, return a mock count
     socket.emit('notification:unread-count', {

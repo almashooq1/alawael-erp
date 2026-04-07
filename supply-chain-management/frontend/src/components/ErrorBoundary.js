@@ -40,8 +40,7 @@ class ErrorBoundary extends Component {
         >
           <h2 style={{ color: '#dc3545', marginBottom: 16 }}>⚠️ حدث خطأ غير متوقع</h2>
           <p style={{ color: '#666', marginBottom: 24, textAlign: 'center', maxWidth: 480 }}>
-            عذراً، حدث خطأ أثناء عرض هذا القسم. يمكنك المحاولة مرة أخرى أو الانتقال للصفحة
-            الرئيسية.
+            عذراً، حدث خطأ أثناء عرض هذا القسم. يمكنك المحاولة مرة أخرى أو الانتقال للصفحة الرئيسية.
           </p>
           <div style={{ display: 'flex', gap: 12 }}>
             <button

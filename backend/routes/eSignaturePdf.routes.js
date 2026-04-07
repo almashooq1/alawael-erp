@@ -40,8 +40,9 @@ const upload = multer({
   limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
   fileFilter: (_req, file, cb) => {
     const allowed = ['.pdf', '.png', '.jpg', '.jpeg'];
+    const allowedMime = ['application/pdf', 'image/png', 'image/jpeg'];
     const ext = path.extname(file.originalname).toLowerCase();
-    if (allowed.includes(ext)) cb(null, true);
+    if (allowed.includes(ext) && allowedMime.includes(file.mimetype)) cb(null, true);
     else cb(new Error('نوع الملف غير مدعوم. المسموح: PDF, PNG, JPG'));
   },
 });

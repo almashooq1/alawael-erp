@@ -40,7 +40,7 @@ const upload = multer({
     const allowedTypes = /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|zip|rar/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    if (extname || mimetype) {
+    if (extname && mimetype) {
       return cb(null, true);
     }
     cb(new Error('Invalid file type'));

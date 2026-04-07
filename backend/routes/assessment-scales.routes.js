@@ -16,7 +16,7 @@
 
 const express = require('express');
 const safeError = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -163,7 +163,7 @@ router.get('/tools/:id', async (req, res) => {
  */
 router.post('/tools', async (req, res) => {
   try {
-    const tool = await AssessmentTool.create({ ...req.body, created_by: req.user._id });
+    const tool = await AssessmentTool.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
     res.status(201).json({ success: true, data: tool, message: 'تم إنشاء المقياس بنجاح' });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });
@@ -175,7 +175,7 @@ router.post('/tools', async (req, res) => {
  */
 router.put('/tools/:id', async (req, res) => {
   try {
-    const tool = await AssessmentTool.findByIdAndUpdate(req.params.id, req.body, {
+    const tool = await AssessmentTool.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

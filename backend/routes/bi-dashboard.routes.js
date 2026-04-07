@@ -16,6 +16,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Safe model loader ─────────────────────────────────────────────
 function safeModel(name) {
@@ -196,7 +197,7 @@ router.put('/kpis/:code', async (req, res) => {
     if (!BIKPI) {
       return res.status(501).json({ success: false, message: 'KPI model not available' });
     }
-    const kpi = await BIKPI.findOneAndUpdate({ code: req.params.code }, req.body, {
+    const kpi = await BIKPI.findOneAndUpdate({ code: req.params.code }, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

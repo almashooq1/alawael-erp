@@ -34,7 +34,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
@@ -159,7 +159,7 @@ router.get('/programs/:id', async (req, res) => {
 
 router.put('/programs/:id', async (req, res) => {
   try {
-    const doc = await CommunityProgram.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await CommunityProgram.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -247,7 +247,7 @@ router.get('/events/:id', async (req, res) => {
 
 router.put('/events/:id', async (req, res) => {
   try {
-    const doc = await CommunityEvent.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await CommunityEvent.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -303,7 +303,7 @@ router.post('/partnerships', async (req, res) => {
 
 router.put('/partnerships/:id', async (req, res) => {
   try {
-    const doc = await CsoPartnership.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await CsoPartnership.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -383,7 +383,7 @@ router.post('/resources', async (req, res) => {
 
 router.put('/resources/:id', async (req, res) => {
   try {
-    const doc = await CommunityResource.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await CommunityResource.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

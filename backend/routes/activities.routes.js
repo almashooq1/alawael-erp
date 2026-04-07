@@ -9,6 +9,7 @@ const Activity = require('../models/Activity');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── GET / — list activities (filter by program, type, status, date range) ──
 router.get('/', requireAuth, async (req, res) => {
@@ -158,7 +159,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post('/', requireAuth, async (req, res) => {
   try {
     const doc = await Activity.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.body.createdBy || req.user?._id,
     });
     res.status(201).json({ success: true, data: doc });
@@ -171,7 +172,7 @@ router.post('/', requireAuth, async (req, res) => {
 // ── PUT /:id — update activity ─────────────────────────────────────────
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const doc = await Activity.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await Activity.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

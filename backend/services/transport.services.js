@@ -100,7 +100,7 @@ class BusService {
     try {
       return await Bus.findByIdAndUpdate(
         busId,
-        { $push: { maintenanceSchedule: maintenanceData } },
+        { $push: { maintenanceSchedule: { $each: [maintenanceData], $slice: -100 } } },
         { new: true, runValidators: true }
       );
     } catch (error) {
@@ -171,7 +171,7 @@ class DriverService {
     try {
       return await Driver.findByIdAndUpdate(
         driverId,
-        { $push: { attendance: attendanceData } },
+        { $push: { attendance: { $each: [attendanceData], $slice: -500 } } },
         { new: true, runValidators: true }
       );
     } catch (error) {
@@ -184,7 +184,7 @@ class DriverService {
     try {
       return await Driver.findByIdAndUpdate(
         driverId,
-        { $push: { violations: violationData } },
+        { $push: { violations: { $each: [violationData], $slice: -200 } } },
         { new: true, runValidators: true }
       );
     } catch (error) {
@@ -386,7 +386,7 @@ class AttendanceService {
       // تحديث سجل الطالب
       await StudentTransport.findByIdAndUpdate(
         attendanceData.studentTransportId,
-        { $push: { attendanceRecords: attendanceData } },
+        { $push: { attendanceRecords: { $each: [attendanceData], $slice: -500 } } },
         { new: true }
       );
 

@@ -154,7 +154,7 @@ router.post('/:id/sessions', requireAuth, async (req, res) => {
   try {
     const program = await GroupProgram.findByIdAndUpdate(
       req.params.id,
-      { $push: { sessions: req.body } },
+      { $push: { sessions: { $each: [req.body], $slice: -200 } } },
       { new: true }
     );
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });

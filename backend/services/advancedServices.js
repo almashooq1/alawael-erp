@@ -15,7 +15,7 @@ class FinancialService {
     return Financial.findOneAndUpdate(
       { beneficiaryId },
       {
-        $push: { invoices: invoiceData },
+        $push: { invoices: { $each: [invoiceData], $slice: -1000 } },
         $inc: { totalAmount: invoiceData.amount, outstandingAmount: invoiceData.amount },
       },
       { new: true, upsert: true }
@@ -26,7 +26,7 @@ class FinancialService {
     return Financial.findOneAndUpdate(
       { beneficiaryId },
       {
-        $push: { payments: paymentData },
+        $push: { payments: { $each: [paymentData], $slice: -1000 } },
         $inc: { paidAmount: paymentData.amount, outstandingAmount: -paymentData.amount },
         $set: { lastPaymentDate: new Date() },
       },
@@ -58,7 +58,7 @@ class FinancialService {
   static async applyDiscount(beneficiaryId, discountData) {
     return Financial.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { discounts: { ...discountData, date: new Date() } } },
+      { $push: { discounts: { $each: [{ ...discountData, date: new Date() }], $slice: -500 } } },
       { new: true }
     );
   }
@@ -75,8 +75,11 @@ class ReportsService {
       {
         $push: {
           customReports: {
+            $each: [{
             ...reportData,
             generatedDate: new Date(),
+            }],
+            $slice: -500,
           },
         },
       },
@@ -90,10 +93,13 @@ class ReportsService {
       {
         $push: {
           customReports: {
+            $each: [{
             title: `Progress Report - ${new Date().toLocaleDateString('ar-SA')}`,
             type: 'progress',
             generatedDate: new Date(),
             format: 'pdf',
+            }],
+            $slice: -500,
           },
         },
       },
@@ -153,7 +159,7 @@ class SettingsService {
   static async createRole(centerId, roleData) {
     return Settings.findOneAndUpdate(
       { centerId },
-      { $push: { roles: roleData } },
+      { $push: { roles: { $each: [roleData], $slice: -50 } } },
       { new: true, upsert: true }
     );
   }
@@ -172,8 +178,8 @@ class SettingsService {
       {
         $push: {
           auditLogs: {
-            ...auditData,
-            timestamp: new Date(),
+            $each: [{ ...auditData, timestamp: new Date() }],
+            $slice: -1000,
           },
         },
       },

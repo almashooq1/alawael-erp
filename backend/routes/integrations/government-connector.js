@@ -97,11 +97,15 @@ class GovernmentConnector extends EventEmitter {
    */
   async refreshAccessToken() {
     try {
-      const response = await axios.post(`${this.config.baseURL}/oauth/token`, {
-        grant_type: 'client_credentials',
-        client_id: this.config.clientId,
-        client_secret: this.config.clientSecret,
-      });
+      const response = await axios.post(
+        `${this.config.baseURL}/oauth/token`,
+        {
+          grant_type: 'client_credentials',
+          client_id: this.config.clientId,
+          client_secret: this.config.clientSecret,
+        },
+        { timeout: this.config.timeout || 30000 }
+      );
 
       this.accessToken = response.data.access_token;
       this.tokenExpiry = Date.now() + response.data.expires_in * 1000;

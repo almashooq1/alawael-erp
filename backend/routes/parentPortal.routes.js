@@ -72,6 +72,21 @@ function generateOtp() {
   return String(crypto.randomInt(100000, 1000000));
 }
 
+// Rate limiters for parent portal OTP endpoints
+const { createCustomLimiter } = require('../middleware/rateLimiter');
+const parentOtpSendLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  prefix: 'rl:parent-otp-send:',
+  message: { success: false, message: 'تم تجاوز الحد الأقصى للمحاولات. يرجى المحاولة لاحقاً.' },
+});
+const parentOtpVerifyLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  prefix: 'rl:parent-otp-verify:',
+  message: { success: false, message: 'تم تجاوز الحد الأقصى لمحاولات التحقق.' },
+});
+
 // ──────────────────────────────────────────────────────────────────────────────
 // 1. المصادقة — بدون middleware
 // ──────────────────────────────────────────────────────────────────────────────
@@ -80,7 +95,7 @@ function generateOtp() {
  * POST /api/parent-portal/auth/send-otp
  * إرسال رمز التحقق لرقم الهاتف
  */
-router.post('/auth/send-otp', async (req, res) => {
+router.post('/auth/send-otp', parentOtpSendLimiter, async (req, res) => {
   try {
     const { phone } = req.body;
 
@@ -131,7 +146,7 @@ router.post('/auth/send-otp', async (req, res) => {
         logger.warn('SMS send failed:', smsErr.message);
       }
     } else {
-      logger.info(`[DEV] OTP for ${phone}: ${otp}`);
+      logger.info(`[DEV] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`);
     }
 
     res.json({
@@ -151,7 +166,7 @@ router.post('/auth/send-otp', async (req, res) => {
  * POST /api/parent-portal/auth/verify-otp
  * التحقق من OTP وإنشاء token
  */
-router.post('/auth/verify-otp', async (req, res) => {
+router.post('/auth/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
   try {
     const { phone, otp, deviceToken, deviceType, deviceName } = req.body;
 

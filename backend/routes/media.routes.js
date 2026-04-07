@@ -515,7 +515,7 @@ router.get('/:id', authenticate, async (req, res) => {
     // Increment view count
     await Media.findByIdAndUpdate(req.params.id, {
       $inc: { viewCount: 1 },
-      $push: { activityLog: { action: 'view', performedBy: req.user?._id, timestamp: new Date() } },
+      $push: { activityLog: { $each: [{ action: 'view', performedBy: req.user?._id, timestamp: new Date() }], $slice: -200 } },
     });
 
     res.json({
@@ -569,10 +569,13 @@ router.put('/:id', authenticate, async (req, res) => {
         $set: updates,
         $push: {
           activityLog: {
-            action: 'edit',
-            performedBy: req.user?._id,
-            details: 'تحديث البيانات',
-            timestamp: new Date(),
+            $each: [{
+              action: 'edit',
+              performedBy: req.user?._id,
+              details: 'تحديث البيانات',
+              timestamp: new Date(),
+            }],
+            $slice: -200,
           },
         },
       },
@@ -611,7 +614,7 @@ router.delete('/:id', authenticate, async (req, res) => {
       {
         $set: { status: 'محذوف' },
         $push: {
-          activityLog: { action: 'delete', performedBy: req.user?._id, timestamp: new Date() },
+          activityLog: { $each: [{ action: 'delete', performedBy: req.user?._id, timestamp: new Date() }], $slice: -200 },
         },
       },
       { new: true }
@@ -646,7 +649,7 @@ router.post('/:id/restore', authenticate, async (req, res) => {
       {
         $set: { status: 'نشط' },
         $push: {
-          activityLog: { action: 'restore', performedBy: req.user?._id, timestamp: new Date() },
+          activityLog: { $each: [{ action: 'restore', performedBy: req.user?._id, timestamp: new Date() }], $slice: -200 },
         },
       },
       { new: true }
@@ -860,7 +863,7 @@ router.get('/:id/download', authenticate, async (req, res) => {
     await Media.findByIdAndUpdate(media._id, {
       $inc: { downloadCount: 1 },
       $push: {
-        activityLog: { action: 'download', performedBy: req.user?._id, timestamp: new Date() },
+        activityLog: { $each: [{ action: 'download', performedBy: req.user?._id, timestamp: new Date() }], $slice: -200 },
       },
     });
 
@@ -895,7 +898,7 @@ router.post('/bulk-delete', authenticate, async (req, res) => {
       {
         $set: { status: 'محذوف' },
         $push: {
-          activityLog: { action: 'delete', performedBy: req.user?._id, timestamp: new Date() },
+          activityLog: { $each: [{ action: 'delete', performedBy: req.user?._id, timestamp: new Date() }], $slice: -200 },
         },
       }
     );
@@ -924,10 +927,13 @@ router.post('/bulk-move', authenticate, async (req, res) => {
         $set: { album: album || null },
         $push: {
           activityLog: {
-            action: 'move',
-            performedBy: req.user?._id,
-            details: `نقل إلى ألبوم`,
-            timestamp: new Date(),
+            $each: [{
+              action: 'move',
+              performedBy: req.user?._id,
+              details: `نقل إلى ألبوم`,
+              timestamp: new Date(),
+            }],
+            $slice: -200,
           },
         },
       }
@@ -959,10 +965,13 @@ router.post('/bulk-tag', authenticate, async (req, res) => {
         $addToSet: { tags: { $each: parsedTags } },
         $push: {
           activityLog: {
-            action: 'tag',
-            performedBy: req.user?._id,
-            details: `إضافة وسوم: ${parsedTags.join(', ')}`,
-            timestamp: new Date(),
+            $each: [{
+              action: 'tag',
+              performedBy: req.user?._id,
+              details: `إضافة وسوم: ${parsedTags.join(', ')}`,
+              timestamp: new Date(),
+            }],
+            $slice: -200,
           },
         },
       }

@@ -257,7 +257,7 @@ router.post(
       const audit = await SurpriseAudit.findOneAndUpdate(
         { auditId: req.params.auditId },
         {
-          $push: { observations: req.body },
+          $push: { observations: { $each: [req.body], $slice: -200 } },
           lastModifiedBy: req.user._id,
           lastModifiedDate: new Date(),
         },

@@ -414,7 +414,7 @@ router.post('/assets/:assetId/maintenance', authenticate, async (req, res) => {
       {
         lastMaintenanceDate: new Date(),
         nextMaintenanceDate,
-        $push: { maintenanceHistory: { date: new Date(), notes, cost, performedBy: req.user._id } },
+        $push: { maintenanceHistory: { $each: [{ date: new Date(), notes, cost, performedBy: req.user._id }], $slice: -200 } },
       },
       { new: true }
     );

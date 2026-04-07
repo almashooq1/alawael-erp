@@ -119,7 +119,7 @@ class FamilyCommunicationService {
   static async sendMessage(beneficiaryId, messageData) {
     return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { messages: { ...messageData, sentDate: new Date() } } },
+      { $push: { messages: { $each: [{ ...messageData, sentDate: new Date() }], $slice: -500 } } },
       { new: true, upsert: true }
     );
   }
@@ -132,7 +132,7 @@ class FamilyCommunicationService {
   static async sendFamilyReport(beneficiaryId, reportData) {
     return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { familyReports: { ...reportData, createdDate: new Date() } } },
+      { $push: { familyReports: { $each: [{ ...reportData, createdDate: new Date() }], $slice: -200 } } },
       { new: true, upsert: true }
     );
   }
@@ -140,7 +140,7 @@ class FamilyCommunicationService {
   static async recordMeeting(beneficiaryId, meetingData) {
     return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { meetings: { ...meetingData, date: new Date() } } },
+      { $push: { meetings: { $each: [{ ...meetingData, date: new Date() }], $slice: -200 } } },
       { new: true, upsert: true }
     );
   }
@@ -159,7 +159,7 @@ class MedicalRecordsService {
   static async addMedicalVisit(beneficiaryId, visitData) {
     return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { medicalVisits: { ...visitData, date: new Date() } } },
+      { $push: { medicalVisits: { $each: [{ ...visitData, date: new Date() }], $slice: -500 } } },
       { new: true, upsert: true }
     );
   }
@@ -167,7 +167,7 @@ class MedicalRecordsService {
   static async addPrescription(beneficiaryId, prescriptionData) {
     return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { prescriptions: { ...prescriptionData, startDate: new Date() } } },
+      { $push: { prescriptions: { $each: [{ ...prescriptionData, startDate: new Date() }], $slice: -200 } } },
       { new: true, upsert: true }
     );
   }
@@ -175,7 +175,7 @@ class MedicalRecordsService {
   static async addLabResult(beneficiaryId, resultData) {
     return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { labResults: { ...resultData, date: new Date() } } },
+      { $push: { labResults: { $each: [{ ...resultData, date: new Date() }], $slice: -500 } } },
       { new: true, upsert: true }
     );
   }
@@ -214,7 +214,7 @@ class AttendanceService {
 
     return Attendance.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { dailyRecords: record } },
+      { $push: { dailyRecords: { $each: [record], $slice: -1000 } } },
       { new: true, upsert: true }
     );
   }
@@ -222,7 +222,7 @@ class AttendanceService {
   static async recordLeave(beneficiaryId, leaveData) {
     return Attendance.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { leaves: { ...leaveData, startDate: new Date(leaveData.startDate) } } },
+      { $push: { leaves: { $each: [{ ...leaveData, startDate: new Date(leaveData.startDate) }], $slice: -200 } } },
       { new: true, upsert: true }
     );
   }

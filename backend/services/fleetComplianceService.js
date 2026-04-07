@@ -90,7 +90,7 @@ class FleetComplianceService {
     return FleetCompliance.findByIdAndUpdate(
       id,
       {
-        $push: { documents: docData },
+        $push: { documents: { $each: [docData], $slice: -200 } },
       },
       { new: true }
     );

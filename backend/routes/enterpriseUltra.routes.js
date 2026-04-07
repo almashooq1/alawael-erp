@@ -536,7 +536,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.findByIdAndUpdate(
       req.params.id,
-      { $push: { acknowledgments: { user: req.user._id, date: new Date(), acknowledged: true } } },
+      { $push: { acknowledgments: { $each: [{ user: req.user._id, date: new Date(), acknowledged: true }], $slice: -500 } } },
       { new: true }
     );
     res.json({ success: true, data: item });
@@ -743,7 +743,7 @@ router.patch(
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
-      { $push: { escalationPath: req.body } },
+      { $push: { escalationPath: { $each: [req.body], $slice: -100 } } },
       { new: true }
     );
     res.json({ success: true, data: item });
@@ -1047,7 +1047,7 @@ router.patch(
       {
         $inc: { escalationLevel: 1 },
         status: 'escalated',
-        $push: { escalationHistory: { ...sanitize(req.body), date: new Date() } },
+        $push: { escalationHistory: { $each: [{ ...sanitize(req.body), date: new Date() }], $slice: -200 } },
       },
       { new: true }
     );
@@ -1711,7 +1711,7 @@ router.patch(
       {
         actual: req.body.actual,
         trend: req.body.trend,
-        $push: { historicalData: { date: new Date(), value: req.body.actual } },
+        $push: { historicalData: { $each: [{ date: new Date(), value: req.body.actual }], $slice: -1000 } },
       },
       { new: true }
     );

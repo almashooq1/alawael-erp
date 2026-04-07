@@ -641,7 +641,7 @@ router.post('/quality/kpis/:branchId/action-plans', async (req, res) => {
       period || `${new Date().getFullYear()}-Q${Math.ceil((new Date().getMonth() + 1) / 3)}`;
     const kpi = await QualityKPI.findOneAndUpdate(
       { branch_id: req.params.branchId, period: currentPeriod },
-      { $push: { action_plans: req.body.action_plan } },
+      { $push: { action_plans: { $each: [req.body.action_plan], $slice: -100 } } },
       { new: true, upsert: false }
     );
     if (!kpi)

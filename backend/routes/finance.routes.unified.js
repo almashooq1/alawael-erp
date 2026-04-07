@@ -464,7 +464,7 @@ router.post(
     const { receipt } = req.body;
 
     const result = await FinanceService.updateTransaction(req.params.id, {
-      $push: { receipts: receipt },
+      $push: { receipts: { $each: [receipt], $slice: -1000 } },
     });
 
     res.status(200).json({

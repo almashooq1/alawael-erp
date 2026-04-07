@@ -1211,7 +1211,10 @@ class CivilDefenseController {
 
       const audits = await SafetyAudit.find({
         facilityId,
-        $or: [{ auditId: new RegExp(safeQuery, 'i') }, { 'inspector.name': new RegExp(safeQuery, 'i') }],
+        $or: [
+          { auditId: new RegExp(safeQuery, 'i') },
+          { 'inspector.name': new RegExp(safeQuery, 'i') },
+        ],
       });
 
       res.json({

@@ -606,7 +606,7 @@ class SaudiVehicleService extends EventEmitter {
     await this.Vehicle.findByIdAndUpdate(trip.vehicleId, {
       'odometer.current': endData.mileage,
       'odometer.lastUpdated': new Date(),
-      $push: { 'odometer.history': { reading: endData.mileage, date: new Date() } },
+      $push: { 'odometer.history': { $each: [{ reading: endData.mileage, date: new Date() }], $slice: -500 } },
     });
 
     this.emit('trip:completed', trip);

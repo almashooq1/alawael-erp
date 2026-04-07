@@ -423,7 +423,7 @@ class TherapistPortalService {
     const Availability = getAvailability();
     const avail = await Availability.findOneAndUpdate(
       { therapist: therapistId },
-      { $push: { exceptions: exception } },
+      { $push: { exceptions: { $each: [exception], $slice: -200 } } },
       { new: true, upsert: true }
     );
     return avail;

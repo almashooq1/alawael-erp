@@ -61,6 +61,21 @@ const {
   ParentNotification,
 } = require('../models/ParentPortal');
 
+// ─── Rate Limiters ────────────────────────────────────────────────────────────
+const { createCustomLimiter } = require('../middleware/rateLimiter');
+const parentOtpSendLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  prefix: 'rl:parent-enh-otp-send:',
+  message: { success: false, message: 'تم تجاوز الحد الأقصى للمحاولات.' },
+});
+const parentOtpVerifyLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  prefix: 'rl:parent-enh-otp-verify:',
+  message: { success: false, message: 'تم تجاوز الحد الأقصى لمحاولات التحقق.' },
+});
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 // Generate secure 6-digit OTP using CSPRNG
@@ -78,7 +93,7 @@ function maskPhone(phone) {
 /**
  * POST /send-otp — إرسال OTP لولي الأمر
  */
-router.post('/send-otp', async (req, res) => {
+router.post('/send-otp', parentOtpSendLimiter, async (req, res) => {
   try {
     const { phone } = req.body;
 
@@ -118,7 +133,7 @@ router.post('/send-otp', async (req, res) => {
 
     // TODO: إرسال SMS عبر SmsService في الإنتاج
     if (process.env.NODE_ENV !== 'production') {
-      logger.info(`[ParentPortal] OTP for ${phone}: ${otp}`);
+      logger.info(`[ParentPortal] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`);
     }
 
     return res.json({
@@ -139,7 +154,7 @@ router.post('/send-otp', async (req, res) => {
 /**
  * POST /verify-otp — التحقق من OTP وإرجاع JWT
  */
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
   try {
     const { phone, otp, deviceToken, deviceType, deviceName } = req.body;
 

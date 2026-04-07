@@ -123,7 +123,7 @@ class FleetAccidentService {
   async addWitness(id, witnessData) {
     return FleetAccident.findByIdAndUpdate(
       id,
-      { $push: { witnesses: witnessData } },
+      { $push: { witnesses: { $each: [witnessData], $slice: -50 } } },
       { new: true }
     );
   }

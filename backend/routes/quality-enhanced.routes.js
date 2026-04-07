@@ -213,7 +213,7 @@ router.post('/incidents/:incidentId/actions', authenticate, async (req, res) => 
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findByIdAndUpdate(
       req.params.incidentId,
-      { $push: { correctiveActions: { ...req.body, addedBy: req.user._id, addedAt: new Date() } } },
+      { $push: { correctiveActions: { $each: [{ ...req.body, addedBy: req.user._id, addedAt: new Date() }], $slice: -200 } } },
       { new: true }
     );
     res.json({ success: true, data: incident });

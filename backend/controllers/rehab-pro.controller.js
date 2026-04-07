@@ -147,7 +147,7 @@ cardiacPulmonary.addExerciseSession = async (req, res) => {
   try {
     const doc = await CardiacPulmonaryRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { exerciseSessions: { ...req.body, date: req.body.date || new Date() } } },
+      { $push: { exerciseSessions: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -500 } } },
       { new: true }
     );
     ok(res, doc, 'Exercise session added');
@@ -173,7 +173,7 @@ cardiacPulmonary.addEducation = async (req, res) => {
   try {
     const doc = await CardiacPulmonaryRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { patientEducation: { ...req.body, date: req.body.date || new Date() } } },
+      { $push: { patientEducation: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -200 } } },
       { new: true }
     );
     ok(res, doc, 'Education session added');
@@ -199,7 +199,7 @@ strokeRehab.addSession = async (req, res) => {
   try {
     const doc = await StrokeRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { sessionLogs: { ...req.body, date: req.body.date || new Date() } } },
+      { $push: { sessionLogs: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -500 } } },
       { new: true }
     );
     ok(res, doc, 'Session log added');

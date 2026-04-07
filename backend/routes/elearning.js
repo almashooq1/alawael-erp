@@ -321,7 +321,7 @@ router.post(
 
       // تحديث الدورة
       await Course.findByIdAndUpdate(req.params.courseId, {
-        $push: { lessons: lesson._id },
+        $push: { lessons: { $each: [lesson._id], $slice: -200 } },
       });
 
       res.status(201).json({

@@ -298,7 +298,7 @@ class KnowledgeCenterService {
 
     const article = await KnowledgeArticle.findByIdAndUpdate(
       articleId,
-      { $push: { comments: { author: userId, text: text.trim(), createdAt: new Date() } } },
+      { $push: { comments: { $each: [{ author: userId, text: text.trim(), createdAt: new Date() }], $slice: -500 } } },
       { new: true }
     )
       .populate('comments.author', 'name fullName')

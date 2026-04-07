@@ -391,7 +391,7 @@ router.post('/:studentId/note', async (req, res) => {
     const { courseId, lessonIndex, content } = req.body;
     const enrollment = await Enrollment.findOneAndUpdate(
       { studentId: req.params.studentId, courseId },
-      { $push: { notes: { lessonIndex, content } } },
+      { $push: { notes: { $each: [{ lessonIndex, content }], $slice: -200 } } },
       { new: true }
     );
     if (!enrollment)

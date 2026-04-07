@@ -223,7 +223,7 @@ class EmployeeAffairsPhase2Service {
     await assignment.save();
     // Update unit occupants
     await HousingUnit.findByIdAndUpdate(data.unitId, {
-      $push: { currentOccupants: data.employeeId },
+      $push: { currentOccupants: { $each: [data.employeeId], $slice: -50 } },
       $set: { status: 'مشغول' },
     });
     return assignment;

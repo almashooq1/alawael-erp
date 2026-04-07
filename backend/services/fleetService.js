@@ -157,7 +157,7 @@ class FleetService {
       const vehicle = await Vehicle.findByIdAndUpdate(
         vehicleId,
         {
-          $push: { 'maintenance.maintenanceHistory': newRecord },
+          $push: { 'maintenance.maintenanceHistory': { $each: [newRecord], $slice: -200 } },
           $inc: { 'maintenance.totalMaintenanceCost': newRecord.cost },
           $set: {
             'maintenance.lastMaintenanceDate': new Date(),

@@ -641,6 +641,36 @@ if (!isTestEnv) {
   }
 }
 
+// ─── Shutdown Hooks — تسجيل إيقاف سلس لجميع الخدمات ذات المؤقتات ────────────
+if (!isTestEnv) {
+  const shutdownServices = [
+    ['HealthCheck', () => require('./services/HealthCheck').shutdown()],
+    ['AlertService', () => require('./services/AlertService').shutdown()],
+    ['CachingService', () => require('./services/cachingService').shutdown()],
+    ['RealtimeDashboard', () => require('./services/realtimeDashboardService').shutdown()],
+    [
+      'NotificationAnalytics',
+      () => require('./services/notificationAnalyticsSystem').shutdown(),
+    ],
+    ['BackupAnalytics', () => require('./services/backup-analytics.service').shutdown()],
+    ['BackupPerformance', () => require('./services/backup-performance.service').shutdown()],
+    ['BackupSync', () => require('./services/backup-sync.service').shutdown()],
+    ['BackupSecurity', () => require('./services/backup-security.service').shutdown()],
+    ['DatabaseMaintenance', () => require('./services/database-maintenance-service').stop()],
+    ['DatabaseReplication', () => require('./services/database-replication-service').stop()],
+  ];
+
+  for (const [name, fn] of shutdownServices) {
+    registerShutdownHook(name, async () => {
+      try {
+        await fn();
+      } catch {
+        /* service may not have been initialised — ignore */
+      }
+    });
+  }
+}
+
 // ─── Settings Seed — تهيئة الإعدادات الافتراضية (البرومبت 24) ────────────────
 if (!isTestEnv) {
   setTimeout(async () => {

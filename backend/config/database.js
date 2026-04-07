@@ -2,6 +2,18 @@
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
+// ==================== GLOBAL QUERY SAFETY (Round 31) ====================
+// Prevent unbounded find() queries from returning millions of docs
+const MAX_QUERY_LIMIT = parseInt(process.env.MONGO_MAX_QUERY_LIMIT, 10) || 1000;
+mongoose.plugin(schema => {
+  schema.pre(/^find/, function () {
+    // Only apply default limit if none was explicitly set
+    if (!this.getOptions().limit) {
+      this.limit(MAX_QUERY_LIMIT);
+    }
+  });
+});
+
 // ==================== CONNECTION RETRY CONFIGURATION ====================
 // Configuration for exponential backoff retry strategy
 const RETRY_CONFIG = {

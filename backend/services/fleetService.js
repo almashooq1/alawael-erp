@@ -338,43 +338,98 @@ class FleetService {
    */
   async getFleetStatistics() {
     try {
-      const vehicles = await Vehicle.find({ isActive: true });
-      const drivers = await Driver.find({ isActive: true, 'employment.status': 'نشط' });
-      const trips = await Trip.find({ status: 'اكتملت' });
+      // استعلامات متوازية بدلاً من تسلسلية + aggregation لتجنب جلب المستندات الكاملة
+      const [vehicleStats, drivers, tripStats] = await Promise.all([
+        Vehicle.aggregate([
+          { $match: { isActive: true } },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              totalCost: { $sum: '$stats.totalCost' },
+              totalFines: { $sum: '$totalFines' },
+              active: {
+                $sum: { $cond: [{ $eq: ['$status', 'نشطة'] }, 1, 0] },
+              },
+              maintenance: {
+                $sum: { $cond: [{ $eq: ['$status', 'في الإصلاح'] }, 1, 0] },
+              },
+              idle: {
+                $sum: { $cond: [{ $eq: ['$status', 'معطلة'] }, 1, 0] },
+              },
+            },
+          },
+        ]),
+        Driver.aggregate([
+          { $match: { isActive: true, 'employment.status': 'نشط' } },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              active: {
+                $sum: { $cond: [{ $eq: ['$employment.status', 'نشط'] }, 1, 0] },
+              },
+              onLeave: {
+                $sum: { $cond: [{ $eq: ['$employment.status', 'إجازة'] }, 1, 0] },
+              },
+              suspended: {
+                $sum: { $cond: [{ $eq: ['$violationPoints.status', 'ممنوع'] }, 1, 0] },
+              },
+            },
+          },
+        ]),
+        Trip.aggregate([
+          { $match: { status: 'اكتملت' } },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              totalDistance: { $sum: { $ifNull: ['$distance', 0] } },
+              totalRevenue: { $sum: { $ifNull: ['$revenue', 0] } },
+            },
+          },
+        ]),
+      ]);
 
-      const totalDistance = trips.reduce((sum, trip) => sum + (trip.distance || 0), 0);
-      const totalCosts = vehicles.reduce((sum, vehicle) => sum + (vehicle.stats.totalCost || 0), 0);
-      const totalRevenue = trips.reduce((sum, trip) => sum + (trip.revenue || 0), 0);
-      const totalFines = vehicles.reduce((sum, vehicle) => sum + (vehicle.totalFines || 0), 0);
-
-      const vehiclesByStatus = {
-        active: vehicles.filter(v => v.status === 'نشطة').length,
-        maintenance: vehicles.filter(v => v.status === 'في الإصلاح').length,
-        idle: vehicles.filter(v => v.status === 'معطلة').length,
+      const v = vehicleStats[0] || {
+        total: 0,
+        totalCost: 0,
+        totalFines: 0,
+        active: 0,
+        maintenance: 0,
+        idle: 0,
       };
+      const d = drivers[0] || { total: 0, active: 0, onLeave: 0, suspended: 0 };
+      const t = tripStats[0] || { total: 0, totalDistance: 0, totalRevenue: 0 };
 
-      const driversByStatus = {
-        active: drivers.filter(d => d.employment.status === 'نشط').length,
-        onLeave: drivers.filter(d => d.employment.status === 'إجازة').length,
-        suspended: drivers.filter(d => d.violationPoints.status === 'ممنوع').length,
-      };
+      const totalCosts = v.totalCost;
+      const totalRevenue = t.totalRevenue;
+      const totalDistance = t.totalDistance;
 
       return {
         success: true,
         statistics: {
-          totalVehicles: vehicles.length,
-          totalDrivers: drivers.length,
-          totalTrips: trips.length,
+          totalVehicles: v.total,
+          totalDrivers: d.total,
+          totalTrips: t.total,
           totalDistance,
           totalCosts,
           totalRevenue,
-          totalFines,
+          totalFines: v.totalFines,
           costPerKm: totalDistance > 0 ? (totalCosts / totalDistance).toFixed(2) : 0,
           profit: totalRevenue - totalCosts,
           profitMargin:
             totalRevenue > 0 ? (((totalRevenue - totalCosts) / totalRevenue) * 100).toFixed(2) : 0,
-          vehiclesByStatus,
-          driversByStatus,
+          vehiclesByStatus: {
+            active: v.active,
+            maintenance: v.maintenance,
+            idle: v.idle,
+          },
+          driversByStatus: {
+            active: d.active,
+            onLeave: d.onLeave,
+            suspended: d.suspended,
+          },
         },
       };
     } catch (error) {

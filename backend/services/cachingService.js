@@ -10,6 +10,7 @@
 class CachingService {
   constructor(options = {}) {
     this.cache = new Map();
+    this._timers = new Map(); // timer refs — prevent stale-timeout bug
     this.ttl = options.ttl || 5 * 60 * 1000; // 5 minutes default
     this.maxSize = options.maxSize || 100; // Max cache entries
     this.stats = {
@@ -42,10 +43,18 @@ class CachingService {
     this.cache.set(key, entry);
     this.stats.sets++;
 
-    // جدولة الحذف التلقائي
-    setTimeout(() => {
+    // إلغاء المؤقت السابق لنفس المفتاح (منع حذف مبكر)
+    if (this._timers.has(key)) {
+      clearTimeout(this._timers.get(key));
+    }
+
+    // جدولة الحذف التلقائي مع حفظ المرجع
+    const timer = setTimeout(() => {
+      this._timers.delete(key);
       this.delete(key);
     }, ttl);
+    if (timer.unref) timer.unref(); // لا يمنع إغلاق العملية
+    this._timers.set(key, timer);
 
     return true;
   }
@@ -81,6 +90,11 @@ class CachingService {
    * Delete data
    */
   delete(key) {
+    // إلغاء المؤقت المرتبط
+    if (this._timers.has(key)) {
+      clearTimeout(this._timers.get(key));
+      this._timers.delete(key);
+    }
     const deleted = this.cache.delete(key);
     if (deleted) {
       this.stats.deletes++;
@@ -110,6 +124,11 @@ class CachingService {
    * Clear cache
    */
   clear() {
+    // إلغاء جميع المؤقتات أولاً
+    for (const timer of this._timers.values()) {
+      clearTimeout(timer);
+    }
+    this._timers.clear();
     this.cache.clear();
     return true;
   }
@@ -130,9 +149,21 @@ class CachingService {
     }
 
     if (lruKey) {
+      if (this._timers.has(lruKey)) {
+        clearTimeout(this._timers.get(lruKey));
+        this._timers.delete(lruKey);
+      }
       this.cache.delete(lruKey);
       this.stats.evictions++;
     }
+  }
+
+  /**
+   * إيقاف الخدمة بشكل سلس — إلغاء كل المؤقتات
+   * Graceful shutdown — cancel all pending timers
+   */
+  shutdown() {
+    this.clear();
   }
 
   /**

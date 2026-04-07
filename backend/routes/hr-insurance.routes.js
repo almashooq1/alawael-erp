@@ -123,7 +123,15 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
-    const INSURANCE_SAFE_SORTS = new Set(['createdAt', 'employeeName', 'policyNumber', 'status', 'expiryDate', 'coverageClass', 'insuranceCompany']);
+    const INSURANCE_SAFE_SORTS = new Set([
+      'createdAt',
+      'employeeName',
+      'policyNumber',
+      'status',
+      'expiryDate',
+      'coverageClass',
+      'insuranceCompany',
+    ]);
     const safeSortBy = INSURANCE_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
     const sort = { [safeSortBy]: sortOrder === 'asc' ? 1 : -1 };
 

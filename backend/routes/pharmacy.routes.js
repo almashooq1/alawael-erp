@@ -450,8 +450,15 @@ router.post('/inventory', async (req, res) => {
 
 // ── Allowed fields for inventory update (prevent mass-assignment) ──
 const INVENTORY_UPDATE_FIELDS = [
-  'batchNumber', 'quantity', 'unitPrice', 'expiryDate', 'status',
-  'supplier', 'notes', 'storageLocation', 'minimumStock',
+  'batchNumber',
+  'quantity',
+  'unitPrice',
+  'expiryDate',
+  'status',
+  'supplier',
+  'notes',
+  'storageLocation',
+  'minimumStock',
 ];
 
 router.put('/inventory/:id', async (req, res) => {

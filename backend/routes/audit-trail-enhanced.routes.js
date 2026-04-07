@@ -32,7 +32,7 @@ try {
   } catch {
     // إنشاء نموذج مبسط إذا لم يكن موجوداً
     const mongoose = require('mongoose');
-const escapeRegex = require('../utils/escapeRegex');
+    const escapeRegex = require('../utils/escapeRegex');
     const auditSchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -186,7 +186,14 @@ router.get('/', requireAuditor, async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(perPage);
-    const AUDIT_SAFE_SORTS = new Set(['createdAt', 'action', 'module', 'userName', 'ipAddress', 'auditableType']);
+    const AUDIT_SAFE_SORTS = new Set([
+      'createdAt',
+      'action',
+      'module',
+      'userName',
+      'ipAddress',
+      'auditableType',
+    ]);
     const safeSortBy = AUDIT_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
     const sort = { [safeSortBy]: sortDir === 'asc' ? 1 : -1 };
 

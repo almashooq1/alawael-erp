@@ -221,7 +221,15 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(perPage);
-    const TICKET_SAFE_SORTS = new Set(['createdAt', 'priority', 'status', 'ticketNumber', 'subject', 'updatedAt', 'type']);
+    const TICKET_SAFE_SORTS = new Set([
+      'createdAt',
+      'priority',
+      'status',
+      'ticketNumber',
+      'subject',
+      'updatedAt',
+      'type',
+    ]);
     const safeSortBy = TICKET_SAFE_SORTS.has(sortBy) ? sortBy : 'createdAt';
     const sort = { [safeSortBy]: sortDir === 'asc' ? 1 : -1 };
 

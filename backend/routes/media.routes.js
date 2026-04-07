@@ -461,7 +461,14 @@ router.get('/list', authenticate, async (req, res) => {
       ];
     }
 
-    const MEDIA_SAFE_SORTS = { '-createdAt': { createdAt: -1 }, 'createdAt': { createdAt: 1 }, '-title': { title: -1 }, 'title': { title: 1 }, '-fileSize': { fileSize: -1 }, 'fileSize': { fileSize: 1 } };
+    const MEDIA_SAFE_SORTS = {
+      '-createdAt': { createdAt: -1 },
+      createdAt: { createdAt: 1 },
+      '-title': { title: -1 },
+      title: { title: 1 },
+      '-fileSize': { fileSize: -1 },
+      fileSize: { fileSize: 1 },
+    };
     const safeSort = MEDIA_SAFE_SORTS[sort] || { createdAt: -1 };
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [items, total] = await Promise.all([

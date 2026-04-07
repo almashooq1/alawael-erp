@@ -62,7 +62,14 @@ router.get('/', async (req, res) => {
     }
 
     const skip = (Number(page) - 1) * Number(limit);
-    const SESSION_SAFE_SORTS = new Set(['date', 'createdAt', 'status', 'sessionType', 'title', 'updatedAt']);
+    const SESSION_SAFE_SORTS = new Set([
+      'date',
+      'createdAt',
+      'status',
+      'sessionType',
+      'title',
+      'updatedAt',
+    ]);
     const safeSortBy = SESSION_SAFE_SORTS.has(sortBy) ? sortBy : 'date';
     const sort = { [safeSortBy]: sortOrder === 'asc' ? 1 : -1 };
 

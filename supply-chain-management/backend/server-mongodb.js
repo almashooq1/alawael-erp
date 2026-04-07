@@ -277,7 +277,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Look up user from MongoDB
     const User = require('./models/User');
-    const user = await User.findOne({ $or: [{ username }, { username: email }] });
+    const user = await User.findOne({ $or: [{ username }, { username: email }] }).select('+password');
 
     if (!user) {
       return res.status(401).json({

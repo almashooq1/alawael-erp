@@ -266,8 +266,8 @@ app.post('/api/auth/register', async (req, res) => {
       });
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password (Round 44: salt rounds 10 → 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create new user
     const newUser = {

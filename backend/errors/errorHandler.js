@@ -57,15 +57,14 @@ const classifyError = err => {
 
   // Mongoose CastError (invalid ObjectId)
   if (err.name === 'CastError') {
-    const message = `Invalid ${err.path}: ${err.value}`;
-    return new AppError(message, 400, 'INVALID_ID');
+    // Do NOT leak err.path or err.value to the client (Round 44)
+    return new AppError('معرّف غير صالح / Invalid identifier format', 400, 'INVALID_ID');
   }
 
   // Mongoose duplicate key (code 11000)
   if (err.code === 11000) {
-    const field = Object.keys(err.keyPattern || err.keyValue || {})[0] || 'field';
-    const value = err.keyValue ? err.keyValue[field] : 'unknown';
-    return new AppError(`Duplicate value for ${field}: ${value}`, 409, 'DUPLICATE_KEY');
+    // Generic message — do NOT expose field name or value (Round 44)
+    return new AppError('هذا العنصر موجود مسبقاً / Duplicate entry', 409, 'DUPLICATE_KEY');
   }
 
   // Mongoose ValidationError

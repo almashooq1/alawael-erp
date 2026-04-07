@@ -16,24 +16,28 @@ const defaultData = {
 // Keep an in-memory store for tests to avoid cross-worker file races
 let memoryDB = { ...defaultData };
 
-function readFromDisk() {
-  if (!fs.existsSync(DB_PATH)) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(defaultData, null, 2));
-    return { ...defaultData };
+async function readFromDisk() {
+  try {
+    const data = await fs.promises.readFile(DB_PATH, 'utf8');
+    return JSON.parse(data);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      await fs.promises.writeFile(DB_PATH, JSON.stringify(defaultData, null, 2));
+      return { ...defaultData };
+    }
+    throw err;
   }
-  const data = fs.readFileSync(DB_PATH, 'utf8');
-  return JSON.parse(data);
 }
 
 /**
  * قراءة قاعدة البيانات
  */
-function read() {
+async function read() {
   try {
     if (isTestEnv) {
       return JSON.parse(JSON.stringify(memoryDB));
     }
-    return readFromDisk();
+    return await readFromDisk();
   } catch (error) {
     logger.error('خطأ في قراءة قاعدة البيانات:', error);
     return { ...defaultData };
@@ -43,7 +47,7 @@ function read() {
 /**
  * كتابة إلى قاعدة البيانات
  */
-function write(data) {
+async function write(data) {
   try {
     const nextData = { ...defaultData, ...data };
 
@@ -52,7 +56,7 @@ function write(data) {
       return true;
     }
 
-    fs.writeFileSync(DB_PATH, JSON.stringify(nextData, null, 2));
+    await fs.promises.writeFile(DB_PATH, JSON.stringify(nextData, null, 2));
     return true;
   } catch (error) {
     logger.error('خطأ في كتابة قاعدة البيانات:', error);

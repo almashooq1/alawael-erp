@@ -66,6 +66,15 @@ export const barcodeAuth = (req, res, next) => {
  */
 const barcodeRateLimitStore = new Map();
 
+// تنظيف دوري — حذف سجلات IP المنتهية كل 5 دقائق لمنع تسرب الذاكرة
+const _barcodeCleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [ip, rec] of barcodeRateLimitStore) {
+    if (now > rec.resetTime) barcodeRateLimitStore.delete(ip);
+  }
+}, 5 * 60 * 1000);
+if (_barcodeCleanupTimer.unref) _barcodeCleanupTimer.unref();
+
 export const barcodeRateLimit = (req, res, next) => {
   const ip = req.ip;
   const now = Date.now();

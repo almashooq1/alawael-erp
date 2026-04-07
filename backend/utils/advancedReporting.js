@@ -210,13 +210,13 @@ class ReportGenerator {
     const filename = `report_${Date.now()}.csv`;
     const filepath = path.join(this.reportsDir, filename);
 
-    fs.writeFileSync(filepath, csvContent, 'utf8');
+    await fs.promises.writeFile(filepath, csvContent, 'utf8');
 
     return {
       success: true,
       filename,
       filepath,
-      size: fs.statSync(filepath).size,
+      size: (await fs.promises.stat(filepath)).size,
     };
   }
 
@@ -231,13 +231,13 @@ class ReportGenerator {
     const filename = `report_${Date.now()}.json`;
     const filepath = path.join(this.reportsDir, filename);
 
-    fs.writeFileSync(filepath, jsonContent, 'utf8');
+    await fs.promises.writeFile(filepath, jsonContent, 'utf8');
 
     return {
       success: true,
       filename,
       filepath,
-      size: fs.statSync(filepath).size,
+      size: (await fs.promises.stat(filepath)).size,
     };
   }
 }

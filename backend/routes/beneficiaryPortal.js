@@ -21,7 +21,7 @@ const {
 } = require('../models/BeneficiaryPortal');
 const { jwtSecret } = require('../config/secrets');
 const { paginate } = require('../utils/paginate');
-const { loginLimiter, registerLimiter } = require('../middleware/rateLimiter');
+const { loginLimiter, registerLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
 
 // ==================== ROOT ENDPOINT ====================
 router.get('/', (req, res) => {
@@ -613,7 +613,7 @@ router.put('/profile', authenticateBeneficiary, async (req, res) => {
 });
 
 // Change Password
-router.post('/profile/change-password', authenticateBeneficiary, async (req, res) => {
+router.post('/profile/change-password', authenticateBeneficiary, sensitiveOperationLimiter, async (req, res) => {
   try {
     const { currentPassword, newPassword, confirmPassword } = req.body;
 

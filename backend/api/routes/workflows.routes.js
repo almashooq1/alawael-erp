@@ -26,11 +26,25 @@ const authenticateToken = (req, res, next) => {
 };
 
 // In-memory storage (في الإنتاج، استخدم قاعدة بيانات حقيقية)
+// ── Bounded Maps — حماية من تسرب الذاكرة (OOM) ──
+const MAX_STORE_SIZE = 10000;
+const MAX_AUDIT_LOG = 5000;
+
 const workflows = new Map();
 const workflowTemplates = new Map();
 const approvals = new Map();
 const delegations = new Map();
 const auditLog = [];
+
+/** إزالة أقدم المُدخلات عند تجاوز الحد */
+function boundedSet(map, key, value) {
+  if (map.size >= MAX_STORE_SIZE && !map.has(key)) {
+    // حذف أقدم إدخال (أول مُدخل في Map)
+    const oldest = map.keys().next().value;
+    map.delete(oldest);
+  }
+  map.set(key, value);
+}
 
 // ============================================
 // WORKFLOW ROUTES
@@ -130,7 +144,7 @@ router.post('/workflows', authenticateToken, async (req, res) => {
       updatedAt: new Date(),
     };
 
-    workflows.set(workflow.id, workflow);
+    boundedSet(workflows, workflow.id, workflow);
 
     // Log audit
     addAuditLog('workflow_created', req.user.id, workflow.id, 'Workflow created');
@@ -316,7 +330,7 @@ router.post('/workflows/:id/delegate', authenticateToken, async (req, res) => {
       status: 'active',
     };
 
-    delegations.set(delegation.id, delegation);
+    boundedSet(delegations, delegation.id, delegation);
 
     // Update stage assignee
     stage.assignees = [delegateToUserId];
@@ -518,6 +532,10 @@ function addAuditLog(action, userId, workflowId, details) {
     details,
     timestamp: new Date(),
   });
+  // قص السجل عند تجاوز الحد — الاحتفاظ بالنصف الأحدث
+  if (auditLog.length > MAX_AUDIT_LOG) {
+    auditLog.splice(0, auditLog.length - Math.floor(MAX_AUDIT_LOG / 2));
+  }
 }
 
 async function sendNotification(workflow, eventType, data = {}) {
@@ -554,7 +572,7 @@ function initializeDefaultTemplates() {
   ];
 
   templates.forEach(template => {
-    workflowTemplates.set(template.id, template);
+    boundedSet(workflowTemplates, template.id, template);
   });
 }
 

@@ -29,14 +29,15 @@ function isStrongPassword(password) {
 // Register
 router.post('/register', authLimiter, async (req, res) => {
   try {
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
     if (!isStrongPassword(password)) {
       return res.status(400).json({
         error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol.',
       });
     }
     const hashed = await bcrypt.hash(password, 12);
-    const user = new User({ username, password: hashed, role });
+    // Role is always 'user' on self-registration; only admins can promote via a separate endpoint
+    const user = new User({ username, password: hashed, role: 'user' });
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (err) {

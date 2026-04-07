@@ -466,12 +466,14 @@ ReportTemplateSchema.statics.getStale = function (days = 90) {
 };
 
 ReportTemplateSchema.statics.searchByKeyword = function (keyword) {
+  // Escape special regex characters to prevent NoSQL injection / ReDoS
+  const escaped = String(keyword).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return this.find({
     $or: [
-      { templateName: { $regex: keyword, $options: 'i' } },
-      { description: { $regex: keyword, $options: 'i' } },
-      { tags: { $in: [keyword] } },
-      { keywords: { $in: [keyword] } },
+      { templateName: { $regex: escaped, $options: 'i' } },
+      { description: { $regex: escaped, $options: 'i' } },
+      { tags: { $in: [String(keyword)] } },
+      { keywords: { $in: [String(keyword)] } },
     ],
     status: 'published',
   });

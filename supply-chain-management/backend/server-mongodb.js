@@ -343,12 +343,14 @@ app.post('/api/auth/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create new user — role is ALWAYS 'user'; only admins can promote via a separate endpoint
+    const ALLOWED_ROLES = ['user'];
+    const safeRole = ALLOWED_ROLES.includes(role) ? role : 'user';
     const newUser = new User({
       username,
       email,
       password: hashedPassword,
-      role: role || 'user',
+      role: safeRole,
     });
 
     await newUser.save();
@@ -396,9 +398,25 @@ app.get('/api/auth/me', (req, res) => {
   }
 });
 
+// ==================== AUTH MIDDLEWARE ====================
+function authRequired(req, res, next) {
+  try {
+    const auth = req.headers.authorization;
+    if (!auth || !auth.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    const token = auth.split(' ')[1];
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'Invalid or expired token' });
+  }
+}
+
 // ==================== DASHBOARD ====================
 
-app.get('/api/dashboard/stats', async (req, res) => {
+app.get('/api/dashboard/stats', authRequired, async (req, res) => {
   try {
     const totalSuppliers = await Supplier.countDocuments();
     const totalProducts = await Product.countDocuments();
@@ -680,7 +698,7 @@ app.get('/api/barcode/statistics', async (req, res) => {
 
 // ==================== SUPPLIERS ====================
 
-app.get('/api/suppliers', async (req, res) => {
+app.get('/api/suppliers', authRequired, async (req, res) => {
   try {
     const suppliers = await Supplier.find();
     res.json({ success: true, data: suppliers });
@@ -689,7 +707,7 @@ app.get('/api/suppliers', async (req, res) => {
   }
 });
 
-app.post('/api/suppliers', async (req, res) => {
+app.post('/api/suppliers', authRequired, async (req, res) => {
   try {
     const { name, email, phone, address, rating } = req.body;
     if (!name || !email) {
@@ -711,9 +729,16 @@ app.post('/api/suppliers', async (req, res) => {
   }
 });
 
-app.put('/api/suppliers/:id', async (req, res) => {
+app.put('/api/suppliers/:id', authRequired, async (req, res) => {
   try {
-    const supplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { name, email, phone, address, rating } = req.body;
+    const allowed = {};
+    if (name !== undefined) allowed.name = name;
+    if (email !== undefined) allowed.email = email;
+    if (phone !== undefined) allowed.phone = phone;
+    if (address !== undefined) allowed.address = address;
+    if (rating !== undefined) allowed.rating = rating;
+    const supplier = await Supplier.findByIdAndUpdate(req.params.id, allowed, { new: true });
     if (!supplier) {
       return res.status(404).json({ error: 'Supplier not found' });
     }
@@ -723,7 +748,7 @@ app.put('/api/suppliers/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/suppliers/:id', async (req, res) => {
+app.delete('/api/suppliers/:id', authRequired, async (req, res) => {
   try {
     await Supplier.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Supplier deleted' });
@@ -734,7 +759,7 @@ app.delete('/api/suppliers/:id', async (req, res) => {
 
 // ==================== PRODUCTS ====================
 
-app.get('/api/products', async (req, res) => {
+app.get('/api/products', authRequired, async (req, res) => {
   try {
     const products = await Product.find();
     res.json({ success: true, data: products });
@@ -743,7 +768,7 @@ app.get('/api/products', async (req, res) => {
   }
 });
 
-app.post('/api/products', async (req, res) => {
+app.post('/api/products', authRequired, async (req, res) => {
   try {
     const { name, sku, price, stock, supplierId } = req.body;
     if (!name || !sku) {
@@ -765,9 +790,16 @@ app.post('/api/products', async (req, res) => {
   }
 });
 
-app.put('/api/products/:id', async (req, res) => {
+app.put('/api/products/:id', authRequired, async (req, res) => {
   try {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { name, sku, price, stock, supplierId } = req.body;
+    const allowed = {};
+    if (name !== undefined) allowed.name = name;
+    if (sku !== undefined) allowed.sku = sku;
+    if (price !== undefined) allowed.price = price;
+    if (stock !== undefined) allowed.stock = stock;
+    if (supplierId !== undefined) allowed.supplierId = supplierId;
+    const product = await Product.findByIdAndUpdate(req.params.id, allowed, { new: true });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
@@ -777,7 +809,7 @@ app.put('/api/products/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+app.delete('/api/products/:id', authRequired, async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Product deleted' });
@@ -788,7 +820,7 @@ app.delete('/api/products/:id', async (req, res) => {
 
 // ==================== INVENTORY ====================
 
-app.get('/api/inventory', async (req, res) => {
+app.get('/api/inventory', authRequired, async (req, res) => {
   try {
     const inventory = await Inventory.find();
     res.json({ success: true, data: inventory });
@@ -797,7 +829,7 @@ app.get('/api/inventory', async (req, res) => {
   }
 });
 
-app.post('/api/inventory', async (req, res) => {
+app.post('/api/inventory', authRequired, async (req, res) => {
   try {
     const { productId, quantity, location } = req.body;
     if (!productId) {
@@ -817,9 +849,14 @@ app.post('/api/inventory', async (req, res) => {
   }
 });
 
-app.put('/api/inventory/:id', async (req, res) => {
+app.put('/api/inventory/:id', authRequired, async (req, res) => {
   try {
-    const inv = await Inventory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { productId, quantity, location } = req.body;
+    const allowed = {};
+    if (productId !== undefined) allowed.productId = productId;
+    if (quantity !== undefined) allowed.quantity = quantity;
+    if (location !== undefined) allowed.location = location;
+    const inv = await Inventory.findByIdAndUpdate(req.params.id, allowed, { new: true });
     if (!inv) {
       return res.status(404).json({ error: 'Inventory not found' });
     }
@@ -829,7 +866,7 @@ app.put('/api/inventory/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/inventory/:id', async (req, res) => {
+app.delete('/api/inventory/:id', authRequired, async (req, res) => {
   try {
     await Inventory.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Inventory deleted' });
@@ -840,7 +877,7 @@ app.delete('/api/inventory/:id', async (req, res) => {
 
 // ==================== ORDERS ====================
 
-app.get('/api/orders', async (req, res) => {
+app.get('/api/orders', authRequired, async (req, res) => {
   try {
     const orders = await Order.find();
     res.json({ success: true, data: orders });
@@ -849,7 +886,7 @@ app.get('/api/orders', async (req, res) => {
   }
 });
 
-app.post('/api/orders', async (req, res) => {
+app.post('/api/orders', authRequired, async (req, res) => {
   try {
     const { number, status, total, supplierId } = req.body;
     if (!number) {
@@ -870,9 +907,15 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-app.put('/api/orders/:id', async (req, res) => {
+app.put('/api/orders/:id', authRequired, async (req, res) => {
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { number, status, total, supplierId } = req.body;
+    const allowed = {};
+    if (number !== undefined) allowed.number = number;
+    if (status !== undefined) allowed.status = status;
+    if (total !== undefined) allowed.total = total;
+    if (supplierId !== undefined) allowed.supplierId = supplierId;
+    const order = await Order.findByIdAndUpdate(req.params.id, allowed, { new: true });
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -882,7 +925,7 @@ app.put('/api/orders/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/orders/:id', async (req, res) => {
+app.delete('/api/orders/:id', authRequired, async (req, res) => {
   try {
     await Order.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Order deleted' });
@@ -893,7 +936,7 @@ app.delete('/api/orders/:id', async (req, res) => {
 
 // ==================== SHIPMENTS ====================
 
-app.get('/api/shipments', async (req, res) => {
+app.get('/api/shipments', authRequired, async (req, res) => {
   try {
     const shipments = await Shipment.find();
     res.json({ success: true, data: shipments });
@@ -902,7 +945,7 @@ app.get('/api/shipments', async (req, res) => {
   }
 });
 
-app.post('/api/shipments', async (req, res) => {
+app.post('/api/shipments', authRequired, async (req, res) => {
   try {
     const { orderId, status, trackingNumber } = req.body;
     if (!orderId) {
@@ -922,9 +965,14 @@ app.post('/api/shipments', async (req, res) => {
   }
 });
 
-app.put('/api/shipments/:id', async (req, res) => {
+app.put('/api/shipments/:id', authRequired, async (req, res) => {
   try {
-    const shipment = await Shipment.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { orderId, status, trackingNumber } = req.body;
+    const allowed = {};
+    if (orderId !== undefined) allowed.orderId = orderId;
+    if (status !== undefined) allowed.status = status;
+    if (trackingNumber !== undefined) allowed.trackingNumber = trackingNumber;
+    const shipment = await Shipment.findByIdAndUpdate(req.params.id, allowed, { new: true });
     if (!shipment) {
       return res.status(404).json({ error: 'Shipment not found' });
     }
@@ -934,7 +982,7 @@ app.put('/api/shipments/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/shipments/:id', async (req, res) => {
+app.delete('/api/shipments/:id', authRequired, async (req, res) => {
   try {
     await Shipment.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Shipment deleted' });
@@ -945,7 +993,7 @@ app.delete('/api/shipments/:id', async (req, res) => {
 
 // ==================== AUDIT LOGS ====================
 
-app.get('/api/audit-logs', async (req, res) => {
+app.get('/api/audit-logs', authRequired, async (req, res) => {
   try {
     const logs = await AuditLog.find().sort({ timestamp: -1 }).limit(100);
     res.json({ success: true, data: logs });

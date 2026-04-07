@@ -269,13 +269,15 @@ app.post('/api/auth/register', async (req, res) => {
     // Hash password (Round 44: salt rounds 10 → 12)
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create new user
+    // Create new user — role is ALWAYS 'user'; only admins can promote via a separate endpoint
+    const ALLOWED_ROLES = ['user'];
+    const safeRole = ALLOWED_ROLES.includes(role) ? role : 'user';
     const newUser = {
       _id: Date.now().toString(),
       username,
       email,
       password: hashedPassword,
-      role: role || 'user',
+      role: safeRole,
     };
 
     users.push(newUser);

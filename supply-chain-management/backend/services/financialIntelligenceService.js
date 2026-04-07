@@ -3,6 +3,7 @@ const Invoice = require('../models/Invoice');
 const Budget = require('../models/Budget');
 const { EventEmitter } = require('events');
 const moment = require('moment');
+const crypto = require('crypto');
 
 /**
  * FinancialIntelligenceService
@@ -24,8 +25,8 @@ class FinancialIntelligenceService extends EventEmitter {
     try {
       const { amount, customerId, currency = 'USD', paymentMethod, paymentGateway, description, orderId, invoiceId } = paymentData;
 
-      // Generate unique transaction ID
-      const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate unique transaction ID using cryptographically secure random bytes
+      const transactionId = `TXN-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
 
       // Calculate net amount (amount minus fees)
       const processingFee = this.calculateProcessingFee(amount, paymentGateway);
@@ -104,7 +105,7 @@ class FinancialIntelligenceService extends EventEmitter {
       if (!originalTransaction) throw new Error('Original transaction not found');
 
       // Create refund transaction
-      const refundId = `REFUND-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const refundId = `REFUND-${Date.now()}-${crypto.randomBytes(6).toString('hex')}`;
       const transaction = new Transaction({
         transactionId: refundId,
         type: 'refund',
@@ -238,7 +239,7 @@ class FinancialIntelligenceService extends EventEmitter {
       const totalAmount = subtotal + taxAmount + (invoiceData.shippingCost || 0) - (invoiceData.discountAmount || 0);
 
       // Generate invoice number
-      const invoiceNumber = `INV-${moment().format('YYYYMMDD')}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      const invoiceNumber = `INV-${moment().format('YYYYMMDD')}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
       // Calculate due date if not provided
       const calculatedDueDate = dueDate || this.calculateDueDate(moment(), paymentTerms);

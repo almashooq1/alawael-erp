@@ -98,7 +98,13 @@ class BackupRestoreService {
   // Restore from Local Backup
   async restoreFromLocalBackup(backupFileName) {
     try {
-      const backupPath = path.join(this.backupDir, backupFileName);
+      // Sanitize: strip directory separators to prevent path traversal
+      const safeName = path.basename(backupFileName);
+      const backupPath = path.join(this.backupDir, safeName);
+      // Ensure resolved path is inside backupDir
+      if (!backupPath.startsWith(path.resolve(this.backupDir))) {
+        throw new Error('Invalid backup file name');
+      }
 
       // Check if file exists
       const fileStats = await fs.stat(backupPath);
@@ -325,6 +331,13 @@ class BackupRestoreService {
   // Verify Backup Integrity
   async verifyBackupIntegrity(backupPath) {
     try {
+      // Ensure the backup path is within the expected backup directory
+      const resolvedPath = path.resolve(backupPath);
+      const resolvedDir = path.resolve(this.backupDir);
+      if (!resolvedPath.startsWith(resolvedDir)) {
+        throw new Error('Invalid backup path');
+      }
+
       // Try to restore to test database
       const testDbUri =
         process.env.MONGODB_TEST_URI || process.env.MONGODB_URI.replace('?', '_test?');

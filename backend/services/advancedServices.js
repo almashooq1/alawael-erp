@@ -75,10 +75,12 @@ class ReportsService {
       {
         $push: {
           customReports: {
-            $each: [{
-            ...reportData,
-            generatedDate: new Date(),
-            }],
+            $each: [
+              {
+                ...reportData,
+                generatedDate: new Date(),
+              },
+            ],
             $slice: -500,
           },
         },
@@ -93,12 +95,14 @@ class ReportsService {
       {
         $push: {
           customReports: {
-            $each: [{
-            title: `Progress Report - ${new Date().toLocaleDateString('ar-SA')}`,
-            type: 'progress',
-            generatedDate: new Date(),
-            format: 'pdf',
-            }],
+            $each: [
+              {
+                title: `Progress Report - ${new Date().toLocaleDateString('ar-SA')}`,
+                type: 'progress',
+                generatedDate: new Date(),
+                format: 'pdf',
+              },
+            ],
             $slice: -500,
           },
         },

@@ -133,7 +133,9 @@ router.post('/send-otp', parentOtpSendLimiter, async (req, res) => {
 
     // TODO: إرسال SMS عبر SmsService في الإنتاج
     if (process.env.NODE_ENV !== 'production') {
-      logger.info(`[ParentPortal] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`);
+      logger.info(
+        `[ParentPortal] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`
+      );
     }
 
     return res.json({

@@ -357,7 +357,9 @@ class DocumentCollaborationService extends EventEmitter {
 
     // Update parent if reply
     if (options.parentId) {
-      await this.Comment.findByIdAndUpdate(options.parentId, { $push: { replies: { $each: [comment._id], $slice: -500 } } });
+      await this.Comment.findByIdAndUpdate(options.parentId, {
+        $push: { replies: { $each: [comment._id], $slice: -500 } },
+      });
     }
 
     // Emit event

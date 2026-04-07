@@ -160,7 +160,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const items = await CourtHearing.find({ organization: req.user.organization })
       .populate('case', 'caseNumber title')
-      .sort({ hearingDate: 1 }).lean();
+      .sort({ hearingDate: 1 })
+      .lean();
     res.json({ success: true, data: items });
   })
 );
@@ -536,7 +537,14 @@ router.post(
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.findByIdAndUpdate(
       req.params.id,
-      { $push: { acknowledgments: { $each: [{ user: req.user._id, date: new Date(), acknowledged: true }], $slice: -500 } } },
+      {
+        $push: {
+          acknowledgments: {
+            $each: [{ user: req.user._id, date: new Date(), acknowledged: true }],
+            $slice: -500,
+          },
+        },
+      },
       { new: true }
     );
     res.json({ success: true, data: item });
@@ -1047,7 +1055,9 @@ router.patch(
       {
         $inc: { escalationLevel: 1 },
         status: 'escalated',
-        $push: { escalationHistory: { $each: [{ ...sanitize(req.body), date: new Date() }], $slice: -200 } },
+        $push: {
+          escalationHistory: { $each: [{ ...sanitize(req.body), date: new Date() }], $slice: -200 },
+        },
       },
       { new: true }
     );
@@ -1711,7 +1721,9 @@ router.patch(
       {
         actual: req.body.actual,
         trend: req.body.trend,
-        $push: { historicalData: { $each: [{ date: new Date(), value: req.body.actual }], $slice: -1000 } },
+        $push: {
+          historicalData: { $each: [{ date: new Date(), value: req.body.actual }], $slice: -1000 },
+        },
       },
       { new: true }
     );

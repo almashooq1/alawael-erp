@@ -146,7 +146,9 @@ router.post('/auth/send-otp', parentOtpSendLimiter, async (req, res) => {
         logger.warn('SMS send failed:', smsErr.message);
       }
     } else {
-      logger.info(`[DEV] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`);
+      logger.info(
+        `[DEV] OTP sent for ${phone.substring(0, 3)}****${phone.slice(-2)} (check response body for devOtp)`
+      );
     }
 
     res.json({

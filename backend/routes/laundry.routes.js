@@ -116,7 +116,9 @@ router.patch('/orders/:id/status', async (req, res) => {
 
     const update = {
       status,
-      $push: { statusHistory: { $each: [{ status, updatedBy: req.user?._id, notes }], $slice: -200 } },
+      $push: {
+        statusHistory: { $each: [{ status, updatedBy: req.user?._id, notes }], $slice: -200 },
+      },
     };
 
     // Timestamp tracking

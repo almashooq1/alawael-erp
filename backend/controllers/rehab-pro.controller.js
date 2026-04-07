@@ -102,7 +102,8 @@ function buildCRUD(Model, label) {
       try {
         const total = await Model.countDocuments();
         const byStatus = await Model.aggregate([
-          { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+          { $limit: 1000 },
         ]);
         ok(res, { total, byStatus });
       } catch (e) {
@@ -147,7 +148,14 @@ cardiacPulmonary.addExerciseSession = async (req, res) => {
   try {
     const doc = await CardiacPulmonaryRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { exerciseSessions: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -500 } } },
+      {
+        $push: {
+          exerciseSessions: {
+            $each: [{ ...req.body, date: req.body.date || new Date() }],
+            $slice: -500,
+          },
+        },
+      },
       { new: true }
     );
     ok(res, doc, 'Exercise session added');
@@ -173,7 +181,14 @@ cardiacPulmonary.addEducation = async (req, res) => {
   try {
     const doc = await CardiacPulmonaryRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { patientEducation: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -200 } } },
+      {
+        $push: {
+          patientEducation: {
+            $each: [{ ...req.body, date: req.body.date || new Date() }],
+            $slice: -200,
+          },
+        },
+      },
       { new: true }
     );
     ok(res, doc, 'Education session added');
@@ -186,7 +201,8 @@ cardiacPulmonary.getPhaseDistribution = async (_req, res) => {
   try {
     const data = await CardiacPulmonaryRehab.aggregate([
       { $group: { _id: '$phase', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -199,7 +215,14 @@ strokeRehab.addSession = async (req, res) => {
   try {
     const doc = await StrokeRehab.findByIdAndUpdate(
       req.params.id,
-      { $push: { sessionLogs: { $each: [{ ...req.body, date: req.body.date || new Date() }], $slice: -500 } } },
+      {
+        $push: {
+          sessionLogs: {
+            $each: [{ ...req.body, date: req.body.date || new Date() }],
+            $slice: -500,
+          },
+        },
+      },
       { new: true }
     );
     ok(res, doc, 'Session log added');
@@ -224,7 +247,8 @@ strokeRehab.addProgressReport = async (req, res) => {
 strokeRehab.getTypeDistribution = async (_req, res) => {
   try {
     const data = await StrokeRehab.aggregate([
-      { $group: { _id: '$strokeData.type', count: { $sum: 1 } } }, { $limit: 1000 }
+      { $group: { _id: '$strokeData.type', count: { $sum: 1 } } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -244,7 +268,8 @@ strokeRehab.getOutcomeTrends = async (_req, res) => {
           avgBergBalance: { $avg: '$progressReports.bergBalance' },
           count: { $sum: 1 },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data[0] || {});
   } catch (e) {
@@ -288,7 +313,8 @@ spinalCord.getInjuryLevelStats = async (_req, res) => {
           count: { $sum: 1 },
         },
       },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -344,7 +370,8 @@ postSurgical.getSurgeryTypeStats = async (_req, res) => {
   try {
     const data = await PostSurgicalRehab.aggregate([
       { $group: { _id: '$surgicalInfo.category', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -387,7 +414,8 @@ geriatric.getFallRiskDistribution = async (_req, res) => {
           _id: '$comprehensiveGeriatricAssessment.functional.fallRisk',
           count: { $sum: 1 },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -403,7 +431,8 @@ geriatric.getCognitiveDistribution = async (_req, res) => {
           _id: '$comprehensiveGeriatricAssessment.cognitive.diagnosis',
           count: { $sum: 1 },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -481,7 +510,8 @@ mentalHealth.getDiagnosisDistribution = async (_req, res) => {
   try {
     const data = await AdvancedMentalHealth.aggregate([
       { $group: { _id: '$psychiatricDiagnosis.dsmCategory', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -494,7 +524,8 @@ mentalHealth.getCrisisStats = async (_req, res) => {
     const data = await AdvancedMentalHealth.aggregate([
       { $unwind: '$crisisHistory' },
       { $group: { _id: '$crisisHistory.type', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -533,7 +564,8 @@ genetic.getTestResultDistribution = async (_req, res) => {
   try {
     const data = await GeneticCounseling.aggregate([
       { $unwind: '$geneticTests' },
-      { $group: { _id: '$geneticTests.result', count: { $sum: 1 } } }, { $limit: 1000 }
+      { $group: { _id: '$geneticTests.result', count: { $sum: 1 } } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -545,7 +577,8 @@ genetic.getReferralReasonStats = async (_req, res) => {
   try {
     const data = await GeneticCounseling.aggregate([
       { $group: { _id: '$referralInfo.reason', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -633,7 +666,8 @@ gamification.getEngagementStats = async (_req, res) => {
           totalSessions: { $sum: '$engagementAnalytics.totalSessions' },
           avgCompliance: { $avg: '$engagementAnalytics.therapyCompliance' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data[0] || {});
   } catch (e) {
@@ -1476,7 +1510,8 @@ iotDevices.getDevicesByCategory = async (_req, res) => {
   try {
     const data = await MedicalDeviceIoT.aggregate([
       { $group: { _id: { category: '$category', status: '$status' }, count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -1564,7 +1599,8 @@ interCenter.getCollabTypeStats = async (_req, res) => {
   try {
     const data = await InterCenterCollab.aggregate([
       { $group: { _id: { type: '$type', status: '$status' }, count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -1651,7 +1687,8 @@ postDischarge.getOutcomeSummary = async (_req, res) => {
           avgQoL: { $avg: '$longitudinalOutcomes.qualityOfLife' },
           avgSatisfaction: { $avg: '$longitudinalOutcomes.satisfaction' },
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -1725,7 +1762,8 @@ arTherapy.getTherapyGoalStats = async (_req, res) => {
   try {
     const data = await ARTherapy.aggregate([
       { $group: { _id: '$protocol.therapyGoal', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -1746,7 +1784,8 @@ arTherapy.getPerformanceAnalytics = async (_req, res) => {
           complianceRate: '$analytics.complianceRate',
           improvementRate: '$analytics.improvementRate',
         },
-      }, { $limit: 1000 }
+      },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {
@@ -1760,7 +1799,8 @@ arTherapy.getSideEffectStats = async (_req, res) => {
       { $unwind: '$sessions' },
       { $unwind: '$sessions.sideEffects' },
       { $group: { _id: '$sessions.sideEffects', count: { $sum: 1 } } },
-      { $sort: { count: -1 } }, { $limit: 1000 }
+      { $sort: { count: -1 } },
+      { $limit: 1000 },
     ]);
     ok(res, data);
   } catch (e) {

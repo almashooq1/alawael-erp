@@ -132,7 +132,11 @@ class FamilyCommunicationService {
   static async sendFamilyReport(beneficiaryId, reportData) {
     return FamilyCommunication.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { familyReports: { $each: [{ ...reportData, createdDate: new Date() }], $slice: -200 } } },
+      {
+        $push: {
+          familyReports: { $each: [{ ...reportData, createdDate: new Date() }], $slice: -200 },
+        },
+      },
       { new: true, upsert: true }
     );
   }
@@ -167,7 +171,11 @@ class MedicalRecordsService {
   static async addPrescription(beneficiaryId, prescriptionData) {
     return MedicalRecords.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { prescriptions: { $each: [{ ...prescriptionData, startDate: new Date() }], $slice: -200 } } },
+      {
+        $push: {
+          prescriptions: { $each: [{ ...prescriptionData, startDate: new Date() }], $slice: -200 },
+        },
+      },
       { new: true, upsert: true }
     );
   }
@@ -181,9 +189,7 @@ class MedicalRecordsService {
   }
 
   static async getMedicalHistory(beneficiaryId) {
-    return MedicalRecords.findOne({ beneficiaryId })
-      .populate('beneficiaryId')
-      .populate('caseId');
+    return MedicalRecords.findOne({ beneficiaryId }).populate('beneficiaryId').populate('caseId');
   }
 
   static async getActivePrescriptions(beneficiaryId) {
@@ -222,7 +228,14 @@ class AttendanceService {
   static async recordLeave(beneficiaryId, leaveData) {
     return Attendance.findOneAndUpdate(
       { beneficiaryId },
-      { $push: { leaves: { $each: [{ ...leaveData, startDate: new Date(leaveData.startDate) }], $slice: -200 } } },
+      {
+        $push: {
+          leaves: {
+            $each: [{ ...leaveData, startDate: new Date(leaveData.startDate) }],
+            $slice: -200,
+          },
+        },
+      },
       { new: true, upsert: true }
     );
   }

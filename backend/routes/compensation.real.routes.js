@@ -24,11 +24,30 @@ router.get('/incentives', async (req, res) => {
   }
 });
 
-// POST /incentives
+// ── Allowed fields for incentive creation (prevent mass-assignment) ──
+const INCENTIVE_FIELDS = [
+  'employeeId', 'type', 'amount', 'currency', 'reason',
+  'description', 'department', 'period', 'effectiveDate',
+];
+
+function pickFields(src, allowedFields) {
+  const out = {};
+  for (const f of allowedFields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
+
+// POST /incentives — with field whitelist & basic validation
 router.post('/incentives', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
-    const incentive = await IndividualIncentive.create({ ...req.body, createdBy: req.user?.id });
+    const fields = pickFields(req.body, INCENTIVE_FIELDS);
+    if (fields.amount !== undefined) {
+      const amt = Number(fields.amount);
+      if (isNaN(amt) || amt <= 0) {
+        return res.status(400).json({ success: false, message: 'المبلغ يجب أن يكون رقماً موجباً' });
+      }
+    }
+    const incentive = await IndividualIncentive.create({ ...fields, status: 'pending', createdBy: req.user?.id });
     res.status(201).json({ success: true, data: incentive, message: 'تم إنشاء الحافز' });
   } catch (err) {
     logger.error('Compensation create error:', err);

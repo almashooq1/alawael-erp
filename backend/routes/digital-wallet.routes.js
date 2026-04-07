@@ -7,6 +7,27 @@ const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+/**
+ * Ownership guard — ensures the authenticated user owns the wallet (or is admin/finance).
+ * Must run AFTER authenticate and BEFORE the route handler.
+ */
+const requireWalletAccess = wrap(async (req, res, next) => {
+  const DigitalWallet = require('../models/DigitalWallet');
+  const wallet = await DigitalWallet.findOne({ _id: req.params.id, deletedAt: null }).lean();
+  if (!wallet) {
+    return res.status(404).json({ success: false, message: 'المحفظة غير موجودة' });
+  }
+  const userRole = req.user?.role;
+  const userId = String(req.user?._id || req.user?.id);
+  const isPrivileged = ['admin', 'super_admin', 'finance'].includes(userRole);
+  const isOwner = String(wallet.ownerId) === userId || String(wallet.createdBy) === userId;
+  if (!isPrivileged && !isOwner) {
+    return res.status(403).json({ success: false, message: 'لا تملك صلاحية للوصول لهذه المحفظة' });
+  }
+  req.wallet = wallet; // cache for handler
+  next();
+});
+
 // ── قائمة المحافظ ────────────────────────────────────────────────────────────
 router.get(
   '/',
@@ -48,6 +69,7 @@ router.post(
 router.get(
   '/:id',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const DigitalWallet = require('../models/DigitalWallet');
     const wallet = await DigitalWallet.findOne({ _id: req.params.id, deletedAt: null });
@@ -74,6 +96,7 @@ router.post(
 router.post(
   '/:id/debit',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.debit(req.params.id, {
       ...req.body,
@@ -87,6 +110,7 @@ router.post(
 router.post(
   '/:id/transfer',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.transfer(req.params.id, req.body.targetWalletId, {
       ...req.body,
@@ -100,6 +124,7 @@ router.post(
 router.post(
   '/:id/apply-coupon',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.applyCoupon(
       req.params.id,
@@ -115,6 +140,7 @@ router.post(
 router.post(
   '/:id/redeem-loyalty',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.redeemLoyaltyPoints(req.params.id, req.body.points, {
       userId: req.user._id,
@@ -127,6 +153,7 @@ router.post(
 router.get(
   '/:id/statement',
   authenticate,
+  requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.getStatement(req.params.id, req.query);
     res.json({ success: true, data });

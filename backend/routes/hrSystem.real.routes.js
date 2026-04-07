@@ -1,7 +1,22 @@
 const express = require('express');
 const router = express.Router();
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+
+/* ── Field whitelists (prevent mass-assignment) ──────────────────────── */
+const PERF_REVIEW_FIELDS = [
+  'employeeId', 'period', 'department', 'rating', 'score',
+  'strengths', 'improvements', 'goals', 'comments', 'reviewDate',
+];
+const LEAVE_FIELDS = [
+  'type', 'startDate', 'endDate', 'reason', 'department', 'attachments',
+];
+
+function pick(src, fields) {
+  const out = {};
+  for (const f of fields) if (src[f] !== undefined) out[f] = src[f];
+  return out;
+}
 
 router.use(authenticate);
 
@@ -24,15 +39,18 @@ router.get('/attendance', async (req, res) => {
   }
 });
 
-// GET /payroll
-router.get('/payroll', async (req, res) => {
+// GET /payroll — restricted to HR/finance/admin roles with minimal projection
+router.get('/payroll', authorize(['admin', 'hr_manager', 'finance']), async (req, res) => {
   try {
     const Payroll = require('../models/HR/Payroll');
     const { month, year } = req.query;
     const filter = {};
     if (month) filter.month = +month;
     if (year) filter.year = +year;
-    const data = await Payroll.find(filter).sort({ createdAt: -1 }).lean();
+    const data = await Payroll.find(filter)
+      .select('employeeId month year paymentStatus totalGross totalNet attendance createdAt')
+      .sort({ createdAt: -1 })
+      .lean();
     res.json({ success: true, data });
   } catch (err) {
     logger.error('HR payroll error:', err);
@@ -71,15 +89,20 @@ router.post('/attendance/checkin', async (req, res) => {
   }
 });
 
-// POST /attendance/checkout
+// POST /attendance/checkout — IDOR fix: non-admin users can only checkout themselves
 router.post('/attendance/checkout', async (req, res) => {
   try {
     const Attendance = require('../models/HR/Attendance');
-    const { employeeId } = req.body;
+    const userRole = req.user?.role;
+    const isPrivileged = ['admin', 'super_admin', 'hr_manager'].includes(userRole);
+    // Only privileged users may check out other employees
+    const targetEmpId = (isPrivileged && req.body.employeeId)
+      ? req.body.employeeId
+      : req.user?.id;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const record = await Attendance.findOneAndUpdate(
-      { employeeId: employeeId || req.user?.id, checkIn: { $gte: today }, checkOut: null },
+      { employeeId: targetEmpId, checkIn: { $gte: today }, checkOut: null },
       { checkOut: new Date() },
       { new: true, sort: { checkIn: -1 } }
     );
@@ -111,11 +134,12 @@ router.get('/performance-reviews', async (req, res) => {
   }
 });
 
-// POST /performance-reviews
-router.post('/performance-reviews', async (req, res) => {
+// POST /performance-reviews — require manager+ & whitelist fields
+router.post('/performance-reviews', authorize(['admin', 'hr_manager', 'manager']), async (req, res) => {
   try {
     const PerformanceEvaluation = require('../models/HR/PerformanceEvaluation');
-    const review = await PerformanceEvaluation.create({ ...req.body, evaluator: req.user?.id });
+    const fields = pick(req.body, PERF_REVIEW_FIELDS);
+    const review = await PerformanceEvaluation.create({ ...fields, evaluator: req.user?.id });
     res.status(201).json({ success: true, data: review, message: 'تم إنشاء تقييم الأداء' });
   } catch (err) {
     logger.error('HR create performance-review error:', err);
@@ -127,7 +151,8 @@ router.post('/performance-reviews', async (req, res) => {
 router.post('/leaves', async (req, res) => {
   try {
     const Leave = require('../models/HR/Leave');
-    const leave = await Leave.create({ ...req.body, requestedBy: req.user?.id, status: 'pending' });
+    const fields = pick(req.body, LEAVE_FIELDS);
+    const leave = await Leave.create({ ...fields, requestedBy: req.user?.id, status: 'pending' });
     res.status(201).json({ success: true, data: leave, message: 'تم تقديم طلب الإجازة' });
   } catch (err) {
     logger.error('HR create leave error:', err);

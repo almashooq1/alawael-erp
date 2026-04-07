@@ -6,7 +6,6 @@
 import { useState, useEffect } from 'react';
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
-import ExcelJS from 'exceljs';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { useAuth } from 'contexts/AuthContext';
@@ -173,6 +172,7 @@ export default function useAdminUsers() {
           return obj;
         });
       } else {
+        const ExcelJS = (await import(/* webpackChunkName: "exceljs" */ 'exceljs')).default;
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(raw);
         const worksheet = workbook.worksheets[0];

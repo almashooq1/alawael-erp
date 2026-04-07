@@ -25,8 +25,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+// html2canvas + jsPDF loaded dynamically on demand (saves ~290KB from initial bundle)
 
 // ── Template Definitions ──────────────────────────
 export const TEMPLATES = [
@@ -248,6 +247,10 @@ const BeneficiaryPrintTemplates = () => {
     const el = document.getElementById('print-template-content');
     if (!el) return;
     try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import(/* webpackChunkName: "html2canvas" */ 'html2canvas'),
+        import(/* webpackChunkName: "jspdf" */ 'jspdf'),
+      ]);
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,

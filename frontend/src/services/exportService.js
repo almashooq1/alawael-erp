@@ -1,6 +1,10 @@
-import ExcelJS from 'exceljs';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
+// ⚡ Heavy libraries loaded on-demand (not at import time)
+// ExcelJS (~300KB), jsPDF (~250KB), html2canvas (~40KB) are only loaded when actually exporting
+let _ExcelJS, _jsPDF, _html2canvas;
+const loadExcelJS = async () => { if (!_ExcelJS) { _ExcelJS = (await import(/* webpackChunkName: "exceljs" */ 'exceljs')).default; } return _ExcelJS; };
+const loadJsPDF = async () => { if (!_jsPDF) { _jsPDF = (await import(/* webpackChunkName: "jspdf" */ 'jspdf')).jsPDF; } return _jsPDF; };
+const loadHtml2Canvas = async () => { if (!_html2canvas) { _html2canvas = (await import(/* webpackChunkName: "html2canvas" */ 'html2canvas')).default; } return _html2canvas; };
+
 import logger from 'utils/logger';
 import { brandColors, surfaceColors } from 'theme/palette';
 import { getOrgBranding } from 'utils/storageService';
@@ -31,6 +35,7 @@ const exportService = {
    */
   toExcel: async (data, fileName = 'export', options = {}) => {
     try {
+      const ExcelJS = await loadExcelJS();
       const branding = getBranding();
       const workbook = new ExcelJS.Workbook();
       const worksheet = workbook.addWorksheet(options.sheetName || 'Sheet1');
@@ -133,6 +138,7 @@ const exportService = {
         throw new Error(`Element with id "${elementId}" not found`);
       }
 
+      const html2canvas = await loadHtml2Canvas();
       const canvas = await html2canvas(element, {
         scale: 2,
         logging: false,
@@ -141,6 +147,7 @@ const exportService = {
       });
 
       const imgData = canvas.toDataURL('image/png');
+      const jsPDF = await loadJsPDF();
       const pdf = new jsPDF({
         orientation: options.orientation || 'portrait',
         unit: 'mm',
@@ -223,6 +230,7 @@ const exportService = {
    */
   tableToAdvancedPDF: async (data, columns, fileName = 'export', options = {}) => {
     try {
+      const jsPDF = await loadJsPDF();
       const pdf = new jsPDF({
         orientation: options.orientation || 'landscape',
         unit: 'mm',

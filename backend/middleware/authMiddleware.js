@@ -1,7 +1,9 @@
-/* eslint-disable no-unused-vars */
-// Compatibility proxy for routes expecting "../middleware/authMiddleware"
-// Re-exports from the existing auth implementation to ensure uniform usage.
-const auth = require('./auth.middleware.js');
+/**
+ * Compatibility proxy for routes expecting "../middleware/authMiddleware"
+ *
+ * ⚠️ COMPATIBILITY PROXY — All logic consolidated in ./auth.js (Round 29)
+ */
+const auth = require('./auth');
 
 // Default export behaves like an Express middleware (authenticate token)
 module.exports = function authMiddleware(req, res, next) {

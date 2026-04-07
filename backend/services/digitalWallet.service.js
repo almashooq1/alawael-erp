@@ -5,6 +5,7 @@
 'use strict';
 
 const { v4: uuidv4 } = require('uuid');
+const mongoose = require('mongoose');
 const DigitalWallet = require('../models/DigitalWallet');
 const WalletTransaction = require('../models/WalletTransaction');
 const DiscountCoupon = require('../models/DiscountCoupon');
@@ -185,37 +186,93 @@ class DigitalWalletService {
     if (fromWallet._id.toString() === toWallet._id.toString()) {
       throw new Error('لا يمكن التحويل لنفس المحفظة');
     }
+    if (fromWallet.isBlocked || toWallet.isBlocked) throw new Error('إحدى المحفظتين محجوبة');
 
-    // خصم من المحفظة الأصلية
-    const { transaction: debitTx } = await this.debit(
-      fromWallet._id,
-      amount,
-      `تحويل إلى محفظة ${toWallet.walletNumber}`,
-      null,
-      null,
-      userId
-    );
+    const available = fromWallet.balance - fromWallet.frozenBalance;
+    if (amount > available) throw new Error(`الرصيد غير كافٍ: ${available.toFixed(2)} SAR`);
 
-    // إضافة للمحفظة الهدف
-    const { transaction: creditTx } = await this.topUp(
-      toWallet._id,
-      amount,
-      `تحويل من محفظة ${fromWallet.walletNumber}`,
-      {},
-      userId
-    );
+    // عملية ذرية (Transaction) — إما ينجح الخصم والإضافة معاً أو يفشلان معاً (Round 43)
+    const session = await mongoose.startSession();
+    try {
+      let debitTx, creditTx;
+      await session.withTransaction(async () => {
+        // خصم من المحفظة الأصلية
+        const debitResult = await DigitalWallet.findOneAndUpdate(
+          {
+            _id: fromWallet._id,
+            deletedAt: null,
+            isBlocked: false,
+            $expr: { $gte: [{ $subtract: ['$balance', '$frozenBalance'] }, amount] },
+          },
+          {
+            $inc: { balance: -amount, totalSpent: amount },
+            $set: { updatedBy: userId },
+          },
+          { new: true, session }
+        );
+        if (!debitResult) throw new Error('فشل الخصم: الرصيد غير كافٍ أو المحفظة محجوبة');
 
-    // تحديث نوع المعاملات
-    await WalletTransaction.findByIdAndUpdate(debitTx._id, {
-      subType: 'transfer_out',
-      counterpartWalletId: toWallet._id,
-    });
-    await WalletTransaction.findByIdAndUpdate(creditTx._id, {
-      subType: 'transfer_in',
-      counterpartWalletId: fromWallet._id,
-    });
+        // إضافة للمحفظة الهدف
+        const creditResult = await DigitalWallet.findOneAndUpdate(
+          { _id: toWallet._id, isBlocked: false, deletedAt: null },
+          {
+            $inc: { balance: amount, totalToppedUp: amount },
+            $set: { updatedBy: userId },
+          },
+          { new: true, session }
+        );
+        if (!creditResult) throw new Error('فشل الإضافة: المحفظة الهدف محجوبة');
 
-    return { debit: debitTx, credit: creditTx };
+        const refBase = `TXN-WLT-${Date.now()}-${Math.floor(Math.random() * 9999)}`;
+
+        // إنشاء سجلي المعاملة
+        [debitTx] = await WalletTransaction.create(
+          [
+            {
+              branchId: fromWallet.branchId,
+              referenceNumber: `${refBase}-OUT`,
+              uuid: uuidv4(),
+              walletId: fromWallet._id,
+              type: 'debit',
+              subType: 'transfer_out',
+              amount,
+              balanceBefore: fromWallet.balance,
+              balanceAfter: debitResult.balance,
+              description: `تحويل إلى محفظة ${toWallet.walletNumber}`,
+              counterpartWalletId: toWallet._id,
+              status: 'completed',
+              createdBy: userId,
+            },
+          ],
+          { session }
+        );
+
+        [creditTx] = await WalletTransaction.create(
+          [
+            {
+              branchId: toWallet.branchId,
+              referenceNumber: `${refBase}-IN`,
+              uuid: uuidv4(),
+              walletId: toWallet._id,
+              type: 'credit',
+              subType: 'transfer_in',
+              amount,
+              balanceBefore: toWallet.balance,
+              balanceAfter: creditResult.balance,
+              description: `تحويل من محفظة ${fromWallet.walletNumber}`,
+              counterpartWalletId: fromWallet._id,
+              status: 'completed',
+              createdBy: userId,
+            },
+          ],
+          { session }
+        );
+      });
+
+      return { debit: debitTx, credit: creditTx };
+    } finally {
+      await session.endSession();
+    }
   }
 
   /**

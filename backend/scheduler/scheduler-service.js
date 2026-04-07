@@ -303,13 +303,21 @@ class SchedulerService {
       return;
     }
 
-    const job = await this.Job.findById(jobId);
-    if (!job || job.status !== 'active') return;
-
-    // Acquire lock
-    job.lockedAt = new Date();
-    job.lockedBy = process.pid.toString();
-    await job.save();
+    // Atomic lock acquisition — prevents duplicate execution in PM2 cluster (Round 43)
+    const staleThreshold = new Date(Date.now() - 5 * 60 * 1000); // 5 min stale
+    const job = await this.Job.findOneAndUpdate(
+      {
+        _id: jobId,
+        status: 'active',
+        $or: [{ lockedAt: null }, { lockedAt: { $lt: staleThreshold } }],
+      },
+      { $set: { lockedAt: new Date(), lockedBy: process.pid.toString() } },
+      { new: true }
+    );
+    if (!job) {
+      logger.info(`Job ${jobId} is locked by another instance or inactive, skipping`);
+      return;
+    }
 
     this.runningJobs.add(jobId.toString());
 
@@ -336,31 +344,29 @@ class SchedulerService {
       historyEntry.duration = historyEntry.completedAt - historyEntry.startedAt;
       historyEntry.result = result;
 
-      // Update job
-      job.lastRun = new Date();
-      job.runCount += 1;
-      job.failureCount = 0;
-      job.lockedAt = null;
-      job.lockedBy = null;
-      await job.save();
+      // Update job — atomic release lock (Round 43)
+      await this.Job.findByIdAndUpdate(job._id, {
+        $set: { lastRun: new Date(), failureCount: 0, lockedAt: null, lockedBy: null },
+        $inc: { runCount: 1 },
+      });
     } catch (error) {
       historyEntry.status = 'failed';
       historyEntry.completedAt = new Date();
       historyEntry.duration = historyEntry.completedAt - historyEntry.startedAt;
       historyEntry.error = error.message;
 
-      // Update job failure
-      job.failureCount += 1;
-      job.lockedAt = null;
-      job.lockedBy = null;
+      // Atomic failure update + release lock (Round 43)
+      const updatedJob = await this.Job.findByIdAndUpdate(
+        job._id,
+        { $inc: { failureCount: 1 }, $set: { lockedAt: null, lockedBy: null } },
+        { new: true }
+      );
 
       // Handle retry
-      if (job.failureCount < job.config.retries) {
-        logger.info(`Retrying job ${job.name} (${job.failureCount}/${job.config.retries})`);
+      if (updatedJob && updatedJob.failureCount < job.config.retries) {
+        logger.info(`Retrying job ${job.name} (${updatedJob.failureCount}/${job.config.retries})`);
         setTimeout(() => this.executeJob(jobId), schedulerConfig.retryDelay);
       }
-
-      await job.save();
     }
 
     // Save history

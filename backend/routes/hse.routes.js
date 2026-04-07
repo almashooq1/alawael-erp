@@ -5,6 +5,7 @@ const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { SafetyIncident, SafetyInspection } = require('../models/HSE');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, async (req, res) => {
@@ -96,7 +97,7 @@ router.post('/incidents', authenticate, validate(schemas.hse.reportIncident), as
 
 router.put('/incidents/:id', authenticate, async (req, res) => {
   try {
-    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -156,7 +157,7 @@ router.post('/inspections', authenticate, async (req, res) => {
 
 router.put('/inspections/:id', authenticate, async (req, res) => {
   try {
-    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

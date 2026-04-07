@@ -20,7 +20,7 @@ const {
   DrugInteraction,
 } = require('../models/pharmacy.model');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 
 // All pharmacy routes require authentication
@@ -251,7 +251,7 @@ router.post('/prescriptions', async (req, res) => {
 
 router.put('/prescriptions/:id', async (req, res) => {
   try {
-    const prescription = await Prescription.findByIdAndUpdate(req.params.id, req.body, {
+    const prescription = await Prescription.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

@@ -40,10 +40,10 @@ const stampImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
   fileFilter: (_req, file, cb) => {
-    if (/^image\/(png|jpeg|jpg|svg\+xml|webp)$/.test(file.mimetype)) {
+    if (/^image\/(png|jpeg|jpg|webp)$/.test(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('نوع الملف غير مدعوم — يُسمح فقط بـ PNG, JPG, SVG, WebP'));
+      cb(new Error('نوع الملف غير مدعوم — يُسمح فقط بـ PNG, JPG, WebP'));
     }
   },
 });

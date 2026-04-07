@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -57,7 +58,7 @@ router.get('/dashboard/stats', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
-const { escapeRegex } = require('../utils/sanitize');
+    const { escapeRegex } = require('../utils/sanitize');
     const { page = 1, limit = 50, status, category, search } = req.query;
     const filter = { isDeleted: { $ne: true } };
     if (status) filter.status = status;
@@ -92,7 +93,7 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
-    const data = await Vendor.create(req.body);
+    const data = await Vendor.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data, message: 'تم إضافة المورد بنجاح' });
   } catch (err) {
     logger.error('Vendor create error:', err);
@@ -104,7 +105,9 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
-    const data = await Vendor.findByIdAndUpdate(req.params.id, req.body, { new: true }).lean();
+    const data = await Vendor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المورد بنجاح' });
   } catch (err) {

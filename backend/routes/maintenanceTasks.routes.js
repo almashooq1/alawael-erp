@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceTask = require('../models/MaintenanceTask');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-tasks — list tasks */
 router.get('/', requireAuth, async (req, res) => {
@@ -125,7 +126,7 @@ router.post(
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const task = await MaintenanceTask.create(req.body);
+      const task = await MaintenanceTask.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: task });
     } catch (err) {
       logger.error('maintenanceTask create error:', err);
@@ -137,7 +138,7 @@ router.post(
 /** PUT /api/maintenance-tasks/:id — update task */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const task = await MaintenanceTask.findByIdAndUpdate(req.params.id, req.body, {
+    const task = await MaintenanceTask.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

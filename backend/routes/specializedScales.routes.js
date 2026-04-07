@@ -26,7 +26,7 @@ const {
   SpecializedAssessmentScale,
   SpecializedScaleResult,
 } = require('../models/SpecializedAssessmentScale');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth guard ──────────────────────────────────────────────
 router.use(authenticate);
@@ -398,7 +398,7 @@ router.post(
 router.put(
   '/results/:id',
   asyncHandler(async (req, res) => {
-    const result = await SpecializedScaleResult.findByIdAndUpdate(req.params.id, req.body, {
+    const result = await SpecializedScaleResult.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

@@ -13,12 +13,10 @@ import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
 import ErrorBoundary from './components/ErrorBoundary';
 import logger from './utils/logger';
 
-// Pages — lightweight, eagerly loaded for login
-import Login from './pages/common/SimpleLogin';
-import Register from './pages/Register';
-
-// Landing page — lazy loaded
+// Public pages — lazy loaded with Tailwind design
 const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
+const LoginPage = React.lazy(() => import('./pages/Landing/LoginPage'));
+const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
 
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
@@ -86,14 +84,30 @@ function AppRoutes() {
           </Suspense>
         }
       />
-      {/* Public Routes — lightweight, load instantly */}
+      {/* Public Routes — Tailwind design */}
       <Route
         path="/login"
-        element={!currentUser ? <Login /> : <Navigate to="/dashboard" replace />}
+        element={
+          !currentUser ? (
+            <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+              <LoginPage />
+            </Suspense>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
       />
       <Route
         path="/register"
-        element={!currentUser ? <Register /> : <Navigate to="/dashboard" replace />}
+        element={
+          !currentUser ? (
+            <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+              <RegisterPage />
+            </Suspense>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
       />
       {/* All other routes — heavy shell only for authenticated users */}
       <Route

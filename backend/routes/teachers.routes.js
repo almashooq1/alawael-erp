@@ -8,6 +8,7 @@ const Teacher = require('../models/Teacher');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -80,7 +81,7 @@ router.post('/', authorize(['admin']), async (req, res) => {
 // ── Update teacher ───────────────────────────────────────────
 router.put('/:id', validateObjectId('id'), authorize(['admin']), async (req, res) => {
   try {
-    const teacher = await Teacher.findByIdAndUpdate(req.params.id, req.body, {
+    const teacher = await Teacher.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     }).populate('subjects', 'name code');

@@ -730,7 +730,8 @@ router.get(
     const filter = { deleted_at: null };
 
     if (status) filter.status = status;
-    if (insurance_company) filter.insurance_company = { $regex: escapeRegex(insurance_company), $options: 'i' };
+    if (insurance_company)
+      filter.insurance_company = { $regex: escapeRegex(insurance_company), $options: 'i' };
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (from_date || to_date) {
       filter.claim_date = {};

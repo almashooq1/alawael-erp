@@ -6,6 +6,7 @@ const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { HelpDeskTicket, HelpDeskArticle } = require('../models/HelpDesk');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -113,7 +114,7 @@ router.post('/tickets', authenticate, validate(schemas.helpdesk.createTicket), a
 router.put('/tickets/:id', authenticate, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, req.body, {
+    const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

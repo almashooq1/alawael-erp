@@ -44,6 +44,7 @@ const {
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
 const { validateOutboundUrl } = require('../utils/validateUrl');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -680,7 +681,7 @@ router.put('/webhooks/:id', authMiddleware, async (req, res) => {
           .json({ success: false, message: `رابط غير مسموح: ${urlCheck.reason}` });
       }
     }
-    const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });
   } catch (error) {
@@ -1084,7 +1085,7 @@ router.post('/tags', authMiddleware, async (req, res) => {
 /** Update tag */
 router.put('/tags/:id', authMiddleware, async (req, res) => {
   try {
-    const tag = await WorkflowTag.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const tag = await WorkflowTag.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!tag) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: tag });
   } catch (error) {

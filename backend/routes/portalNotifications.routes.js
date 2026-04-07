@@ -10,6 +10,7 @@ const PortalNotification = require('../models/PortalNotification');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Helpers ────────────────────────────────────────────────────────────
 const toId = v => {
@@ -215,7 +216,7 @@ router.post('/send', requireAuth, async (req, res) => {
 // ── PUT /:id — update notification ─────────────────────────────────────
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const doc = await PortalNotification.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await PortalNotification.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

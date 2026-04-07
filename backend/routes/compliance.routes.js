@@ -140,10 +140,14 @@ router.put('/controls/:id', async (req, res) => {
   try {
     if (!InternalControl)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const control = await InternalControl.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const control = await InternalControl.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
     res.json({ success: true, data: control });
   } catch (error) {
@@ -158,7 +162,11 @@ router.post('/controls/:id/test-result', async (req, res) => {
     const control = await InternalControl.findById(req.params.id);
     if (!control) return res.status(404).json({ success: false, error: 'الضابط غير موجود' });
 
-    control.testResults.push({ ...stripUpdateMeta(req.body), tester: req.user?._id, testDate: new Date() });
+    control.testResults.push({
+      ...stripUpdateMeta(req.body),
+      tester: req.user?._id,
+      testDate: new Date(),
+    });
     control.lastTestDate = new Date();
     control.lastTestResult = req.body.result;
     await control.save();
@@ -372,10 +380,14 @@ router.put('/metrics/:id', async (req, res) => {
   try {
     if (!ComplianceMetric)
       return res.status(501).json({ success: false, error: 'Model not available' });
-    const metric = await ComplianceMetric.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const metric = await ComplianceMetric.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!metric) return res.status(404).json({ success: false, error: 'المقياس غير موجود' });
     res.json({ success: true, data: metric });
   } catch (error) {

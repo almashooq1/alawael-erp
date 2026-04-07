@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenancePrediction = require('../models/MaintenancePrediction');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-predictions — list predictions */
 router.get('/', requireAuth, async (req, res) => {
@@ -88,7 +89,7 @@ router.post(
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const prediction = await MaintenancePrediction.create(req.body);
+      const prediction = await MaintenancePrediction.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: prediction });
     } catch (err) {
       logger.error('maintenancePrediction create error:', err);
@@ -100,10 +101,14 @@ router.post(
 /** PUT /api/maintenance-predictions/:id — update prediction */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const prediction = await MaintenancePrediction.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const prediction = await MaintenancePrediction.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!prediction)
       return res.status(404).json({ success: false, message: 'Prediction not found' });
     res.json({ success: true, data: prediction });

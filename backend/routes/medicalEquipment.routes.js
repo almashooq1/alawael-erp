@@ -19,7 +19,7 @@ const {
   SafetyCertificate,
 } = require('../models/medicalEquipment.model');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
 
@@ -106,7 +106,7 @@ router.post('/equipment', async (req, res) => {
 
 router.put('/equipment/:id', async (req, res) => {
   try {
-    const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, req.body, {
+    const eq = await MedicalEquipment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

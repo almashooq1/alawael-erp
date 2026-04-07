@@ -84,7 +84,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
 // ── Update timetable ─────────────────────────────────────────
 router.put('/:id', validateObjectId('id'), authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const timetable = await Timetable.findByIdAndUpdate(req.params.id, req.body, {
+    const timetable = await Timetable.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

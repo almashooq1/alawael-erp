@@ -8,6 +8,7 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 
 // 🔒 All KPI Dashboard routes require authentication
@@ -41,7 +42,7 @@ router.get('/categories', async (req, res) => {
 // POST /api/kpi-dashboard/categories — إنشاء فئة
 router.post('/categories', async (req, res) => {
   try {
-    const category = await KpiCategory.create(req.body);
+    const category = await KpiCategory.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: category });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -51,7 +52,9 @@ router.post('/categories', async (req, res) => {
 // PUT /api/kpi-dashboard/categories/:id — تعديل فئة
 router.put('/categories/:id', async (req, res) => {
   try {
-    const category = await KpiCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const category = await KpiCategory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!category) return res.status(404).json({ success: false, message: 'الفئة غير موجودة' });
     res.json({ success: true, data: category });
   } catch (err) {
@@ -93,7 +96,7 @@ router.get('/definitions', async (req, res) => {
 // POST /api/kpi-dashboard/definitions — إنشاء تعريف KPI
 router.post('/definitions', async (req, res) => {
   try {
-    const definition = await KpiDefinition.create(req.body);
+    const definition = await KpiDefinition.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: definition });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -103,9 +106,13 @@ router.post('/definitions', async (req, res) => {
 // PUT /api/kpi-dashboard/definitions/:id — تعديل تعريف KPI
 router.put('/definitions/:id', async (req, res) => {
   try {
-    const definition = await KpiDefinition.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const definition = await KpiDefinition.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+      }
+    );
     if (!definition) return res.status(404).json({ success: false, message: 'التعريف غير موجود' });
     res.json({ success: true, data: definition });
   } catch (err) {

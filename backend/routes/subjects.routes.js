@@ -8,6 +8,7 @@ const Subject = require('../models/Subject');
 const { authenticate, authorize } = require('../middleware/auth');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
@@ -92,7 +93,7 @@ router.post('/', authorize(['admin']), async (req, res) => {
 // ── Update subject ───────────────────────────────────────────
 router.put('/:id', validateObjectId('id'), authorize(['admin']), async (req, res) => {
   try {
-    const subject = await Subject.findByIdAndUpdate(req.params.id, req.body, {
+    const subject = await Subject.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

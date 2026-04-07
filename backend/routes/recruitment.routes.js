@@ -37,6 +37,7 @@ const { authenticate } = require('../middleware/auth');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // 🔒 All recruitment routes require authentication
 router.use(authenticate);
@@ -173,7 +174,7 @@ router.get('/postings/:id', async (req, res) => {
 
 router.put('/postings/:id', async (req, res) => {
   try {
-    const doc = await JobPosting.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await JobPosting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

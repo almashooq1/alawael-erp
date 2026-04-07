@@ -9,7 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const StandardizedAssessment = require('../models/StandardizedAssessment');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/standardized-assessments — list assessments */
 router.get('/', requireAuth, async (req, res) => {
@@ -105,7 +105,7 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/standardized-assessments/:id — update assessment */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const assessment = await StandardizedAssessment.findByIdAndUpdate(req.params.id, req.body, {
+    const assessment = await StandardizedAssessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

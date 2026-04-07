@@ -12,6 +12,7 @@ const DevelopmentPlan = require('../models/DevelopmentPlan');
 const { authenticate: authMiddleware, authorize } = require('../middleware/auth');
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ═══════════════════════════════════════════════════════════════
 //  LIST, STATS & CREATE (frontend-compatible)
@@ -271,7 +272,7 @@ router.put(
   ]),
   async (req, res) => {
     try {
-      const plan = await SuccessionPlan.findByIdAndUpdate(req.params.planId, req.body, {
+      const plan = await SuccessionPlan.findByIdAndUpdate(req.params.planId, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

@@ -29,6 +29,7 @@ const {
 
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticateToken);
 
@@ -98,7 +99,7 @@ router.post('/forms', async (req, res) => {
 // PUT /forms/:id — Update form template
 router.put('/forms/:id', async (req, res) => {
   try {
-    const form = await WorkflowFormTemplate.findByIdAndUpdate(req.params.id, req.body, {
+    const form = await WorkflowFormTemplate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -333,7 +334,7 @@ router.post('/escalations/rules', async (req, res) => {
 // PUT /escalations/rules/:id — Update escalation rule
 router.put('/escalations/rules/:id', async (req, res) => {
   try {
-    const rule = await WorkflowEscalationRule.findByIdAndUpdate(req.params.id, req.body, {
+    const rule = await WorkflowEscalationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -625,7 +626,7 @@ router.post('/sla-policies', async (req, res) => {
 // PUT /sla-policies/:id — Update policy
 router.put('/sla-policies/:id', async (req, res) => {
   try {
-    const policy = await WorkflowSLAPolicy.findByIdAndUpdate(req.params.id, req.body, {
+    const policy = await WorkflowSLAPolicy.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -1238,7 +1239,7 @@ router.post('/approval-chains', async (req, res) => {
 // PUT /approval-chains/:id — Update chain
 router.put('/approval-chains/:id', async (req, res) => {
   try {
-    const chain = await WorkflowApprovalChain.findByIdAndUpdate(req.params.id, req.body, {
+    const chain = await WorkflowApprovalChain.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -1577,7 +1578,7 @@ router.post('/automations', async (req, res) => {
 // PUT /automations/:id — Update automation rule
 router.put('/automations/:id', async (req, res) => {
   try {
-    const rule = await WorkflowAutomationRule.findByIdAndUpdate(req.params.id, req.body, {
+    const rule = await WorkflowAutomationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

@@ -34,6 +34,7 @@ const Beneficiary = require('../models/Beneficiary');
 const beneficiaryService = require('../services/BeneficiaryService');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { WAITLIST_STATUSES } = require('../constants/beneficiary.constants');
+const { escapeRegex } = require('../utils/sanitize');
 
 // ─── دوال مساعدة ──────────────────────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -129,7 +130,7 @@ router.get('/', async (req, res) => {
     if (disabilityType) filter.disabilityType = disabilityType;
 
     if (search && search.trim()) {
-      const s = search.trim();
+      const s = escapeRegex(search.trim());
       filter.$or = [
         { applicantName: new RegExp(s, 'i') },
         { applicantPhone: new RegExp(s) },

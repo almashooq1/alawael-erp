@@ -19,7 +19,7 @@ const {
 } = require('../models/insuranceClaim.model');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
 const { body, param, validationResult } = require('express-validator');
 
@@ -109,7 +109,7 @@ router.post(
 
 router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
-    const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, req.body, {
+    const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -377,7 +377,7 @@ router.post(
 
 router.put('/claims/:id', async (req, res) => {
   try {
-    const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, req.body, {
+    const claim = await InsuranceClaim.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

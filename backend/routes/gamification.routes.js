@@ -10,6 +10,7 @@ const SmartGamificationService = require('../services/smartGamification.service'
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Badges CRUD ──────────────────────────────────────────────────
 
@@ -27,7 +28,7 @@ router.get('/badges', requireAuth, async (req, res) => {
 /** POST /api/gamification/badges — create badge (admin) */
 router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const badge = await Badge.create(req.body);
+    const badge = await Badge.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: badge });
   } catch (err) {
     logger.error('gamification badge create error:', err);
@@ -38,7 +39,7 @@ router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => 
 /** PUT /api/gamification/badges/:id — update badge (admin) */
 router.put('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const badge = await Badge.findByIdAndUpdate(req.params.id, req.body, {
+    const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

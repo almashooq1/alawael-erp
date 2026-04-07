@@ -1321,10 +1321,14 @@ exports.changePassword = catchAsync(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
-    return res.status(400).json({ success: false, message: 'Current and new password are required' });
+    return res
+      .status(400)
+      .json({ success: false, message: 'Current and new password are required' });
   }
   if (newPassword.length < 8) {
-    return res.status(400).json({ success: false, message: 'New password must be at least 8 characters' });
+    return res
+      .status(400)
+      .json({ success: false, message: 'New password must be at least 8 characters' });
   }
 
   const user = await require('../models/User').findById(guardianId).select('+password');

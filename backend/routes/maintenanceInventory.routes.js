@@ -9,7 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceInventory = require('../models/MaintenanceInventory');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-inventory — list inventory items */
 router.get('/', requireAuth, async (req, res) => {
@@ -126,7 +126,7 @@ router.put(
   async (req, res) => {
     try {
       req.body.lastUpdatedBy = req.user?._id || req.user?.id;
-      const item = await MaintenanceInventory.findByIdAndUpdate(req.params.id, req.body, {
+      const item = await MaintenanceInventory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

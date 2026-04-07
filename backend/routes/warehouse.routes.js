@@ -7,6 +7,7 @@
 
 const express = require('express');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 
 // ── Helpers ──────────────────────────────────────────────────────
@@ -91,7 +92,9 @@ router.get('/', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المستودعات', error: safeError(err) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب المستودعات', error: safeError(err) });
   }
 });
 
@@ -111,24 +114,28 @@ router.post('/', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
     if (!WH) return res.status(500).json({ success: false, message: 'النموذج غير متوفر' });
-    const data = await WH.create(req.body);
+    const data = await WH.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المستودع', error: safeError(err) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في إنشاء المستودع', error: safeError(err) });
   }
 });
 
 router.put('/:id', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
-    const data = await WH.findByIdAndUpdate(req.params.id, req.body, {
+    const data = await WH.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المستودع', error: safeError(err) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في تحديث المستودع', error: safeError(err) });
   }
 });
 
@@ -180,7 +187,9 @@ router.post('/:warehouseId/items', async (req, res) => {
 router.put('/items/:id', async (req, res) => {
   try {
     const WHItem = safeModel('WarehouseItem');
-    const data = await WHItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const data = await WHItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!data) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
@@ -237,7 +246,9 @@ router.put('/transactions/:id/approve', async (req, res) => {
     await tx.save();
     res.json({ success: true, data: tx });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الحركة', error: safeError(err) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في اعتماد الحركة', error: safeError(err) });
   }
 });
 
@@ -271,7 +282,9 @@ router.get('/alerts/low-stock', async (_req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التنبيهات', error: safeError(err) });
+    res
+      .status(500)
+      .json({ success: false, message: 'خطأ في جلب التنبيهات', error: safeError(err) });
   }
 });
 

@@ -10,6 +10,7 @@ const SmartIRPService = require('../services/smartIRP.service');
 const SmartIRP = require('../models/SmartIRP');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── IRP CRUD ─────────────────────────────────────────────────────
 
@@ -68,7 +69,7 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/smart-irp/:id — update IRP metadata */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, req.body, {
+    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

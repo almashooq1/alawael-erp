@@ -102,7 +102,7 @@ router.post('/', async (req, res) => {
 // ── Update exam ──────────────────────────────────────────────
 router.put('/:id', async (req, res) => {
   try {
-    const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, {
+    const exam = await Exam.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

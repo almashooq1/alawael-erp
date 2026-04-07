@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const GoalProgressHistory = require('../models/GoalProgressHistory');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/goal-progress — list progress records (filter by planId, goalId) */
 router.get('/', requireAuth, async (req, res) => {
@@ -88,7 +89,7 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/goal-progress/:id — update progress record */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const record = await GoalProgressHistory.findByIdAndUpdate(req.params.id, req.body, {
+    const record = await GoalProgressHistory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

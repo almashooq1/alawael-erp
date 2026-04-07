@@ -6,6 +6,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EventManagement`)[n];
@@ -85,7 +86,7 @@ router.post('/', authenticate, async (req, res) => {
 router.put('/:id', authenticate, async (req, res) => {
   try {
     const Ev = safeModel('Event');
-    const doc = await Ev.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Ev.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الفعالية غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {

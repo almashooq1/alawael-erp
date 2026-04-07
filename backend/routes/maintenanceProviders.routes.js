@@ -9,7 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceProvider = require('../models/MaintenanceProvider');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-providers — list providers */
 router.get('/', requireAuth, async (req, res) => {
@@ -86,7 +86,7 @@ router.post(
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const provider = await MaintenanceProvider.create(req.body);
+      const provider = await MaintenanceProvider.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: provider });
     } catch (err) {
       logger.error('maintenanceProvider create error:', err);
@@ -103,10 +103,14 @@ router.put(
   async (req, res) => {
     try {
       req.body.lastModifiedBy = req.user?._id || req.user?.id;
-      const provider = await MaintenanceProvider.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      const provider = await MaintenanceProvider.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
       res.json({ success: true, data: provider });
     } catch (err) {

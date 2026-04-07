@@ -20,6 +20,7 @@ const EmploymentContract = require('../models/EmploymentContract');
 const ChartOfAccounts = require('../models/ChartOfAccounts');
 const AssessmentComparison = require('../models/AssessmentComparison');
 const safeError = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Helper: standard response ───────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });
@@ -217,7 +218,7 @@ router.get('/emergency-contacts/:beneficiaryId', requireAuth, async (req, res) =
 // POST /emergency-contacts
 router.post('/emergency-contacts', requireAuth, async (req, res) => {
   try {
-    const contact = await EmergencyContact.create(req.body);
+    const contact = await EmergencyContact.create(stripUpdateMeta(req.body));
     ok(res, contact, { message: 'تمت إضافة جهة الاتصال' });
   } catch (err) {
     serverError(res, err);
@@ -227,10 +228,14 @@ router.post('/emergency-contacts', requireAuth, async (req, res) => {
 // PATCH /emergency-contacts/:id
 router.patch('/emergency-contacts/:id', requireAuth, async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const contact = await EmergencyContact.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!contact) return fail(res, 'جهة الاتصال غير موجودة', 404);
     ok(res, contact, { message: 'تم التحديث' });
   } catch (err) {
@@ -418,10 +423,14 @@ router.post('/employment-contracts', requireAuth, async (req, res) => {
 // PATCH /employment-contracts/:id
 router.patch('/employment-contracts/:id', requireAuth, async (req, res) => {
   try {
-    const contract = await EmploymentContract.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const contract = await EmploymentContract.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!contract) return fail(res, 'العقد غير موجود', 404);
     ok(res, contract, { message: 'تم التحديث' });
   } catch (err) {
@@ -546,7 +555,7 @@ router.get('/chart-of-accounts/:id', requireAuth, async (req, res) => {
 // POST /chart-of-accounts
 router.post('/chart-of-accounts', requireAuth, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.create(req.body);
+    const account = await ChartOfAccounts.create(stripUpdateMeta(req.body));
     // إذا كان له أب، تحديث isParent للأب
     if (account.parent) {
       await ChartOfAccounts.findByIdAndUpdate(account.parent, { isParent: true });
@@ -560,10 +569,14 @@ router.post('/chart-of-accounts', requireAuth, async (req, res) => {
 // PATCH /chart-of-accounts/:id
 router.patch('/chart-of-accounts/:id', requireAuth, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const account = await ChartOfAccounts.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!account) return fail(res, 'الحساب غير موجود', 404);
     ok(res, account, { message: 'تم التحديث' });
   } catch (err) {

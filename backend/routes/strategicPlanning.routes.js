@@ -11,6 +11,7 @@ const logger = require('../utils/logger');
 const StrategicGoal = require('../models/StrategicGoal');
 const StrategicInitiative = require('../models/StrategicInitiative');
 const StrategicKPI = require('../models/StrategicKPI');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -80,7 +81,7 @@ router.post(
 // PUT /goals/:id
 router.put('/goals/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const goal = await StrategicGoal.findByIdAndUpdate(req.params.id, req.body, {
+    const goal = await StrategicGoal.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -176,7 +177,7 @@ router.post(
 
 router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await StrategicInitiative.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -254,7 +255,7 @@ router.post(
 
 router.put('/kpis/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const doc = await StrategicKPI.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await StrategicKPI.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

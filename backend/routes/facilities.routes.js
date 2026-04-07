@@ -11,6 +11,7 @@ const logger = require('../utils/logger');
 const Room = require('../models/Room');
 const RoomBooking = require('../models/RoomBooking');
 const MaintenanceRequest = require('../models/MaintenanceRequest');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -87,7 +88,7 @@ router.put(
   ]),
   async (req, res) => {
     try {
-      const room = await Room.findByIdAndUpdate(req.params.id, req.body, {
+      const room = await Room.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

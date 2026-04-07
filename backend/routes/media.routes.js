@@ -17,6 +17,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 const { validateUploadedFile } = require('../utils/uploadValidator');
@@ -47,8 +48,8 @@ const thumbsDir = path.join(uploadsDir, 'thumbnails');
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadsDir),
   filename: (_req, file, cb) => {
-    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
+    const unique = Date.now() + '-' + crypto.randomBytes(8).toString('hex');
+    const ext = path.extname(file.originalname).replace(/[^a-zA-Z0-9.]/g, ''); // sanitize extension
     const name = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9\u0600-\u06FF_-]/g, '_');
     cb(null, `${name}-${unique}${ext}`);
   },

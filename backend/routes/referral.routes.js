@@ -33,6 +33,7 @@ const {
   canTransition,
 } = require('../services/referralService');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Multer Setup ─────────────────────────────────────────────────────────────
 
@@ -161,7 +162,7 @@ router.patch(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
-      const facility = await ReferringFacility.findByIdAndUpdate(req.params.id, req.body, {
+      const facility = await ReferringFacility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
       });
       res.json({ success: true, data: facility });

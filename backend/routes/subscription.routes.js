@@ -10,6 +10,7 @@ const SubscriptionPlan = require('../models/SubscriptionPlan');
 const UserSubscription = require('../models/UserSubscription');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ══════════════════════════════════════════════════════════════════
 // PLANS — إدارة خطط الاشتراك
@@ -43,7 +44,7 @@ router.get('/plans/:id', requireAuth, async (req, res) => {
 /** POST /api/subscriptions/plans — create plan (admin) */
 router.post('/plans', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const plan = await SubscriptionPlan.create(req.body);
+    const plan = await SubscriptionPlan.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: plan });
   } catch (err) {
     logger.error('subscription plan create error:', err);
@@ -54,10 +55,14 @@ router.post('/plans', requireAuth, requireRole(['admin']), async (req, res) => {
 /** PUT /api/subscriptions/plans/:id — update plan (admin) */
 router.put('/plans/:id', requireAuth, requireRole(['admin']), async (req, res) => {
   try {
-    const plan = await SubscriptionPlan.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const plan = await SubscriptionPlan.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
     res.json({ success: true, data: plan });
   } catch (err) {

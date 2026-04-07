@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const MaintenanceIssue = require('../models/MaintenanceIssue');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-issues — list issues */
 router.get('/', requireAuth, async (req, res) => {
@@ -111,7 +112,7 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/maintenance-issues/:id — update issue */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const issue = await MaintenanceIssue.findByIdAndUpdate(req.params.id, req.body, {
+    const issue = await MaintenanceIssue.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

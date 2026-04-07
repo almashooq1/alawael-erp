@@ -9,7 +9,7 @@ const Program = require('../models/Program');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 // ── GET / — list programs (filter by category, status, tags) ───────────
 router.get('/', requireAuth, async (req, res) => {
@@ -139,7 +139,7 @@ router.post('/', requireAuth, async (req, res) => {
 // ── PUT /:id — update program ──────────────────────────────────────────
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const doc = await Program.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await Program.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

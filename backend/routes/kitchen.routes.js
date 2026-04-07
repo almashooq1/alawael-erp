@@ -13,7 +13,7 @@ const express = require('express');
 const router = express.Router();
 const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../models/kitchen.model');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 
 // All kitchen routes require authentication
@@ -141,7 +141,7 @@ router.post('/menu-items', async (req, res) => {
 
 router.put('/menu-items/:id', async (req, res) => {
   try {
-    const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+    const item = await MenuItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -244,7 +244,7 @@ router.post('/daily-menus', async (req, res) => {
 
 router.put('/daily-menus/:id', async (req, res) => {
   try {
-    const menu = await DailyMenu.findByIdAndUpdate(req.params.id, req.body, {
+    const menu = await DailyMenu.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -324,7 +324,7 @@ router.post('/meal-service', async (req, res) => {
 
 router.put('/meal-service/:id', async (req, res) => {
   try {
-    const record = await MealService.findByIdAndUpdate(req.params.id, req.body, {
+    const record = await MealService.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -417,7 +417,7 @@ router.post('/inventory', async (req, res) => {
 
 router.put('/inventory/:id', async (req, res) => {
   try {
-    const item = await KitchenInventory.findByIdAndUpdate(req.params.id, req.body, {
+    const item = await KitchenInventory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

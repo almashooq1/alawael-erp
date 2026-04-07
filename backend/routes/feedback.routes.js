@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const Feedback = require('../models/Feedback');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/feedback — list feedback (filter by beneficiary, therapist, sentiment, followUp) */
 router.get('/', requireAuth, async (req, res) => {
@@ -144,7 +145,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 /** POST /api/feedback — create feedback */
 router.post('/', requireAuth, async (req, res) => {
   try {
-    const feedback = await Feedback.create(req.body);
+    const feedback = await Feedback.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: feedback });
   } catch (err) {
     logger.error('feedback create error:', err);
@@ -155,7 +156,7 @@ router.post('/', requireAuth, async (req, res) => {
 /** PUT /api/feedback/:id — update feedback */
 router.put('/:id', requireAuth, async (req, res) => {
   try {
-    const feedback = await Feedback.findByIdAndUpdate(req.params.id, req.body, {
+    const feedback = await Feedback.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

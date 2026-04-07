@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/therapy-rooms — list rooms */
 router.get('/', requireAuth, async (req, res) => {
@@ -57,7 +58,7 @@ router.get('/:id', requireAuth, async (req, res) => {
 /** POST /api/therapy-rooms — create room (admin) */
 router.post('/', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
   try {
-    const room = await TherapyRoom.create(req.body);
+    const room = await TherapyRoom.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: room });
   } catch (err) {
     logger.error('therapyRoom create error:', err);
@@ -68,7 +69,7 @@ router.post('/', requireAuth, requireRole(['admin', 'supervisor']), async (req, 
 /** PUT /api/therapy-rooms/:id — update room */
 router.put('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
   try {
-    const room = await TherapyRoom.findByIdAndUpdate(req.params.id, req.body, {
+    const room = await TherapyRoom.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

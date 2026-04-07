@@ -104,7 +104,7 @@ router.get('/', async (req, res) => {
     const filter = {};
 
     if (search && search.trim()) {
-      const s = search.trim();
+      const s = escapeRegex(search.trim());
       filter.$or = [
         { name_ar: new RegExp(s, 'i') },
         { firstName_ar: new RegExp(s, 'i') },

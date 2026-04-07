@@ -33,6 +33,7 @@ const { _AppError } = require('../errors/AppError');
 const safeRequire = (path, name) => {
   try {
     return require(path);
+const { stripUpdateMeta } = require('../utils/sanitize');
   } catch (e) {
     logger.warn(`[Finance Advanced] ${name} model not available`);
     return null;
@@ -1779,7 +1780,7 @@ router.put(
   '/donations/:id',
   asyncHandler(async (req, res) => {
     if (Donation) {
-      const donation = await Donation.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      const donation = await Donation.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
       if (donation)
         return res.json({ success: true, data: donation, message: 'تم تعديل بيانات التبرع' });
     }

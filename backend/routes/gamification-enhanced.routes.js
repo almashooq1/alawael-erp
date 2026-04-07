@@ -13,6 +13,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // 🔒 All gamification routes require authentication
 router.use(authenticate);
@@ -422,7 +423,7 @@ router.post('/levels', async (req, res) => {
  */
 router.put('/levels/:id', async (req, res) => {
   try {
-    const level = await GamificationLevel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const level = await GamificationLevel.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!level) return fail(res, 'المستوى غير موجود', 404);
     ok(res, { data: level, message: 'تم التحديث' });
   } catch (e) {

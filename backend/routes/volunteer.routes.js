@@ -37,6 +37,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // 🔒 All volunteer routes require authentication
 router.use(authenticate);
@@ -282,7 +283,7 @@ router.get('/opportunities/:id', async (req, res) => {
 
 router.put('/opportunities/:id', async (req, res) => {
   try {
-    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

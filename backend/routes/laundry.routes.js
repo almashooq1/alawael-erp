@@ -14,6 +14,7 @@ const { authenticate } = require('../middleware/auth');
 const { LaundryOrder, LaundryMachine, LaundrySchedule } = require('../models/laundry.model');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Authentication Middleware ────────────────────────────────────────
 router.use(authenticate);
@@ -97,7 +98,7 @@ router.post('/orders', async (req, res) => {
 
 router.put('/orders/:id', async (req, res) => {
   try {
-    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, req.body, {
+    const order = await LaundryOrder.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });
@@ -197,7 +198,7 @@ router.get('/machines', async (req, res) => {
 
 router.post('/machines', async (req, res) => {
   try {
-    const machine = await LaundryMachine.create(req.body);
+    const machine = await LaundryMachine.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: machine });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -206,10 +207,14 @@ router.post('/machines', async (req, res) => {
 
 router.put('/machines/:id', async (req, res) => {
   try {
-    const machine = await LaundryMachine.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const machine = await LaundryMachine.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!machine) return res.status(404).json({ success: false, error: 'الجهاز غير موجود' });
     res.json({ success: true, data: machine });
   } catch (error) {
@@ -257,7 +262,7 @@ router.get('/schedules', async (req, res) => {
 
 router.post('/schedules', async (req, res) => {
   try {
-    const schedule = await LaundrySchedule.create(req.body);
+    const schedule = await LaundrySchedule.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: schedule });
   } catch (error) {
     res.status(400).json({ success: false, error: safeError(error) });
@@ -266,10 +271,14 @@ router.post('/schedules', async (req, res) => {
 
 router.put('/schedules/:id', async (req, res) => {
   try {
-    const schedule = await LaundrySchedule.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const schedule = await LaundrySchedule.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!schedule) return res.status(404).json({ success: false, error: 'الجدول غير موجود' });
     res.json({ success: true, data: schedule });
   } catch (error) {

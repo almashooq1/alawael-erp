@@ -9,6 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const GroupProgram = require('../models/GroupProgram');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/group-programs — list programs */
 router.get('/', requireAuth, async (req, res) => {
@@ -59,7 +60,7 @@ router.post(
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const program = await GroupProgram.create(req.body);
+      const program = await GroupProgram.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: program });
     } catch (err) {
       logger.error('groupProgram create error:', err);
@@ -75,10 +76,14 @@ router.put(
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const program = await GroupProgram.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true,
-      });
+      const program = await GroupProgram.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });
     } catch (err) {

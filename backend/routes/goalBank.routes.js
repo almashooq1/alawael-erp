@@ -9,7 +9,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 // ── List / Search ────────────────────────────────────────────────
 
@@ -101,7 +101,7 @@ router.post(
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const goal = await GoalBank.create(req.body);
+      const goal = await GoalBank.create(stripUpdateMeta(req.body));
       res.status(201).json({ success: true, data: goal });
     } catch (err) {
       logger.error('goalBank create error:', err);
@@ -117,7 +117,7 @@ router.put(
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const goal = await GoalBank.findByIdAndUpdate(req.params.id, req.body, {
+      const goal = await GoalBank.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
         new: true,
         runValidators: true,
       });

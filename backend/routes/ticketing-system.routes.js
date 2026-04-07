@@ -37,6 +37,7 @@ const {
   TicketAutoAssignment,
 } = require('../models/TicketEnhanced');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -789,7 +790,7 @@ router.post('/sla-configs', requireAdmin, async (req, res) => {
  */
 router.put('/sla-configs/:id', requireAdmin, async (req, res) => {
   try {
-    const config = await TicketSlaConfig.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const config = await TicketSlaConfig.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     return res.json({ success: true, message: 'تم تحديث إعداد SLA', data: config });
   } catch (err) {
@@ -854,7 +855,7 @@ router.post('/escalation-rules', requireAdmin, async (req, res) => {
  */
 router.put('/escalation-rules/:id', requireAdmin, async (req, res) => {
   try {
-    const rule = await TicketEscalationRule.findByIdAndUpdate(req.params.id, req.body, {
+    const rule = await TicketEscalationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
     });
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });

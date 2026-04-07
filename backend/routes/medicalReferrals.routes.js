@@ -11,7 +11,7 @@ const express = require('express');
 const router = express.Router();
 const { MedicalReferral, ReferralFollowUp } = require('../models/medicalReferral.model');
 const logger = require('../utils/logger');
-const { escapeRegex } = require('../utils/sanitize');
+const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { safeError } = require('../utils/safeError');
 
@@ -115,7 +115,7 @@ router.post('/', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
   try {
-    const referral = await MedicalReferral.findByIdAndUpdate(req.params.id, req.body, {
+    const referral = await MedicalReferral.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     });

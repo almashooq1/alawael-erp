@@ -124,7 +124,7 @@ router.post(
 // ─── Update MDT Meeting ──────────────────────────────────────────────────────
 router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, req.body, {
+    const meeting = await MDTMeeting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     }).lean();
@@ -433,7 +433,7 @@ router.post(
 // ─── Update Plan ─────────────────────────────────────────────────────────────
 router.put('/plans/:id', authorize(['admin', 'manager', 'therapist']), async (req, res) => {
   try {
-    const plan = await UnifiedRehabPlan.findByIdAndUpdate(req.params.id, req.body, {
+    const plan = await UnifiedRehabPlan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     }).lean();
@@ -790,7 +790,7 @@ router.post(
 // ─── Update Referral Ticket ──────────────────────────────────────────────────
 router.put('/referrals/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const ticket = await ReferralTicket.findByIdAndUpdate(req.params.id, req.body, {
+    const ticket = await ReferralTicket.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
       runValidators: true,
     }).lean();

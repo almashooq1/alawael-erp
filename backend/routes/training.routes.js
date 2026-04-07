@@ -21,6 +21,7 @@ const validObjectId = (req, res) => {
 };
 
 const safeModel = n => (mongoose.models[n] ? mongoose.model(n) : require(`../models/Training`)[n]);
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Dashboard ────────────────────────────────────────────────
 router.get('/dashboard', authenticate, async (_req, res) => {
@@ -97,7 +98,7 @@ router.put('/courses/:id', authenticate, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Course = safeModel('TrainingCourse');
-    const doc = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Course.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -157,7 +158,7 @@ router.put('/sessions/:id', authenticate, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Session = safeModel('TrainingSession');
-    const doc = await Session.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Session.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -190,7 +191,7 @@ router.put('/plans/:id', authenticate, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Plan = safeModel('TrainingPlan');
-    const doc = await Plan.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const doc = await Plan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {

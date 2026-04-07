@@ -21,6 +21,7 @@ const Announcement = require('../models/communication/Announcement');
 const InternalMessage = require('../models/communication/InternalMessage');
 const NotificationLog = require('../models/communication/NotificationLog');
 const ContactDirectory = require('../models/communication/ContactDirectory');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 router.use(authenticate);
@@ -39,8 +40,8 @@ router.get('/announcements', async (req, res) => {
     if (is_published !== undefined) filter.is_published = is_published === 'true';
     if (search)
       filter.$or = [
-        { title_ar: { $regex: search, $options: 'i' } },
-        { title_en: { $regex: search, $options: 'i' } },
+        { title_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { title_en: { $regex: escapeRegex(search), $options: 'i' } },
       ];
 
     const [announcements, total] = await Promise.all([

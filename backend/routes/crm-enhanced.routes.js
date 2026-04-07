@@ -7,6 +7,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Models ─────────────────────────────────────────────────────────────────
 const CrmLead = require('../models/CrmLead');
@@ -15,6 +16,7 @@ const CrmCampaign = require('../models/CrmCampaign');
 const CrmSegment = require('../models/CrmSegment');
 const CrmSurvey = require('../models/CrmSurvey');
 const CrmReferralCommission = require('../models/CrmReferralCommission');
+const escapeRegex = require('../utils/escapeRegex');
 
 router.use(authenticate);
 
@@ -43,10 +45,10 @@ router.get('/leads', async (req, res) => {
 
     if (search) {
       filter.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { firstName: { $regex: escapeRegex(search), $options: 'i' } },
+        { lastName: { $regex: escapeRegex(search), $options: 'i' } },
+        { phone: { $regex: escapeRegex(search), $options: 'i' } },
+        { email: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     if (status) filter.status = status;
@@ -227,7 +229,7 @@ router.get('/leads/:id', async (req, res) => {
 /** POST /api/crm-enhanced/leads — create lead */
 router.post('/leads', async (req, res) => {
   try {
-    const data = req.body;
+    const data = stripUpdateMeta(req.body);
     if (!data.firstName || !data.lastName)
       return res.status(400).json({ success: false, message: 'الاسم الأول والأخير مطلوبان' });
     if (!data.source) return res.status(400).json({ success: false, message: 'مصدر العميل مطلوب' });
@@ -266,7 +268,7 @@ router.put('/leads/:id', async (req, res) => {
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
 
     const oldStatus = lead.status;
-    const updateData = { ...req.body, updatedBy: req.user?._id || req.userId };
+    const updateData = { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId };
     delete updateData.activities;
 
     Object.assign(lead, updateData);
@@ -443,7 +445,7 @@ router.post('/partners', authorize(['admin', 'super_admin', 'manager']), async (
     if (!req.body.name)
       return res.status(400).json({ success: false, message: 'اسم الشريك مطلوب' });
     const partner = await CrmPartner.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?._id || req.userId,
     });
     res.status(201).json({ success: true, data: partner, message: 'تم إنشاء الشريك بنجاح' });
@@ -460,7 +462,7 @@ router.put('/partners/:id', authorize(['admin', 'super_admin', 'manager']), asyn
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const partner = await CrmPartner.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user?._id || req.userId },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
       { new: true, runValidators: true }
     );
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
@@ -563,7 +565,7 @@ router.post('/campaigns', authorize(['admin', 'super_admin', 'manager']), async 
     if (!req.body.name || !req.body.contentAr)
       return res.status(400).json({ success: false, message: 'اسم الحملة والمحتوى مطلوبان' });
     const campaign = await CrmCampaign.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?._id || req.userId,
     });
     res.status(201).json({ success: true, data: campaign, message: 'تم إنشاء الحملة بنجاح' });
@@ -583,7 +585,7 @@ router.put('/campaigns/:id', authorize(['admin', 'super_admin', 'manager']), asy
     if (campaign.status === 'running')
       return res.status(422).json({ success: false, message: 'لا يمكن تعديل حملة جارية' });
 
-    Object.assign(campaign, req.body);
+    Object.assign(campaign, stripUpdateMeta(req.body));
     campaign.updatedBy = req.user?._id || req.userId;
     await campaign.save();
     res.json({ success: true, data: campaign, message: 'تم تحديث الحملة بنجاح' });
@@ -676,7 +678,7 @@ router.post('/segments', async (req, res) => {
     if (!req.body.name)
       return res.status(400).json({ success: false, message: 'اسم الشريحة مطلوب' });
     const segment = await CrmSegment.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?._id || req.userId,
     });
     res.status(201).json({ success: true, data: segment, message: 'تم إنشاء الشريحة بنجاح' });
@@ -693,7 +695,7 @@ router.put('/segments/:id', async (req, res) => {
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
     const segment = await CrmSegment.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, updatedBy: req.user?._id || req.userId },
+      { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
       { new: true, runValidators: true }
     );
     if (!segment) return res.status(404).json({ success: false, message: 'الشريحة غير موجودة' });
@@ -757,7 +759,7 @@ router.post('/surveys', async (req, res) => {
     if (!req.body.title)
       return res.status(400).json({ success: false, message: 'عنوان الاستطلاع مطلوب' });
     const survey = await CrmSurvey.create({
-      ...req.body,
+      ...stripUpdateMeta(req.body),
       createdBy: req.user?._id || req.userId,
     });
     res.status(201).json({ success: true, data: survey, message: 'تم إنشاء الاستطلاع بنجاح' });
@@ -871,7 +873,7 @@ router.post(
         return res.status(400).json({ success: false, message: 'الشريك والعميل والمبلغ مطلوبون' });
 
       const commission = await CrmReferralCommission.create({
-        ...req.body,
+        ...stripUpdateMeta(req.body),
         createdBy: req.user?._id || req.userId,
       });
       res.status(201).json({ success: true, data: commission, message: 'تم إنشاء العمولة بنجاح' });
@@ -892,7 +894,7 @@ router.put(
         return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
       const commission = await CrmReferralCommission.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, updatedBy: req.user?._id || req.userId },
+        { ...stripUpdateMeta(req.body), updatedBy: req.user?._id || req.userId },
         { new: true, runValidators: true }
       );
       if (!commission)

@@ -32,6 +32,7 @@ const {
   recalculatePriority,
   canTransition,
 } = require('../services/referralService');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ─── Multer Setup ─────────────────────────────────────────────────────────────
 
@@ -101,7 +102,7 @@ router.get('/facilities', async (req, res) => {
     if (type) filter.type = type;
     if (city) filter.city = city;
     if (isActive !== undefined) filter.isActive = isActive === 'true';
-    if (search) filter.name = { $regex: search, $options: 'i' };
+    if (search) filter.name = { $regex: escapeRegex(search), $options: 'i' };
 
     const total = await ReferringFacility.countDocuments(filter);
     const facilities = await ReferringFacility.find(filter)
@@ -215,9 +216,9 @@ router.get('/', async (req, res) => {
     }
     if (search) {
       filter.$or = [
-        { patientName: { $regex: search, $options: 'i' } },
-        { referralNumber: { $regex: search, $options: 'i' } },
-        { patientNationalId: { $regex: search, $options: 'i' } },
+        { patientName: { $regex: escapeRegex(search), $options: 'i' } },
+        { referralNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { patientNationalId: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

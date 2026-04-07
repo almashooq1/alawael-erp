@@ -32,6 +32,7 @@ const {
   RewardRedemption,
   Leaderboard,
 } = require('../rehabilitation-gamification/gamification-enhanced-service');
+const escapeRegex = require('../utils/escapeRegex');
 
 const service = new GamificationEnhancedService();
 
@@ -83,7 +84,7 @@ router.get('/profiles', async (req, res) => {
     if (search) {
       const beneficiaryIds = await require('mongoose')
         .model('Beneficiary')
-        .find({ full_name: { $regex: search, $options: 'i' } })
+        .find({ full_name: { $regex: escapeRegex(search), $options: 'i' } })
         .select('_id')
         .lean();
       query.beneficiary_id = { $in: beneficiaryIds.map(b => b._id) };

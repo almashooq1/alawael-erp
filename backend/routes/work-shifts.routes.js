@@ -13,6 +13,7 @@ const WorkShift = require('../models/WorkShift');
 const OvertimeRequest = require('../models/OvertimeRequest');
 const Employee = require('../models/Employee');
 const safeError = require('../utils/safeError');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. جداول الدوام — Work Shifts CRUD
@@ -32,9 +33,9 @@ router.get('/', authenticate, async (req, res) => {
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (search)
       filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { nameAr: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+        { nameAr: { $regex: escapeRegex(search), $options: 'i' } },
+        { code: { $regex: escapeRegex(search), $options: 'i' } },
       ];
 
     const [shifts, total] = await Promise.all([

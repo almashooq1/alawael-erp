@@ -32,6 +32,7 @@ const {
   PreTripInspectionService,
   ParentNotificationService,
 } = require('../services/transport/TransportService');
+const escapeRegex = require('../utils/escapeRegex');
 
 const routeOptimizer = new RouteOptimizationService();
 const inspectionService = new PreTripInspectionService();
@@ -75,10 +76,10 @@ router.get(
       filter.wheelchair_accessible = wheelchair_accessible === 'true';
     if (search) {
       filter.$or = [
-        { plate_number: { $regex: search, $options: 'i' } },
-        { make: { $regex: search, $options: 'i' } },
-        { model: { $regex: search, $options: 'i' } },
-        { vehicle_number: { $regex: search, $options: 'i' } },
+        { plate_number: { $regex: escapeRegex(search), $options: 'i' } },
+        { make: { $regex: escapeRegex(search), $options: 'i' } },
+        { model: { $regex: escapeRegex(search), $options: 'i' } },
+        { vehicle_number: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -212,8 +213,8 @@ router.get(
     if (day_of_week) filter.operating_days = day_of_week;
     if (search) {
       filter.$or = [
-        { route_name_ar: { $regex: search, $options: 'i' } },
-        { route_number: { $regex: search, $options: 'i' } },
+        { route_name_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { route_number: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

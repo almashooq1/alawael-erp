@@ -14,6 +14,14 @@ const { authenticate } = require('../middleware/auth');
 
 const MAX_PAGE_LIMIT = 100;
 
+/* ━━━ Sort Whitelist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+const ADMIN_SAFE_SORTS = new Set([
+  'createdAt', '-createdAt', 'updatedAt', '-updatedAt',
+  'title', '-title', 'status', '-status', 'priority', '-priority',
+  'department', '-department', 'effectiveDate', '-effectiveDate',
+]);
+const safeSortOf = (raw) => ADMIN_SAFE_SORTS.has(raw) ? raw : '-createdAt';
+
 /* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 router.use(authenticate);
 
@@ -217,7 +225,7 @@ router.get(
     const [items, total] = await Promise.all([
       AdminDecision.find(filter)
         .select('-body -auditTrail -comments')
-        .sort(sort)
+        .sort(safeSortOf(sort))
         .skip(skip)
         .limit(safeLimit),
       AdminDecision.countDocuments(filter),
@@ -499,7 +507,7 @@ router.get(
     const [items, total] = await Promise.all([
       Correspondence.find(filter)
         .select('-auditTrail -routingHistory')
-        .sort(sort)
+        .sort(safeSortOf(sort))
         .skip(skip)
         .limit(safeLimit),
       Correspondence.countDocuments(filter),
@@ -727,7 +735,7 @@ router.get(
     const [items, total] = await Promise.all([
       Delegation.find(filter)
         .select('-auditTrail -usageLogs')
-        .sort(sort)
+        .sort(safeSortOf(sort))
         .skip(skip)
         .limit(parseInt(limit)),
       Delegation.countDocuments(filter),

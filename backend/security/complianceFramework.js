@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+const crypto = require('crypto');
 const logger = require('../utils/logger');
 /**
  * ⚖️ GDPR/HIPAA Compliance Framework
@@ -147,7 +148,7 @@ class ComplianceFramework {
    * Anonymize user data
    */
   anonymizeUserData(userId) {
-    const anonymizationId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const anonymizationId = `anon_${Date.now()}_${crypto.randomBytes(8).toString('hex')}`;
 
     // Replace personally identifiable info
     if (this.userConsents.has(userId)) {

@@ -59,6 +59,7 @@ const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
 const safeError = require('../utils/safeError');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ══════════════════════════════════════════════════════════════════
 //  مساعدات داخلية
@@ -111,8 +112,8 @@ router.get('/templates', authenticate, async (req, res) => {
     if (is_active !== undefined) filter.is_active = is_active === 'true';
     if (search) {
       filter.$or = [
-        { name_ar: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
+        { name_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { code: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

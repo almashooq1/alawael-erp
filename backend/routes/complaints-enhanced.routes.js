@@ -14,6 +14,7 @@ const {
   ComplaintSlaConfig,
   CrmFeedback,
 } = require('../models/ComplaintEnhanced');
+const escapeRegex = require('../utils/escapeRegex');
 
 router.use(authenticate);
 
@@ -47,9 +48,9 @@ router.get('/', async (req, res) => {
     if (slaBreached !== undefined) filter.slaBreached = slaBreached === 'true';
     if (search) {
       filter.$or = [
-        { subject: { $regex: search, $options: 'i' } },
-        { complaintNumber: { $regex: search, $options: 'i' } },
-        { complainantName: { $regex: search, $options: 'i' } },
+        { subject: { $regex: escapeRegex(search), $options: 'i' } },
+        { complaintNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { complainantName: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     if (dateFrom || dateTo) {
@@ -719,9 +720,9 @@ router.get('/feedback', async (req, res) => {
     if (sentiment) filter.sentiment = sentiment;
     if (search) {
       filter.$or = [
-        { subject: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
-        { submitterName: { $regex: search, $options: 'i' } },
+        { subject: { $regex: escapeRegex(search), $options: 'i' } },
+        { content: { $regex: escapeRegex(search), $options: 'i' } },
+        { submitterName: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

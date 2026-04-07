@@ -21,6 +21,7 @@ const {
 const logger = require('../utils/logger');
 
 const { safeError } = require('../utils/safeError');
+const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
 function ok(res, data, msg = 'Success') {
@@ -38,7 +39,7 @@ function buildCRUD(Model, label) {
   return {
     create: async (req, res) => {
       try {
-        const doc = await Model.create({ ...req.body, createdBy: req.user?._id });
+        const doc = await Model.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
         ok(res, doc, `${label} created`);
       } catch (e) {
         fail(res, e);
@@ -47,13 +48,15 @@ function buildCRUD(Model, label) {
 
     getAll: async (req, res) => {
       try {
+        const ALLOWED_SORTS = new Set(['createdAt', '-createdAt', 'updatedAt', '-updatedAt', 'status', '-status', 'beneficiary', '-beneficiary']);
         const { page = 1, limit = 25, status, beneficiary, sort = '-createdAt' } = req.query;
+        const safeSort = ALLOWED_SORTS.has(sort) ? sort : '-createdAt';
         const filter = {};
         if (status) filter.status = status;
         if (beneficiary) filter.beneficiary = beneficiary;
         const [docs, total] = await Promise.all([
           Model.find(filter)
-            .sort(sort)
+            .sort(safeSort)
             .skip((page - 1) * limit)
             .limit(+limit)
             .lean(),
@@ -77,7 +80,7 @@ function buildCRUD(Model, label) {
 
     update: async (req, res) => {
       try {
-        const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+        const doc = await Model.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
           new: true,
           runValidators: true,
         });

@@ -13,6 +13,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -31,6 +32,7 @@ const {
   ConflictDetectionService,
   WaitlistService,
 } = require('../services/scheduling/SchedulingService');
+const escapeRegex = require('../utils/escapeRegex');
 
 const conflictService = new ConflictDetectionService();
 const waitlistService = new WaitlistService();
@@ -90,8 +92,8 @@ router.get(
     }
     if (search) {
       filter.$or = [
-        { appointment_number: { $regex: search, $options: 'i' } },
-        { notes: { $regex: search, $options: 'i' } },
+        { appointment_number: { $regex: escapeRegex(search), $options: 'i' } },
+        { notes: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -468,13 +470,13 @@ router.post(
     });
 
     if (existing) {
-      Object.assign(existing, req.body);
+      Object.assign(existing, stripUpdateMeta(req.body));
       existing.updated_at = new Date();
       await existing.save();
       return res.json({ success: true, data: existing, message: 'تم تحديث جدول التوفر' });
     }
 
-    const availability = new TherapistAvailability({ ...req.body, created_by: req.user?._id });
+    const availability = new TherapistAvailability({ ...stripUpdateMeta(req.body), created_by: req.user?._id });
     await availability.save();
     res.status(201).json({ success: true, data: availability, message: 'تم إنشاء جدول التوفر' });
   })

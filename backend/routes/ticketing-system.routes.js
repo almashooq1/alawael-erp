@@ -36,6 +36,7 @@ const {
   TicketEscalationRule,
   TicketAutoAssignment,
 } = require('../models/TicketEnhanced');
+const escapeRegex = require('../utils/escapeRegex');
 
 router.use(authenticate);
 
@@ -213,9 +214,9 @@ router.get('/', async (req, res) => {
 
     if (search) {
       filter.$or = [
-        { ticketNumber: { $regex: search, $options: 'i' } },
-        { subject: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { ticketNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { subject: { $regex: escapeRegex(search), $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 

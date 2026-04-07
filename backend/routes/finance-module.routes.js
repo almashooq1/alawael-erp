@@ -34,6 +34,7 @@ const {
   ZatcaService,
   InsuranceClaimService,
 } = require('../services/finance/FinanceService');
+const escapeRegex = require('../utils/escapeRegex');
 
 const accountingService = new AccountingService();
 const zatcaService = new ZatcaService();
@@ -67,9 +68,9 @@ router.get(
     if (parent_id) filter.parent_account_id = parent_id === 'null' ? null : parent_id;
     if (search) {
       filter.$or = [
-        { account_name_ar: { $regex: search, $options: 'i' } },
-        { account_name_en: { $regex: search, $options: 'i' } },
-        { account_code: { $regex: search, $options: 'i' } },
+        { account_name_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { account_name_en: { $regex: escapeRegex(search), $options: 'i' } },
+        { account_code: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -189,8 +190,8 @@ router.get(
     }
     if (search) {
       filter.$or = [
-        { entry_number: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
+        { entry_number: { $regex: escapeRegex(search), $options: 'i' } },
+        { description: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -362,9 +363,9 @@ router.get(
     }
     if (search) {
       filter.$or = [
-        { invoice_number: { $regex: search, $options: 'i' } },
-        { 'buyer.name': { $regex: search, $options: 'i' } },
-        { 'buyer.vat_number': { $regex: search, $options: 'i' } },
+        { invoice_number: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'buyer.name': { $regex: escapeRegex(search), $options: 'i' } },
+        { 'buyer.vat_number': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
 
@@ -725,7 +726,7 @@ router.get(
     const filter = { deleted_at: null };
 
     if (status) filter.status = status;
-    if (insurance_company) filter.insurance_company = { $regex: insurance_company, $options: 'i' };
+    if (insurance_company) filter.insurance_company = { $regex: escapeRegex(insurance_company), $options: 'i' };
     if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
     if (from_date || to_date) {
       filter.claim_date = {};

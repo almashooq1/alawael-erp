@@ -33,9 +33,9 @@ router.get('/items', authenticate, async (req, res) => {
     if (type) filter.type = type;
     if (search)
       filter.$or = [
-        { nameAr: { $regex: search, $options: 'i' } },
-        { nameEn: { $regex: search, $options: 'i' } },
-        { sku: { $regex: search, $options: 'i' } },
+        { nameAr: { $regex: escapeRegex(search), $options: 'i' } },
+        { nameEn: { $regex: escapeRegex(search), $options: 'i' } },
+        { sku: { $regex: escapeRegex(search), $options: 'i' } },
       ];
     const items = await InventoryItem.find(filter)
       .skip((page - 1) * limit)
@@ -66,6 +66,7 @@ router.post(
 router.get('/items/:itemId', authenticate, async (req, res) => {
   try {
     const { InventoryItem } = require('../models/InventoryItem');
+const escapeRegex = require('../utils/escapeRegex');
     const item = await InventoryItem.findById(req.params.itemId).populate('categoryId');
     if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data: item });

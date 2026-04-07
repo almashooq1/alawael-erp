@@ -155,11 +155,11 @@ router.get('/assets', async (req, res) => {
     const filter = {};
     if (status) filter.status = status;
     if (category) filter.category = category;
-    if (branchId) filter.location = { $regex: branchId, $options: 'i' };
+    if (branchId) filter.location = { $regex: escapeRegex(branchId), $options: 'i' };
     if (search) {
       const safe = escapeRegex(String(search));
       filter.$or = [
-        { name: { $regex: safe, $options: 'i' } },
+        { name: { $regex: escapeRegex(safe), $options: 'i' } },
         { tags: { $in: [new RegExp(safe, 'i')] } },
       ];
     }

@@ -26,6 +26,7 @@ const ContractParty = require('../models/ContractParty');
 const ContractApproval = require('../models/ContractApproval');
 const ContractAmendment = require('../models/ContractAmendment');
 const ContractNegotiation = require('../models/ContractNegotiation');
+const escapeRegex = require('../utils/escapeRegex');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const MAX_LIMIT = 100;
@@ -167,9 +168,9 @@ router.get('/contracts', async (req, res) => {
     }
     if (search) {
       filter.$or = [
-        { contractTitle: { $regex: search, $options: 'i' } },
-        { contractNumber: { $regex: search, $options: 'i' } },
-        { 'supplier.supplierName': { $regex: search, $options: 'i' } },
+        { contractTitle: { $regex: escapeRegex(search), $options: 'i' } },
+        { contractNumber: { $regex: escapeRegex(search), $options: 'i' } },
+        { 'supplier.supplierName': { $regex: escapeRegex(search), $options: 'i' } },
       ];
     }
     const limit = clamp(rawLimit);

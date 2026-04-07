@@ -28,6 +28,7 @@ const {
   IotMaintenance,
   VitalBaseline,
 } = require('../rehabilitation-gamification/iot-wearables-service');
+const escapeRegex = require('../utils/escapeRegex');
 
 const service = new IotWearablesService();
 
@@ -70,9 +71,9 @@ router.get('/device-types', async (req, res) => {
     if (category) query.category = category;
     if (search)
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { name_ar: { $regex: search, $options: 'i' } },
-        { manufacturer: { $regex: search, $options: 'i' } },
+        { name: { $regex: escapeRegex(search), $options: 'i' } },
+        { name_ar: { $regex: escapeRegex(search), $options: 'i' } },
+        { manufacturer: { $regex: escapeRegex(search), $options: 'i' } },
       ];
 
     const total = await IotDeviceType.countDocuments(query);

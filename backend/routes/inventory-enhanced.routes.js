@@ -67,7 +67,7 @@ router.post(
 router.get('/items/:itemId', authenticate, async (req, res) => {
   try {
     const { InventoryItem } = require('../models/InventoryItem');
-const escapeRegex = require('../utils/escapeRegex');
+    const escapeRegex = require('../utils/escapeRegex');
     const item = await InventoryItem.findById(req.params.itemId).populate('categoryId');
     if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data: item });
@@ -83,9 +83,13 @@ router.put(
   async (req, res) => {
     try {
       const { InventoryItem } = require('../models/InventoryItem');
-      const item = await InventoryItem.findByIdAndUpdate(req.params.itemId, stripUpdateMeta(req.body), {
-        new: true,
-      });
+      const item = await InventoryItem.findByIdAndUpdate(
+        req.params.itemId,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+        }
+      );
       if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
       res.json({ success: true, data: item });
     } catch (err) {
@@ -191,7 +195,9 @@ router.put(
   async (req, res) => {
     try {
       const { Supplier } = require('../models/InventoryStock');
-      const supplier = await Supplier.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+      const supplier = await Supplier.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+      });
       res.json({ success: true, data: supplier });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -387,7 +393,9 @@ router.put(
   async (req, res) => {
     try {
       const { Asset } = require('../models/InventoryStock');
-      const asset = await Asset.findByIdAndUpdate(req.params.assetId, stripUpdateMeta(req.body), { new: true });
+      const asset = await Asset.findByIdAndUpdate(req.params.assetId, stripUpdateMeta(req.body), {
+        new: true,
+      });
       res.json({ success: true, data: asset });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

@@ -163,7 +163,10 @@ router.get('/tools/:id', async (req, res) => {
  */
 router.post('/tools', async (req, res) => {
   try {
-    const tool = await AssessmentTool.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
+    const tool = await AssessmentTool.create({
+      ...stripUpdateMeta(req.body),
+      created_by: req.user._id,
+    });
     res.status(201).json({ success: true, data: tool, message: 'تم إنشاء المقياس بنجاح' });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });

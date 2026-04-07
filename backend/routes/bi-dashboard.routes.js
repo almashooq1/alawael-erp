@@ -234,13 +234,15 @@ router.get('/finance/analytics', async (req, res) => {
         Payment
           ? Payment.aggregate([
               { $match: { createdAt: dateFilter, status: { $in: ['completed', 'paid'] } } },
-              { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+              { $group: { _id: null, total: { $sum: '$amount' } } },
+              { $limit: 1000 },
             ])
           : [{ total: 0 }],
         Expense
           ? Expense.aggregate([
               { $match: { date: dateFilter, status: { $ne: 'cancelled' } } },
-              { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+              { $group: { _id: null, total: { $sum: '$amount' } } },
+              { $limit: 1000 },
             ])
           : [{ total: 0 }],
         Invoice ? Invoice.countDocuments({ createdAt: dateFilter }) : 0,
@@ -315,13 +317,15 @@ router.get('/finance/cashflow', async (req, res) => {
         Payment
           ? Payment.aggregate([
               { $match: { createdAt: { $gte: start, $lt: end }, status: 'completed' } },
-              { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+              { $group: { _id: null, total: { $sum: '$amount' } } },
+              { $limit: 1000 },
             ])
           : [{ total: 0 }],
         Expense
           ? Expense.aggregate([
               { $match: { date: { $gte: start, $lt: end } } },
-              { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+              { $group: { _id: null, total: { $sum: '$amount' } } },
+              { $limit: 1000 },
             ])
           : [{ total: 0 }],
       ]);
@@ -382,7 +386,8 @@ router.get('/hr/analytics', async (req, res) => {
                 count: { $sum: 1 },
                 totalDays: { $sum: '$days' },
               },
-            }, { $limit: 1000 }
+            },
+            { $limit: 1000 },
           ])
         : [],
       Attendance
@@ -395,7 +400,8 @@ router.get('/hr/analytics', async (req, res) => {
                 total: { $sum: 1 },
               },
             },
-            { $sort: { _id: 1 } }, { $limit: 1000 }
+            { $sort: { _id: 1 } },
+            { $limit: 1000 },
           ])
         : [],
       Evaluation
@@ -407,7 +413,8 @@ router.get('/hr/analytics', async (req, res) => {
                 avgScore: { $avg: '$overallScore' },
                 count: { $sum: 1 },
               },
-            }, { $limit: 1000 }
+            },
+            { $limit: 1000 },
           ])
         : [],
     ]);
@@ -477,22 +484,27 @@ router.get('/operations/analytics', async (req, res) => {
                 _id: '$status',
                 count: { $sum: 1 },
               },
-            }, { $limit: 1000 }
+            },
+            { $limit: 1000 },
           ])
         : [],
       Complaint
         ? Complaint.aggregate([
             { $match: { createdAt: { $gte: monthStart } } },
-            { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
+            { $group: { _id: '$status', count: { $sum: 1 } } },
+            { $limit: 1000 },
           ])
         : [],
       MaintenanceRequest
         ? MaintenanceRequest.aggregate([
             { $match: { createdAt: { $gte: monthStart } } },
-            { $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }
+            { $group: { _id: '$status', count: { $sum: 1 } } },
+            { $limit: 1000 },
           ])
         : [],
-      Vehicle ? Vehicle.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }]) : [],
+      Vehicle
+        ? Vehicle.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }, { $limit: 1000 }])
+        : [],
     ]);
 
     res.json({
@@ -882,13 +894,15 @@ async function aggregateFinance(startDate) {
     Payment
       ? Payment.aggregate([
           { $match: { createdAt: { $gte: startDate }, status: { $in: ['completed', 'paid'] } } },
-          { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+          { $limit: 1000 },
         ])
       : [{ total: 0 }],
     Expense
       ? Expense.aggregate([
           { $match: { date: { $gte: startDate } } },
-          { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+          { $limit: 1000 },
         ])
       : [{ total: 0 }],
   ]);
@@ -983,7 +997,8 @@ async function getMetricValue(metric, start, end) {
       if (!Payment) return 0;
       const result = await Payment.aggregate([
         { $match: { createdAt: dateFilter, status: { $in: ['completed', 'paid'] } } },
-        { $group: { _id: null, total: { $sum: '$amount' } } }, { $limit: 1000 }
+        { $group: { _id: null, total: { $sum: '$amount' } } },
+        { $limit: 1000 },
       ]);
       return result[0]?.total || 0;
     }

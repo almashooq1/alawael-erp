@@ -59,7 +59,10 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
 
 router.post('/employees', authenticate, authorize('hr.create'), async (req, res) => {
   try {
-    const employee = await Employee.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
+    const employee = await Employee.create({
+      ...stripUpdateMeta(req.body),
+      created_by: req.user._id,
+    });
     res.status(201).json({ data: employee });
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -252,7 +255,10 @@ router.get('/leave-balance/:employee_id', authenticate, async (req, res) => {
 // ===== الحضور =====
 router.post('/attendance', authenticate, async (req, res) => {
   try {
-    const record = await AttendanceRecord.create({ ...stripUpdateMeta(req.body), approved_by: req.user._id });
+    const record = await AttendanceRecord.create({
+      ...stripUpdateMeta(req.body),
+      approved_by: req.user._id,
+    });
     res.status(201).json({ data: record });
   } catch (err) {
     res.status(400).json({ error: err.message });

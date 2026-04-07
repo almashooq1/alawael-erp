@@ -383,10 +383,14 @@ router.post('/resources', async (req, res) => {
 
 router.put('/resources/:id', async (req, res) => {
   try {
-    const doc = await CommunityResource.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await CommunityResource.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return fail(res, 'المورد غير موجود', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {

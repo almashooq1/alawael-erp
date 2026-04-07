@@ -60,7 +60,11 @@ router.put(
   async (req, res) => {
     try {
       const Branch = require('../models/Branch');
-      const branch = await Branch.findByIdAndUpdate(req.params.branchId, stripUpdateMeta(req.body), { new: true });
+      const branch = await Branch.findByIdAndUpdate(
+        req.params.branchId,
+        stripUpdateMeta(req.body),
+        { new: true }
+      );
       if (!branch) return res.status(404).json({ success: false, message: 'الفرع غير موجود' });
       res.json({ success: true, data: branch });
     } catch (err) {

@@ -305,7 +305,8 @@ router.get('/audit-hub/checklists', authenticateToken, async (req, res) => {
     if (isActive !== undefined) q.isActive = isActive === 'true';
     const lists = await ComplianceChecklist.find(q)
       .sort({ updatedAt: -1 })
-      .populate('createdBy', 'name').lean();
+      .populate('createdBy', 'name')
+      .lean();
     res.json(lists);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -318,7 +319,8 @@ router.get('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
     const cl = await ComplianceChecklist.findById(req.params.id)
       .populate('createdBy', 'name')
       .populate('items.assignedTo', 'name')
-      .populate('items.checkedBy', 'name').lean();
+      .populate('items.checkedBy', 'name')
+      .lean();
     if (!cl) return res.status(404).json({ error: 'Not found' });
     res.json(cl);
   } catch (e) {
@@ -419,7 +421,8 @@ router.get('/audit-hub/alerts', authenticateToken, async (req, res) => {
     if (isResolved !== undefined) q.isResolved = isResolved === 'true';
     const alerts = await ComplianceAlert.find(q)
       .sort({ createdAt: -1 })
-      .populate('checklist', 'name nameAr').lean();
+      .populate('checklist', 'name nameAr')
+      .lean();
     res.json(alerts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -454,7 +457,8 @@ router.get('/report-builder/templates', authenticateToken, async (req, res) => {
     if (isPublic !== undefined) q.isPublic = isPublic === 'true';
     const templates = await ReportTemplate.find(q)
       .sort({ updatedAt: -1 })
-      .populate('createdBy', 'name').lean();
+      .populate('createdBy', 'name')
+      .lean();
     res.json(templates);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -466,7 +470,8 @@ router.get('/report-builder/templates/:id', authenticateToken, async (req, res) 
   try {
     const t = await ReportTemplate.findById(req.params.id)
       .populate('createdBy', 'name')
-      .populate('schedule.recipients', 'name email').lean();
+      .populate('schedule.recipients', 'name email')
+      .lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
@@ -622,7 +627,8 @@ router.get('/calendar-hub/events', authenticateToken, async (req, res) => {
     const events = await CalendarEvent.find(q)
       .sort({ start: 1 })
       .populate('createdBy', 'name')
-      .populate('attendees.user', 'name email').lean();
+      .populate('attendees.user', 'name email')
+      .lean();
     res.json(events);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -634,7 +640,8 @@ router.get('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
   try {
     const ev = await CalendarEvent.findById(req.params.id)
       .populate('createdBy', 'name')
-      .populate('attendees.user', 'name email').lean();
+      .populate('attendees.user', 'name email')
+      .lean();
     if (!ev) return res.status(404).json({ error: 'Not found' });
     res.json(ev);
   } catch (e) {
@@ -713,7 +720,8 @@ router.get('/calendar-hub/today', authenticateToken, async (_req, res) => {
     end.setHours(23, 59, 59, 999);
     const events = await CalendarEvent.find({ start: { $gte: start, $lte: end } })
       .sort({ start: 1 })
-      .populate('createdBy', 'name').lean();
+      .populate('createdBy', 'name')
+      .lean();
     res.json(events);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -739,7 +747,10 @@ router.get('/calendar-hub/room-bookings', authenticateToken, async (req, res) =>
     if (room) q.room = room;
     if (start) q.start = { $gte: new Date(start) };
     if (end) q.end = { ...(q.end || {}), $lte: new Date(end) };
-    const bookings = await RoomBooking.find(q).sort({ start: 1 }).populate('bookedBy', 'name').lean();
+    const bookings = await RoomBooking.find(q)
+      .sort({ start: 1 })
+      .populate('bookedBy', 'name')
+      .lean();
     res.json(bookings);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -964,7 +975,8 @@ router.get('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
     const d = await CRMDeal.findById(req.params.id)
       .populate('contact')
       .populate('pipeline')
-      .populate('assignedTo', 'name email').lean();
+      .populate('assignedTo', 'name email')
+      .lean();
     if (!d) return res.status(404).json({ error: 'Not found' });
     res.json(d);
   } catch (e) {
@@ -1025,7 +1037,8 @@ router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, async (req,
     if (!pipeline) return res.status(404).json({ error: 'Not found' });
     const deals = await CRMDeal.find({ pipeline: req.params.pipelineId, status: 'open' })
       .populate('contact', 'firstName lastName company')
-      .populate('assignedTo', 'name').lean();
+      .populate('assignedTo', 'name')
+      .lean();
     const board = pipeline.stages.map(s => ({
       stage: s,
       deals: deals.filter(d => String(d.stage) === String(s._id)),
@@ -1050,7 +1063,8 @@ router.get('/crm-pro/activities', authenticateToken, async (req, res) => {
       .sort({ updatedAt: -1 })
       .limit(100)
       .populate('contact', 'firstName lastName')
-      .populate('performedBy', 'name').lean();
+      .populate('performedBy', 'name')
+      .lean();
     res.json(acts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1263,7 +1277,8 @@ router.get('/warehouse-intel/alerts', authenticateToken, async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(200)
       .populate('warehouse', 'name code')
-      .populate('item', 'name code').lean();
+      .populate('item', 'name code')
+      .lean();
     res.json(alerts);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1445,7 +1460,8 @@ router.get('/project-pro/projects/:id', authenticateToken, async (req, res) => {
   try {
     const p = await ProjectPro.findById(req.params.id)
       .populate('manager', 'name email')
-      .populate('team.user', 'name email').lean();
+      .populate('team.user', 'name email')
+      .lean();
     if (!p) return res.status(404).json({ error: 'Not found' });
     res.json(p);
   } catch (e) {
@@ -1542,7 +1558,8 @@ router.get('/project-pro/tasks', authenticateToken, async (req, res) => {
       .sort({ order: 1, updatedAt: -1 })
       .populate('assignee', 'name')
       .populate('reporter', 'name')
-      .populate('parentTask', 'title').lean();
+      .populate('parentTask', 'title')
+      .lean();
     res.json(tasks);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1556,7 +1573,8 @@ router.get('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
       .populate('assignee', 'name email')
       .populate('reporter', 'name')
       .populate('parentTask', 'title')
-      .populate('dependencies', 'title status').lean();
+      .populate('dependencies', 'title status')
+      .lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
@@ -1637,7 +1655,8 @@ router.get('/project-pro/kanban/:projectId', authenticateToken, async (req, res)
   try {
     const tasks = await ProjectTask.find({ project: req.params.projectId })
       .sort({ order: 1 })
-      .populate('assignee', 'name').lean();
+      .populate('assignee', 'name')
+      .lean();
     const columns = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked'];
     const board = {};
     columns.forEach(c => {
@@ -1667,7 +1686,8 @@ router.get('/project-pro/timelogs', authenticateToken, async (req, res) => {
       .sort({ date: -1 })
       .populate('project', 'name code')
       .populate('task', 'title')
-      .populate('user', 'name').lean();
+      .populate('user', 'name')
+      .lean();
     res.json(logs);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
@@ -1734,7 +1754,8 @@ router.get('/project-pro/my-tasks', authenticateToken, async (req, res) => {
   try {
     const tasks = await ProjectTask.find({ assignee: uid(req), status: { $ne: 'done' } })
       .sort({ dueDate: 1 })
-      .populate('project', 'name code').lean();
+      .populate('project', 'name code')
+      .lean();
     res.json(tasks);
   } catch (e) {
     logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });

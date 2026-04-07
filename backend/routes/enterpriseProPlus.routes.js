@@ -179,7 +179,9 @@ router.post('/talent/candidates', authenticateToken, async (req, res) => {
 
 router.put('/talent/candidates/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await Candidate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Candidate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -272,7 +274,11 @@ router.post('/talent/interviews', authenticateToken, async (req, res) => {
 
 router.put('/talent/interviews/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await InterviewSchedule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await InterviewSchedule.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      { new: true }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -319,7 +325,9 @@ router.get('/facilities/:id', authenticateToken, async (req, res) => {
 
 router.put('/facilities/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await Facility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Facility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -394,7 +402,9 @@ router.post('/facilities/bookings', authenticateToken, async (req, res) => {
 
 router.put('/facilities/bookings/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await SpaceBooking.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await SpaceBooking.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -438,7 +448,9 @@ router.post('/facilities/leases', authenticateToken, async (req, res) => {
 
 router.put('/facilities/leases/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await LeaseContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await LeaseContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -602,7 +614,9 @@ router.post('/vendors/rfqs', authenticateToken, async (req, res) => {
 
 router.put('/vendors/rfqs/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await RFQ.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await RFQ.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -722,7 +736,9 @@ router.get('/itsm/incidents/:id', authenticateToken, async (req, res) => {
 
 router.put('/itsm/incidents/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await ITIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await ITIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -818,7 +834,9 @@ router.post('/itsm/assets', authenticateToken, async (req, res) => {
 
 router.put('/itsm/assets/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await ITAsset.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await ITAsset.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -856,7 +874,11 @@ router.post('/itsm/catalog', authenticateToken, async (req, res) => {
 
 router.put('/itsm/catalog/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await ServiceCatalogItem.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await ServiceCatalogItem.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      { new: true }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -898,7 +920,9 @@ router.post('/itsm/changes', authenticateToken, async (req, res) => {
 
 router.put('/itsm/changes/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await ChangeRequest.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await ChangeRequest.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -983,7 +1007,9 @@ router.get('/ehs/incidents/:id', authenticateToken, async (req, res) => {
 
 router.put('/ehs/incidents/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1046,7 +1072,9 @@ router.post('/ehs/inspections', authenticateToken, async (req, res) => {
 
 router.put('/ehs/inspections/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1087,7 +1115,9 @@ router.post('/ehs/hazards', authenticateToken, async (req, res) => {
 
 router.put('/ehs/hazards/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await HazardRegister.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await HazardRegister.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1124,7 +1154,9 @@ router.post('/ehs/ppe', authenticateToken, async (req, res) => {
 
 router.put('/ehs/ppe/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await PPERecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await PPERecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1186,7 +1218,11 @@ router.get('/strategy/objectives/:id', authenticateToken, async (req, res) => {
 
 router.put('/strategy/objectives/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await StrategicObjective.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await StrategicObjective.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      { new: true }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1295,7 +1331,11 @@ router.post('/strategy/initiatives', authenticateToken, async (req, res) => {
 
 router.put('/strategy/initiatives/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await StrategicInitiative.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      { new: true }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -1336,7 +1376,9 @@ router.post('/strategy/swot', authenticateToken, async (req, res) => {
 
 router.put('/strategy/swot/:id', authenticateToken, async (req, res) => {
   try {
-    const doc = await SWOTAnalysis.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await SWOTAnalysis.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {

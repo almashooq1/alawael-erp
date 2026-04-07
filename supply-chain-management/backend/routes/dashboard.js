@@ -37,17 +37,11 @@ router.get('/stats', async (_req, res) => {
 router.get('/advanced-reports', async (_req, res) => {
   try {
     // الطلبات حسب الحالة
-    const ordersByStatus = await Order.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
+    const ordersByStatus = await Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
     // الشحنات حسب الحالة
-    const shipmentsByStatus = await Shipment.aggregate([
-      { $group: { _id: '$status', count: { $sum: 1 } } },
-    ]);
+    const shipmentsByStatus = await Shipment.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
     // المنتجات حسب المورد
-    const productsBySupplier = await Product.aggregate([
-      { $group: { _id: '$supplier', count: { $sum: 1 } } },
-    ]);
+    const productsBySupplier = await Product.aggregate([{ $group: { _id: '$supplier', count: { $sum: 1 } } }]);
     // الموردون مع عدد المنتجات
     const suppliers = await Supplier.find({}, 'name');
     const productsPerSupplier = productsBySupplier.map(p => ({

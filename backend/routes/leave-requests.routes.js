@@ -7,6 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 
@@ -83,7 +84,7 @@ router.put('/:id', async (req, res) => {
     if (request.status !== 'pending') {
       return res.status(400).json({ success: false, message: 'لا يمكن تعديل طلب تمت معالجته' });
     }
-    Object.assign(request, req.body, { updatedBy: req.user?._id });
+    Object.assign(request, stripUpdateMeta(req.body), { updatedBy: req.user?._id });
     await request.save();
     res.json({ success: true, data: request });
   } catch (err) {

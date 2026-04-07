@@ -1320,7 +1320,17 @@ exports.changePassword = catchAsync(async (req, res) => {
   const guardianId = req.user._id;
   const { currentPassword, newPassword } = req.body;
 
-  const user = await require('../models/User').findById(guardianId).lean();
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Current and new password are required' });
+  }
+  if (newPassword.length < 8) {
+    return res.status(400).json({ success: false, message: 'New password must be at least 8 characters' });
+  }
+
+  const user = await require('../models/User').findById(guardianId).select('+password');
+  if (!user) {
+    return res.status(404).json({ success: false, message: 'User not found' });
+  }
   const isCorrect = await user.comparePassword(currentPassword);
 
   if (!isCorrect) {

@@ -56,14 +56,13 @@ async function run() {
   console.log('🔑 Final verification in DB:', finalMatch ? '✅ MATCHES' : '❌ NO MATCH');
 
   if (!finalMatch) {
-    console.log('🔍 Stored hash:', verifyUser.password.substring(0, 20), '...');
-    console.log('🔍 Fresh hash:', hash.substring(0, 20), '...');
+    console.log('🔍 Hash mismatch detected — check bcrypt version');
   }
 
   await mongoose.disconnect();
   console.log('\n🎉 Done! Login with:');
   console.log('   Email:', EMAIL);
-  console.log('   Password:', NEW_PASSWORD);
+  console.log('   Password: ********');
   process.exit(finalMatch ? 0 : 1);
 }
 

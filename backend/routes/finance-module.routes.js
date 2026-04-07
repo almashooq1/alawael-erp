@@ -16,6 +16,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const { stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 
 // 🔒 All finance routes require authentication
@@ -453,8 +454,11 @@ router.put(
         .json({ success: false, message: 'لا يمكن تعديل فاتورة مدفوعة أو ملغاة' });
     }
 
-    const { invoice_number, invoice_uuid, created_by, zatca_hash, zatca_qr_code, ...updateData } =
-      req.body;
+    const updateData = stripUpdateMeta(req.body);
+    delete updateData.invoice_number;
+    delete updateData.invoice_uuid;
+    delete updateData.zatca_hash;
+    delete updateData.zatca_qr_code;
     Object.assign(invoice, updateData);
     invoice.updated_at = new Date();
     await invoice.save();

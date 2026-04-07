@@ -244,7 +244,8 @@ router.put(
       }
     }
 
-    const { appointment_number, created_by, ...updateData } = req.body;
+    const updateData = stripUpdateMeta(req.body);
+    delete updateData.appointment_number;
     Object.assign(existing, updateData);
     existing.updated_at = new Date();
     await existing.save();

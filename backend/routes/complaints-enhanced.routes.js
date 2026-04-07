@@ -15,6 +15,7 @@ const {
   CrmFeedback,
 } = require('../models/ComplaintEnhanced');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
 
@@ -494,7 +495,7 @@ router.post(
         createdBy: req.user?._id || req.userId,
       });
 
-      Object.assign(complaint, updateData);
+      Object.assign(complaint, stripUpdateMeta(updateData));
       await complaint.save();
 
       res.json({ success: true, data: complaint, message: 'تم تحديث الحالة بنجاح' });

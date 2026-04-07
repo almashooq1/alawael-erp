@@ -56,6 +56,26 @@ function generateZatcaInvoiceData(transaction) {
 
 class PaymentGatewayService {
   /**
+   * Validate callback URL against allowed origins
+   */
+  _validateCallbackUrl(callbackUrl) {
+    if (!callbackUrl) return; // will use default
+    try {
+      const parsed = new URL(callbackUrl);
+      const allowedHosts = [
+        new URL(process.env.APP_URL || 'http://localhost:5000').hostname,
+        process.env.FRONTEND_URL ? new URL(process.env.FRONTEND_URL).hostname : null,
+      ].filter(Boolean);
+      if (!allowedHosts.includes(parsed.hostname)) {
+        throw new Error('Callback URL hostname not in allowlist');
+      }
+    } catch (err) {
+      if (err.message.includes('allowlist')) throw err;
+      throw new Error('Invalid callback URL format');
+    }
+  }
+
+  /**
    * بدء معاملة دفع جديدة
    */
   async initiatePayment(data) {
@@ -95,6 +115,7 @@ class PaymentGatewayService {
 
     let gatewayResult;
     try {
+      this._validateCallbackUrl(callbackUrl);
       gatewayResult = await this._callGateway(gateway, transaction, { callbackUrl, metadata });
       const zatca = generateZatcaInvoiceData(transaction);
       await PaymentTransaction.findByIdAndUpdate(transaction._id, {

@@ -1098,7 +1098,15 @@ router.get('/:id/download', async (req, res) => {
       return res.status(403).json({ message: 'ليس لديك صلاحية لتنزيل هذا المستند' });
     }
 
-    if (!document.filePath || !fs.existsSync(document.filePath)) {
+    if (!document.filePath) {
+      return res.status(404).json({ message: 'مسار الملف غير موجود' });
+    }
+    const UPLOADS_BASE = path.resolve(__dirname, '..', '..', 'uploads');
+    const resolvedPath = path.resolve(document.filePath);
+    if (!resolvedPath.startsWith(UPLOADS_BASE)) {
+      return res.status(403).json({ message: 'مسار الملف غير مسموح' });
+    }
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ message: 'الملف غير موجود على السيرفر' });
     }
 
@@ -1110,7 +1118,7 @@ router.get('/:id/download', async (req, res) => {
     });
     await document.save();
 
-    res.download(document.filePath, document.originalFileName, err => {
+    res.download(resolvedPath, document.originalFileName, err => {
       if (err) {
         logger.error('[Documents] Download file error:', err);
       }
@@ -1139,12 +1147,20 @@ router.get('/:id/preview', async (req, res) => {
       return res.status(403).json({ message: 'ليس لديك صلاحية لمعاينة هذا المستند' });
     }
 
-    if (!document.filePath || !fs.existsSync(document.filePath)) {
+    if (!document.filePath) {
+      return res.status(404).json({ message: 'مسار الملف غير موجود' });
+    }
+    const UPLOADS_BASE_PREV = path.resolve(__dirname, '..', '..', 'uploads');
+    const resolvedPreviewPath = path.resolve(document.filePath);
+    if (!resolvedPreviewPath.startsWith(UPLOADS_BASE_PREV)) {
+      return res.status(403).json({ message: 'مسار الملف غير مسموح' });
+    }
+    if (!fs.existsSync(resolvedPreviewPath)) {
       return res.status(404).json({ message: 'الملف غير موجود على السيرفر' });
     }
 
     const mimeType = document.mimeType || 'application/octet-stream';
-    const fileStat = fs.statSync(document.filePath);
+    const fileStat = fs.statSync(resolvedPreviewPath);
     const fileSize = fileStat.size;
 
     // Security: CSP for HTML/SVG to prevent XSS
@@ -1188,12 +1204,12 @@ router.get('/:id/preview', async (req, res) => {
       res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
       res.setHeader('Content-Length', chunkSize);
 
-      const fileStream = fs.createReadStream(document.filePath, { start, end });
+      const fileStream = fs.createReadStream(resolvedPreviewPath, { start, end });
       fileStream.pipe(res);
     } else {
       // Normal full-file response
       res.setHeader('Content-Length', fileSize);
-      const fileStream = fs.createReadStream(document.filePath);
+      const fileStream = fs.createReadStream(resolvedPreviewPath);
       fileStream.pipe(res);
     }
   } catch (error) {

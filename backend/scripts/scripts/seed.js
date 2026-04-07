@@ -132,7 +132,7 @@ async function seedDatabase() {
     // Display admin credentials
     console.log('🔑 Admin Credentials:');
     console.log(`   Email: ${users[0].email}`);
-    console.log(`   Password: ${sampleUsers[0].password}\n`);
+    console.log('   Password: ********\n');
 
     console.log('✅ Database seeding completed successfully!\n');
 

@@ -60,6 +60,7 @@ const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
 const safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
+const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ══════════════════════════════════════════════════════════════════
 //  مساعدات داخلية
@@ -183,7 +184,7 @@ router.put('/templates/:id', authenticate, async (req, res) => {
       return res.status(403).json({ success: false, message: 'لا يمكن تعديل قوالب النظام' });
     }
 
-    Object.assign(template, { ...req.body, updated_by: req.user?._id });
+    Object.assign(template, { ...stripUpdateMeta(req.body), updated_by: req.user?._id });
     template.version = (template.version || 1) + 1;
     await template.save();
     res.json({ success: true, data: template, message: 'تم تعديل القالب بنجاح' });
@@ -448,7 +449,7 @@ router.put('/schedules/:id', authenticate, async (req, res) => {
   try {
     const schedule = await ReportSchedule.findById(req.params.id);
     if (!schedule) return res.status(404).json({ success: false, message: 'الجدولة غير موجودة' });
-    Object.assign(schedule, { ...req.body, updated_by: req.user?._id });
+    Object.assign(schedule, { ...stripUpdateMeta(req.body), updated_by: req.user?._id });
     await schedule.save();
     res.json({ success: true, data: schedule, message: 'تم تعديل الجدولة بنجاح' });
   } catch (err) {

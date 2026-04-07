@@ -213,7 +213,12 @@ exports.downloadDocument = async (req, res) => {
     }
 
     // التحقق من وجود الملف
-    if (!fs.existsSync(document.filePath)) {
+    const UPLOADS_BASE = path.resolve(__dirname, '..', 'uploads');
+    const resolvedPath = path.resolve(document.filePath);
+    if (!resolvedPath.startsWith(UPLOADS_BASE)) {
+      return res.status(403).json({ message: 'مسار الملف غير مسموح' });
+    }
+    if (!fs.existsSync(resolvedPath)) {
       return res.status(404).json({ message: 'الملف غير موجود على السيرفر' });
     }
 
@@ -223,7 +228,7 @@ exports.downloadDocument = async (req, res) => {
     await document.save();
 
     // إرسال الملف
-    res.download(document.filePath, document.originalFileName, err => {
+    res.download(resolvedPath, document.originalFileName, err => {
       if (err) {
         logger.error('خطأ في التنزيل:', err);
       }

@@ -23,5 +23,7 @@ module.exports = {
   refreshToken: auth.refreshToken,
   revokeToken: auth.revokeToken,
   authorizeRole: auth.requireRole,
-  get Session() { return auth.Session.current; },
+  get Session() {
+    return auth.Session.current;
+  },
 };

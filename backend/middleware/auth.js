@@ -154,7 +154,11 @@ const requireAdmin = (req, res, next) => {
     return res.status(401).json({ success: false, message: 'Authentication required' });
   }
   const normalizedRole = role.toLowerCase();
-  if (normalizedRole !== 'admin' && normalizedRole !== 'superadmin' && normalizedRole !== 'super_admin') {
+  if (
+    normalizedRole !== 'admin' &&
+    normalizedRole !== 'superadmin' &&
+    normalizedRole !== 'super_admin'
+  ) {
     return res.status(403).json({ success: false, message: 'Admin access required' });
   }
   next();
@@ -420,5 +424,9 @@ module.exports = {
   authenticate: authenticateToken,
 
   // Re-export Session model (used by some importers of auth.middleware)
-  Session: { get current() { return getSession(); } },
+  Session: {
+    get current() {
+      return getSession();
+    },
+  },
 };

@@ -54,9 +54,13 @@ router.put(
   async (req, res) => {
     try {
       const { QualityStandard } = require('../models/QualityModels');
-      const standard = await QualityStandard.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-      });
+      const standard = await QualityStandard.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+        }
+      );
       res.json({ success: true, data: standard });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -102,7 +106,11 @@ router.put(
   async (req, res) => {
     try {
       const { Checklist } = require('../models/QualityModels');
-      const checklist = await Checklist.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+      const checklist = await Checklist.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        { new: true }
+      );
       res.json({ success: true, data: checklist });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -188,9 +196,13 @@ router.get('/incidents/:incidentId', authenticate, async (req, res) => {
 router.put('/incidents/:incidentId', authenticate, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
-    const incident = await Incident.findByIdAndUpdate(req.params.incidentId, stripUpdateMeta(req.body), {
-      new: true,
-    });
+    const incident = await Incident.findByIdAndUpdate(
+      req.params.incidentId,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+      }
+    );
     res.json({ success: true, data: incident });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -298,9 +310,13 @@ router.get('/complaints/:complaintId', authenticate, async (req, res) => {
 router.put('/complaints/:complaintId', authenticate, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
-    const complaint = await Complaint.findByIdAndUpdate(req.params.complaintId, stripUpdateMeta(req.body), {
-      new: true,
-    });
+    const complaint = await Complaint.findByIdAndUpdate(
+      req.params.complaintId,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+      }
+    );
     res.json({ success: true, data: complaint });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -412,7 +428,9 @@ router.put(
   async (req, res) => {
     try {
       const { Audit } = require('../models/QualityModels');
-      const audit = await Audit.findByIdAndUpdate(req.params.auditId, stripUpdateMeta(req.body), { new: true });
+      const audit = await Audit.findByIdAndUpdate(req.params.auditId, stripUpdateMeta(req.body), {
+        new: true,
+      });
       res.json({ success: true, data: audit });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
@@ -466,9 +484,13 @@ router.get('/improvements/:projectId', authenticate, async (req, res) => {
 router.put('/improvements/:projectId', authenticate, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
-    const project = await ImprovementProject.findByIdAndUpdate(req.params.projectId, stripUpdateMeta(req.body), {
-      new: true,
-    });
+    const project = await ImprovementProject.findByIdAndUpdate(
+      req.params.projectId,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+      }
+    );
     res.json({ success: true, data: project });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -564,7 +586,9 @@ router.put('/risks/:riskId', authenticate, async (req, res) => {
       const impact = req.body.impact || existing.impact;
       req.body.riskLevel = svc.assessRiskLevel(likelihood, impact);
     }
-    const risk = await Risk.findByIdAndUpdate(req.params.riskId, stripUpdateMeta(req.body), { new: true });
+    const risk = await Risk.findByIdAndUpdate(req.params.riskId, stripUpdateMeta(req.body), {
+      new: true,
+    });
     res.json({ success: true, data: risk });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

@@ -273,6 +273,14 @@ const options = {
 
 const swaggerSpec = swaggerJsdoc(options);
 
+// Enrich with DDD rehabilitation domain tags & schemas (20 domains, 10+ schemas)
+try {
+  const { enrichSwaggerWithDDD } = require('./swagger-ddd.config');
+  enrichSwaggerWithDDD(swaggerSpec);
+} catch (err) {
+  logger.warn('[Swagger] DDD enrichment skipped:', err.message);
+}
+
 /**
  * Setup Swagger UI — single consolidated mount point
  * Mounts at /api-docs (primary) and /api/docs (alias)

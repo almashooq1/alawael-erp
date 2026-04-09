@@ -1,8 +1,9 @@
 /**
- * LandingPage — Enhanced Tailwind Design
- * Premium landing with particles, glassmorphism, parallax sections
+ * LandingPage — Premium Professional Design v2
+ * Advanced landing with particles, glassmorphism, parallax, typewriter,
+ * how-it-works timeline, trusted-by ticker, FAQ accordion, auto-slide testimonials
  */
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
 /* ══════════════════════ helpers ══════════════════════ */
@@ -30,6 +31,37 @@ function CountUp({ end, duration = 2000, suffix = '' }) {
     return () => clearInterval(id);
   }, [visible, end, duration]);
   return <span ref={ref}>{count.toLocaleString('ar-SA')}{suffix}</span>;
+}
+
+/* Typewriter hook */
+function useTypewriter(words, typingSpeed = 100, deletingSpeed = 60, pauseTime = 2200) {
+  const [text, setText] = useState('');
+  const [wordIdx, setWordIdx] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const current = words[wordIdx];
+    let timeout;
+    if (!isDeleting && text === current) {
+      timeout = setTimeout(() => setIsDeleting(true), pauseTime);
+    } else if (isDeleting && text === '') {
+      setIsDeleting(false);
+      setWordIdx((prev) => (prev + 1) % words.length);
+    } else {
+      timeout = setTimeout(() => {
+        setText(current.substring(0, text.length + (isDeleting ? -1 : 1)));
+      }, isDeleting ? deletingSpeed : typingSpeed);
+    }
+    return () => clearTimeout(timeout);
+  }, [text, isDeleting, wordIdx, words, typingSpeed, deletingSpeed, pauseTime]);
+
+  return text;
+}
+
+/* Smooth scroll helper */
+function smoothScrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* ══════════════════════ Floating Particles ══════════════════════ */
@@ -64,6 +96,44 @@ function FloatingParticles({ count = 30, color = 'white' }) {
         />
       ))}
     </div>
+  );
+}
+
+/* ══════════════════════ Scroll Progress Bar ══════════════════════ */
+function ScrollProgress() {
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const handler = () => {
+      const scrolled = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      setProgress(height > 0 ? (scrolled / height) * 100 : 0);
+    };
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[60] h-1">
+      <div className="h-full bg-gradient-to-l from-accent-400 via-primary-500 to-emerald-500 transition-all duration-150" style={{ width: `${progress}%` }} />
+    </div>
+  );
+}
+
+/* ══════════════════════ Back to Top ══════════════════════ */
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const handler = () => setShow(window.scrollY > 600);
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className={`fixed bottom-8 left-8 z-50 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-700 text-white shadow-xl shadow-primary-600/30 flex items-center justify-center transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+      aria-label="العودة للأعلى"
+    >
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+    </button>
   );
 }
 
@@ -104,25 +174,27 @@ const icons = {
 
 /* ══════════════════════ data ══════════════════════ */
 const services = [
-  { icon: icons.rehab, title: 'إعادة التأهيل', desc: 'برامج تأهيلية شاملة لإعادة الاستقلالية وتحسين جودة الحياة بأحدث المنهجيات العلمية', color: 'from-green-500 to-emerald-600', light: 'bg-green-50', text: 'text-green-600' },
-  { icon: icons.education, title: 'التعليم والتدريب', desc: 'خطط تعليمية فردية (IEP) وبرامج تعلّم إلكتروني متطورة تتكيّف مع كل مستفيد', color: 'from-blue-500 to-indigo-600', light: 'bg-blue-50', text: 'text-blue-600' },
-  { icon: icons.hr, title: 'الموارد البشرية', desc: 'إدارة شاملة للموظفين — الحضور، الرواتب، التقييم، التدريب، والامتثال التنظيمي', color: 'from-purple-500 to-violet-600', light: 'bg-purple-50', text: 'text-purple-600' },
-  { icon: icons.finance, title: 'الإدارة المالية', desc: 'فواتير إلكترونية متوافقة مع ZATCA، محاسبة متكاملة، وتقارير مالية دقيقة', color: 'from-amber-500 to-orange-600', light: 'bg-amber-50', text: 'text-amber-600' },
-  { icon: icons.admin, title: 'إدارة المراكز', desc: 'متابعة الفروع، المرافق، المستودعات، الصيانة، وجميع العمليات التشغيلية', color: 'from-rose-500 to-pink-600', light: 'bg-rose-50', text: 'text-rose-600' },
-  { icon: icons.reports, title: 'التقارير والتحليلات', desc: 'لوحات بيانات ذكية وتقارير شاملة لاتخاذ قرارات مبنية على بيانات دقيقة', color: 'from-teal-500 to-cyan-600', light: 'bg-teal-50', text: 'text-teal-600' },
+  { icon: icons.rehab, title: 'إعادة التأهيل', desc: 'برامج تأهيلية شاملة لإعادة الاستقلالية وتحسين جودة الحياة بأحدث المنهجيات العلمية', color: 'from-green-500 to-emerald-600', ring: 'ring-green-500/20' },
+  { icon: icons.education, title: 'التعليم والتدريب', desc: 'خطط تعليمية فردية (IEP) وبرامج تعلّم إلكتروني متطورة تتكيّف مع كل مستفيد', color: 'from-blue-500 to-indigo-600', ring: 'ring-blue-500/20' },
+  { icon: icons.hr, title: 'الموارد البشرية', desc: 'إدارة شاملة للموظفين — الحضور، الرواتب، التقييم، التدريب، والامتثال التنظيمي', color: 'from-purple-500 to-violet-600', ring: 'ring-purple-500/20' },
+  { icon: icons.finance, title: 'الإدارة المالية', desc: 'فواتير إلكترونية متوافقة مع ZATCA، محاسبة متكاملة، وتقارير مالية دقيقة', color: 'from-amber-500 to-orange-600', ring: 'ring-amber-500/20' },
+  { icon: icons.admin, title: 'إدارة المراكز', desc: 'متابعة الفروع، المرافق، المستودعات، الصيانة، وجميع العمليات التشغيلية', color: 'from-rose-500 to-pink-600', ring: 'ring-rose-500/20' },
+  { icon: icons.reports, title: 'التقارير والتحليلات', desc: 'لوحات بيانات ذكية وتقارير شاملة لاتخاذ قرارات مبنية على بيانات دقيقة', color: 'from-teal-500 to-cyan-600', ring: 'ring-teal-500/20' },
 ];
 
 const stats = [
-  { value: 12, suffix: '+', label: 'فرع ومركز', icon: '🏢' },
-  { value: 2500, suffix: '+', label: 'مستفيد', icon: '👥' },
-  { value: 850, suffix: '+', label: 'موظف وأخصائي', icon: '👨‍⚕️' },
-  { value: 15, suffix: '+', label: 'سنة خبرة', icon: '📅' },
+  { value: 12, suffix: '+', label: 'فرع ومركز', icon: '🏢', gradient: 'from-emerald-400/20 to-green-400/5' },
+  { value: 2500, suffix: '+', label: 'مستفيد', icon: '👥', gradient: 'from-blue-400/20 to-indigo-400/5' },
+  { value: 850, suffix: '+', label: 'موظف وأخصائي', icon: '👨‍⚕️', gradient: 'from-purple-400/20 to-violet-400/5' },
+  { value: 15, suffix: '+', label: 'سنة خبرة', icon: '📅', gradient: 'from-accent-400/20 to-amber-400/5' },
 ];
 
 const testimonials = [
   { name: 'أم عبدالله', role: 'ولي أمر مستفيد', text: 'نظام الأوائل غيّر حياتنا — نتابع تقدم ابننا لحظة بلحظة ونتواصل مع الأخصائيين بسهولة تامة.', avatar: '👩', rating: 5 },
   { name: 'د. سارة المحمدي', role: 'مديرة مركز تأهيلي', text: 'وفّر علينا ساعات عمل يومية. إدارة الموظفين والتقارير والفواتير كلها في مكان واحد.', avatar: '👩‍⚕️', rating: 5 },
   { name: 'أ. خالد العمري', role: 'أخصائي تعليمي', text: 'الخطط التعليمية الفردية والمتابعة الرقمية رفعت جودة خدماتنا بشكل ملموس.', avatar: '👨‍🏫', rating: 5 },
+  { name: 'م. فهد الرشيدي', role: 'مدير تقنية المعلومات', text: 'النظام متكامل ومستقر، والدعم الفني متميز. أفضل قرار تقني اتخذناه.', avatar: '👨‍💻', rating: 5 },
+  { name: 'أ. نورة القحطاني', role: 'مشرفة جودة', text: 'التقارير التحليلية ساعدتنا في تحسين الخدمات واتخاذ قرارات مدروسة.', avatar: '👩‍💼', rating: 5 },
 ];
 
 const whyUsFeatures = [
@@ -134,31 +206,70 @@ const whyUsFeatures = [
   { icon: '🔄', title: 'تحديثات مستمرة', desc: 'ميزات جديدة وتحسينات دورية بدون توقف' },
 ];
 
+const howItWorks = [
+  { step: 1, title: 'سجّل حسابك', desc: 'أنشئ حساب مركزك في دقائق معدودة بخطوات بسيطة', icon: '📋', color: 'from-primary-500 to-emerald-500' },
+  { step: 2, title: 'خصّص النظام', desc: 'اضبط الأقسام والصلاحيات والإعدادات حسب احتياجات مركزك', icon: '⚙️', color: 'from-blue-500 to-indigo-500' },
+  { step: 3, title: 'أضف فريقك', desc: 'ادعُ الموظفين والأخصائيين وحدد صلاحياتهم بسهولة', icon: '👥', color: 'from-purple-500 to-violet-500' },
+  { step: 4, title: 'انطلق بثقة', desc: 'ابدأ إدارة مركزك بكفاءة واستمتع بتقارير وتحليلات فورية', icon: '🚀', color: 'from-accent-500 to-orange-500' },
+];
+
+const faqs = [
+  { q: 'هل النظام متوافق مع متطلبات ZATCA للفواتير الإلكترونية؟', a: 'نعم، النظام متوافق بالكامل مع المرحلتين الأولى والثانية من الفوترة الإلكترونية وفقاً لمتطلبات هيئة الزكاة والضريبة والجمارك (ZATCA).' },
+  { q: 'هل يمكنني تجربة النظام قبل الاشتراك؟', a: 'بالتأكيد! نوفّر فترة تجريبية مجانية لمدة 14 يوماً بجميع المميزات، بدون الحاجة لإدخال بيانات الدفع.' },
+  { q: 'هل البيانات آمنة في النظام؟', a: 'نستخدم تشفير SSL 256-بت، مع نسخ احتياطية يومية تلقائية وحماية متعددة الطبقات. بياناتكم مستضافة على خوادم سعودية آمنة.' },
+  { q: 'هل يدعم النظام اللغة العربية بالكامل؟', a: 'نعم، النظام مصمم من الأساس لدعم اللغة العربية واتجاه RTL بشكل كامل، مع واجهة مستخدم مريحة وسلسة.' },
+  { q: 'كم يستغرق التفعيل والبدء في استخدام النظام؟', a: 'يمكنك البدء فوراً بعد التسجيل. فريقنا يساعدك في إعداد النظام وتدريب الفريق خلال أسبوع واحد فقط.' },
+];
+
+const trustedBy = [
+  'وزارة الموارد البشرية', 'هيئة تقويم التعليم', 'وزارة الصحة', 'هيئة الرعاية الصحية',
+  'المؤسسة العامة للتأمينات', 'صندوق الموارد البشرية', 'هيئة الزكاة والضريبة', 'برنامج جودة الحياة',
+];
+
 /* ══════════════════════ Navbar ══════════════════════ */
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40);
+    const handler = () => {
+      setScrolled(window.scrollY > 40);
+      // Active section detection
+      const sections = ['hero', 'services', 'how-it-works', 'why-us', 'stats', 'testimonials', 'faq'];
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && window.scrollY >= el.offsetTop - 200) {
+          setActiveSection(sections[i]);
+          break;
+        }
+      }
+    };
     window.addEventListener('scroll', handler, { passive: true });
     return () => window.removeEventListener('scroll', handler);
   }, []);
 
   const navLinks = [
-    ['الرئيسية', '#hero'],
-    ['الخدمات', '#services'],
-    ['لماذا نحن', '#why-us'],
-    ['الإحصائيات', '#stats'],
-    ['آراء العملاء', '#testimonials'],
+    ['الرئيسية', 'hero'],
+    ['الخدمات', 'services'],
+    ['كيف يعمل', 'how-it-works'],
+    ['لماذا نحن', 'why-us'],
+    ['الإحصائيات', 'stats'],
+    ['آراء العملاء', 'testimonials'],
   ];
 
+  const handleNav = useCallback((e, id) => {
+    e.preventDefault();
+    setIsOpen(false);
+    smoothScrollTo(id);
+  }, []);
+
   return (
-    <nav className={`fixed top-0 right-0 left-0 z-50 transition-all duration-500 ${scrolled ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-gray-100/50' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 right-0 left-0 z-50 transition-all duration-500 ${scrolled ? 'bg-white/90 backdrop-blur-2xl shadow-lg shadow-black/[0.03] border-b border-gray-100/50' : 'bg-transparent'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <a href="#hero" className="flex items-center gap-3 group">
+          <a href="#hero" onClick={(e) => handleNav(e, 'hero')} className="flex items-center gap-3 group">
             <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-xl transition-all duration-500 overflow-hidden ${scrolled ? 'bg-gradient-to-br from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-600/25' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}>
               <span className="relative z-10">أ</span>
               <div className="absolute inset-0 bg-gradient-to-br from-accent-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -170,24 +281,36 @@ function Navbar() {
           </a>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map(([label, href]) => (
-              <a key={href} href={href} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${scrolled ? 'text-gray-600 hover:text-primary-700 hover:bg-primary-50' : 'text-white/80 hover:text-white hover:bg-white/10'}`}>
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map(([label, id]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={(e) => handleNav(e, id)}
+                className={`relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300 ${
+                  activeSection === id
+                    ? (scrolled ? 'text-primary-700 bg-primary-50' : 'text-white bg-white/15')
+                    : (scrolled ? 'text-gray-600 hover:text-primary-700 hover:bg-primary-50/50' : 'text-white/80 hover:text-white hover:bg-white/10')
+                }`}
+              >
                 {label}
+                {activeSection === id && (
+                  <span className={`absolute bottom-0 right-1/2 translate-x-1/2 w-5 h-0.5 rounded-full ${scrolled ? 'bg-primary-600' : 'bg-accent-400'}`} />
+                )}
               </a>
             ))}
-            <div className="w-px h-6 bg-gray-300/30 mx-2" />
+            <div className="w-px h-6 bg-gray-300/30 mx-3" />
             <Link to="/register" className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${scrolled ? 'text-primary-700 hover:bg-primary-50' : 'text-white/90 hover:bg-white/10'}`}>
               حساب جديد
             </Link>
-            <Link to="/login" className={`group relative px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${scrolled ? 'bg-gradient-to-l from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30' : 'bg-white text-primary-700 shadow-lg shadow-black/10 hover:shadow-xl'}`}>
+            <Link to="/login" className={`group relative px-7 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${scrolled ? 'bg-gradient-to-l from-primary-600 to-primary-700 text-white shadow-lg shadow-primary-600/25 hover:shadow-xl hover:shadow-primary-600/30 hover:-translate-y-0.5' : 'bg-white text-primary-700 shadow-lg shadow-black/10 hover:shadow-xl hover:-translate-y-0.5'}`}>
               <span className="relative z-10">تسجيل الدخول</span>
               <div className="absolute inset-0 bg-gradient-to-l from-primary-700 to-primary-800 opacity-0 group-hover:opacity-100 transition-opacity" />
             </Link>
           </div>
 
           {/* Mobile toggle */}
-          <button onClick={() => setIsOpen(!isOpen)} className={`md:hidden p-2.5 rounded-xl transition-all duration-300 ${scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
+          <button onClick={() => setIsOpen(!isOpen)} className={`lg:hidden p-2.5 rounded-xl transition-all duration-300 ${scrolled ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-white/10'}`}>
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               {isOpen
                 ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -198,10 +321,15 @@ function Navbar() {
         </div>
 
         {/* Mobile Menu */}
-        <div className={`md:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className={`lg:hidden transition-all duration-500 overflow-hidden ${isOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
           <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-5 mb-4 border border-gray-100/50">
-            {navLinks.map(([label, href]) => (
-              <a key={href} href={href} onClick={() => setIsOpen(false)} className="block py-3 text-gray-700 font-medium border-b border-gray-100/50 last:border-0 hover:text-primary-600 transition-colors">
+            {navLinks.map(([label, id]) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                onClick={(e) => handleNav(e, id)}
+                className={`block py-3 font-medium border-b border-gray-100/50 last:border-0 transition-colors ${activeSection === id ? 'text-primary-700' : 'text-gray-700 hover:text-primary-600'}`}
+              >
                 {label}
               </a>
             ))}
@@ -224,6 +352,14 @@ function Navbar() {
 function Hero() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => { const t = setTimeout(() => setMounted(true), 100); return () => clearTimeout(t); }, []);
+
+  const typewriterText = useTypewriter([
+    'إعادة التأهيل',
+    'التعليم والتدريب',
+    'الموارد البشرية',
+    'الإدارة المالية',
+    'التقارير الذكية',
+  ], 90, 50, 2000);
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
@@ -262,7 +398,7 @@ function Hero() {
             </div>
 
             {/* Heading */}
-            <h1 className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.15] mb-6 transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+            <h1 className={`text-4xl sm:text-5xl lg:text-[3.5rem] font-bold text-white leading-[1.15] mb-4 transition-all duration-1000 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               مراكز{' '}
               <span className="relative inline-block">
                 <span className="bg-gradient-to-l from-accent-300 to-accent-400 bg-clip-text text-transparent">الأوائل</span>
@@ -274,6 +410,14 @@ function Hero() {
               <span className="text-3xl sm:text-4xl lg:text-[2.75rem] text-white/85">للرعاية النهارية</span>
             </h1>
 
+            {/* Typewriter line */}
+            <div className={`h-12 mb-6 transition-all duration-1000 delay-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
+              <span className="text-xl sm:text-2xl text-accent-300 font-semibold">
+                {typewriterText}
+                <span className="animate-pulse text-accent-400 mr-0.5">|</span>
+              </span>
+            </div>
+
             {/* Description */}
             <p className={`text-lg sm:text-xl text-white/75 leading-relaxed max-w-xl mb-10 transition-all duration-1000 delay-400 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               نظام إدارة متكامل يربط جميع أقسام المركز — من التأهيل والتعليم
@@ -283,18 +427,18 @@ function Hero() {
             {/* CTA Buttons */}
             <div className={`flex flex-wrap gap-4 transition-all duration-1000 delay-500 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
               <Link to="/login" className="group relative inline-flex items-center gap-3 px-9 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-2xl shadow-black/15 hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
-                <span className="relative z-10">ابدأ الآن</span>
-                <svg className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <span className="relative z-10">ابدأ الآن مجاناً</span>
+                <svg className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1.5 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 <div className="absolute inset-0 bg-gradient-to-l from-primary-50 to-accent-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </Link>
-              <a href="#services" className="group inline-flex items-center gap-3 px-9 py-4 border-2 border-white/25 text-white rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/40 transition-all duration-500 backdrop-blur-sm">
-                <svg className="w-6 h-6 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" /></svg>
+              <a href="#services" onClick={(e) => { e.preventDefault(); smoothScrollTo('services'); }} className="group inline-flex items-center gap-3 px-9 py-4 border-2 border-white/25 text-white rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/40 transition-all duration-500 backdrop-blur-sm">
+                <svg className="w-6 h-6 opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" /></svg>
                 اكتشف الخدمات
               </a>
             </div>
 
             {/* Trust badges */}
-            <div className={`flex items-center gap-6 mt-10 transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className={`flex flex-wrap items-center gap-4 sm:gap-6 mt-10 transition-all duration-1000 delay-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
               <div className="flex items-center gap-2 text-white/50 text-sm">
                 <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
@@ -322,7 +466,7 @@ function Hero() {
           <div className={`hidden lg:flex justify-center transition-all duration-1000 delay-300 ${mounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
             <div className="relative animate-float">
               {/* Main glass card */}
-              <div className="w-[380px] h-[400px] rounded-3xl bg-white/[0.07] backdrop-blur-xl border border-white/[0.15] shadow-2xl shadow-black/20 p-7 flex flex-col">
+              <div className="w-[400px] h-[420px] rounded-3xl bg-white/[0.07] backdrop-blur-xl border border-white/[0.15] shadow-2xl shadow-black/20 p-7 flex flex-col">
                 {/* Browser dots */}
                 <div className="flex items-center gap-2 mb-5">
                   <div className="w-3 h-3 rounded-full bg-red-400/80" />
@@ -362,7 +506,7 @@ function Hero() {
                   <div className="h-3 bg-white/15 rounded w-20 mb-3" />
                   <div className="flex items-end gap-2 h-full pb-2">
                     {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85].map((h, i) => (
-                      <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary-400/40 to-emerald-400/40" style={{ height: `${h}%` }} />
+                      <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary-400/40 to-emerald-400/40 transition-all duration-700 hover:from-primary-400/70 hover:to-emerald-400/70" style={{ height: `${h}%` }} />
                     ))}
                   </div>
                 </div>
@@ -413,10 +557,59 @@ function Hero() {
   );
 }
 
+/* ══════════════════════ Trusted By (Ticker) ══════════════════════ */
+function TrustedBy() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  return (
+    <section ref={ref} className="py-16 bg-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">متوافق مع معايير ومتطلبات</p>
+        </div>
+        {/* Marquee ticker */}
+        <div className="relative overflow-hidden">
+          {/* fade edges */}
+          <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          <div className={`flex gap-12 animate-marquee transition-opacity duration-1000 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+            {[...trustedBy, ...trustedBy].map((name, i) => (
+              <div key={i} className="flex items-center gap-3 shrink-0 px-5 py-3 rounded-xl bg-gray-50 border border-gray-100">
+                <div className="w-8 h-8 rounded-lg bg-primary-100 flex items-center justify-center">
+                  <svg className="w-4 h-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-gray-600 whitespace-nowrap">{name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Inline style for marquee animation */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 40s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+    </section>
+  );
+}
+
 /* ══════════════════════ Services ══════════════════════ */
 function Services() {
   const ref = useRef(null);
   const visible = useOnScreen(ref);
+  const [hoveredIdx, setHoveredIdx] = useState(null);
+
   return (
     <section id="services" ref={ref} className="py-28 bg-white relative">
       {/* Subtle background accents */}
@@ -439,11 +632,13 @@ function Services() {
           {services.map((s, i) => (
             <div
               key={s.title}
-              className={`group relative rounded-3xl p-8 border border-gray-100 bg-white hover:border-gray-200 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              className={`group relative rounded-3xl p-8 border bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${hoveredIdx === i ? `border-transparent ring-2 ${s.ring}` : 'border-gray-100 hover:border-gray-200'} ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
               style={{ transitionDelay: `${i * 100}ms` }}
             >
               {/* Icon */}
-              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${s.color} text-white flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl transition-all duration-500`}>
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${s.color} text-white flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 group-hover:shadow-xl group-hover:rotate-3 transition-all duration-500`}>
                 {s.icon}
               </div>
 
@@ -452,16 +647,67 @@ function Services() {
               <p className="text-gray-500 leading-relaxed text-[15px]">{s.desc}</p>
 
               {/* Arrow link */}
-              <div className="mt-5 flex items-center gap-2 text-sm font-medium text-primary-600 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+              <div className="mt-6 flex items-center gap-2 text-sm font-medium text-primary-600 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                 <span>اعرف المزيد</span>
-                <svg className="w-4 h-4 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                <svg className="w-4 h-4 rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
               </div>
 
               {/* Hover gradient overlay */}
               <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${s.color} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500`} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
-              {/* Corner accent */}
-              <div className={`absolute top-0 left-0 w-20 h-20 rounded-tl-3xl bg-gradient-to-br ${s.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+/* ══════════════════════ How It Works ══════════════════════ */
+function HowItWorks() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref);
+  return (
+    <section id="how-it-works" ref={ref} className="py-28 bg-gray-50 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_30%_at_50%_100%,rgba(21,128,61,0.04),transparent)]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className={`text-center mb-20 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary-50 text-primary-700 text-sm font-semibold mb-5 border border-primary-100">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>
+            كيف يعمل
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">ابدأ في ٤ خطوات بسيطة</h2>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">من التسجيل إلى الإدارة الكاملة — كل شيء مصمم ليكون سهلاً وسريعاً</p>
+        </div>
+
+        {/* Steps */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {howItWorks.map((step, i) => (
+            <div
+              key={step.step}
+              className={`relative text-center group transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
+              style={{ transitionDelay: `${i * 150}ms` }}
+            >
+              {/* Connector line on desktop */}
+              {i < howItWorks.length - 1 && (
+                <div className="hidden lg:block absolute top-12 -left-4 w-[calc(100%-0px)] h-px">
+                  <div className={`w-full h-full bg-gradient-to-l from-primary-200 to-primary-100 transition-all duration-1000 ${visible ? 'scale-x-100' : 'scale-x-0'}`} style={{ transitionDelay: `${(i + 1) * 200}ms`, transformOrigin: 'right' }} />
+                </div>
+              )}
+
+              {/* Step number + icon */}
+              <div className="relative inline-flex mb-6">
+                <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${step.color} flex items-center justify-center text-4xl shadow-xl group-hover:scale-110 group-hover:shadow-2xl group-hover:-rotate-6 transition-all duration-500`}>
+                  {step.icon}
+                </div>
+                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-sm font-bold text-primary-700 border-2 border-primary-200">
+                  {step.step}
+                </div>
+              </div>
+
+              <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary-700 transition-colors">{step.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -475,7 +721,7 @@ function WhyUs() {
   const ref = useRef(null);
   const visible = useOnScreen(ref);
   return (
-    <section id="why-us" ref={ref} className="py-28 bg-gray-50 relative overflow-hidden">
+    <section id="why-us" ref={ref} className="py-28 bg-white relative overflow-hidden">
       {/* Background mesh */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(21,128,61,0.04),transparent)]" />
 
@@ -491,20 +737,20 @@ function WhyUs() {
               لماذا تختار
               <span className="text-primary-600"> نظام الأوائل؟</span>
             </h2>
-            <p className="text-lg text-gray-500 leading-relaxed mb-8">
+            <p className="text-lg text-gray-500 leading-relaxed mb-10">
               نوفّر لك حلاً تقنياً متكاملاً يجمع بين البساطة والقوة، مع دعم فني متواصل ومعايير أمان عالمية.
             </p>
 
             {/* Features grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               {whyUsFeatures.map((f, i) => (
                 <div
                   key={f.title}
-                  className={`p-4 rounded-2xl bg-white border border-gray-100 hover:border-primary-100 hover:shadow-lg transition-all duration-500 group ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                  className={`p-5 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:border-primary-100 hover:shadow-lg transition-all duration-500 group ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                   style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  <div className="text-2xl mb-2 group-hover:scale-110 transition-transform">{f.icon}</div>
-                  <h4 className="font-bold text-gray-900 text-sm mb-1">{f.title}</h4>
+                  <div className="text-2xl mb-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 inline-block">{f.icon}</div>
+                  <h4 className="font-bold text-gray-900 text-sm mb-1.5">{f.title}</h4>
                   <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
                 </div>
               ))}
@@ -521,7 +767,7 @@ function WhyUs() {
 
                 <div className="relative text-center space-y-6">
                   {/* Central icon */}
-                  <div className="w-20 h-20 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center">
+                  <div className="w-20 h-20 mx-auto rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center animate-pulse-soft">
                     <span className="text-4xl font-bold text-accent-400">أ</span>
                   </div>
                   <h3 className="text-2xl font-bold text-white">نظام واحد متكامل</h3>
@@ -530,16 +776,21 @@ function WhyUs() {
                   {/* Module badges */}
                   <div className="flex flex-wrap justify-center gap-3 pt-4">
                     {['التأهيل', 'التعليم', 'الموارد البشرية', 'المالية', 'التقارير', 'المخازن'].map((m) => (
-                      <span key={m} className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm text-white/90 text-sm border border-white/10">
+                      <span key={m} className="px-4 py-2 rounded-xl bg-white/10 backdrop-blur-sm text-white/90 text-sm border border-white/10 hover:bg-white/20 hover:border-white/25 transition-all cursor-default">
                         {m}
                       </span>
                     ))}
+                  </div>
+
+                  {/* Animated pulse ring */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-32 h-32 rounded-full border border-white/5 animate-ping" style={{ animationDuration: '4s' }} />
                   </div>
                 </div>
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -top-4 -left-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+              <div className="absolute -top-4 -left-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 text-sm">✓</div>
                   <span className="text-sm font-bold text-gray-800">99.9% مدة التشغيل</span>
@@ -547,7 +798,7 @@ function WhyUs() {
               </div>
 
               {/* Floating users count */}
-              <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+              <div className="absolute -bottom-4 -right-4 bg-white rounded-2xl shadow-xl p-4 border border-gray-100 hover:shadow-2xl transition-shadow">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600 text-sm">👥</div>
                   <span className="text-sm font-bold text-gray-800">+2500 مستخدم</span>
@@ -592,14 +843,16 @@ function Stats() {
           {stats.map((s, i) => (
             <div
               key={s.label}
-              className={`group text-center p-8 rounded-3xl bg-white/[0.07] backdrop-blur-md border border-white/[0.1] hover:bg-white/[0.12] hover:border-white/[0.15] transition-all duration-500 ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
+              className={`group text-center p-8 rounded-3xl bg-white/[0.07] backdrop-blur-md border border-white/[0.1] hover:bg-white/[0.14] hover:border-white/[0.2] hover:scale-[1.03] transition-all duration-500 ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-90'}`}
               style={{ transitionDelay: `${i * 150}ms` }}
             >
-              <div className="text-3xl mb-3 group-hover:scale-110 transition-transform duration-300">{s.icon}</div>
+              <div className="text-4xl mb-4 group-hover:scale-125 group-hover:-rotate-12 transition-all duration-500">{s.icon}</div>
               <div className="text-4xl sm:text-5xl font-bold text-white mb-2 tabular-nums">
                 <CountUp end={s.value} suffix={s.suffix} />
               </div>
-              <div className="text-white/60 font-medium">{s.label}</div>
+              <div className="text-white/60 font-medium text-sm">{s.label}</div>
+              {/* Decorative bottom line */}
+              <div className="mt-4 mx-auto w-12 h-1 rounded-full bg-gradient-to-l from-accent-400/60 to-primary-400/60 group-hover:w-20 transition-all duration-500" />
             </div>
           ))}
         </div>
@@ -608,13 +861,23 @@ function Stats() {
   );
 }
 
-/* ══════════════════════ Testimonials ══════════════════════ */
+/* ══════════════════════ Testimonials (Auto-slide) ══════════════════════ */
 function Testimonials() {
   const ref = useRef(null);
   const visible = useOnScreen(ref);
+  const [active, setActive] = useState(0);
+
+  // Auto-slide
+  useEffect(() => {
+    if (!visible) return;
+    const id = setInterval(() => setActive(prev => (prev + 1) % testimonials.length), 5000);
+    return () => clearInterval(id);
+  }, [visible]);
+
   return (
-    <section id="testimonials" ref={ref} className="py-28 bg-white relative overflow-hidden">
+    <section id="testimonials" ref={ref} className="py-28 bg-gray-50 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-50/40 rounded-full blur-[100px] translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute bottom-0 left-0 w-80 h-80 bg-accent-50/30 rounded-full blur-[100px]" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -627,35 +890,94 @@ function Testimonials() {
           <p className="text-lg text-gray-500 max-w-xl mx-auto leading-relaxed">تجارب حقيقية من مستخدمي النظام</p>
         </div>
 
-        {/* Testimonial cards */}
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Featured testimonial */}
+        <div className="max-w-3xl mx-auto mb-12">
+          <div className={`relative bg-white rounded-3xl p-10 sm:p-12 border border-gray-100 shadow-xl transition-all duration-700 ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
+            {/* Quote icon */}
+            <div className="absolute top-8 left-8 text-primary-100">
+              <svg className="w-14 h-14" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609L9.978 5.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" /></svg>
+            </div>
+
+            {/* Stars */}
+            <div className="flex items-center gap-1 mb-6">
+              {Array.from({ length: testimonials[active].rating }).map((_, j) => (
+                <svg key={j} className="w-6 h-6 text-accent-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+              ))}
+            </div>
+
+            {/* Text */}
+            <p className="text-xl sm:text-2xl text-gray-700 leading-relaxed mb-8 relative z-10 font-medium">
+              "{testimonials[active].text}"
+            </p>
+
+            {/* Author */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center text-3xl shadow-inner ring-4 ring-primary-50">{testimonials[active].avatar}</div>
+              <div>
+                <div className="font-bold text-gray-900 text-lg">{testimonials[active].name}</div>
+                <div className="text-sm text-gray-500">{testimonials[active].role}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Indicators + Mini cards */}
+        <div className="flex justify-center items-center gap-3">
           {testimonials.map((t, i) => (
+            <button
+              key={i}
+              onClick={() => setActive(i)}
+              className={`transition-all duration-500 rounded-full ${active === i ? 'w-10 h-3 bg-primary-600' : 'w-3 h-3 bg-gray-300 hover:bg-primary-300'}`}
+              aria-label={`شهادة ${t.name}`}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ FAQ Accordion ══════════════════════ */
+function FAQ() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref);
+  const [openIdx, setOpenIdx] = useState(0);
+
+  return (
+    <section id="faq" ref={ref} className="py-28 bg-white relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary-50/50 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/3" />
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary-50 text-primary-700 text-sm font-semibold mb-5 border border-primary-100">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /></svg>
+            الأسئلة الشائعة
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-5">أسئلة متكررة</h2>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">إجابات على أكثر الأسئلة شيوعاً حول نظام الأوائل</p>
+        </div>
+
+        {/* Accordion */}
+        <div className="space-y-4">
+          {faqs.map((faq, i) => (
             <div
-              key={t.name}
-              className={`group relative bg-white rounded-3xl p-8 border border-gray-100 hover:border-gray-200 shadow-sm hover:shadow-xl transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}
-              style={{ transitionDelay: `${i * 150}ms` }}
+              key={i}
+              className={`rounded-2xl border transition-all duration-500 ${openIdx === i ? 'bg-white border-primary-200 shadow-lg shadow-primary-100/50' : 'bg-gray-50 border-gray-100 hover:bg-white hover:border-gray-200 hover:shadow-md'} ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={{ transitionDelay: `${i * 80}ms` }}
             >
-              {/* Quote icon */}
-              <div className="absolute top-6 left-6 text-primary-100">
-                <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H14.017zM0 21v-7.391c0-5.704 3.731-9.57 8.983-10.609L9.978 5.151c-2.432.917-3.995 3.638-3.995 5.849h4v10H0z" /></svg>
-              </div>
-
-              {/* Stars */}
-              <div className="flex items-center gap-1 mb-5">
-                {Array.from({ length: t.rating }).map((_, j) => (
-                  <svg key={j} className="w-5 h-5 text-accent-500 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-                ))}
-              </div>
-
-              {/* Text */}
-              <p className="text-gray-600 leading-relaxed mb-8 text-[15px] relative z-10">"{t.text}"</p>
-
-              {/* Author */}
-              <div className="flex items-center gap-4 pt-5 border-t border-gray-100">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center text-2xl shadow-inner">{t.avatar}</div>
-                <div>
-                  <div className="font-bold text-gray-900">{t.name}</div>
-                  <div className="text-sm text-gray-500">{t.role}</div>
+              <button
+                onClick={() => setOpenIdx(openIdx === i ? -1 : i)}
+                className="w-full flex items-center justify-between p-6 text-right"
+              >
+                <span className={`font-bold transition-colors ${openIdx === i ? 'text-primary-700' : 'text-gray-900'}`}>{faq.q}</span>
+                <div className={`shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-300 mr-4 ${openIdx === i ? 'bg-primary-100 text-primary-700 rotate-180' : 'bg-gray-100 text-gray-500'}`}>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                </div>
+              </button>
+              <div className={`overflow-hidden transition-all duration-500 ${openIdx === i ? 'max-h-60 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-6 pb-6 text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                  {faq.a}
                 </div>
               </div>
             </div>
@@ -693,7 +1015,7 @@ function CTA() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <Link to="/register" className="group relative inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden">
-                <span className="relative z-10">سجّل مجاناً</span>
+                <span className="relative z-10">ابدأ تجربتك المجانية</span>
                 <svg className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                 <div className="absolute inset-0 bg-gradient-to-l from-primary-50 to-accent-50 opacity-0 group-hover:opacity-100 transition-opacity" />
               </Link>
@@ -702,6 +1024,9 @@ function CTA() {
                 تواصل معنا
               </a>
             </div>
+
+            {/* Extra trust line */}
+            <p className="text-white/40 text-sm mt-6">14 يوم تجربة مجانية — لا حاجة لبيانات الدفع</p>
           </div>
         </div>
       </div>
@@ -739,7 +1064,7 @@ function Footer() {
                   <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />,
                   <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />,
                 ].map((pathD, i) => (
-                  <a key={i} href="#" className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-primary-600 flex items-center justify-center transition-colors duration-300">
+                  <a key={i} href="#" className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-primary-600 flex items-center justify-center transition-all duration-300 hover:scale-110">
                     <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">{pathD}</svg>
                   </a>
                 ))}
@@ -750,9 +1075,9 @@ function Footer() {
             <div>
               <h4 className="font-bold text-lg mb-5">روابط سريعة</h4>
               <ul className="space-y-3">
-                {[['الرئيسية', '#hero'], ['الخدمات', '#services'], ['لماذا نحن', '#why-us'], ['الإحصائيات', '#stats'], ['آراء العملاء', '#testimonials']].map(([label, href]) => (
-                  <li key={href}>
-                    <a href={href} className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group text-sm">
+                {[['الرئيسية', 'hero'], ['الخدمات', 'services'], ['كيف يعمل', 'how-it-works'], ['لماذا نحن', 'why-us'], ['آراء العملاء', 'testimonials'], ['الأسئلة الشائعة', 'faq']].map(([label, id]) => (
+                  <li key={id}>
+                    <a href={`#${id}`} onClick={(e) => { e.preventDefault(); smoothScrollTo(id); }} className="text-gray-400 hover:text-white transition-colors flex items-center gap-2 group text-sm">
                       <svg className="w-3 h-3 text-primary-500 opacity-0 group-hover:opacity-100 transition-opacity rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
                       {label}
                     </a>
@@ -766,7 +1091,7 @@ function Footer() {
               <h4 className="font-bold text-lg mb-5">الخدمات</h4>
               <ul className="space-y-3">
                 {['إعادة التأهيل', 'التعليم الإلكتروني', 'الموارد البشرية', 'الإدارة المالية', 'التقارير والتحليلات'].map(s => (
-                  <li key={s}><span className="text-gray-400 text-sm">{s}</span></li>
+                  <li key={s}><span className="text-gray-400 text-sm hover:text-gray-300 transition-colors cursor-default">{s}</span></li>
                 ))}
               </ul>
             </div>
@@ -775,23 +1100,23 @@ function Footer() {
             <div>
               <h4 className="font-bold text-lg mb-5">تواصل معنا</h4>
               <ul className="space-y-4 text-gray-400 text-sm">
-                <li className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                <li className="flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-gray-800 group-hover:bg-primary-600/20 flex items-center justify-center shrink-0 transition-colors">
                     <svg className="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
                   </div>
-                  info@alawael.org
+                  <span className="group-hover:text-white transition-colors">info@alawael.org</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                <li className="flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-gray-800 group-hover:bg-primary-600/20 flex items-center justify-center shrink-0 transition-colors">
                     <svg className="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
                   </div>
-                  966+ 50 000 0000
+                  <span className="group-hover:text-white transition-colors" dir="ltr">+966 50 000 0000</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-gray-800 flex items-center justify-center shrink-0">
+                <li className="flex items-center gap-3 group">
+                  <div className="w-9 h-9 rounded-lg bg-gray-800 group-hover:bg-primary-600/20 flex items-center justify-center shrink-0 transition-colors">
                     <svg className="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg>
                   </div>
-                  المملكة العربية السعودية
+                  <span className="group-hover:text-white transition-colors">المملكة العربية السعودية</span>
                 </li>
               </ul>
             </div>
@@ -815,18 +1140,26 @@ function Footer() {
 export default function LandingPage() {
   useEffect(() => {
     document.title = 'الأوائل — نظام إدارة مراكز الرعاية النهارية';
+    // Enable smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => { document.documentElement.style.scrollBehavior = ''; };
   }, []);
 
   return (
     <div id="tailwind-scope" dir="rtl" className="font-cairo antialiased text-gray-900 overflow-x-hidden">
+      <ScrollProgress />
       <Navbar />
       <Hero />
+      <TrustedBy />
       <Services />
+      <HowItWorks />
       <WhyUs />
       <Stats />
       <Testimonials />
+      <FAQ />
       <CTA />
       <Footer />
+      <BackToTop />
     </div>
   );
 }

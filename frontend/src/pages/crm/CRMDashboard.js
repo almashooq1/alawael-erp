@@ -179,7 +179,8 @@ export default function CRMDashboard() {
           mb: 3,
           background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
           color: 'white',
-          borderRadius: 3,
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
         }}
       >
         <CardContent
@@ -223,8 +224,23 @@ export default function CRMDashboard() {
         {kpis.map((k, i) => (
           <Grid item xs={12} sm={6} md={2.4} key={i}>
             <Card
-              sx={{ borderRadius: 2, height: '100%', position: 'relative', overflow: 'visible' }}
+              sx={{
+                borderRadius: '16px',
+                height: '100%',
+                position: 'relative',
+                overflow: 'hidden',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                },
+              }}
             >
+              <Box
+                sx={{ height: 3, background: `linear-gradient(90deg, ${k.color}, ${k.color}88)` }}
+              />
               <CardContent>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Avatar sx={{ bgcolor: `${k.color}22`, color: k.color, width: 44, height: 44 }}>
@@ -257,8 +273,32 @@ export default function CRMDashboard() {
       </Grid>
 
       {/* Tabs */}
-      <Paper sx={{ mb: 3, borderRadius: 2 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+      <Paper
+        sx={{
+          mb: 3,
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
+        }}
+      >
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': {
+              fontWeight: 600,
+              textTransform: 'none',
+              minHeight: 52,
+              transition: 'all 0.2s',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' },
+            },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
+        >
           <Tab label="نظرة عامة" />
           <Tab label="مسار المبيعات" />
           <Tab label="مصادر العملاء" />
@@ -272,42 +312,67 @@ export default function CRMDashboard() {
         <Grid container spacing={3}>
           {/* Revenue & Leads Trend */}
           <Grid item xs={12} md={8}>
-            <Card sx={{ borderRadius: 2, height: 400 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                height: 400,
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   📈 اتجاه الإيرادات والفرص الشهري
                 </Typography>
                 <ResponsiveContainer width="100%" height={320}>
                   <LineChart data={data.monthlyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" />
-                    <ReTooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#999' }} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 12, fill: '#999' }} />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      tick={{ fontSize: 12, fill: '#999' }}
+                    />
+                    <ReTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                     <Legend />
                     <Line
                       yAxisId="left"
                       type="monotone"
                       dataKey="leads"
                       stroke="#4FC3F7"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       name="العملاء المحتملين"
+                      dot={{ r: 4, fill: '#4FC3F7' }}
+                      activeDot={{ r: 6 }}
                     />
                     <Line
                       yAxisId="left"
                       type="monotone"
                       dataKey="won"
                       stroke="#81C784"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       name="صفقات ناجحة"
+                      dot={{ r: 4, fill: '#81C784' }}
+                      activeDot={{ r: 6 }}
                     />
                     <Line
                       yAxisId="right"
                       type="monotone"
                       dataKey="revenue"
                       stroke="#FFB74D"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       name="الإيرادات"
+                      dot={{ r: 4, fill: '#FFB74D' }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -317,9 +382,18 @@ export default function CRMDashboard() {
 
           {/* Top Performers */}
           <Grid item xs={12} md={4}>
-            <Card sx={{ borderRadius: 2, height: 400 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                height: 400,
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   🏆 أفضل مندوبي المبيعات
                 </Typography>
                 <List dense>
@@ -358,27 +432,55 @@ export default function CRMDashboard() {
       {tab === 1 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={7}>
-            <Card sx={{ borderRadius: 2 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   📊 توزيع مسار المبيعات
                 </Typography>
                 <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={data.pipelineDistribution} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="stage" type="category" width={120} />
-                    <ReTooltip formatter={v => formatCurrency(v)} />
-                    <Bar dataKey="value" fill="#4FC3F7" radius={[0, 6, 6, 0]} name="القيمة" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                    <XAxis type="number" tick={{ fontSize: 12, fill: '#999' }} />
+                    <YAxis
+                      dataKey="stage"
+                      type="category"
+                      width={120}
+                      tick={{ fontSize: 12, fill: '#999' }}
+                    />
+                    <ReTooltip
+                      formatter={v => formatCurrency(v)}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
+                    <Bar dataKey="value" fill="#4FC3F7" radius={[0, 8, 8, 0]} name="القيمة" />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={5}>
-            <Card sx={{ borderRadius: 2 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   عدد الفرص لكل مرحلة
                 </Typography>
                 {data.pipelineDistribution.map((s, i) => (
@@ -413,9 +515,17 @@ export default function CRMDashboard() {
       {tab === 2 && (
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
-            <Card sx={{ borderRadius: 2 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   🎯 توزيع مصادر العملاء
                 </Typography>
                 <ResponsiveContainer width="100%" height={350}>
@@ -433,16 +543,30 @@ export default function CRMDashboard() {
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <ReTooltip />
+                    <ReTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           </Grid>
           <Grid item xs={12} md={6}>
-            <Card sx={{ borderRadius: 2 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   إحصائيات المصادر
                 </Typography>
                 {data.sourceDistribution.map((s, i) => (
@@ -488,9 +612,17 @@ export default function CRMDashboard() {
       )}
 
       {tab === 3 && (
-        <Card sx={{ borderRadius: 2 }}>
+        <Card
+          sx={{
+            borderRadius: '20px',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+          }}
+        >
           <CardContent>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               🕐 الأنشطة الأخيرة
             </Typography>
             <List>
@@ -538,9 +670,17 @@ export default function CRMDashboard() {
           )}
           {/* قائمة المتابعات القادمة */}
           <Grid item xs={12}>
-            <Card sx={{ borderRadius: 2 }}>
+            <Card
+              sx={{
+                borderRadius: '20px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   <CalendarIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المتابعات القادمة
                 </Typography>

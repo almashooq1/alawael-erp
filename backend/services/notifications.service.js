@@ -8,11 +8,30 @@ const Notification = require('../models/Notification');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 
+// Unified email service for email delivery channel
+let emailManager;
+try {
+  const { emailManager: em } = require('./email');
+  emailManager = em;
+} catch {
+  emailManager = null;
+}
+
+// User model for email lookups
+let User;
+try {
+  User = require('../models/User');
+} catch {
+  User = null;
+}
+
 class NotificationsService {
   /**
    * Create a new notification
+   * @param {Object} data - Notification data
+   * @param {Object} [options] - Options: { sendEmail: true/false }
    */
-  static async createNotification(data) {
+  static async createNotification(data, options = {}) {
     try {
       const {
         userId,
@@ -51,6 +70,33 @@ class NotificationsService {
 
       await notification.save();
       logger.info(`Notification created: ${notification._id}`);
+
+      // Send email notification if requested (non-blocking)
+      const shouldEmail =
+        options.sendEmail !== false &&
+        (priority === 'high' || priority === 'urgent' || options.sendEmail === true);
+      if (shouldEmail && emailManager && userId && User) {
+        User.findById(userId)
+          .select('email fullName')
+          .lean()
+          .then(user => {
+            if (user && user.email) {
+              emailManager
+                .sendNotification(user.email, {
+                  title,
+                  message,
+                  fullName: user.fullName,
+                  type,
+                  priority,
+                  category: category || '',
+                })
+                .catch(err => {
+                  logger.error('Failed to send notification email:', err.message);
+                });
+            }
+          })
+          .catch(() => {});
+      }
 
       return {
         success: true,

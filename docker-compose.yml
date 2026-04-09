@@ -342,6 +342,11 @@ services:
       ENABLE_AUTO_BACKUP: "true"
       GRAPHQL_URL: http://graphql:4000
       PYTHON_ML_URL: http://python-ml:5001
+      # ── DDD Platform (Unified Rehabilitation) ──────────────────────────
+      DDD_DOMAINS_ENABLED: "true"
+      DDD_SEED_ON_START: ${DDD_SEED_ON_START:-false}
+      DDD_REALTIME_ENABLED: "true"
+      DDD_KPI_BROADCAST_INTERVAL: ${DDD_KPI_BROADCAST_INTERVAL:-60000}
     ports:
       - "${BACKEND_PORT:-3001}:3001"
     volumes:

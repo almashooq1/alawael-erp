@@ -15,7 +15,6 @@ import {
   TableHead,
   TableRow,
   LinearProgress,
-  Divider,
 } from '@mui/material';
 import {
   AccountBalance as AccountIcon,
@@ -38,27 +37,39 @@ import { useSnackbar } from '../../contexts/SnackbarContext';
 const StatCard = ({ title, value, icon, color, subtitle, trend }) => (
   <Card
     sx={{
-      borderRadius: 2.5,
-      border: `1px solid ${surfaceColors.border}`,
+      borderRadius: '20px',
+      border: '1px solid rgba(0,0,0,0.04)',
       height: '100%',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.1)' },
+      overflow: 'hidden',
+      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+      transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+      '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 12px 32px rgba(0,0,0,0.1)' },
     }}
   >
-    <CardContent sx={{ p: 2.5 }}>
+    <Box sx={{ height: 4, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
+    <CardContent sx={{ p: '20px 24px !important' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box>
           <Typography
-            variant="body2"
-            sx={{ color: neutralColors.textSecondary, mb: 0.5, fontWeight: 500 }}
+            variant="caption"
+            sx={{ color: neutralColors.textSecondary, fontWeight: 600, letterSpacing: 0.5 }}
           >
             {title}
           </Typography>
-          <Typography variant="h5" fontWeight={800} sx={{ color: neutralColors.textPrimary }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              mt: 0.5,
+              mb: 0.5,
+              lineHeight: 1.2,
+              color: neutralColors.textPrimary,
+            }}
+          >
             {value}
           </Typography>
           {subtitle && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               {trend === 'up' ? (
                 <ArrowUpward sx={{ fontSize: 14, color: statusColors.success }} />
               ) : trend === 'down' ? (
@@ -66,14 +77,30 @@ const StatCard = ({ title, value, icon, color, subtitle, trend }) => (
               ) : null}
               <Typography
                 variant="caption"
-                sx={{ color: trend === 'up' ? statusColors.success : statusColors.error }}
+                sx={{
+                  color: trend === 'up' ? statusColors.success : statusColors.error,
+                  fontWeight: 600,
+                }}
               >
                 {subtitle}
               </Typography>
             </Box>
           )}
         </Box>
-        <Avatar sx={{ bgcolor: `${color}15`, width: 48, height: 48 }}>{icon}</Avatar>
+        <Box
+          sx={{
+            width: 52,
+            height: 52,
+            borderRadius: '16px',
+            bgcolor: `${color}12`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: `0 4px 14px ${color}20`,
+          }}
+        >
+          {icon}
+        </Box>
       </Box>
     </CardContent>
   </Card>
@@ -219,25 +246,76 @@ const AccountingDashboard = () => {
         {/* Revenue by Month */}
         <Grid item xs={12} md={7}>
           <Card
-            sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}`, height: '100%' }}
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              height: '100%',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
           >
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-                الإيرادات الشهرية
-              </Typography>
+            <CardContent sx={{ p: '24px !important' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 3,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '12px',
+                      bgcolor: 'rgba(16,185,129,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <TrendingUp sx={{ fontSize: 22, color: statusColors.success }} />
+                  </Box>
+                  <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                    الإيرادات الشهرية
+                  </Typography>
+                </Box>
+                <Chip
+                  label="سنوي"
+                  size="small"
+                  variant="outlined"
+                  sx={{ borderRadius: '8px', fontWeight: 500 }}
+                />
+              </Box>
               {data.revenueByMonth?.map((item, i) => (
-                <Box key={i} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Box
+                  key={i}
+                  sx={{
+                    mb: 2.5,
+                    p: 1.5,
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(0,0,0,0.01)',
+                    transition: 'all 0.2s',
+                    '&:hover': { bgcolor: 'rgba(0,0,0,0.025)' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" fontWeight={600}>
                       {item.month}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      fontWeight={700}
-                      sx={{ color: statusColors.success }}
-                    >
-                      {item.amount?.toLocaleString()} ر.س
-                    </Typography>
+                    <Chip
+                      label={`${item.amount?.toLocaleString()} ر.س`}
+                      size="small"
+                      sx={{
+                        bgcolor: 'rgba(16,185,129,0.1)',
+                        color: '#059669',
+                        fontWeight: 700,
+                        borderRadius: '8px',
+                        height: 24,
+                      }}
+                    />
                   </Box>
                   <LinearProgress
                     variant="determinate"
@@ -248,12 +326,12 @@ const AccountingDashboard = () => {
                       100
                     )}
                     sx={{
-                      height: 10,
-                      borderRadius: 5,
-                      bgcolor: `${statusColors.success}15`,
+                      height: 6,
+                      borderRadius: 3,
+                      bgcolor: 'rgba(0,0,0,0.04)',
                       '& .MuiLinearProgress-bar': {
-                        borderRadius: 5,
-                        background: gradients.primary,
+                        borderRadius: 3,
+                        background: 'linear-gradient(90deg, #10b981, #34d399)',
                       },
                     }}
                   />
@@ -266,15 +344,56 @@ const AccountingDashboard = () => {
         {/* Expenses by Category */}
         <Grid item xs={12} md={5}>
           <Card
-            sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}`, height: '100%' }}
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              height: '100%',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
           >
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-                المصروفات حسب الفئة
-              </Typography>
+            <CardContent sx={{ p: '24px !important' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 3,
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '12px',
+                      bgcolor: 'rgba(239,68,68,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <ExpenseIcon sx={{ fontSize: 22, color: statusColors.error }} />
+                  </Box>
+                  <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                    المصروفات حسب الفئة
+                  </Typography>
+                </Box>
+              </Box>
               {data.expensesByCategory?.map((cat, i) => (
-                <Box key={i} sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Box
+                  key={i}
+                  sx={{
+                    mb: 2.5,
+                    p: 1.5,
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(0,0,0,0.01)',
+                    transition: 'all 0.2s',
+                    '&:hover': { bgcolor: 'rgba(0,0,0,0.025)' },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body2" fontWeight={600}>
                       {cat.category}
                     </Typography>
@@ -283,13 +402,19 @@ const AccountingDashboard = () => {
                         label={`${cat.percentage}%`}
                         size="small"
                         sx={{
-                          bgcolor: `${statusColors.error}15`,
-                          color: statusColors.error,
+                          bgcolor: 'rgba(239,68,68,0.08)',
+                          color: '#DC2626',
                           fontWeight: 700,
-                          fontSize: '0.7rem',
+                          fontSize: '11px',
+                          borderRadius: '8px',
+                          height: 22,
                         }}
                       />
-                      <Typography variant="body2" fontWeight={600}>
+                      <Typography
+                        variant="body2"
+                        fontWeight={700}
+                        sx={{ color: '#DC2626', fontSize: '13px' }}
+                      >
                         {cat.amount?.toLocaleString()} ر.س
                       </Typography>
                     </Box>
@@ -298,10 +423,13 @@ const AccountingDashboard = () => {
                     variant="determinate"
                     value={cat.percentage}
                     sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      bgcolor: `${statusColors.error}12`,
-                      '& .MuiLinearProgress-bar': { borderRadius: 4, bgcolor: statusColors.error },
+                      height: 6,
+                      borderRadius: 3,
+                      bgcolor: 'rgba(0,0,0,0.04)',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 3,
+                        background: 'linear-gradient(90deg, #ef4444, #f87171)',
+                      },
                     }}
                   />
                 </Box>
@@ -312,52 +440,94 @@ const AccountingDashboard = () => {
 
         {/* Recent Transactions */}
         <Grid item xs={12}>
-          <Card sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}` }}>
-            <CardContent>
+          <Card
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
+            <CardContent sx={{ p: '24px !important' }}>
               <Box
                 sx={{
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  mb: 2,
+                  mb: 3,
                 }}
               >
-                <Typography variant="h6" fontWeight={700}>
-                  آخر المعاملات
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <Box
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '12px',
+                      bgcolor: 'rgba(99,102,241,0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <InvoiceIcon sx={{ fontSize: 22, color: '#6366f1' }} />
+                  </Box>
+                  <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                    آخر المعاملات
+                  </Typography>
+                </Box>
                 <Chip
                   label="عرض الكل"
                   size="small"
                   clickable
                   onClick={() => navigate('/accounting/journal-entries')}
                   sx={{
-                    bgcolor: `${brandColors.primary}15`,
-                    color: brandColors.primary,
+                    bgcolor: 'rgba(99,102,241,0.08)',
+                    color: '#6366f1',
                     fontWeight: 600,
+                    borderRadius: '8px',
                   }}
                 />
               </Box>
               <TableContainer>
-                <Table size="small">
+                <Table
+                  size="small"
+                  sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)', py: 1.5 } }}
+                >
                   <TableHead>
-                    <TableRow sx={{ bgcolor: surfaceColors.background }}>
-                      <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الوصف</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>النوع</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="left">
-                        المبلغ
-                      </TableCell>
+                    <TableRow
+                      sx={{
+                        '& .MuiTableCell-head': {
+                          fontWeight: 700,
+                          color: 'text.secondary',
+                          fontSize: '12px',
+                          letterSpacing: 0.5,
+                          bgcolor: 'rgba(0,0,0,0.02)',
+                        },
+                      }}
+                    >
+                      <TableCell>التاريخ</TableCell>
+                      <TableCell>الوصف</TableCell>
+                      <TableCell>النوع</TableCell>
+                      <TableCell align="left">المبلغ</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {data.recentTransactions?.map(tx => (
-                      <TableRow key={tx.id} hover>
+                      <TableRow
+                        key={tx.id}
+                        sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}
+                      >
                         <TableCell>
-                          <Typography variant="body2" fontWeight={500}>
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            sx={{ fontFamily: 'monospace', fontSize: '13px' }}
+                          >
                             {tx.date}
                           </Typography>
                         </TableCell>
-                        <TableCell>{tx.description}</TableCell>
+                        <TableCell sx={{ fontWeight: 500 }}>{tx.description}</TableCell>
                         <TableCell>
                           <Chip
                             label={tx.type === 'income' ? 'إيراد' : 'مصروف'}
@@ -365,11 +535,11 @@ const AccountingDashboard = () => {
                             sx={{
                               bgcolor:
                                 tx.type === 'income'
-                                  ? `${statusColors.success}15`
-                                  : `${statusColors.error}15`,
-                              color:
-                                tx.type === 'income' ? statusColors.success : statusColors.error,
+                                  ? 'rgba(16,185,129,0.1)'
+                                  : 'rgba(239,68,68,0.1)',
+                              color: tx.type === 'income' ? '#059669' : '#DC2626',
                               fontWeight: 600,
+                              borderRadius: '8px',
                             }}
                           />
                         </TableCell>
@@ -377,10 +547,7 @@ const AccountingDashboard = () => {
                           <Typography
                             variant="body2"
                             fontWeight={700}
-                            sx={{
-                              color:
-                                tx.type === 'income' ? statusColors.success : statusColors.error,
-                            }}
+                            sx={{ color: tx.type === 'income' ? '#059669' : '#DC2626' }}
                           >
                             {tx.type === 'income' ? '+' : '-'}
                             {tx.amount?.toLocaleString()} ر.س
@@ -397,12 +564,32 @@ const AccountingDashboard = () => {
 
         {/* Quick Navigation */}
         <Grid item xs={12}>
-          <Card sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}` }}>
-            <CardContent>
-              <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>
-                الوصول السريع
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
+          <Card
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+            }}
+          >
+            <CardContent sx={{ p: '24px !important' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '12px',
+                    bgcolor: 'rgba(139,92,246,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <ReportIcon sx={{ fontSize: 22, color: '#8b5cf6' }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">
+                  الوصول السريع
+                </Typography>
+              </Box>
               <Grid container spacing={2}>
                 {[
                   {
@@ -410,36 +597,42 @@ const AccountingDashboard = () => {
                     path: '/accounting/chart-of-accounts',
                     icon: <AccountIcon />,
                     color: brandColors.primary,
+                    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   },
                   {
                     label: 'القيود اليومية',
                     path: '/accounting/journal-entries',
                     icon: <ReportIcon />,
                     color: statusColors.info,
+                    gradient: 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)',
                   },
                   {
                     label: 'الفواتير',
                     path: '/accounting/invoices',
                     icon: <InvoiceIcon />,
                     color: statusColors.success,
+                    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   },
                   {
                     label: 'المصروفات',
                     path: '/accounting/expenses',
                     icon: <ExpenseIcon />,
                     color: statusColors.error,
+                    gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                   },
                   {
                     label: 'الموازنات',
                     path: '/accounting/budgets',
                     icon: <WalletIcon />,
                     color: statusColors.warning,
+                    gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
                   },
                   {
                     label: 'التقارير المالية',
                     path: '/accounting/reports',
                     icon: <ReportIcon />,
                     color: brandColors.accentTeal,
+                    gradient: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
                   },
                 ].map((item, i) => (
                   <Grid item xs={6} sm={4} md={2} key={i}>
@@ -447,22 +640,36 @@ const AccountingDashboard = () => {
                       sx={{
                         cursor: 'pointer',
                         textAlign: 'center',
-                        p: 2,
-                        borderRadius: 2,
-                        border: `1px solid ${surfaceColors.border}`,
-                        transition: 'all 0.2s',
+                        p: 2.5,
+                        borderRadius: '16px',
+                        border: '1px solid rgba(0,0,0,0.04)',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
                         '&:hover': {
-                          borderColor: item.color,
-                          transform: 'translateY(-2px)',
-                          boxShadow: `0 4px 12px ${item.color}30`,
+                          borderColor: `${item.color}40`,
+                          transform: 'translateY(-4px)',
+                          boxShadow: `0 8px 24px ${item.color}25`,
                         },
                       }}
                       onClick={() => navigate(item.path)}
                     >
-                      <Avatar sx={{ bgcolor: `${item.color}15`, mx: 'auto', mb: 1 }}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '14px',
+                          background: item.gradient,
+                          mx: 'auto',
+                          mb: 1.5,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          boxShadow: `0 4px 14px ${item.color}30`,
+                        }}
+                      >
                         {item.icon}
-                      </Avatar>
-                      <Typography variant="body2" fontWeight={600}>
+                      </Box>
+                      <Typography variant="body2" fontWeight={700} fontSize="13px">
                         {item.label}
                       </Typography>
                     </Card>

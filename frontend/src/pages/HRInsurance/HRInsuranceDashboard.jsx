@@ -110,7 +110,8 @@ const KPICard = ({ title, value, icon, gradient, subtitle, badge }) => (
     sx={{
       background: gradient || gradients.primary,
       color: '#fff',
-      borderRadius: 3,
+      borderRadius: '20px',
+      boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
       position: 'relative',
       overflow: 'hidden',
       '&::after': {
@@ -129,7 +130,7 @@ const KPICard = ({ title, value, icon, gradient, subtitle, badge }) => (
       <Box display="flex" justifyContent="space-between" alignItems="flex-start">
         <Box>
           <Typography variant="body2" sx={{ opacity: 0.85, mb: 0.5 }}>{title}</Typography>
-          <Typography variant="h4" fontWeight="bold">
+          <Typography variant="h4" fontWeight={700}>
             {badge ? <Badge badgeContent={badge} color="error">{value}</Badge> : value}
           </Typography>
           {subtitle && (
@@ -389,7 +390,7 @@ export default function HRInsuranceDashboard() {
         <Box display="flex" alignItems="center" gap={1}>
           <InsuranceIcon sx={{ fontSize: 36, color: 'primary.main' }} />
           <Box>
-            <Typography variant="h5" fontWeight="bold">
+            <Typography variant="h5" fontWeight={700}>
               تأمين الموظفين الصحي
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -414,13 +415,13 @@ export default function HRInsuranceDashboard() {
       </Box>
 
       {/* ── Tabs ─────────────────────────────────────────────────────────── */}
-      <Paper sx={{ borderRadius: 2, mb: 3 }}>
+      <Paper sx={{ borderRadius: '16px', mb: 3, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Tabs
           value={activeTab}
           onChange={(_, v) => { setActiveTab(v); if (v === 3) fetchReport(); }}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{ borderBottom: 1, borderColor: 'divider', '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 }, '& .Mui-selected': { fontWeight: 700 }, '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' } }}
         >
           <Tab icon={<InsuranceIcon />} label="لوحة المعلومات" iconPosition="start" />
           <Tab icon={<PeopleIcon />} label="وثائق التأمين" iconPosition="start" />
@@ -478,8 +479,8 @@ export default function HRInsuranceDashboard() {
           <Grid container spacing={3}>
             {/* Company Distribution */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <CompanyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   توزيع شركات التأمين
                 </Typography>
@@ -512,8 +513,8 @@ export default function HRInsuranceDashboard() {
 
             {/* Coverage Class Distribution */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: 2, mb: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '16px', mb: 2, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <VipIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   فئات التغطية
                 </Typography>
@@ -540,7 +541,7 @@ export default function HRInsuranceDashboard() {
                               }}
                             />
                           </Box>
-                          <Typography fontWeight="bold" minWidth={40} textAlign="center">
+                          <Typography fontWeight={700} minWidth={40} textAlign="center">
                             {item.count}
                           </Typography>
                         </Box>
@@ -555,8 +556,8 @@ export default function HRInsuranceDashboard() {
               </Paper>
 
               {/* Financial Summary */}
-              <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <MoneyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   الملخص المالي
                 </Typography>
@@ -569,7 +570,7 @@ export default function HRInsuranceDashboard() {
                     <Grid item xs={12} key={item.label}>
                       <Box display="flex" justifyContent="space-between" alignItems="center" py={0.5}>
                         <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-                        <Typography fontWeight="bold" sx={{ color: item.color }}>{item.value}</Typography>
+                        <Typography fontWeight={700} sx={{ color: item.color }}>{item.value}</Typography>
                       </Box>
                       <Divider />
                     </Grid>
@@ -582,7 +583,7 @@ export default function HRInsuranceDashboard() {
             {expiringPolicies.length > 0 && (
               <Grid item xs={12}>
                 <Alert severity="warning" icon={<WarningIcon />}>
-                  <Typography fontWeight="bold" mb={1}>
+                  <Typography fontWeight={700} mb={1}>
                     تنبيه: {expiringPolicies.length} وثيقة تأمين تنتهي خلال 30 يوم
                   </Typography>
                   {expiringPolicies.slice(0, 5).map((p) => (
@@ -602,7 +603,7 @@ export default function HRInsuranceDashboard() {
       {/* TAB 1: وثائق التأمين (Policies Table)                           */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {activeTab === 1 && (
-        <Paper sx={{ borderRadius: 2 }}>
+        <Paper sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
           {/* Filters */}
           <Box p={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
             <TextField
@@ -647,16 +648,16 @@ export default function HRInsuranceDashboard() {
           <TableContainer>
             <Table size="small">
               <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الموظف</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>رقم الوثيقة</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>شركة التأمين</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الفئة</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>تاريخ الانتهاء</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>المعالون</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>القسط السنوي</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }} align="center">إجراءات</TableCell>
+                <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموظف</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>رقم الوثيقة</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>شركة التأمين</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الفئة</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>تاريخ الانتهاء</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المعالون</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسط السنوي</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">إجراءات</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -676,7 +677,7 @@ export default function HRInsuranceDashboard() {
                       <TableRow key={p._id} hover>
                         <TableCell>
                           <Box>
-                            <Typography variant="body2" fontWeight="bold">{p.employeeName}</Typography>
+                            <Typography variant="body2" fontWeight={700}>{p.employeeName}</Typography>
                             <Typography variant="caption" color="text.secondary">{p.employeeId} — {p.department}</Typography>
                           </Box>
                         </TableCell>
@@ -696,7 +697,7 @@ export default function HRInsuranceDashboard() {
                           <Chip icon={<FamilyIcon />} label={depCount} size="small" variant="outlined" />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" fontWeight="bold">{formatCurrency(p.premium?.totalAnnualPremium)}</Typography>
+                          <Typography variant="body2" fontWeight={700}>{formatCurrency(p.premium?.totalAnnualPremium)}</Typography>
                         </TableCell>
                         <TableCell>
                           <Chip icon={sts.icon} label={sts.label || p.status} size="small" color={sts.color || 'default'} />
@@ -738,8 +739,8 @@ export default function HRInsuranceDashboard() {
       {/* TAB 2: المطالبات الطبية (Claims)                                 */}
       {/* ══════════════════════════════════════════════════════════════════ */}
       {activeTab === 2 && (
-        <Paper sx={{ borderRadius: 2, p: 2.5 }}>
-          <Typography variant="h6" fontWeight="bold" mb={2}>
+        <Paper sx={{ borderRadius: '20px', p: 2.5, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Typography variant="h6" fontWeight={700} mb={2}>
             <ClaimIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
             المطالبات الطبية
           </Typography>
@@ -754,10 +755,10 @@ export default function HRInsuranceDashboard() {
                 const csConfig = CLAIM_STATUS_CONFIG[cs._id] || {};
                 return (
                   <Grid item xs={6} sm={4} md={3} key={cs._id}>
-                    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+                    <Card variant="outlined" sx={{ borderRadius: '16px', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
                       <CardContent sx={{ textAlign: 'center', p: 2 }}>
                         <Chip label={csConfig.label || cs._id} color={csConfig.color || 'default'} size="small" sx={{ mb: 1 }} />
-                        <Typography variant="h5" fontWeight="bold">{cs.count}</Typography>
+                        <Typography variant="h5" fontWeight={700}>{cs.count}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {formatCurrency(cs.totalClaimed)} مطالبة
                         </Typography>
@@ -776,12 +777,12 @@ export default function HRInsuranceDashboard() {
             policies
               .filter((p) => p.claims?.length > 0)
               .map((p) => (
-                <Accordion key={p._id} sx={{ mb: 1, borderRadius: 1, '&:before': { display: 'none' } }}>
+                <Accordion key={p._id} sx={{ mb: 1, borderRadius: '10px', '&:before': { display: 'none' } }}>
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box display="flex" alignItems="center" gap={2} width="100%">
                       <MedicalIcon color="primary" />
                       <Box flex={1}>
-                        <Typography fontWeight="bold">{p.employeeName}</Typography>
+                        <Typography fontWeight={700}>{p.employeeName}</Typography>
                         <Typography variant="caption" color="text.secondary">
                           {p.policyNumber} — {p.claims.length} مطالبة
                         </Typography>
@@ -836,8 +837,8 @@ export default function HRInsuranceDashboard() {
           <Grid container spacing={3}>
             {/* Financial Overview */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   نظرة مالية عامة
                 </Typography>
@@ -853,7 +854,7 @@ export default function HRInsuranceDashboard() {
                     ].map((item) => (
                       <ListItem key={item.label} divider>
                         <ListItemText primary={item.label} />
-                        <Typography fontWeight="bold">{item.value}</Typography>
+                        <Typography fontWeight={700}>{item.value}</Typography>
                       </ListItem>
                     ))}
                   </List>
@@ -865,8 +866,8 @@ export default function HRInsuranceDashboard() {
 
             {/* Claims by Type */}
             <Grid item xs={12} md={6}>
-              <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <HospitalIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المطالبات حسب النوع
                 </Typography>
@@ -879,7 +880,7 @@ export default function HRInsuranceDashboard() {
                           secondary={`${ct.count} مطالبة`}
                         />
                         <Box textAlign="right">
-                          <Typography variant="body2" fontWeight="bold">{formatCurrency(ct.totalClaimed)}</Typography>
+                          <Typography variant="body2" fontWeight={700}>{formatCurrency(ct.totalClaimed)}</Typography>
                           <Typography variant="caption" color="success.main">
                             معتمد: {formatCurrency(ct.totalApproved)}
                           </Typography>
@@ -895,8 +896,8 @@ export default function HRInsuranceDashboard() {
 
             {/* Department Breakdown */}
             <Grid item xs={12}>
-              <Paper sx={{ p: 2.5, borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" mb={2}>
+              <Paper sx={{ p: 2.5, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                <Typography variant="h6" fontWeight={700} mb={2}>
                   <PeopleIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   التوزيع حسب الأقسام
                 </Typography>
@@ -904,11 +905,11 @@ export default function HRInsuranceDashboard() {
                   <TableContainer>
                     <Table size="small">
                       <TableHead>
-                        <TableRow sx={{ bgcolor: 'grey.50' }}>
-                          <TableCell sx={{ fontWeight: 'bold' }}>القسم</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>عدد الموظفين المؤمنين</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>إجمالي الأقساط</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>متوسط القسط</TableCell>
+                        <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسم</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>عدد الموظفين المؤمنين</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>إجمالي الأقساط</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>متوسط القسط</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -937,7 +938,7 @@ export default function HRInsuranceDashboard() {
       {/* ══════════════════════════════════════════════════════════════════ */}
 
       {/* ── Policy Create/Edit Dialog ──────────────────────────────────── */}
-      <Dialog open={policyDialog} onClose={() => setPolicyDialog(false)} maxWidth="md" fullWidth>
+      <Dialog open={policyDialog} onClose={() => setPolicyDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>{selectedPolicy ? 'تعديل وثيقة التأمين' : 'إنشاء وثيقة تأمين جديدة'}</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -998,7 +999,7 @@ export default function HRInsuranceDashboard() {
       </Dialog>
 
       {/* ── Policy Detail Dialog ───────────────────────────────────────── */}
-      <Dialog open={detailDialog} onClose={() => setDetailDialog(false)} maxWidth="md" fullWidth>
+      <Dialog open={detailDialog} onClose={() => setDetailDialog(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={1}>
             <InsuranceIcon color="primary" />
@@ -1012,11 +1013,11 @@ export default function HRInsuranceDashboard() {
               <Grid container spacing={2} mb={3}>
                 <Grid item xs={6} sm={4}>
                   <Typography variant="caption" color="text.secondary">رقم الموظف</Typography>
-                  <Typography fontWeight="bold">{selectedPolicy.employeeId}</Typography>
+                  <Typography fontWeight={700}>{selectedPolicy.employeeId}</Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
                   <Typography variant="caption" color="text.secondary">شركة التأمين</Typography>
-                  <Typography fontWeight="bold">{selectedPolicy.insuranceCompanyNameAr || selectedPolicy.insuranceCompany}</Typography>
+                  <Typography fontWeight={700}>{selectedPolicy.insuranceCompanyNameAr || selectedPolicy.insuranceCompany}</Typography>
                 </Grid>
                 <Grid item xs={6} sm={4}>
                   <Typography variant="caption" color="text.secondary">فئة التغطية</Typography>
@@ -1044,7 +1045,7 @@ export default function HRInsuranceDashboard() {
 
               {/* Dependents */}
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <Typography variant="subtitle1" fontWeight="bold">
+                <Typography variant="subtitle1" fontWeight={700}>
                   <FamilyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المعالون ({selectedPolicy.dependents?.length || 0})
                 </Typography>
@@ -1077,7 +1078,7 @@ export default function HRInsuranceDashboard() {
 
               {/* Claims list */}
               <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <Typography variant="subtitle1" fontWeight="bold">
+                <Typography variant="subtitle1" fontWeight={700}>
                   <ClaimIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                   المطالبات ({selectedPolicy.claims?.length || 0})
                 </Typography>
@@ -1120,7 +1121,7 @@ export default function HRInsuranceDashboard() {
       </Dialog>
 
       {/* ── Add Dependent Dialog ───────────────────────────────────────── */}
-      <Dialog open={dependentDialog} onClose={() => setDependentDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={dependentDialog} onClose={() => setDependentDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>إضافة تابع جديد</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -1159,7 +1160,7 @@ export default function HRInsuranceDashboard() {
       </Dialog>
 
       {/* ── Submit Claim Dialog ────────────────────────────────────────── */}
-      <Dialog open={claimDialog} onClose={() => setClaimDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={claimDialog} onClose={() => setClaimDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>تقديم مطالبة طبية جديدة</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -1201,7 +1202,7 @@ export default function HRInsuranceDashboard() {
       </Dialog>
 
       {/* ── Renewal Dialog ─────────────────────────────────────────────── */}
-      <Dialog open={renewDialog} onClose={() => setRenewDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={renewDialog} onClose={() => setRenewDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>
           <RenewIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
           تجديد وثيقة التأمين — {selectedPolicy?.employeeName}

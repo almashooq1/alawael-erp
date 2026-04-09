@@ -197,7 +197,7 @@ export default function TemplatesManagement() {
       )}
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+      <Paper sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={6}>
             <TextField
@@ -245,7 +245,7 @@ export default function TemplatesManagement() {
           ))}
         </Grid>
       ) : filtered.length === 0 ? (
-        <Paper sx={{ p: 6, textAlign: 'center', borderRadius: 2 }}>
+        <Paper sx={{ p: 6, textAlign: 'center', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)' }}>
           <TemplateIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
             لا توجد قوالب
@@ -268,9 +268,11 @@ export default function TemplatesManagement() {
                     height: '100%',
                     display: 'flex',
                     flexDirection: 'column',
-                    borderRadius: 2,
-                    transition: 'all 0.2s',
-                    '&:hover': { boxShadow: 4 },
+                    borderRadius: '16px',
+                    border: '1px solid rgba(0,0,0,0.04)',
+                    boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                    transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                    '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' },
                   }}
                 >
                   <CardContent sx={{ flex: 1 }}>
@@ -359,7 +361,7 @@ export default function TemplatesManagement() {
       )}
 
       {/* ═══ Create Dialog ═══════════════════════════════ */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>إنشاء قالب جديد</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>

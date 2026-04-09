@@ -330,9 +330,9 @@ const BeneficiariesManagementPage = () => {
         {/* ── Charts ─────────────────────── */}
         <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid item xs={12} md={8}>
-            <Card elevation={0} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+            <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
               <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   اتجاه التسجيل الشهري
                 </Typography>
                 <Line data={monthlyTrendData} options={{
@@ -344,9 +344,9 @@ const BeneficiariesManagementPage = () => {
             </Card>
           </Grid>
           <Grid item xs={12} md={4}>
-            <Card elevation={0} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+            <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
               <CardContent>
-                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   توزيع الفئات
                 </Typography>
                 <Doughnut data={categoryDistData} options={{
@@ -371,7 +371,7 @@ const BeneficiariesManagementPage = () => {
         </Box>
 
         {/* ── Search & Filters ───────────── */}
-        <Card elevation={0} sx={{ borderRadius: 3, mb: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
+        <Card elevation={0} sx={{ borderRadius: '20px', mb: 3, border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
           <CardContent>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} md={5}>

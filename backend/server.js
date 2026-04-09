@@ -267,6 +267,98 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Message Queue initialization skipped:', err.message);
   }
 
+  // Initialize Unified Email System (Event Bridge + Scheduler)
+  try {
+    const {
+      emailManager,
+      EmailEventBridge,
+      EmailScheduler,
+      digestAggregator,
+    } = require('./services/email');
+
+    // Validate email configuration at startup
+    try {
+      const { validateAndLog } = require('./services/email/EmailConfigValidator');
+      const EmailConfig = require('./services/email/EmailConfig');
+      validateAndLog(EmailConfig);
+    } catch (_) {
+      logger.info('📧 Email config validation skipped (validator not available)');
+    }
+
+    // Start the email event bridge (routes domain events to email delivery)
+    const emailEventBridge = new EmailEventBridge(emailManager);
+    try {
+      const systemIntegrationBus = require('./integration/systemIntegrationBus');
+      emailEventBridge.connect({ bus: systemIntegrationBus });
+      logger.info('📧 Email Event Bridge connected to integration bus');
+    } catch (_) {
+      logger.info('📧 Email Event Bridge running in standalone mode (no integration bus)');
+    }
+
+    // Start the email scheduler (queue processing, digests, reminders, cleanup)
+    const emailScheduler = new EmailScheduler(emailManager);
+
+    // Wire digest aggregator into the scheduler for periodic flushing
+    if (digestAggregator) {
+      emailScheduler.setDigestAggregator(digestAggregator);
+    }
+
+    emailScheduler.start();
+    logger.info('📧 Email Scheduler ready (queue processing + daily digest + cleanup)');
+
+    // Store references for graceful shutdown
+    server._emailEventBridge = emailEventBridge;
+    server._emailScheduler = emailScheduler;
+    server._digestAggregator = digestAggregator;
+
+    // Register email shutdown hooks
+    try {
+      const { registerShutdownHook } = require('./utils/gracefulShutdown');
+      registerShutdownHook('Email Scheduler', () => {
+        if (server._emailScheduler) {
+          server._emailScheduler.stop();
+          logger.info('📧 Email Scheduler stopped');
+        }
+      });
+      registerShutdownHook('Email Event Bridge', () => {
+        if (server._emailEventBridge) {
+          server._emailEventBridge.disconnect();
+          logger.info('📧 Email Event Bridge disconnected');
+        }
+      });
+      registerShutdownHook('Email Queue Flush', async () => {
+        if (emailManager && typeof emailManager.flushQueue === 'function') {
+          await emailManager.flushQueue();
+          logger.info('📧 Email queue flushed');
+        }
+      });
+      registerShutdownHook('Email Digest Aggregator', () => {
+        if (server._digestAggregator) {
+          const counts = server._digestAggregator.purge();
+          logger.info(
+            `📧 Digest aggregator purged (${counts.dailyItems} daily, ${counts.weeklyItems} weekly)`
+          );
+        }
+      });
+    } catch (_) {
+      // gracefulShutdown may not be loaded yet — that's OK
+    }
+
+    logger.info('📧 Unified Email System initialized successfully');
+  } catch (err) {
+    logger.info('Email System initialization skipped:', err.message);
+  }
+
+  // Initialize Cross-Module Email Subscribers
+  try {
+    const { initializeCrossModuleSubscribers } = require('./integration/crossModuleSubscribers');
+    const systemIntegrationBus = require('./integration/systemIntegrationBus');
+    const result = initializeCrossModuleSubscribers(systemIntegrationBus);
+    logger.info(`🔗 Cross-Module Subscribers ready (${result.subscriberCount} registered)`);
+  } catch (err) {
+    logger.info('Cross-Module Subscribers initialization skipped:', err.message);
+  }
+
   // Run pending database migrations
   try {
     if (process.env.AUTO_MIGRATE !== 'false') {

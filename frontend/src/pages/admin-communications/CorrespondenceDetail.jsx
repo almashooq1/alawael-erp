@@ -43,17 +43,20 @@ import {
   Archive,
   Print,
   Download,
-  CheckCircle,  AttachFile,
+  CheckCircle,
+  AttachFile,
   InsertDriveFile,
   History,
   Person,
   Business,
   CalendarMonth,
-  Lock,  CallReceived,
+  Lock,
+  CallReceived,
   CallMade,
   ThumbUp,
   ThumbDown,
-  Share,  Directions,
+  Share,
+  Directions,
 } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';
@@ -83,7 +86,7 @@ function DirectiveDialog({ open, onClose, onSubmit }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
       <DialogTitle>إضافة توجيه</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
@@ -139,7 +142,7 @@ function ApprovalDialog({ open, onClose, onApprove, onReject }) {
   const [mode, setMode] = useState('approve');
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
       <DialogTitle>
         {mode === 'approve' ? 'اعتماد المراسلة' : 'رفض المراسلة'}
       </DialogTitle>
@@ -353,7 +356,8 @@ export default function CorrespondenceDetail() {
           background:
             gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
           color: '#fff',
-          borderRadius: 2,
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -457,8 +461,8 @@ export default function CorrespondenceDetail() {
                   lineHeight: 1.8,
                   minHeight: 200,
                   p: 2,
-                  bgcolor: 'grey.50',
-                  borderRadius: 1,
+                  bgcolor: 'rgba(0,0,0,0.02)',
+                  borderRadius: '10px',
                 }}
               >
                 {item.body || item.content || '(لا يوجد محتوى)'}
@@ -484,7 +488,7 @@ export default function CorrespondenceDetail() {
                     {item.directives.map((d, i) => (
                       <ListItem
                         key={i}
-                        sx={{ bgcolor: '#fff8e1', borderRadius: 1, mb: 0.5 }}
+                        sx={{ bgcolor: '#fff8e1', borderRadius: '10px', mb: 0.5 }}
                       >
                         <ListItemIcon>
                           <Directions color="warning" />
@@ -518,7 +522,7 @@ export default function CorrespondenceDetail() {
                   {item.attachments.map((att, i) => (
                     <ListItem
                       key={i}
-                      sx={{ bgcolor: 'grey.50', borderRadius: 1, mb: 1 }}
+                      sx={{ bgcolor: 'rgba(0,0,0,0.02)', borderRadius: '10px', mb: 1 }}
                     >
                       <ListItemIcon>
                         <InsertDriveFile color="primary" />

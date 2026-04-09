@@ -54,6 +54,11 @@ const BehaviorManagement = lazyWithRetry(
 // Rehabilitation Plans Dashboard (12-week AI-assisted plans)
 const RehabDashboard = lazyWithRetry(() => import('../pages/RehabDashboard'));
 
+// Smart Clinical Assessment Engine
+const SmartAssessmentDashboard = lazyWithRetry(
+  () => import('../pages/SmartAssessment/SmartAssessmentDashboard')
+);
+
 // Sessions
 const SessionsManagement = lazyWithRetry(() => import('../pages/Sessions'));
 const SessionsDashboard = lazyWithRetry(() => import('../pages/Sessions/SessionsDashboard'));
@@ -98,6 +103,9 @@ export default function RehabRoutes() {
 
       {/* Individualized Rehabilitation Plans — 12-week AI-assisted */}
       <Route path="rehab-plans" element={<RehabDashboard />} />
+
+      {/* Smart Clinical Assessment Engine — محرك التقييم الذكي */}
+      <Route path="smart-assessment" element={<SmartAssessmentDashboard />} />
     </>
   );
 }

@@ -614,7 +614,7 @@ export default function ComposeCorrespondence() {
         {attachments.length > 0 && (
           <List dense>
             {attachments.map((file, i) => (
-              <ListItem key={i} sx={{ bgcolor: 'grey.50', borderRadius: 1, mb: 0.5 }}>
+              <ListItem key={i} sx={{ bgcolor: 'rgba(0,0,0,0.02)', borderRadius: '10px', mb: 0.5 }}>
                 <ListItemIcon><InsertDriveFile color="primary" /></ListItemIcon>
                 <ListItemText primary={file.name} secondary={formatFileSize(file.size)} />
                 <ListItemSecondaryAction>
@@ -766,7 +766,8 @@ export default function ComposeCorrespondence() {
         sx={{
           p: 3, mb: 3,
           background: gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-          color: '#fff', borderRadius: 2,
+          color: '#fff', borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
         }}
       >
         <Box display="flex" alignItems="center" gap={2}>
@@ -784,7 +785,7 @@ export default function ComposeCorrespondence() {
         </Box>
       </Paper>
 
-      <Paper sx={{ p: 2, mb: 3 }}>
+      <Paper sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)' }}>
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map(label => (
             <Step key={label}><StepLabel>{label}</StepLabel></Step>
@@ -792,9 +793,9 @@ export default function ComposeCorrespondence() {
         </Stepper>
       </Paper>
 
-      <Paper sx={{ p: 3, mb: 3 }}>{getStepContent(activeStep)}</Paper>
+      <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>{getStepContent(activeStep)}</Paper>
 
-      <Paper sx={{ p: 2 }}>
+      <Paper sx={{ p: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)' }}>
         <Box display="flex" justifyContent="space-between">
           <Box>
             {activeStep > 0 && (

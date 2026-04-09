@@ -1,7 +1,7 @@
 /**
- * RegisterPage — Enhanced Tailwind Registration
+ * RegisterPage — Premium Professional Registration v2
  * Multi-step: بيانات أساسية → كلمة المرور → نوع الحساب
- * Premium glass design with rich animations
+ * Premium glass design with rich animations & micro-interactions
  */
 import React, { useState, useCallback, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -493,7 +493,7 @@ export default function RegisterPage() {
                   ) : (
                     <span className="relative z-10 flex items-center gap-2">
                       التالي
-                      <svg className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                       </svg>
                     </span>
@@ -503,22 +503,22 @@ export default function RegisterPage() {
             </form>
 
             {/* Login link */}
-            <div className="text-center mt-7">
+            <div className="text-center mt-7 p-4 rounded-2xl bg-gray-50 border border-gray-100">
               <span className="text-sm text-gray-500">لديك حساب بالفعل؟ </span>
               <Link to="/login" className="text-sm font-semibold text-primary-600 hover:text-primary-700 transition-colors hover:underline">
                 تسجيل الدخول
               </Link>
             </div>
 
-            <div className="text-center mt-3">
-              <Link to="/" className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-colors group">
+            <div className="text-center mt-5">
+              <Link to="/" className="inline-flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 transition-all duration-300 group hover:-translate-y-0.5">
                 <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" /></svg>
                 العودة للصفحة الرئيسية
               </Link>
             </div>
 
-            <p className="text-center text-xs text-gray-300 mt-6">
-              © 2026 مراكز الأوائل. جميع الحقوق محفوظة
+            <p className="text-center text-xs text-gray-300 mt-8">
+              © {new Date().getFullYear()} مراكز الأوائل. جميع الحقوق محفوظة
             </p>
           </div>
         </div>

@@ -18,9 +18,10 @@ const DashboardHeader = ({ loading, dashError, fetchDashboard }) => (
       sx={{
         mb: 4,
         p: 3,
-        borderRadius: 3,
+        borderRadius: '20px',
         background: gradients.primary,
         color: '#fff',
+        boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
       }}
     >
       <Grid container spacing={2} alignItems="center">
@@ -54,7 +55,7 @@ const DashboardHeader = ({ loading, dashError, fetchDashboard }) => (
     </Box>
 
     {dashError && (
-      <Alert severity="error" sx={{ mb: 3 }} action={
+      <Alert severity="error" sx={{ mb: 3, borderRadius: '12px' }} action={
         <Button color="inherit" size="small" onClick={fetchDashboard}>إعادة المحاولة</Button>
       }>
         {dashError}

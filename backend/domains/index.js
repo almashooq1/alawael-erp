@@ -143,6 +143,45 @@ function _topologicalSort(domains) {
   return sorted;
 }
 
+// ─── Auto-register Core Domains (v2 — Unified Platform) ─────────────────────
+
+const _autoRegisterCoreDomains = () => {
+  const domainModules = [
+    { path: './core', name: 'core' },
+    { path: './episodes', name: 'episodes' },
+    { path: './timeline', name: 'timeline' },
+    { path: './assessments', name: 'assessments' },
+    { path: './care-plans', name: 'care-plans' },
+    { path: './sessions', name: 'sessions' },
+    { path: './goals', name: 'goals' },
+    { path: './workflow', name: 'workflow' },
+    { path: './programs', name: 'programs' },
+    { path: './ai-recommendations', name: 'ai-recommendations' },
+    { path: './quality', name: 'quality' },
+    { path: './family', name: 'family' },
+    { path: './reports', name: 'reports' },
+    { path: './group-therapy', name: 'group-therapy' },
+    { path: './tele-rehab', name: 'tele-rehab' },
+    { path: './ar-vr', name: 'ar-vr' },
+    { path: './behavior', name: 'behavior' },
+    { path: './research', name: 'research' },
+    { path: './field-training', name: 'field-training' },
+    { path: './dashboards', name: 'dashboards' },
+  ];
+
+  for (const { path, name } of domainModules) {
+    try {
+      const domainModule = require(path);
+      registerDomain(domainModule);
+    } catch (error) {
+      logger.warn(`[DomainRegistry] Could not auto-register domain "${name}": ${error.message}`);
+    }
+  }
+};
+
+// Auto-register on import
+_autoRegisterCoreDomains();
+
 module.exports = {
   registerDomain,
   initializeAllDomains,

@@ -266,21 +266,32 @@ export default function SessionsDashboard() {
       {/* ──── Charts Row 1: Weekly Trend + By Type ──── */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              اتجاه الجلسات الأسبوعي
-            </Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrendingUpIcon sx={{ fontSize: 20, color: statusColors.success }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">اتجاه الجلسات الأسبوعي</Typography>
+              </Box>
+              <Chip label="هذا الأسبوع" size="small" variant="outlined" sx={{ borderRadius: '8px', fontWeight: 500 }} />
+            </Box>
             {weeklyTrend.length > 0 ? (
               <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني لاتجاه الجلسات الأسبوعي">
-                <BarChart data={weeklyTrend}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" />
-                  <YAxis />
-                  <RTooltip />
+                <BarChart data={weeklyTrend} barSize={20}>
+                  <defs>
+                    <linearGradient id="sessDone" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#10b981" /><stop offset="100%" stopColor="#059669" /></linearGradient>
+                    <linearGradient id="sessCancel" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef4444" /><stop offset="100%" stopColor="#dc2626" /></linearGradient>
+                    <linearGradient id="sessNoShow" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f59e0b" /><stop offset="100%" stopColor="#d97706" /></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#999' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                   <Legend />
-                  <Bar dataKey="completed" fill={statusColors.success} name="مكتملة" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="cancelled" fill={statusColors.error} name="ملغاة" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="noShow" fill={statusColors.warning} name="لم يحضر" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="completed" fill="url(#sessDone)" name="مكتملة" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="cancelled" fill="url(#sessCancel)" name="ملغاة" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="noShow" fill="url(#sessNoShow)" name="لم يحضر" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -289,10 +300,13 @@ export default function SessionsDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              الجلسات حسب النوع
-            </Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ScheduleIcon sx={{ fontSize: 20, color: '#6366f1' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">الجلسات حسب النوع</Typography>
+            </Box>
             {byType.length > 0 ? (
               <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني لتوزيع الجلسات حسب النوع">
                 <PieChart>
@@ -302,14 +316,15 @@ export default function SessionsDashboard() {
                     cy="50%"
                     outerRadius={90}
                     innerRadius={50}
+                    paddingAngle={2}
                     dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   >
                     {byType.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
+                      <Cell key={i} fill={entry.color} stroke="none" />
                     ))}
                   </Pie>
-                  <RTooltip />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -322,18 +337,27 @@ export default function SessionsDashboard() {
       {/* ──── Charts Row 2: Hourly Distribution + Therapist Load ──── */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              توزيع الجلسات حسب الساعة
-            </Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AccessTimeIcon sx={{ fontSize: 20, color: '#3b82f6' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">توزيع الجلسات حسب الساعة</Typography>
+            </Box>
             {hourlyDist.length > 0 ? (
               <ResponsiveContainer width="100%" height={260} role="img" aria-label="رسم بياني لتوزيع الجلسات حسب الساعة">
                 <LineChart data={hourlyDist}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="hour" />
-                  <YAxis />
-                  <RTooltip />
-                  <Line type="monotone" dataKey="sessions" stroke={statusColors.primaryBlue} strokeWidth={3} name="عدد الجلسات" dot={{ r: 5 }} />
+                  <defs>
+                    <linearGradient id="sessLineGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.01} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="hour" tick={{ fontSize: 12, fill: '#999' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <Line type="monotone" dataKey="sessions" stroke="#3b82f6" strokeWidth={2.5} name="عدد الجلسات" dot={{ r: 4, fill: '#3b82f6' }} activeDot={{ r: 6 }} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -342,38 +366,43 @@ export default function SessionsDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              <GroupsIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
-              عبء عمل المعالجين
-            </Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <GroupsIcon sx={{ fontSize: 20, color: '#8b5cf6' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">عبء عمل المعالجين</Typography>
+            </Box>
             <TableContainer>
-              <Table size="small">
+              <Table size="small" sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)', py: 1.5 } }}>
                 <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>المعالج</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 700 }}>الجلسات</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>نسبة الإنجاز</TableCell>
+                  <TableRow sx={{ '& .MuiTableCell-head': { fontWeight: 700, color: 'text.secondary', fontSize: '12px', letterSpacing: 0.5, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: 0 } }}>
+                    <TableCell>المعالج</TableCell>
+                    <TableCell align="center">الجلسات</TableCell>
+                    <TableCell>نسبة الإنجاز</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {therapistLoad.map((t, i) => (
-                    <TableRow key={i}>
-                      <TableCell>{t.name}</TableCell>
+                    <TableRow key={i} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}>
+                      <TableCell sx={{ fontWeight: 600 }}>{t.name}</TableCell>
                       <TableCell align="center">
-                        <Chip label={t.sessions} size="small" variant="outlined" />
+                        <Chip label={t.sessions} size="small" sx={{ bgcolor: 'rgba(99,102,241,0.08)', color: '#6366f1', fontWeight: 700, borderRadius: '8px' }} />
                       </TableCell>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <LinearProgress
                             variant="determinate"
                             value={t.completion}
-                            sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                            color={t.completion >= 90 ? 'success' : t.completion >= 80 ? 'warning' : 'error'}
+                            sx={{
+                              flex: 1, height: 6, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.04)',
+                              '& .MuiLinearProgress-bar': {
+                                borderRadius: 3,
+                                background: t.completion >= 90 ? 'linear-gradient(90deg, #10b981, #34d399)' : t.completion >= 80 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #ef4444, #f87171)',
+                              },
+                            }}
                           />
-                          <Typography variant="caption" fontWeight={600}>
-                            {t.completion}%
-                          </Typography>
+                          <Chip label={`${t.completion}%`} size="small" sx={{ height: 22, fontSize: '11px', fontWeight: 700, bgcolor: t.completion >= 90 ? 'rgba(16,185,129,0.1)' : t.completion >= 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: t.completion >= 90 ? '#059669' : t.completion >= 80 ? '#D97706' : '#DC2626', borderRadius: '6px' }} />
                         </Box>
                       </TableCell>
                     </TableRow>
@@ -386,40 +415,44 @@ export default function SessionsDashboard() {
       </Grid>
 
       {/* ──── Recent Sessions ──── */}
-      <Paper sx={{ p: 3, borderRadius: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight={600}>
-            آخر الجلسات
-          </Typography>
-          <Button size="small" onClick={() => navigate('/sessions')}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <ScheduleIcon sx={{ fontSize: 20, color: '#f59e0b' }} />
+            </Box>
+            <Typography variant="h6" fontWeight={700} fontSize="1rem">آخر الجلسات</Typography>
+          </Box>
+          <Button size="small" onClick={() => navigate('/sessions')} sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '12px' }} endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}>
             عرض الكل
           </Button>
         </Box>
         <TableContainer>
-          <Table>
+          <Table sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)' } }}>
             <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>الطالب</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>المعالج</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>النوع</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>الوقت</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
+              <TableRow sx={{ '& .MuiTableCell-head': { fontWeight: 700, color: 'text.secondary', fontSize: '12px', letterSpacing: 0.5, bgcolor: 'rgba(0,0,0,0.02)' } }}>
+                <TableCell>الطالب</TableCell>
+                <TableCell>المعالج</TableCell>
+                <TableCell>النوع</TableCell>
+                <TableCell>الوقت</TableCell>
+                <TableCell>الحالة</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {recentSessions.map(s => (
-                <TableRow key={s.id} hover>
-                  <TableCell>{s.student}</TableCell>
+                <TableRow key={s.id} sx={{ transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>{s.student}</TableCell>
                   <TableCell>{s.therapist}</TableCell>
                   <TableCell>{s.type}</TableCell>
                   <TableCell>
-                    <Chip label={s.time} size="small" variant="outlined" icon={<AccessTimeIcon />} />
+                    <Chip label={s.time} size="small" sx={{ bgcolor: 'rgba(59,130,246,0.08)', color: '#3b82f6', fontWeight: 600, borderRadius: '8px', '& .MuiChip-icon': { color: '#3b82f6' } }} icon={<AccessTimeIcon />} />
                   </TableCell>
                   <TableCell>
                     <Chip
                       label={STATUS_MAP[s.status]?.label || s.status}
                       color={STATUS_MAP[s.status]?.color || 'default'}
                       size="small"
+                      sx={{ fontWeight: 600, borderRadius: '8px' }}
                     />
                   </TableCell>
                 </TableRow>

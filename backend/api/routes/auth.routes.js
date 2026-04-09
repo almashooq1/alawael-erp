@@ -29,12 +29,13 @@ try {
   Session = null;
 }
 
-// Email service for password-reset flows
-let emailService;
+// Unified email service
+let emailManager;
 try {
-  emailService = require('../../services/emailService');
+  const { emailManager: em } = require('../../services/email');
+  emailManager = em;
 } catch {
-  emailService = null;
+  emailManager = null;
 }
 
 // Max concurrent sessions per user (configurable via env)
@@ -88,6 +89,13 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       email: user.email,
       ip: getClientIP(req),
     });
+
+    // Send welcome email (non-blocking)
+    if (emailManager) {
+      emailManager.sendWelcome(user.email, { fullName, email }).catch(err => {
+        logger.error('Failed to send welcome email:', err.message);
+      });
+    }
 
     // Generate tokens
     const accessToken = jwt.sign(
@@ -265,6 +273,20 @@ router.post('/login', authLimiter, async (req, res) => {
       email,
       ip: getClientIP(req),
     });
+
+    // Send login alert email (non-blocking)
+    if (emailManager) {
+      emailManager
+        .sendLoginAlert(user.email, {
+          fullName: user.fullName,
+          ip: getClientIP(req),
+          userAgent: req.headers['user-agent'] || 'Unknown',
+          time: new Date().toLocaleString('ar-SA', { timeZone: 'Asia/Riyadh' }),
+        })
+        .catch(err => {
+          logger.error('Failed to send login alert email:', err.message);
+        });
+    }
 
     return res.status(200).json({
       success: true,
@@ -566,6 +588,19 @@ router.post(
         ip: getClientIP(req),
       });
 
+      // Send password change notification email (non-blocking)
+      if (emailManager) {
+        emailManager
+          .sendNotification(user.email, {
+            title: 'تم تغيير كلمة المرور',
+            message: `تم تغيير كلمة المرور الخاصة بحسابك بنجاح. إذا لم تقم بهذا التغيير، يرجى التواصل مع الدعم الفني فوراً.`,
+            fullName: user.fullName,
+          })
+          .catch(err => {
+            logger.error('Failed to send password change notification:', err.message);
+          });
+      }
+
       // Issue fresh tokens so the user stays logged in with the new password
       const newAccessToken = jwt.sign(
         { userId: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() },
@@ -635,9 +670,14 @@ router.post('/forgot-password', passwordLimiter, async (req, res) => {
 
     // Send reset email (non-blocking — failure does NOT expose existence)
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    if (emailService && emailService.sendEmail) {
-      emailService
-        .sendEmail(user.email, 'passwordReset', { resetUrl, fullName: user.fullName })
+    if (emailManager) {
+      emailManager
+        .sendPasswordReset(user.email, {
+          fullName: user.fullName,
+          resetUrl,
+          resetToken,
+          expiresIn: '60 دقيقة',
+        })
         .catch(err => {
           logger.error('Failed to send reset email:', err.message);
         });
@@ -711,6 +751,20 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
       userId: user.id,
       ip: getClientIP(req),
     });
+
+    // Send password reset confirmation email (non-blocking)
+    if (emailManager) {
+      emailManager
+        .sendNotification(user.email, {
+          title: 'تم إعادة تعيين كلمة المرور',
+          message:
+            'تم إعادة تعيين كلمة المرور بنجاح. يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة. تم إنهاء جميع الجلسات النشطة السابقة لحماية حسابك.',
+          fullName: user.fullName,
+        })
+        .catch(err => {
+          logger.error('Failed to send password reset confirmation:', err.message);
+        });
+    }
 
     return res.json({ success: true, message: 'Password reset successful. Please log in.' });
   } catch (error) {

@@ -6,8 +6,26 @@
 
 const crypto = require('crypto');
 const mfaService = require('../services/mfaService');
-const emailService = require('../services/emailService');
 const smsService = require('../services/smsService');
+
+// Unified email service
+let emailManager;
+try {
+  const { emailManager: em } = require('../services/email');
+  emailManager = em;
+} catch {
+  emailManager = null;
+}
+
+// Backward-compatible emailService wrapper
+const emailService = {
+  sendOTPEmail: async (email, code, opts) => {
+    if (emailManager) {
+      return emailManager.sendOTP(email, { code, fullName: opts?.name, purpose: opts?.purpose });
+    }
+    throw new Error('Email service not available');
+  },
+};
 const {
   MFASettings,
   MFASession,

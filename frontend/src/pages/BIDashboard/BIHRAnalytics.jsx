@@ -62,11 +62,16 @@ function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
       <Card
         elevation={0}
         sx={{
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          borderRadius: '16px',
           height: '100%',
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          transition: 'all 0.3s',
+          overflow: 'hidden',
+          '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
         }}
       >
+        <Box sx={{ height: 3, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
             <Box
@@ -243,8 +248,8 @@ export default function BIHRAnalytics() {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Department Distribution */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               توزيع الموظفين حسب القسم
             </Typography>
             {deptPie.length > 0 ? (
@@ -255,7 +260,7 @@ export default function BIHRAnalytics() {
                       <Cell key={idx} fill={entry.fill} />
                     ))}
                   </Pie>
-                  <RechartTooltip />
+                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -268,17 +273,17 @@ export default function BIHRAnalytics() {
 
         {/* Attendance Trend */}
         <Grid item xs={12} md={6}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               اتجاه نسبة الحضور الشهري
             </Typography>
             {attendanceData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={attendanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                   <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                  <RechartTooltip formatter={(val) => `${val}%`} />
+                  <RechartTooltip formatter={(val) => `${val}%`} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                   <Line type="monotone" dataKey="rate" stroke="#4CAF50" strokeWidth={3} dot={{ r: 5 }} name="نسبة الحضور" />
                 </LineChart>
               </ResponsiveContainer>
@@ -295,17 +300,17 @@ export default function BIHRAnalytics() {
       <Grid container spacing={3}>
         {/* Leave Breakdown */}
         <Grid item xs={12} md={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               توزيع الإجازات
             </Typography>
             {leaveData.length > 0 ? (
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={leaveData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                   <XAxis type="number" tick={{ fontSize: 11 }} />
                   <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={60} />
-                  <RechartTooltip />
+                  <RechartTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                   <Bar dataKey="count" fill="#9C27B0" name="عدد الطلبات" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -319,8 +324,8 @@ export default function BIHRAnalytics() {
 
         {/* Department Performance Radar */}
         <Grid item xs={12} md={8}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               مقارنة أداء الأقسام
             </Typography>
             {deptComparison.length > 0 ? (

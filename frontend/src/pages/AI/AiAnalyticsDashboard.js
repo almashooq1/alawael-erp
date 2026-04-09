@@ -369,10 +369,15 @@ export default function AiAnalyticsDashboard() {
         {kpiCards.map((card, i) => (
           <Grid item xs={12} sm={6} lg={3} key={i}>
             <Card
-              sx={{ bgcolor: card.color, cursor: 'pointer' }}
+              sx={{
+                bgcolor: card.color,
+                cursor: 'pointer',
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              }}
               onClick={() => setTab(i)}
               elevation={0}
-              variant="outlined"
             >
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start">
@@ -396,11 +401,25 @@ export default function AiAnalyticsDashboard() {
       </Grid>
 
       {/* Main Content Tabs */}
-      <Paper elevation={1} sx={{ borderRadius: 2 }}>
+      <Paper
+        elevation={1}
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
-          sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            px: 2,
+            '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
         >
           <Tab
             label={
@@ -545,13 +564,71 @@ export default function AiAnalyticsDashboard() {
           {tab === 1 && (
             <Table size="small">
               <TableHead>
-                <TableRow sx={{ bgcolor: 'grey.50' }}>
-                  <TableCell>المستفيد</TableCell>
-                  <TableCell>نوع التنبؤ</TableCell>
-                  <TableCell align="center">القيمة المتوقعة</TableCell>
-                  <TableCell align="center">الثقة</TableCell>
-                  <TableCell align="center">تاريخ الهدف</TableCell>
-                  <TableCell align="center">الحالة</TableCell>
+                <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    المستفيد
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    نوع التنبؤ
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    القيمة المتوقعة
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الثقة
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    تاريخ الهدف
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الحالة
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -611,8 +688,11 @@ export default function AiAnalyticsDashboard() {
                     key={s._id}
                     sx={{
                       mb: 2,
-                      border: s.status === 'pending' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
+                      borderRadius: '16px',
+                      border:
+                        s.status === 'pending' ? '1px solid #93c5fd' : '1px solid rgba(0,0,0,0.04)',
                       bgcolor: s.status === 'pending' ? '#eff6ff' : 'white',
+                      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
                     }}
                     elevation={0}
                   >
@@ -713,12 +793,60 @@ export default function AiAnalyticsDashboard() {
               </Box>
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.50' }}>
-                    <TableCell>المستفيد</TableCell>
-                    <TableCell>نوع التقرير</TableCell>
-                    <TableCell align="center">الفترة</TableCell>
-                    <TableCell align="center">الحالة</TableCell>
-                    <TableCell align="center">إجراءات</TableCell>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      المستفيد
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      نوع التقرير
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الفترة
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الحالة
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      إجراءات
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -860,7 +988,16 @@ export default function AiAnalyticsDashboard() {
                 </Typography>
               ) : (
                 models.map(m => (
-                  <Card key={m._id} sx={{ mb: 2 }} variant="outlined">
+                  <Card
+                    key={m._id}
+                    sx={{
+                      mb: 2,
+                      borderRadius: '16px',
+                      border: '1px solid rgba(0,0,0,0.04)',
+                      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                    }}
+                    variant="outlined"
+                  >
                     <CardContent>
                       <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
                         <Box>
@@ -891,7 +1028,7 @@ export default function AiAnalyticsDashboard() {
                             },
                           ].map(({ label, value }) => (
                             <Grid item xs={6} sm={3} key={label}>
-                              <Box sx={{ bgcolor: 'grey.50', borderRadius: 1, p: 1 }}>
+                              <Box sx={{ bgcolor: 'rgba(0,0,0,0.02)', borderRadius: '10px', p: 1 }}>
                                 <Typography variant="caption" color="text.secondary">
                                   {label}
                                 </Typography>
@@ -913,7 +1050,13 @@ export default function AiAnalyticsDashboard() {
       </Paper>
 
       {/* Generate Report Modal */}
-      <Dialog open={generateModal} onClose={() => setGenerateModal(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={generateModal}
+        onClose={() => setGenerateModal(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>✨ توليد تقرير بالذكاء الاصطناعي</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>

@@ -267,18 +267,30 @@ export default function BeneficiariesDashboard() {
       {/* Charts Row 1 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>التسجيل الشهري</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrendUpIcon sx={{ fontSize: 20, color: '#10b981' }} />
+                </Box>
+                <Typography variant="h6" fontWeight={700} fontSize="1rem">التسجيل الشهري</Typography>
+              </Box>
+              <Chip label="آخر 6 أشهر" size="small" variant="outlined" sx={{ borderRadius: '8px', fontWeight: 500 }} />
+            </Box>
             {monthlyReg.length > 0 ? (
               <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني للتسجيل الشهري">
                 <AreaChart data={monthlyReg}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <RTooltip />
+                  <defs>
+                    <linearGradient id="benReg" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={brandColors.primaryStart} stopOpacity={0.2} /><stop offset="95%" stopColor={brandColors.primaryStart} stopOpacity={0.01} /></linearGradient>
+                    <linearGradient id="benActive" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor={statusColors.success} stopOpacity={0.15} /><stop offset="95%" stopColor={statusColors.success} stopOpacity={0.01} /></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#999' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                   <Legend />
-                  <Area type="monotone" dataKey="registrations" fill={brandColors.primaryStart} fillOpacity={0.3} stroke={brandColors.primaryStart} strokeWidth={2} name="التسجيلات" />
-                  <Area type="monotone" dataKey="active" fill={statusColors.success} fillOpacity={0.2} stroke={statusColors.success} strokeWidth={2} name="نشطون" />
+                  <Area type="monotone" dataKey="registrations" fill="url(#benReg)" stroke={brandColors.primaryStart} strokeWidth={2.5} name="التسجيلات" dot={{ r: 4, fill: brandColors.primaryStart }} activeDot={{ r: 6 }} />
+                  <Area type="monotone" dataKey="active" fill="url(#benActive)" stroke={statusColors.success} strokeWidth={2} name="نشطون" dot={{ r: 3, fill: statusColors.success }} />
                 </AreaChart>
               </ResponsiveContainer>
             ) : (
@@ -287,16 +299,21 @@ export default function BeneficiariesDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 3, height: '100%' }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>حالة المستفيدين</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', height: '100%', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PeopleIcon sx={{ fontSize: 20, color: '#6366f1' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">حالة المستفيدين</Typography>
+            </Box>
             {statusDist.length > 0 ? (
               <ResponsiveContainer width="100%" height={280} role="img" aria-label="رسم بياني لحالة المستفيدين">
                 <PieChart>
-                  <Pie data={statusDist} cx="50%" cy="50%" outerRadius={90} innerRadius={50} dataKey="value"
+                  <Pie data={statusDist} cx="50%" cy="50%" outerRadius={90} innerRadius={50} paddingAngle={2} dataKey="value"
                     label={({ name, value }) => `${name}: ${value}`}>
-                    {statusDist.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    {statusDist.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
                   </Pie>
-                  <RTooltip />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -309,16 +326,21 @@ export default function BeneficiariesDashboard() {
       {/* Charts Row 2 */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>حسب نوع الإعاقة</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(236,72,153,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <BenIcon sx={{ fontSize: 20, color: '#ec4899' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">حسب نوع الإعاقة</Typography>
+            </Box>
             {byCategory.length > 0 ? (
               <ResponsiveContainer width="100%" height={260} role="img" aria-label="رسم بياني حسب نوع الإعاقة">
                 <PieChart>
-                  <Pie data={byCategory} cx="50%" cy="50%" outerRadius={80} innerRadius={40} dataKey="value"
+                  <Pie data={byCategory} cx="50%" cy="50%" outerRadius={80} innerRadius={40} paddingAngle={2} dataKey="value"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {byCategory.map((e, i) => <Cell key={i} fill={e.color} />)}
+                    {byCategory.map((e, i) => <Cell key={i} fill={e.color} stroke="none" />)}
                   </Pie>
-                  <RTooltip />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -327,16 +349,21 @@ export default function BeneficiariesDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>توزيع التقدم</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <TrendUpIcon sx={{ fontSize: 20, color: '#f59e0b' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">توزيع التقدم</Typography>
+            </Box>
             {progressDist.length > 0 ? (
               <ResponsiveContainer width="100%" height={260} role="img" aria-label="رسم بياني لتوزيع التقدم">
-                <BarChart data={progressDist}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="range" />
-                  <YAxis />
-                  <RTooltip />
-                  <Bar dataKey="count" name="عدد المستفيدين" radius={[4, 4, 0, 0]}>
+                <BarChart data={progressDist} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis dataKey="range" tick={{ fontSize: 11, fill: '#999' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#999' }} />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <Bar dataKey="count" name="عدد المستفيدين" radius={[8, 8, 0, 0]}>
                     {progressDist.map((_, i) => <Cell key={i} fill={PROG_COLORS[i]} />)}
                   </Bar>
                 </BarChart>
@@ -347,16 +374,24 @@ export default function BeneficiariesDashboard() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>الفئات العمرية</Typography>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+              <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PeopleIcon sx={{ fontSize: 20, color: '#3b82f6' }} />
+              </Box>
+              <Typography variant="h6" fontWeight={700} fontSize="1rem">الفئات العمرية</Typography>
+            </Box>
             {ageDist.length > 0 ? (
               <ResponsiveContainer width="100%" height={260} role="img" aria-label="رسم بياني للفئات العمرية">
-                <BarChart data={ageDist} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="range" type="category" width={80} />
-                  <RTooltip />
-                  <Bar dataKey="count" fill={brandColors.primaryStart} name="عدد المستفيدين" radius={[0, 4, 4, 0]} />
+                <BarChart data={ageDist} layout="vertical" barSize={20}>
+                  <defs>
+                    <linearGradient id="benAgeGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#3b82f6" /><stop offset="100%" stopColor="#6366f1" /></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                  <XAxis type="number" tick={{ fontSize: 12, fill: '#999' }} />
+                  <YAxis dataKey="range" type="category" width={80} tick={{ fontSize: 12, fill: '#999' }} />
+                  <RTooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
+                  <Bar dataKey="count" fill="url(#benAgeGrad)" name="عدد المستفيدين" radius={[0, 8, 8, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -367,50 +402,62 @@ export default function BeneficiariesDashboard() {
       </Grid>
 
       {/* Recent */}
-      <Paper sx={{ p: 3, borderRadius: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight={600}>آخر المستفيدين المسجلين</Typography>
-          <Button size="small" onClick={() => navigate('/beneficiaries')}>عرض الكل</Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <NewIcon sx={{ fontSize: 20, color: '#8b5cf6' }} />
+            </Box>
+            <Typography variant="h6" fontWeight={700} fontSize="1rem">آخر المستفيدين المسجلين</Typography>
+          </Box>
+          <Button size="small" onClick={() => navigate('/beneficiaries')} sx={{ borderRadius: '10px', fontWeight: 600, fontSize: '12px' }} endIcon={<ArrowForwardIcon sx={{ fontSize: 16 }} />}>عرض الكل</Button>
         </Box>
         <TableContainer>
-          <Table>
+          <Table sx={{ '& .MuiTableCell-root': { borderColor: 'rgba(0,0,0,0.06)' } }}>
             <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>الاسم</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>نوع الإعاقة</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700 }}>الجلسات</TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700 }}>التقدم</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>تاريخ التسجيل</TableCell>
+              <TableRow sx={{ '& .MuiTableCell-head': { fontWeight: 700, color: 'text.secondary', fontSize: '12px', letterSpacing: 0.5, bgcolor: 'rgba(0,0,0,0.02)' } }}>
+                <TableCell>الاسم</TableCell>
+                <TableCell>نوع الإعاقة</TableCell>
+                <TableCell>الحالة</TableCell>
+                <TableCell align="center">الجلسات</TableCell>
+                <TableCell align="center">التقدم</TableCell>
+                <TableCell>تاريخ التسجيل</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {recentList.map(b => (
-                <TableRow key={b.id} hover sx={{ cursor: 'pointer' }} onClick={() => navigate(`/beneficiary-portal/${b.id}`)}>
-                  <TableCell>{b.name}</TableCell>
+                <TableRow key={b.id} sx={{ cursor: 'pointer', transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.015)' } }} onClick={() => navigate(`/beneficiary-portal/${b.id}`)}>
+                  <TableCell sx={{ fontWeight: 600 }}>{b.name}</TableCell>
                   <TableCell>
                     <Chip label={CATEGORY_LABELS[b.category] || b.category} size="small"
-                      sx={{ bgcolor: CATEGORY_COLORS[b.category] || neutralColors.fallback, color: 'white' }} />
+                      sx={{ bgcolor: CATEGORY_COLORS[b.category] || neutralColors.fallback, color: 'white', fontWeight: 600, borderRadius: '8px' }} />
                   </TableCell>
                   <TableCell>
                     <Chip label={STATUS_LABELS[b.status] || b.status} size="small"
-                      color={b.status === 'active' ? 'success' : b.status === 'pending' ? 'warning' : 'error'} />
+                      sx={{
+                        fontWeight: 600, borderRadius: '8px',
+                        bgcolor: b.status === 'active' ? 'rgba(16,185,129,0.1)' : b.status === 'pending' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)',
+                        color: b.status === 'active' ? '#059669' : b.status === 'pending' ? '#D97706' : '#DC2626',
+                      }} />
                   </TableCell>
-                  <TableCell align="center">{b.sessions}</TableCell>
+                  <TableCell align="center">
+                    <Chip label={b.sessions} size="small" sx={{ bgcolor: 'rgba(99,102,241,0.08)', color: '#6366f1', fontWeight: 700, borderRadius: '8px' }} />
+                  </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
                       <LinearProgress
                         variant="determinate" value={b.progress}
-                        sx={{ width: 60, height: 8, borderRadius: 4, bgcolor: 'grey.200',
+                        sx={{ width: 60, height: 6, borderRadius: 3, bgcolor: 'rgba(0,0,0,0.04)',
                           '& .MuiLinearProgress-bar': {
-                            bgcolor: b.progress >= 80 ? statusColors.success : b.progress >= 50 ? statusColors.warning : statusColors.error,
+                            borderRadius: 3,
+                            background: b.progress >= 80 ? 'linear-gradient(90deg, #10b981, #34d399)' : b.progress >= 50 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' : 'linear-gradient(90deg, #ef4444, #f87171)',
                           },
                         }}
                       />
-                      <Typography variant="caption" fontWeight={600}>{b.progress}%</Typography>
+                      <Chip label={`${b.progress}%`} size="small" sx={{ height: 22, fontSize: '11px', fontWeight: 700, bgcolor: b.progress >= 80 ? 'rgba(16,185,129,0.1)' : b.progress >= 50 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: b.progress >= 80 ? '#059669' : b.progress >= 50 ? '#D97706' : '#DC2626', borderRadius: '6px' }} />
                     </Box>
                   </TableCell>
-                  <TableCell>{b.joinDate}</TableCell>
+                  <TableCell sx={{ fontFamily: 'monospace', fontSize: '13px' }}>{b.joinDate}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

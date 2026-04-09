@@ -69,12 +69,17 @@ function FinanceCard({ title, value, change, icon: Icon, color, format = 'curren
       <Card
         elevation={0}
         sx={{
-          border: `1px solid ${theme.palette.divider}`,
-          borderRadius: 3,
+          border: '1px solid rgba(0,0,0,0.04)',
+          borderRadius: '16px',
           height: '100%',
           background: `linear-gradient(135deg, ${alpha(color, 0.05)} 0%, transparent 100%)`,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          transition: 'all 0.3s',
+          overflow: 'hidden',
+          '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
         }}
       >
+        <Box sx={{ height: 3, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
             <Typography variant="body2" color="text.secondary" fontWeight={500}>
@@ -241,16 +246,16 @@ export default function BIFinanceAnalytics() {
       {/* Revenue vs Expenses Chart */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} lg={8}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}` }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               الإيرادات مقابل المصروفات — {year}
             </Typography>
             <ResponsiveContainer width="100%" height={350}>
               <ComposedChart data={monthly}>
-                <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <RechartTooltip formatter={(val) => formatCurrency(val)} />
+                <RechartTooltip formatter={(val) => formatCurrency(val)} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 <Legend />
                 <Bar dataKey="revenue" fill="#4CAF50" name="الإيرادات" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="expenses" fill="#F44336" name="المصروفات" radius={[4, 4, 0, 0]} />
@@ -262,8 +267,8 @@ export default function BIFinanceAnalytics() {
 
         {/* Cashflow */}
         <Grid item xs={12} lg={4}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: `1px solid ${theme.palette.divider}`, height: '100%' }}>
-            <Typography variant="h6" fontWeight={600} gutterBottom>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }, height: '100%' }}>
+            <Typography variant="h6" fontWeight={700} gutterBottom>
               التدفق النقدي
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
@@ -278,10 +283,10 @@ export default function BIFinanceAnalytics() {
                     <stop offset="95%" stopColor="#F44336" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                 <XAxis dataKey="month" tick={{ fontSize: 9 }} />
                 <YAxis tick={{ fontSize: 10 }} />
-                <RechartTooltip formatter={(val) => formatCurrency(val)} />
+                <RechartTooltip formatter={(val) => formatCurrency(val)} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.12)' }} />
                 <Area type="monotone" dataKey="inflow" stroke="#4CAF50" fill="url(#inflowGrad)" name="وارد" />
                 <Area type="monotone" dataKey="outflow" stroke="#F44336" fill="url(#outflowGrad)" name="صادر" />
               </AreaChart>
@@ -291,21 +296,21 @@ export default function BIFinanceAnalytics() {
       </Grid>
 
       {/* Monthly Detail Table */}
-      <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${theme.palette.divider}`, overflow: 'hidden' }}>
+      <Paper elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
         <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Typography variant="h6" fontWeight={600}>
+          <Typography variant="h6" fontWeight={700}>
             التفاصيل الشهرية — {year}
           </Typography>
         </Box>
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.04) }}>
-                <TableCell sx={{ fontWeight: 600 }}>الشهر</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">الإيرادات</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">المصروفات</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">صافي الدخل</TableCell>
-                <TableCell sx={{ fontWeight: 600 }} align="right">الفواتير</TableCell>
+              <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الشهر</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="right">الإيرادات</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="right">المصروفات</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="right">صافي الدخل</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="right">الفواتير</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

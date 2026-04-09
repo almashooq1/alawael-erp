@@ -12,13 +12,15 @@ import {
   CardActionArea,
   Paper,
   Button,
-  Chip,  Divider,
+  Chip,
+  Divider,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
   ListItemSecondaryAction,
-  Avatar,  Skeleton,
+  Avatar,
+  Skeleton,
 } from '@mui/material';
 import {
   Mail as MailIcon,
@@ -37,7 +39,8 @@ import {
   CallMade,
   Notifications,
   Assignment,
-  Speed,} from '@mui/icons-material';
+  Speed,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 
@@ -47,12 +50,13 @@ function StatCard({ title, value, icon, color, gradient, onClick, subtitle, load
     <Card
       sx={{
         height: '100%',
+        borderRadius: '16px',
         background: gradient || `linear-gradient(135deg, ${color}15 0%, ${color}08 100%)`,
-        border: `1px solid ${color}30`,
+        border: `1px solid ${color}20`,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
         '&:hover': onClick
-          ? { transform: 'translateY(-4px)', boxShadow: `0 8px 25px ${color}25` }
+          ? { transform: 'translateY(-4px)', boxShadow: `0 12px 32px ${color}20` }
           : {},
       }}
       onClick={onClick}
@@ -100,7 +104,7 @@ function RecentItem({ item, onClick }) {
       button
       onClick={onClick}
       sx={{
-        borderRadius: 1,
+        borderRadius: '10px',
         mb: 0.5,
         '&:hover': { bgcolor: 'action.hover' },
       }}
@@ -242,7 +246,8 @@ export default function AdminCommunicationsDashboard() {
           mb: 3,
           background: gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
           color: '#fff',
-          borderRadius: 2,
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -283,9 +288,9 @@ export default function AdminCommunicationsDashboard() {
       <Grid container spacing={3}>
         {/* Recent Inbox */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
+          <Paper sx={{ p: 2, height: '100%', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 <InboxIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#1976d2' }} />
                 آخر الوارد
               </Typography>
@@ -323,9 +328,9 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Recent Outbox */}
         <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, height: '100%' }}>
+          <Paper sx={{ p: 2, height: '100%', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 <SendIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#2e7d32' }} />
                 آخر الصادر
               </Typography>
@@ -363,9 +368,9 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Overdue / Alerts */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={{ p: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 <WarningIcon sx={{ mr: 1, verticalAlign: 'middle', color: '#d32f2f' }} />
                 المراسلات المتأخرة والتنبيهات
               </Typography>
@@ -395,7 +400,7 @@ export default function AdminCommunicationsDashboard() {
                     onClick={() => navigate(`/admin-communications/view/${item._id}`)}
                     sx={{
                       bgcolor: '#fff3e0',
-                      borderRadius: 1,
+                      borderRadius: '10px',
                       mb: 0.5,
                     }}
                   >
@@ -416,8 +421,8 @@ export default function AdminCommunicationsDashboard() {
 
         {/* Quick Actions */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 2 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               <Speed sx={{ mr: 1, verticalAlign: 'middle', color: '#1976d2' }} />
               إجراءات سريعة
             </Typography>
@@ -465,14 +470,15 @@ export default function AdminCommunicationsDashboard() {
                     sx={{
                       textAlign: 'center',
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
                       '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: 3,
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
                         borderColor: action.color,
                       },
                       border: '1px solid',
                       borderColor: 'divider',
+                      borderRadius: '14px',
                     }}
                     onClick={() => navigate(action.path)}
                   >

@@ -21,7 +21,17 @@ const AuditLog = require('../models/AuditLog');
 const FiscalPeriod = require('../models/FiscalPeriod');
 const PDFGenerator = require('../utils/pdf-generator');
 const ExcelGenerator = require('../utils/excel-generator');
-const { sendEmail } = require('../utils/emailService');
+// Unified email service (replaces legacy emailService)
+let emailManager;
+try {
+  const { emailManager: em } = require('./email');
+  emailManager = em;
+} catch {
+  emailManager = null;
+}
+const sendEmail = async (to, subject, html) => {
+  if (emailManager) return emailManager.send({ to, subject, html });
+};
 const { calculateVAT, calculateFinancialRatios } = require('../utils/financial-calculations');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');

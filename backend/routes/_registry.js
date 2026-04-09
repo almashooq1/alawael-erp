@@ -76,6 +76,7 @@ const orgBrandingRoutes = safeRequire('../routes/orgBranding');
 
 // Real Mongoose CRUD routes (converted from frontend-api-stubs)
 const adminRouter = safeRequire('../routes/admin.real.routes');
+const userManagementRouter = safeRequire('../routes/user-management.routes');
 const accountRouter = safeRequire('../routes/account.real.routes');
 const paymentsRouter = safeRequire('../routes/payments.real.routes');
 const monitoringRouter = safeRequire('../routes/monitoring.real.routes');
@@ -238,6 +239,9 @@ const employeeAffairsPhase3Routes = safeRequire('../routes/employeeAffairs.phase
 // HR Smart System — AI, Analytics, Onboarding, Documents (النظام الذكي لشؤون الموظفين)
 const hrSmartRoutes = safeRequire('../routes/hr/smart.routes');
 
+// Email System v2 (نظام البريد الإلكتروني الموحد)
+const emailV2Routes = safeRequire('../routes/email.routes');
+
 // WhatsApp Communication System (نظام الوتساب)
 const whatsappRoutes = safeRequire('../communication/whatsapp-routes');
 const whatsappEnhancedRoutes = safeRequire('../communication/whatsapp-enhanced-routes');
@@ -328,6 +332,15 @@ const qualityModuleRoutes = safeRequire('../routes/quality-module.routes');
 // ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────────
 const notificationEnhancedRoutes = safeRequire('../routes/notification-enhanced.routes');
 const documentEnhancedRoutes = safeRequire('../routes/document-enhanced.routes');
+const documentsProRoutes = safeRequire('../api/routes/documents-pro.routes');
+const documentsProExtRoutes = safeRequire('../api/routes/documents-pro-extended.routes');
+const documentsProV3Routes = safeRequire('../api/routes/documents-pro-phase3.routes');
+const documentsProV4Routes = safeRequire('../api/routes/documents-pro-phase4.routes');
+const documentsProV5Routes = safeRequire('../api/routes/documents-pro-phase5.routes');
+const documentsProV6Routes = safeRequire('../api/routes/documents-pro-phase6.routes');
+const documentsProV7Routes = safeRequire('../api/routes/documents-pro-phase7.routes');
+const documentsProV8Routes = safeRequire('../api/routes/documents-pro-phase8.routes');
+const documentsProV9Routes = safeRequire('../api/routes/documents-pro-phase9.routes');
 const branchEnhancedRoutes = safeRequire('../routes/branch-enhanced.routes');
 const inventoryEnhancedRoutes = safeRequire('../routes/inventory-enhanced.routes');
 const qualityEnhancedRoutes = safeRequire('../routes/quality-enhanced.routes');
@@ -470,6 +483,10 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── Real Mongoose CRUD Routes (dual-mounted /api + /api/v1) ─────────────
   dualMount(app, 'admin', adminRouter);
+  dualMount(app, 'user-management', userManagementRouter);
+  logger.info(
+    '✅ User Management System routes mounted (stats, CRUD, bulk-actions, permissions, import/export)'
+  );
   dualMount(app, 'account', accountRouter);
   dualMount(app, 'payments', paymentsRouter);
   dualMount(app, 'monitoring', monitoringRouter);
@@ -518,6 +535,11 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'purchasing', purchasingRoutes);
   dualMount(app, 'hr-advanced', hrAdvancedRoutes);
   dualMount(app, 'communication', communicationRoutes);
+
+  // ── Email System v2 (نظام البريد الإلكتروني الموحد) ──
+  app.use('/api/v2/email', emailV2Routes);
+  dualMount(app, 'email', emailV2Routes);
+
   dualMount(app, 'drivers', driversRoutes);
   dualMount(app, 'vehicles', vehiclesRoutes);
   dualMount(app, 'trips', tripsRoutes);
@@ -1676,6 +1698,33 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   // ─── prompt_08 Enhanced: الوحدات المحسّنة (8-12) ─────────────────────────
   dualMount(app, 'communication/notifications', notificationEnhancedRoutes);
   dualMount(app, 'documents-enhanced', documentEnhancedRoutes);
+  dualMount(app, 'documents-pro', documentsProRoutes);
+  dualMount(app, 'documents-pro-ext', documentsProExtRoutes);
+  dualMount(app, 'documents-pro-v3', documentsProV3Routes);
+  dualMount(app, 'documents-pro-v4', documentsProV4Routes);
+  dualMount(app, 'documents-pro-v5', documentsProV5Routes);
+  dualMount(app, 'documents-pro-v6', documentsProV6Routes);
+  dualMount(app, 'documents-pro-v7', documentsProV7Routes);
+  dualMount(app, 'documents-pro-v8', documentsProV8Routes);
+  dualMount(app, 'documents-pro-v9', documentsProV9Routes);
+  logger.info(
+    '✅ Documents Pro mounted: AI classification, workflow engine, advanced search, notifications, analytics (50+ endpoints)'
+  );
+  logger.info(
+    '✅ Documents Pro V9 mounted: lifecycle, digital certificates, classification AI, workflow orchestration, forensics (85+ endpoints)'
+  );
+  logger.info(
+    '✅ Documents Pro V8 mounted: translation, dynamic forms, approval chains, encryption/DLP, backup/recovery (80+ endpoints)'
+  );
+  logger.info(
+    '✅ Documents Pro V6 mounted: OCR, archiving, reporting engine, email gateway, AI assistant (70+ endpoints)'
+  );
+  logger.info(
+    '✅ Documents Pro V7 mounted: watermark, import/export, compliance monitor, knowledge graph, automation RPA (80+ endpoints)'
+  );
+  logger.info(
+    '✅ Documents Pro Extended mounted: signatures, versioning, templates, audit trail, bulk operations (40+ endpoints)'
+  );
   dualMount(app, 'branches-enhanced', branchEnhancedRoutes);
   dualMount(app, 'inventory-enhanced', inventoryEnhancedRoutes);
   dualMount(app, 'quality-enhanced', qualityEnhancedRoutes);
@@ -1929,6 +1978,16 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   logger.info(
     '🎉 البرومبت 23 مُثبّت بالكامل: إدارة المتطوعين (41) + الخدمة المجتمعية (42) + التوظيف الداخلي (43)'
+  );
+
+  // ─── النظام 44 — محرك التقييم الذكي (Smart Clinical Assessment Engine) ──
+  safeMount(
+    app,
+    ['/api/smart-assessment', '/api/v1/smart-assessment'],
+    require('./smart-assessment-engine.routes')
+  );
+  logger.info(
+    '✅ Smart Assessment Engine routes mounted (System 44): M-CHAT-R/F, CARS-2, Sensory Profile 2, BRIEF-2, SRS-2, Portage Guide, ABC Data Collection, Family Needs, QoL, Transition Readiness, Saudi Screening, FBA, Caregiver Burden — auto-scoring + CDSS protocols + progress analytics + effect size + RCI + clinical significance + trend analysis + goal prediction + benchmarks + ROI (60+ endpoints)'
   );
 
   // ── Setup & Admin Init — إعداد أولي (محمي بـ secret key) ──────────────

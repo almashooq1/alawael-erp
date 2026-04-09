@@ -166,6 +166,13 @@ const SEED_REGISTRY = [
     order: 19,
     envs: ['development', 'staging'],
   },
+  {
+    name: 'ddd-domains',
+    file: '../seeds/ddd-domains-seed.js',
+    description: 'منصة التأهيل الموحدة DDD — 20 مجال، 700+ وثيقة واقعية',
+    order: 20,
+    envs: ['development', 'staging'],
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

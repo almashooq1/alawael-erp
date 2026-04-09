@@ -443,11 +443,11 @@ const AttendanceManagement = () => {
   return (
     <Container maxWidth="xl" sx={{ py: 3 }}>
       {/* Header */}
-      <Box sx={{ background: gradients.info, borderRadius: 2, p: 3, mb: 3, color: 'white' }}>
+      <Box sx={{ background: gradients.info, borderRadius: '20px', p: 3, mb: 3, color: 'white', boxShadow: '0 8px 32px rgba(102,126,234,0.25)' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <TimeIcon sx={{ fontSize: 40 }} />
           <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>إدارة الحضور والانصراف</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>إدارة الحضور والانصراف</Typography>
             <Typography variant="body2">تسجيل ومتابعة حضور الموظفين • الورديات • التقارير والإحصائيات • أجهزة البصمة ZKTeco</Typography>
           </Box>
           {quickStats && (
@@ -468,9 +468,9 @@ const AttendanceManagement = () => {
       </Box>
 
       {/* Tabs */}
-      <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
+      <Paper elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', mb: 3, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} variant="fullWidth"
-          sx={{ '& .MuiTab-root': { fontWeight: 700, fontSize: '0.9rem', py: 1.5 } }}>
+          sx={{ '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48, fontSize: '0.9rem', py: 1.5 }, '& .Mui-selected': { fontWeight: 700 }, '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' } }}>
           <Tab icon={<TodayIcon />} iconPosition="start" label="الحضور اليومي" />
           <Tab icon={<ReportIcon />} iconPosition="start" label="التقارير" />
           <Tab icon={<Badge badgeContent={pendingLeavesCount} color="error"><LeaveIcon /></Badge>}
@@ -503,8 +503,8 @@ const AttendanceManagement = () => {
           {/* ZKTeco Banner */}
           {zktecoStats && zktecoStats.totalDevices > 0 && (
             <Paper elevation={0} sx={{
-              p: 2, mb: 3, borderRadius: 3, border: '1px solid',
-              borderColor: zktecoStats.online > 0 ? 'success.light' : 'warning.light',
+              p: 2, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)',
+              borderColor: zktecoStats.online > 0 ? 'success.light' : 'warning.light', boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
               background: zktecoStats.online > 0
                 ? 'linear-gradient(135deg, rgba(17,153,142,0.06), rgba(56,239,125,0.06))'
                 : 'linear-gradient(135deg, rgba(255,193,7,0.06), rgba(255,152,0,0.06))',
@@ -513,7 +513,7 @@ const AttendanceManagement = () => {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}><FingerprintIcon fontSize="small" /></Avatar>
                   <Box>
-                    <Typography variant="subtitle2" fontWeight="bold">أجهزة البصمة ZKTeco</Typography>
+                    <Typography variant="subtitle2" fontWeight={700}>أجهزة البصمة ZKTeco</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {zktecoStats.online} متصل من {zktecoStats.totalDevices} جهاز • {zktecoStats.todayBiometricCheckIns || 0} بصمة اليوم • {zktecoStats.totalMappedUsers || 0} موظف مربوط
                       {zktecoHealth && zktecoHealth.connections && (
@@ -548,7 +548,7 @@ const AttendanceManagement = () => {
               { label: 'نسبة الحضور', value: `${stats.attendanceRate}%`, color: statusColors.purple, icon: <TrendUpIcon />, sub: 'معدل اليوم', progress: stats.attendanceRate },
             ].map((s, i) => (
               <Grid item xs={6} sm={4} md={2} key={i}>
-                <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 3 } }}>
+                <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
                   <CardContent sx={{ py: 1.5, px: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: s.progress !== undefined ? 1 : 0 }}>
                       <Avatar sx={{ bgcolor: `${s.color}15`, color: s.color, width: 42, height: 42 }}>{s.icon}</Avatar>
@@ -571,7 +571,7 @@ const AttendanceManagement = () => {
 
           {/* Overtime Summary */}
           {stats.totalOvertime > 0 && (
-            <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: `${statusColors.warning}40`, bgcolor: surfaceColors.warningLighter, mb: 3 }}>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: `${statusColors.warning}40`, bgcolor: surfaceColors.warningLighter, mb: 3, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Avatar sx={{ bgcolor: `${statusColors.warning}25`, color: statusColors.warning }}><OvertimeIcon /></Avatar>
                 <Box>
@@ -583,7 +583,7 @@ const AttendanceManagement = () => {
           )}
 
           {/* Filters */}
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', mb: 3, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={2.5}>
                 <TextField fullWidth size="small" type="date" label="التاريخ" value={selectedDate}
@@ -622,19 +622,19 @@ const AttendanceManagement = () => {
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
           ) : (
-            <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+            <Paper elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell sx={{ fontWeight: 700 }}>الموظف</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>القسم</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الحضور</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الانصراف</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>ساعات العمل</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الإضافي</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="center">الإجراءات</TableCell>
+                    <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموظف</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسم</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحضور</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الانصراف</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>ساعات العمل</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الإضافي</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">الإجراءات</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -757,7 +757,7 @@ const AttendanceManagement = () => {
           </Box>
 
           {/* Report Filters */}
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: '1px solid', borderColor: 'divider', mb: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', mb: 3, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={3}>
                 <TextField fullWidth size="small" type="date" label="من تاريخ" value={reportStartDate}
@@ -796,7 +796,7 @@ const AttendanceManagement = () => {
           ) : reportData ? (
             <>
               {reportData.isDemo && (
-                <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>هذا تقرير تجريبي مبني على البيانات اليومية المتاحة</Alert>
+                <Alert severity="info" sx={{ mb: 2, borderRadius: '10px' }}>هذا تقرير تجريبي مبني على البيانات اليومية المتاحة</Alert>
               )}
 
               {/* Report Summary Cards */}
@@ -810,7 +810,7 @@ const AttendanceManagement = () => {
                   { label: 'ساعات إضافية', value: `${(reportData.summary?.totalOvertimeHours || 0).toFixed(1)}h`, icon: <OvertimeIcon />, color: statusColors.purple },
                 ].map((c, i) => (
                   <Grid item xs={6} sm={4} md={2} key={i}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+                    <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
                       <CardContent sx={{ py: 2, px: 2, textAlign: 'center' }}>
                         <Avatar sx={{ bgcolor: `${c.color}15`, color: c.color, mx: 'auto', mb: 1 }}>{c.icon}</Avatar>
                         <Typography variant="h5" fontWeight={700} color={c.color}>{c.value}</Typography>
@@ -823,21 +823,21 @@ const AttendanceManagement = () => {
 
               {/* Department Stats */}
               {reportData.summary?.departmentStats && Object.keys(reportData.summary.departmentStats).length > 0 && (
-                <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden', mb: 3 }}>
-                  <Box sx={{ p: 2, bgcolor: 'action.hover', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Paper elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', overflow: 'hidden', mb: 3, boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+                  <Box sx={{ p: 2, bgcolor: 'rgba(0,0,0,0.02)', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <ChartIcon color="primary" />
                     <Typography variant="subtitle1" fontWeight={700}>إحصائيات الأقسام</Typography>
                   </Box>
                   <TableContainer>
                     <Table size="small">
                       <TableHead>
-                        <TableRow>
-                          <TableCell sx={{ fontWeight: 700 }}>القسم</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }} align="center">الإجمالي</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }} align="center">حاضرون</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }} align="center">متأخرون</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }} align="center">غائبون</TableCell>
-                          <TableCell sx={{ fontWeight: 700 }} align="center">نسبة الحضور</TableCell>
+                        <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>القسم</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">الإجمالي</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">حاضرون</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">متأخرون</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">غائبون</TableCell>
+                          <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">نسبة الحضور</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -877,7 +877,7 @@ const AttendanceManagement = () => {
 
               {/* Attendance Rate Visual Bar */}
               {reportData.summary && (
-                <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+                <Paper elevation={0} sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
                   <Typography variant="subtitle1" fontWeight={700} sx={{ mb: 2 }}>توزيع الحالات</Typography>
                   <Grid container spacing={2}>
                     {[
@@ -904,7 +904,7 @@ const AttendanceManagement = () => {
               )}
             </>
           ) : (
-            <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+            <Paper elevation={0} sx={{ p: 6, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', textAlign: 'center', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <ReportIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6" color="text.secondary">اختر الفترة واضغط "تحميل التقرير"</Typography>
               <Typography variant="body2" color="text.disabled">سيتم عرض إحصائيات شاملة عن الحضور والانصراف</Typography>
@@ -942,7 +942,7 @@ const AttendanceManagement = () => {
               { label: 'مرفوضة', value: leaves.filter(l => l.status === 'rejected').length, color: statusColors.error, icon: <EventBusyIcon /> },
             ].map((c, i) => (
               <Grid item xs={6} sm={3} key={i}>
-                <Card elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+                <Card elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
                   <CardContent sx={{ py: 1.5, px: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Avatar sx={{ bgcolor: `${c.color}15`, color: c.color }}>{c.icon}</Avatar>
                     <Box>
@@ -958,19 +958,19 @@ const AttendanceManagement = () => {
           {leavesLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
           ) : (
-            <Paper elevation={0} sx={{ borderRadius: 3, border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
+            <Paper elevation={0} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', overflow: 'hidden', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <TableContainer>
                 <Table>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell sx={{ fontWeight: 700 }}>الموظف</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>نوع الإجازة</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>من</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>إلى</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="center">الأيام</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>السبب</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }} align="center">الإجراءات</TableCell>
+                    <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموظف</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>نوع الإجازة</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>من</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>إلى</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">الأيام</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>السبب</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">الإجراءات</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -1072,7 +1072,7 @@ const AttendanceManagement = () => {
           </Box>
 
           {/* Shift Type Legend */}
-          <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+          <Paper elevation={0} sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
               {[
                 { type: 'morning', label: 'صباحية', icon: '🌅', color: statusColors.warning },
@@ -1090,7 +1090,7 @@ const AttendanceManagement = () => {
           {shiftsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}><CircularProgress /></Box>
           ) : shifts.length === 0 ? (
-            <Paper elevation={0} sx={{ p: 6, borderRadius: 3, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+            <Paper elevation={0} sx={{ p: 6, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', textAlign: 'center', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <ScheduleIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
               <Typography variant="h6" color="text.secondary">لم يتم تعريف ورديات بعد</Typography>
               <Typography variant="body2" color="text.disabled" sx={{ mb: 2 }}>اضغط "إضافة وردية" لإنشاء الوردية الأولى</Typography>
@@ -1112,7 +1112,7 @@ const AttendanceManagement = () => {
                 }[shift.shiftType] || { label: shift.shiftType, icon: '📋', color: neutralColors.fallback };
                 return (
                   <Grid item xs={12} sm={6} md={4} key={shift._id}>
-                    <Card elevation={0} sx={{ borderRadius: 3, border: '2px solid', borderColor: shift.isDefault ? 'primary.main' : 'divider', transition: 'box-shadow 0.2s', '&:hover': { boxShadow: 4 } }}>
+                    <Card elevation={0} sx={{ borderRadius: '20px', border: '2px solid', borderColor: shift.isDefault ? 'primary.main' : 'divider', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s cubic-bezier(.4,0,.2,1)', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' } }}>
                       <CardContent sx={{ p: 2.5 }}>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                           <Box>
@@ -1176,7 +1176,7 @@ const AttendanceManagement = () => {
           ══════════════════════════════════════════════════════════ */}
 
       {/* Shift Create Dialog */}
-      <Dialog open={shiftDialog} onClose={() => setShiftDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={shiftDialog} onClose={() => setShiftDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <ScheduleIcon color="primary" /> إضافة وردية جديدة
         </DialogTitle>
@@ -1241,7 +1241,7 @@ const AttendanceManagement = () => {
       </Dialog>
 
       {/* View Detail Dialog */}
-      <Dialog open={!!viewItem} onClose={() => setViewItem(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={!!viewItem} onClose={() => setViewItem(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         {viewItem && (() => {
           const st = STATUS_CONFIG[viewItem.status] || STATUS_CONFIG.present;
           const dc = getDeptColor(viewItem.department);
@@ -1319,7 +1319,7 @@ const AttendanceManagement = () => {
       </Dialog>
 
       {/* Edit Attendance Dialog */}
-      <Dialog open={!!editItem} onClose={() => setEditItem(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={!!editItem} onClose={() => setEditItem(null)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <EditIcon color="primary" /> تعديل سجل الحضور
           {editItem && <Chip label={editItem.employeeName} size="small" sx={{ ml: 1 }} />}
@@ -1362,7 +1362,7 @@ const AttendanceManagement = () => {
       </Dialog>
 
       {/* Employee History Dialog */}
-      <Dialog open={!!historyEmployee} onClose={() => setHistoryEmployee(null)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <Dialog open={!!historyEmployee} onClose={() => setHistoryEmployee(null)} maxWidth="md" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <HistoryIcon color="secondary" /> سجل حضور الموظف
           {historyEmployee && (
@@ -1399,7 +1399,7 @@ const AttendanceManagement = () => {
                     { label: 'نسبة الحضور', value: `${rate}%`, color: statusColors.primaryBlue },
                   ].map((s, i) => (
                     <Grid item xs={3} key={i}>
-                      <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+                      <Card elevation={0} sx={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', borderColor: 'divider', textAlign: 'center', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
                         <CardContent sx={{ py: 1.5 }}>
                           <Typography variant="h6" fontWeight={700} color={s.color}>{s.value}</Typography>
                           <Typography variant="caption" color="text.secondary">{s.label}</Typography>
@@ -1413,13 +1413,13 @@ const AttendanceManagement = () => {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow sx={{ bgcolor: 'action.hover' }}>
-                      <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الحضور</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الانصراف</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>ساعات العمل</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الإضافي</TableCell>
-                      <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
+                    <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>التاريخ</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحضور</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الانصراف</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>ساعات العمل</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الإضافي</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

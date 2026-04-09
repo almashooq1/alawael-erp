@@ -27,7 +27,8 @@ import {
   DialogActions,
   TextField,
   Tooltip,
-  Skeleton,  Table,
+  Skeleton,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
@@ -348,8 +349,8 @@ export default function DirectiveDetail() {
         {/* ═══ Main Content ═══════════════════════════════ */}
         <Grid item xs={12} md={8}>
           {/* Content */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               محتوى التوجيه
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -362,8 +363,8 @@ export default function DirectiveDetail() {
           </Paper>
 
           {/* Recipients */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               المستلمون ({directive.recipients?.length || 0})
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -371,11 +372,11 @@ export default function DirectiveDetail() {
               <TableContainer>
                 <Table size="small">
                   <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold' }}>النوع</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>الاسم</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>مقروء</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>الإقرار</TableCell>
+                    <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الاسم</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>مقروء</TableCell>
+                      <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الإقرار</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -440,9 +441,9 @@ export default function DirectiveDetail() {
           </Paper>
 
           {/* Required Actions */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 الإجراءات المطلوبة ({directive.requiredActions?.length || 0})
               </Typography>
               {isActive && (
@@ -469,7 +470,7 @@ export default function DirectiveDetail() {
                       key={idx}
                       sx={{
                         bgcolor: isOverdue ? '#d32f2f08' : 'transparent',
-                        borderRadius: 1,
+                        borderRadius: '10px',
                         mb: 1,
                         border: isOverdue ? '1px solid #d32f2f30' : '1px solid transparent',
                       }}
@@ -533,8 +534,8 @@ export default function DirectiveDetail() {
           </Paper>
 
           {/* Attachments */}
-          <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               المرفقات ({directive.attachments?.length || 0})
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -580,8 +581,8 @@ export default function DirectiveDetail() {
         {/* ═══ Sidebar ═══════════════════════════════════ */}
         <Grid item xs={12} md={4}>
           {/* Info Card */}
-          <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               معلومات التوجيه
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -674,8 +675,8 @@ export default function DirectiveDetail() {
 
           {/* Delivery Stats */}
           {isActive && totalRecipients > 0 && (
-            <Paper sx={{ p: 3, mb: 3, borderRadius: 2 }}>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
+            <Paper sx={{ p: 3, mb: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Typography variant="h6" fontWeight={700} mb={2}>
                 إحصائيات التسليم
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -722,8 +723,8 @@ export default function DirectiveDetail() {
 
           {/* Tags & Categories */}
           {(directive.tags?.length > 0 || directive.categories?.length > 0) && (
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
-              <Typography variant="h6" fontWeight="bold" mb={2}>
+            <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+              <Typography variant="h6" fontWeight={700} mb={2}>
                 الوسوم والتصنيفات
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -757,7 +758,7 @@ export default function DirectiveDetail() {
       </Grid>
 
       {/* ═══ Cancel Dialog ═══════════════════════════════ */}
-      <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={cancelDialog} onClose={() => setCancelDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>إلغاء التوجيه</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" mb={2}>
@@ -786,7 +787,7 @@ export default function DirectiveDetail() {
       </Dialog>
 
       {/* ═══ Acknowledge Dialog ══════════════════════════ */}
-      <Dialog open={ackDialog} onClose={() => setAckDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={ackDialog} onClose={() => setAckDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>الإقرار بالاستلام</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" mb={2}>
@@ -810,7 +811,7 @@ export default function DirectiveDetail() {
       </Dialog>
 
       {/* ═══ Add Action Dialog ═══════════════════════════ */}
-      <Dialog open={actionDialog} onClose={() => setActionDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={actionDialog} onClose={() => setActionDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>إضافة إجراء مطلوب</DialogTitle>
         <DialogContent>
           <TextField

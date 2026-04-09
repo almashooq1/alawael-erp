@@ -197,17 +197,38 @@ class WorkflowEngine {
   registerDefaultActions() {
     // Notification action
     this.registerAction('notify', async (params, _context) => {
-      const {
-        notificationService: _notificationService,
-      } = require('../communication/email-service');
-      // Send notification based on params
+      let emailMgr;
+      try {
+        const { emailManager } = require('../services/email');
+        emailMgr = emailManager;
+      } catch {
+        emailMgr = null;
+      }
+      if (emailMgr && params.recipients) {
+        for (const r of [].concat(params.recipients)) {
+          await emailMgr
+            .sendNotification(r, {
+              title: params.title || 'Notification',
+              message: params.message || '',
+            })
+            .catch(() => {});
+        }
+      }
       return { notified: true, recipients: params.recipients };
     });
 
     // Email action
     this.registerAction('sendEmail', async (params, _context) => {
-      const { emailService } = require('../communication/email-service');
-      await emailService.send(params);
+      let emailMgr;
+      try {
+        const { emailManager } = require('../services/email');
+        emailMgr = emailManager;
+      } catch {
+        emailMgr = null;
+      }
+      if (emailMgr) {
+        await emailMgr.send(params);
+      }
       return { sent: true };
     });
 
@@ -227,7 +248,9 @@ class WorkflowEngine {
 
     // Delay action
     this.registerAction('delay', async (params, _context) => {
-      await new Promise(resolve => { setTimeout(resolve, params.duration || 1000); });
+      await new Promise(resolve => {
+        setTimeout(resolve, params.duration || 1000);
+      });
       return { delayed: true };
     });
 
@@ -403,7 +426,9 @@ class WorkflowEngine {
         throw error;
       } else if (step.onError === 'retry' && step.retryCount > 0) {
         step.retryCount--;
-        await new Promise(resolve => { setTimeout(resolve, workflowConfig.retryDelay); });
+        await new Promise(resolve => {
+          setTimeout(resolve, workflowConfig.retryDelay);
+        });
         return this.executeStep(instance, step);
       }
 
@@ -457,7 +482,9 @@ class WorkflowEngine {
    */
   async executeDelay(step) {
     const duration = step.params?.duration || 1000;
-    await new Promise(resolve => { setTimeout(resolve, duration); });
+    await new Promise(resolve => {
+      setTimeout(resolve, duration);
+    });
     return { delayed: true, duration };
   }
 

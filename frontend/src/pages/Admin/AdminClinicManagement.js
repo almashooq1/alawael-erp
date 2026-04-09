@@ -144,10 +144,11 @@ const AdminClinicManagement = () => {
       <Box
         sx={{
           background: gradients.primary,
-          borderRadius: 2,
+          borderRadius: '20px',
           p: 3,
           mb: 4,
           color: 'white',
+          boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -178,6 +179,8 @@ const AdminClinicManagement = () => {
             sx={{
               background: gradients.primary,
               color: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(102,126,234,0.2)',
             }}
           >
             <CardContent>
@@ -196,6 +199,8 @@ const AdminClinicManagement = () => {
             sx={{
               background: gradients.warning,
               color: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(237,137,54,0.2)',
             }}
           >
             <CardContent>
@@ -214,6 +219,8 @@ const AdminClinicManagement = () => {
             sx={{
               background: gradients.info,
               color: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(49,130,206,0.2)',
             }}
           >
             <CardContent>
@@ -232,6 +239,8 @@ const AdminClinicManagement = () => {
             sx={{
               background: gradients.success,
               color: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 4px 20px rgba(56,161,105,0.2)',
             }}
           >
             <CardContent>
@@ -250,7 +259,19 @@ const AdminClinicManagement = () => {
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {clinics.map(clinic => (
           <Grid item xs={12} md={6} key={clinic.id}>
-            <Card sx={{ height: '100%' }}>
+            <Card
+              sx={{
+                height: '100%',
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                  transform: 'translateY(-2px)',
+                },
+              }}
+            >
               <CardHeader
                 title={clinic.name}
                 subheader={clinic.code}
@@ -350,18 +371,79 @@ const AdminClinicManagement = () => {
       </Grid>
 
       {/* Clinics Table View */}
-      <Card>
+      <Card
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <CardHeader title="قائمة العيادات الكاملة" />
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow sx={{ backgroundColor: surfaceColors.lightGray }}>
-                <TableCell sx={{ fontWeight: 'bold' }}>اسم العيادة</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>المدينة</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الهاتف</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الموظفون</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', textAlign: 'center' }}>الإجراءات</TableCell>
+              <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  اسم العيادة
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  المدينة
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الهاتف
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الموظفون
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                  }}
+                >
+                  الحالة
+                </TableCell>
+                <TableCell
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: 0.5,
+                    color: 'text.secondary',
+                    textAlign: 'center',
+                  }}
+                >
+                  الإجراءات
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -406,7 +488,13 @@ const AdminClinicManagement = () => {
       </Card>
 
       {/* Add/Edit Clinic Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>{editingClinic ? 'تعديل العيادة' : 'إضافة عيادة جديدة'}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>

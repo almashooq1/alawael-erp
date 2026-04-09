@@ -104,36 +104,48 @@ export default function DisabilityAuthorityDashboard() {
       {/* إحصائيات مختصرة */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' }, overflow: 'hidden' }}>
+            <Box sx={{ height: 3, background: 'linear-gradient(90deg, #1976d2, #1976d288)' }} />
             <CardContent sx={{ textAlign: 'center' }}>
-              <Gavel color="primary" sx={{ fontSize: 40, mb: 1 }} />
+              <Box sx={{ width: 56, height: 56, borderRadius: '14px', bgcolor: 'rgba(25,118,210,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1 }}>
+                <Gavel color="primary" sx={{ fontSize: 28 }} />
+              </Box>
               <Typography variant="h4" fontWeight="bold">{reports.length}</Typography>
               <Typography variant="body2" color="text.secondary">تقارير الهيئة</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' }, overflow: 'hidden' }}>
+            <Box sx={{ height: 3, background: 'linear-gradient(90deg, #2e7d32, #2e7d3288)' }} />
             <CardContent sx={{ textAlign: 'center' }}>
-              <VerifiedUser color="success" sx={{ fontSize: 40, mb: 1 }} />
+              <Box sx={{ width: 56, height: 56, borderRadius: '14px', bgcolor: 'rgba(46,125,50,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1 }}>
+                <VerifiedUser color="success" sx={{ fontSize: 28 }} />
+              </Box>
               <Typography variant="h4" fontWeight="bold">{standards.length}</Typography>
               <Typography variant="body2" color="text.secondary">معايير سباهي</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' }, overflow: 'hidden' }}>
+            <Box sx={{ height: 3, background: 'linear-gradient(90deg, #0288d1, #0288d188)' }} />
             <CardContent sx={{ textAlign: 'center' }}>
-              <Assessment color="info" sx={{ fontSize: 40, mb: 1 }} />
+              <Box sx={{ width: 56, height: 56, borderRadius: '14px', bgcolor: 'rgba(2,136,209,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1 }}>
+                <Assessment color="info" sx={{ fontSize: 28 }} />
+              </Box>
               <Typography variant="h4" fontWeight="bold">{assessments.length}</Typography>
               <Typography variant="body2" color="text.secondary">تقييمات سباهي</Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' }, overflow: 'hidden' }}>
+            <Box sx={{ height: 3, background: 'linear-gradient(90deg, #ed6c02, #ed6c0288)' }} />
             <CardContent sx={{ textAlign: 'center' }}>
-              <Star color="warning" sx={{ fontSize: 40, mb: 1 }} />
+              <Box sx={{ width: 56, height: 56, borderRadius: '14px', bgcolor: 'rgba(237,108,2,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', mx: 'auto', mb: 1 }}>
+                <Star color="warning" sx={{ fontSize: 28 }} />
+              </Box>
               <Typography variant="h4" fontWeight="bold">
                 {cbahiDashboard?.latestScore ? `${cbahiDashboard.latestScore}%` : '—'}
               </Typography>
@@ -144,8 +156,8 @@ export default function DisabilityAuthorityDashboard() {
       </Grid>
 
       {/* التبويبات */}
-      <Card>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2, pt: 1 }}>
+      <Card sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+        <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ px: 2, pt: 1, '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 52 }, '& .Mui-selected': { fontWeight: 700 }, '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' } }}>
           <Tab label="تقارير الهيئة" icon={<Gavel />} iconPosition="start" />
           <Tab label="معايير سباهي" icon={<VerifiedUser />} iconPosition="start" />
           <Tab label="تقييمات الامتثال" icon={<Assessment />} iconPosition="start" />
@@ -158,12 +170,12 @@ export default function DisabilityAuthorityDashboard() {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>نوع التقرير</TableCell>
-                    <TableCell>الفترة</TableCell>
-                    <TableCell align="center">المستفيدون</TableCell>
-                    <TableCell align="center">الخدمات المقدمة</TableCell>
-                    <TableCell align="center">الحالة</TableCell>
-                    <TableCell>تاريخ الإنشاء</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>نوع التقرير</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>الفترة</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>المستفيدون</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>الخدمات المقدمة</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>الحالة</TableCell>
+                    <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', bgcolor: 'rgba(0,0,0,0.02)' }}>تاريخ الإنشاء</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -204,7 +216,7 @@ export default function DisabilityAuthorityDashboard() {
                 </Box>
               ) : (
                 standards.map((std) => (
-                  <Accordion key={std._id} sx={{ mb: 1 }}>
+                  <Accordion key={std._id} sx={{ mb: 1, borderRadius: '12px !important', border: '1px solid rgba(0,0,0,0.06)', '&:before': { display: 'none' }, overflow: 'hidden', transition: 'all 0.3s', '&:hover': { boxShadow: '0 4px 16px rgba(0,0,0,0.06)' } }}>
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <Box display="flex" alignItems="center" gap={2} width="100%">
                         <Chip label={std.code} size="small" color="primary" variant="outlined" />
@@ -244,7 +256,7 @@ export default function DisabilityAuthorityDashboard() {
               {assessments.length === 0 ? (
                 <Typography color="text.secondary" textAlign="center" py={4}>لا توجد تقييمات</Typography>
               ) : assessments.map((assess) => (
-                <Card key={assess._id} variant="outlined" sx={{ mb: 2, p: 2 }}>
+                <Card key={assess._id} variant="outlined" sx={{ mb: 2, p: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.03)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 6px 24px rgba(0,0,0,0.07)' } }}>
                   <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                     <Box>
                       <Typography variant="h6" fontWeight="bold">تقييم {assess.assessmentType || ''}</Typography>
@@ -270,12 +282,12 @@ export default function DisabilityAuthorityDashboard() {
                     <Grid container spacing={1}>
                       {Object.entries(assess.chapterResults).map(([chapter, data]) => (
                         <Grid item xs={12} sm={6} md={4} key={chapter}>
-                          <Box sx={{ p: 1, borderRadius: 1, bgcolor: 'grey.50' }}>
+                          <Box sx={{ p: 1.5, borderRadius: '10px', bgcolor: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.04)' }}>
                             <Typography variant="caption" fontWeight="bold">{chapter}</Typography>
                             <LinearProgress
                               variant="determinate"
                               value={data?.score || 0}
-                              sx={{ height: 6, borderRadius: 3, mt: 0.5 }}
+                              sx={{ height: 8, borderRadius: 4, mt: 0.5 }}
                               color={(data?.score || 0) >= 80 ? 'success' : (data?.score || 0) >= 60 ? 'warning' : 'error'}
                             />
                             <Typography variant="caption" color="text.secondary">{data?.score || 0}%</Typography>

@@ -144,3 +144,7 @@ export { default as NphiesRoutes } from './NphiesRoutes';
 
 // سجلات التدقيق المحسّنة — Enhanced Audit Trail
 export { default as AuditLogsRoutes } from './AuditLogsRoutes';
+
+// === DDD Unified Rehabilitation Platform (منصة التأهيل الموحدة) ===
+export { default as DDDRoutes } from './DDDRoutes';
+export { DDD_NAV_ITEMS } from './DDDRoutes';

@@ -249,6 +249,15 @@ const getNavigationItems = () => [
     ],
   },
   {
+    id: 'smart-assessment-engine',
+    label: 'محرك التقييم الذكي',
+    icon: <ICFIcon />,
+    path: '/smart-assessment',
+    roles: ['admin', 'super_admin', 'therapist', 'doctor'],
+    badge: 'AI',
+    badgeColor: '#7b1fa2',
+  },
+  {
     id: 'scheduling',
     label: 'الجلسات والمواعيد',
     icon: <ScheduleIcon />,
@@ -1097,12 +1106,21 @@ const getNavigationItems = () => [
     roles: ['admin', 'super_admin'],
     children: [
       { id: 'admin-main', label: 'اللوحة الرئيسية', path: '/admin-portal' },
-      { id: 'admin-users', label: 'إدارة المستخدمين', path: '/admin-portal/users' },
+      { id: 'admin-users', label: 'إدارة المستخدمين (قديم)', path: '/admin-portal/users' },
+      { id: 'admin-user-mgmt', label: 'إدارة المستخدمين', path: '/user-management', badge: 'جديد' },
       { id: 'admin-settings', label: 'إعدادات النظام', path: '/admin-portal/settings' },
       { id: 'admin-branding', label: 'الهوية والتصميم', path: '/admin-portal/branding' },
       { id: 'admin-audit', label: 'سجل المراجعة', path: '/admin-portal/audit-logs' },
       { id: 'admin-reports', label: 'التقارير', path: '/admin-portal/reports' },
     ],
+  },
+  // نظام إدارة المستخدمين المتقدم — مع وصول HR و المديرين
+  {
+    id: 'user-management-standalone',
+    label: 'إدارة المستخدمين',
+    icon: <PeopleIcon />,
+    path: '/user-management',
+    roles: ['admin', 'super_admin', 'hr', 'hr_manager', 'manager'],
   },
   {
     id: 'system-admin',

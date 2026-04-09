@@ -25,11 +25,12 @@ const _MSG_TYPE_ICONS = { text: <Chat fontSize="small" />, file: <InsertDriveFil
 // ── KPI Card ──
 function KPICard({ title, value, icon, color = '#1976d2', subtitle }) {
   return (
-    <Card sx={{ height: '100%', borderTop: `4px solid ${color}` }}>
+    <Card sx={{ height: '100%', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0,0,0,0.08)' } }}>
+      <Box sx={{ height: 3, background: `linear-gradient(90deg, ${color}, ${color}88)` }} />
       <CardContent sx={{ textAlign: 'center', py: 2 }}>
-        <Avatar sx={{ bgcolor: `${color}20`, color, mx: 'auto', mb: 1, width: 48, height: 48 }}>{icon}</Avatar>
-        <Typography variant="h4" fontWeight="bold">{value}</Typography>
-        <Typography variant="body2" color="text.secondary">{title}</Typography>
+        <Avatar sx={{ bgcolor: `${color}15`, color, mx: 'auto', mb: 1, width: 48, height: 48 }}>{icon}</Avatar>
+        <Typography variant="h4" fontWeight={800}>{value}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{title}</Typography>
         {subtitle && <Typography variant="caption" color="text.disabled">{subtitle}</Typography>}
       </CardContent>
     </Card>
@@ -251,8 +252,18 @@ export default function ChatDashboard() {
       </Grid>
 
       {/* ── Tabs ── */}
-      <Paper sx={{ mb: 2 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+      <Paper sx={{ mb: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 52, transition: 'all 0.2s', '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' } },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
+        >
           <Tab icon={<Chat />} label="المحادثات" />
           <Tab icon={<Person />} label="المتصلون" />
           <Tab icon={<Search />} label="بحث الرسائل" />
@@ -264,7 +275,7 @@ export default function ChatDashboard() {
         <Grid container spacing={2}>
           {/* Conversation List */}
           <Grid item xs={12} md={4}>
-            <Paper sx={{ height: 600, overflow: 'auto' }}>
+            <Paper sx={{ height: 600, overflow: 'auto', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
               <Box sx={{ p: 1.5, borderBottom: '1px solid #eee' }}>
                 <TextField
                   size="small" fullWidth placeholder="بحث في المحادثات..."
@@ -319,7 +330,7 @@ export default function ChatDashboard() {
 
           {/* Chat Area */}
           <Grid item xs={12} md={8}>
-            <Paper sx={{ height: 600, display: 'flex', flexDirection: 'column' }}>
+            <Paper sx={{ height: 600, display: 'flex', flexDirection: 'column', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
               {selectedConv ? (
                 <>
                   {/* Chat Header */}
@@ -357,9 +368,10 @@ export default function ChatDashboard() {
                           </Avatar>
                           <Box
                             sx={{
-                              maxWidth: '70%', p: 1.5, borderRadius: 2,
+                              maxWidth: '70%', p: 1.5, borderRadius: '14px',
                               bgcolor: msg.senderId === 'u1' ? '#e3f2fd' : '#fff',
-                              border: '1px solid #e0e0e0',
+                              border: '1px solid rgba(0,0,0,0.06)',
+                              boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                             }}
                           >
                             {msg.sender && msg.senderId !== 'u1' && (
@@ -443,8 +455,8 @@ export default function ChatDashboard() {
 
       {/* ═══ Tab 1: Online Users ═══ */}
       {tab === 1 && (
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>المستخدمون المتصلون ({dashboard?.onlineUsers?.length || 0})</Typography>
+        <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>المستخدمون المتصلون ({dashboard?.onlineUsers?.length || 0})</Typography>
           <Grid container spacing={2}>
             {(dashboard?.onlineUsers || []).map(user => (
               <Grid item xs={12} sm={6} md={4} key={user.id}>
@@ -516,7 +528,7 @@ export default function ChatDashboard() {
 
       {/* ═══ Tab 2: Search ═══ */}
       {tab === 2 && (
-        <Paper sx={{ p: 2 }}>
+        <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
             <TextField
               size="small" fullWidth placeholder="ابحث في جميع الرسائل..."
@@ -524,7 +536,7 @@ export default function ChatDashboard() {
               onKeyDown={e => e.key === 'Enter' && handleSearch()}
               InputProps={{ startAdornment: <InputAdornment position="start"><Search /></InputAdornment> }}
             />
-            <Button variant="contained" onClick={handleSearch}>بحث</Button>
+            <Button variant="contained" sx={{ borderRadius: '12px' }} onClick={handleSearch}>بحث</Button>
           </Box>
           {searchResults.length > 0 ? (
             <List>

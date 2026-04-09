@@ -322,7 +322,16 @@ export default function AdminDelegations() {
   return (
     <Box sx={{ p: 3 }} dir="rtl">
       {/* ─── Header ──────────────────────────────────────────────────────── */}
-      <Box sx={{ background: gradients.primary, borderRadius: 3, p: 3, mb: 4, color: 'white' }}>
+      <Box
+        sx={{
+          background: gradients.primary,
+          borderRadius: '20px',
+          p: 3,
+          mb: 4,
+          color: 'white',
+          boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
+        }}
+      >
         <Box
           sx={{
             display: 'flex',
@@ -360,7 +369,7 @@ export default function AdminDelegations() {
       </Box>
 
       {/* ─── Status Tabs ─────────────────────────────────────────────────── */}
-      <Paper sx={{ borderRadius: 2, mb: 3 }}>
+      <Paper sx={{ borderRadius: '16px', mb: 3, border: '1px solid rgba(0,0,0,0.04)' }}>
         <Tabs
           value={statusFilter}
           onChange={(_, v) => {
@@ -369,6 +378,11 @@ export default function AdminDelegations() {
           }}
           variant="scrollable"
           scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
         >
           {tabStatuses.map(t => (
             <Tab key={t.value} value={t.value} label={t.label} />
@@ -377,7 +391,15 @@ export default function AdminDelegations() {
       </Paper>
 
       {/* ─── Search ──────────────────────────────────────────────────────── */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+      <Paper
+        sx={{
+          p: 2,
+          mb: 3,
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField
             size="small"
@@ -403,7 +425,13 @@ export default function AdminDelegations() {
       </Paper>
 
       {/* ─── Table ───────────────────────────────────────────────────────── */}
-      <Paper sx={{ borderRadius: 2 }}>
+      <Paper
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         {loading ? (
           <Box sx={{ textAlign: 'center', py: 6 }}>
             <CircularProgress />
@@ -418,15 +446,87 @@ export default function AdminDelegations() {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.50' }}>
-                    <TableCell sx={{ fontWeight: 'bold' }}>الرقم</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>العنوان</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>النوع</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>المفوِّض</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>المفوَّض إليه</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>الفترة</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }}>الاستخدام</TableCell>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الرقم
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      العنوان
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      النوع
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      المفوِّض
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      المفوَّض إليه
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الفترة
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الحالة
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الاستخدام
+                    </TableCell>
                     <TableCell />
                   </TableRow>
                 </TableHead>
@@ -565,7 +665,13 @@ export default function AdminDelegations() {
       </Menu>
 
       {/* ─── Create Dialog ───────────────────────────────────────────────── */}
-      <Dialog open={createDialog} onClose={() => setCreateDialog(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={createDialog}
+        onClose={() => setCreateDialog(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تفويض جديد</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
@@ -789,6 +895,7 @@ export default function AdminDelegations() {
         onClose={() => setReasonDialog({ open: false, type: '' })}
         maxWidth="sm"
         fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
       >
         <DialogTitle>
           {reasonDialog.type === 'suspend' ? 'تعليق التفويض' : 'إلغاء التفويض'}
@@ -826,7 +933,13 @@ export default function AdminDelegations() {
       </Dialog>
 
       {/* ─── Extend Dialog ───────────────────────────────────────────────── */}
-      <Dialog open={extendDialog} onClose={() => setExtendDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={extendDialog}
+        onClose={() => setExtendDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تمديد التفويض</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>

@@ -49,6 +49,9 @@ const DirDetail = lazyWithRetry(() => import('../pages/electronic-directives/Dir
 // System Settings Page — إعدادات النظام
 const SystemSettingsPage = lazyWithRetry(() => import('../pages/SystemAdmin/SystemSettingsPage'));
 
+// User Management System — نظام إدارة المستخدمين المتقدم
+const UserManagement = lazyWithRetry(() => import('../pages/UserManagement'));
+
 export default function AdminRoutes() {
   return (
     <>
@@ -138,6 +141,24 @@ export default function AdminRoutes() {
         element={
           <RoleGuard allowedRoles={['admin', 'super_admin']}>
             <SystemSettingsPage />
+          </RoleGuard>
+        }
+      />
+
+      {/* User Management System — نظام إدارة المستخدمين المتقدم */}
+      <Route
+        path="user-management"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin', 'hr', 'hr_manager', 'manager']}>
+            <UserManagement />
+          </RoleGuard>
+        }
+      />
+      <Route
+        path="admin-portal/user-management"
+        element={
+          <RoleGuard allowedRoles={['admin', 'super_admin', 'hr', 'hr_manager', 'manager']}>
+            <UserManagement />
           </RoleGuard>
         }
       />

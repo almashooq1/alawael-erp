@@ -8,6 +8,7 @@ const moduleHandler = require('./moduleHandler');
 const dashboardHandler = require('./dashboardHandler');
 const notificationHandler = require('./notificationHandler');
 const chatHandler = require('./chatHandler');
+const dddHandler = require('./dddHandler');
 const logger = require('../../utils/logger');
 
 // Active subscriptions tracking
@@ -34,6 +35,7 @@ function initializeHandlers(io) {
     dashboardHandler(socket, io, activeSubscriptions);
     notificationHandler(socket, io, activeSubscriptions);
     chatHandler(socket, io, activeSubscriptions);
+    dddHandler(socket, io, activeSubscriptions);
 
     // Connection health check
     socket.on('ping', () => {
@@ -55,8 +57,7 @@ function initializeHandlers(io) {
 
     // Error handler
     socket.on('error', error => {
-      const safeError =
-        error instanceof Error ? { message: error.message } : String(error);
+      const safeError = error instanceof Error ? { message: error.message } : String(error);
       logger.error(`[Socket.IO] Socket error (${socket.id}):`, safeError);
       socket.emit('error', {
         message: 'حدث خطأ في الاتصال',

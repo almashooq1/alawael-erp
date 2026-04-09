@@ -151,7 +151,7 @@ export default function DirectivesList() {
       )}
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 3, borderRadius: 2 }}>
+      <Paper sx={{ p: 2, mb: 3, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={4}>
             <TextField
@@ -233,18 +233,18 @@ export default function DirectivesList() {
       </Paper>
 
       {/* Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+      <TableContainer component={Paper} sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: 'grey.50' }}>
-              <TableCell sx={{ fontWeight: 'bold' }}>النوع</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>الرقم المرجعي</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>الموضوع</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>الأولوية</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>تاريخ الإصدار</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }}>المستلمون</TableCell>
-              <TableCell sx={{ fontWeight: 'bold' }} align="center">
+            <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الرقم المرجعي</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموضوع</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الأولوية</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>تاريخ الإصدار</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المستلمون</TableCell>
+              <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }} align="center">
                 إجراءات
               </TableCell>
             </TableRow>

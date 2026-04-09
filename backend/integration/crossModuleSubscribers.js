@@ -38,6 +38,23 @@
 
 const logger = console;
 
+// Unified email service for email delivery in cross-module events
+let emailManager;
+try {
+  const { emailManager: em } = require('../services/email');
+  emailManager = em;
+} catch {
+  emailManager = null;
+}
+
+// User model for lookups
+let User;
+try {
+  User = require('../models/User');
+} catch {
+  User = null;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Cross-Module Subscriber Definitions
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -376,7 +393,7 @@ function createSubscribers(integrationBus, moduleConnector) {
   // ─── System → Monitoring: Error aggregation ────────────────────────
   subscribers.push({
     name: 'system:error → monitoring:aggregate',
-    pattern: 'system.system.error',
+    pattern: 'system.error.*',
     handler: async event => {
       logger.error(
         `[CrossModule] SYSTEM ERROR in ${event.payload.module}: ${event.payload.message}`
@@ -423,6 +440,145 @@ function createSubscribers(integrationBus, moduleConnector) {
         });
       } catch (err) {
         logger.warn(`[CrossModule] Failed to notify finance of salary change:`, err.message);
+      }
+    },
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  //  EMAIL DELIVERY SUBSCRIBERS — Route domain events to email notifications
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ─── HR → Email: Welcome email for new hires ──────────────────────
+  subscribers.push({
+    name: 'hr:hired → email:welcome',
+    pattern: 'hr.employee.hired',
+    handler: async event => {
+      if (!emailManager || !event.payload.email) return;
+      try {
+        await emailManager.sendWelcome(event.payload.email, {
+          fullName: event.payload.name,
+          email: event.payload.email,
+          department: event.payload.department,
+          position: event.payload.position,
+        });
+        logger.info(`[CrossModule/Email] Welcome email sent to ${event.payload.name}`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send welcome email:`, err.message);
+      }
+    },
+  });
+
+  // ─── Finance → Email: Budget threshold alert ──────────────────────
+  subscribers.push({
+    name: 'finance:budget_alert → email:alert',
+    pattern: 'finance.budget.threshold_reached',
+    handler: async event => {
+      if (!emailManager) return;
+      const financeEmail = process.env.FINANCE_MANAGER_EMAIL;
+      if (!financeEmail) return;
+      try {
+        await emailManager.sendAlert(financeEmail, {
+          title: 'تنبيه: تجاوز حد الميزانية',
+          message: `الميزانية "${event.payload.budgetName || ''}" وصلت إلى ${event.payload.percentage || 0}% من الحد المسموح. المبلغ المتبقي: ${event.payload.remaining || 0} ر.س`,
+          severity: event.payload.percentage >= 100 ? 'critical' : 'high',
+        });
+        logger.info(`[CrossModule/Email] Budget alert sent`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send budget alert:`, err.message);
+      }
+    },
+  });
+
+  // ─── Medical → Email: Risk alert to care team ─────────────────────
+  subscribers.push({
+    name: 'medical:risk_alert → email:alert',
+    pattern: 'medical.risk.alert_raised',
+    handler: async event => {
+      if (!emailManager) return;
+      const careEmail = process.env.CARE_TEAM_EMAIL;
+      if (!careEmail) return;
+      try {
+        await emailManager.sendAlert(careEmail, {
+          title: 'تنبيه طبي عاجل',
+          message: `تنبيه مخاطر للمستفيد: ${event.payload.beneficiaryName || 'غير محدد'} - النوع: ${event.payload.riskType || ''} - المستوى: ${event.payload.severity || 'متوسط'}`,
+          severity: event.payload.severity || 'high',
+        });
+        logger.info(`[CrossModule/Email] Medical risk alert sent`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send medical risk alert:`, err.message);
+      }
+    },
+  });
+
+  // ─── Beneficiary → Email: Status change notification ──────────────
+  subscribers.push({
+    name: 'beneficiary:status → email:notification',
+    pattern: 'beneficiary.status.changed',
+    handler: async event => {
+      if (!emailManager || !User) return;
+      try {
+        // Notify stakeholders about beneficiary status change
+        const stakeholderIds = event.payload.stakeholderIds || [];
+        for (const id of stakeholderIds.slice(0, 5)) {
+          const user = await User.findById(id).select('email fullName').lean();
+          if (user && user.email) {
+            await emailManager.sendStatusChange(user.email, {
+              fullName: user.fullName,
+              itemType: 'مستفيد',
+              itemName: event.payload.beneficiaryName || '',
+              oldStatus: event.payload.oldStatus || '',
+              newStatus: event.payload.newStatus || '',
+              changedBy: event.payload.changedBy || 'النظام',
+            });
+          }
+        }
+        logger.info(`[CrossModule/Email] Beneficiary status emails sent`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send beneficiary status email:`, err.message);
+      }
+    },
+  });
+
+  // ─── System → Email: Critical error alerts ────────────────────────
+  subscribers.push({
+    name: 'system:error → email:alert',
+    pattern: 'system.error.*',
+    handler: async event => {
+      if (!emailManager) return;
+      const adminEmail = process.env.ADMIN_ALERT_EMAIL || process.env.SYSTEM_ADMIN_EMAIL;
+      if (!adminEmail) return;
+      // Only alert on critical/fatal errors
+      const severity = event.payload.severity || 'error';
+      if (!['critical', 'fatal'].includes(severity)) return;
+      try {
+        await emailManager.sendAlert(adminEmail, {
+          title: `خطأ حرج في النظام: ${event.payload.module || 'غير محدد'}`,
+          message: `${event.payload.message || 'حدث خطأ حرج'}${event.payload.stack ? '\n\n' + event.payload.stack.slice(0, 500) : ''}`,
+          severity: 'critical',
+        });
+        logger.info(`[CrossModule/Email] System error alert sent`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send system error alert:`, err.message);
+      }
+    },
+  });
+
+  // ─── Auth → Email: Account locked alert ───────────────────────────
+  subscribers.push({
+    name: 'auth:locked → email:alert',
+    pattern: 'auth.account.locked',
+    handler: async event => {
+      if (!emailManager || !event.payload.email) return;
+      try {
+        await emailManager.sendAccountLocked(event.payload.email, {
+          fullName: event.payload.fullName || event.payload.email,
+          reason: event.payload.reason || 'تجاوز عدد المحاولات المسموح',
+          lockDuration: event.payload.lockDuration || '30 دقيقة',
+          ip: event.payload.ip || '',
+        });
+        logger.info(`[CrossModule/Email] Account locked email sent`);
+      } catch (err) {
+        logger.warn(`[CrossModule/Email] Failed to send account locked email:`, err.message);
       }
     },
   });

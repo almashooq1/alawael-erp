@@ -7,17 +7,20 @@ import {
   Box,
   Typography,
   Paper,
-  Button,  Chip,
+  Button,
+  Chip,
   IconButton,
   TextField,
-  InputAdornment,  Table,
+  InputAdornment,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
   TablePagination,
-  Avatar,  Tooltip,
+  Avatar,
+  Tooltip,
   Menu,
   MenuItem,
   Divider,
@@ -37,17 +40,22 @@ import {
   Forward,
   CheckCircle,
   Archive,
-  Reply,  CallReceived,
+  Reply,
+  CallReceived,
   CallMade,
-  DoneAll,  Mail,
-  MailOutline,  ArrowBack,} from '@mui/icons-material';
+  DoneAll,
+  Mail,
+  MailOutline,
+  ArrowBack,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';
 import {
   CORRESPONDENCE_TYPES,
   CORRESPONDENCE_STATUS,
-  PRIORITY_LEVELS,} from './constants';
+  PRIORITY_LEVELS,
+} from './constants';
 
 /* ═══ View Modes ═════════════════════════════════════════════════════════ */
 const VIEW_MODES = {
@@ -190,7 +198,8 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
           background:
             gradients?.primary || 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
           color: '#fff',
-          borderRadius: 2,
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(25,118,210,0.25)',
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
@@ -232,7 +241,7 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
       </Paper>
 
       {/* ── Filters ─────────────────────────────────────────── */}
-      <Paper sx={{ p: 2, mb: 2 }}>
+      <Paper sx={{ p: 2, mb: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
           <TextField
             size="small"
@@ -318,21 +327,21 @@ export default function CorrespondenceList({ viewMode = 'all' }) {
       </Paper>
 
       {/* ── Table ───────────────────────────────────────────── */}
-      <Paper sx={{ overflow: 'hidden' }}>
+      <Paper sx={{ overflow: 'hidden', borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
         <TableContainer>
           <Table size="small">
             <TableHead>
-              <TableRow sx={{ bgcolor: 'grey.50' }}>
+              <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
                 <TableCell width={50} />
-                <TableCell sx={{ fontWeight: 'bold' }}>الرقم المرجعي</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الموضوع</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الرقم المرجعي</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الموضوع</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>
                   {viewMode === 'outbox' ? 'المستلم' : 'المرسل'}
                 </TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>النوع</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الأولوية</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>الحالة</TableCell>
-                <TableCell sx={{ fontWeight: 'bold' }}>التاريخ</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الأولوية</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+                <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>التاريخ</TableCell>
                 <TableCell width={50} />
               </TableRow>
             </TableHead>

@@ -94,10 +94,11 @@ const AdminDashboard = () => {
       <Box
         sx={{
           background: gradients.primary,
-          borderRadius: 2,
+          borderRadius: '20px',
           p: 3,
           mb: 4,
           color: 'white',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -119,7 +120,13 @@ const AdminDashboard = () => {
             sx={{
               background: gradients.primary,
               color: 'white',
+              borderRadius: '16px',
               boxShadow: '0 8px 16px rgba(102, 126, 234, 0.4)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 12px 24px rgba(102, 126, 234, 0.5)',
+              },
             }}
           >
             <CardContent>
@@ -147,7 +154,13 @@ const AdminDashboard = () => {
             sx={{
               background: gradients.warning,
               color: 'white',
+              borderRadius: '16px',
               boxShadow: '0 8px 16px rgba(245, 87, 108, 0.4)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 12px 24px rgba(245, 87, 108, 0.5)',
+              },
             }}
           >
             <CardContent>
@@ -175,7 +188,13 @@ const AdminDashboard = () => {
             sx={{
               background: gradients.info,
               color: 'white',
+              borderRadius: '16px',
               boxShadow: '0 8px 16px rgba(79, 172, 254, 0.4)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 12px 24px rgba(79, 172, 254, 0.5)',
+              },
             }}
           >
             <CardContent>
@@ -203,7 +222,13 @@ const AdminDashboard = () => {
             sx={{
               background: gradients.success,
               color: 'white',
+              borderRadius: '16px',
               boxShadow: '0 8px 16px rgba(67, 233, 123, 0.4)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-3px)',
+                boxShadow: '0 12px 24px rgba(67, 233, 123, 0.5)',
+              },
             }}
           >
             <CardContent>
@@ -229,9 +254,18 @@ const AdminDashboard = () => {
       {/* System Status */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} md={6}>
-          <Card>
+          <Card
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
             <CardHeader
               title="حالة الخدمات"
+              titleTypographyProps={{ fontWeight: 700 }}
               avatar={<CheckCircleIcon sx={{ color: statusColors.success }} />}
             />
             <CardContent>
@@ -278,8 +312,16 @@ const AdminDashboard = () => {
 
         {/* Recent Activity */}
         <Grid item xs={12} md={6}>
-          <Card>
-            <CardHeader title="الأنشطة الأخيرة" />
+          <Card
+            sx={{
+              borderRadius: '20px',
+              border: '1px solid rgba(0,0,0,0.04)',
+              boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              transition: 'all 0.3s',
+              '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+            }}
+          >
+            <CardHeader title="الأنشطة الأخيرة" titleTypographyProps={{ fontWeight: 700 }} />
             <CardContent>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {(Array.isArray(dashboardData.recentActivity)
@@ -293,8 +335,10 @@ const AdminDashboard = () => {
                       alignItems: 'center',
                       padding: 1,
                       borderLeft: `3px solid ${brandColors.primaryStart}`,
-                      backgroundColor: surfaceColors.lightGray,
-                      borderRadius: 1,
+                      backgroundColor: 'rgba(0,0,0,0.015)',
+                      borderRadius: '10px',
+                      transition: 'all 0.2s',
+                      '&:hover': { backgroundColor: 'rgba(0,0,0,0.03)' },
                     }}
                   >
                     <Avatar
@@ -324,21 +368,75 @@ const AdminDashboard = () => {
       </Grid>
 
       {/* System Alerts */}
-      <Card sx={{ mb: 4 }}>
+      <Card
+        sx={{
+          mb: 4,
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
+        }}
+      >
         <CardHeader
           title="تنبيهات النظام"
+          titleTypographyProps={{ fontWeight: 700 }}
           avatar={<WarningIcon sx={{ color: statusColors.warning }} />}
         />
         <CardContent>
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow sx={{ backgroundColor: surfaceColors.lightGray }}>
-                  <TableCell sx={{ fontWeight: 'bold' }}>النوع</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الرسالة</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الشدة</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الوقت</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>الإجراء</TableCell>
+                <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    النوع
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الرسالة
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الشدة
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الوقت
+                  </TableCell>
+                  <TableCell
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: 0.5,
+                      color: 'text.secondary',
+                    }}
+                  >
+                    الإجراء
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -386,7 +484,13 @@ const AdminDashboard = () => {
       </Card>
 
       {/* Alert Details Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تفاصيل التنبيه</DialogTitle>
         <DialogContent>
           {selectedAlert && (

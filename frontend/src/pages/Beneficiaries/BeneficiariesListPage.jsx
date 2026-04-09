@@ -56,6 +56,7 @@ const GradientHeader = styled(Box)(() => ({
   color: 'white',
   position: 'relative',
   overflow: 'hidden',
+  boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
   '&::before': {
     content: '""', position: 'absolute', top: -30, right: -30,
     width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.06)',
@@ -65,9 +66,10 @@ const GradientHeader = styled(Box)(() => ({
 const KpiCard = styled(Card)(({ gradient }) => ({
   background: gradient,
   color: 'white',
-  borderRadius: 16,
-  transition: 'transform 0.3s, box-shadow 0.3s',
-  '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
+  borderRadius: '16px',
+  border: '1px solid rgba(255,255,255,0.12)',
+  transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+  '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 30px rgba(0,0,0,0.15)' },
 }));
 
 // ── Constants ────────────────────────────────────
@@ -414,7 +416,7 @@ const BeneficiariesListPage = () => {
         <Container maxWidth="xl">
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} md={7}>
-              <Typography variant="h4" fontWeight="bold" gutterBottom>
+              <Typography variant="h4" fontWeight={700} gutterBottom>
                 قائمة المستفيدين
               </Typography>
               <Typography variant="body2" sx={{ opacity: 0.9 }}>
@@ -427,11 +429,11 @@ const BeneficiariesListPage = () => {
                 <Tooltip title="تحديث"><IconButton onClick={loadData} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Refresh /></IconButton></Tooltip>
                 <Tooltip title="طباعة"><IconButton onClick={handlePrint} sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}><Print /></IconButton></Tooltip>
                 <Button variant="outlined" startIcon={<Description />} onClick={() => navigate('/beneficiaries/templates')}
-                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 'bold' }}>قوالب الطباعة</Button>
+                  sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)', fontWeight: 700 }}>قوالب الطباعة</Button>
                 <Button variant="outlined" startIcon={<Download />} onClick={handleExport}
                   sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.5)' }}>تصدير CSV</Button>
                 <Button variant="contained" startIcon={<PersonAdd />} onClick={handleAdd}
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', fontWeight: 'bold' }}>إضافة مستفيد</Button>
+                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', fontWeight: 700 }}>إضافة مستفيد</Button>
               </Stack>
             </Grid>
           </Grid>
@@ -454,7 +456,7 @@ const BeneficiariesListPage = () => {
                 <CardContent sx={{ py: 2, px: 2 }}>
                   <Box display="flex" justifyContent="space-between" alignItems="center">
                     <Box>
-                      <Typography variant="h5" fontWeight="bold">{loading ? '—' : kpi.value}</Typography>
+                      <Typography variant="h5" fontWeight={700}>{loading ? '—' : kpi.value}</Typography>
                       <Typography variant="caption" sx={{ opacity: 0.9 }}>{kpi.label}</Typography>
                     </Box>
                     <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 40, height: 40 }}>{kpi.icon}</Avatar>
@@ -485,7 +487,7 @@ const BeneficiariesListPage = () => {
         </Box>
 
         {/* ── Search & Filter Bar ────────── */}
-        <Card elevation={0} sx={{ borderRadius: 3, mb: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+        <Card elevation={0} sx={{ borderRadius: '20px', mb: 2, boxShadow: '0 2px 16px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)' }}>
           <CardContent sx={{ py: 2 }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
               <TextField fullWidth placeholder="بحث: اسم، هوية، هاتف، بريد، ملف طبي..."
@@ -569,8 +571,8 @@ const BeneficiariesListPage = () => {
 
         {/* ── Bulk Actions Bar ───────────── */}
         {selected.length > 0 && (
-          <Paper elevation={3} sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.50', borderRadius: 2 }}>
-            <Typography variant="subtitle2" fontWeight="bold">
+          <Paper elevation={3} sx={{ p: 2, mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'primary.50', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)' }}>
+            <Typography variant="subtitle2" fontWeight={700}>
               تم تحديد {selected.length} مستفيد
             </Typography>
             <Stack direction="row" spacing={1}>
@@ -598,11 +600,11 @@ const BeneficiariesListPage = () => {
 
         {/* ── TABLE VIEW ─────────────────── */}
         {viewMode === 'table' && (
-          <Card elevation={0} sx={{ borderRadius: 3, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+          <Card elevation={0} sx={{ borderRadius: '20px', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.04)', overflow: 'hidden' }}>
             <TableContainer>
               <Table size="small" id="beneficiaries-table">
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'grey.50' }}>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
                     <TableCell padding="checkbox">
                       <Checkbox
                         indeterminate={selected.length > 0 && selected.length < beneficiaries.length}
@@ -611,7 +613,7 @@ const BeneficiariesListPage = () => {
                     </TableCell>
                     <TableCell sx={{ width: 40 }} />
                     {columns.map((col) => (
-                      <TableCell key={col.id} sx={{ fontWeight: 700, minWidth: col.minWidth, whiteSpace: 'nowrap' }}>
+                      <TableCell key={col.id} sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary', minWidth: col.minWidth, whiteSpace: 'nowrap' }}>
                         {col.sortable ? (
                           <TableSortLabel active={orderBy === col.id}
                             direction={orderBy === col.id ? order : 'asc'}
@@ -795,11 +797,11 @@ const BeneficiariesListPage = () => {
                         <TableRow>
                           <TableCell sx={{ py: 0 }} colSpan={columns.length + 2}>
                             <Collapse in={isOpen} timeout="auto" unmountOnExit>
-                              <Box sx={{ m: 2, p: 2, bgcolor: 'grey.50', borderRadius: 2 }}>
+                              <Box sx={{ m: 2, p: 2, bgcolor: 'rgba(0,0,0,0.02)', borderRadius: '16px' }}>
                                 <Grid container spacing={3}>
                                   <Grid item xs={12} md={4}>
                                     <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight="bold" color="primary">
+                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
                                         <FamilyRestroom sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
                                         بيانات الاتصال
                                       </Typography>
@@ -819,7 +821,7 @@ const BeneficiariesListPage = () => {
                                   </Grid>
                                   <Grid item xs={12} md={4}>
                                     <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight="bold" color="primary">
+                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
                                         <LocalHospital sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
                                         المعالج والجلسات
                                       </Typography>
@@ -841,7 +843,7 @@ const BeneficiariesListPage = () => {
                                   </Grid>
                                   <Grid item xs={12} md={4}>
                                     <Stack spacing={1.5}>
-                                      <Typography variant="subtitle2" fontWeight="bold" color="primary">
+                                      <Typography variant="subtitle2" fontWeight={700} color="primary">
                                         <Description sx={{ fontSize: 16, mr: 0.5, verticalAlign: 'text-bottom' }} />
                                         ولي الأمر والملاحظات
                                       </Typography>
@@ -887,7 +889,7 @@ const BeneficiariesListPage = () => {
               <Grid container spacing={2.5}>
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <Grid item xs={12} sm={6} md={4} key={i}>
-                    <Card sx={{ borderRadius: 3, p: 2 }}>
+                    <Card sx={{ borderRadius: '20px', p: 2 }}>
                       <Box display="flex" gap={2} mb={2}>
                         <Skeleton variant="circular" width={48} height={48} />
                         <Box flex={1}><Skeleton width="60%" height={22} /><Skeleton width="40%" height={16} /></Box>
@@ -905,11 +907,11 @@ const BeneficiariesListPage = () => {
                   <Grid item xs={12} sm={6} md={4} key={b.id}>
                     <Fade in timeout={400}>
                       <Card elevation={0} sx={{
-                        borderRadius: 3, height: '100%',
-                        boxShadow: '0 2px 16px rgba(0,0,0,0.06)',
-                        transition: 'all 0.3s',
-                        border: b.isAtRisk ? '2px solid #ff6b6b' : '1px solid transparent',
-                        '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 8px 32px rgba(0,0,0,0.1)' },
+                        borderRadius: '20px', height: '100%',
+                        boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                        border: b.isAtRisk ? '2px solid #ff6b6b' : '1px solid rgba(0,0,0,0.04)',
+                        '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)', transform: 'translateY(-2px)' },
                       }}>
                         <CardContent>
                           {/* Card Header */}
@@ -922,7 +924,7 @@ const BeneficiariesListPage = () => {
                                 </Avatar>
                               </Badge>
                               <Box>
-                                <Typography variant="subtitle2" fontWeight="bold" sx={{ lineHeight: 1.3 }}>{b.name}</Typography>
+                                <Typography variant="subtitle2" fontWeight={700} sx={{ lineHeight: 1.3 }}>{b.name}</Typography>
                                 {b.nameEn && <Typography variant="caption" color="text.secondary">{b.nameEn}</Typography>}
                                 {b.nationalId && <Box><Chip label={b.nationalId} size="small" sx={{ mt: 0.3, fontSize: 10, height: 20 }} /></Box>}
                               </Box>
@@ -1078,8 +1080,9 @@ const BeneficiariesListPage = () => {
       </Menu>
 
       {/* ── Advanced Filter Dialog ────── */}
-      <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 'bold' }}>الفلاتر المتقدمة</DialogTitle>
+      <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} maxWidth="sm" fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}>
+        <DialogTitle sx={{ fontWeight: 700 }}>الفلاتر المتقدمة</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <FormControl fullWidth>

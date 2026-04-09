@@ -2,11 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* RTL direction + code font — all other body styles are in App.css */
+/* ═══════════════════════════════════════════════════
+   Global Styles — Professional Enhancements
+   ═══════════════════════════════════════════════════ */
+
+/* RTL direction + smooth scroll */
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   direction: rtl;
+  overflow-x: hidden;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* ═══ Selection ═══ */
+::selection {
+  background-color: rgba(46, 125, 50, 0.15);
+  color: #1B5E20;
+}
+
+::-moz-selection {
+  background-color: rgba(46, 125, 50, 0.15);
+  color: #1B5E20;
+}
+
+/* ═══ Focus Visible ═══ */
+:focus-visible {
+  outline: 2px solid rgba(46, 125, 50, 0.5);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ═══ Custom Scrollbar ═══ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(46, 125, 50, 0.2);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(46, 125, 50, 0.35);
+  background-clip: content-box;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(46, 125, 50, 0.2) transparent;
+}
+
+/* ═══ Smooth image loading ═══ */
+img {
+  content-visibility: auto;
+}
+
+/* ═══ Form autofill style fix ═══ */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px #fafafa inset !important;
+  -webkit-text-fill-color: #1a1a1a !important;
+  caret-color: #1B5E20;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ═══ Reduced motion ═══ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

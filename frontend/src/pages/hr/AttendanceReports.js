@@ -139,8 +139,9 @@ const AttendanceReports = () => {
           mb: 3,
           background: gradients.primary,
           color: '#fff',
-          borderRadius: 3,
+          borderRadius: '20px',
           overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
         }}
       >
         <CardContent sx={{ py: 3, px: 4 }}>
@@ -173,13 +174,14 @@ const AttendanceReports = () => {
           <Grid item xs={6} sm={3} key={stat.id}>
             <Card
               sx={{
-                borderRadius: 2.5,
-                border: `1px solid ${surfaceColors.border}`,
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
                 background: surfaceColors.card,
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
                 '&:hover': {
                   transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
                 },
               }}
             >
@@ -200,7 +202,14 @@ const AttendanceReports = () => {
       </Grid>
 
       {/* Tabs */}
-      <Card sx={{ borderRadius: 3, border: `1px solid ${surfaceColors.border}`, mb: 3 }}>
+      <Card
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          mb: 3,
+        }}
+      >
         <Tabs
           value={tabValue}
           onChange={(_, v) => setTabValue(v)}
@@ -209,9 +218,13 @@ const AttendanceReports = () => {
             borderBottom: `1px solid ${surfaceColors.border}`,
             '& .MuiTab-root': {
               fontWeight: 600,
+              textTransform: 'none',
+              minHeight: 48,
               fontSize: '0.95rem',
               py: 2,
             },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
           }}
         >
           <Tab icon={<CalendarIcon />} label="سجل الحضور" iconPosition="start" />
@@ -238,29 +251,70 @@ const AttendanceReports = () => {
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
+                    borderRadius: '16px',
                     bgcolor: surfaceColors.background,
                   },
                 }}
               />
             </Box>
-            <TableContainer sx={{ borderRadius: 2, border: `1px solid ${surfaceColors.border}` }}>
+            <TableContainer
+              sx={{
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+              }}
+            >
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: surfaceColors.background }}>
-                    <TableCell sx={{ fontWeight: 700, color: neutralColors.textPrimary }}>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
                       التاريخ
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: neutralColors.textPrimary }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
                       الوقت
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: neutralColors.textPrimary }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
                       المعالج
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: neutralColors.textPrimary }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
                       الحالة
                     </TableCell>
-                    <TableCell sx={{ fontWeight: 700, color: neutralColors.textPrimary }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
                       ملاحظات
                     </TableCell>
                   </TableRow>
@@ -349,13 +403,14 @@ const AttendanceReports = () => {
                 <Grid item xs={12} md={6} key={report.id}>
                   <Card
                     sx={{
-                      borderRadius: 2.5,
-                      border: `1px solid ${surfaceColors.border}`,
+                      borderRadius: '16px',
+                      border: '1px solid rgba(0,0,0,0.04)',
+                      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
                       cursor: 'pointer',
-                      transition: 'all 0.2s',
+                      transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
                       '&:hover': {
                         borderColor: brandColors.primary,
-                        boxShadow: `0 4px 16px ${brandColors.primary}20`,
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
                         transform: 'translateY(-2px)',
                       },
                     }}
@@ -454,9 +509,15 @@ const AttendanceReports = () => {
                 <Grid item xs={12} sm={6} key={metric.id}>
                   <Card
                     sx={{
-                      borderRadius: 2.5,
-                      border: `1px solid ${surfaceColors.border}`,
+                      borderRadius: '16px',
+                      border: '1px solid rgba(0,0,0,0.04)',
+                      boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
                       overflow: 'hidden',
+                      transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                      '&:hover': {
+                        boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+                        transform: 'translateY(-2px)',
+                      },
                     }}
                   >
                     <Box
@@ -485,7 +546,7 @@ const AttendanceReports = () => {
                             bgcolor: `${metric.color}15`,
                             px: 1.5,
                             py: 0.5,
-                            borderRadius: 2,
+                            borderRadius: '10px',
                           }}
                         >
                           <StarIcon sx={{ fontSize: 18, color: metric.color }} />
@@ -540,7 +601,7 @@ const AttendanceReports = () => {
         onClose={() => setBehaviorDialogOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { borderRadius: 3 } }}
+        PaperProps={{ sx: { borderRadius: '20px' } }}
       >
         <DialogTitle
           sx={{
@@ -550,6 +611,7 @@ const AttendanceReports = () => {
             display: 'flex',
             alignItems: 'center',
             gap: 1.5,
+            boxShadow: '0 8px 32px rgba(102,126,234,0.25)',
           }}
         >
           <BehaviorIcon />
@@ -614,7 +676,7 @@ const AttendanceReports = () => {
           <Button
             onClick={() => setBehaviorDialogOpen(false)}
             variant="contained"
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: '10px' }}
           >
             إغلاق
           </Button>

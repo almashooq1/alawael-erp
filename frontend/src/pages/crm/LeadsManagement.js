@@ -257,7 +257,7 @@ export default function LeadsManagement() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      {loading && <LinearProgress sx={{ mb: 1, borderRadius: 1 }} />}
+      {loading && <LinearProgress sx={{ mb: 1, borderRadius: '10px' }} />}
 
       {/* Header */}
       <Card
@@ -265,7 +265,8 @@ export default function LeadsManagement() {
           mb: 3,
           background: 'linear-gradient(135deg, #7E57C2 0%, #5E35B1 100%)',
           color: 'white',
-          borderRadius: 3,
+          borderRadius: '20px',
+          boxShadow: '0 4px 24px rgba(126,87,194,0.3)',
         }}
       >
         <CardContent
@@ -307,7 +308,16 @@ export default function LeadsManagement() {
           { label: 'متوسط الاحتمالية', value: `${stats.avgProbability}%`, color: '#26A69A' },
         ].map((s, i) => (
           <Grid item xs={6} md={2.4} key={i}>
-            <Card sx={{ borderRadius: 2, borderTop: `3px solid ${s.color}` }}>
+            <Card
+              sx={{
+                borderRadius: '16px',
+                borderTop: `3px solid ${s.color}`,
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' },
+              }}
+            >
               <CardContent sx={{ textAlign: 'center', py: 2 }}>
                 <Typography variant="h5" fontWeight={700} color={s.color}>
                   {s.value}
@@ -322,7 +332,16 @@ export default function LeadsManagement() {
       </Grid>
 
       {/* Pipeline Overview */}
-      <Paper sx={{ px: 2, py: 1.5, mb: 3, borderRadius: 2 }}>
+      <Paper
+        sx={{
+          px: 2,
+          py: 1.5,
+          mb: 3,
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Typography variant="subtitle2" gutterBottom>
           مسار المبيعات
         </Typography>
@@ -353,8 +372,25 @@ export default function LeadsManagement() {
       </Paper>
 
       {/* Tabs & Filters */}
-      <Paper sx={{ mb: 3, borderRadius: 2 }}>
-        <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
+      <Paper
+        sx={{
+          mb: 3,
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
+        <Tabs
+          value={tab}
+          onChange={(_, v) => setTab(v)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': { fontWeight: 600, textTransform: 'none', minHeight: 48 },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
+        >
           <Tab label={`الكل (${leads.length})`} />
           <Tab label={`مفتوحة (${stats.open})`} />
           <Tab label={`ناجحة (${stats.won})`} />
@@ -366,7 +402,9 @@ export default function LeadsManagement() {
         sx={{
           p: 2,
           mb: 3,
-          borderRadius: 2,
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
           display: 'flex',
           gap: 2,
           flexWrap: 'wrap',
@@ -420,18 +458,97 @@ export default function LeadsManagement() {
       </Paper>
 
       {/* Table */}
-      <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+        }}
+      >
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: 'action.hover' }}>
-              <TableCell sx={{ fontWeight: 700 }}>الفرصة</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>الشركة</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>المصدر</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>المرحلة</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>الأولوية</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>القيمة المقدرة</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>الاحتمالية</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>الإجراءات</TableCell>
+            <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الفرصة
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الشركة
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                المصدر
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                المرحلة
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الأولوية
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                القيمة المقدرة
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الاحتمالية
+              </TableCell>
+              <TableCell
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '12px',
+                  letterSpacing: 0.5,
+                  color: 'text.secondary',
+                }}
+              >
+                الإجراءات
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -537,7 +654,13 @@ export default function LeadsManagement() {
       </TableContainer>
 
       {/* Create/Edit Dialog */}
-      <Dialog open={formOpen} onClose={() => setFormOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle
           sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
@@ -696,7 +819,13 @@ export default function LeadsManagement() {
       </Dialog>
 
       {/* Detail Dialog */}
-      <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle
           sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
@@ -742,7 +871,7 @@ export default function LeadsManagement() {
                       gap: 1,
                       p: 1,
                       bgcolor: 'action.hover',
-                      borderRadius: 1,
+                      borderRadius: '10px',
                     }}
                   >
                     {f.icon}
@@ -758,7 +887,7 @@ export default function LeadsManagement() {
                 </Grid>
               ))}
             </Grid>
-            <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: 2 }}>
+            <Box sx={{ mt: 2, p: 2, bgcolor: 'action.hover', borderRadius: '16px' }}>
               <Typography variant="subtitle2" gutterBottom>
                 معلومات إضافية
               </Typography>
@@ -782,7 +911,13 @@ export default function LeadsManagement() {
       </Dialog>
 
       {/* Stage Update Dialog */}
-      <Dialog open={stageOpen} onClose={() => setStageOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={stageOpen}
+        onClose={() => setStageOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تغيير مرحلة الفرصة</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
@@ -804,7 +939,12 @@ export default function LeadsManagement() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs">
+      <Dialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تأكيد الحذف</DialogTitle>
         <DialogContent>
           <Typography>هل أنت متأكد من حذف "{selected?.title}"?</Typography>

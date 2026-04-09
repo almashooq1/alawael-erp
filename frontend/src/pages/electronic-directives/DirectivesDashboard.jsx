@@ -51,12 +51,13 @@ function StatCard({ title, value, icon, color, onClick, loading }) {
     <Card
       sx={{
         height: '100%',
+        borderRadius: '16px',
         background: `linear-gradient(135deg, ${color}15 0%, ${color}08 100%)`,
-        border: `1px solid ${color}30`,
+        border: `1px solid ${color}20`,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
         '&:hover': onClick
-          ? { transform: 'translateY(-4px)', boxShadow: `0 8px 25px ${color}25` }
+          ? { transform: 'translateY(-4px)', boxShadow: `0 12px 32px ${color}20` }
           : {},
       }}
       onClick={onClick}
@@ -208,9 +209,9 @@ export default function DirectivesDashboard() {
       <Grid container spacing={3}>
         {/* ─── Recent Directives ─────────────────────────── */}
         <Grid item xs={12} md={7}>
-          <Paper sx={{ p: 3, borderRadius: 2 }}>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { boxShadow: '0 8px 30px rgba(0,0,0,0.08)' } }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6" fontWeight="bold">
+              <Typography variant="h6" fontWeight={700}>
                 آخر التوجيهات
               </Typography>
               <Button
@@ -235,7 +236,7 @@ export default function DirectivesDashboard() {
                   <ListItem
                     key={d._id}
                     sx={{
-                      borderRadius: 1,
+                      borderRadius: '10px',
                       mb: 1,
                       '&:hover': { bgcolor: 'action.hover' },
                       cursor: 'pointer',
@@ -311,8 +312,8 @@ export default function DirectivesDashboard() {
         {/* ─── Type Distribution + Overdue ───────────────── */}
         <Grid item xs={12} md={5}>
           {/* Type Distribution */}
-          <Paper sx={{ p: 3, borderRadius: 2, mb: 3 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', mb: 3 }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               التوزيع حسب النوع
             </Typography>
             <Divider sx={{ mb: 2 }} />
@@ -357,7 +358,7 @@ export default function DirectivesDashboard() {
 
           {/* Overdue Actions */}
           {overdueActions.length > 0 && (
-            <Paper sx={{ p: 3, borderRadius: 2, border: '1px solid #d32f2f30' }}>
+            <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid #d32f2f15', boxShadow: '0 2px 16px rgba(211,47,47,0.06)' }}>
               <Box display="flex" alignItems="center" gap={1} mb={2}>
                 <WarningIcon color="error" />
                 <Typography variant="h6" fontWeight="bold" color="error">
@@ -386,8 +387,8 @@ export default function DirectivesDashboard() {
           )}
 
           {/* Engagement Stats */}
-          <Paper sx={{ p: 3, borderRadius: 2, mt: 3 }}>
-            <Typography variant="h6" fontWeight="bold" mb={2}>
+          <Paper sx={{ p: 3, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', mt: 3 }}>
+            <Typography variant="h6" fontWeight={700} mb={2}>
               إحصائيات التفاعل
             </Typography>
             <Divider sx={{ mb: 2 }} />

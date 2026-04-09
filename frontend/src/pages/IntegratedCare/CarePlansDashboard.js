@@ -47,38 +47,86 @@ const IntegratedCareStats = ({ plans, sessions: _sessions }) => {
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
       <Grid item xs={12} sm={6} md={3}>
-        <Card>
+        <Card
+          sx={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
+          }}
+        >
+          <Box sx={{ height: 3, background: 'linear-gradient(90deg, #1976d2, #42a5f5)' }} />
           <CardContent sx={{ textAlign: 'center' }}>
             <PlanIcon color="primary" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{plans.length}</Typography>
-            <Typography color="text.secondary">إجمالي الخطط</Typography>
+            <Typography variant="h4" fontWeight={800}>
+              {plans.length}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>إجمالي الخطط</Typography>
           </CardContent>
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card>
+        <Card
+          sx={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
+          }}
+        >
+          <Box sx={{ height: 3, background: 'linear-gradient(90deg, #4caf50, #66bb6a)' }} />
           <CardContent sx={{ textAlign: 'center' }}>
             <CheckIcon color="success" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{activePlans}</Typography>
-            <Typography color="text.secondary">خطط نشطة</Typography>
+            <Typography variant="h4" fontWeight={800}>
+              {activePlans}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>خطط نشطة</Typography>
           </CardContent>
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card>
+        <Card
+          sx={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
+          }}
+        >
+          <Box sx={{ height: 3, background: 'linear-gradient(90deg, #ff9800, #ffb74d)' }} />
           <CardContent sx={{ textAlign: 'center' }}>
             <PendingIcon color="warning" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{draftPlans}</Typography>
-            <Typography color="text.secondary">مسودات</Typography>
+            <Typography variant="h4" fontWeight={800}>
+              {draftPlans}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>مسودات</Typography>
           </CardContent>
         </Card>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <Card>
+        <Card
+          sx={{
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.04)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            transition: 'all 0.3s',
+            '&:hover': { transform: 'translateY(-3px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)' },
+          }}
+        >
+          <Box sx={{ height: 3, background: 'linear-gradient(90deg, #2196f3, #64b5f6)' }} />
           <CardContent sx={{ textAlign: 'center' }}>
             <PeopleIcon color="info" sx={{ fontSize: 40, mb: 1 }} />
-            <Typography variant="h4">{uniqueStudents}</Typography>
-            <Typography color="text.secondary">طلاب مسجلين</Typography>
+            <Typography variant="h4" fontWeight={800}>
+              {uniqueStudents}
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', fontWeight: 600 }}>طلاب مسجلين</Typography>
           </CardContent>
         </Card>
       </Grid>
@@ -252,7 +300,16 @@ function CarePlansDashboard() {
   return (
     <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
       {/* Header */}
-      <Box sx={{ background: gradients.info, borderRadius: 2, p: 3, mb: 4, color: 'white' }}>
+      <Box
+        sx={{
+          background: gradients.info,
+          borderRadius: '20px',
+          p: 3,
+          mb: 4,
+          color: 'white',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+        }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <PlanIcon sx={{ fontSize: 40 }} />
           <Box>
@@ -299,14 +356,34 @@ function CarePlansDashboard() {
       <IntegratedCareStats plans={plans} sessions={sessions} />
 
       {/* Main Content */}
-      <Paper sx={{ mt: 3 }}>
+      <Paper
+        sx={{
+          mt: 3,
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
+        }}
+      >
         <Tabs
           value={activeTab}
           onChange={(e, v) => setActiveTab(v)}
           variant="fullWidth"
           indicatorColor="primary"
           textColor="primary"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .MuiTab-root': {
+              fontWeight: 600,
+              textTransform: 'none',
+              minHeight: 56,
+              transition: 'all 0.2s',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' },
+            },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
         >
           <Tab icon={<SchoolIcon />} label="الخطط الفردية" />
           <Tab icon={<GroupsIcon />} label="البرامج الجماعية" />

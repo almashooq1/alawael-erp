@@ -247,7 +247,7 @@ export default function ChatRoom() {
 
       {/* Pinned message banner */}
       {pinnedMessages.length > 0 && (
-        <Paper sx={{ p: 1.5, mb: 2, bgcolor: '#fff3e0', display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+        <Paper sx={{ p: 1.5, mb: 2, bgcolor: '#fff3e0', display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', borderRadius: '12px' }}
           onClick={() => setPinnedDialog(true)}
         >
           <PushPin color="warning" />
@@ -259,7 +259,7 @@ export default function ChatRoom() {
       )}
 
       {/* ── Chat Area ── */}
-      <Paper sx={{ height: 500, display: 'flex', flexDirection: 'column', mb: 2 }}>
+      <Paper sx={{ height: 500, display: 'flex', flexDirection: 'column', mb: 2, borderRadius: '20px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', overflow: 'hidden' }}>
         <Box sx={{ flex: 1, overflow: 'auto', p: 2, bgcolor: '#fafafa' }}>
           {messages.map(msg => (
             <Box
@@ -274,9 +274,10 @@ export default function ChatRoom() {
               </Avatar>
               <Box
                 sx={{
-                  maxWidth: '70%', p: 1.5, borderRadius: 2,
+                  maxWidth: '70%', p: 1.5, borderRadius: '14px',
                   bgcolor: msg.senderId === 'u1' ? '#e3f2fd' : '#fff',
-                  border: '1px solid #e0e0e0', position: 'relative',
+                  border: '1px solid rgba(0,0,0,0.06)', position: 'relative',
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
                 }}
               >
                 {msg.sender && msg.senderId !== 'u1' && (
@@ -385,7 +386,7 @@ export default function ChatRoom() {
       </Menu>
 
       {/* ═══ Pinned Messages Dialog ═══ */}
-      <Dialog open={pinnedDialog} onClose={() => setPinnedDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={pinnedDialog} onClose={() => setPinnedDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>الرسائل المثبتة ({pinnedMessages.length})</DialogTitle>
         <DialogContent>
           {pinnedMessages.length > 0 ? (
@@ -409,7 +410,7 @@ export default function ChatRoom() {
       </Dialog>
 
       {/* ═══ Attachments Dialog ═══ */}
-      <Dialog open={attachDialog} onClose={() => setAttachDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={attachDialog} onClose={() => setAttachDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>المرفقات ({attachments.length})</DialogTitle>
         <DialogContent>
           {attachments.length > 0 ? (
@@ -433,7 +434,7 @@ export default function ChatRoom() {
 
       {/* ═══ Members Dialog ═══ */}
       {isGroup && (
-        <Dialog open={membersDialog} onClose={() => setMembersDialog(false)} maxWidth="sm" fullWidth>
+        <Dialog open={membersDialog} onClose={() => setMembersDialog(false)} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
           <DialogTitle>
             أعضاء المجموعة ({conv.participants?.length || 0})
             <Button size="small" startIcon={<GroupAdd />} onClick={openAddMember} sx={{ mr: 2 }}>إضافة</Button>
@@ -467,7 +468,7 @@ export default function ChatRoom() {
       )}
 
       {/* ═══ Add Member Dialog ═══ */}
-      <Dialog open={addMemberDialog} onClose={() => setAddMemberDialog(false)} maxWidth="xs" fullWidth>
+      <Dialog open={addMemberDialog} onClose={() => setAddMemberDialog(false)} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '20px' } }}>
         <DialogTitle>إضافة عضو</DialogTitle>
         <DialogContent>
           <List>

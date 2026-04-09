@@ -216,16 +216,17 @@ export default function MDTMeetingsPage() {
           { label: 'متوسط الحضور', value: Math.round(stats.averageAttendees || 0), color: '#9c27b0' },
         ].map(s => (
           <Grid item xs={6} sm={3} key={s.label}>
-            <Paper sx={{ p: 2, borderRadius: 2, borderTop: `3px solid ${s.color}`, textAlign: 'center' }}>
-              <Typography variant="h4" fontWeight="bold" sx={{ color: s.color }}>{s.value}</Typography>
-              <Typography variant="body2" color="text.secondary">{s.label}</Typography>
+            <Paper sx={{ p: 2.5, borderRadius: '16px', overflow: 'hidden', textAlign: 'center', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', transition: 'all 0.3s', '&:hover': { transform: 'translateY(-2px)', boxShadow: '0 6px 20px rgba(0,0,0,0.08)' } }}>
+              <Box sx={{ height: 3, background: `linear-gradient(90deg, ${s.color}, ${s.color}88)`, mx: -2.5, mt: -2.5, mb: 2 }} />
+              <Typography variant="h4" fontWeight={800} sx={{ color: s.color, lineHeight: 1.2 }}>{s.value}</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600, mt: 0.5 }}>{s.label}</Typography>
             </Paper>
           </Grid>
         ))}
       </Grid>
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 2, borderRadius: 2 }}>
+      <Paper sx={{ p: 2.5, mb: 2, borderRadius: '16px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
         <Box display="flex" gap={2} alignItems="center">
           <TextField select label="الحالة" value={filter.status} onChange={e => { setFilter(f => ({ ...f, status: e.target.value })); setPage(0); }} size="small" sx={{ minWidth: 140 }}>
             <MenuItem value="">الكل</MenuItem>
@@ -239,17 +240,23 @@ export default function MDTMeetingsPage() {
       </Paper>
 
       {/* Table */}
-      <Paper sx={{ borderRadius: 2 }}>
+      <Paper sx={{ borderRadius: '20px', border: '1px solid rgba(0,0,0,0.04)', boxShadow: '0 2px 16px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
         {loading ? (
           <Box display="flex" justifyContent="center" py={4}><CircularProgress /></Box>
         ) : (
           <>
             <Table size="small">
               <TableHead>
-                <TableRow sx={{ bgcolor: '#f5f5f5' }}>
-                  <TableCell>الرقم</TableCell><TableCell>العنوان</TableCell><TableCell>النوع</TableCell>
-                  <TableCell>الحالة</TableCell><TableCell>التاريخ</TableCell><TableCell>الوقت</TableCell>
-                  <TableCell>المكان</TableCell><TableCell>المشاركون</TableCell><TableCell>الإجراءات</TableCell>
+                <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الرقم</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>العنوان</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>النوع</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الحالة</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>التاريخ</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الوقت</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المكان</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>المشاركون</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: '12px', letterSpacing: 0.5, color: 'text.secondary' }}>الإجراءات</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -320,7 +327,7 @@ export default function MDTMeetingsPage() {
               </Box>
             </DialogTitle>
             <DialogContent>
-              <Tabs value={detailTab} onChange={(_, v) => setDetailTab(v)} sx={{ mb: 2 }}>
+              <Tabs value={detailTab} onChange={(_, v) => setDetailTab(v)} sx={{ mb: 2, '& .MuiTab-root': { fontWeight: 600, textTransform: 'none' }, '& .Mui-selected': { fontWeight: 700 }, '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' } }}>
                 <Tab label="التفاصيل" />
                 <Tab label={`المشاركون (${detail.attendees?.length || 0})`} />
                 <Tab label={`جدول الأعمال (${detail.agenda?.length || 0})`} />
@@ -405,7 +412,7 @@ export default function MDTMeetingsPage() {
                     </Button>
                   </Box>
                   {detail.minutes?.content ? (
-                    <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: 2, bgcolor: '#fafafa' }}>
+                    <Paper variant="outlined" sx={{ p: 2, mb: 2, borderRadius: '14px', bgcolor: 'rgba(0,0,0,0.015)', border: '1px solid rgba(0,0,0,0.06)' }}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{detail.minutes.content}</Typography>
                       <Box display="flex" gap={2} mt={1}>
                         <Chip label={detail.minutes.approved ? 'معتمد' : 'غير معتمد'} size="small" color={detail.minutes.approved ? 'success' : 'warning'} />

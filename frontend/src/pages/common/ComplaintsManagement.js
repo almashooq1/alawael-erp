@@ -32,7 +32,8 @@ import {
   InputAdornment,
   Tabs,
   Tab,
-  Rating,} from '@mui/material';
+  Rating,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Edit as EditIcon,
@@ -44,7 +45,7 @@ import {
   CheckCircle as ResolveIcon,
   ReportProblem as ComplaintIcon,
   Lightbulb as SuggestionIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import {
   BarChart,
   Bar,
@@ -250,14 +251,15 @@ export default function ComplaintsManagement() {
 
   return (
     <Box sx={{ p: { xs: 2, md: 3 } }}>
-      {loading && <LinearProgress sx={{ mb: 1, borderRadius: 1 }} />}
+      {loading && <LinearProgress sx={{ mb: 1, borderRadius: '10px' }} />}
 
       <Card
         sx={{
           mb: 3,
           background: 'linear-gradient(135deg, #F57F17 0%, #E65100 100%)',
           color: 'white',
-          borderRadius: 3,
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
         }}
       >
         <CardContent
@@ -298,12 +300,27 @@ export default function ComplaintsManagement() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {kpis.map((k, i) => (
           <Grid item xs={6} md={2} key={i}>
-            <Card sx={{ borderRadius: 2, borderTop: `3px solid ${k.color}` }}>
+            <Card
+              sx={{
+                borderRadius: '16px',
+                overflow: 'hidden',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                transition: 'all 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
+                },
+              }}
+            >
+              <Box
+                sx={{ height: 3, background: `linear-gradient(90deg, ${k.color}, ${k.color}88)` }}
+              />
               <CardContent sx={{ textAlign: 'center', py: 1.5 }}>
-                <Typography variant="h5" fontWeight={700} color={k.color}>
+                <Typography variant="h5" fontWeight={800} color={k.color}>
                   {k.value}
                 </Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                   {k.label}
                 </Typography>
               </CardContent>
@@ -312,13 +329,32 @@ export default function ComplaintsManagement() {
         ))}
       </Grid>
 
-      <Paper sx={{ borderRadius: 2 }}>
+      <Paper
+        sx={{
+          borderRadius: '20px',
+          border: '1px solid rgba(0,0,0,0.04)',
+          boxShadow: '0 2px 16px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
+        }}
+      >
         <Tabs
           value={tab}
           onChange={(_, v) => setTab(v)}
           variant="scrollable"
           scrollButtons="auto"
-          sx={{ borderBottom: 1, borderColor: 'divider', '& .MuiTab-root': { fontWeight: 600 } }}
+          sx={{
+            borderBottom: 1,
+            borderColor: 'divider',
+            '& .MuiTab-root': {
+              fontWeight: 600,
+              textTransform: 'none',
+              minHeight: 52,
+              transition: 'all 0.2s',
+              '&:hover': { bgcolor: 'rgba(0,0,0,0.02)' },
+            },
+            '& .Mui-selected': { fontWeight: 700 },
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' },
+          }}
         >
           <Tab label="نظرة عامة" />
           <Tab label="قائمة الشكاوى والاقتراحات" />
@@ -329,7 +365,7 @@ export default function ComplaintsManagement() {
           <Box sx={{ p: 2 }}>
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   التوزيع حسب النوع
                 </Typography>
                 <ResponsiveContainer width="100%" height={250}>
@@ -347,12 +383,18 @@ export default function ComplaintsManagement() {
                         <Cell key={i} fill={COLORS[i]} />
                       ))}
                     </Pie>
-                    <RTooltip />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   التوزيع حسب الحالة
                 </Typography>
                 <ResponsiveContainer width="100%" height={250}>
@@ -370,20 +412,32 @@ export default function ComplaintsManagement() {
                         <Cell key={i} fill={d.color || COLORS[i]} />
                       ))}
                     </Pie>
-                    <RTooltip />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </Grid>
               <Grid item xs={12} md={4}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   حسب الأولوية
                 </Typography>
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={dashboard.priorityDistribution}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                     <XAxis dataKey="name" fontSize={11} />
                     <YAxis />
-                    <RTooltip />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                     <Bar dataKey="count" name="العدد" fill="#FB8C00" radius={[4, 4, 0, 0]}>
                       {dashboard.priorityDistribution.map((_, i) => (
                         <Cell key={i} fill={COLORS[i]} />
@@ -393,22 +447,28 @@ export default function ComplaintsManagement() {
                 </ResponsiveContainer>
               </Grid>
               <Grid item xs={12} md={6}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   الاتجاه الشهري
                 </Typography>
                 <ResponsiveContainer width="100%" height={280}>
                   <LineChart data={dashboard.monthlyTrend}>
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                     <XAxis dataKey="month" fontSize={11} />
                     <YAxis />
-                    <RTooltip />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                     <Legend />
                     <Line
                       type="monotone"
                       dataKey="complaints"
                       name="واردة"
                       stroke="#E53935"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       dot={{ r: 4 }}
                     />
                     <Line
@@ -416,22 +476,28 @@ export default function ComplaintsManagement() {
                       dataKey="resolved"
                       name="منجزة"
                       stroke="#43A047"
-                      strokeWidth={2}
+                      strokeWidth={2.5}
                       dot={{ r: 4 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </Grid>
               <Grid item xs={12} md={6}>
-                <Typography variant="h6" fontWeight={600} gutterBottom>
+                <Typography variant="h6" fontWeight={700} gutterBottom>
                   حسب الفئة
                 </Typography>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={dashboard.categoryDistribution} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" fontSize={11} width={60} />
-                    <RTooltip />
+                    <RTooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                      }}
+                    />
                     <Bar dataKey="count" name="العدد" fill="#1E88E5" radius={[0, 4, 4, 0]}>
                       {dashboard.categoryDistribution.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -448,7 +514,17 @@ export default function ComplaintsManagement() {
         <TabPanel value={tab} index={1}>
           <Box sx={{ p: 2 }}>
             <Paper
-              sx={{ p: 2, mb: 2, display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}
+              sx={{
+                p: 2.5,
+                mb: 2,
+                display: 'flex',
+                gap: 2,
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              }}
             >
               <TextField
                 size="small"
@@ -511,18 +587,97 @@ export default function ComplaintsManagement() {
               </TextField>
               <Chip label={`${filtered.length} عنصر`} variant="outlined" />
             </Paper>
-            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+            <TableContainer
+              component={Paper}
+              sx={{
+                borderRadius: '16px',
+                border: '1px solid rgba(0,0,0,0.04)',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              }}
+            >
               <Table>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'action.hover' }}>
-                    <TableCell sx={{ fontWeight: 700 }}>العنوان</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>النوع</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>الفئة</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>الأولوية</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>مقدم من</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>الحالة</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>التاريخ</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>الإجراءات</TableCell>
+                  <TableRow sx={{ bgcolor: 'rgba(0,0,0,0.02)' }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      العنوان
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      النوع
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الفئة
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الأولوية
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      مقدم من
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الحالة
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      التاريخ
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: '12px',
+                        letterSpacing: 0.5,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      الإجراءات
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -635,7 +790,13 @@ export default function ComplaintsManagement() {
       </Paper>
 
       {/* Create/Edit */}
-      <Dialog open={formOpen} onClose={() => setFormOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between' }}>
           {selected ? 'تعديل' : 'تسجيل شكوى/اقتراح جديد'}
           <IconButton onClick={() => setFormOpen(false)}>
@@ -753,7 +914,13 @@ export default function ComplaintsManagement() {
       </Dialog>
 
       {/* Detail */}
-      <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between' }}>
           التفاصيل
           <IconButton onClick={() => setDetailOpen(false)}>
@@ -794,7 +961,7 @@ export default function ComplaintsManagement() {
             </Box>
             <Typography
               variant="body2"
-              sx={{ mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}
+              sx={{ mb: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: '10px' }}
             >
               {selected.description}
             </Typography>
@@ -808,7 +975,7 @@ export default function ComplaintsManagement() {
                 { label: 'تاريخ الحل', value: selected.resolvedAt || '-' },
               ].map((f, i) => (
                 <Grid item xs={6} key={i}>
-                  <Box sx={{ p: 1, bgcolor: 'action.hover', borderRadius: 1 }}>
+                  <Box sx={{ p: 1, bgcolor: 'action.hover', borderRadius: '10px' }}>
                     <Typography variant="caption" color="text.secondary">
                       {f.label}
                     </Typography>
@@ -820,7 +987,7 @@ export default function ComplaintsManagement() {
               ))}
             </Grid>
             {selected.resolution && (
-              <Box sx={{ mt: 2, p: 1.5, bgcolor: '#E8F5E9', borderRadius: 1 }}>
+              <Box sx={{ mt: 2, p: 1.5, bgcolor: '#E8F5E9', borderRadius: '10px' }}>
                 <Typography variant="caption" color="text.secondary">
                   الحل:
                 </Typography>
@@ -838,7 +1005,13 @@ export default function ComplaintsManagement() {
       </Dialog>
 
       {/* Resolve */}
-      <Dialog open={resolveOpen} onClose={() => setResolveOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={resolveOpen}
+        onClose={() => setResolveOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>حل الشكوى/الاقتراح</DialogTitle>
         <DialogContent>
           <Typography variant="body2" sx={{ mb: 2 }}>
@@ -863,7 +1036,12 @@ export default function ComplaintsManagement() {
       </Dialog>
 
       {/* Delete */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs">
+      <Dialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        maxWidth="xs"
+        PaperProps={{ sx: { borderRadius: '20px' } }}
+      >
         <DialogTitle>تأكيد الحذف</DialogTitle>
         <DialogContent>
           <Typography>هل أنت متأكد من حذف "{selected?.title}"?</Typography>

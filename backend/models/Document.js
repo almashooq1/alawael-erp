@@ -236,6 +236,90 @@ const DocumentSchema = new mongoose.Schema(
       comments: String,
     },
 
+    // ═══ التصنيف الذكي (AI-Powered) ═══
+    smartClassification: {
+      category: String,
+      confidence: { type: Number, min: 0, max: 1 },
+      securityLevel: {
+        type: String,
+        enum: ['public', 'internal', 'confidential', 'secret'],
+        default: 'internal',
+      },
+      priority: {
+        type: String,
+        enum: ['low', 'medium', 'high', 'urgent'],
+        default: 'medium',
+      },
+      suggestedTags: [String],
+      language: {
+        primary: String,
+        isMultilingual: Boolean,
+      },
+      entities: {
+        dates: [String],
+        amounts: [mongoose.Schema.Types.Mixed],
+        references: [String],
+        emails: [String],
+      },
+      classifiedAt: Date,
+      classifiedBy: { type: String, enum: ['auto', 'manual'], default: 'auto' },
+    },
+
+    // ═══ بصمة المحتوى (Duplicate Detection) ═══
+    contentFingerprint: {
+      type: String,
+      index: true,
+      sparse: true,
+    },
+
+    // ═══ سير العمل ═══
+    workflowStatus: {
+      type: String,
+      enum: [
+        'draft',
+        'pending_review',
+        'reviewed',
+        'revision_required',
+        'pending_approval',
+        'approved',
+        'rejected',
+        'published',
+        'archived',
+        'cancelled',
+      ],
+      default: 'draft',
+    },
+    activeWorkflowId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'WorkflowInstance',
+    },
+
+    // ═══ التلخيص التلقائي ═══
+    summary: {
+      text: String,
+      keyPoints: [String],
+      wordCount: Number,
+      readingTimeMinutes: Number,
+      generatedAt: Date,
+    },
+
+    // ═══ التوصيات ═══
+    recommendations: [
+      {
+        type: String,
+        priority: String,
+        icon: String,
+        title: String,
+        message: String,
+        action: String,
+        createdAt: { type: Date, default: Date.now },
+        isDismissed: { type: Boolean, default: false },
+      },
+    ],
+
+    // ═══ المفضلة ═══
+    isFavoriteOf: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+
     // التنبيهات والتذكيرات
     expiryDate: Date,
     requiresApproval: {
@@ -257,7 +341,20 @@ const DocumentSchema = new mongoose.Schema(
       {
         action: {
           type: String,
-          enum: ['تحميل', 'تنزيل', 'عرض', 'مشاركة', 'تعديل', 'حذف', 'استرجاع'],
+          enum: [
+            'تحميل',
+            'تنزيل',
+            'عرض',
+            'مشاركة',
+            'تعديل',
+            'حذف',
+            'استرجاع',
+            'موافقة',
+            'رفض',
+            'توقيع',
+            'تعليق',
+            'أرشفة',
+          ],
         },
         performedBy: {
           type: mongoose.Schema.Types.ObjectId,
@@ -269,6 +366,7 @@ const DocumentSchema = new mongoose.Schema(
           default: Date.now,
         },
         details: String,
+        metadata: mongoose.Schema.Types.Mixed,
       },
     ],
   },
@@ -281,11 +379,19 @@ const DocumentSchema = new mongoose.Schema(
 // الفهارس
 DocumentSchema.index({ uploadedBy: 1, createdAt: -1 });
 DocumentSchema.index({ category: 1 });
-DocumentSchema.index({ title: 'text', description: 'text', tags: 'text' });
+DocumentSchema.index({ title: 'text', description: 'text', tags: 'text', extractedText: 'text' });
 DocumentSchema.index({ 'sharedWith.userId': 1 });
 DocumentSchema.index({ folder: 1 });
 DocumentSchema.index({ status: 1 });
 DocumentSchema.index({ expiryDate: 1 });
+DocumentSchema.index({ contentFingerprint: 1 }, { sparse: true });
+DocumentSchema.index({ workflowStatus: 1 });
+DocumentSchema.index({ 'smartClassification.securityLevel': 1 });
+DocumentSchema.index({ 'smartClassification.priority': 1 });
+DocumentSchema.index({ isFavoriteOf: 1 });
+DocumentSchema.index({ fileType: 1, createdAt: -1 });
+DocumentSchema.index({ viewCount: -1 });
+DocumentSchema.index({ downloadCount: -1 });
 
 // تحديث معلومات البحث قبل الحفظ
 DocumentSchema.pre('save', function () {
@@ -295,6 +401,7 @@ DocumentSchema.pre('save', function () {
       this.description,
       ...(this.tags || []),
       this.originalFileName,
+      ...(this.smartClassification?.suggestedTags || []),
     ].filter(Boolean);
   }
 });

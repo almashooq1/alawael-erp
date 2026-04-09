@@ -15,6 +15,15 @@ const { AppError } = require('../errors/AppError');
 const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 
+// Unified email service
+let emailManager;
+try {
+  const { emailManager: em } = require('../services/email');
+  emailManager = em;
+} catch {
+  emailManager = null;
+}
+
 // Models for accounting endpoints
 let Account, JournalEntry, Expense, AccountingInvoice, CostCenter, FixedAsset, Transaction;
 try {
@@ -323,6 +332,22 @@ router.post(
 
     // Ensure we're sending valid JSON
     const responseBody = result || { success: true, transaction: {} };
+
+    // Alert on large transactions (non-blocking)
+    const LARGE_TXN_THRESHOLD = parseInt(process.env.LARGE_TRANSACTION_THRESHOLD, 10) || 50000;
+    if (emailManager && amount >= LARGE_TXN_THRESHOLD) {
+      const financeEmail = process.env.FINANCE_MANAGER_EMAIL;
+      if (financeEmail) {
+        emailManager
+          .sendAlert(financeEmail, {
+            title: 'تنبيه: معاملة مالية كبيرة',
+            message: `تم إنشاء معاملة مالية بمبلغ ${amount.toLocaleString('ar-SA')} ر.س - النوع: ${type} - ${description || 'بدون وصف'}`,
+            severity: 'high',
+          })
+          .catch(err => logger.error('Failed to send large transaction alert:', err.message));
+      }
+    }
+
     res.status(201).json(responseBody);
   })
 );
@@ -842,6 +867,20 @@ router.post(
       status: 'pending',
       createdAt: new Date(),
     };
+
+    // Send payment confirmation email if payee email is provided (non-blocking)
+    if (emailManager && req.body.payeeEmail) {
+      emailManager
+        .sendPaymentConfirmation(req.body.payeeEmail, {
+          fullName: payee,
+          amount,
+          method: method || 'تحويل بنكي',
+          date: new Date().toLocaleDateString('ar-SA'),
+          reference: payment._id,
+          description: description || '',
+        })
+        .catch(err => logger.error('Failed to send payment confirmation:', err.message));
+    }
 
     res.status(201).json({
       success: true,
@@ -1387,6 +1426,23 @@ router.post(
       createdBy: req.user?.id,
     });
 
+    // Notify finance manager about new pending expense (non-blocking)
+    if (emailManager) {
+      const financeEmail = process.env.FINANCE_MANAGER_EMAIL;
+      if (financeEmail) {
+        emailManager
+          .sendApprovalRequest(financeEmail, {
+            title: 'طلب اعتماد مصروف جديد',
+            requestType: 'مصروف',
+            description: `${description} - ${Number(amount).toLocaleString('ar-SA')} ر.س`,
+            requestedBy: req.user?.fullName || req.user?.email || 'موظف',
+            category,
+            amount: Number(amount),
+          })
+          .catch(err => logger.error('Failed to send expense approval email:', err.message));
+      }
+    }
+
     res.status(201).json({ success: true, data: expense });
   })
 );
@@ -1410,6 +1466,28 @@ router.put(
     expense.approvedBy = req.user?.id;
     expense.approvedAt = new Date();
     await expense.save();
+
+    // Notify expense creator about approval (non-blocking)
+    if (emailManager && expense.createdBy) {
+      try {
+        const User = require('../models/User');
+        const creator = await User.findById(expense.createdBy).select('email fullName').lean();
+        if (creator && creator.email) {
+          emailManager
+            .sendStatusChange(creator.email, {
+              fullName: creator.fullName,
+              itemType: 'مصروف',
+              itemName: expense.description,
+              oldStatus: 'pending',
+              newStatus: 'تمت الموافقة',
+              changedBy: req.user?.fullName || 'الإدارة',
+            })
+            .catch(err => logger.error('Failed to send expense approval email:', err.message));
+        }
+      } catch (_) {
+        /* user lookup failed, non-critical */
+      }
+    }
 
     res.json({ success: true, data: expense });
   })
@@ -1435,6 +1513,29 @@ router.put(
     expense.rejectedAt = new Date();
     expense.rejectionReason = req.body.reason || '';
     await expense.save();
+
+    // Notify expense creator about rejection (non-blocking)
+    if (emailManager && expense.createdBy) {
+      try {
+        const User = require('../models/User');
+        const creator = await User.findById(expense.createdBy).select('email fullName').lean();
+        if (creator && creator.email) {
+          emailManager
+            .sendStatusChange(creator.email, {
+              fullName: creator.fullName,
+              itemType: 'مصروف',
+              itemName: expense.description,
+              oldStatus: 'pending',
+              newStatus: 'تم الرفض',
+              changedBy: req.user?.fullName || 'الإدارة',
+              reason: req.body.reason || '',
+            })
+            .catch(err => logger.error('Failed to send expense rejection email:', err.message));
+        }
+      } catch (_) {
+        /* user lookup failed, non-critical */
+      }
+    }
 
     res.json({ success: true, data: expense });
   })
@@ -1881,6 +1982,22 @@ router.post(
           paidAmount: invoice.paidAmount,
         },
       });
+    }
+
+    // Send invoice email to customer if email provided (non-blocking)
+    if (emailManager && customerEmail) {
+      emailManager
+        .sendInvoice(customerEmail, {
+          customerName: clientName,
+          invoiceNumber: invoice?.invoiceNumber || `INV-${Date.now()}`,
+          date: new Date().toLocaleDateString('ar-SA'),
+          dueDate: dueDate ? new Date(dueDate).toLocaleDateString('ar-SA') : 'خلال 30 يوم',
+          items: items || [],
+          subtotal: invoice?.subtotal || 0,
+          vatAmount: invoice?.vatAmount || 0,
+          totalAmount: invoice?.totalAmount || 0,
+        })
+        .catch(err => logger.error('Failed to send invoice email:', err.message));
     }
 
     // Fallback

@@ -172,6 +172,22 @@ import {
   assessmentsAPI, carePlansAPI, goalsAPI, groupTherapyAPI,
   teleRehabAPI, arVrAPI, behaviorAPI, familyAPI, programsAPI,
   aiRecommendationsAPI, researchAPI, fieldTrainingAPI,
+  // Phase 29 – Workforce Development
+  workforceAnalyticsAPI, credentialManagerAPI, mentorshipProgramAPI, careerPathwayAPI,
+  // Phase 30 – Accreditation & Compliance
+  accreditationManagerAPI, inspectionTrackerAPI, standardsComplianceAPI, licensureManagerAPI,
+  // Phase 31 – Patient Engagement
+  patientPortalAPI, healthEducationAPI, remoteMonitoringAPI, patientCommunityAPI,
+  // Phase 32 – Interoperability
+  fhirIntegrationAPI, hl7MessagingAPI, dataExchangeAPI, interoperabilityHubAPI,
+  // Phase 33 – Disaster Recovery
+  backupManagerAPI, businessContinuityAPI, systemFailoverAPI, incidentResponseAPI,
+  // Phase 34 – Facility & Asset
+  equipmentLifecycleAPI, environmentalMonitoringAPI, spaceManagementAPI, assetTrackingAPI,
+  // Phase 35 – Clinical Research
+  clinicalResearchAPI, clinicalTrialsAPI, outcomeResearchAPI, publicationManagerAPI,
+  // Phase 36 – Community Engagement
+  volunteerManagementAPI, communityOutreachAPI, donorRelationsAPI, advocacyProgramAPI,
 } from '../../services/ddd';
 
 import {
@@ -416,6 +432,678 @@ export const FieldTrainingPage = createDomainPage({
     { label: 'الوصف', field: 'description' },
     { label: 'المشرف', render: i => i.supervisor?.name || '-' },
     { label: 'المتدربون', render: i => `${i.traineeCount || 0}` },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 29 – Workforce Development & Training
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Workforce Analytics ── */
+export const WorkforceAnalyticsPage = createDomainPage({
+  title: 'تحليلات القوى العاملة', icon: '📊', apiModule: workforceAnalyticsAPI,
+  columns: [
+    { label: 'المؤشر', render: i => i.name || i.title || '-' },
+    { label: 'القيمة', render: i => i.value ?? i.score ?? '-' },
+    { label: 'الفترة', render: i => i.period || '-' },
+    { label: 'الاتجاه', field: 'trend', chip: true, chipColor: i => i.trend === 'up' ? 'success' : i.trend === 'down' ? 'error' : 'default' },
+    { label: 'الحالة', field: 'status', chip: true },
+  ],
+  detailFields: [
+    { label: 'المؤشر', render: i => i.name || '-' },
+    { label: 'القيمة', render: i => `${i.value ?? '-'}` },
+    { label: 'الفترة', field: 'period' },
+    { label: 'الاتجاه', field: 'trend' },
+    { label: 'التاريخ', render: i => fmtDate(i.createdAt) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Credential Manager ── */
+export const CredentialManagerPage = createDomainPage({
+  title: 'إدارة الشهادات', icon: '🏅', apiModule: credentialManagerAPI,
+  columns: [
+    { label: 'الموظف', render: i => i.employeeName || i.name || '-' },
+    { label: 'الشهادة', render: i => i.credentialName || i.title || '-' },
+    { label: 'تاريخ الإصدار', render: i => fmtDate(i.issueDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : i.status === 'expired' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'الموظف', render: i => i.employeeName || '-' },
+    { label: 'الشهادة', render: i => i.credentialName || '-' },
+    { label: 'الجهة المانحة', field: 'issuingBody' },
+    { label: 'تاريخ الإصدار', render: i => fmtDate(i.issueDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Mentorship Program ── */
+export const MentorshipProgramPage = createDomainPage({
+  title: 'برنامج التوجيه والإرشاد', icon: '🤝', apiModule: mentorshipProgramAPI,
+  columns: [
+    { label: 'البرنامج', render: i => i.name || i.title || '-' },
+    { label: 'المرشد', render: i => i.mentorName || i.mentor?.name || '-' },
+    { label: 'المتدرب', render: i => i.menteeName || i.mentee?.name || '-' },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'البرنامج', render: i => i.name || '-' },
+    { label: 'المرشد', render: i => i.mentorName || '-' },
+    { label: 'المتدرب', render: i => i.menteeName || '-' },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.endDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Career Pathway ── */
+export const CareerPathwayPage = createDomainPage({
+  title: 'المسارات المهنية', icon: '🛤️', apiModule: careerPathwayAPI,
+  columns: [
+    { label: 'المسار', render: i => i.name || i.title || '-' },
+    { label: 'المستوى', render: i => i.level || i.currentLevel || '-' },
+    { label: 'المرحلة', field: 'stage' },
+    { label: 'التقدم', render: i => i.progressPercent != null ? `${i.progressPercent}%` : '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'المسار', render: i => i.name || '-' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'المستوى', render: i => i.level || '-' },
+    { label: 'المرحلة', field: 'stage' },
+    { label: 'التقدم', render: i => `${i.progressPercent || 0}%` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 30 – Accreditation & Compliance
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Accreditation Manager ── */
+export const AccreditationManagerPage = createDomainPage({
+  title: 'إدارة الاعتماد المؤسسي', icon: '🏛️', apiModule: accreditationManagerAPI,
+  columns: [
+    { label: 'الجهة', render: i => i.body || i.organization || '-' },
+    { label: 'المعيار', render: i => i.standard || i.name || '-' },
+    { label: 'تاريخ التقديم', render: i => fmtDate(i.submissionDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'approved' ? 'success' : i.status === 'pending' ? 'warning' : 'default' },
+  ],
+  detailFields: [
+    { label: 'الجهة', render: i => i.body || '-' },
+    { label: 'المعيار', render: i => i.standard || '-' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'تاريخ التقديم', render: i => fmtDate(i.submissionDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Inspection Tracker ── */
+export const InspectionTrackerPage = createDomainPage({
+  title: 'متابعة التفتيش', icon: '🔍', apiModule: inspectionTrackerAPI,
+  columns: [
+    { label: 'نوع التفتيش', render: i => i.type || i.inspectionType || '-' },
+    { label: 'المفتش', render: i => i.inspectorName || i.inspector?.name || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.inspectionDate) },
+    { label: 'النتيجة', render: i => i.result || i.outcome || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'passed' ? 'success' : i.status === 'failed' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'نوع التفتيش', render: i => i.type || '-' },
+    { label: 'المفتش', render: i => i.inspectorName || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'النتيجة', render: i => i.result || '-' },
+    { label: 'الملاحظات', field: 'notes' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Standards Compliance ── */
+export const StandardsCompliancePage = createDomainPage({
+  title: 'الامتثال للمعايير', icon: '✅', apiModule: standardsComplianceAPI,
+  columns: [
+    { label: 'المعيار', render: i => i.name || i.standardName || '-' },
+    { label: 'الفئة', field: 'category' },
+    { label: 'نسبة الامتثال', render: i => i.complianceRate != null ? `${i.complianceRate}%` : '-' },
+    { label: 'آخر مراجعة', render: i => fmtDate(i.lastReviewDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'compliant' ? 'success' : i.status === 'non_compliant' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'المعيار', render: i => i.name || '-' },
+    { label: 'الفئة', field: 'category' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'نسبة الامتثال', render: i => `${i.complianceRate || 0}%` },
+    { label: 'آخر مراجعة', render: i => fmtDate(i.lastReviewDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Licensure Manager ── */
+export const LicensureManagerPage = createDomainPage({
+  title: 'إدارة التراخيص', icon: '📜', apiModule: licensureManagerAPI,
+  columns: [
+    { label: 'الترخيص', render: i => i.name || i.licenseName || '-' },
+    { label: 'الجهة', render: i => i.issuingAuthority || i.authority || '-' },
+    { label: 'تاريخ الإصدار', render: i => fmtDate(i.issueDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : i.status === 'expired' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'الترخيص', render: i => i.name || '-' },
+    { label: 'الجهة', render: i => i.issuingAuthority || '-' },
+    { label: 'رقم الترخيص', field: 'licenseNumber' },
+    { label: 'تاريخ الإصدار', render: i => fmtDate(i.issueDate) },
+    { label: 'تاريخ الانتهاء', render: i => fmtDate(i.expiryDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 31 – Patient Engagement & Portal
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Patient Portal ── */
+export const PatientPortalPage = createDomainPage({
+  title: 'بوابة المريض', icon: '🏥', apiModule: patientPortalAPI,
+  columns: [
+    { label: 'المريض', render: i => i.patientName || i.name || '-' },
+    { label: 'النوع', render: i => i.type || i.requestType || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.createdAt) },
+    { label: 'الأولوية', field: 'priority', chip: true, chipColor: i => i.priority === 'high' ? 'error' : i.priority === 'medium' ? 'warning' : 'success' },
+    { label: 'الحالة', field: 'status', chip: true },
+  ],
+  detailFields: [
+    { label: 'المريض', render: i => i.patientName || '-' },
+    { label: 'النوع', render: i => i.type || '-' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'الأولوية', field: 'priority' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Health Education ── */
+export const HealthEducationPage = createDomainPage({
+  title: 'التثقيف الصحي', icon: '📚', apiModule: healthEducationAPI,
+  columns: [
+    { label: 'العنوان', render: i => i.title || i.name || '-' },
+    { label: 'الفئة', field: 'category' },
+    { label: 'الجمهور المستهدف', render: i => i.targetAudience || '-' },
+    { label: 'المشاهدات', render: i => i.viewCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'published' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'العنوان', render: i => i.title || '-' },
+    { label: 'الفئة', field: 'category' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'الجمهور المستهدف', render: i => i.targetAudience || '-' },
+    { label: 'المشاهدات', render: i => `${i.viewCount ?? 0}` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Remote Monitoring ── */
+export const RemoteMonitoringPage = createDomainPage({
+  title: 'المراقبة عن بُعد', icon: '📡', apiModule: remoteMonitoringAPI,
+  columns: [
+    { label: 'المريض', render: i => i.patientName || i.name || '-' },
+    { label: 'الجهاز', render: i => i.deviceType || i.device || '-' },
+    { label: 'آخر قراءة', render: i => fmtDate(i.lastReading) },
+    { label: 'القيمة', render: i => i.lastValue ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'normal' ? 'success' : i.status === 'alert' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'المريض', render: i => i.patientName || '-' },
+    { label: 'الجهاز', render: i => i.deviceType || '-' },
+    { label: 'آخر قراءة', render: i => fmtDate(i.lastReading) },
+    { label: 'القيمة', render: i => `${i.lastValue ?? '-'}` },
+    { label: 'الحد الأعلى', render: i => `${i.upperThreshold ?? '-'}` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Patient Community ── */
+export const PatientCommunityPage = createDomainPage({
+  title: 'مجتمع المرضى', icon: '💬', apiModule: patientCommunityAPI,
+  columns: [
+    { label: 'المجموعة', render: i => i.name || i.groupName || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الأعضاء', render: i => i.memberCount ?? '-' },
+    { label: 'المنشورات', render: i => i.postCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'المجموعة', render: i => i.name || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'الأعضاء', render: i => `${i.memberCount ?? 0}` },
+    { label: 'المنشورات', render: i => `${i.postCount ?? 0}` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 32 – Interoperability & Data Exchange
+   ══════════════════════════════════════════════════════════ */
+
+/* ── FHIR Integration ── */
+export const FhirIntegrationPage = createDomainPage({
+  title: 'تكامل FHIR', icon: '🔗', apiModule: fhirIntegrationAPI,
+  columns: [
+    { label: 'المورد', render: i => i.resourceType || i.name || '-' },
+    { label: 'الإجراء', render: i => i.action || i.operation || '-' },
+    { label: 'المصدر', render: i => i.source || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.createdAt) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'success' ? 'success' : i.status === 'failed' ? 'error' : 'info' },
+  ],
+  detailFields: [
+    { label: 'المورد', render: i => i.resourceType || '-' },
+    { label: 'الإجراء', render: i => i.action || '-' },
+    { label: 'المصدر', field: 'source' },
+    { label: 'الوجهة', field: 'destination' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── HL7 Messaging ── */
+export const HL7MessagingPage = createDomainPage({
+  title: 'رسائل HL7', icon: '📨', apiModule: hl7MessagingAPI,
+  columns: [
+    { label: 'نوع الرسالة', render: i => i.messageType || i.type || '-' },
+    { label: 'المرسل', render: i => i.sender || '-' },
+    { label: 'المستقبل', render: i => i.receiver || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.createdAt) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'delivered' ? 'success' : i.status === 'failed' ? 'error' : 'info' },
+  ],
+  detailFields: [
+    { label: 'نوع الرسالة', render: i => i.messageType || '-' },
+    { label: 'المرسل', field: 'sender' },
+    { label: 'المستقبل', field: 'receiver' },
+    { label: 'الحجم', render: i => i.size ? `${i.size} bytes` : '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Data Exchange ── */
+export const DataExchangePage = createDomainPage({
+  title: 'تبادل البيانات', icon: '🔄', apiModule: dataExchangeAPI,
+  columns: [
+    { label: 'العملية', render: i => i.name || i.operationType || '-' },
+    { label: 'المصدر', render: i => i.source || '-' },
+    { label: 'الوجهة', render: i => i.destination || '-' },
+    { label: 'السجلات', render: i => i.recordCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'completed' ? 'success' : i.status === 'failed' ? 'error' : 'info' },
+  ],
+  detailFields: [
+    { label: 'العملية', render: i => i.name || '-' },
+    { label: 'المصدر', field: 'source' },
+    { label: 'الوجهة', field: 'destination' },
+    { label: 'السجلات', render: i => `${i.recordCount ?? 0}` },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Interoperability Hub ── */
+export const InteroperabilityHubPage = createDomainPage({
+  title: 'مركز التشغيل البيني', icon: '🌐', apiModule: interoperabilityHubAPI,
+  columns: [
+    { label: 'النظام', render: i => i.systemName || i.name || '-' },
+    { label: 'البروتوكول', render: i => i.protocol || '-' },
+    { label: 'آخر مزامنة', render: i => fmtDate(i.lastSyncDate) },
+    { label: 'الاتصال', field: 'connectionStatus', chip: true, chipColor: i => i.connectionStatus === 'connected' ? 'success' : 'error' },
+    { label: 'الحالة', field: 'status', chip: true },
+  ],
+  detailFields: [
+    { label: 'النظام', render: i => i.systemName || '-' },
+    { label: 'البروتوكول', field: 'protocol' },
+    { label: 'العنوان', field: 'endpoint' },
+    { label: 'آخر مزامنة', render: i => fmtDate(i.lastSyncDate) },
+    { label: 'الاتصال', field: 'connectionStatus' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 33 – Disaster Recovery & Business Continuity
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Backup Manager ── */
+export const BackupManagerPage = createDomainPage({
+  title: 'إدارة النسخ الاحتياطي', icon: '💾', apiModule: backupManagerAPI,
+  columns: [
+    { label: 'النسخة', render: i => i.name || i.backupId || '-' },
+    { label: 'النوع', render: i => i.type || i.backupType || '-' },
+    { label: 'الحجم', render: i => i.size || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.createdAt) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'completed' ? 'success' : i.status === 'failed' ? 'error' : 'info' },
+  ],
+  detailFields: [
+    { label: 'النسخة', render: i => i.name || '-' },
+    { label: 'النوع', render: i => i.type || '-' },
+    { label: 'الحجم', render: i => i.size || '-' },
+    { label: 'المسار', field: 'path' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Business Continuity ── */
+export const BusinessContinuityPage = createDomainPage({
+  title: 'استمرارية الأعمال', icon: '🔄', apiModule: businessContinuityAPI,
+  columns: [
+    { label: 'الخطة', render: i => i.name || i.planName || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'آخر اختبار', render: i => fmtDate(i.lastTestDate) },
+    { label: 'RTO', render: i => i.rto || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'الخطة', render: i => i.name || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'RTO', render: i => i.rto || '-' },
+    { label: 'RPO', render: i => i.rpo || '-' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── System Failover ── */
+export const SystemFailoverPage = createDomainPage({
+  title: 'تجاوز الأعطال', icon: '⚡', apiModule: systemFailoverAPI,
+  columns: [
+    { label: 'النظام', render: i => i.systemName || i.name || '-' },
+    { label: 'النوع', render: i => i.failoverType || i.type || '-' },
+    { label: 'آخر اختبار', render: i => fmtDate(i.lastTestDate) },
+    { label: 'وقت التبديل', render: i => i.switchoverTime || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'ready' ? 'success' : i.status === 'active' ? 'warning' : 'error' },
+  ],
+  detailFields: [
+    { label: 'النظام', render: i => i.systemName || '-' },
+    { label: 'النوع', render: i => i.failoverType || '-' },
+    { label: 'آخر اختبار', render: i => fmtDate(i.lastTestDate) },
+    { label: 'وقت التبديل', render: i => i.switchoverTime || '-' },
+    { label: 'النظام البديل', field: 'backupSystem' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Incident Response ── */
+export const IncidentResponsePage = createDomainPage({
+  title: 'الاستجابة للحوادث', icon: '🚨', apiModule: incidentResponseAPI,
+  columns: [
+    { label: 'الحادثة', render: i => i.title || i.name || '-' },
+    { label: 'الشدة', field: 'severity', chip: true, chipColor: i => i.severity === 'critical' ? 'error' : i.severity === 'high' ? 'warning' : 'info' },
+    { label: 'التاريخ', render: i => fmtDate(i.date || i.reportedAt) },
+    { label: 'المسؤول', render: i => i.assignee || i.responder || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'resolved' ? 'success' : i.status === 'open' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'الحادثة', render: i => i.title || '-' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'الشدة', field: 'severity' },
+    { label: 'التاريخ', render: i => fmtDate(i.date) },
+    { label: 'المسؤول', render: i => i.assignee || '-' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 34 – Environmental & Facility Management
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Equipment Lifecycle ── */
+export const EquipmentLifecyclePage = createDomainPage({
+  title: 'دورة حياة المعدات', icon: '🔧', apiModule: equipmentLifecycleAPI,
+  columns: [
+    { label: 'المعدة', render: i => i.name || i.equipmentName || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الموقع', render: i => i.location || '-' },
+    { label: 'آخر صيانة', render: i => fmtDate(i.lastMaintenanceDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'operational' ? 'success' : i.status === 'maintenance' ? 'warning' : 'error' },
+  ],
+  detailFields: [
+    { label: 'المعدة', render: i => i.name || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الرقم التسلسلي', field: 'serialNumber' },
+    { label: 'الموقع', render: i => i.location || '-' },
+    { label: 'آخر صيانة', render: i => fmtDate(i.lastMaintenanceDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Environmental Monitoring ── */
+export const EnvironmentalMonitoringPage = createDomainPage({
+  title: 'المراقبة البيئية', icon: '🌡️', apiModule: environmentalMonitoringAPI,
+  columns: [
+    { label: 'الموقع', render: i => i.location || i.name || '-' },
+    { label: 'المؤشر', render: i => i.parameter || i.metric || '-' },
+    { label: 'القيمة', render: i => i.value ?? '-' },
+    { label: 'آخر قراءة', render: i => fmtDate(i.lastReading) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'normal' ? 'success' : i.status === 'alert' ? 'error' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'الموقع', render: i => i.location || '-' },
+    { label: 'المؤشر', render: i => i.parameter || '-' },
+    { label: 'القيمة', render: i => `${i.value ?? '-'}` },
+    { label: 'الحد الأعلى', render: i => `${i.upperLimit ?? '-'}` },
+    { label: 'الحد الأدنى', render: i => `${i.lowerLimit ?? '-'}` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Space Management ── */
+export const SpaceManagementPage = createDomainPage({
+  title: 'إدارة المساحات', icon: '🏢', apiModule: spaceManagementAPI,
+  columns: [
+    { label: 'المساحة', render: i => i.name || i.spaceName || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'السعة', render: i => i.capacity ?? '-' },
+    { label: 'الطابق', render: i => i.floor || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'available' ? 'success' : i.status === 'occupied' ? 'info' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'المساحة', render: i => i.name || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'السعة', render: i => `${i.capacity ?? '-'}` },
+    { label: 'الطابق', render: i => i.floor || '-' },
+    { label: 'المبنى', field: 'building' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Asset Tracking ── */
+export const AssetTrackingPage = createDomainPage({
+  title: 'تتبع الأصول', icon: '📦', apiModule: assetTrackingAPI,
+  columns: [
+    { label: 'الأصل', render: i => i.name || i.assetName || '-' },
+    { label: 'الرمز', render: i => i.assetTag || i.code || '-' },
+    { label: 'الموقع', render: i => i.location || '-' },
+    { label: 'القيمة', render: i => i.value ? `${i.value} ر.س` : '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : i.status === 'retired' ? 'default' : 'warning' },
+  ],
+  detailFields: [
+    { label: 'الأصل', render: i => i.name || '-' },
+    { label: 'الرمز', render: i => i.assetTag || '-' },
+    { label: 'الموقع', render: i => i.location || '-' },
+    { label: 'القيمة', render: i => i.value ? `${i.value} ر.س` : '-' },
+    { label: 'تاريخ الشراء', render: i => fmtDate(i.purchaseDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 35 – Clinical Research & Evidence-Based Practice
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Clinical Research (Advanced) ── */
+export const ClinicalResearchPage = createDomainPage({
+  title: 'البحث السريري المتقدم', icon: '🧬', apiModule: clinicalResearchAPI,
+  columns: [
+    { label: 'الدراسة', render: i => i.title || i.name || '-' },
+    { label: 'الباحث', render: i => i.principalInvestigator || i.researcher || '-' },
+    { label: 'المنهجية', field: 'methodology' },
+    { label: 'المشاركون', render: i => i.participantCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : i.status === 'completed' ? 'default' : 'info' },
+  ],
+  detailFields: [
+    { label: 'الدراسة', render: i => i.title || '-' },
+    { label: 'الباحث', render: i => i.principalInvestigator || '-' },
+    { label: 'المنهجية', field: 'methodology' },
+    { label: 'المشاركون', render: i => `${i.participantCount ?? 0}` },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Clinical Trials ── */
+export const ClinicalTrialsPage = createDomainPage({
+  title: 'التجارب السريرية', icon: '🧪', apiModule: clinicalTrialsAPI,
+  columns: [
+    { label: 'التجربة', render: i => i.title || i.name || '-' },
+    { label: 'المرحلة', render: i => i.phase || '-' },
+    { label: 'الراعي', render: i => i.sponsor || '-' },
+    { label: 'المشاركون', render: i => i.enrolledCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'recruiting' ? 'success' : i.status === 'completed' ? 'default' : 'info' },
+  ],
+  detailFields: [
+    { label: 'التجربة', render: i => i.title || '-' },
+    { label: 'المرحلة', render: i => i.phase || '-' },
+    { label: 'الراعي', render: i => i.sponsor || '-' },
+    { label: 'المشاركون', render: i => `${i.enrolledCount ?? 0}` },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Outcome Research ── */
+export const OutcomeResearchPage = createDomainPage({
+  title: 'بحوث النتائج', icon: '📈', apiModule: outcomeResearchAPI,
+  columns: [
+    { label: 'الدراسة', render: i => i.title || i.name || '-' },
+    { label: 'المقياس', render: i => i.outcomeMeasure || '-' },
+    { label: 'حجم العينة', render: i => i.sampleSize ?? '-' },
+    { label: 'النتيجة', render: i => i.result || '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'published' ? 'success' : i.status === 'analysis' ? 'info' : 'default' },
+  ],
+  detailFields: [
+    { label: 'الدراسة', render: i => i.title || '-' },
+    { label: 'المقياس', render: i => i.outcomeMeasure || '-' },
+    { label: 'حجم العينة', render: i => `${i.sampleSize ?? 0}` },
+    { label: 'النتيجة', render: i => i.result || '-' },
+    { label: 'التاريخ', render: i => fmtDate(i.completionDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Publication Manager ── */
+export const PublicationManagerPage = createDomainPage({
+  title: 'إدارة المنشورات العلمية', icon: '📄', apiModule: publicationManagerAPI,
+  columns: [
+    { label: 'العنوان', render: i => i.title || i.name || '-' },
+    { label: 'المجلة', render: i => i.journal || '-' },
+    { label: 'المؤلفون', render: i => i.authors?.join(', ') || i.authorName || '-' },
+    { label: 'تاريخ النشر', render: i => fmtDate(i.publicationDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'published' ? 'success' : i.status === 'submitted' ? 'info' : 'default' },
+  ],
+  detailFields: [
+    { label: 'العنوان', render: i => i.title || '-' },
+    { label: 'المجلة', render: i => i.journal || '-' },
+    { label: 'المؤلفون', render: i => i.authors?.join(', ') || '-' },
+    { label: 'DOI', field: 'doi' },
+    { label: 'تاريخ النشر', render: i => fmtDate(i.publicationDate) },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ══════════════════════════════════════════════════════════
+   Phase 36 – Community Engagement & Outreach
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Volunteer Management ── */
+export const VolunteerManagementPage = createDomainPage({
+  title: 'إدارة المتطوعين', icon: '🙋', apiModule: volunteerManagementAPI,
+  columns: [
+    { label: 'المتطوع', render: i => i.name || i.volunteerName || '-' },
+    { label: 'المهارة', render: i => i.skill || i.specialty || '-' },
+    { label: 'الساعات', render: i => i.totalHours ?? '-' },
+    { label: 'تاريخ التسجيل', render: i => fmtDate(i.registrationDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'المتطوع', render: i => i.name || '-' },
+    { label: 'المهارة', render: i => i.skill || '-' },
+    { label: 'الساعات', render: i => `${i.totalHours ?? 0}` },
+    { label: 'الهاتف', field: 'phone' },
+    { label: 'البريد', field: 'email' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Community Outreach ── */
+export const CommunityOutreachPage = createDomainPage({
+  title: 'التواصل المجتمعي', icon: '📢', apiModule: communityOutreachAPI,
+  columns: [
+    { label: 'البرنامج', render: i => i.name || i.title || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الجمهور', render: i => i.targetAudience || '-' },
+    { label: 'المشاركون', render: i => i.participantCount ?? '-' },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : i.status === 'completed' ? 'default' : 'info' },
+  ],
+  detailFields: [
+    { label: 'البرنامج', render: i => i.name || '-' },
+    { label: 'النوع', field: 'type' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'الجمهور', render: i => i.targetAudience || '-' },
+    { label: 'المشاركون', render: i => `${i.participantCount ?? 0}` },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Donor Relations ── */
+export const DonorRelationsPage = createDomainPage({
+  title: 'علاقات المانحين', icon: '💝', apiModule: donorRelationsAPI,
+  columns: [
+    { label: 'المانح', render: i => i.name || i.donorName || '-' },
+    { label: 'النوع', render: i => i.type || i.donorType || '-' },
+    { label: 'إجمالي التبرعات', render: i => i.totalDonations ? `${i.totalDonations} ر.س` : '-' },
+    { label: 'آخر تبرع', render: i => fmtDate(i.lastDonationDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'المانح', render: i => i.name || '-' },
+    { label: 'النوع', render: i => i.type || '-' },
+    { label: 'إجمالي التبرعات', render: i => i.totalDonations ? `${i.totalDonations} ر.س` : '-' },
+    { label: 'الهاتف', field: 'phone' },
+    { label: 'البريد', field: 'email' },
+    { label: 'الحالة', field: 'status' },
+  ],
+});
+
+/* ── Advocacy Program ── */
+export const AdvocacyProgramPage = createDomainPage({
+  title: 'برنامج المناصرة', icon: '📣', apiModule: advocacyProgramAPI,
+  columns: [
+    { label: 'البرنامج', render: i => i.name || i.title || '-' },
+    { label: 'القضية', render: i => i.cause || i.issue || '-' },
+    { label: 'المؤيدون', render: i => i.supporterCount ?? '-' },
+    { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
+    { label: 'الحالة', field: 'status', chip: true, chipColor: i => i.status === 'active' ? 'success' : 'default' },
+  ],
+  detailFields: [
+    { label: 'البرنامج', render: i => i.name || '-' },
+    { label: 'القضية', render: i => i.cause || '-' },
+    { label: 'الوصف', field: 'description' },
+    { label: 'المؤيدون', render: i => `${i.supporterCount ?? 0}` },
     { label: 'تاريخ البدء', render: i => fmtDate(i.startDate) },
     { label: 'الحالة', field: 'status' },
   ],

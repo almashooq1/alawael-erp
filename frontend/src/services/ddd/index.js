@@ -405,6 +405,390 @@ export const dashboardsAPI = {
 };
 
 /* ═══════════════════════════════════════════════════════════
+ *  21. WORKFORCE ANALYTICS — تحليلات القوى العاملة
+ * ═══════════════════════════════════════════════════════════ */
+export const workforceAnalyticsAPI = {
+  create: data => apiClient.post('/workforce-analytics', data),
+  list: params => apiClient.get('/workforce-analytics', { params }),
+  get: id => apiClient.get(`/workforce-analytics/${id}`),
+  update: (id, data) => apiClient.put(`/workforce-analytics/${id}`, data),
+  remove: id => apiClient.delete(`/workforce-analytics/${id}`),
+  getDashboard: params => apiClient.get('/workforce-analytics/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  22. CREDENTIAL MANAGER — إدارة الشهادات والاعتمادات
+ * ═══════════════════════════════════════════════════════════ */
+export const credentialManagerAPI = {
+  create: data => apiClient.post('/credential-manager', data),
+  list: params => apiClient.get('/credential-manager', { params }),
+  get: id => apiClient.get(`/credential-manager/${id}`),
+  update: (id, data) => apiClient.put(`/credential-manager/${id}`, data),
+  remove: id => apiClient.delete(`/credential-manager/${id}`),
+  getDashboard: params => apiClient.get('/credential-manager/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  23. MENTORSHIP PROGRAM — برنامج التوجيه والإرشاد
+ * ═══════════════════════════════════════════════════════════ */
+export const mentorshipProgramAPI = {
+  create: data => apiClient.post('/mentorship-program', data),
+  list: params => apiClient.get('/mentorship-program', { params }),
+  get: id => apiClient.get(`/mentorship-program/${id}`),
+  update: (id, data) => apiClient.put(`/mentorship-program/${id}`, data),
+  remove: id => apiClient.delete(`/mentorship-program/${id}`),
+  getDashboard: params => apiClient.get('/mentorship-program/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  24. CAREER PATHWAY — المسارات المهنية
+ * ═══════════════════════════════════════════════════════════ */
+export const careerPathwayAPI = {
+  create: data => apiClient.post('/career-pathway', data),
+  list: params => apiClient.get('/career-pathway', { params }),
+  get: id => apiClient.get(`/career-pathway/${id}`),
+  update: (id, data) => apiClient.put(`/career-pathway/${id}`, data),
+  remove: id => apiClient.delete(`/career-pathway/${id}`),
+  getDashboard: params => apiClient.get('/career-pathway/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  25. ACCREDITATION MANAGER — إدارة الاعتماد المؤسسي
+ * ═══════════════════════════════════════════════════════════ */
+export const accreditationManagerAPI = {
+  create: data => apiClient.post('/accreditation-manager', data),
+  list: params => apiClient.get('/accreditation-manager', { params }),
+  get: id => apiClient.get(`/accreditation-manager/${id}`),
+  update: (id, data) => apiClient.put(`/accreditation-manager/${id}`, data),
+  remove: id => apiClient.delete(`/accreditation-manager/${id}`),
+  getDashboard: params => apiClient.get('/accreditation-manager/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  26. INSPECTION TRACKER — متابعة التفتيش والزيارات
+ * ═══════════════════════════════════════════════════════════ */
+export const inspectionTrackerAPI = {
+  create: data => apiClient.post('/inspection-tracker', data),
+  list: params => apiClient.get('/inspection-tracker', { params }),
+  get: id => apiClient.get(`/inspection-tracker/${id}`),
+  update: (id, data) => apiClient.put(`/inspection-tracker/${id}`, data),
+  remove: id => apiClient.delete(`/inspection-tracker/${id}`),
+  getDashboard: params => apiClient.get('/inspection-tracker/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  27. STANDARDS COMPLIANCE — الامتثال للمعايير
+ * ═══════════════════════════════════════════════════════════ */
+export const standardsComplianceAPI = {
+  create: data => apiClient.post('/standards-compliance', data),
+  list: params => apiClient.get('/standards-compliance', { params }),
+  get: id => apiClient.get(`/standards-compliance/${id}`),
+  update: (id, data) => apiClient.put(`/standards-compliance/${id}`, data),
+  remove: id => apiClient.delete(`/standards-compliance/${id}`),
+  getDashboard: params => apiClient.get('/standards-compliance/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  28. LICENSURE MANAGER — إدارة التراخيص
+ * ═══════════════════════════════════════════════════════════ */
+export const licensureManagerAPI = {
+  create: data => apiClient.post('/licensure-manager', data),
+  list: params => apiClient.get('/licensure-manager', { params }),
+  get: id => apiClient.get(`/licensure-manager/${id}`),
+  update: (id, data) => apiClient.put(`/licensure-manager/${id}`, data),
+  remove: id => apiClient.delete(`/licensure-manager/${id}`),
+  getDashboard: params => apiClient.get('/licensure-manager/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  29. PATIENT PORTAL — بوابة المريض
+ * ═══════════════════════════════════════════════════════════ */
+export const patientPortalAPI = {
+  create: data => apiClient.post('/patient-portal', data),
+  list: params => apiClient.get('/patient-portal', { params }),
+  get: id => apiClient.get(`/patient-portal/${id}`),
+  update: (id, data) => apiClient.put(`/patient-portal/${id}`, data),
+  remove: id => apiClient.delete(`/patient-portal/${id}`),
+  getDashboard: params => apiClient.get('/patient-portal/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  30. HEALTH EDUCATION — التثقيف الصحي
+ * ═══════════════════════════════════════════════════════════ */
+export const healthEducationAPI = {
+  create: data => apiClient.post('/health-education', data),
+  list: params => apiClient.get('/health-education', { params }),
+  get: id => apiClient.get(`/health-education/${id}`),
+  update: (id, data) => apiClient.put(`/health-education/${id}`, data),
+  remove: id => apiClient.delete(`/health-education/${id}`),
+  getDashboard: params => apiClient.get('/health-education/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  31. REMOTE MONITORING — المراقبة عن بُعد
+ * ═══════════════════════════════════════════════════════════ */
+export const remoteMonitoringAPI = {
+  create: data => apiClient.post('/remote-monitoring', data),
+  list: params => apiClient.get('/remote-monitoring', { params }),
+  get: id => apiClient.get(`/remote-monitoring/${id}`),
+  update: (id, data) => apiClient.put(`/remote-monitoring/${id}`, data),
+  remove: id => apiClient.delete(`/remote-monitoring/${id}`),
+  getDashboard: params => apiClient.get('/remote-monitoring/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  32. PATIENT COMMUNITY — مجتمع المرضى
+ * ═══════════════════════════════════════════════════════════ */
+export const patientCommunityAPI = {
+  create: data => apiClient.post('/patient-community', data),
+  list: params => apiClient.get('/patient-community', { params }),
+  get: id => apiClient.get(`/patient-community/${id}`),
+  update: (id, data) => apiClient.put(`/patient-community/${id}`, data),
+  remove: id => apiClient.delete(`/patient-community/${id}`),
+  getDashboard: params => apiClient.get('/patient-community/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  33. FHIR INTEGRATION — تكامل FHIR
+ * ═══════════════════════════════════════════════════════════ */
+export const fhirIntegrationAPI = {
+  create: data => apiClient.post('/fhir-integration', data),
+  list: params => apiClient.get('/fhir-integration', { params }),
+  get: id => apiClient.get(`/fhir-integration/${id}`),
+  update: (id, data) => apiClient.put(`/fhir-integration/${id}`, data),
+  remove: id => apiClient.delete(`/fhir-integration/${id}`),
+  getDashboard: params => apiClient.get('/fhir-integration/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  34. HL7 MESSAGING — رسائل HL7
+ * ═══════════════════════════════════════════════════════════ */
+export const hl7MessagingAPI = {
+  create: data => apiClient.post('/hl7-messaging', data),
+  list: params => apiClient.get('/hl7-messaging', { params }),
+  get: id => apiClient.get(`/hl7-messaging/${id}`),
+  update: (id, data) => apiClient.put(`/hl7-messaging/${id}`, data),
+  remove: id => apiClient.delete(`/hl7-messaging/${id}`),
+  getDashboard: params => apiClient.get('/hl7-messaging/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  35. DATA EXCHANGE — تبادل البيانات
+ * ═══════════════════════════════════════════════════════════ */
+export const dataExchangeAPI = {
+  create: data => apiClient.post('/data-exchange', data),
+  list: params => apiClient.get('/data-exchange', { params }),
+  get: id => apiClient.get(`/data-exchange/${id}`),
+  update: (id, data) => apiClient.put(`/data-exchange/${id}`, data),
+  remove: id => apiClient.delete(`/data-exchange/${id}`),
+  getDashboard: params => apiClient.get('/data-exchange/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  36. INTEROPERABILITY HUB — مركز التشغيل البيني
+ * ═══════════════════════════════════════════════════════════ */
+export const interoperabilityHubAPI = {
+  create: data => apiClient.post('/interoperability-hub', data),
+  list: params => apiClient.get('/interoperability-hub', { params }),
+  get: id => apiClient.get(`/interoperability-hub/${id}`),
+  update: (id, data) => apiClient.put(`/interoperability-hub/${id}`, data),
+  remove: id => apiClient.delete(`/interoperability-hub/${id}`),
+  getDashboard: params => apiClient.get('/interoperability-hub/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  37. BACKUP MANAGER — إدارة النسخ الاحتياطي
+ * ═══════════════════════════════════════════════════════════ */
+export const backupManagerAPI = {
+  create: data => apiClient.post('/backup-manager', data),
+  list: params => apiClient.get('/backup-manager', { params }),
+  get: id => apiClient.get(`/backup-manager/${id}`),
+  update: (id, data) => apiClient.put(`/backup-manager/${id}`, data),
+  remove: id => apiClient.delete(`/backup-manager/${id}`),
+  getDashboard: params => apiClient.get('/backup-manager/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  38. BUSINESS CONTINUITY — استمرارية الأعمال
+ * ═══════════════════════════════════════════════════════════ */
+export const businessContinuityAPI = {
+  create: data => apiClient.post('/business-continuity', data),
+  list: params => apiClient.get('/business-continuity', { params }),
+  get: id => apiClient.get(`/business-continuity/${id}`),
+  update: (id, data) => apiClient.put(`/business-continuity/${id}`, data),
+  remove: id => apiClient.delete(`/business-continuity/${id}`),
+  getDashboard: params => apiClient.get('/business-continuity/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  39. SYSTEM FAILOVER — تجاوز الأعطال
+ * ═══════════════════════════════════════════════════════════ */
+export const systemFailoverAPI = {
+  create: data => apiClient.post('/system-failover', data),
+  list: params => apiClient.get('/system-failover', { params }),
+  get: id => apiClient.get(`/system-failover/${id}`),
+  update: (id, data) => apiClient.put(`/system-failover/${id}`, data),
+  remove: id => apiClient.delete(`/system-failover/${id}`),
+  getDashboard: params => apiClient.get('/system-failover/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  40. INCIDENT RESPONSE — الاستجابة للحوادث
+ * ═══════════════════════════════════════════════════════════ */
+export const incidentResponseAPI = {
+  create: data => apiClient.post('/incident-response', data),
+  list: params => apiClient.get('/incident-response', { params }),
+  get: id => apiClient.get(`/incident-response/${id}`),
+  update: (id, data) => apiClient.put(`/incident-response/${id}`, data),
+  remove: id => apiClient.delete(`/incident-response/${id}`),
+  getDashboard: params => apiClient.get('/incident-response/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  41. EQUIPMENT LIFECYCLE — دورة حياة المعدات
+ * ═══════════════════════════════════════════════════════════ */
+export const equipmentLifecycleAPI = {
+  create: data => apiClient.post('/equipment-lifecycle', data),
+  list: params => apiClient.get('/equipment-lifecycle', { params }),
+  get: id => apiClient.get(`/equipment-lifecycle/${id}`),
+  update: (id, data) => apiClient.put(`/equipment-lifecycle/${id}`, data),
+  remove: id => apiClient.delete(`/equipment-lifecycle/${id}`),
+  getDashboard: params => apiClient.get('/equipment-lifecycle/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  42. ENVIRONMENTAL MONITORING — المراقبة البيئية
+ * ═══════════════════════════════════════════════════════════ */
+export const environmentalMonitoringAPI = {
+  create: data => apiClient.post('/environmental-monitoring', data),
+  list: params => apiClient.get('/environmental-monitoring', { params }),
+  get: id => apiClient.get(`/environmental-monitoring/${id}`),
+  update: (id, data) => apiClient.put(`/environmental-monitoring/${id}`, data),
+  remove: id => apiClient.delete(`/environmental-monitoring/${id}`),
+  getDashboard: params => apiClient.get('/environmental-monitoring/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  43. SPACE MANAGEMENT — إدارة المساحات والمرافق
+ * ═══════════════════════════════════════════════════════════ */
+export const spaceManagementAPI = {
+  create: data => apiClient.post('/space-management', data),
+  list: params => apiClient.get('/space-management', { params }),
+  get: id => apiClient.get(`/space-management/${id}`),
+  update: (id, data) => apiClient.put(`/space-management/${id}`, data),
+  remove: id => apiClient.delete(`/space-management/${id}`),
+  getDashboard: params => apiClient.get('/space-management/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  44. ASSET TRACKING — تتبع الأصول
+ * ═══════════════════════════════════════════════════════════ */
+export const assetTrackingAPI = {
+  create: data => apiClient.post('/asset-tracking', data),
+  list: params => apiClient.get('/asset-tracking', { params }),
+  get: id => apiClient.get(`/asset-tracking/${id}`),
+  update: (id, data) => apiClient.put(`/asset-tracking/${id}`, data),
+  remove: id => apiClient.delete(`/asset-tracking/${id}`),
+  getDashboard: params => apiClient.get('/asset-tracking/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  45. CLINICAL RESEARCH (Advanced) — البحث السريري المتقدم
+ * ═══════════════════════════════════════════════════════════ */
+export const clinicalResearchAPI = {
+  create: data => apiClient.post('/clinical-research', data),
+  list: params => apiClient.get('/clinical-research', { params }),
+  get: id => apiClient.get(`/clinical-research/${id}`),
+  update: (id, data) => apiClient.put(`/clinical-research/${id}`, data),
+  remove: id => apiClient.delete(`/clinical-research/${id}`),
+  getDashboard: params => apiClient.get('/clinical-research/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  46. CLINICAL TRIALS — التجارب السريرية
+ * ═══════════════════════════════════════════════════════════ */
+export const clinicalTrialsAPI = {
+  create: data => apiClient.post('/clinical-trials', data),
+  list: params => apiClient.get('/clinical-trials', { params }),
+  get: id => apiClient.get(`/clinical-trials/${id}`),
+  update: (id, data) => apiClient.put(`/clinical-trials/${id}`, data),
+  remove: id => apiClient.delete(`/clinical-trials/${id}`),
+  getDashboard: params => apiClient.get('/clinical-trials/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  47. OUTCOME RESEARCH — بحوث النتائج
+ * ═══════════════════════════════════════════════════════════ */
+export const outcomeResearchAPI = {
+  create: data => apiClient.post('/outcome-research', data),
+  list: params => apiClient.get('/outcome-research', { params }),
+  get: id => apiClient.get(`/outcome-research/${id}`),
+  update: (id, data) => apiClient.put(`/outcome-research/${id}`, data),
+  remove: id => apiClient.delete(`/outcome-research/${id}`),
+  getDashboard: params => apiClient.get('/outcome-research/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  48. PUBLICATION MANAGER — إدارة المنشورات العلمية
+ * ═══════════════════════════════════════════════════════════ */
+export const publicationManagerAPI = {
+  create: data => apiClient.post('/publication-manager', data),
+  list: params => apiClient.get('/publication-manager', { params }),
+  get: id => apiClient.get(`/publication-manager/${id}`),
+  update: (id, data) => apiClient.put(`/publication-manager/${id}`, data),
+  remove: id => apiClient.delete(`/publication-manager/${id}`),
+  getDashboard: params => apiClient.get('/publication-manager/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  49. VOLUNTEER MANAGEMENT — إدارة المتطوعين
+ * ═══════════════════════════════════════════════════════════ */
+export const volunteerManagementAPI = {
+  create: data => apiClient.post('/volunteer-management', data),
+  list: params => apiClient.get('/volunteer-management', { params }),
+  get: id => apiClient.get(`/volunteer-management/${id}`),
+  update: (id, data) => apiClient.put(`/volunteer-management/${id}`, data),
+  remove: id => apiClient.delete(`/volunteer-management/${id}`),
+  getDashboard: params => apiClient.get('/volunteer-management/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  50. COMMUNITY OUTREACH — التواصل المجتمعي
+ * ═══════════════════════════════════════════════════════════ */
+export const communityOutreachAPI = {
+  create: data => apiClient.post('/community-outreach', data),
+  list: params => apiClient.get('/community-outreach', { params }),
+  get: id => apiClient.get(`/community-outreach/${id}`),
+  update: (id, data) => apiClient.put(`/community-outreach/${id}`, data),
+  remove: id => apiClient.delete(`/community-outreach/${id}`),
+  getDashboard: params => apiClient.get('/community-outreach/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  51. DONOR RELATIONS — علاقات المانحين
+ * ═══════════════════════════════════════════════════════════ */
+export const donorRelationsAPI = {
+  create: data => apiClient.post('/donor-relations', data),
+  list: params => apiClient.get('/donor-relations', { params }),
+  get: id => apiClient.get(`/donor-relations/${id}`),
+  update: (id, data) => apiClient.put(`/donor-relations/${id}`, data),
+  remove: id => apiClient.delete(`/donor-relations/${id}`),
+  getDashboard: params => apiClient.get('/donor-relations/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
+ *  52. ADVOCACY PROGRAM — برنامج المناصرة
+ * ═══════════════════════════════════════════════════════════ */
+export const advocacyProgramAPI = {
+  create: data => apiClient.post('/advocacy-program', data),
+  list: params => apiClient.get('/advocacy-program', { params }),
+  get: id => apiClient.get(`/advocacy-program/${id}`),
+  update: (id, data) => apiClient.put(`/advocacy-program/${id}`, data),
+  remove: id => apiClient.delete(`/advocacy-program/${id}`),
+  getDashboard: params => apiClient.get('/advocacy-program/dashboard', { params }),
+};
+
+/* ═══════════════════════════════════════════════════════════
  *  UNIFIED EXPORT — تصدير موحد
  * ═══════════════════════════════════════════════════════════ */
 const dddAPI = {
@@ -428,6 +812,46 @@ const dddAPI = {
   research: researchAPI,
   fieldTraining: fieldTrainingAPI,
   dashboards: dashboardsAPI,
+  // Phase 29 – Workforce Development
+  workforceAnalytics: workforceAnalyticsAPI,
+  credentialManager: credentialManagerAPI,
+  mentorshipProgram: mentorshipProgramAPI,
+  careerPathway: careerPathwayAPI,
+  // Phase 30 – Accreditation & Compliance
+  accreditationManager: accreditationManagerAPI,
+  inspectionTracker: inspectionTrackerAPI,
+  standardsCompliance: standardsComplianceAPI,
+  licensureManager: licensureManagerAPI,
+  // Phase 31 – Patient Engagement
+  patientPortal: patientPortalAPI,
+  healthEducation: healthEducationAPI,
+  remoteMonitoring: remoteMonitoringAPI,
+  patientCommunity: patientCommunityAPI,
+  // Phase 32 – Interoperability
+  fhirIntegration: fhirIntegrationAPI,
+  hl7Messaging: hl7MessagingAPI,
+  dataExchange: dataExchangeAPI,
+  interoperabilityHub: interoperabilityHubAPI,
+  // Phase 33 – Disaster Recovery
+  backupManager: backupManagerAPI,
+  businessContinuity: businessContinuityAPI,
+  systemFailover: systemFailoverAPI,
+  incidentResponse: incidentResponseAPI,
+  // Phase 34 – Facility & Asset
+  equipmentLifecycle: equipmentLifecycleAPI,
+  environmentalMonitoring: environmentalMonitoringAPI,
+  spaceManagement: spaceManagementAPI,
+  assetTracking: assetTrackingAPI,
+  // Phase 35 – Clinical Research
+  clinicalResearch: clinicalResearchAPI,
+  clinicalTrials: clinicalTrialsAPI,
+  outcomeResearch: outcomeResearchAPI,
+  publicationManager: publicationManagerAPI,
+  // Phase 36 – Community Engagement
+  volunteerManagement: volunteerManagementAPI,
+  communityOutreach: communityOutreachAPI,
+  donorRelations: donorRelationsAPI,
+  advocacyProgram: advocacyProgramAPI,
 };
 
 export default dddAPI;

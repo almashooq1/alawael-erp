@@ -322,6 +322,38 @@ const infraFiles = [
   ['Evidence Library', 'services/dddEvidenceLibrary.js'],
   ['Clinical Trial', 'services/dddClinicalTrial.js'],
   ['Publication Tracker', 'services/dddPublicationTracker.js'],
+  ['Workforce Analytics', 'services/dddWorkforceAnalytics.js'],
+  ['Credential Manager', 'services/dddCredentialManager.js'],
+  ['Mentorship Program', 'services/dddMentorshipProgram.js'],
+  ['Career Pathway', 'services/dddCareerPathway.js'],
+  ['Accreditation Manager', 'services/dddAccreditationManager.js'],
+  ['Inspection Tracker', 'services/dddInspectionTracker.js'],
+  ['Standards Compliance', 'services/dddStandardsCompliance.js'],
+  ['Licensure Manager', 'services/dddLicensureManager.js'],
+  ['Patient Portal', 'services/dddPatientPortal.js'],
+  ['Health Education', 'services/dddHealthEducation.js'],
+  ['Remote Monitoring', 'services/dddRemoteMonitoring.js'],
+  ['Patient Community', 'services/dddPatientCommunity.js'],
+  ['FHIR Integration', 'services/dddFhirIntegration.js'],
+  ['HL7 Messaging', 'services/dddHL7Messaging.js'],
+  ['Data Exchange', 'services/dddDataExchange.js'],
+  ['Interoperability Hub', 'services/dddInteroperabilityHub.js'],
+  ['Backup Manager', 'services/dddBackupManager.js'],
+  ['Business Continuity', 'services/dddBusinessContinuity.js'],
+  ['System Failover', 'services/dddSystemFailover.js'],
+  ['Incident Response', 'services/dddIncidentResponse.js'],
+  ['Equipment Lifecycle', 'services/dddEquipmentLifecycle.js'],
+  ['Environmental Monitoring', 'services/dddEnvironmentalMonitoring.js'],
+  ['Space Management', 'services/dddSpaceManagement.js'],
+  ['Asset Tracking', 'services/dddAssetTracking.js'],
+  ['Clinical Research', 'services/dddClinicalResearch.js'],
+  ['Clinical Trials', 'services/dddClinicalTrials.js'],
+  ['Outcome Research', 'services/dddOutcomeResearch.js'],
+  ['Publication Manager', 'services/dddPublicationManager.js'],
+  ['Volunteer Management', 'services/dddVolunteerManagement.js'],
+  ['Community Outreach', 'services/dddCommunityOutreach.js'],
+  ['Donor Relations', 'services/dddDonorRelations.js'],
+  ['Advocacy Program', 'services/dddAdvocacyProgram.js'],
 ];
 
 for (const [label, relPath] of infraFiles) {
@@ -5843,6 +5875,1110 @@ check('34.5.1 — platform.routes.js references all Phase 28 routers', () => {
     content.includes('evidenceLibraryRouter') &&
     content.includes('clinicalTrialRouter') &&
     content.includes('publicationTrackerRouter')
+  );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Section 35: Phase 29 — Workforce & Professional Development
+// ═══════════════════════════════════════════════════════════════════════════
+console.log(c.cyan('\n═══ Section 35: Phase 29 — Workforce & Professional Development ═══'));
+
+/* ── 35.1 Workforce Analytics ── */
+check('35.1.1 dddWorkforceAnalytics.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddWorkforceAnalytics.js'));
+});
+check(
+  '35.1.2 WorkforceAnalytics exports constants (WORKFORCE_METRIC_TYPES, WORKFORCE_STATUSES, DEPARTMENT_TYPES, SKILL_LEVELS, WORKLOAD_CATEGORIES, ANALYTICS_PERIODS, BUILTIN_KPI_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddWorkforceAnalytics'));
+    return (
+      m.WORKFORCE_METRIC_TYPES?.length >= 10 &&
+      m.WORKFORCE_STATUSES?.length >= 10 &&
+      m.DEPARTMENT_TYPES?.length >= 10 &&
+      m.SKILL_LEVELS?.length >= 10 &&
+      m.WORKLOAD_CATEGORIES?.length >= 10 &&
+      m.ANALYTICS_PERIODS?.length >= 10 &&
+      m.BUILTIN_KPI_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '35.1.3 WorkforceAnalytics exports models (DDDWorkforceSnapshot, DDDStaffProfile, DDDWorkloadEntry, DDDKPIRecord)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddWorkforceAnalytics'));
+    return m.DDDWorkforceSnapshot && m.DDDStaffProfile && m.DDDWorkloadEntry && m.DDDKPIRecord;
+  }
+);
+check('35.1.4 WorkforceAnalytics domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddWorkforceAnalytics'));
+  return typeof m.WorkforceAnalytics === 'function';
+});
+check('35.1.5 WorkforceAnalytics domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddWorkforceAnalytics'));
+  return typeof new m.WorkforceAnalytics().healthCheck === 'function';
+});
+check('35.1.6 createWorkforceAnalyticsRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddWorkforceAnalytics'));
+  return typeof m.createWorkforceAnalyticsRouter === 'function';
+});
+
+/* ── 35.2 Credential Manager ── */
+check('35.2.1 dddCredentialManager.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddCredentialManager.js'));
+});
+check(
+  '35.2.2 CredentialManager exports constants (CREDENTIAL_TYPES, CREDENTIAL_STATUSES, ISSUING_BODIES, CEU_CATEGORIES, VERIFICATION_METHODS, RENEWAL_FREQUENCIES, BUILTIN_CREDENTIAL_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddCredentialManager'));
+    return (
+      m.CREDENTIAL_TYPES?.length >= 10 &&
+      m.CREDENTIAL_STATUSES?.length >= 10 &&
+      m.ISSUING_BODIES?.length >= 10 &&
+      m.CEU_CATEGORIES?.length >= 10 &&
+      m.VERIFICATION_METHODS?.length >= 10 &&
+      m.RENEWAL_FREQUENCIES?.length >= 10 &&
+      m.BUILTIN_CREDENTIAL_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '35.2.3 CredentialManager exports models (DDDCredential, DDDCEURecord, DDDVerificationLog, DDDComplianceRequirement)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddCredentialManager'));
+    return m.DDDCredential && m.DDDCEURecord && m.DDDVerificationLog && m.DDDComplianceRequirement;
+  }
+);
+check('35.2.4 CredentialManager domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCredentialManager'));
+  return typeof m.CredentialManager === 'function';
+});
+check('35.2.5 CredentialManager domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCredentialManager'));
+  return typeof new m.CredentialManager().healthCheck === 'function';
+});
+check('35.2.6 createCredentialManagerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCredentialManager'));
+  return typeof m.createCredentialManagerRouter === 'function';
+});
+
+/* ── 35.3 Mentorship Program ── */
+check('35.3.1 dddMentorshipProgram.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddMentorshipProgram.js'));
+});
+check(
+  '35.3.2 MentorshipProgram exports constants (MENTORSHIP_TYPES, MENTORSHIP_STATUSES, GOAL_STATUSES, MEETING_FORMATS, FEEDBACK_TYPES, COMPETENCY_DOMAINS, BUILTIN_PROGRAM_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddMentorshipProgram'));
+    return (
+      m.MENTORSHIP_TYPES?.length >= 10 &&
+      m.MENTORSHIP_STATUSES?.length >= 10 &&
+      m.GOAL_STATUSES?.length >= 10 &&
+      m.MEETING_FORMATS?.length >= 10 &&
+      m.FEEDBACK_TYPES?.length >= 10 &&
+      m.COMPETENCY_DOMAINS?.length >= 10 &&
+      m.BUILTIN_PROGRAM_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '35.3.3 MentorshipProgram exports models (DDDMentorshipPair, DDDMentorMeeting, DDDMentorFeedback, DDDMentorshipProgram)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddMentorshipProgram'));
+    return (
+      m.DDDMentorshipPair && m.DDDMentorMeeting && m.DDDMentorFeedback && m.DDDMentorshipProgram
+    );
+  }
+);
+check('35.3.4 MentorshipProgram domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddMentorshipProgram'));
+  return typeof m.MentorshipProgram === 'function';
+});
+check('35.3.5 MentorshipProgram domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddMentorshipProgram'));
+  return typeof new m.MentorshipProgram().healthCheck === 'function';
+});
+check('35.3.6 createMentorshipProgramRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddMentorshipProgram'));
+  return typeof m.createMentorshipProgramRouter === 'function';
+});
+
+/* ── 35.4 Career Pathway ── */
+check('35.4.1 dddCareerPathway.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddCareerPathway.js'));
+});
+check(
+  '35.4.2 CareerPathway exports constants (PATHWAY_TYPES, PATHWAY_STATUSES, DEVELOPMENT_AREAS, MILESTONE_TYPES, SKILL_GAP_LEVELS, SUCCESSION_PRIORITIES, BUILTIN_PATHWAY_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddCareerPathway'));
+    return (
+      m.PATHWAY_TYPES?.length >= 10 &&
+      m.PATHWAY_STATUSES?.length >= 10 &&
+      m.DEVELOPMENT_AREAS?.length >= 10 &&
+      m.MILESTONE_TYPES?.length >= 10 &&
+      m.SKILL_GAP_LEVELS?.length >= 10 &&
+      m.SUCCESSION_PRIORITIES?.length >= 10 &&
+      m.BUILTIN_PATHWAY_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '35.4.3 CareerPathway exports models (DDDCareerPath, DDDSkillAssessment, DDDSuccessionPlan, DDDDevelopmentActivity)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddCareerPathway'));
+    return (
+      m.DDDCareerPath && m.DDDSkillAssessment && m.DDDSuccessionPlan && m.DDDDevelopmentActivity
+    );
+  }
+);
+check('35.4.4 CareerPathway domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCareerPathway'));
+  return typeof m.CareerPathway === 'function';
+});
+check('35.4.5 CareerPathway domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCareerPathway'));
+  return typeof new m.CareerPathway().healthCheck === 'function';
+});
+check('35.4.6 createCareerPathwayRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCareerPathway'));
+  return typeof m.createCareerPathwayRouter === 'function';
+});
+
+/* ── 35.5 Integration ── */
+check('35.5.1 platform.routes.js mounts Phase 29 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('workforceAnalyticsRouter') &&
+    content.includes('credentialManagerRouter') &&
+    content.includes('mentorshipProgramRouter') &&
+    content.includes('careerPathwayRouter')
+  );
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+// Section 36: Phase 30 — Regulatory Compliance & Accreditation
+// ═════════════════════════════════════════════════════════════════════════
+console.log(c.cyan('\n═══ Section 36: Phase 30 — Regulatory Compliance & Accreditation ═══'));
+
+/* ── 36.1 Accreditation Manager ── */
+check('36.1.1 dddAccreditationManager.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddAccreditationManager.js'));
+});
+check(
+  '36.1.2 AccreditationManager exports constants (ACCREDITATION_TYPES, ACCREDITATION_STATUSES, SURVEY_TYPES, FINDING_SEVERITIES, CORRECTIVE_ACTION_STATUSES, STANDARD_CHAPTERS, BUILTIN_ACCREDITATION_BODIES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddAccreditationManager'));
+    return (
+      m.ACCREDITATION_TYPES?.length >= 10 &&
+      m.ACCREDITATION_STATUSES?.length >= 10 &&
+      m.SURVEY_TYPES?.length >= 10 &&
+      m.FINDING_SEVERITIES?.length >= 10 &&
+      m.CORRECTIVE_ACTION_STATUSES?.length >= 10 &&
+      m.STANDARD_CHAPTERS?.length >= 10 &&
+      m.BUILTIN_ACCREDITATION_BODIES?.length >= 10
+    );
+  }
+);
+check(
+  '36.1.3 AccreditationManager exports models (DDDAccreditationCycle, DDDSelfAssessment, DDDSurveyFinding, DDDCorrectiveAction)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddAccreditationManager'));
+    return (
+      m.DDDAccreditationCycle && m.DDDSelfAssessment && m.DDDSurveyFinding && m.DDDCorrectiveAction
+    );
+  }
+);
+check('36.1.4 AccreditationManager domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAccreditationManager'));
+  return typeof m.AccreditationManager === 'function';
+});
+check('36.1.5 AccreditationManager domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAccreditationManager'));
+  return typeof new m.AccreditationManager().healthCheck === 'function';
+});
+check('36.1.6 createAccreditationManagerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAccreditationManager'));
+  return typeof m.createAccreditationManagerRouter === 'function';
+});
+
+/* ── 36.2 Inspection Tracker ── */
+check('36.2.1 dddInspectionTracker.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddInspectionTracker.js'));
+});
+check(
+  '36.2.2 InspectionTracker exports constants (INSPECTION_TYPES, INSPECTION_STATUSES, INSPECTOR_TYPES, COMPLIANCE_LEVELS, AREA_CATEGORIES, FOLLOW_UP_PRIORITIES, BUILTIN_INSPECTION_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddInspectionTracker'));
+    return (
+      m.INSPECTION_TYPES?.length >= 10 &&
+      m.INSPECTION_STATUSES?.length >= 10 &&
+      m.INSPECTOR_TYPES?.length >= 10 &&
+      m.COMPLIANCE_LEVELS?.length >= 10 &&
+      m.AREA_CATEGORIES?.length >= 10 &&
+      m.FOLLOW_UP_PRIORITIES?.length >= 10 &&
+      m.BUILTIN_INSPECTION_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '36.2.3 InspectionTracker exports models (DDDInspection, DDDInspectionItem, DDDFollowUpAction, DDDInspectionSchedule)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddInspectionTracker'));
+    return m.DDDInspection && m.DDDInspectionItem && m.DDDFollowUpAction && m.DDDInspectionSchedule;
+  }
+);
+check('36.2.4 InspectionTracker domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInspectionTracker'));
+  return typeof m.InspectionTracker === 'function';
+});
+check('36.2.5 InspectionTracker domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInspectionTracker'));
+  return typeof new m.InspectionTracker().healthCheck === 'function';
+});
+check('36.2.6 createInspectionTrackerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInspectionTracker'));
+  return typeof m.createInspectionTrackerRouter === 'function';
+});
+
+/* ── 36.3 Standards Compliance ── */
+check('36.3.1 dddStandardsCompliance.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddStandardsCompliance.js'));
+});
+check(
+  '36.3.2 StandardsCompliance exports constants (STANDARD_FRAMEWORKS, COMPLIANCE_STATUSES, REQUIREMENT_PRIORITIES, EVIDENCE_TYPES, GAP_CATEGORIES, ASSESSMENT_METHODS, BUILTIN_REGULATORY_BODIES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddStandardsCompliance'));
+    return (
+      m.STANDARD_FRAMEWORKS?.length >= 10 &&
+      m.COMPLIANCE_STATUSES?.length >= 10 &&
+      m.REQUIREMENT_PRIORITIES?.length >= 10 &&
+      m.EVIDENCE_TYPES?.length >= 10 &&
+      m.GAP_CATEGORIES?.length >= 10 &&
+      m.ASSESSMENT_METHODS?.length >= 10 &&
+      m.BUILTIN_REGULATORY_BODIES?.length >= 10
+    );
+  }
+);
+check(
+  '36.3.3 StandardsCompliance exports models (DDDComplianceStandard, DDDComplianceAssessment, DDDGapAnalysis, DDDComplianceScore)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddStandardsCompliance'));
+    return (
+      m.DDDComplianceStandard &&
+      m.DDDComplianceAssessment &&
+      m.DDDGapAnalysis &&
+      m.DDDComplianceScore
+    );
+  }
+);
+check('36.3.4 StandardsCompliance domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddStandardsCompliance'));
+  return typeof m.StandardsCompliance === 'function';
+});
+check('36.3.5 StandardsCompliance domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddStandardsCompliance'));
+  return typeof new m.StandardsCompliance().healthCheck === 'function';
+});
+check('36.3.6 createStandardsComplianceRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddStandardsCompliance'));
+  return typeof m.createStandardsComplianceRouter === 'function';
+});
+
+/* ── 36.4 Licensure Manager ── */
+check('36.4.1 dddLicensureManager.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddLicensureManager.js'));
+});
+check(
+  '36.4.2 LicensureManager exports constants (LICENSE_TYPES, LICENSE_STATUSES, REGULATORY_BODIES, RENEWAL_STATUSES, REPORTING_FREQUENCIES, DOCUMENT_CATEGORIES, BUILTIN_LICENSE_TEMPLATES)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddLicensureManager'));
+    return (
+      m.LICENSE_TYPES?.length >= 10 &&
+      m.LICENSE_STATUSES?.length >= 10 &&
+      m.REGULATORY_BODIES?.length >= 10 &&
+      m.RENEWAL_STATUSES?.length >= 10 &&
+      m.REPORTING_FREQUENCIES?.length >= 10 &&
+      m.DOCUMENT_CATEGORIES?.length >= 10 &&
+      m.BUILTIN_LICENSE_TEMPLATES?.length >= 10
+    );
+  }
+);
+check(
+  '36.4.3 LicensureManager exports models (DDDInstitutionalLicense, DDDRenewalTracking, DDDRegulatoryReport, DDDLicenseAlert)',
+  () => {
+    const m = require(path.join(backendRoot, 'services', 'dddLicensureManager'));
+    return (
+      m.DDDInstitutionalLicense &&
+      m.DDDRenewalTracking &&
+      m.DDDRegulatoryReport &&
+      m.DDDLicenseAlert
+    );
+  }
+);
+check('36.4.4 LicensureManager domain class exists', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddLicensureManager'));
+  return typeof m.LicensureManager === 'function';
+});
+check('36.4.5 LicensureManager domain class has healthCheck()', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddLicensureManager'));
+  return typeof new m.LicensureManager().healthCheck === 'function';
+});
+check('36.4.6 createLicensureManagerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddLicensureManager'));
+  return typeof m.createLicensureManagerRouter === 'function';
+});
+
+/* ── 36.5 Integration ── */
+check('36.5.1 platform.routes.js mounts Phase 30 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('accreditationManagerRouter') &&
+    content.includes('inspectionTrackerRouter') &&
+    content.includes('standardsComplianceRouter') &&
+    content.includes('licensureManagerRouter')
+  );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Section 37 — Phase 31: Patient Engagement & Digital Health
+// ═══════════════════════════════════════════════════════════════════════════════
+console.log(c.cyan('\n═══ Section 37: Patient Engagement & Digital Health ═══'));
+
+/* ── 37.1 Patient Portal ── */
+check('37.1.1 dddPatientPortal.js exports PORTAL_ACCOUNT_STATUSES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  return Array.isArray(m.PORTAL_ACCOUNT_STATUSES) && m.PORTAL_ACCOUNT_STATUSES.length >= 10;
+});
+check('37.1.2 dddPatientPortal.js exports DDDPortalAccount model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  return typeof m.DDDPortalAccount === 'function';
+});
+check('37.1.3 dddPatientPortal.js exports DDDSecureMessage model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  return typeof m.DDDSecureMessage === 'function';
+});
+check('37.1.4 PatientPortal class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  return typeof new m.PatientPortal().healthCheck === 'function';
+});
+check('37.1.5 PatientPortal has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('37.1.6 createPatientPortalRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientPortal'));
+  return typeof m.createPatientPortalRouter === 'function';
+});
+
+/* ── 37.2 Health Education ── */
+check('37.2.1 dddHealthEducation.js exports CONTENT_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  return Array.isArray(m.CONTENT_TYPES) && m.CONTENT_TYPES.length >= 10;
+});
+check('37.2.2 dddHealthEducation.js exports DDDEducationContent model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  return typeof m.DDDEducationContent === 'function';
+});
+check('37.2.3 dddHealthEducation.js exports DDDLearningPath model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  return typeof m.DDDLearningPath === 'function';
+});
+check('37.2.4 HealthEducation class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  return typeof new m.HealthEducation().healthCheck === 'function';
+});
+check('37.2.5 HealthEducation has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('37.2.6 createHealthEducationRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHealthEducation'));
+  return typeof m.createHealthEducationRouter === 'function';
+});
+
+/* ── 37.3 Remote Monitoring ── */
+check('37.3.1 dddRemoteMonitoring.js exports DEVICE_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  return Array.isArray(m.DEVICE_TYPES) && m.DEVICE_TYPES.length >= 10;
+});
+check('37.3.2 dddRemoteMonitoring.js exports DDDMonitoringDevice model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  return typeof m.DDDMonitoringDevice === 'function';
+});
+check('37.3.3 dddRemoteMonitoring.js exports DDDVitalReading model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  return typeof m.DDDVitalReading === 'function';
+});
+check('37.3.4 RemoteMonitoring class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  return typeof new m.RemoteMonitoring().healthCheck === 'function';
+});
+check('37.3.5 RemoteMonitoring has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('37.3.6 createRemoteMonitoringRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddRemoteMonitoring'));
+  return typeof m.createRemoteMonitoringRouter === 'function';
+});
+
+/* ── 37.4 Patient Community ── */
+check('37.4.1 dddPatientCommunity.js exports COMMUNITY_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  return Array.isArray(m.COMMUNITY_TYPES) && m.COMMUNITY_TYPES.length >= 10;
+});
+check('37.4.2 dddPatientCommunity.js exports DDDCommunityGroup model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  return typeof m.DDDCommunityGroup === 'function';
+});
+check('37.4.3 dddPatientCommunity.js exports DDDCommunityPost model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  return typeof m.DDDCommunityPost === 'function';
+});
+check('37.4.4 PatientCommunity class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  return typeof new m.PatientCommunity().healthCheck === 'function';
+});
+check('37.4.5 PatientCommunity has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('37.4.6 createPatientCommunityRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPatientCommunity'));
+  return typeof m.createPatientCommunityRouter === 'function';
+});
+
+/* ── 37.5 Integration ── */
+check('37.5.1 platform.routes.js mounts Phase 31 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('patientPortalRouter') &&
+    content.includes('healthEducationRouter') &&
+    content.includes('remoteMonitoringRouter') &&
+    content.includes('patientCommunityRouter')
+  );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Section 38 — Phase 32: Integration & Interoperability
+// ═══════════════════════════════════════════════════════════════════════════════
+console.log(c.cyan('\n═══ Section 38: Integration & Interoperability ═══'));
+
+/* ── 38.1 FHIR Integration ── */
+check('38.1.1 dddFhirIntegration.js exports FHIR_RESOURCE_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  return Array.isArray(m.FHIR_RESOURCE_TYPES) && m.FHIR_RESOURCE_TYPES.length >= 10;
+});
+check('38.1.2 dddFhirIntegration.js exports DDDFhirResource model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  return typeof m.DDDFhirResource === 'function';
+});
+check('38.1.3 dddFhirIntegration.js exports DDDResourceMapping model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  return typeof m.DDDResourceMapping === 'function';
+});
+check('38.1.4 FhirIntegration class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  return typeof new m.FhirIntegration().healthCheck === 'function';
+});
+check('38.1.5 FhirIntegration has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('38.1.6 createFhirIntegrationRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddFhirIntegration'));
+  return typeof m.createFhirIntegrationRouter === 'function';
+});
+
+/* ── 38.2 HL7 Messaging ── */
+check('38.2.1 dddHL7Messaging.js exports MESSAGE_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  return Array.isArray(m.MESSAGE_TYPES) && m.MESSAGE_TYPES.length >= 10;
+});
+check('38.2.2 dddHL7Messaging.js exports DDDHL7Message model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  return typeof m.DDDHL7Message === 'function';
+});
+check('38.2.3 dddHL7Messaging.js exports DDDMessageRoute model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  return typeof m.DDDMessageRoute === 'function';
+});
+check('38.2.4 HL7Messaging class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  return typeof new m.HL7Messaging().healthCheck === 'function';
+});
+check('38.2.5 HL7Messaging has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('38.2.6 createHL7MessagingRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddHL7Messaging'));
+  return typeof m.createHL7MessagingRouter === 'function';
+});
+
+/* ── 38.3 Data Exchange ── */
+check('38.3.1 dddDataExchange.js exports EXCHANGE_FORMATS', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  return Array.isArray(m.EXCHANGE_FORMATS) && m.EXCHANGE_FORMATS.length >= 10;
+});
+check('38.3.2 dddDataExchange.js exports DDDExchangeJob model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  return typeof m.DDDExchangeJob === 'function';
+});
+check('38.3.3 dddDataExchange.js exports DDDTransformPipeline model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  return typeof m.DDDTransformPipeline === 'function';
+});
+check('38.3.4 DataExchange class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  return typeof new m.DataExchange().healthCheck === 'function';
+});
+check('38.3.5 DataExchange has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('38.3.6 createDataExchangeRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDataExchange'));
+  return typeof m.createDataExchangeRouter === 'function';
+});
+
+/* ── 38.4 Interoperability Hub ── */
+check('38.4.1 dddInteroperabilityHub.js exports CONNECTION_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  return Array.isArray(m.CONNECTION_TYPES) && m.CONNECTION_TYPES.length >= 10;
+});
+check('38.4.2 dddInteroperabilityHub.js exports DDDExternalConnection model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  return typeof m.DDDExternalConnection === 'function';
+});
+check('38.4.3 dddInteroperabilityHub.js exports DDDWebhookSubscription model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  return typeof m.DDDWebhookSubscription === 'function';
+});
+check('38.4.4 InteroperabilityHub class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  return typeof new m.InteroperabilityHub().healthCheck === 'function';
+});
+check('38.4.5 InteroperabilityHub has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('38.4.6 createInteroperabilityHubRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddInteroperabilityHub'));
+  return typeof m.createInteroperabilityHubRouter === 'function';
+});
+
+/* ── 38.5 Integration ── */
+check('38.5.1 platform.routes.js mounts Phase 32 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('fhirIntegrationRouter') &&
+    content.includes('hl7MessagingRouter') &&
+    content.includes('dataExchangeRouter') &&
+    content.includes('interoperabilityHubRouter')
+  );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Section 39 — Phase 33: Disaster Recovery & Business Continuity
+// ═══════════════════════════════════════════════════════════════════════════════
+console.log(c.cyan('\n═══ Section 39: Disaster Recovery & Business Continuity ═══'));
+
+/* ── 39.1 Backup Manager ── */
+check('39.1.1 dddBackupManager.js exports BACKUP_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  return Array.isArray(m.BACKUP_TYPES) && m.BACKUP_TYPES.length >= 10;
+});
+check('39.1.2 dddBackupManager.js exports DDDBackupJob model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  return typeof m.DDDBackupJob === 'function';
+});
+check('39.1.3 dddBackupManager.js exports DDDRestoreOperation model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  return typeof m.DDDRestoreOperation === 'function';
+});
+check('39.1.4 BackupManager class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  return typeof new m.BackupManager().healthCheck === 'function';
+});
+check('39.1.5 BackupManager has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('39.1.6 createBackupManagerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBackupManager'));
+  return typeof m.createBackupManagerRouter === 'function';
+});
+
+/* ── 39.2 Business Continuity ── */
+check('39.2.1 dddBusinessContinuity.js exports PLAN_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  return Array.isArray(m.PLAN_TYPES) && m.PLAN_TYPES.length >= 10;
+});
+check('39.2.2 dddBusinessContinuity.js exports DDDContinuityPlan model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  return typeof m.DDDContinuityPlan === 'function';
+});
+check('39.2.3 dddBusinessContinuity.js exports DDDImpactAnalysis model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  return typeof m.DDDImpactAnalysis === 'function';
+});
+check('39.2.4 BusinessContinuity class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  return typeof new m.BusinessContinuity().healthCheck === 'function';
+});
+check('39.2.5 BusinessContinuity has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('39.2.6 createBusinessContinuityRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddBusinessContinuity'));
+  return typeof m.createBusinessContinuityRouter === 'function';
+});
+
+/* ── 39.3 System Failover ── */
+check('39.3.1 dddSystemFailover.js exports FAILOVER_MODES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  return Array.isArray(m.FAILOVER_MODES) && m.FAILOVER_MODES.length >= 10;
+});
+check('39.3.2 dddSystemFailover.js exports DDDFailoverConfig model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  return typeof m.DDDFailoverConfig === 'function';
+});
+check('39.3.3 dddSystemFailover.js exports DDDHealthProbe model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  return typeof m.DDDHealthProbe === 'function';
+});
+check('39.3.4 SystemFailover class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  return typeof new m.SystemFailover().healthCheck === 'function';
+});
+check('39.3.5 SystemFailover has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('39.3.6 createSystemFailoverRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSystemFailover'));
+  return typeof m.createSystemFailoverRouter === 'function';
+});
+
+/* ── 39.4 Incident Response ── */
+check('39.4.1 dddIncidentResponse.js exports INCIDENT_TYPES', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  return Array.isArray(m.INCIDENT_TYPES) && m.INCIDENT_TYPES.length >= 10;
+});
+check('39.4.2 dddIncidentResponse.js exports DDDIncident model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  return typeof m.DDDIncident === 'function';
+});
+check('39.4.3 dddIncidentResponse.js exports DDDResponseAction model', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  return typeof m.DDDResponseAction === 'function';
+});
+check('39.4.4 IncidentResponse class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  return typeof new m.IncidentResponse().healthCheck === 'function';
+});
+check('39.4.5 IncidentResponse has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('39.4.6 createIncidentResponseRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddIncidentResponse'));
+  return typeof m.createIncidentResponseRouter === 'function';
+});
+
+/* ── 39.5 Integration ── */
+check('39.5.1 platform.routes.js mounts Phase 33 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('backupManagerRouter') &&
+    content.includes('businessContinuityRouter') &&
+    content.includes('systemFailoverRouter') &&
+    content.includes('incidentResponseRouter')
+  );
+});
+
+console.log(c.cyan('\n═══ Section 40: Environmental & Facility Management ═══'));
+
+/* ── 40.1 Equipment Lifecycle ── */
+check('40.1.1 dddEquipmentLifecycle.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddEquipmentLifecycle.js'));
+});
+check('40.1.2 EquipmentLifecycle has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEquipmentLifecycle'));
+  return (
+    m.DDDEquipmentAsset && m.DDDMaintenanceRecord && m.DDDCalibrationLog && m.DDDDisposalRequest
+  );
+});
+check('40.1.3 EquipmentLifecycle constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEquipmentLifecycle'));
+  return m.EQUIPMENT_CATEGORIES.length >= 10;
+});
+check('40.1.4 EquipmentLifecycle class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEquipmentLifecycle'));
+  return typeof new m.EquipmentLifecycle().healthCheck === 'function';
+});
+check('40.1.5 EquipmentLifecycle has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEquipmentLifecycle'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('40.1.6 createEquipmentLifecycleRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEquipmentLifecycle'));
+  return typeof m.createEquipmentLifecycleRouter === 'function';
+});
+
+/* ── 40.2 Environmental Monitoring ── */
+check('40.2.1 dddEnvironmentalMonitoring.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring.js'));
+});
+check('40.2.2 EnvironmentalMonitoring has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring'));
+  return (
+    m.DDDEnvironmentSensor &&
+    m.DDDEnvironmentReading &&
+    m.DDDEnvironmentAlert &&
+    m.DDDComplianceReport
+  );
+});
+check('40.2.3 EnvironmentalMonitoring constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring'));
+  return m.SENSOR_TYPES.length >= 10;
+});
+check('40.2.4 EnvironmentalMonitoring class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring'));
+  return typeof new m.EnvironmentalMonitoring().healthCheck === 'function';
+});
+check('40.2.5 EnvironmentalMonitoring has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('40.2.6 createEnvironmentalMonitoringRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddEnvironmentalMonitoring'));
+  return typeof m.createEnvironmentalMonitoringRouter === 'function';
+});
+
+/* ── 40.3 Space Management ── */
+check('40.3.1 dddSpaceManagement.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddSpaceManagement.js'));
+});
+check('40.3.2 SpaceManagement has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSpaceManagement'));
+  return (
+    m.DDDFacilitySpace && m.DDDRoomBooking && m.DDDUtilizationRecord && m.DDDSpaceMaintenanceReq
+  );
+});
+check('40.3.3 SpaceManagement constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSpaceManagement'));
+  return m.SPACE_TYPES.length >= 10;
+});
+check('40.3.4 SpaceManagement class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSpaceManagement'));
+  return typeof new m.SpaceManagement().healthCheck === 'function';
+});
+check('40.3.5 SpaceManagement has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSpaceManagement'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('40.3.6 createSpaceManagementRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddSpaceManagement'));
+  return typeof m.createSpaceManagementRouter === 'function';
+});
+
+/* ── 40.4 Asset Tracking ── */
+check('40.4.1 dddAssetTracking.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddAssetTracking.js'));
+});
+check('40.4.2 AssetTracking has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAssetTracking'));
+  return m.DDDTrackedAsset && m.DDDAssetCheckout && m.DDDInventoryAudit && m.DDDDepreciationLog;
+});
+check('40.4.3 AssetTracking constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAssetTracking'));
+  return m.ASSET_CATEGORIES.length >= 10;
+});
+check('40.4.4 AssetTracking class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAssetTracking'));
+  return typeof new m.AssetTracking().healthCheck === 'function';
+});
+check('40.4.5 AssetTracking has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAssetTracking'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('40.4.6 createAssetTrackingRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAssetTracking'));
+  return typeof m.createAssetTrackingRouter === 'function';
+});
+
+/* ── 40.5 Integration ── */
+check('40.5.1 platform.routes.js mounts Phase 34 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('equipmentLifecycleRouter') &&
+    content.includes('environmentalMonitoringRouter') &&
+    content.includes('spaceManagementRouter') &&
+    content.includes('assetTrackingRouter')
+  );
+});
+
+console.log(c.cyan('\n═══ Section 41: Clinical Research & Evidence-Based Practice ═══'));
+
+/* ── 41.1 Clinical Research ── */
+check('41.1.1 dddClinicalResearch.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddClinicalResearch.js'));
+});
+check('41.1.2 ClinicalResearch has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalResearch'));
+  return m.DDDResearchStudy && m.DDDIrbSubmission && m.DDDEthicsReview && m.DDDResearchFunding;
+});
+check('41.1.3 ClinicalResearch constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalResearch'));
+  return m.RESEARCH_DOMAINS.length >= 10;
+});
+check('41.1.4 ClinicalResearch class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalResearch'));
+  return typeof new m.ClinicalResearch().healthCheck === 'function';
+});
+check('41.1.5 ClinicalResearch has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalResearch'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('41.1.6 createClinicalResearchRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalResearch'));
+  return typeof m.createClinicalResearchRouter === 'function';
+});
+
+/* ── 41.2 Clinical Trials ── */
+check('41.2.1 dddClinicalTrials.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddClinicalTrials.js'));
+});
+check('41.2.2 ClinicalTrials has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalTrials'));
+  return m.DDDClinicalTrial && m.DDDTrialEnrollment && m.DDDAdverseEvent && m.DDDTrialEndpoint;
+});
+check('41.2.3 ClinicalTrials constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalTrials'));
+  return m.TRIAL_PHASES.length >= 10;
+});
+check('41.2.4 ClinicalTrials class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalTrials'));
+  return typeof new m.ClinicalTrials().healthCheck === 'function';
+});
+check('41.2.5 ClinicalTrials has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalTrials'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('41.2.6 createClinicalTrialsRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddClinicalTrials'));
+  return typeof m.createClinicalTrialsRouter === 'function';
+});
+
+/* ── 41.3 Outcome Research ── */
+check('41.3.1 dddOutcomeResearch.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddOutcomeResearch.js'));
+});
+check('41.3.2 OutcomeResearch has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddOutcomeResearch'));
+  return m.DDDOutcomeMeasure && m.DDDDataCollection && m.DDDCohortDefinition && m.DDDAnalysisResult;
+});
+check('41.3.3 OutcomeResearch constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddOutcomeResearch'));
+  return m.OUTCOME_DOMAINS.length >= 10;
+});
+check('41.3.4 OutcomeResearch class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddOutcomeResearch'));
+  return typeof new m.OutcomeResearch().healthCheck === 'function';
+});
+check('41.3.5 OutcomeResearch has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddOutcomeResearch'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('41.3.6 createOutcomeResearchRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddOutcomeResearch'));
+  return typeof m.createOutcomeResearchRouter === 'function';
+});
+
+/* ── 41.4 Publication Manager ── */
+check('41.4.1 dddPublicationManager.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddPublicationManager.js'));
+});
+check('41.4.2 PublicationManager has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPublicationManager'));
+  return m.DDDManuscript && m.DDDAuthorship && m.DDDCitationRecord && m.DDDDisseminationEvent;
+});
+check('41.4.3 PublicationManager constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPublicationManager'));
+  return m.PUBLICATION_TYPES.length >= 10;
+});
+check('41.4.4 PublicationManager class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPublicationManager'));
+  return typeof new m.PublicationManager().healthCheck === 'function';
+});
+check('41.4.5 PublicationManager has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPublicationManager'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('41.4.6 createPublicationManagerRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddPublicationManager'));
+  return typeof m.createPublicationManagerRouter === 'function';
+});
+
+/* ── 41.5 Integration ── */
+check('41.5.1 platform.routes.js mounts Phase 35 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('clinicalResearchRouter') &&
+    content.includes('clinicalTrialsRouter') &&
+    content.includes('outcomeResearchRouter') &&
+    content.includes('publicationManagerRouter')
+  );
+});
+
+console.log(c.cyan('\n═══ Section 42: Community Engagement & Outreach ═══'));
+
+/* ── 42.1 Volunteer Management ── */
+check('42.1.1 dddVolunteerManagement.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddVolunteerManagement.js'));
+});
+check('42.1.2 VolunteerManagement has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddVolunteerManagement'));
+  return (
+    m.DDDVolunteerProfile &&
+    m.DDDVolunteerShift &&
+    m.DDDVolunteerTraining &&
+    m.DDDVolunteerRecognition
+  );
+});
+check('42.1.3 VolunteerManagement constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddVolunteerManagement'));
+  return m.VOLUNTEER_ROLES.length >= 10;
+});
+check('42.1.4 VolunteerManagement class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddVolunteerManagement'));
+  return typeof new m.VolunteerManagement().healthCheck === 'function';
+});
+check('42.1.5 VolunteerManagement has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddVolunteerManagement'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('42.1.6 createVolunteerManagementRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddVolunteerManagement'));
+  return typeof m.createVolunteerManagementRouter === 'function';
+});
+
+/* ── 42.2 Community Outreach ── */
+check('42.2.1 dddCommunityOutreach.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddCommunityOutreach.js'));
+});
+check('42.2.2 CommunityOutreach has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCommunityOutreach'));
+  return m.DDDOutreachProgram && m.DDDCommunityPartner && m.DDDOutreachEvent && m.DDDImpactReport;
+});
+check('42.2.3 CommunityOutreach constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCommunityOutreach'));
+  return m.PROGRAM_TYPES.length >= 10;
+});
+check('42.2.4 CommunityOutreach class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCommunityOutreach'));
+  return typeof new m.CommunityOutreach().healthCheck === 'function';
+});
+check('42.2.5 CommunityOutreach has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCommunityOutreach'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('42.2.6 createCommunityOutreachRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddCommunityOutreach'));
+  return typeof m.createCommunityOutreachRouter === 'function';
+});
+
+/* ── 42.3 Donor Relations ── */
+check('42.3.1 dddDonorRelations.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddDonorRelations.js'));
+});
+check('42.3.2 DonorRelations has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDonorRelations'));
+  return (
+    m.DDDDonorProfile && m.DDDDonationRecord && m.DDDFundraisingCampaign && m.DDDStewardshipLog
+  );
+});
+check('42.3.3 DonorRelations constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDonorRelations'));
+  return m.DONOR_TYPES.length >= 10;
+});
+check('42.3.4 DonorRelations class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDonorRelations'));
+  return typeof new m.DonorRelations().healthCheck === 'function';
+});
+check('42.3.5 DonorRelations has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDonorRelations'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('42.3.6 createDonorRelationsRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddDonorRelations'));
+  return typeof m.createDonorRelationsRouter === 'function';
+});
+
+/* ── 42.4 Advocacy Program ── */
+check('42.4.1 dddAdvocacyProgram.js exists', () => {
+  return fs.existsSync(path.join(backendRoot, 'services', 'dddAdvocacyProgram.js'));
+});
+check('42.4.2 AdvocacyProgram has 4 models', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAdvocacyProgram'));
+  return (
+    m.DDDAdvocacyCampaign &&
+    m.DDDPolicyTracker &&
+    m.DDDSelfAdvocacyTraining &&
+    m.DDDStakeholderEngagement
+  );
+});
+check('42.4.3 AdvocacyProgram constants ≥ 10 items each', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAdvocacyProgram'));
+  return m.ADVOCACY_AREAS.length >= 10;
+});
+check('42.4.4 AdvocacyProgram class has healthCheck', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAdvocacyProgram'));
+  return typeof new m.AdvocacyProgram().healthCheck === 'function';
+});
+check('42.4.5 AdvocacyProgram has ≥ 7 constants', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAdvocacyProgram'));
+  const arrs = Object.values(m).filter(v => Array.isArray(v));
+  return arrs.length >= 7;
+});
+check('42.4.6 createAdvocacyProgramRouter factory', () => {
+  const m = require(path.join(backendRoot, 'services', 'dddAdvocacyProgram'));
+  return typeof m.createAdvocacyProgramRouter === 'function';
+});
+
+/* ── 42.5 Integration ── */
+check('42.5.1 platform.routes.js mounts Phase 36 routers', () => {
+  const content = fs.readFileSync(path.join(backendRoot, 'routes', 'platform.routes.js'), 'utf8');
+  return (
+    content.includes('volunteerManagementRouter') &&
+    content.includes('communityOutreachRouter') &&
+    content.includes('donorRelationsRouter') &&
+    content.includes('advocacyProgramRouter')
   );
 });
 

@@ -368,6 +368,20 @@ let feedbackManagerRouter,
   complaintManagerRouter,
   patientExperienceRouter;
 let researchProtocolRouter, evidenceLibraryRouter, clinicalTrialRouter, publicationTrackerRouter;
+let workforceAnalyticsRouter, credentialManagerRouter, mentorshipProgramRouter, careerPathwayRouter;
+let accreditationManagerRouter,
+  inspectionTrackerRouter,
+  standardsComplianceRouter,
+  licensureManagerRouter;
+let patientPortalRouter, healthEducationRouter, remoteMonitoringRouter, patientCommunityRouter;
+let fhirIntegrationRouter, hl7MessagingRouter, dataExchangeRouter, interoperabilityHubRouter;
+let backupManagerRouter, businessContinuityRouter, systemFailoverRouter, incidentResponseRouter;
+let equipmentLifecycleRouter,
+  environmentalMonitoringRouter,
+  spaceManagementRouter,
+  assetTrackingRouter;
+let clinicalResearchRouter, clinicalTrialsRouter, outcomeResearchRouter, publicationManagerRouter;
+let volunteerManagementRouter, communityOutreachRouter, donorRelationsRouter, advocacyProgramRouter;
 try {
   const { createBillingEngineRouter } = require('../services/dddBillingEngine');
   billingEngineRouter = createBillingEngineRouter();
@@ -688,6 +702,198 @@ try {
 } catch (e) {
   console.warn('[Platform] Publication Tracker router load failed:', e.message);
 }
+try {
+  const { createWorkforceAnalyticsRouter } = require('../services/dddWorkforceAnalytics');
+  workforceAnalyticsRouter = createWorkforceAnalyticsRouter();
+} catch (e) {
+  console.warn('[Platform] Workforce Analytics router load failed:', e.message);
+}
+try {
+  const { createCredentialManagerRouter } = require('../services/dddCredentialManager');
+  credentialManagerRouter = createCredentialManagerRouter();
+} catch (e) {
+  console.warn('[Platform] Credential Manager router load failed:', e.message);
+}
+try {
+  const { createMentorshipProgramRouter } = require('../services/dddMentorshipProgram');
+  mentorshipProgramRouter = createMentorshipProgramRouter();
+} catch (e) {
+  console.warn('[Platform] Mentorship Program router load failed:', e.message);
+}
+try {
+  const { createCareerPathwayRouter } = require('../services/dddCareerPathway');
+  careerPathwayRouter = createCareerPathwayRouter();
+} catch (e) {
+  console.warn('[Platform] Career Pathway router load failed:', e.message);
+}
+try {
+  const { createAccreditationManagerRouter } = require('../services/dddAccreditationManager');
+  accreditationManagerRouter = createAccreditationManagerRouter();
+} catch (e) {
+  console.warn('[Platform] Accreditation Manager router load failed:', e.message);
+}
+try {
+  const { createInspectionTrackerRouter } = require('../services/dddInspectionTracker');
+  inspectionTrackerRouter = createInspectionTrackerRouter();
+} catch (e) {
+  console.warn('[Platform] Inspection Tracker router load failed:', e.message);
+}
+try {
+  const { createStandardsComplianceRouter } = require('../services/dddStandardsCompliance');
+  standardsComplianceRouter = createStandardsComplianceRouter();
+} catch (e) {
+  console.warn('[Platform] Standards Compliance router load failed:', e.message);
+}
+try {
+  const { createLicensureManagerRouter } = require('../services/dddLicensureManager');
+  licensureManagerRouter = createLicensureManagerRouter();
+} catch (e) {
+  console.warn('[Platform] Licensure Manager router load failed:', e.message);
+}
+try {
+  const { createPatientPortalRouter } = require('../services/dddPatientPortal');
+  patientPortalRouter = createPatientPortalRouter();
+} catch (e) {
+  console.warn('[Platform] Patient Portal router load failed:', e.message);
+}
+try {
+  const { createHealthEducationRouter } = require('../services/dddHealthEducation');
+  healthEducationRouter = createHealthEducationRouter();
+} catch (e) {
+  console.warn('[Platform] Health Education router load failed:', e.message);
+}
+try {
+  const { createRemoteMonitoringRouter } = require('../services/dddRemoteMonitoring');
+  remoteMonitoringRouter = createRemoteMonitoringRouter();
+} catch (e) {
+  console.warn('[Platform] Remote Monitoring router load failed:', e.message);
+}
+try {
+  const { createPatientCommunityRouter } = require('../services/dddPatientCommunity');
+  patientCommunityRouter = createPatientCommunityRouter();
+} catch (e) {
+  console.warn('[Platform] Patient Community router load failed:', e.message);
+}
+try {
+  const { createFhirIntegrationRouter } = require('../services/dddFhirIntegration');
+  fhirIntegrationRouter = createFhirIntegrationRouter();
+} catch (e) {
+  console.warn('[Platform] FHIR Integration router load failed:', e.message);
+}
+try {
+  const { createHL7MessagingRouter } = require('../services/dddHL7Messaging');
+  hl7MessagingRouter = createHL7MessagingRouter();
+} catch (e) {
+  console.warn('[Platform] HL7 Messaging router load failed:', e.message);
+}
+try {
+  const { createDataExchangeRouter } = require('../services/dddDataExchange');
+  dataExchangeRouter = createDataExchangeRouter();
+} catch (e) {
+  console.warn('[Platform] Data Exchange router load failed:', e.message);
+}
+try {
+  const { createInteroperabilityHubRouter } = require('../services/dddInteroperabilityHub');
+  interoperabilityHubRouter = createInteroperabilityHubRouter();
+} catch (e) {
+  console.warn('[Platform] Interoperability Hub router load failed:', e.message);
+}
+try {
+  const { createBackupManagerRouter } = require('../services/dddBackupManager');
+  backupManagerRouter = createBackupManagerRouter();
+} catch (e) {
+  console.warn('[Platform] Backup Manager router load failed:', e.message);
+}
+try {
+  const { createBusinessContinuityRouter } = require('../services/dddBusinessContinuity');
+  businessContinuityRouter = createBusinessContinuityRouter();
+} catch (e) {
+  console.warn('[Platform] Business Continuity router load failed:', e.message);
+}
+try {
+  const { createSystemFailoverRouter } = require('../services/dddSystemFailover');
+  systemFailoverRouter = createSystemFailoverRouter();
+} catch (e) {
+  console.warn('[Platform] System Failover router load failed:', e.message);
+}
+try {
+  const { createIncidentResponseRouter } = require('../services/dddIncidentResponse');
+  incidentResponseRouter = createIncidentResponseRouter();
+} catch (e) {
+  console.warn('[Platform] Incident Response router load failed:', e.message);
+}
+try {
+  const { createEquipmentLifecycleRouter } = require('../services/dddEquipmentLifecycle');
+  equipmentLifecycleRouter = createEquipmentLifecycleRouter();
+} catch (e) {
+  console.warn('[Platform] Equipment Lifecycle router load failed:', e.message);
+}
+try {
+  const { createEnvironmentalMonitoringRouter } = require('../services/dddEnvironmentalMonitoring');
+  environmentalMonitoringRouter = createEnvironmentalMonitoringRouter();
+} catch (e) {
+  console.warn('[Platform] Environmental Monitoring router load failed:', e.message);
+}
+try {
+  const { createSpaceManagementRouter } = require('../services/dddSpaceManagement');
+  spaceManagementRouter = createSpaceManagementRouter();
+} catch (e) {
+  console.warn('[Platform] Space Management router load failed:', e.message);
+}
+try {
+  const { createAssetTrackingRouter } = require('../services/dddAssetTracking');
+  assetTrackingRouter = createAssetTrackingRouter();
+} catch (e) {
+  console.warn('[Platform] Asset Tracking router load failed:', e.message);
+}
+try {
+  const { createClinicalResearchRouter } = require('../services/dddClinicalResearch');
+  clinicalResearchRouter = createClinicalResearchRouter();
+} catch (e) {
+  console.warn('[Platform] Clinical Research router load failed:', e.message);
+}
+try {
+  const { createClinicalTrialsRouter } = require('../services/dddClinicalTrials');
+  clinicalTrialsRouter = createClinicalTrialsRouter();
+} catch (e) {
+  console.warn('[Platform] Clinical Trials router load failed:', e.message);
+}
+try {
+  const { createOutcomeResearchRouter } = require('../services/dddOutcomeResearch');
+  outcomeResearchRouter = createOutcomeResearchRouter();
+} catch (e) {
+  console.warn('[Platform] Outcome Research router load failed:', e.message);
+}
+try {
+  const { createPublicationManagerRouter } = require('../services/dddPublicationManager');
+  publicationManagerRouter = createPublicationManagerRouter();
+} catch (e) {
+  console.warn('[Platform] Publication Manager router load failed:', e.message);
+}
+try {
+  const { createVolunteerManagementRouter } = require('../services/dddVolunteerManagement');
+  volunteerManagementRouter = createVolunteerManagementRouter();
+} catch (e) {
+  console.warn('[Platform] Volunteer Management router load failed:', e.message);
+}
+try {
+  const { createCommunityOutreachRouter } = require('../services/dddCommunityOutreach');
+  communityOutreachRouter = createCommunityOutreachRouter();
+} catch (e) {
+  console.warn('[Platform] Community Outreach router load failed:', e.message);
+}
+try {
+  const { createDonorRelationsRouter } = require('../services/dddDonorRelations');
+  donorRelationsRouter = createDonorRelationsRouter();
+} catch (e) {
+  console.warn('[Platform] Donor Relations router load failed:', e.message);
+}
+try {
+  const { createAdvocacyProgramRouter } = require('../services/dddAdvocacyProgram');
+  advocacyProgramRouter = createAdvocacyProgramRouter();
+} catch (e) {
+  console.warn('[Platform] Advocacy Program router load failed:', e.message);
+}
 
 /* ── GET /health — Full platform health check ── */
 router.get('/health', async (req, res) => {
@@ -991,6 +1197,38 @@ if (researchProtocolRouter) router.use('/', researchProtocolRouter);
 if (evidenceLibraryRouter) router.use('/', evidenceLibraryRouter);
 if (clinicalTrialRouter) router.use('/', clinicalTrialRouter);
 if (publicationTrackerRouter) router.use('/', publicationTrackerRouter);
+if (workforceAnalyticsRouter) router.use('/', workforceAnalyticsRouter);
+if (credentialManagerRouter) router.use('/', credentialManagerRouter);
+if (mentorshipProgramRouter) router.use('/', mentorshipProgramRouter);
+if (careerPathwayRouter) router.use('/', careerPathwayRouter);
+if (accreditationManagerRouter) router.use('/', accreditationManagerRouter);
+if (inspectionTrackerRouter) router.use('/', inspectionTrackerRouter);
+if (standardsComplianceRouter) router.use('/', standardsComplianceRouter);
+if (licensureManagerRouter) router.use('/', licensureManagerRouter);
+if (patientPortalRouter) router.use('/', patientPortalRouter);
+if (healthEducationRouter) router.use('/', healthEducationRouter);
+if (remoteMonitoringRouter) router.use('/', remoteMonitoringRouter);
+if (patientCommunityRouter) router.use('/', patientCommunityRouter);
+if (fhirIntegrationRouter) router.use('/', fhirIntegrationRouter);
+if (hl7MessagingRouter) router.use('/', hl7MessagingRouter);
+if (dataExchangeRouter) router.use('/', dataExchangeRouter);
+if (interoperabilityHubRouter) router.use('/', interoperabilityHubRouter);
+if (backupManagerRouter) router.use('/', backupManagerRouter);
+if (businessContinuityRouter) router.use('/', businessContinuityRouter);
+if (systemFailoverRouter) router.use('/', systemFailoverRouter);
+if (incidentResponseRouter) router.use('/', incidentResponseRouter);
+if (equipmentLifecycleRouter) router.use('/', equipmentLifecycleRouter);
+if (environmentalMonitoringRouter) router.use('/', environmentalMonitoringRouter);
+if (spaceManagementRouter) router.use('/', spaceManagementRouter);
+if (assetTrackingRouter) router.use('/', assetTrackingRouter);
+if (clinicalResearchRouter) router.use('/', clinicalResearchRouter);
+if (clinicalTrialsRouter) router.use('/', clinicalTrialsRouter);
+if (outcomeResearchRouter) router.use('/', outcomeResearchRouter);
+if (publicationManagerRouter) router.use('/', publicationManagerRouter);
+if (volunteerManagementRouter) router.use('/', volunteerManagementRouter);
+if (communityOutreachRouter) router.use('/', communityOutreachRouter);
+if (donorRelationsRouter) router.use('/', donorRelationsRouter);
+if (advocacyProgramRouter) router.use('/', advocacyProgramRouter);
 
 /* ── Notification templates listing ── */
 router.get('/notifications/templates', (_req, res) => {

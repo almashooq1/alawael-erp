@@ -15,6 +15,7 @@ const rbacManager = require('../services/rbacManager.service');
 const auditLog = require('../services/auditLog.service');
 const ruleBuilder = require('../services/ruleBuilder.service');
 const Logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /**
  * ============================================
@@ -68,9 +69,7 @@ exports.createPolicy = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error creating policy: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -102,9 +101,7 @@ exports.getPolicy = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting policy: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -133,9 +130,7 @@ exports.getAllPolicies = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting policies: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -170,9 +165,7 @@ exports.updatePolicy = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error updating policy: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -213,9 +206,7 @@ exports.deletePolicy = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error deleting policy: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -252,9 +243,7 @@ exports.evaluatePolicy = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error evaluating policy: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -300,9 +289,7 @@ exports.createRole = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error creating role: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -329,9 +316,7 @@ exports.getAllRoles = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting roles: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -365,9 +350,7 @@ exports.assignPermissionToRole = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error assigning permission: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -400,9 +383,7 @@ exports.removePermissionFromRole = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error removing permission: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -436,9 +417,7 @@ exports.assignRoleToUser = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error assigning role to user: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -471,9 +450,7 @@ exports.removeRoleFromUser = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error removing role from user: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -500,9 +477,7 @@ exports.getUserPermissions = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting user permissions: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -540,9 +515,7 @@ exports.createRule = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error creating rule: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -566,9 +539,7 @@ exports.getAllRules = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting rules: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -594,9 +565,7 @@ exports.evaluateRule = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error evaluating rule: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -619,9 +588,7 @@ exports.getRuleTemplates = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting templates: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -677,9 +644,7 @@ exports.getAuditLogs = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting audit logs: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -703,9 +668,7 @@ exports.getUserActivityReport = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting activity report: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -728,9 +691,7 @@ exports.getComplianceReport = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting compliance report: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -753,9 +714,7 @@ exports.getDecisionStats = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting decision stats: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -789,9 +748,7 @@ exports.getStatistics = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting statistics: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'Internal server error',
     });
   }
@@ -821,9 +778,7 @@ exports.healthCheck = (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error in health check: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
+    safeError(res, error, 'rbac');
       en: 'حدث خطأ داخلي',
     });
   }

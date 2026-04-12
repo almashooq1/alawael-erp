@@ -11,6 +11,7 @@ const GPSSecurityService = require('../services/gpsSecurityService');
 const SmartGPSWebSocketService = require('../services/smartGPSWebSocket.service');
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Alias for backward compatibility with .verifyToken pattern
 const authMiddleware = { verifyToken: authenticateToken };
@@ -74,12 +75,7 @@ router.post('/location/update', authMiddleware.verifyToken, async (req, res) => 
 
     res.json(result);
   } catch (error) {
-    logger.error('خطأ في تحديث موقع المركبة:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في تحديث الموقع',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في تحديث موقع المركبة');
   }
 });
 
@@ -114,12 +110,7 @@ router.get('/location/:vehicleId', authMiddleware.verifyToken, async (req, res) 
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب الموقع:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الموقع',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب الموقع');
   }
 });
 
@@ -143,12 +134,7 @@ router.get('/location/history/:vehicleId', authMiddleware.verifyToken, async (re
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب السجل:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب السجل',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب السجل');
   }
 });
 
@@ -170,12 +156,7 @@ router.get('/fleet/snapshot', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب لقطة الأسطول:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب بيانات الأسطول',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب لقطة الأسطول');
   }
 });
 
@@ -198,12 +179,7 @@ router.get('/fleet/map', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب بيانات الخريطة:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب بيانات الخريطة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب بيانات الخريطة');
   }
 });
 
@@ -222,12 +198,7 @@ router.get('/alerts/dashboard', authMiddleware.verifyToken, async (req, res) => 
 
     res.json(alertsDashboard);
   } catch (error) {
-    logger.error('خطأ في جلب لوحة التنبيهات:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب التنبيهات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب لوحة التنبيهات');
   }
 });
 
@@ -254,12 +225,7 @@ router.post('/predict/eta', authMiddleware.verifyToken, async (req, res) => {
 
     res.json(eta);
   } catch (error) {
-    logger.error('خطأ في حساب ETA:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في حساب وقت الوصول',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في حساب ETA');
   }
 });
 
@@ -281,12 +247,7 @@ router.get('/predict/danger-points/:vehicleId', authMiddleware.verifyToken, asyn
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في التنبؤ بنقاط الخطر:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في التنبؤ بنقاط الخطر',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في التنبؤ بنقاط الخطر');
   }
 });
 
@@ -310,12 +271,7 @@ router.post('/predict/fuel', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في التنبؤ بالوقود:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في التنبؤ باستهلاك الوقود',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في التنبؤ بالوقود');
   }
 });
 
@@ -346,12 +302,7 @@ router.post('/routes/optimize', authMiddleware.verifyToken, async (req, res) => 
 
     res.json(optimizedRoute);
   } catch (error) {
-    logger.error('خطأ في تحسين المسار:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في تحسين المسار',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في تحسين المسار');
   }
 });
 
@@ -375,12 +326,7 @@ router.get('/drivers/:driverId/performance', authMiddleware.verifyToken, async (
 
     res.json(report);
   } catch (error) {
-    logger.error('خطأ في جلب تقرير الأداء:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب تقرير الأداء',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب تقرير الأداء');
   }
 });
 
@@ -404,12 +350,7 @@ router.get('/fleet/kpis', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب KPIs:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب مؤشرات الأداء',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب KPIs');
   }
 });
 
@@ -431,12 +372,7 @@ router.get('/websocket/stats', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب إحصائيات WebSocket:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الإحصائيات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب إحصائيات WebSocket');
   }
 });
 
@@ -467,12 +403,7 @@ router.get('/audit-logs', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب السجلات:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب السجلات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب السجلات');
   }
 });
 
@@ -496,12 +427,7 @@ router.get('/reports/daily', authMiddleware.verifyToken, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    logger.error('خطأ في جلب التقرير:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب التقرير',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'خطأ في جلب التقرير');
   }
 });
 

@@ -27,6 +27,7 @@ const logger = require('../utils/logger');
 const ESignature = require('../models/ESignature');
 const ESignatureTemplate = require('../models/ESignatureTemplate');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -119,8 +120,7 @@ router.get('/stats', async (req, res) => {
       message: 'إحصائيات التوقيع الإلكتروني',
     });
   } catch (error) {
-    logger.error('Error fetching e-signature stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching e-signature stats');
   }
 });
 
@@ -141,8 +141,7 @@ router.get('/templates/list', async (req, res) => {
 
     res.json({ success: true, data, message: 'قوالب المستندات' });
   } catch (error) {
-    logger.error('Error fetching templates:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, error, 'fetching templates');
   }
 });
 
@@ -158,7 +157,7 @@ router.post('/templates', authorize(['admin', 'super_admin']), async (req, res) 
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'كود القالب مستخدم بالفعل' });
     }
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القالب' });
+    safeError(res, error, 'eSignature');
   }
 });
 
@@ -174,8 +173,7 @@ router.put('/templates/:id', authorize(['admin', 'super_admin']), async (req, re
     await tpl.save();
     res.json({ success: true, data: tpl, message: 'تم تحديث القالب' });
   } catch (error) {
-    logger.error('Error updating template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث القالب' });
+    safeError(res, error, 'updating template');
   }
 });
 
@@ -189,8 +187,7 @@ router.delete('/templates/:id', authorize(['admin', 'super_admin']), async (req,
     if (!tpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, message: 'تم حذف القالب' });
   } catch (error) {
-    logger.error('Error deleting template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف القالب' });
+    safeError(res, error, 'deleting template');
   }
 });
 
@@ -225,8 +222,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة طلبات التوقيع',
     });
   } catch (error) {
-    logger.error('Error fetching signature requests:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب طلبات التوقيع' });
+    safeError(res, error, 'fetching signature requests');
   }
 });
 
@@ -239,8 +235,7 @@ router.get('/:id', async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'طلب التوقيع غير موجود' });
     res.json({ success: true, data: doc, message: 'بيانات طلب التوقيع' });
   } catch (error) {
-    logger.error('Error fetching signature request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب طلب التوقيع' });
+    safeError(res, error, 'fetching signature request');
   }
 });
 
@@ -323,8 +318,7 @@ router.post('/', authorize(['admin', 'manager', 'super_admin']), async (req, res
 
     res.status(201).json({ success: true, data: doc, message: 'تم إنشاء طلب التوقيع بنجاح' });
   } catch (error) {
-    logger.error('Error creating signature request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء طلب التوقيع' });
+    safeError(res, error, 'creating signature request');
   }
 });
 
@@ -399,8 +393,7 @@ router.post('/:id/sign', async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc, message: 'تم التوقيع بنجاح' });
   } catch (error) {
-    logger.error('Error signing document:', error);
-    res.status(500).json({ success: false, message: 'خطأ في التوقيع' });
+    safeError(res, error, 'signing document');
   }
 });
 
@@ -434,8 +427,7 @@ router.post('/:id/reject', async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc, message: 'تم رفض التوقيع' });
   } catch (error) {
-    logger.error('Error rejecting signature:', error);
-    res.status(500).json({ success: false, message: 'خطأ في رفض التوقيع' });
+    safeError(res, error, 'rejecting signature');
   }
 });
 
@@ -476,8 +468,7 @@ router.get('/:id/verify', async (req, res) => {
       message: isValid ? 'المستند موثق بالكامل' : 'المستند لم يكتمل توثيقه',
     });
   } catch (error) {
-    logger.error('Error verifying signature:', error);
-    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
+    safeError(res, error, 'verifying signature');
   }
 });
 
@@ -504,8 +495,7 @@ router.get('/verify-code/:code', async (req, res) => {
       message: isValid ? 'المستند موثق' : 'المستند غير مكتمل',
     });
   } catch (error) {
-    logger.error('Error verifying by code:', error);
-    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
+    safeError(res, error, 'verifying by code');
   }
 });
 
@@ -530,8 +520,7 @@ router.get('/:id/audit', async (req, res) => {
       message: 'سجل التدقيق',
     });
   } catch (error) {
-    logger.error('Error fetching audit trail:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل التدقيق' });
+    safeError(res, error, 'fetching audit trail');
   }
 });
 
@@ -580,8 +569,7 @@ router.post('/:id/delegate', async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc, message: 'تم تفويض التوقيع بنجاح' });
   } catch (error) {
-    logger.error('Error delegating signature:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تفويض التوقيع' });
+    safeError(res, error, 'delegating signature');
   }
 });
 
@@ -619,8 +607,7 @@ router.post('/:id/remind', authorize(['admin', 'manager', 'super_admin']), async
       message: `تم إرسال تذكير لـ ${pendingSigners.length} موقعين`,
     });
   } catch (error) {
-    logger.error('Error sending reminder:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال التذكير' });
+    safeError(res, error, 'sending reminder');
   }
 });
 
@@ -649,8 +636,7 @@ router.post('/:id/cancel', authorize(['admin', 'manager', 'super_admin']), async
     await doc.save();
     res.json({ success: true, data: doc, message: 'تم إلغاء الطلب' });
   } catch (error) {
-    logger.error('Error cancelling request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الطلب' });
+    safeError(res, error, 'cancelling request');
   }
 });
 
@@ -683,8 +669,7 @@ router.post('/:id/comment', async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc.comments, message: 'تم إضافة التعليق' });
   } catch (error) {
-    logger.error('Error adding comment:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التعليق' });
+    safeError(res, error, 'adding comment');
   }
 });
 
@@ -731,8 +716,7 @@ router.post('/batch', authorize(['admin', 'super_admin']), async (req, res) => {
       message: `تم إنشاء ${results.length} طلبات توقيع`,
     });
   } catch (error) {
-    logger.error('Error creating batch:', error);
-    res.status(500).json({ success: false, message: 'خطأ في الإنشاء الدفعي' });
+    safeError(res, error, 'creating batch');
   }
 });
 

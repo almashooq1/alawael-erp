@@ -40,8 +40,7 @@ router.get('/public', async (req, res) => {
     const settings = await settingsService.getPublicSettings(branchId);
     res.json({ settings });
   } catch (err) {
-    logger.error('[AdvancedSettings] GET /public error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الخادم' });
+    safeError(res, err, '[AdvancedSettings] GET /public error');
   }
 });
 
@@ -59,8 +58,7 @@ router.get('/', requireAdmin, async (req, res) => {
     const groups = await settingsService.getAllGroups(branchId);
     res.json({ groups, branch_id: branchId });
   } catch (err) {
-    logger.error('[AdvancedSettings] GET / error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الخادم' });
+    safeError(res, err, '[AdvancedSettings] GET / error');
   }
 });
 
@@ -80,8 +78,7 @@ router.get('/group/:group', requireAdmin, async (req, res) => {
 
     res.json({ group, settings, branch_id: branchId });
   } catch (err) {
-    logger.error('[AdvancedSettings] GET /group error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الخادم' });
+    safeError(res, err, '[AdvancedSettings] GET /group error');
   }
 });
 
@@ -102,8 +99,7 @@ router.get('/:key', requireAdmin, async (req, res) => {
     const value = await settingsService.get(key, null, branchId);
     res.json({ key, value, meta: setting, branch_id: branchId });
   } catch (err) {
-    logger.error('[AdvancedSettings] GET /:key error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الخادم' });
+    safeError(res, err, '[AdvancedSettings] GET /:key error');
   }
 });
 
@@ -176,8 +172,7 @@ router.put('/:key', requireAdmin, async (req, res) => {
       branch_id: branch_id || null,
     });
   } catch (err) {
-    logger.error('[AdvancedSettings] PUT /:key error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في التحديث' });
+    safeError(res, err, '[AdvancedSettings] PUT /:key error');
   }
 });
 
@@ -202,8 +197,7 @@ router.delete('/branch-override', requireAdmin, async (req, res) => {
       branch_id,
     });
   } catch (err) {
-    logger.error('[AdvancedSettings] DELETE /branch-override error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في الحذف' });
+    safeError(res, err, '[AdvancedSettings] DELETE /branch-override error');
   }
 });
 
@@ -228,8 +222,7 @@ router.post('/seed', requireAdmin, async (req, res) => {
       inserted,
     });
   } catch (err) {
-    logger.error('[AdvancedSettings] POST /seed error', { error: err.message });
-    res.status(500).json({ message: 'خطأ في التهيئة' });
+    safeError(res, err, '[AdvancedSettings] POST /seed error');
   }
 });
 

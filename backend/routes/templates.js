@@ -20,6 +20,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const safeError = require('../utils/safeError');
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 const storage = multer.diskStorage({
@@ -177,7 +178,7 @@ router.post('/:id/approve', auth, requireAdmin, async (req, res) => {
     }
     res.json(tpl);
   } catch (e) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, e, 'templates');
   }
 });
 
@@ -267,7 +268,7 @@ router.post('/:id/reject', auth, requireAdmin, async (req, res) => {
     }
     res.json(tpl);
   } catch (e) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, e, 'templates');
   }
 });
 
@@ -318,7 +319,7 @@ router.get('/', auth, async (req, res) => {
     const tpls = await Template.find(query);
     res.json(tpls);
   } catch (e) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, e, 'templates');
   }
 });
 

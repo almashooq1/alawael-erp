@@ -281,4 +281,4 @@ emailPreferenceSchema.methods.recordEmailOpened = async function () {
   await this.save();
 };
 
-module.exports = mongoose.model('EmailPreference', emailPreferenceSchema);
+module.exports = mongoose.models.EmailPreference || mongoose.model('EmailPreference', emailPreferenceSchema);

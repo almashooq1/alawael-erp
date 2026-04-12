@@ -7,6 +7,7 @@ router.use(authenticate);
 
 const getProject = () => require('../models/project.model');
 const getTask = () => require('../models/task.model');
+const safeError = require('../utils/safeError');
 
 // GET /projects
 router.get('/projects', async (req, res) => {
@@ -22,8 +23,7 @@ router.get('/projects', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('PM projects error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المشاريع' });
+    safeError(res, err, 'PM projects error');
   }
 });
 
@@ -35,8 +35,7 @@ router.get('/projects/:id', async (req, res) => {
     if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project });
   } catch (err) {
-    logger.error('PM project detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المشروع' });
+    safeError(res, err, 'PM project detail error');
   }
 });
 
@@ -47,8 +46,7 @@ router.get('/projects/:pid/tasks', async (req, res) => {
     const data = await Task.find({ projectId: req.params.pid }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('PM project tasks error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المهام' });
+    safeError(res, err, 'PM project tasks error');
   }
 });
 
@@ -59,8 +57,7 @@ router.post('/projects', authorize(['admin', 'manager']), async (req, res) => {
     const project = await Project.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: project, message: 'تم إنشاء المشروع' });
   } catch (err) {
-    logger.error('PM project create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المشروع' });
+    safeError(res, err, 'PM project create error');
   }
 });
 
@@ -71,8 +68,7 @@ router.post('/tasks', async (req, res) => {
     const task = await Task.create({ ...req.body, assignedBy: req.user?.id });
     res.status(201).json({ success: true, data: task, message: 'تم إنشاء المهمة' });
   } catch (err) {
-    logger.error('PM task create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المهمة' });
+    safeError(res, err, 'PM task create error');
   }
 });
 
@@ -111,8 +107,7 @@ router.put('/projects/:id', authorize(['admin', 'manager']), async (req, res) =>
     if (!project) return res.status(404).json({ success: false, message: 'المشروع غير موجود' });
     res.json({ success: true, data: project, message: 'تم تحديث المشروع' });
   } catch (err) {
-    logger.error('PM project update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المشروع' });
+    safeError(res, err, 'PM project update error');
   }
 });
 
@@ -130,8 +125,7 @@ router.patch('/tasks/:id', async (req, res) => {
     if (!task) return res.status(404).json({ success: false, message: 'المهمة غير موجودة' });
     res.json({ success: true, data: task, message: 'تم تحديث المهمة' });
   } catch (err) {
-    logger.error('PM task update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المهمة' });
+    safeError(res, err, 'PM task update error');
   }
 });
 
@@ -142,8 +136,7 @@ router.delete('/tasks/:id', async (req, res) => {
     await Task.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم حذف المهمة' });
   } catch (err) {
-    logger.error('PM task delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المهمة' });
+    safeError(res, err, 'PM task delete error');
   }
 });
 

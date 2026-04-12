@@ -48,6 +48,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
+const safeError = require('../utils/safeError');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
@@ -149,8 +150,7 @@ router.post('/send-otp', parentOtpSendLimiter, async (req, res) => {
       ...(process.env.NODE_ENV !== 'production' && { devOtp: otp }),
     });
   } catch (err) {
-    logger.error('[ParentPortal] send-otp error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] send-otp error');
   }
 });
 
@@ -227,8 +227,7 @@ router.post('/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
       guardian: { phone: maskPhone(phone) },
     });
   } catch (err) {
-    logger.error('[ParentPortal] verify-otp error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] verify-otp error');
   }
 });
 
@@ -246,8 +245,7 @@ router.post('/logout', async (req, res) => {
     }
     return res.json({ success: true, message: 'تم تسجيل الخروج' });
   } catch (err) {
-    logger.error('[ParentPortal] logout error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] logout error');
   }
 });
 
@@ -273,8 +271,7 @@ router.post('/fcm-token', async (req, res) => {
 
     return res.json({ success: true, message: 'تم تسجيل الجهاز' });
   } catch (err) {
-    logger.error('[ParentPortal] fcm-token error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] fcm-token error');
   }
 });
 
@@ -289,8 +286,7 @@ router.delete('/fcm-token', async (req, res) => {
     }
     return res.json({ success: true, message: 'تم إلغاء تسجيل الجهاز' });
   } catch (err) {
-    logger.error('[ParentPortal] delete fcm-token error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] delete fcm-token error');
   }
 });
 
@@ -326,8 +322,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] dashboard error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] dashboard error');
   }
 });
 
@@ -346,8 +341,7 @@ router.get('/children', async (req, res) => {
       hint: 'يتطلب ربط Guardian بـ Beneficiaries في قاعدة البيانات',
     });
   } catch (err) {
-    logger.error('[ParentPortal] children error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] children error');
   }
 });
 
@@ -362,8 +356,7 @@ router.get('/children/:id', async (req, res) => {
       message: 'ملف الطفل',
     });
   } catch (err) {
-    logger.error('[ParentPortal] child detail error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] child detail error');
   }
 });
 
@@ -380,8 +373,7 @@ router.get('/children/:id/sessions', async (req, res) => {
       message: 'جلسات الطفل',
     });
   } catch (err) {
-    logger.error('[ParentPortal] child sessions error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] child sessions error');
   }
 });
 
@@ -400,8 +392,7 @@ router.get('/children/:id/progress', async (req, res) => {
       message: 'تقدم الطفل',
     });
   } catch (err) {
-    logger.error('[ParentPortal] child progress error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] child progress error');
   }
 });
 
@@ -416,8 +407,7 @@ router.get('/children/:id/assessments', async (req, res) => {
       message: 'تقييمات الطفل',
     });
   } catch (err) {
-    logger.error('[ParentPortal] child assessments error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] child assessments error');
   }
 });
 
@@ -436,8 +426,7 @@ router.get('/appointments', async (req, res) => {
       message: 'قائمة المواعيد',
     });
   } catch (err) {
-    logger.error('[ParentPortal] appointments error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] appointments error');
   }
 });
 
@@ -466,8 +455,7 @@ router.post('/appointments/request', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] appointment request error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] appointment request error');
   }
 });
 
@@ -483,8 +471,7 @@ router.put('/appointments/:id/cancel', async (req, res) => {
       data: { id: req.params.id, reason },
     });
   } catch (err) {
-    logger.error('[ParentPortal] cancel appointment error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] cancel appointment error');
   }
 });
 
@@ -503,8 +490,7 @@ router.get('/transport/live-tracking', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] live-tracking error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] live-tracking error');
   }
 });
 
@@ -519,8 +505,7 @@ router.get('/transport/schedule', async (req, res) => {
       message: 'جدول النقل',
     });
   } catch (err) {
-    logger.error('[ParentPortal] transport schedule error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] transport schedule error');
   }
 });
 
@@ -539,8 +524,7 @@ router.get('/invoices', async (req, res) => {
       message: 'قائمة الفواتير',
     });
   } catch (err) {
-    logger.error('[ParentPortal] invoices error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] invoices error');
   }
 });
 
@@ -555,8 +539,7 @@ router.get('/invoices/:id', async (req, res) => {
       message: 'تفاصيل الفاتورة',
     });
   } catch (err) {
-    logger.error('[ParentPortal] invoice detail error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] invoice detail error');
   }
 });
 
@@ -583,8 +566,7 @@ router.get('/messages', async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[ParentPortal] messages error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] messages error');
   }
 });
 
@@ -614,8 +596,7 @@ router.post('/messages', async (req, res) => {
       data: msg,
     });
   } catch (err) {
-    logger.error('[ParentPortal] send message error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] send message error');
   }
 });
 
@@ -630,8 +611,7 @@ router.put('/messages/:id/read', async (req, res) => {
     });
     return res.json({ success: true, message: 'تم التعليم كمقروء' });
   } catch (err) {
-    logger.error('[ParentPortal] mark read error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] mark read error');
   }
 });
 
@@ -664,8 +644,7 @@ router.get('/notifications', async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[ParentPortal] notifications error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] notifications error');
   }
 });
 
@@ -693,8 +672,7 @@ router.put('/notifications/mark-read', async (req, res) => {
       unreadCount,
     });
   } catch (err) {
-    logger.error('[ParentPortal] mark-read error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] mark-read error');
   }
 });
 
@@ -723,8 +701,7 @@ router.get('/complaints', async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[ParentPortal] complaints list error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] complaints list error');
   }
 });
 
@@ -791,8 +768,7 @@ router.post('/complaints', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] submit complaint error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] submit complaint error');
   }
 });
 
@@ -807,8 +783,7 @@ router.get('/complaints/:id', async (req, res) => {
     }
     return res.json({ success: true, data: complaint });
   } catch (err) {
-    logger.error('[ParentPortal] complaint detail error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] complaint detail error');
   }
 });
 
@@ -844,8 +819,7 @@ router.post('/complaints/:id/rate', async (req, res) => {
 
     return res.json({ success: true, message: 'شكراً لتقييمك' });
   } catch (err) {
-    logger.error('[ParentPortal] rate complaint error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] rate complaint error');
   }
 });
 
@@ -879,8 +853,7 @@ router.get('/settings', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] settings error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] settings error');
   }
 });
 
@@ -904,8 +877,7 @@ router.put('/settings', async (req, res) => {
     // TODO: حفظ الإعدادات في نموذج Guardian
     return res.json({ success: true, message: 'تم تحديث الإعدادات بنجاح' });
   } catch (err) {
-    logger.error('[ParentPortal] update settings error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] update settings error');
   }
 });
 
@@ -946,8 +918,7 @@ router.post('/settings/change-phone', async (req, res) => {
       ...(process.env.NODE_ENV !== 'production' && { devOtp: otp }),
     });
   } catch (err) {
-    logger.error('[ParentPortal] change-phone error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] change-phone error');
   }
 });
 
@@ -1003,8 +974,7 @@ router.post('/settings/change-phone/verify', async (req, res) => {
       newPhone: maskPhone(newPhone),
     });
   } catch (err) {
-    logger.error('[ParentPortal] change-phone verify error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] change-phone verify error');
   }
 });
 
@@ -1039,8 +1009,7 @@ router.get('/admin/complaints', async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[ParentPortal] admin complaints error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] admin complaints error');
   }
 });
 
@@ -1074,8 +1043,7 @@ router.put('/admin/complaints/:id', async (req, res) => {
       data: complaint,
     });
   } catch (err) {
-    logger.error('[ParentPortal] admin update complaint error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] admin update complaint error');
   }
 });
 
@@ -1107,8 +1075,7 @@ router.get('/admin/notifications/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[ParentPortal] notifications stats error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] notifications stats error');
   }
 });
 
@@ -1141,8 +1108,7 @@ router.post('/admin/notifications/broadcast', async (req, res) => {
       data: notification,
     });
   } catch (err) {
-    logger.error('[ParentPortal] broadcast error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[ParentPortal] broadcast error');
   }
 });
 

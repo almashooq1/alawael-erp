@@ -75,7 +75,7 @@ router.get('/talent/jobs', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -96,7 +96,7 @@ router.get('/talent/jobs/:id', authenticateToken, async (req, res) => {
     if (!job) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: job });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -118,7 +118,7 @@ router.delete('/talent/jobs/:id', authenticateToken, async (req, res) => {
     await JobPosting.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -135,7 +135,7 @@ router.get('/talent/jobs/statistics/summary', authenticateToken, async (req, res
       data: { totalJobs: total, openJobs: open, filledJobs: filled, totalApplications: apps },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -164,7 +164,7 @@ router.get('/talent/candidates', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -210,7 +210,7 @@ router.get('/talent/applications', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -245,7 +245,7 @@ router.get('/talent/pipeline', authenticateToken, async (req, res) => {
     ]);
     res.json({ success: true, data: pipeline });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -259,7 +259,7 @@ router.get('/talent/interviews', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -300,7 +300,7 @@ router.get('/facilities', authenticateToken, async (req, res) => {
     const data = await Facility.find(filter).sort({ name: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -319,7 +319,7 @@ router.get('/facilities/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -340,7 +340,7 @@ router.delete('/facilities/:id', authenticateToken, async (req, res) => {
     await Facility.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -364,7 +364,7 @@ router.get('/facilities/statistics/summary', authenticateToken, async (req, res)
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -387,7 +387,7 @@ router.get('/facilities/bookings/list', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -417,7 +417,7 @@ router.delete('/facilities/bookings/:id', authenticateToken, async (req, res) =>
     await SpaceBooking.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -433,7 +433,7 @@ router.get('/facilities/leases', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -472,7 +472,7 @@ router.get('/facilities/utilities', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -513,7 +513,7 @@ router.get('/vendors', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -532,7 +532,7 @@ router.get('/vendors/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -554,7 +554,7 @@ router.delete('/vendors/:id', authenticateToken, async (req, res) => {
     await Vendor.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -578,7 +578,7 @@ router.get('/vendors/statistics/summary', authenticateToken, async (req, res) =>
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -594,7 +594,7 @@ router.get('/vendors/rfqs/list', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -649,7 +649,7 @@ router.get('/vendors/evaluations/list', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -702,7 +702,7 @@ router.get('/itsm/incidents', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -730,7 +730,7 @@ router.get('/itsm/incidents/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -794,7 +794,7 @@ router.get('/itsm/incidents/statistics/summary', authenticateToken, async (req, 
     ]);
     res.json({ success: true, data: { total, open, critical, slaBreached: breached, resolved } });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -819,7 +819,7 @@ router.get('/itsm/assets', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -849,7 +849,7 @@ router.delete('/itsm/assets/:id', authenticateToken, async (req, res) => {
     await ITAsset.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -859,7 +859,7 @@ router.get('/itsm/catalog', authenticateToken, async (req, res) => {
     const data = await ServiceCatalogItem.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -900,7 +900,7 @@ router.get('/itsm/changes', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -974,7 +974,7 @@ router.get('/ehs/incidents', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1001,7 +1001,7 @@ router.get('/ehs/incidents/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1035,7 +1035,7 @@ router.get('/ehs/incidents/statistics/summary', authenticateToken, async (req, r
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1052,7 +1052,7 @@ router.get('/ehs/inspections', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1096,7 +1096,7 @@ router.get('/ehs/hazards', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1139,7 +1139,7 @@ router.get('/ehs/ppe', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1190,7 +1190,7 @@ router.get('/strategy/objectives', authenticateToken, async (req, res) => {
       pagination: { total, page: +page, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1212,7 +1212,7 @@ router.get('/strategy/objectives/:id', authenticateToken, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1235,7 +1235,7 @@ router.delete('/strategy/objectives/:id', authenticateToken, async (req, res) =>
     await StrategicObjective.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1298,7 +1298,7 @@ router.get('/strategy/objectives/statistics/summary', authenticateToken, async (
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1316,7 +1316,7 @@ router.get('/strategy/initiatives', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1348,7 +1348,7 @@ router.delete('/strategy/initiatives/:id', authenticateToken, async (req, res) =
     await StrategicInitiative.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1361,7 +1361,7 @@ router.get('/strategy/swot', authenticateToken, async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 
@@ -1391,7 +1391,7 @@ router.delete('/strategy/swot/:id', authenticateToken, async (req, res) => {
     await SWOTAnalysis.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterpriseProPlus');
   }
 });
 

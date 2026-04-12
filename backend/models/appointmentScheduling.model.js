@@ -107,7 +107,7 @@ const timeSlotSchema = new Schema(
       default: 'available',
     },
     appointment: { type: Schema.Types.ObjectId, ref: 'Appointment' },
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile' },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary' },
     appointmentType: String,
     maxPatients: { type: Number, default: 1 },
     currentPatients: { type: Number, default: 0 },
@@ -130,7 +130,7 @@ timeSlotSchema.index({ appointment: 1 });
 const appointmentReminderSchema = new Schema(
   {
     appointment: { type: Schema.Types.ObjectId, ref: 'Appointment', required: true },
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile' },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary' },
     recipientPhone: String,
     recipientEmail: String,
     channel: {
@@ -174,7 +174,7 @@ appointmentReminderSchema.index({ appointment: 1 });
 
 const waitlistEntrySchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: String,
     beneficiaryPhone: String,
     requestedProvider: { type: Schema.Types.ObjectId, ref: 'User' },

@@ -16,6 +16,7 @@ const {
 } = require('../models/ComplaintEnhanced');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -75,8 +76,7 @@ router.get('/', async (req, res) => {
 
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Complaints list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكاوى' });
+    safeError(res, err, 'Complaints list error');
   }
 });
 
@@ -158,8 +158,7 @@ router.get('/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Complaints stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإحصائيات' });
+    safeError(res, err, 'Complaints stats error');
   }
 });
 
@@ -225,8 +224,7 @@ router.get('/analytics', async (req, res) => {
       data: { byStatus, byPriority, byCategory, byChannel, bySentiment, dailyTrend, slaCompliance },
     });
   } catch (err) {
-    logger.error('Complaints analytics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحليلات' });
+    safeError(res, err, 'Complaints analytics error');
   }
 });
 
@@ -280,8 +278,7 @@ router.get('/form-options', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Complaints form-options error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في خيارات النموذج' });
+    safeError(res, err, 'Complaints form-options error');
   }
 });
 
@@ -296,8 +293,7 @@ router.get('/public-form', async (req, res) => {
       .lean();
     res.json({ success: true, data: { categories } });
   } catch (err) {
-    logger.error('Public form error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في البوابة العامة' });
+    safeError(res, err, 'Public form error');
   }
 });
 
@@ -359,8 +355,7 @@ router.post('/public-submit', async (req, res) => {
       complaintNumber,
     });
   } catch (err) {
-    logger.error('Public submit error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الشكوى' });
+    safeError(res, err, 'Public submit error');
   }
 });
 
@@ -378,8 +373,7 @@ router.get('/:id', async (req, res) => {
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, data: complaint });
   } catch (err) {
-    logger.error('Complaint detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكوى' });
+    safeError(res, err, 'Complaint detail error');
   }
 });
 
@@ -426,8 +420,7 @@ router.post('/', async (req, res) => {
     await complaint.save();
     res.status(201).json({ success: true, data: complaint, message: 'تم تسجيل الشكوى بنجاح' });
   } catch (err) {
-    logger.error('Complaint create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الشكوى' });
+    safeError(res, err, 'Complaint create error');
   }
 });
 
@@ -447,8 +440,7 @@ router.put(
       if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: complaint, message: 'تم تحديث الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الشكوى' });
+      safeError(res, err, 'Complaint update error');
     }
   }
 );
@@ -500,8 +492,7 @@ router.post(
 
       res.json({ success: true, data: complaint, message: 'تم تحديث الحالة بنجاح' });
     } catch (err) {
-      logger.error('Complaint status change error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تغيير الحالة' });
+      safeError(res, err, 'Complaint status change error');
     }
   }
 );
@@ -550,8 +541,7 @@ router.post('/:id/escalate', authorize(['admin', 'super_admin', 'manager']), asy
     await complaint.save();
     res.json({ success: true, data: complaint, message: 'تم تصعيد الشكوى بنجاح' });
   } catch (err) {
-    logger.error('Complaint escalate error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تصعيد الشكوى' });
+    safeError(res, err, 'Complaint escalate error');
   }
 });
 
@@ -573,8 +563,7 @@ router.post('/:id/rate', async (req, res) => {
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, message: 'شكرًا على تقييمك' });
   } catch (err) {
-    logger.error('Complaint rate error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التقييم' });
+    safeError(res, err, 'Complaint rate error');
   }
 });
 
@@ -586,8 +575,7 @@ router.delete('/:id', authorize(['admin', 'super_admin']), async (req, res) => {
     await ComplaintV2.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
   } catch (err) {
-    logger.error('Complaint delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'Complaint delete error');
   }
 });
 
@@ -604,8 +592,7 @@ router.get('/categories', async (req, res) => {
     const data = await ComplaintCategory.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Complaint categories error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التصنيفات' });
+    safeError(res, err, 'Complaint categories error');
   }
 });
 
@@ -620,8 +607,7 @@ router.post('/categories', authorize(['admin', 'super_admin', 'manager']), async
     });
     res.status(201).json({ success: true, data: category, message: 'تم إنشاء التصنيف بنجاح' });
   } catch (err) {
-    logger.error('Complaint category create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التصنيف' });
+    safeError(res, err, 'Complaint category create error');
   }
 });
 
@@ -638,8 +624,7 @@ router.put('/categories/:id', authorize(['admin', 'super_admin', 'manager']), as
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
     res.json({ success: true, data: category, message: 'تم تحديث التصنيف بنجاح' });
   } catch (err) {
-    logger.error('Complaint category update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التصنيف' });
+    safeError(res, err, 'Complaint category update error');
   }
 });
 
@@ -651,8 +636,7 @@ router.delete('/categories/:id', authorize(['admin', 'super_admin']), async (req
     await ComplaintCategory.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف التصنيف بنجاح' });
   } catch (err) {
-    logger.error('Complaint category delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'Complaint category delete error');
   }
 });
 
@@ -669,8 +653,7 @@ router.get('/sla-configs', authorize(['admin', 'super_admin', 'manager']), async
     const data = await ComplaintSlaConfig.find(filter).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('SLA configs list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إعدادات SLA' });
+    safeError(res, err, 'SLA configs list error');
   }
 });
 
@@ -683,8 +666,7 @@ router.post('/sla-configs', authorize(['admin', 'super_admin']), async (req, res
     });
     res.status(201).json({ success: true, data: config, message: 'تم إنشاء إعداد SLA بنجاح' });
   } catch (err) {
-    logger.error('SLA config create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء إعداد SLA' });
+    safeError(res, err, 'SLA config create error');
   }
 });
 
@@ -701,8 +683,7 @@ router.put('/sla-configs/:id', authorize(['admin', 'super_admin']), async (req, 
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     res.json({ success: true, data: config, message: 'تم تحديث إعداد SLA بنجاح' });
   } catch (err) {
-    logger.error('SLA config update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث إعداد SLA' });
+    safeError(res, err, 'SLA config update error');
   }
 });
 
@@ -740,8 +721,7 @@ router.get('/feedback', async (req, res) => {
 
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Feedback list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظات' });
+    safeError(res, err, 'Feedback list error');
   }
 });
 
@@ -759,8 +739,7 @@ router.get('/feedback/stats', async (req, res) => {
     ]);
     res.json({ success: true, data: { total, newUnreviewed, positive, negative, byType } });
   } catch (err) {
-    logger.error('Feedback stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإحصائيات' });
+    safeError(res, err, 'Feedback stats error');
   }
 });
 
@@ -775,8 +754,7 @@ router.get('/feedback/:id', async (req, res) => {
     if (!feedback) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     res.json({ success: true, data: feedback });
   } catch (err) {
-    logger.error('Feedback detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظة' });
+    safeError(res, err, 'Feedback detail error');
   }
 });
 
@@ -802,8 +780,7 @@ router.post('/feedback', async (req, res) => {
 
     res.status(201).json({ success: true, data: feedback, message: 'شكرًا على ملاحظتك القيّمة' });
   } catch (err) {
-    logger.error('Feedback create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الملاحظة' });
+    safeError(res, err, 'Feedback create error');
   }
 });
 
@@ -833,8 +810,7 @@ router.post(
         return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
       res.json({ success: true, data: feedback, message: 'تم الرد بنجاح' });
     } catch (err) {
-      logger.error('Feedback respond error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في الرد' });
+      safeError(res, err, 'Feedback respond error');
     }
   }
 );
@@ -852,8 +828,7 @@ router.put('/feedback/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     if (!feedback) return res.status(404).json({ success: false, message: 'الملاحظة غير موجودة' });
     res.json({ success: true, data: feedback, message: 'تم التحديث بنجاح' });
   } catch (err) {
-    logger.error('Feedback update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'Feedback update error');
   }
 });
 
@@ -865,8 +840,7 @@ router.delete('/feedback/:id', authorize(['admin', 'super_admin']), async (req, 
     await CrmFeedback.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الملاحظة بنجاح' });
   } catch (err) {
-    logger.error('Feedback delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'Feedback delete error');
   }
 });
 

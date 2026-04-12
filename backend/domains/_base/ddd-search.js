@@ -13,6 +13,7 @@
 
 const mongoose = require('mongoose');
 const express = require('express');
+const safeError = require('../../utils/safeError');
 
 // ── Domain → Model registry ────────────────────────────────────────────
 
@@ -286,9 +287,7 @@ function createSearchRouter() {
       res.json(result);
     } catch (err) {
       console.error('[DDD-Search] Error:', err.message);
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في البحث',
+      safeError(res, err, 'ddd-search');
         message_en: 'Search error',
         error: process.env.NODE_ENV === 'development' ? err.message : undefined,
       });

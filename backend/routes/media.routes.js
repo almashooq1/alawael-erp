@@ -182,8 +182,7 @@ router.get('/', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('GET /media dashboard error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل لوحة الوسائط' });
+    safeError(res, error, 'GET /media dashboard error');
   }
 });
 
@@ -259,8 +258,7 @@ router.get('/stats', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('GET /media/stats error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إحصائيات التخزين' });
+    safeError(res, error, 'GET /media/stats error');
   }
 });
 
@@ -339,8 +337,7 @@ router.post(
       if (req.file?.path && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
-      logger.error('POST /media/upload error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحميل الملف' });
+      safeError(res, error, 'POST /media/upload error');
     }
   }
 );
@@ -417,8 +414,7 @@ router.post(
           if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
         });
       }
-      logger.error('POST /media/upload-bulk error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحميل الملفات' });
+      safeError(res, error, 'POST /media/upload-bulk error');
     }
   }
 );
@@ -498,8 +494,7 @@ router.get('/list', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('GET /media/list error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوسائط' });
+    safeError(res, error, 'GET /media/list error');
   }
 });
 
@@ -542,8 +537,7 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('GET /media/:id error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تفاصيل الوسيط' });
+    safeError(res, error, 'GET /media/:id error');
   }
 });
 
@@ -615,8 +609,7 @@ router.put('/:id', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('PUT /media/:id error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الوسيط' });
+    safeError(res, error, 'PUT /media/:id error');
   }
 });
 
@@ -653,8 +646,7 @@ router.delete('/:id', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'تم حذف الوسيط بنجاح' });
   } catch (error) {
-    logger.error('DELETE /media/:id error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الوسيط' });
+    safeError(res, error, 'DELETE /media/:id error');
   }
 });
 
@@ -688,8 +680,7 @@ router.post('/:id/restore', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'تم استعادة الوسيط بنجاح' });
   } catch (error) {
-    logger.error('POST /media/:id/restore error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في استعادة الوسيط' });
+    safeError(res, error, 'POST /media/:id/restore error');
   }
 });
 
@@ -723,8 +714,7 @@ router.delete('/:id/permanent', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'تم حذف الوسيط نهائياً' });
   } catch (error) {
-    logger.error('DELETE /media/:id/permanent error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف النهائي' });
+    safeError(res, error, 'DELETE /media/:id/permanent error');
   }
 });
 
@@ -755,8 +745,7 @@ router.post('/:id/favorite', authenticate, async (req, res) => {
       message: media.isFavorite ? 'تمت الإضافة للمفضلة' : 'تمت الإزالة من المفضلة',
     });
   } catch (error) {
-    logger.error('POST /media/:id/favorite error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المفضلة' });
+    safeError(res, error, 'POST /media/:id/favorite error');
   }
 });
 
@@ -778,8 +767,7 @@ router.post('/:id/pin', authenticate, async (req, res) => {
       message: media.isPinned ? 'تم التثبيت' : 'تم إلغاء التثبيت',
     });
   } catch (error) {
-    logger.error('POST /media/:id/pin error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في التثبيت' });
+    safeError(res, error, 'POST /media/:id/pin error');
   }
 });
 
@@ -844,7 +832,7 @@ router.get('/file/:filename', authenticate, (req, res) => {
         const { pipeline } = require('stream');
         pipeline(fs.createReadStream(filePath, { start, end }), res, err => {
           if (err && !res.headersSent) {
-            res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });
+            safeError(res, error, 'media');
           }
         });
         return;
@@ -858,12 +846,11 @@ router.get('/file/:filename', authenticate, (req, res) => {
     const { pipeline: pipe2 } = require('stream');
     pipe2(fs.createReadStream(filePath), res, err => {
       if (err && !res.headersSent) {
-        res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });
+        safeError(res, error, 'media');
       }
     });
   } catch (error) {
-    logger.error('GET /media/file/:filename error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الملف' });
+    safeError(res, error, 'GET /media/file/:filename error');
   }
 });
 
@@ -899,8 +886,7 @@ router.get('/:id/download', authenticate, async (req, res) => {
     );
     res.download(filePath, safeOriginalName);
   } catch (error) {
-    logger.error('GET /media/:id/download error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل الملف' });
+    safeError(res, error, 'GET /media/:id/download error');
   }
 });
 
@@ -934,8 +920,7 @@ router.post('/bulk-delete', authenticate, async (req, res) => {
 
     res.json({ success: true, message: `تم حذف ${ids.length} ملف بنجاح` });
   } catch (error) {
-    logger.error('POST /media/bulk-delete error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف الجماعي' });
+    safeError(res, error, 'POST /media/bulk-delete error');
   }
 });
 
@@ -972,8 +957,7 @@ router.post('/bulk-move', authenticate, async (req, res) => {
 
     res.json({ success: true, message: `تم نقل ${ids.length} ملف بنجاح` });
   } catch (error) {
-    logger.error('POST /media/bulk-move error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في النقل الجماعي' });
+    safeError(res, error, 'POST /media/bulk-move error');
   }
 });
 
@@ -1012,8 +996,7 @@ router.post('/bulk-tag', authenticate, async (req, res) => {
 
     res.json({ success: true, message: `تم إضافة الوسوم لـ ${ids.length} ملف` });
   } catch (error) {
-    logger.error('POST /media/bulk-tag error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الوسوم' });
+    safeError(res, error, 'POST /media/bulk-tag error');
   }
 });
 
@@ -1041,8 +1024,7 @@ router.get('/albums', authenticate, async (req, res) => {
 
     res.json({ success: true, data: albums });
   } catch (error) {
-    logger.error('GET /media/albums error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الألبومات' });
+    safeError(res, error, 'GET /media/albums error');
   }
 });
 
@@ -1068,8 +1050,7 @@ router.post('/albums', authenticate, async (req, res) => {
     await album.save();
     res.status(201).json({ success: true, message: 'تم إنشاء الألبوم بنجاح', data: album });
   } catch (error) {
-    logger.error('POST /media/albums error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الألبوم' });
+    safeError(res, error, 'POST /media/albums error');
   }
 });
 
@@ -1100,8 +1081,7 @@ router.put('/albums/:id', authenticate, async (req, res) => {
     if (!album) return res.status(404).json({ success: false, message: 'الألبوم غير موجود' });
     res.json({ success: true, message: 'تم تحديث الألبوم بنجاح', data: album });
   } catch (error) {
-    logger.error('PUT /media/albums/:id error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الألبوم' });
+    safeError(res, error, 'PUT /media/albums/:id error');
   }
 });
 
@@ -1123,8 +1103,7 @@ router.delete('/albums/:id', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'تم حذف الألبوم بنجاح' });
   } catch (error) {
-    logger.error('DELETE /media/albums/:id error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الألبوم' });
+    safeError(res, error, 'DELETE /media/albums/:id error');
   }
 });
 
@@ -1148,8 +1127,7 @@ router.get('/tags', authenticate, async (req, res) => {
 
     res.json({ success: true, data: tags.map(t => ({ tag: t._id, count: t.count })) });
   } catch (error) {
-    logger.error('GET /media/tags error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوسوم' });
+    safeError(res, error, 'GET /media/tags error');
   }
 });
 
@@ -1177,8 +1155,7 @@ router.get('/trash', authenticate, async (req, res) => {
       })),
     });
   } catch (error) {
-    logger.error('GET /media/trash error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المحذوفات' });
+    safeError(res, error, 'GET /media/trash error');
   }
 });
 
@@ -1203,8 +1180,7 @@ router.post('/trash/empty', authenticate, async (req, res) => {
 
     res.json({ success: true, message: `تم حذف ${result.deletedCount} ملف نهائياً` });
   } catch (error) {
-    logger.error('POST /media/trash/empty error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تفريغ المحذوفات' });
+    safeError(res, error, 'POST /media/trash/empty error');
   }
 });
 

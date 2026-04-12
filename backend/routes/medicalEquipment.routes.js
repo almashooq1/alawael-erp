@@ -57,8 +57,7 @@ router.get('/equipment', async (req, res) => {
     ]);
     res.json({ success: true, data: equipment, total });
   } catch (error) {
-    logger.error('[MedEquip] List equipment error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المعدات', error: safeError(error) });
+    safeError(res, error, '[MedEquip] List equipment error');
   }
 });
 
@@ -87,8 +86,7 @@ router.get('/equipment/:id', async (req, res) => {
       data: { ...eq.toObject(), calibrations, maintenanceRecords, certificates },
     });
   } catch (error) {
-    logger.error('[MedEquip] Get equipment error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المعدة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Get equipment error');
   }
 });
 
@@ -99,8 +97,7 @@ router.post('/equipment', async (req, res) => {
     logger.info(`[MedEquip] Equipment created: ${eq.assetTag} - ${eq.name.ar}`);
     res.status(201).json({ success: true, data: eq });
   } catch (error) {
-    logger.error('[MedEquip] Create equipment error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة المعدة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Create equipment error');
   }
 });
 
@@ -113,8 +110,7 @@ router.put('/equipment/:id', async (req, res) => {
     if (!eq) return res.status(404).json({ success: false, message: 'المعدة غير موجودة' });
     res.json({ success: true, data: eq });
   } catch (error) {
-    logger.error('[MedEquip] Update equipment error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المعدة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Update equipment error');
   }
 });
 
@@ -123,8 +119,7 @@ router.delete('/equipment/:id', async (req, res) => {
     await MedicalEquipment.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف المعدة بنجاح' });
   } catch (error) {
-    logger.error('[MedEquip] Delete equipment error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف المعدة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Delete equipment error');
   }
 });
 
@@ -262,8 +257,7 @@ router.patch('/maintenance/:id/complete', async (req, res) => {
     logger.info(`[MedEquip] Maintenance completed: ${record.workOrderNumber}`);
     res.json({ success: true, data: record, message: 'تم إكمال الصيانة بنجاح' });
   } catch (error) {
-    logger.error('[MedEquip] Complete maintenance error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إكمال الصيانة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Complete maintenance error');
   }
 });
 
@@ -289,8 +283,7 @@ router.get('/certificates', async (req, res) => {
     ]);
     res.json({ success: true, data: certs, total });
   } catch (error) {
-    logger.error('[MedEquip] List certificates error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشهادات', error: safeError(error) });
+    safeError(res, error, '[MedEquip] List certificates error');
   }
 });
 
@@ -301,8 +294,7 @@ router.post('/certificates', async (req, res) => {
     logger.info(`[MedEquip] Certificate added: ${cert.certificateNumber}`);
     res.status(201).json({ success: true, data: cert });
   } catch (error) {
-    logger.error('[MedEquip] Create certificate error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الشهادة', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Create certificate error');
   }
 });
 
@@ -390,8 +382,7 @@ router.get('/alerts', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[MedEquip] Alerts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التنبيهات', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Alerts error');
   }
 });
 
@@ -452,8 +443,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[MedEquip] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
+    safeError(res, error, '[MedEquip] Dashboard error');
   }
 });
 

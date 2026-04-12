@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-const BeneficiaryFile = require('../models/BeneficiaryFile');
+const BeneficiaryFile = require('../models/Beneficiary');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 const TherapySession = require('../models/TherapySession');
 const StandardizedAssessment = require('../models/StandardizedAssessment');

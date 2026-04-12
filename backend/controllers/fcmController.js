@@ -2,6 +2,7 @@
 // backend/controllers/fcmController.js
 // إدارة تسجيل توكنات FCM للمستخدمين
 const User = require('../models/User');
+const safeError = require('../utils/safeError');
 
 const fcmController = {
   /**
@@ -26,7 +27,7 @@ const fcmController = {
       }
       res.status(200).json({ success: true, message: 'FCM token registered' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Error registering FCM token' });
+      safeError(res, error, 'fcmController');
     }
   },
   /**
@@ -49,7 +50,7 @@ const fcmController = {
       await user.save();
       res.status(200).json({ success: true, message: 'FCM token unregistered' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Error unregistering FCM token' });
+      safeError(res, error, 'fcmController');
     }
   },
 };

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const feedbackSchema = new mongoose.Schema(
   {
     session: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapySession', unique: true }, // One feedback per session
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' }, // Who provided service
 
     // Net Promoter Score (Likelihood to recommend)

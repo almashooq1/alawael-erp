@@ -12,6 +12,7 @@ class SSOAuthMiddleware {
   constructor() {
     this.ssoService = new SSOService();
     const { jwtSecret } = require('../config/secrets');
+const safeError = require('../utils/safeError');
     this.JWT_SECRET = jwtSecret;
   }
 
@@ -147,12 +148,7 @@ class SSOAuthMiddleware {
 
         next();
       } catch (error) {
-        logger.error('Role verification failed:', error);
-        return res.status(500).json({
-          success: false,
-          error: 'internal_error',
-          message: 'Role verification failed',
-        });
+        safeError(res, error, 'Role verification failed');
       }
     };
   };
@@ -186,12 +182,7 @@ class SSOAuthMiddleware {
 
         next();
       } catch (error) {
-        logger.error('Permission verification failed:', error);
-        return res.status(500).json({
-          success: false,
-          error: 'internal_error',
-          message: 'Permission verification failed',
-        });
+        safeError(res, error, 'Permission verification failed');
       }
     };
   };

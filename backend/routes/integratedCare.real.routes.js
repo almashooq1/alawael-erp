@@ -10,11 +10,11 @@ router.use(authenticate);
 router.post('/sessions', async (req, res) => {
   try {
     const TherapySession = require('../models/TherapySession');
+const safeError = require('../utils/safeError');
     const session = await TherapySession.create({ ...req.body, therapist: req.user?.id });
     res.status(201).json({ success: true, data: session, message: 'تم إنشاء الجلسة' });
   } catch (err) {
-    logger.error('Integrated care session error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الجلسة' });
+    safeError(res, err, 'Integrated care session error');
   }
 });
 
@@ -24,8 +24,7 @@ router.post('/plans', async (req, res) => {
     const plan = await CarePlan.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: plan, message: 'تم إنشاء خطة الرعاية' });
   } catch (err) {
-    logger.error('Care plan create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء خطة الرعاية' });
+    safeError(res, err, 'Care plan create error');
   }
 });
 
@@ -35,8 +34,7 @@ router.get('/plans', async (req, res) => {
     const data = await CarePlan.find().sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Care plans error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطط الرعاية' });
+    safeError(res, err, 'Care plans error');
   }
 });
 
@@ -78,8 +76,7 @@ router.get('/plans/student/:studentId', async (req, res) => {
 
     res.json({ success: true, data: plan, goals });
   } catch (err) {
-    logger.error('Care plan by student error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطة الطالب' });
+    safeError(res, err, 'Care plan by student error');
   }
 });
 
@@ -95,8 +92,7 @@ router.get('/students', async (req, res) => {
       .lean();
     res.json({ success: true, data: students });
   } catch (err) {
-    logger.error('IC students list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب قائمة الطلاب' });
+    safeError(res, err, 'IC students list error');
   }
 });
 

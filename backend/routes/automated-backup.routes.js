@@ -69,7 +69,7 @@ router.get('/', guard, (req, res) => {
     const result = backupService.listBackups(req.query);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -81,7 +81,7 @@ router.get('/health', guard, (_req, res) => {
     const health = backupService.getHealthStatus();
     res.json({ success: true, data: health });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -91,7 +91,7 @@ router.get('/analytics', guard, (req, res) => {
     const analytics = backupService.getAnalytics(req.query);
     res.json({ success: true, data: analytics });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -101,7 +101,7 @@ router.get('/config', guard, (_req, res) => {
     const config = backupService.getConfig();
     res.json({ success: true, data: config });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -121,7 +121,7 @@ router.post('/cleanup', guard, (_req, res) => {
     const result = backupService.runRetentionCleanup();
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -165,7 +165,7 @@ router.get('/schedules/list', guard, (_req, res) => {
     const result = backupService.listSchedules();
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -209,7 +209,7 @@ router.get('/storage/targets', guard, (_req, res) => {
     const result = backupService.listStorageTargets();
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 
@@ -263,7 +263,7 @@ router.get('/restore/history', guard, (req, res) => {
     const result = backupService.listRestoreHistory(req.query);
     res.json({ success: true, ...result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeErrorMsg(error) });
+    safeError(res, error, 'automated-backup');
   }
 });
 

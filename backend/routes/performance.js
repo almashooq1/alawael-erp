@@ -3,6 +3,7 @@ const express = require('express');
 const PerformanceService = require('../services/performanceService');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -76,7 +77,7 @@ router.get('/load-testing', (_req, res) => {
     const results = PerformanceService.getLoadTestingResults();
     res.json(results);
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'performance');
   }
 });
 
@@ -86,7 +87,7 @@ router.post('/report/generate', (_req, res) => {
     const report = PerformanceService.generatePerformanceReport();
     res.status(201).json(report);
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'performance');
   }
 });
 

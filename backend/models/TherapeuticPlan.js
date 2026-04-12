@@ -14,7 +14,7 @@ const goalSchema = new mongoose.Schema({
 
 const therapeuticPlanSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     program: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapyProgram', required: true },
 
     // The team assigned to this specific patient's plan

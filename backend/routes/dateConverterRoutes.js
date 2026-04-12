@@ -49,7 +49,7 @@ router.post('/gregorian-to-hijri', (req, res) => {
       day: dayInfo,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -107,7 +107,7 @@ router.post('/info', (req, res) => {
       timestamp: info.timestamp,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -125,7 +125,7 @@ router.get('/today', (req, res) => {
       timestamp: info.timestamp,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -155,7 +155,7 @@ router.post('/validate', (req, res) => {
       day,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -178,7 +178,7 @@ router.post('/difference', (req, res) => {
       difference,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -202,7 +202,7 @@ router.post('/format', (req, res) => {
       pattern: pattern || 'DD/MM/YYYY',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -240,7 +240,7 @@ router.post('/batch', (req, res) => {
       converted: results.filter(r => r.success).length,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -270,7 +270,7 @@ router.get('/hijri-month/:month/:year', (req, res) => {
       monthNameAr,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -287,7 +287,7 @@ router.post('/toHijri', (req, res) => {
       data: { gregorian: gregorianDate, hijri, formatted: hijri.formatted },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -309,7 +309,7 @@ router.post('/toGregorian', (req, res) => {
       data: { hijri: { year: hijriYear, month: hijriMonth, day: hijriDay }, gregorian: result },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 
@@ -318,7 +318,7 @@ router.get('/now', (req, res) => {
     const info = DateConverterService.getCompleteDateInfo(new Date());
     res.json({ success: true, data: { gregorian: info.gregorian, hijri: info.hijri } });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dateConverterRoutes');
   }
 });
 

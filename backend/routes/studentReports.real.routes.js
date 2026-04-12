@@ -12,8 +12,7 @@ router.post('/:id/schedule', async (req, res) => {
     const report = await Report.create({ ...req.body, studentId: req.params.id, type: 'scheduled', createdBy: req.user?.id });
     res.status(201).json({ success: true, data: report, message: 'تم جدولة التقرير' });
   } catch (err) {
-    logger.error('Student report schedule error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جدولة التقرير' });
+    safeError(res, err, 'Student report schedule error');
   }
 });
 
@@ -21,11 +20,11 @@ router.post('/:id/schedule', async (req, res) => {
 router.post('/:id/comparison', async (req, res) => {
   try {
     const Report = require('../models/Report');
+const safeError = require('../utils/safeError');
     const report = await Report.create({ ...req.body, studentId: req.params.id, type: 'comparison', createdBy: req.user?.id });
     res.status(201).json({ success: true, data: report, message: 'تم إنشاء تقرير المقارنة' });
   } catch (err) {
-    logger.error('Student report comparison error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء تقرير المقارنة' });
+    safeError(res, err, 'Student report comparison error');
   }
 });
 

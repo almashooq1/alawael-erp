@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { ScheduleManagementService } = require('../services/scheduleManagementService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const scheduleService = new ScheduleManagementService();
@@ -35,11 +36,7 @@ router.get(
         data: schedules,
       });
     } catch (error) {
-      logger.error('Error fetching schedules:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
-      });
+      safeError(res, error, 'fetching schedules');
     }
   }
 );
@@ -79,11 +76,7 @@ router.post(
         data: schedule,
       });
     } catch (error) {
-      logger.error('Error creating schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create schedule',
-      });
+      safeError(res, error, 'creating schedule');
     }
   }
 );
@@ -106,11 +99,7 @@ router.get(
         data: schedules,
       });
     } catch (error) {
-      logger.error('Error fetching resource schedules:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
-      });
+      safeError(res, error, 'fetching resource schedules');
     }
   }
 );
@@ -136,11 +125,7 @@ router.get(
         data: schedules,
       });
     } catch (error) {
-      logger.error('Error fetching schedules by date range:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedules',
-      });
+      safeError(res, error, 'fetching schedules by date range');
     }
   }
 );
@@ -169,11 +154,7 @@ router.get(
         data: schedule,
       });
     } catch (error) {
-      logger.error('Error fetching schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
-      });
+      safeError(res, error, 'fetching schedule');
     }
   }
 );
@@ -203,11 +184,7 @@ router.put(
         data: schedule,
       });
     } catch (error) {
-      logger.error('Error updating schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to update schedule',
-      });
+      safeError(res, error, 'updating schedule');
     }
   }
 );
@@ -237,11 +214,7 @@ router.delete(
         message: 'Schedule deleted successfully',
       });
     } catch (error) {
-      logger.error('Error deleting schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to delete schedule',
-      });
+      safeError(res, error, 'deleting schedule');
     }
   }
 );
@@ -270,23 +243,13 @@ router.post(
         data: schedule,
       });
     } catch (error) {
-      logger.error('Error confirming schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to confirm schedule',
-      });
+      safeError(res, error, 'confirming schedule');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

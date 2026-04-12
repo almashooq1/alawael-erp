@@ -4,6 +4,7 @@ const { authenticate } = require('../middleware/auth');
 const { sensitiveOperationLimiter } = require('../middleware/rateLimiter');
 const logger = require('../utils/logger');
 const Payment = require('../models/Payment');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -73,8 +74,7 @@ router.get('/all', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Payments all error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المدفوعات' });
+    safeError(res, err, 'Payments all error');
   }
 });
 
@@ -87,8 +87,7 @@ router.get('/history', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Payment history error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل المدفوعات' });
+    safeError(res, err, 'Payment history error');
   }
 });
 
@@ -106,8 +105,7 @@ router.post('/stripe', async (req, res) => {
     });
     res.status(201).json({ success: true, data: payment, message: 'تم إنشاء طلب الدفع' });
   } catch (err) {
-    logger.error('Stripe payment error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في معالجة الدفع' });
+    safeError(res, err, 'Stripe payment error');
   }
 });
 
@@ -125,8 +123,7 @@ router.post('/paypal', async (req, res) => {
     });
     res.status(201).json({ success: true, data: payment, message: 'تم إنشاء طلب الدفع' });
   } catch (err) {
-    logger.error('PayPal payment error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في معالجة الدفع' });
+    safeError(res, err, 'PayPal payment error');
   }
 });
 
@@ -144,8 +141,7 @@ router.post('/installment', async (req, res) => {
     });
     res.status(201).json({ success: true, data: payment, message: 'تم إنشاء خطة التقسيط' });
   } catch (err) {
-    logger.error('Installment error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء خطة التقسيط' });
+    safeError(res, err, 'Installment error');
   }
 });
 
@@ -166,8 +162,7 @@ router.post('/subscriptions/create', async (req, res) => {
     const sub = await Subscription.create({ ...fields, userId: req.user?.id, status: 'active' });
     res.status(201).json({ success: true, data: sub, message: 'تم إنشاء الاشتراك' });
   } catch (err) {
-    logger.error('Subscription create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الاشتراك' });
+    safeError(res, err, 'Subscription create error');
   }
 });
 

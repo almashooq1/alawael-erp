@@ -19,7 +19,7 @@ const appointmentSchema = new mongoose.Schema(
     // Who is the appointment for
     beneficiary: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'BeneficiaryFile',
+      ref: 'Beneficiary',
     },
     beneficiaryName: { type: String }, // Denormalized for quick display
     beneficiaryPhone: { type: String },

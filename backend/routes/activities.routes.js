@@ -47,8 +47,7 @@ router.get('/', requireAuth, async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    logger.error('Activities GET / error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities GET / error');
   }
 });
 
@@ -79,8 +78,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       data: { total, byStatus, byType },
     });
   } catch (err) {
-    logger.error('Activities GET /stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities GET /stats error');
   }
 });
 
@@ -111,8 +109,7 @@ router.get('/program/:programId', requireAuth, async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    logger.error('Activities GET /program/:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities GET /program/:id error');
   }
 });
 
@@ -135,8 +132,7 @@ router.get('/upcoming', requireAuth, async (req, res) => {
 
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('Activities GET /upcoming error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities GET /upcoming error');
   }
 });
 
@@ -150,8 +146,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Activities GET /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities GET /:id error');
   }
 });
 
@@ -191,8 +186,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, message: 'Activity deleted' });
   } catch (err) {
-    logger.error('Activities DELETE /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities DELETE /:id error');
   }
 });
 
@@ -216,8 +210,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Activities PATCH /:id/status error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities PATCH /:id/status error');
   }
 });
 
@@ -238,8 +231,7 @@ router.post('/:id/participants', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Activities POST /:id/participants error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities POST /:id/participants error');
   }
 });
 
@@ -255,8 +247,7 @@ router.delete('/:id/participants/:participantId', requireAuth, async (req, res) 
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Activities DELETE /:id/participants/:pid error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Activities DELETE /:id/participants/:pid error');
   }
 });
 

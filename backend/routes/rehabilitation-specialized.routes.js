@@ -58,8 +58,7 @@ function buildCrud(Model, modelName, opts = {}) {
         pages: Math.ceil(total / Number(limit)),
       });
     } catch (err) {
-      logger.error(`${modelName} GET / error:`, err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehabilitation-specialized');
     }
   });
 
@@ -73,8 +72,7 @@ function buildCrud(Model, modelName, opts = {}) {
       ]);
       res.json({ success: true, data: { total, byStatus } });
     } catch (err) {
-      logger.error(`${modelName} GET /stats error:`, err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehabilitation-specialized');
     }
   });
 
@@ -85,8 +83,7 @@ function buildCrud(Model, modelName, opts = {}) {
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, data: doc });
     } catch (err) {
-      logger.error(`${modelName} GET /:id error:`, err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehabilitation-specialized');
     }
   });
 
@@ -123,8 +120,7 @@ function buildCrud(Model, modelName, opts = {}) {
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, message: `${modelName} deleted` });
     } catch (err) {
-      logger.error(`${modelName} DELETE /:id error:`, err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehabilitation-specialized');
     }
   });
 

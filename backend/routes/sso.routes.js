@@ -17,6 +17,7 @@ const {
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const { loginLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiter');
+const safeError = require('../utils/safeError');
 
 const ssoService = new SSOService();
 const oAuthService = new OAuthService();
@@ -129,12 +130,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('SSO login failed:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Login failed',
-    });
+    safeError(res, error, 'SSO login failed');
   }
 });
 
@@ -155,12 +151,7 @@ router.post('/logout', verifySSOToken(), async (req, res) => {
       message: 'Logged out successfully',
     });
   } catch (error) {
-    logger.error('SSO logout failed:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Logout failed',
-    });
+    safeError(res, error, 'SSO logout failed');
   }
 });
 
@@ -182,12 +173,7 @@ router.post('/logout-all', verifySSOToken(), async (req, res, _next) => {
       sessionsEnded: result.sessionsEnded,
     });
   } catch (error) {
-    logger.error('Logout all failed:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Logout failed',
-    });
+    safeError(res, error, 'Logout all failed');
   }
 });
 
@@ -205,12 +191,7 @@ router.get('/sessions', verifySSOToken(), async (req, res, _next) => {
       data: sessions,
     });
   } catch (error) {
-    logger.error('Failed to fetch sessions:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Failed to fetch sessions',
-    });
+    safeError(res, error, 'Failed to fetch sessions');
   }
 });
 
@@ -244,12 +225,7 @@ router.delete('/sessions/:sessionId', verifySSOToken(), async (req, res, _next) 
       message: 'Session ended',
     });
   } catch (error) {
-    logger.error('Failed to end session:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Failed to end session',
-    });
+    safeError(res, error, 'Failed to end session');
   }
 });
 
@@ -633,12 +609,7 @@ router.put('/me', verifySSOToken(), async (req, res, _next) => {
       data: updatedSession,
     });
   } catch (error) {
-    logger.error('Failed to update user:', error);
-    res.status(500).json({
-      success: false,
-      error: 'internal_error',
-      message: 'Failed to update user',
-    });
+    safeError(res, error, 'Failed to update user');
   }
 });
 

@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const QualityEnhancedService = require('../services/quality/quality-enhanced.service');
+// Service exports a singleton instance — use directly (no `new`)
+const svc = require('../services/quality/quality-enhanced.service');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
-
-const svc = new QualityEnhancedService();
 
 // ── لوحة مؤشرات الجودة ───────────────────────────────
 router.get('/dashboard/:branchId', authenticate, async (req, res) => {

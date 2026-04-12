@@ -24,6 +24,7 @@ const bulkService = require('../../services/documents/documentBulk.service');
 let authenticateToken;
 try {
   authenticateToken = require('../../middleware/auth');
+const safeError = require('../../utils/safeError');
   if (typeof authenticateToken !== 'function') {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;
@@ -837,8 +838,6 @@ router.get(
 
 // ─── Error handler ──────────────────────────
 router.use((err, req, res, _next) => {
-  logger.error(`[Documents-Pro-Ext] Error: ${err.message}`, { stack: err.stack });
-  res.status(500).json({ success: false, error: err.message || 'خطأ في الخادم' });
-});
+  safeError(res, error, 'documents-pro-extended');
 
 module.exports = router;

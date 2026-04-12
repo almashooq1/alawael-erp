@@ -1,412 +1,38 @@
+'use strict';
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
- * DDD Payment Gateway — Phase 16 · Financial & Billing Management
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * Payment processing, multi-gateway integration, refund management,
- * financial reconciliation, revenue cycle analytics, and payment plan
- * management for rehabilitation services.
- *
- * Aggregates
- *   DDDPaymentGatewayConfig — gateway provider configuration
- *   DDDTransaction          — individual financial transaction record
- *   DDDPaymentPlan          — installment/payment plan for beneficiaries
- *   DDDReconciliation       — batch reconciliation records
- *
- * Canonical links
- *   beneficiaryId    → Beneficiary Core
- *   billingAccountId → DDDBillingAccount
- *   invoiceId        → DDDInvoice
- *   paymentId        → DDDPayment
- * ═══════════════════════════════════════════════════════════════════════════════
+ * PaymentGateway Service — Pure Business Logic
+ * Singleton export — use directly, do NOT call `new`.
+ * Models: ../models/DddPaymentGateway.js
  */
 
-'use strict';
+const {
+  DDDPaymentGatewayConfig,
+  DDDTransaction,
+  DDDPaymentPlan,
+  DDDReconciliation,
+  GATEWAY_PROVIDERS,
+  TRANSACTION_TYPES,
+  TRANSACTION_STATUSES,
+  PAYMENT_PLAN_STATUSES,
+  PAYMENT_PLAN_FREQUENCIES,
+  RECONCILIATION_STATUSES,
+  CURRENCY_CODES,
+  BUILTIN_GATEWAYS,
+} = require('../models/DddPaymentGateway');
 
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
-const { Router } = require('express');
+const BaseCrudService = require('./base/BaseCrudService');
 
-/** Lightweight base so every DDD module has .log() */
-class BaseDomainModule {
-  constructor(name, opts = {}) {
-    this.name = name;
-    this.opts = opts;
-  }
-  log(msg) {
-    console.log(`[${this.name}] ${msg}`);
-  }
-}
-
-/* ── helper ────────────────────────────────────────────────────────────────── */
-const model = name => {
-  try {
-    return mongoose.model(name);
-  } catch {
-    return null;
-  }
-};
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  CONSTANTS                                                                 */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-const GATEWAY_PROVIDERS = [
-  'mada',
-  'visa',
-  'mastercard',
-  'apple_pay',
-  'stc_pay',
-  'sadad',
-  'moyasar',
-  'hyperpay',
-  'tap',
-  'payfort',
-  'bank_transfer',
-  'cash',
-  'cheque',
-];
-
-const TRANSACTION_TYPES = [
-  'payment',
-  'refund',
-  'partial_refund',
-  'chargeback',
-  'void',
-  'capture',
-  'authorization',
-  'settlement',
-  'adjustment',
-  'fee',
-  'transfer',
-];
-
-const TRANSACTION_STATUSES = [
-  'initiated',
-  'pending',
-  'processing',
-  'completed',
-  'failed',
-  'cancelled',
-  'reversed',
-  'disputed',
-  'settled',
-  'expired',
-];
-
-const PAYMENT_PLAN_STATUSES = [
-  'draft',
-  'active',
-  'on_hold',
-  'completed',
-  'defaulted',
-  'cancelled',
-  'renegotiated',
-];
-
-const PAYMENT_PLAN_FREQUENCIES = [
-  'weekly',
-  'bi_weekly',
-  'monthly',
-  'bi_monthly',
-  'quarterly',
-  'custom',
-];
-
-const RECONCILIATION_STATUSES = [
-  'pending',
-  'in_progress',
-  'matched',
-  'discrepancy',
-  'resolved',
-  'completed',
-];
-
-const CURRENCY_CODES = ['SAR', 'AED', 'USD', 'EUR', 'GBP', 'KWD', 'BHD', 'QAR', 'OMR', 'EGP'];
-
-/* ── Built-in gateway configurations ───────────────────────────────────── */
-const BUILTIN_GATEWAYS = [
-  {
-    code: 'GW-MADA',
-    name: 'Mada Payment Network',
-    nameAr: 'شبكة مدى',
-    provider: 'mada',
-    isActive: true,
-    supportedCurrencies: ['SAR'],
-  },
-  {
-    code: 'GW-VISA',
-    name: 'Visa Payment Gateway',
-    nameAr: 'بوابة فيزا',
-    provider: 'visa',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'USD', 'EUR'],
-  },
-  {
-    code: 'GW-MC',
-    name: 'Mastercard Gateway',
-    nameAr: 'بوابة ماستركارد',
-    provider: 'mastercard',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'USD', 'EUR'],
-  },
-  {
-    code: 'GW-APPLE',
-    name: 'Apple Pay',
-    nameAr: 'أبل باي',
-    provider: 'apple_pay',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'USD'],
-  },
-  {
-    code: 'GW-STC',
-    name: 'STC Pay',
-    nameAr: 'إس تي سي باي',
-    provider: 'stc_pay',
-    isActive: true,
-    supportedCurrencies: ['SAR'],
-  },
-  {
-    code: 'GW-SADAD',
-    name: 'SADAD Payment System',
-    nameAr: 'نظام سداد',
-    provider: 'sadad',
-    isActive: true,
-    supportedCurrencies: ['SAR'],
-  },
-  {
-    code: 'GW-MOYASAR',
-    name: 'Moyasar Gateway',
-    nameAr: 'بوابة ميسر',
-    provider: 'moyasar',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'USD'],
-  },
-  {
-    code: 'GW-CASH',
-    name: 'Cash Payment',
-    nameAr: 'دفع نقدي',
-    provider: 'cash',
-    isActive: true,
-    supportedCurrencies: ['SAR'],
-  },
-  {
-    code: 'GW-BANK',
-    name: 'Bank Transfer',
-    nameAr: 'تحويل بنكي',
-    provider: 'bank_transfer',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'USD', 'EUR'],
-  },
-  {
-    code: 'GW-HYPERPAY',
-    name: 'HyperPay Gateway',
-    nameAr: 'بوابة هايبرباي',
-    provider: 'hyperpay',
-    isActive: true,
-    supportedCurrencies: ['SAR', 'AED', 'USD'],
-  },
-];
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  SCHEMAS                                                                   */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Gateway Configuration ─────────────────────────────────────────────── */
-const gatewayConfigSchema = new Schema(
-  {
-    code: { type: String, required: true, unique: true, uppercase: true, trim: true },
-    name: { type: String, required: true },
-    nameAr: { type: String },
-    provider: { type: String, enum: GATEWAY_PROVIDERS, required: true },
-    isActive: { type: Boolean, default: true },
-    isDefault: { type: Boolean, default: false },
-    supportedCurrencies: [{ type: String, enum: CURRENCY_CODES }],
-    config: {
-      merchantId: { type: String },
-      apiKey: { type: String },
-      secretKey: { type: String },
-      webhookUrl: { type: String },
-      callbackUrl: { type: String },
-      environment: { type: String, enum: ['sandbox', 'production'], default: 'sandbox' },
-    },
-    fees: {
-      fixedFee: { type: Number, default: 0 },
-      percentageFee: { type: Number, default: 0 },
-      currency: { type: String, default: 'SAR' },
-    },
-    limits: {
-      minTransaction: { type: Number, default: 1 },
-      maxTransaction: { type: Number, default: 100000 },
-      dailyLimit: { type: Number, default: 500000 },
-    },
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-const DDDPaymentGatewayConfig =
-  mongoose.models.DDDPaymentGatewayConfig ||
-  mongoose.model('DDDPaymentGatewayConfig', gatewayConfigSchema);
-
-/* ── Transaction ───────────────────────────────────────────────────────── */
-const transactionSchema = new Schema(
-  {
-    transactionNumber: { type: String, unique: true, required: true },
-    gatewayId: { type: Schema.Types.ObjectId, ref: 'DDDPaymentGatewayConfig', index: true },
-    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', index: true },
-    billingAccountId: { type: Schema.Types.ObjectId, ref: 'DDDBillingAccount' },
-    invoiceId: { type: Schema.Types.ObjectId, ref: 'DDDInvoice' },
-    paymentId: { type: Schema.Types.ObjectId, ref: 'DDDPayment' },
-    type: { type: String, enum: TRANSACTION_TYPES, required: true },
-    status: { type: String, enum: TRANSACTION_STATUSES, default: 'initiated' },
-    amount: { type: Number, required: true },
-    currency: { type: String, enum: CURRENCY_CODES, default: 'SAR' },
-    fees: { type: Number, default: 0 },
-    netAmount: { type: Number },
-    gatewayRef: { type: String },
-    authCode: { type: String },
-    cardLast4: { type: String },
-    cardBrand: { type: String },
-    cardHolderName: { type: String },
-    bankRef: { type: String },
-    errorCode: { type: String },
-    errorMessage: { type: String },
-    parentTransactionId: { type: Schema.Types.ObjectId, ref: 'DDDTransaction' },
-    initiatedAt: { type: Date, default: Date.now },
-    completedAt: { type: Date },
-    failedAt: { type: Date },
-    settledAt: { type: Date },
-    ipAddress: { type: String },
-    userAgent: { type: String },
-    gatewayResponse: { type: Map, of: Schema.Types.Mixed },
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-transactionSchema.index({ status: 1, type: 1 });
-transactionSchema.index({ transactionNumber: 1 });
-transactionSchema.index({ initiatedAt: -1 });
-transactionSchema.index({ gatewayRef: 1 });
-
-const DDDTransaction =
-  mongoose.models.DDDTransaction || mongoose.model('DDDTransaction', transactionSchema);
-
-/* ── Payment Plan ──────────────────────────────────────────────────────── */
-const installmentSchema = new Schema(
-  {
-    installmentNumber: { type: Number, required: true },
-    dueDate: { type: Date, required: true },
-    amount: { type: Number, required: true },
-    status: {
-      type: String,
-      enum: ['pending', 'paid', 'overdue', 'waived', 'partial'],
-      default: 'pending',
-    },
-    paidAmount: { type: Number, default: 0 },
-    paidAt: { type: Date },
-    transactionId: { type: Schema.Types.ObjectId, ref: 'DDDTransaction' },
-    lateFee: { type: Number, default: 0 },
-    notes: { type: String },
-  },
-  { _id: true }
-);
-
-const paymentPlanSchema = new Schema(
-  {
-    planNumber: { type: String, unique: true, required: true },
-    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true, index: true },
-    billingAccountId: { type: Schema.Types.ObjectId, ref: 'DDDBillingAccount' },
-    invoiceIds: [{ type: Schema.Types.ObjectId, ref: 'DDDInvoice' }],
-    status: { type: String, enum: PAYMENT_PLAN_STATUSES, default: 'draft' },
-    totalAmount: { type: Number, required: true },
-    downPayment: { type: Number, default: 0 },
-    remainingAmount: { type: Number },
-    numberOfInstallments: { type: Number, required: true, min: 2 },
-    frequency: { type: String, enum: PAYMENT_PLAN_FREQUENCIES, default: 'monthly' },
-    startDate: { type: Date, required: true },
-    endDate: { type: Date },
-    interestRate: { type: Number, default: 0 },
-    lateFeeAmount: { type: Number, default: 0 },
-    lateFeePercent: { type: Number, default: 0 },
-    gracePeriodDays: { type: Number, default: 5 },
-    installments: [installmentSchema],
-    totalPaid: { type: Number, default: 0 },
-    totalRemaining: { type: Number },
-    missedPayments: { type: Number, default: 0 },
-    approvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    approvedAt: { type: Date },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    notes: { type: String },
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-paymentPlanSchema.index({ status: 1 });
-
-const DDDPaymentPlan =
-  mongoose.models.DDDPaymentPlan || mongoose.model('DDDPaymentPlan', paymentPlanSchema);
-
-/* ── Reconciliation ────────────────────────────────────────────────────── */
-const reconciliationSchema = new Schema(
-  {
-    batchNumber: { type: String, unique: true, required: true },
-    gatewayId: { type: Schema.Types.ObjectId, ref: 'DDDPaymentGatewayConfig', index: true },
-    status: { type: String, enum: RECONCILIATION_STATUSES, default: 'pending' },
-    periodFrom: { type: Date, required: true },
-    periodTo: { type: Date, required: true },
-    totalTransactions: { type: Number, default: 0 },
-    matchedCount: { type: Number, default: 0 },
-    discrepancyCount: { type: Number, default: 0 },
-    systemTotal: { type: Number, default: 0 },
-    gatewayTotal: { type: Number, default: 0 },
-    difference: { type: Number, default: 0 },
-    discrepancies: [
-      {
-        transactionId: { type: Schema.Types.ObjectId, ref: 'DDDTransaction' },
-        systemAmount: { type: Number },
-        gatewayAmount: { type: Number },
-        difference: { type: Number },
-        type: {
-          type: String,
-          enum: [
-            'amount_mismatch',
-            'missing_in_system',
-            'missing_in_gateway',
-            'status_mismatch',
-            'duplicate',
-          ],
-        },
-        resolved: { type: Boolean, default: false },
-        resolvedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-        resolvedAt: { type: Date },
-        resolution: { type: String },
-      },
-    ],
-    reconciledBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    reconciledAt: { type: Date },
-    completedAt: { type: Date },
-    notes: { type: String },
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-const DDDReconciliation =
-  mongoose.models.DDDReconciliation || mongoose.model('DDDReconciliation', reconciliationSchema);
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  DOMAIN MODULE                                                             */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-class PaymentGateway extends BaseDomainModule {
+class PaymentGateway extends BaseCrudService {
   constructor() {
     super('PaymentGateway', {
       description: 'Payment processing, multi-gateway integration, reconciliation & payment plans',
       version: '1.0.0',
-    });
+    }, {
+      paymentGatewayConfigs: DDDPaymentGatewayConfig,
+      transactions: DDDTransaction,
+      paymentPlans: DDDPaymentPlan,
+      reconciliations: DDDReconciliation,
+    })
   }
 
   async initialize() {
@@ -443,15 +69,9 @@ class PaymentGateway extends BaseDomainModule {
     if (filters.isActive !== undefined) q.isActive = filters.isActive;
     return DDDPaymentGatewayConfig.find(q).sort({ name: 1 }).lean();
   }
-  async getGateway(id) {
-    return DDDPaymentGatewayConfig.findById(id).lean();
-  }
-  async createGateway(data) {
-    return DDDPaymentGatewayConfig.create(data);
-  }
-  async updateGateway(id, data) {
-    return DDDPaymentGatewayConfig.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-  }
+  async getGateway(id) { return this._getById(DDDPaymentGatewayConfig, id); }
+  async createGateway(data) { return this._create(DDDPaymentGatewayConfig, data); }
+  async updateGateway(id, data) { return this._update(DDDPaymentGatewayConfig, id, data, { runValidators: true }); }
 
   /* ── Transaction Processing ── */
   async listTransactions(filters = {}) {
@@ -468,9 +88,7 @@ class PaymentGateway extends BaseDomainModule {
     return DDDTransaction.find(q).sort({ initiatedAt: -1 }).lean();
   }
 
-  async getTransaction(id) {
-    return DDDTransaction.findById(id).lean();
-  }
+  async getTransaction(id) { return this._getById(DDDTransaction, id); }
 
   async initiateTransaction(data) {
     data.transactionNumber = data.transactionNumber || (await this._nextTxnNumber());
@@ -498,7 +116,7 @@ class PaymentGateway extends BaseDomainModule {
         gatewayResponse: response,
       },
       { new: true }
-    );
+    ).lean();
   }
 
   async failTransaction(id, errorCode, errorMessage) {
@@ -511,7 +129,7 @@ class PaymentGateway extends BaseDomainModule {
         errorMessage,
       },
       { new: true }
-    );
+    ).lean();
   }
 
   async refundTransaction(id, amount, reason) {
@@ -538,9 +156,7 @@ class PaymentGateway extends BaseDomainModule {
     if (filters.status) q.status = filters.status;
     return DDDPaymentPlan.find(q).sort({ createdAt: -1 }).lean();
   }
-  async getPaymentPlan(id) {
-    return DDDPaymentPlan.findById(id).lean();
-  }
+  async getPaymentPlan(id) { return this._getById(DDDPaymentPlan, id); }
 
   async createPaymentPlan(data) {
     data.planNumber = data.planNumber || (await this._nextPlanNumber());
@@ -602,7 +218,7 @@ class PaymentGateway extends BaseDomainModule {
         approvedAt: new Date(),
       },
       { new: true }
-    );
+    ).lean();
   }
 
   async recordInstallmentPayment(planId, installmentNumber, transactionId, amount) {
@@ -655,9 +271,7 @@ class PaymentGateway extends BaseDomainModule {
     if (filters.status) q.status = filters.status;
     return DDDReconciliation.find(q).sort({ createdAt: -1 }).lean();
   }
-  async getReconciliation(id) {
-    return DDDReconciliation.findById(id).lean();
-  }
+  async getReconciliation(id) { return this._getById(DDDReconciliation, id); }
 
   async createReconciliation(data) {
     data.batchNumber = data.batchNumber || (await this._nextReconciliationNumber());
@@ -742,248 +356,7 @@ class PaymentGateway extends BaseDomainModule {
     };
   }
 
-  /** Health check */
-  async healthCheck() {
-    const [gateways, transactions, plans, reconciliations] = await Promise.all([
-      DDDPaymentGatewayConfig.countDocuments(),
-      DDDTransaction.countDocuments(),
-      DDDPaymentPlan.countDocuments(),
-      DDDReconciliation.countDocuments(),
-    ]);
-    return { status: 'healthy', gateways, transactions, paymentPlans: plans, reconciliations };
-  }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  ROUTER                                                                    */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-function createPaymentGatewayRouter() {
-  const router = Router();
-  const gw = new PaymentGateway();
-
-  /* ── Gateways ── */
-  router.get('/payment-gateway/gateways', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.listGateways(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/payment-gateway/gateways/:id', async (req, res) => {
-    try {
-      const d = await gw.getGateway(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/gateways', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await gw.createGateway(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.put('/payment-gateway/gateways/:id', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.updateGateway(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Transactions ── */
-  router.get('/payment-gateway/transactions', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.listTransactions(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/payment-gateway/transactions/:id', async (req, res) => {
-    try {
-      const d = await gw.getTransaction(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/transactions', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await gw.initiateTransaction(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/transactions/:id/complete', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.completeTransaction(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/transactions/:id/fail', async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        data: await gw.failTransaction(req.params.id, req.body.errorCode, req.body.errorMessage),
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/transactions/:id/refund', async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        data: await gw.refundTransaction(req.params.id, req.body.amount, req.body.reason),
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Payment Plans ── */
-  router.get('/payment-gateway/plans', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.listPaymentPlans(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/payment-gateway/plans/overdue', async (_req, res) => {
-    try {
-      res.json({ success: true, data: await gw.getOverdueInstallments() });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/payment-gateway/plans/:id', async (req, res) => {
-    try {
-      const d = await gw.getPaymentPlan(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/plans', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await gw.createPaymentPlan(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/plans/:id/activate', async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        data: await gw.activatePaymentPlan(req.params.id, req.body.approvedBy),
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/plans/:id/pay-installment', async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        data: await gw.recordInstallmentPayment(
-          req.params.id,
-          req.body.installmentNumber,
-          req.body.transactionId,
-          req.body.amount
-        ),
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Reconciliation ── */
-  router.get('/payment-gateway/reconciliation', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.listReconciliations(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/payment-gateway/reconciliation/:id', async (req, res) => {
-    try {
-      const d = await gw.getReconciliation(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/reconciliation', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await gw.createReconciliation(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/payment-gateway/reconciliation/:id/resolve', async (req, res) => {
-    try {
-      res.json({
-        success: true,
-        data: await gw.resolveDiscrepancy(
-          req.params.id,
-          req.body.index,
-          req.body.resolution,
-          req.body.userId
-        ),
-      });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Revenue Analytics ── */
-  router.get('/payment-gateway/revenue', async (req, res) => {
-    try {
-      res.json({ success: true, data: await gw.getRevenueAnalytics(req.query.from, req.query.to) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Health ── */
-  router.get('/payment-gateway/health', async (_req, res) => {
-    try {
-      res.json({ success: true, data: await gw.healthCheck() });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  return router;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  EXPORTS                                                                   */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-module.exports = {
-  PaymentGateway,
-  DDDPaymentGatewayConfig,
-  DDDTransaction,
-  DDDPaymentPlan,
-  DDDReconciliation,
-  GATEWAY_PROVIDERS,
-  TRANSACTION_TYPES,
-  TRANSACTION_STATUSES,
-  PAYMENT_PLAN_STATUSES,
-  PAYMENT_PLAN_FREQUENCIES,
-  RECONCILIATION_STATUSES,
-  BUILTIN_GATEWAYS,
-  createPaymentGatewayRouter,
-};
+/* ═══════════════════ Singleton Export ═══════════════════ */
+module.exports = new PaymentGateway();

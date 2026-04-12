@@ -1,7 +1,2 @@
-/* eslint-disable no-unused-vars */
-// Alias for backward compatibility
-try {
-  module.exports = require('./User') || require('./user') || require('./Student') || class {};
-} catch (e) {
-  module.exports = class {};
-}
+// Stub — original archived in _archived/dead-models/ (P#38)
+module.exports = {};

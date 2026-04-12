@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { analyzeAndSuggestNotifications } = require('../services/aiNotificationService');
 const { authenticateToken } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // تحليل بيانات الموظف واقتراح تنبيهات ذكية
 router.post('/suggest', authenticateToken, async (req, res) => {
@@ -11,7 +12,7 @@ router.post('/suggest', authenticateToken, async (req, res) => {
     const suggestions = await analyzeAndSuggestNotifications(employeeData);
     res.json({ success: true, suggestions });
   } catch (err) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, err, 'aiNotifications');
   }
 });
 

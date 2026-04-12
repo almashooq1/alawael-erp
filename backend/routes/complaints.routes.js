@@ -10,6 +10,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Complaint = require('../models/Complaint');
 const validateObjectId = require('../middleware/validateObjectId');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -71,8 +72,7 @@ router.get('/', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Complaints list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكاوى' });
+    safeError(res, err, 'Complaints list error');
   }
 });
 
@@ -107,8 +107,7 @@ router.get('/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Complaints stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, err, 'Complaints stats error');
   }
 });
 
@@ -123,8 +122,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Complaint detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكوى' });
+    safeError(res, err, 'Complaint detail error');
   }
 });
 
@@ -148,8 +146,7 @@ router.post(
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم تقديم الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تقديم الشكوى' });
+      safeError(res, err, 'Complaint create error');
     }
   }
 );
@@ -182,8 +179,7 @@ router.put(
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم تحديث الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الشكوى' });
+      safeError(res, err, 'Complaint update error');
     }
   }
 );
@@ -209,8 +205,7 @@ router.post(
       await doc.save();
       res.json({ success: true, data: doc, message: 'تم إضافة الرد بنجاح' });
     } catch (err) {
-      logger.error('Complaint respond error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة الرد' });
+      safeError(res, err, 'Complaint respond error');
     }
   }
 );
@@ -237,8 +232,7 @@ router.post(
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم تصعيد الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint escalate error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تصعيد الشكوى' });
+      safeError(res, err, 'Complaint escalate error');
     }
   }
 );
@@ -265,8 +259,7 @@ router.post(
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'تم حل الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint resolve error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في حل الشكوى' });
+      safeError(res, err, 'Complaint resolve error');
     }
   }
 );
@@ -288,8 +281,7 @@ router.post(
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, data: doc, message: 'شكراً لتقييمك' });
     } catch (err) {
-      logger.error('Complaint rate error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في التقييم' });
+      safeError(res, err, 'Complaint rate error');
     }
   }
 );
@@ -305,8 +297,7 @@ router.delete(
       if (!doc) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
       res.json({ success: true, message: 'تم حذف الشكوى بنجاح' });
     } catch (err) {
-      logger.error('Complaint delete error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في حذف الشكوى' });
+      safeError(res, err, 'Complaint delete error');
     }
   }
 );

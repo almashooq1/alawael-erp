@@ -10,7 +10,7 @@ const SessionDocumentation = require('../models/SessionDocumentation');
 const TherapistAvailability = require('../models/TherapistAvailability');
 const TherapeuticPlan = require('../models/TherapeuticPlan');
 const Employee = require('../models/Employee');
-const BeneficiaryFile = require('../models/BeneficiaryFile');
+const BeneficiaryFile = require('../models/Beneficiary');
 
 class TherapeuticSessionService {
   /**

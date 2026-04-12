@@ -97,7 +97,7 @@ router.get('/tickets', authenticate, async (req, res) => {
 
     res.json({ success: true, data, pagination: { total, page: +page, limit: +limit } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذاكر', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -107,7 +107,7 @@ router.post('/tickets', authenticate, validate(schemas.helpdesk.createTicket), a
     await ticket.save();
     res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التذكرة', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -121,7 +121,7 @@ router.put('/tickets/:id', authenticate, async (req, res) => {
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التذكرة', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -132,7 +132,7 @@ router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res)
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, message: 'تم حذف التذكرة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف التذكرة', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -150,7 +150,7 @@ router.post('/tickets/:id/comments', authenticate, async (req, res) => {
     await ticket.save();
     res.json({ success: true, data: ticket });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التعليق', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -174,7 +174,7 @@ router.get('/articles', authenticate, async (req, res) => {
 
     res.json({ success: true, data, pagination: { total, page: +page, limit: +limit } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المقالات', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 
@@ -184,7 +184,7 @@ router.post('/articles', authenticate, async (req, res) => {
     await article.save();
     res.status(201).json({ success: true, data: article });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المقالة', error: safeError(error) });
+    safeError(res, error, 'helpdesk');
   }
 });
 

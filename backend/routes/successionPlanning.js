@@ -13,6 +13,7 @@ const { authenticate: authMiddleware, authorize } = require('../middleware/auth'
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════
 //  LIST, STATS & CREATE (frontend-compatible)
@@ -38,8 +39,7 @@ router.get('/', authMiddleware, async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (error) {
-    logger.error('Succession plans list error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطط التعاقب' });
+    safeError(res, error, 'Succession plans list error');
   }
 });
 
@@ -76,8 +76,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Succession stats error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'Succession stats error');
   }
 });
 
@@ -102,8 +101,7 @@ router.get('/reports/top-candidates', authMiddleware, async (req, res) => {
     });
     res.json({ success: true, data: candidates });
   } catch (error) {
-    logger.error('Top candidates report error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التقرير' });
+    safeError(res, error, 'Top candidates report error');
   }
 });
 
@@ -127,8 +125,7 @@ router.post(
       await plan.save();
       res.status(201).json({ success: true, message: 'تم إنشاء خطة التعاقب بنجاح', data: plan });
     } catch (error) {
-      logger.error('Succession plan create error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء خطة التعاقب' });
+      safeError(res, error, 'Succession plan create error');
     }
   }
 );
@@ -156,11 +153,7 @@ router.post('/create', authMiddleware, adminOnly, async (req, res) => {
       data: plan,
     });
   } catch (error) {
-    logger.error('Succession plan create (legacy) error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إنشاء خطة التعاقب',
-    });
+    safeError(res, error, 'Succession plan create (legacy) error');
   }
 });
 
@@ -183,8 +176,7 @@ router.post('/:planId/candidates', authMiddleware, adminOnly, async (req, res) =
     if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم إضافة المرشح بنجاح', data: plan });
   } catch (error) {
-    logger.error('Add candidate error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة المرشح' });
+    safeError(res, error, 'Add candidate error');
   }
 });
 
@@ -203,8 +195,7 @@ router.put('/:planId/candidates/:candidateId', authMiddleware, adminOnly, async 
     if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم تحديث المرشح بنجاح', data: plan });
   } catch (error) {
-    logger.error('Update candidate error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المرشح' });
+    safeError(res, error, 'Update candidate error');
   }
 });
 
@@ -219,8 +210,7 @@ router.get('/:planId/candidates/:candidateId/development', authMiddleware, async
     }
     res.json({ success: true, data: devPlan });
   } catch (error) {
-    logger.error('Get candidate development error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطة التطوير' });
+    safeError(res, error, 'Get candidate development error');
   }
 });
 
@@ -248,8 +238,7 @@ router.post(
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تقييم الجاهزية بنجاح', data: plan });
     } catch (error) {
-      logger.error('Readiness assessment error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تقييم الجاهزية' });
+      safeError(res, error, 'Readiness assessment error');
     }
   }
 );
@@ -279,8 +268,7 @@ router.put(
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث خطة التعاقب بنجاح', data: plan });
     } catch (error) {
-      logger.error('Succession plan update error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث خطة التعاقب' });
+      safeError(res, error, 'Succession plan update error');
     }
   }
 );
@@ -326,11 +314,7 @@ router.post('/:planId/add-successor', authMiddleware, adminOnly, async (req, res
       data: plan,
     });
   } catch (error) {
-    logger.error('Add successor (legacy) error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إضافة مرشح الخلافة',
-    });
+    safeError(res, error, 'Add successor (legacy) error');
   }
 });
 
@@ -373,11 +357,7 @@ router.post(
         data: developmentPlan,
       });
     } catch (error) {
-      logger.error('Create development plan error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في إنشاء خطة التطوير',
-      });
+      safeError(res, error, 'Create development plan error');
     }
   }
 );
@@ -409,11 +389,7 @@ router.put('/development-plan/:planId/update', authMiddleware, adminOnly, async 
       data: plan,
     });
   } catch (error) {
-    logger.error('Update development plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في تحديث خطة التطوير',
-    });
+    safeError(res, error, 'Update development plan error');
   }
 });
 
@@ -447,11 +423,7 @@ router.put(
         data: plan,
       });
     } catch (error) {
-      logger.error('Goal status update error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في تحديث حالة الهدف',
-      });
+      safeError(res, error, 'Goal status update error');
     }
   }
 );
@@ -487,11 +459,7 @@ router.post('/:planId/add-leadership-program', authMiddleware, adminOnly, async 
       data: plan,
     });
   } catch (error) {
-    logger.error('Leadership program error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إضافة برنامج الإعداد',
-    });
+    safeError(res, error, 'Leadership program error');
   }
 });
 
@@ -523,11 +491,7 @@ router.post('/:planId/add-mentorship/:successorId', authMiddleware, adminOnly, a
       data: plan,
     });
   } catch (error) {
-    logger.error('Mentorship program error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إضافة برنامج التوجيه',
-    });
+    safeError(res, error, 'Mentorship program error');
   }
 });
 
@@ -551,11 +515,7 @@ router.get('/development-plan/:planId', authMiddleware, async (req, res) => {
       data: plan,
     });
   } catch (error) {
-    logger.error('Get development plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في الحصول على خطة التطوير',
-    });
+    safeError(res, error, 'Get development plan error');
   }
 });
 
@@ -572,11 +532,7 @@ router.get('/position/:positionId/plans', authMiddleware, async (req, res) => {
       data: plans,
     });
   } catch (error) {
-    logger.error('Position plans error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في الحصول على خطط التعاقب',
-    });
+    safeError(res, error, 'Position plans error');
   }
 });
 
@@ -601,11 +557,7 @@ router.get('/reports/best-candidates', authMiddleware, async (req, res) => {
       data: candidates,
     });
   } catch (error) {
-    logger.error('Best candidates report error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إنشاء التقرير',
-    });
+    safeError(res, error, 'Best candidates report error');
   }
 });
 
@@ -678,11 +630,7 @@ router.get('/reports/risk-assessment', authMiddleware, async (req, res) => {
       data: riskAssessment,
     });
   } catch (error) {
-    logger.error('Risk assessment error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في تقييم المخاطر',
-    });
+    safeError(res, error, 'Risk assessment error');
   }
 });
 
@@ -707,11 +655,7 @@ router.get('/:planId', authMiddleware, async (req, res) => {
       data: plan,
     });
   } catch (error) {
-    logger.error('Get succession plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في الحصول على خطة التعاقب',
-    });
+    safeError(res, error, 'Get succession plan error');
   }
 });
 
@@ -729,11 +673,7 @@ router.delete('/:planId', authMiddleware, adminOnly, async (req, res) => {
       message: 'تم حذف خطة التعاقب بنجاح',
     });
   } catch (error) {
-    logger.error('Delete succession plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في حذف خطة التعاقب',
-    });
+    safeError(res, error, 'Delete succession plan error');
   }
 });
 
@@ -751,11 +691,7 @@ router.delete('/development-plan/:planId', authMiddleware, adminOnly, async (req
       message: 'تم حذف خطة التطوير بنجاح',
     });
   } catch (error) {
-    logger.error('Delete development plan error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في حذف خطة التطوير',
-    });
+    safeError(res, error, 'Delete development plan error');
   }
 });
 

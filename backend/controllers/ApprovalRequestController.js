@@ -2,6 +2,7 @@
 // ApprovalRequestController.js
 const ApprovalRequest = require('../models/ApprovalRequest');
 const NotificationService = require('../services/notificationService');
+const safeError = require('../utils/safeError');
 // ...existing code...
 
 const ApprovalRequestController = {
@@ -29,7 +30,7 @@ const ApprovalRequestController = {
       });
       res.json({ success: true, approval });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 
@@ -41,7 +42,7 @@ const ApprovalRequestController = {
       });
       res.json({ success: true, approvals });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 
@@ -55,7 +56,7 @@ const ApprovalRequestController = {
       });
       res.json({ success: true, approvals });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 
@@ -66,7 +67,7 @@ const ApprovalRequestController = {
       if (!approval) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
       res.json({ success: true, approval });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 
@@ -77,7 +78,7 @@ const ApprovalRequestController = {
       if (!approval) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
       res.json({ success: true, message: 'تم حذف طلب الموافقة بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 
@@ -126,7 +127,7 @@ const ApprovalRequestController = {
       }
       res.json({ success: true, approval });
     } catch (err) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, err, 'ApprovalRequestController');
     }
   },
 };

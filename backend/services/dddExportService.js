@@ -15,6 +15,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // ── Domain column definitions (Arabic + English headers) ────────────────
 
@@ -393,8 +394,7 @@ function createExportRouter() {
       res.setHeader('Content-Disposition', `attachment; filename="${model}_export.csv"`);
       return res.send(csv);
     } catch (err) {
-      logger.error(`[DDD-Export] Error: ${err.message}`);
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddExportService');
     }
   });
 

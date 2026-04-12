@@ -28,6 +28,7 @@ try {
 } catch {
   // إنشاء نماذج مبسطة إذا لم تكن موجودة
   const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 
   const globalSettingSchema = new mongoose.Schema(
     {
@@ -163,8 +164,7 @@ router.get('/public', async (req, res) => {
 
     return res.json({ success: true, settings: result });
   } catch (err) {
-    logger.error('[CentralSettings] public error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] public error');
   }
 });
 
@@ -203,8 +203,7 @@ router.get('/', requireAdmin, async (req, res) => {
 
     return res.json({ success: true, groups, branchId: branchId || null });
   } catch (err) {
-    logger.error('[CentralSettings] all groups error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] all groups error');
   }
 });
 
@@ -238,8 +237,7 @@ router.get('/group/:group', requireAdmin, async (req, res) => {
 
     return res.json({ success: true, group, settings: result });
   } catch (err) {
-    logger.error('[CentralSettings] group error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] group error');
   }
 });
 
@@ -293,8 +291,7 @@ router.put('/', requireAdmin, async (req, res) => {
       updated,
     });
   } catch (err) {
-    logger.error('[CentralSettings] update error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] update error');
   }
 });
 
@@ -315,8 +312,7 @@ router.get('/branch/:branchId', requireAdmin, async (req, res) => {
       total: overrides.length,
     });
   } catch (err) {
-    logger.error('[CentralSettings] branch settings error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] branch settings error');
   }
 });
 
@@ -349,8 +345,7 @@ router.put('/branch/:branchId', requireAdmin, async (req, res) => {
       updated,
     });
   } catch (err) {
-    logger.error('[CentralSettings] update branch error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] update branch error');
   }
 });
 
@@ -381,8 +376,7 @@ router.post('/reset-branch', requireAdmin, async (req, res) => {
       message: 'تم إعادة الإعداد للقيمة الافتراضية',
     });
   } catch (err) {
-    logger.error('[CentralSettings] reset branch error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] reset branch error');
   }
 });
 
@@ -435,8 +429,7 @@ router.post('/upload', requireAdmin, async (req, res) => {
       url: fileUrl,
     });
   } catch (err) {
-    logger.error('[CentralSettings] upload error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] upload error');
   }
 });
 
@@ -796,8 +789,7 @@ router.post('/seed', requireAdmin, async (req, res) => {
       skipped,
     });
   } catch (err) {
-    logger.error('[CentralSettings] seed error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] seed error');
   }
 });
 
@@ -834,8 +826,7 @@ router.get('/key/:key', requireAdmin, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[CentralSettings] get key error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[CentralSettings] get key error');
   }
 });
 

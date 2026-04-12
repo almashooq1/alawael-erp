@@ -6,6 +6,7 @@
 const incidentService = require('../services/incidentService');
 const { validationResult } = require('express-validator');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class IncidentController {
   // 1. إنشاء حادثة
@@ -24,11 +25,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in createIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in createIncident');
     }
   }
 
@@ -64,11 +61,7 @@ class IncidentController {
         pagination: result.pagination,
       });
     } catch (error) {
-      logger.error('Error in getAllIncidents', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getAllIncidents');
     }
   }
 
@@ -106,11 +99,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in updateIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateIncident');
     }
   }
 
@@ -124,11 +113,7 @@ class IncidentController {
         message: result.message,
       });
     } catch (error) {
-      logger.error('Error in deleteIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in deleteIncident');
     }
   }
 
@@ -154,11 +139,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in updateStatus', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateStatus');
     }
   }
 
@@ -184,11 +165,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in assignIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in assignIncident');
     }
   }
 
@@ -208,11 +185,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in addResponder', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addResponder');
     }
   }
 
@@ -236,11 +209,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in escalateIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in escalateIncident');
     }
   }
 
@@ -260,11 +229,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in addComment', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addComment');
     }
   }
 
@@ -299,11 +264,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in addAttachment', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addAttachment');
     }
   }
 
@@ -323,11 +284,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in resolveIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in resolveIncident');
     }
   }
 
@@ -347,11 +304,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in closeIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in closeIncident');
     }
   }
 
@@ -365,11 +318,7 @@ class IncidentController {
         data: report,
       });
     } catch (error) {
-      logger.error('Error in generateReport', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in generateReport');
     }
   }
 
@@ -396,11 +345,7 @@ class IncidentController {
         data: statistics,
       });
     } catch (error) {
-      logger.error('Error in getStatistics', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getStatistics');
     }
   }
 
@@ -442,11 +387,7 @@ class IncidentController {
         pagination: result.pagination,
       });
     } catch (error) {
-      logger.error('Error in searchIncidents', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in searchIncidents');
     }
   }
 
@@ -461,11 +402,7 @@ class IncidentController {
         data: incident,
       });
     } catch (error) {
-      logger.error('Error in archiveIncident', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in archiveIncident');
     }
   }
 
@@ -482,11 +419,7 @@ class IncidentController {
         data: incidents,
       });
     } catch (error) {
-      logger.error('Error in getRelatedIncidents', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getRelatedIncidents');
     }
   }
 
@@ -507,11 +440,7 @@ class IncidentController {
         count: result.pagination.total,
       });
     } catch (error) {
-      logger.error('Error in getPendingIncidents', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getPendingIncidents');
     }
   }
 
@@ -526,11 +455,7 @@ class IncidentController {
         count: result.pagination.total,
       });
     } catch (error) {
-      logger.error('Error in getCriticalIncidents', { error: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getCriticalIncidents');
     }
   }
 }

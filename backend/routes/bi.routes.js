@@ -32,11 +32,11 @@ router.get('/executive', async (req, res) => {
     const data = {};
 
     // Beneficiary stats
-    const BeneficiaryFile = safeModel('BeneficiaryFile');
-    if (BeneficiaryFile) {
+    const Beneficiary = safeModel('Beneficiary');
+    if (Beneficiary) {
       const [total, active] = await Promise.all([
-        BeneficiaryFile.countDocuments(),
-        BeneficiaryFile.countDocuments({ status: { $in: ['active', 'ACTIVE'] } }),
+        Beneficiary.countDocuments(),
+        Beneficiary.countDocuments({ status: { $in: ['active', 'ACTIVE'] } }),
       ]);
       data.beneficiaries = {
         total,
@@ -89,8 +89,7 @@ router.get('/executive', async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    logger.error('[BI] Executive dashboard error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[BI] Executive dashboard error');
   }
 });
 
@@ -142,7 +141,7 @@ router.get('/kpis', async (req, res) => {
 
     res.json({ success: true, data: kpis });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'bi');
   }
 });
 
@@ -209,7 +208,7 @@ router.get('/trends', async (req, res) => {
 
     res.json({ success: true, data: { metric, period: days, trends: trendData } });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'bi');
   }
 });
 
@@ -220,7 +219,7 @@ router.get('/trends', async (req, res) => {
 router.get('/modules', async (req, res) => {
   try {
     const modules = [
-      'BeneficiaryFile',
+      'Beneficiary',
       'User',
       'TherapySession',
       'Attendance',
@@ -251,7 +250,7 @@ router.get('/modules', async (req, res) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'bi');
   }
 });
 
@@ -321,7 +320,7 @@ router.get('/reports/summary', async (req, res) => {
 
     res.json({ success: true, data: summary });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'bi');
   }
 });
 

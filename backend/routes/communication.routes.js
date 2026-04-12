@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // Apply authentication to all routes
@@ -58,11 +59,7 @@ router.post('/email', authorize(['admin', 'system_admin']), async (req, res) => 
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إرسال البريد الإلكتروني',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'communication');
   }
 });
 
@@ -92,11 +89,7 @@ router.post('/sms', authorize(['admin', 'system_admin']), async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إرسال الرسالة القصيرة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'communication');
   }
 });
 
@@ -126,11 +119,7 @@ router.post('/whatsapp', authorize(['admin', 'system_admin']), async (req, res) 
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إرسال رسالة الواتساب',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'communication');
   }
 });
 
@@ -160,11 +149,7 @@ router.post('/notifications', authorize(['admin', 'system_admin']), async (req, 
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إرسال الإشعار',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'communication');
   }
 });
 

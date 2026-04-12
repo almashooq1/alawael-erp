@@ -11,6 +11,7 @@ const { authenticate } = require('../middleware/auth');
 const QualityIndicator = require('../models/quality/QualityIndicator');
 const QualityMeasurement = require('../models/quality/QualityMeasurement');
 const IncidentReport = require('../models/quality/IncidentReport');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -46,7 +47,7 @@ router.get('/indicators', async (req, res) => {
     ]);
     res.json({ indicators, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -60,7 +61,7 @@ router.get('/indicators/:id', async (req, res) => {
     if (!indicator) return res.status(404).json({ error: 'المؤشر غير موجود' });
     res.json({ indicator });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -101,7 +102,7 @@ router.delete('/indicators/:id', async (req, res) => {
     if (!indicator) return res.status(404).json({ error: 'المؤشر غير موجود' });
     res.json({ message: 'تم حذف المؤشر' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -150,7 +151,7 @@ router.get('/measurements', async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -170,7 +171,7 @@ router.get('/measurements/:id', async (req, res) => {
     if (!measurement) return res.status(404).json({ error: 'القياس غير موجود' });
     res.json({ measurement });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -242,7 +243,7 @@ router.post('/measurements/:id/verify', async (req, res) => {
       return res.status(404).json({ error: 'القياس غير موجود أو تم التحقق منه مسبقاً' });
     res.json({ measurement, message: 'تم التحقق من القياس' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -257,7 +258,7 @@ router.delete('/measurements/:id', async (req, res) => {
     if (!measurement) return res.status(404).json({ error: 'القياس غير موجود' });
     res.json({ message: 'تم حذف القياس' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -280,7 +281,7 @@ router.get('/measurements/indicator/:indicatorId/trend', async (req, res) => {
 
     res.json({ measurements, count: measurements.length });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -324,7 +325,7 @@ router.get('/incidents', async (req, res) => {
     ]);
     res.json({ incidents, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -340,7 +341,7 @@ router.get('/incidents/:id', async (req, res) => {
     if (!incident) return res.status(404).json({ error: 'الحادثة غير موجودة' });
     res.json({ incident });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -391,7 +392,7 @@ router.post('/incidents/:id/investigate', async (req, res) => {
     if (!incident) return res.status(404).json({ error: 'لا يمكن فتح تحقيق لهذه الحادثة' });
     res.json({ incident, message: 'تم فتح التحقيق' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -416,7 +417,7 @@ router.post('/incidents/:id/close', async (req, res) => {
     if (!incident) return res.status(404).json({ error: 'لا يمكن إغلاق هذه الحادثة' });
     res.json({ incident, message: 'تم إغلاق الحادثة' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -431,7 +432,7 @@ router.post('/incidents/:id/escalate', async (req, res) => {
     if (!incident) return res.status(404).json({ error: 'لا يمكن تصعيد هذه الحادثة' });
     res.json({ incident, message: 'تم تصعيد الحادثة للجهات المختصة' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -454,7 +455,7 @@ router.post('/incidents/:id/corrective-action/:actionId/complete', async (req, r
     await incident.save();
     res.json({ incident, message: 'تم إكمال الإجراء التصحيحي' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -469,7 +470,7 @@ router.delete('/incidents/:id', async (req, res) => {
     if (!incident) return res.status(404).json({ error: 'لا يمكن حذف هذه الحادثة' });
     res.json({ message: 'تم حذف الحادثة' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 
@@ -551,7 +552,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'quality-module');
   }
 });
 

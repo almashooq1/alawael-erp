@@ -6,6 +6,7 @@
 
 const { advancedPermissionService } = require('./permission-service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /**
  * Permission Middleware Factory
@@ -63,12 +64,7 @@ function requirePermission(permissionKey, options = {}) {
 
       next();
     } catch (error) {
-      logger.error('Permission middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-        message: 'خطأ في التحقق من الصلاحيات',
-      });
+      safeError(res, error, 'Permission middleware error');
     }
   };
 }
@@ -110,11 +106,7 @@ function requireRole(roleKey, options = {}) {
 
       next();
     } catch (error) {
-      logger.error('Role middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Role middleware error');
     }
   };
 }
@@ -162,11 +154,7 @@ function requireAnyPermission(permissionKeys, options = {}) {
         permissions: permissionKeys,
       });
     } catch (error) {
-      logger.error('Permission middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Permission middleware error');
     }
   };
 }
@@ -220,11 +208,7 @@ function requireAllPermissions(permissionKeys, options = {}) {
       req.permission = { keys: permissionKeys, checked: true, granted: true };
       next();
     } catch (error) {
-      logger.error('Permission middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Permission middleware error');
     }
   };
 }
@@ -325,11 +309,7 @@ function ownerOrAdmin(getOwnerId) {
         message: 'يجب أن تكون المالك أو مدير',
       });
     } catch (error) {
-      logger.error('Owner/Admin middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Owner/Admin middleware error');
     }
   };
 }
@@ -367,11 +347,7 @@ function requireLevel(minLevel, options = {}) {
 
       next();
     } catch (error) {
-      logger.error('Level middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Level middleware error');
     }
   };
 }
@@ -424,11 +400,7 @@ function dynamicPermission(options = {}) {
       req.permission = { key: permissionKey, checked: true, granted: true };
       next();
     } catch (error) {
-      logger.error('Dynamic permission middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Dynamic permission middleware error');
     }
   };
 }
@@ -462,11 +434,7 @@ function conditionalPermission(condition, permissionIfTrue, permissionIfFalse = 
 
       return requirePermission(permissionKey)(req, res, next);
     } catch (error) {
-      logger.error('Conditional permission middleware error:', error);
-      return res.status(500).json({
-        success: false,
-        error: 'Internal Server Error',
-      });
+      safeError(res, error, 'Conditional permission middleware error');
     }
   };
 }

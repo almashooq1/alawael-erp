@@ -14,7 +14,7 @@ const {
   Report,
   MontessoriProgram,
 } = require('../models/montessori');
-const { authenticateToken, authorizeRoles } = require('../middleware/montessoriAuth');
+const { authenticateToken, requireRole: authorizeRoles } = require('../middleware/auth');
 
 // Async error safety wrapper — catches unhandled promise rejections in route handlers
 const wrapAsync = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

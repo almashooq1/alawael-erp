@@ -16,6 +16,7 @@ const {
 const authMiddleware = require('../middleware/auth');
 const { checkPermission } = require('../permissions/permission-middleware');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 const hrService = new SaudiHRService();
 
@@ -65,7 +66,7 @@ router.get('/employees', authMiddleware, checkPermission('hr.view'), async (req,
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -87,7 +88,7 @@ router.get('/employees/:id', authMiddleware, checkPermission('hr.view'), async (
 
     res.json({ success: true, data: employee });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -183,7 +184,7 @@ router.delete('/employees/:id', authMiddleware, checkPermission('hr.delete'), as
 
     res.json({ success: true, message: 'تم إنهاء خدمة الموظف' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -229,7 +230,7 @@ router.get(
       const deduction = hrService.calculateGOSIDeduction(employee);
       res.json({ success: true, data: deduction });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -252,7 +253,7 @@ router.get(
       const data = await hrService.calculateSaudization(req.params.departmentId);
       res.json({ success: true, data });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -272,7 +273,7 @@ router.get(
       const requirements = hrService.getNitaqatRequirements(activityType, totalEmployees);
       res.json({ success: true, data: requirements });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -291,7 +292,7 @@ router.get('/leave-entitlements', authMiddleware, async (req, res) => {
     const entitlements = hrService.getSaudiLeaveEntitlements();
     res.json({ success: true, data: entitlements });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -328,7 +329,7 @@ router.get('/leave-requests', authMiddleware, checkPermission('hr.view'), async 
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -399,7 +400,7 @@ router.put(
 
       res.json({ success: true, data: leaveRequest, message: 'تم رفض الإجازة' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -453,7 +454,7 @@ router.get('/attendance/report', authMiddleware, checkPermission('hr.view'), asy
     const report = await hrService.getAttendanceReport(startDate, endDate, department);
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 
@@ -496,7 +497,7 @@ router.post(
       const results = await hrService.processMonthlyPayroll(month, year, departmentId);
       res.json({ success: true, data: results, message: 'تم معالجة الرواتب' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -516,7 +517,7 @@ router.get(
       const wpsFile = await hrService.generateWPSFile(parseInt(month), parseInt(year));
       res.json({ success: true, data: wpsFile });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -545,7 +546,7 @@ router.get(
 
       res.json({ success: true, data: payroll });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'saudi-hr');
     }
   }
 );
@@ -564,7 +565,7 @@ router.get('/statistics', authMiddleware, checkPermission('hr.view'), async (req
     const stats = await hrService.getEmployeeStatistics();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-hr');
   }
 });
 

@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { WebhookService } = require('../services/webhookService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const webhookService = new WebhookService();
@@ -36,11 +37,7 @@ router.get(
         data: webhooks,
       });
     } catch (error) {
-      logger.error('Error fetching webhooks:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch webhooks',
-      });
+      safeError(res, error, 'fetching webhooks');
     }
   }
 );
@@ -93,11 +90,7 @@ router.post(
         data: webhook,
       });
     } catch (error) {
-      logger.error('Error registering webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to register webhook',
-      });
+      safeError(res, error, 'registering webhook');
     }
   }
 );
@@ -127,11 +120,7 @@ router.get(
         data: webhook,
       });
     } catch (error) {
-      logger.error('Error fetching webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch webhook',
-      });
+      safeError(res, error, 'fetching webhook');
     }
   }
 );
@@ -161,11 +150,7 @@ router.put(
         data: webhook,
       });
     } catch (error) {
-      logger.error('Error updating webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to update webhook',
-      });
+      safeError(res, error, 'updating webhook');
     }
   }
 );
@@ -195,11 +180,7 @@ router.delete(
         message: 'Webhook deleted successfully',
       });
     } catch (error) {
-      logger.error('Error deleting webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to delete webhook',
-      });
+      safeError(res, error, 'deleting webhook');
     }
   }
 );
@@ -235,11 +216,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('Error triggering webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to trigger webhook',
-      });
+      safeError(res, error, 'triggering webhook');
     }
   }
 );
@@ -271,11 +248,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('Error testing webhook:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to test webhook',
-      });
+      safeError(res, error, 'testing webhook');
     }
   }
 );
@@ -306,23 +279,13 @@ router.get(
         data: deliveries,
       });
     } catch (error) {
-      logger.error('Error fetching deliveries:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch deliveries',
-      });
+      safeError(res, error, 'fetching deliveries');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

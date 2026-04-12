@@ -19,8 +19,7 @@ router.get('/incentives', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Compensation incentives error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحوافز' });
+    safeError(res, err, 'Compensation incentives error');
   }
 });
 
@@ -47,6 +46,7 @@ function pickFields(src, allowedFields) {
 router.post('/incentives', authorize(['admin', 'manager']), async (req, res) => {
   try {
     const { IndividualIncentive } = require('../models/compensation.model');
+const safeError = require('../utils/safeError');
     const fields = pickFields(req.body, INCENTIVE_FIELDS);
     if (fields.amount !== undefined) {
       const amt = Number(fields.amount);
@@ -61,8 +61,7 @@ router.post('/incentives', authorize(['admin', 'manager']), async (req, res) => 
     });
     res.status(201).json({ success: true, data: incentive, message: 'تم إنشاء الحافز' });
   } catch (err) {
-    logger.error('Compensation create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحافز' });
+    safeError(res, err, 'Compensation create error');
   }
 });
 
@@ -78,8 +77,7 @@ router.put('/incentives/:id/approve', authorize(['admin', 'manager']), async (re
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم اعتماد الحافز' });
   } catch (err) {
-    logger.error('Compensation approve error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الحافز' });
+    safeError(res, err, 'Compensation approve error');
   }
 });
 
@@ -95,8 +93,7 @@ router.put('/incentives/:id/mark-paid', authorize(['admin']), async (req, res) =
     if (!item) return res.status(404).json({ success: false, message: 'الحافز غير موجود' });
     res.json({ success: true, data: item, message: 'تم صرف الحافز' });
   } catch (err) {
-    logger.error('Compensation mark-paid error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في صرف الحافز' });
+    safeError(res, err, 'Compensation mark-paid error');
   }
 });
 

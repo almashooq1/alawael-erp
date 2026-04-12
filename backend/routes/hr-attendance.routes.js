@@ -155,7 +155,7 @@ router.get(
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: safeErrorMessage(error) });
+      safeError(res, error, 'hr-attendance');
     }
   }
 );
@@ -172,7 +172,7 @@ router.get(
       const result = await AttendanceEngine.getQuickStats();
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: safeErrorMessage(error) });
+      safeError(res, error, 'hr-attendance');
     }
   }
 );
@@ -288,7 +288,7 @@ router.get(
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: safeErrorMessage(error) });
+      safeError(res, error, 'hr-attendance');
     }
   }
 );
@@ -380,7 +380,7 @@ router.get(
 
       res.json({ success: true, data: result });
     } catch (error) {
-      res.status(500).json({ success: false, message: safeErrorMessage(error) });
+      safeError(res, error, 'hr-attendance');
     }
   }
 );
@@ -398,7 +398,7 @@ router.get('/shifts', async (req, res) => {
     const shifts = await AttendanceEngine.getShifts();
     res.json({ success: true, data: shifts, count: shifts.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: safeErrorMessage(error) });
+    safeError(res, error, 'hr-attendance');
   }
 });
 

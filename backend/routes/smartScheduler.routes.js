@@ -10,6 +10,7 @@ const SmartScheduler = require('../models/smartScheduler');
 const TherapySession = require('../models/TherapySession');
 const appointmentService = require('../services/appointment.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -46,8 +47,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة الجداول الذكية',
     });
   } catch (error) {
-    logger.error('Error fetching smart schedules:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجداول' });
+    safeError(res, error, 'fetching smart schedules');
   }
 });
 
@@ -66,8 +66,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ success: true, data: scheduler, message: 'بيانات الجدول' });
   } catch (error) {
-    logger.error('Error fetching schedule:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجدول' });
+    safeError(res, error, 'fetching schedule');
   }
 });
 
@@ -199,8 +198,7 @@ router.post('/', async (req, res) => {
       message: 'تم إنشاء الجدول بنجاح',
     });
   } catch (error) {
-    logger.error('Error creating schedule:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الجدول' });
+    safeError(res, error, 'creating schedule');
   }
 });
 
@@ -228,8 +226,7 @@ router.post('/:id/generate-suggestions', async (req, res) => {
       message: 'تم توليد المقترحات بنجاح',
     });
   } catch (error) {
-    logger.error('Error generating suggestions:', error);
-    res.status(500).json({ success: false, message: 'فشل في توليد المقترحات' });
+    safeError(res, error, 'generating suggestions');
   }
 });
 
@@ -280,8 +277,7 @@ router.get('/:id/conflicts', async (req, res) => {
       message: 'تم الكشف عن التعارضات',
     });
   } catch (error) {
-    logger.error('Error detecting conflicts:', error);
-    res.status(500).json({ success: false, message: 'فشل في الكشف عن التعارضات' });
+    safeError(res, error, 'detecting conflicts');
   }
 });
 
@@ -315,8 +311,7 @@ router.post('/:id/approve', authorize(['admin', 'manager']), async (req, res) =>
     await scheduler.save();
     res.json({ success: true, data: scheduler, message: 'تم تسجيل الموافقة' });
   } catch (error) {
-    logger.error('Error approving schedule:', error);
-    res.status(500).json({ success: false, message: 'فشل في تسجيل الموافقة' });
+    safeError(res, error, 'approving schedule');
   }
 });
 
@@ -365,8 +360,7 @@ router.post('/:id/activate', authorize(['admin', 'manager']), async (req, res) =
       message: `تم تفعيل الجدولة وإنشاء ${created.length} جلسة`,
     });
   } catch (error) {
-    logger.error('Error activating schedule:', error);
-    res.status(500).json({ success: false, message: 'فشل في تفعيل الجدولة' });
+    safeError(res, error, 'activating schedule');
   }
 });
 
@@ -384,8 +378,7 @@ router.put('/:id', async (req, res) => {
     }
     res.json({ success: true, data: scheduler, message: 'تم تحديث الجدول بنجاح' });
   } catch (error) {
-    logger.error('Error updating schedule:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الجدول' });
+    safeError(res, error, 'updating schedule');
   }
 });
 
@@ -399,8 +392,7 @@ router.delete('/:id', authorize(['admin', 'manager']), async (req, res) => {
     }
     res.json({ success: true, message: 'تم حذف الجدول بنجاح' });
   } catch (error) {
-    logger.error('Error deleting schedule:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الجدول' });
+    safeError(res, error, 'deleting schedule');
   }
 });
 
@@ -419,8 +411,7 @@ router.get('/available-slots/:therapistId', async (req, res) => {
     );
     res.json({ success: true, data: slots });
   } catch (error) {
-    logger.error('Error getting available slots:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأوقات المتاحة' });
+    safeError(res, error, 'getting available slots');
   }
 });
 

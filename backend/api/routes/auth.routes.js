@@ -33,6 +33,7 @@ try {
 let emailManager;
 try {
   const { emailManager: em } = require('../../services/email');
+const safeError = require('../../utils/safeError');
   emailManager = em;
 } catch {
   emailManager = null;
@@ -131,11 +132,7 @@ router.post('/register', createAccountLimiter, validateRegistration, async (req,
       },
     });
   } catch (error) {
-    logger.error('Registration error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Registration failed',
-    });
+    safeError(res, error, 'Registration error');
   }
 });
 
@@ -304,11 +301,7 @@ router.post('/login', authLimiter, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('❌ Login error:', error.message);
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, '❌ Login error');
   }
 });
 
@@ -390,12 +383,7 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    logger.error('Token refresh error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Token refresh failed',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
+    safeError(res, error, 'Token refresh error');
   }
 });
 
@@ -462,11 +450,7 @@ const getProfileHandler = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Get profile error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get profile',
-    });
+    safeError(res, error, 'Get profile error');
   }
 };
 router.get('/me', authenticateToken, getProfileHandler);
@@ -522,11 +506,7 @@ router.put('/profile', authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Update profile error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to update profile',
-    });
+    safeError(res, error, 'Update profile error');
   }
 });
 
@@ -629,11 +609,7 @@ router.post(
         },
       });
     } catch (error) {
-      logger.error('Change password error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to change password',
-      });
+      safeError(res, error, 'Change password error');
     }
   }
 );
@@ -690,8 +666,7 @@ router.post('/forgot-password', passwordLimiter, async (req, res) => {
 
     return res.json({ success: true, message: genericMsg });
   } catch (error) {
-    logger.error('Forgot password error:', error.message);
-    return res.status(500).json({ success: false, message: 'Internal error' });
+    safeError(res, error, 'Forgot password error');
   }
 });
 
@@ -768,8 +743,7 @@ router.post('/reset-password', passwordLimiter, async (req, res) => {
 
     return res.json({ success: true, message: 'Password reset successful. Please log in.' });
   } catch (error) {
-    logger.error('Reset password error:', error.message);
-    return res.status(500).json({ success: false, message: 'Internal error' });
+    safeError(res, error, 'Reset password error');
   }
 });
 
@@ -796,8 +770,7 @@ router.get('/sessions', authenticateToken, async (req, res) => {
       })),
     });
   } catch (error) {
-    logger.error('List sessions error:', error.message);
-    return res.status(500).json({ success: false, message: 'Failed to list sessions' });
+    safeError(res, error, 'List sessions error');
   }
 });
 
@@ -827,8 +800,7 @@ router.delete('/sessions/:id', authenticateToken, async (req, res) => {
     });
     return res.json({ success: true, message: 'Session revoked' });
   } catch (error) {
-    logger.error('Revoke session error:', error.message);
-    return res.status(500).json({ success: false, message: 'Failed to revoke session' });
+    safeError(res, error, 'Revoke session error');
   }
 });
 

@@ -28,8 +28,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Campaigns list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحملات' });
+    safeError(res, err, 'Campaigns list error');
   }
 });
 
@@ -41,8 +40,7 @@ router.get('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Campaign get error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحملة' });
+    safeError(res, err, 'Campaign get error');
   }
 });
 
@@ -50,11 +48,11 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
+const safeError = require('../utils/safeError');
     const data = await Campaign.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data, message: 'تم إنشاء الحملة بنجاح' });
   } catch (err) {
-    logger.error('Campaign create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحملة' });
+    safeError(res, err, 'Campaign create error');
   }
 });
 
@@ -66,8 +64,7 @@ router.put('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data, message: 'تم تحديث الحملة بنجاح' });
   } catch (err) {
-    logger.error('Campaign update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الحملة' });
+    safeError(res, err, 'Campaign update error');
   }
 });
 
@@ -78,8 +75,7 @@ router.delete('/:id', async (req, res) => {
     await Campaign.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف الحملة بنجاح' });
   } catch (err) {
-    logger.error('Campaign delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الحملة' });
+    safeError(res, err, 'Campaign delete error');
   }
 });
 

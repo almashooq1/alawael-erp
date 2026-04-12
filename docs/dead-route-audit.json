@@ -1,0 +1,835 @@
+{
+  "timestamp": "2026-04-09T21:53:15.908Z",
+  "summary": {
+    "totalRouteFiles": 542,
+    "liveRoutes": 450,
+    "deadRoutes": 92,
+    "deadDDD": 0,
+    "deadNonDDD": 92,
+    "totalDeadLines": 33063,
+    "trulyDeadLines": 33063
+  },
+  "deadNonDDD": [
+    {
+      "file": "finance.routes.advanced.js",
+      "lines": 2968
+    },
+    {
+      "file": "finance.routes.elite.js",
+      "lines": 1336
+    },
+    {
+      "file": "finance.routes.extended.js",
+      "lines": 1336
+    },
+    {
+      "file": "elearning.js",
+      "lines": 1242
+    },
+    {
+      "file": "finance.routes.pro.js",
+      "lines": 1211
+    },
+    {
+      "file": "finance.routes.enterprise.js",
+      "lines": 1161
+    },
+    {
+      "file": "finance.routes.ultimate.js",
+      "lines": 1123
+    },
+    {
+      "file": "database-admin.routes.js",
+      "lines": 1094
+    },
+    {
+      "file": "inventory.routes.unified.js",
+      "lines": 1013
+    },
+    {
+      "file": "purchasing.routes.unified.js",
+      "lines": 934
+    },
+    {
+      "file": "equipment.js",
+      "lines": 803
+    },
+    {
+      "file": "beneficiaryPortal.js",
+      "lines": 764
+    },
+    {
+      "file": "assessment-scales.routes.js",
+      "lines": 676
+    },
+    {
+      "file": "disabilityCard.routes.js",
+      "lines": 625
+    },
+    {
+      "file": "executive-dashboard-enhanced.js",
+      "lines": 574
+    },
+    {
+      "file": "employeeAffairs.phase3.routes.js",
+      "lines": 557
+    },
+    {
+      "file": "studentElearning.routes.js",
+      "lines": 552
+    },
+    {
+      "file": "dashboard.routes.unified.js",
+      "lines": 517
+    },
+    {
+      "file": "rehabProgramTemplates.routes.js",
+      "lines": 487
+    },
+    {
+      "file": "employeeAffairs.expanded.routes.js",
+      "lines": 475
+    },
+    {
+      "file": "employeeAffairs.phase2.routes.js",
+      "lines": 456
+    },
+    {
+      "file": "cms.js",
+      "lines": 442
+    },
+    {
+      "file": "specializedScales.routes.js",
+      "lines": 435
+    },
+    {
+      "file": "studentRewardsStore.routes.js",
+      "lines": 432
+    },
+    {
+      "file": "hr/smart.routes.js",
+      "lines": 427
+    },
+    {
+      "file": "studentEvents.routes.js",
+      "lines": 427
+    },
+    {
+      "file": "hr.routes.unified.js",
+      "lines": 425
+    },
+    {
+      "file": "executive-dashboard.js",
+      "lines": 403
+    },
+    {
+      "file": "studentHealthTracker.routes.js",
+      "lines": 399
+    },
+    {
+      "file": "licenses.js",
+      "lines": 397
+    },
+    {
+      "file": "advancedSessions.js",
+      "lines": 388
+    },
+    {
+      "file": "employeeProfile.js",
+      "lines": 379
+    },
+    {
+      "file": "maintenance.js",
+      "lines": 342
+    },
+    {
+      "file": "therapy-sessions-analytics.routes.js",
+      "lines": 339
+    },
+    {
+      "file": "payment-transactions.routes.js",
+      "lines": 336
+    },
+    {
+      "file": "studentCertificates.routes.js",
+      "lines": 335
+    },
+    {
+      "file": "specializedPrograms.js",
+      "lines": 313
+    },
+    {
+      "file": "hr/performanceEvaluation.routes.js",
+      "lines": 289
+    },
+    {
+      "file": "domain-map.js",
+      "lines": 278
+    },
+    {
+      "file": "compensation-benefits.routes.js",
+      "lines": 270
+    },
+    {
+      "file": "studentComplaints.routes.js",
+      "lines": 258
+    },
+    {
+      "file": "trafficAccidents.js",
+      "lines": 253
+    },
+    {
+      "file": "orgBranding.js",
+      "lines": 247
+    },
+    {
+      "file": "trips.js",
+      "lines": 222
+    },
+    {
+      "file": "integrations/integration-manager.js",
+      "lines": 209
+    },
+    {
+      "file": "search.js",
+      "lines": 205
+    },
+    {
+      "file": "transportRoutes.js",
+      "lines": 186
+    },
+    {
+      "file": "dashboards.js",
+      "lines": 159
+    },
+    {
+      "file": "driverShifts.js",
+      "lines": 157
+    },
+    {
+      "file": "vehicles.js",
+      "lines": 155
+    },
+    {
+      "file": "driverTraining.js",
+      "lines": 154
+    },
+    {
+      "file": "fleetSafety.js",
+      "lines": 152
+    },
+    {
+      "file": "integration.routes.minimal.js",
+      "lines": 143
+    },
+    {
+      "file": "trafficFines.js",
+      "lines": 137
+    },
+    {
+      "file": "fleetCommunications.js",
+      "lines": 133
+    },
+    {
+      "file": "fleetFuelCards.js",
+      "lines": 129
+    },
+    {
+      "file": "gps.js",
+      "lines": 123
+    },
+    {
+      "file": "mfa.js",
+      "lines": 123
+    },
+    {
+      "file": "support.js",
+      "lines": 121
+    },
+    {
+      "file": "carePlan.routes.js",
+      "lines": 119
+    },
+    {
+      "file": "driverLeaves.js",
+      "lines": 119
+    },
+    {
+      "file": "fleetDisposals.js",
+      "lines": 119
+    },
+    {
+      "file": "fleetInspections.js",
+      "lines": 119
+    },
+    {
+      "file": "fleetAlerts.js",
+      "lines": 116
+    },
+    {
+      "file": "fleetTires.js",
+      "lines": 116
+    },
+    {
+      "file": "fleetCompliance.js",
+      "lines": 112
+    },
+    {
+      "file": "fleetReservations.js",
+      "lines": 112
+    },
+    {
+      "file": "vehicleInsurance.js",
+      "lines": 112
+    },
+    {
+      "file": "fleetPenalties.js",
+      "lines": 111
+    },
+    {
+      "file": "fleetRoutePlans.js",
+      "lines": 107
+    },
+    {
+      "file": "vehicleAssignments.js",
+      "lines": 107
+    },
+    {
+      "file": "dispatch.js",
+      "lines": 102
+    },
+    {
+      "file": "fleetParking.js",
+      "lines": 102
+    },
+    {
+      "file": "fleetAccidents.js",
+      "lines": 100
+    },
+    {
+      "file": "fleetCosts.js",
+      "lines": 100
+    },
+    {
+      "file": "cargo.js",
+      "lines": 95
+    },
+    {
+      "file": "fleetDocuments.js",
+      "lines": 95
+    },
+    {
+      "file": "geofences.js",
+      "lines": 95
+    },
+    {
+      "file": "fleetTolls.js",
+      "lines": 93
+    },
+    {
+      "file": "fleetWarranties.js",
+      "lines": 93
+    },
+    {
+      "file": "fleetFuel.js",
+      "lines": 88
+    },
+    {
+      "file": "fleetParts.js",
+      "lines": 88
+    },
+    {
+      "file": "communityAwarenessRoutes.js",
+      "lines": 73
+    },
+    {
+      "file": "fleetKPI.js",
+      "lines": 67
+    },
+    {
+      "file": "hr/attendance.js",
+      "lines": 46
+    },
+    {
+      "file": "hr/performanceEvaluation.js",
+      "lines": 46
+    },
+    {
+      "file": "assessment.routes.js",
+      "lines": 42
+    },
+    {
+      "file": "montessoriAuth.js",
+      "lines": 33
+    },
+    {
+      "file": "hr/leave.js",
+      "lines": 31
+    },
+    {
+      "file": "ai-enhanced.routes.js",
+      "lines": 27
+    },
+    {
+      "file": "hr/employee.js",
+      "lines": 26
+    },
+    {
+      "file": "hr/payroll.js",
+      "lines": 26
+    }
+  ],
+  "deadDDD": [],
+  "liveRoutes": [
+    "academicYear.routes.js",
+    "account.real.routes.js",
+    "accounting-operations.routes.js",
+    "activities.routes.js",
+    "admin.real.routes.js",
+    "administration.routes.js",
+    "advancedAnalytics.routes.js",
+    "advancedSettings.routes.js",
+    "advancedTickets.routes.js",
+    "ai-analytics.routes.js",
+    "ai.recommendations.routes.js",
+    "aiCommunications.real.routes.js",
+    "aiDiagnostic.routes.js",
+    "aiNotifications.js",
+    "aiPredictions.real.routes.js",
+    "analytics.js",
+    "analyticsExtra.real.routes.js",
+    "apiKey.routes.js",
+    "appointments.routes.js",
+    "appointmentScheduling.routes.js",
+    "approvalRequests.js",
+    "approvalRequests.routes.js",
+    "ar-rehab.routes.js",
+    "asset-management.routes.js",
+    "assets.js",
+    "attendance.routes.js",
+    "audit-trail-enhanced.routes.js",
+    "automated-backup.routes.js",
+    "beneficiaries.js",
+    "beneficiary-management.routes.js",
+    "beneficiary-transfers.routes.js",
+    "bi-dashboard.routes.js",
+    "bi.routes.js",
+    "biometric-attendance.routes.js",
+    "blockchain.routes.js",
+    "branch-enhanced.routes.js",
+    "branch-integration.routes.js",
+    "branch.routes.js",
+    "branches.routes.js",
+    "budgetManagement.routes.js",
+    "busTracking.routes.js",
+    "cache-management.routes.js",
+    "campaigns.real.routes.js",
+    "caseManagement.js",
+    "cdss.routes.js",
+    "central-settings.routes.js",
+    "ceoDashboard.routes.js",
+    "chat.routes.js",
+    "civilDefense.routes.js",
+    "classrooms.routes.js",
+    "communication-module.routes.js",
+    "communication.routes.js",
+    "communications.real.routes.js",
+    "community-service.routes.js",
+    "community.js",
+    "communityIntegration.routes.js",
+    "compensation.real.routes.js",
+    "complaints-enhanced.routes.js",
+    "complaints.routes.js",
+    "compliance.routes.js",
+    "contract-management.routes.js",
+    "contracts.routes.js",
+    "conversations.routes.js",
+    "crisis.routes.js",
+    "crm-enhanced.routes.js",
+    "curriculum.routes.js",
+    "dashboard.js",
+    "dashboard.stats.js",
+    "dashboardExtras.real.routes.js",
+    "dashboardWidget.routes.js",
+    "database.routes.js",
+    "dateConverterRoutes.js",
+    "ddd-access-control.routes.js",
+    "ddd-accreditation-manager.routes.js",
+    "ddd-activity-feed.routes.js",
+    "ddd-advocacy-program.routes.js",
+    "ddd-analytics-dashboard.routes.js",
+    "ddd-announcement-manager.routes.js",
+    "ddd-api-gateway.routes.js",
+    "ddd-appointment-engine.routes.js",
+    "ddd-approval-chain.routes.js",
+    "ddd-archive-manager.routes.js",
+    "ddd-asset-tracker.routes.js",
+    "ddd-asset-tracking.routes.js",
+    "ddd-backup-manager.routes.js",
+    "ddd-billing-engine.routes.js",
+    "ddd-business-continuity.routes.js",
+    "ddd-business-intelligence.routes.js",
+    "ddd-capacity-planner.routes.js",
+    "ddd-career-pathway.routes.js",
+    "ddd-case-conference.routes.js",
+    "ddd-circuit-breaker.routes.js",
+    "ddd-claims-processor.routes.js",
+    "ddd-clinical-engine.routes.js",
+    "ddd-clinical-research.routes.js",
+    "ddd-clinical-trial.routes.js",
+    "ddd-clinical-trials.routes.js",
+    "ddd-collaboration-hub.routes.js",
+    "ddd-communication-log.routes.js",
+    "ddd-community-outreach.routes.js",
+    "ddd-community-program.routes.js",
+    "ddd-competency-tracker.routes.js",
+    "ddd-complaint-manager.routes.js",
+    "ddd-compliance-dashboard.routes.js",
+    "ddd-config-manager.routes.js",
+    "ddd-consent-manager.routes.js",
+    "ddd-continuous-education.routes.js",
+    "ddd-contract-manager.routes.js",
+    "ddd-credential-manager.routes.js",
+    "ddd-data-exchange.routes.js",
+    "ddd-data-migration.routes.js",
+    "ddd-data-quality-monitor.routes.js",
+    "ddd-data-warehouse.routes.js",
+    "ddd-dev-portal.routes.js",
+    "ddd-digital-signature.routes.js",
+    "ddd-disaster-recovery.routes.js",
+    "ddd-document-collaboration.routes.js",
+    "ddd-document-generator.routes.js",
+    "ddd-document-vault.routes.js",
+    "ddd-donation-manager.routes.js",
+    "ddd-donor-relations.routes.js",
+    "ddd-emergency-response.routes.js",
+    "ddd-encryption-service.routes.js",
+    "ddd-environmental-monitor.routes.js",
+    "ddd-environmental-monitoring.routes.js",
+    "ddd-equipment-lifecycle.routes.js",
+    "ddd-error-tracker.routes.js",
+    "ddd-evidence-library.routes.js",
+    "ddd-facility-manager.routes.js",
+    "ddd-feature-flags.routes.js",
+    "ddd-feedback-manager.routes.js",
+    "ddd-fhir-integration.routes.js",
+    "ddd-fleet-tracker.routes.js",
+    "ddd-form-builder.routes.js",
+    "ddd-h-l7-messaging.routes.js",
+    "ddd-health-education.routes.js",
+    "ddd-health-monitor.routes.js",
+    "ddd-incident-response.routes.js",
+    "ddd-incident-tracker.routes.js",
+    "ddd-inspection-tracker.routes.js",
+    "ddd-insurance-manager.routes.js",
+    "ddd-interoperability-gateway.routes.js",
+    "ddd-interoperability-hub.routes.js",
+    "ddd-inventory-manager.routes.js",
+    "ddd-knowledge-base.routes.js",
+    "ddd-learning-management.routes.js",
+    "ddd-leave-manager.routes.js",
+    "ddd-legal-case-tracker.routes.js",
+    "ddd-licensure-manager.routes.js",
+    "ddd-loader.js",
+    "ddd-localization-engine.routes.js",
+    "ddd-maintenance-tracker.routes.js",
+    "ddd-mentorship-program.routes.js",
+    "ddd-message-center.routes.js",
+    "ddd-metrics-collector.routes.js",
+    "ddd-notification-engine.routes.js",
+    "ddd-outcome-research.routes.js",
+    "ddd-outcome-tracker.routes.js",
+    "ddd-outreach-tracker.routes.js",
+    "ddd-patient-community.routes.js",
+    "ddd-patient-experience.routes.js",
+    "ddd-patient-portal.routes.js",
+    "ddd-patient-transport.routes.js",
+    "ddd-payment-gateway.routes.js",
+    "ddd-performance-evaluator.routes.js",
+    "ddd-policy-governance.routes.js",
+    "ddd-predictive-engine.routes.js",
+    "ddd-procurement-engine.routes.js",
+    "ddd-publication-manager.routes.js",
+    "ddd-publication-tracker.routes.js",
+    "ddd-record-manager.routes.js",
+    "ddd-regulatory-tracker.routes.js",
+    "ddd-remote-monitoring.routes.js",
+    "ddd-report-builder.routes.js",
+    "ddd-research-protocol.routes.js",
+    "ddd-resource-manager.routes.js",
+    "ddd-risk-stratification.routes.js",
+    "ddd-route-optimizer.routes.js",
+    "ddd-safety-manager.routes.js",
+    "ddd-satisfaction-tracker.routes.js",
+    "ddd-security-auditor.routes.js",
+    "ddd-session-manager.routes.js",
+    "ddd-shift-scheduler.routes.js",
+    "ddd-smart-scheduler.routes.js",
+    "ddd-space-allocator.routes.js",
+    "ddd-space-management.routes.js",
+    "ddd-staff-manager.routes.js",
+    "ddd-standards-compliance.routes.js",
+    "ddd-supply-chain-tracker.routes.js",
+    "ddd-system-failover.routes.js",
+    "ddd-task-queue.routes.js",
+    "ddd-tenant-manager.routes.js",
+    "ddd-transport-manager.routes.js",
+    "ddd-volunteer-management.routes.js",
+    "ddd-volunteer-manager.routes.js",
+    "ddd-warehouse-manager.routes.js",
+    "ddd-workflow-engine.routes.js",
+    "ddd-workforce-analytics.routes.js",
+    "digital-wallet.routes.js",
+    "disability-assessments.routes.js",
+    "disability-rehabilitation.js",
+    "disability-rehabilitation.routes.js",
+    "disability.real.routes.js",
+    "disabilityAuthority.routes.js",
+    "document-enhanced.routes.js",
+    "documentAdvanced.routes.js",
+    "documentsSmart.real.routes.js",
+    "donations.real.routes.js",
+    "donors.real.routes.js",
+    "drivers.js",
+    "early-intervention.routes.js",
+    "ecommerce.routes.js",
+    "eInvoicing.routes.js",
+    "elearning-enhanced.routes.js",
+    "email.routes.js",
+    "employeeAffairs.routes.js",
+    "employeePortal.routes.js",
+    "emr.routes.js",
+    "enterprise-risk.routes.js",
+    "enterprisePro.routes.js",
+    "enterpriseProPlus.routes.js",
+    "enterpriseUltra.routes.js",
+    "eSignature.routes.js",
+    "eSignaturePdf.routes.js",
+    "eStamp.routes.js",
+    "events-management.routes.js",
+    "exams.routes.js",
+    "exportImport.real.routes.js",
+    "exports.real.routes.js",
+    "facilities.routes.js",
+    "familySatisfaction.routes.js",
+    "fcm.js",
+    "feedback.routes.js",
+    "files-module.routes.js",
+    "finance-module.routes.js",
+    "finance.routes.js",
+    "finance.routes.unified.js",
+    "financeOperations.routes.js",
+    "formTemplates.routes.js",
+    "frontend-api-stubs.js",
+    "gamification-enhanced.routes.js",
+    "gamification.routes.js",
+    "goalBank.routes.js",
+    "goalProgress.routes.js",
+    "gosi-full.routes.js",
+    "gosi.routes.js",
+    "governmentIntegration.routes.js",
+    "gradebook.routes.js",
+    "gratuity.routes.js",
+    "groupPrograms.routes.js",
+    "groups.routes.js",
+    "guardian.portal.routes.js",
+    "guardians.routes.js",
+    "health.routes.js",
+    "helpdesk.routes.js",
+    "hr-advanced.routes.js",
+    "hr-attendance.routes.js",
+    "hr-insurance.routes.js",
+    "hr-module.routes.js",
+    "hr.routes.js",
+    "hrSystem.real.routes.js",
+    "hse.routes.js",
+    "icfAssessment.routes.js",
+    "importExportPro.routes.js",
+    "incidentRoutes.js",
+    "independentLiving.routes.js",
+    "insurance.routes.js",
+    "insuranceClaims.routes.js",
+    "integratedCare.real.routes.js",
+    "integrations/government-connector.js",
+    "integrations/insurance-connector.js",
+    "integrations/lab-connector.js",
+    "integrations.routes.js",
+    "internalAudit.js",
+    "inventory-enhanced.routes.js",
+    "inventory-module.routes.js",
+    "inventory.routes.js",
+    "iot-wearables.routes.js",
+    "iot.routes.js",
+    "kitchen.routes.js",
+    "knowledge.js",
+    "knowledgeCenter.routes.js",
+    "kpi-dashboard.routes.js",
+    "kpi-reports.routes.js",
+    "kpiDashboard.routes.js",
+    "laundry.routes.js",
+    "learning-development.routes.js",
+    "leave-requests.routes.js",
+    "legal-affairs.routes.js",
+    "library.routes.js",
+    "maintenanceInventory.routes.js",
+    "maintenanceIssues.routes.js",
+    "maintenancePredictions.routes.js",
+    "maintenanceProviders.routes.js",
+    "maintenanceTasks.routes.js",
+    "mdt-coordination.routes.js",
+    "measurements.routes.js",
+    "media.routes.js",
+    "medicalEquipment.routes.js",
+    "medicalFiles.js",
+    "medicalReferrals.routes.js",
+    "meetings.routes.js",
+    "messaging.routes.js",
+    "mhpss.routes.js",
+    "missing-models.routes.js",
+    "ml.routes.js",
+    "mobileApp.routes.js",
+    "moi-passport.routes.js",
+    "monitoring.js",
+    "monitoring.real.routes.js",
+    "montessori.js",
+    "mudad.routes.js",
+    "muqeem-full.routes.js",
+    "muqeem.routes.js",
+    "nitaqat.routes.js",
+    "noor.routes.js",
+    "notification-enhanced.routes.js",
+    "notifications.routes.js",
+    "notificationTemplates.routes.js",
+    "nphies.routes.js",
+    "ocrDocument.routes.js",
+    "organization.real.routes.js",
+    "otp-auth.routes.js",
+    "parent-portal-enhanced.routes.js",
+    "parentPortal.routes.js",
+    "parents.real.routes.js",
+    "payment-gateway.routes.js",
+    "payments.real.routes.js",
+    "payroll.routes.js",
+    "pdpl.routes.js",
+    "performance.js",
+    "performanceEvaluations.routes.js",
+    "pharmacy.routes.js",
+    "phase17-advanced.routes.js",
+    "phases-18-20.routes.js",
+    "phases-21-28.routes.js",
+    "phases-29-33.routes.js",
+    "platform.routes.js",
+    "pm.real.routes.js",
+    "policyRoutes.js",
+    "portalNotifications.routes.js",
+    "post-rehab-followup.routes.js",
+    "predictions.routes.js",
+    "programs.routes.js",
+    "projects.routes.js",
+    "public-relations.routes.js",
+    "qiwa.routes.js",
+    "quality-enhanced.routes.js",
+    "quality-module.routes.js",
+    "quality.js",
+    "qualityManagement.routes.js",
+    "rate-limit-waf.routes.js",
+    "rbac-advanced.routes.js",
+    "rbac.admin.routes.js",
+    "rbac.routes.js",
+    "realtimeCollaboration.routes.js",
+    "recruitment.routes.js",
+    "referral.routes.js",
+    "registries/clinical.registry.js",
+    "registries/communication.registry.js",
+    "registries/documents.registry.js",
+    "registries/education.registry.js",
+    "registries/finance.registry.js",
+    "registries/fleet.registry.js",
+    "registries/government.registry.js",
+    "registries/hr.registry.js",
+    "registries/student-parent.registry.js",
+    "rehab-expansion.routes.js",
+    "rehab-pro.routes.js",
+    "rehab-programs-module.routes.js",
+    "rehabCenterLicenses.routes.js",
+    "rehabilitation-advanced.routes.js",
+    "rehabilitation-center.routes.js",
+    "rehabilitation-intelligent.routes.js",
+    "rehabilitation-specialized.routes.js",
+    "rehabilitation.routes.js",
+    "rehabilitationPlan.routes.js",
+    "rehabPrograms.real.routes.js",
+    "reportBuilder.routes.js",
+    "reporting.routes.js",
+    "reports-analytics-module.routes.js",
+    "reports.js",
+    "research.routes.js",
+    "riskAssessment.routes.js",
+    "saudiTax.routes.js",
+    "schedules.js",
+    "scheduling-module.routes.js",
+    "security.real.routes.js",
+    "setup.routes.js",
+    "smart-assessment-engine.routes.js",
+    "smart-attendance.routes.js",
+    "smart-insurance.routes.js",
+    "smartGpsTracking.routes.js",
+    "smartIRP.routes.js",
+    "smartNotificationCenter.routes.js",
+    "smartNotifications.routes.js",
+    "smartScheduler.js",
+    "smartScheduler.routes.js",
+    "smart_attendance.routes.js",
+    "specializedPrograms.routes.js",
+    "sso.routes.js",
+    "standardizedAssessments.routes.js",
+    "strategicPlanning.routes.js",
+    "studentReports.real.routes.js",
+    "students.real.routes.js",
+    "subjects.routes.js",
+    "subscription.routes.js",
+    "successionPlanning.js",
+    "supplyChain.routes.js",
+    "supportTickets.routes.js",
+    "system-optimization.routes.js",
+    "systemSettings.routes.js",
+    "taqat.routes.js",
+    "teachers.routes.js",
+    "telehealth.routes.js",
+    "templates.js",
+    "templates.routes.js",
+    "tenant.routes.js",
+    "therapist.js",
+    "therapistElite.routes.js",
+    "therapistExtended.routes.js",
+    "therapistPro.routes.js",
+    "therapistUltra.routes.js",
+    "therapy-sessions.routes.js",
+    "therapyPrograms.routes.js",
+    "therapyRooms.routes.js",
+    "threads.routes.js",
+    "ticketing-system.routes.js",
+    "timetable.routes.js",
+    "trafficAccidentAnalytics.js",
+    "training.routes.js",
+    "transport-module.routes.js",
+    "treatmentAuthorization.routes.js",
+    "user-management.routes.js",
+    "validate.js",
+    "vendor-evaluations.real.routes.js",
+    "vendors.real.routes.js",
+    "visitors.routes.js",
+    "volunteer.routes.js",
+    "waitlist.routes.js",
+    "warehouse.routes.js",
+    "webhooks.js",
+    "work-shifts.routes.js",
+    "workflow.routes.js",
+    "workflowEnhanced.routes.js",
+    "workflowPro.routes.js",
+    "workforce-analytics.routes.js",
+    "zatca-phase2.routes.js",
+    "zkteco.routes.js",
+    "_registry.js"
+  ]
+}

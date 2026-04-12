@@ -24,6 +24,7 @@ const {
 } = require('./administrative-communications-service');
 
 const { authenticate, authorize } = require('../middleware/advancedAuth');
+const safeError = require('../utils/safeError');
 
 // ==================== Multer Configuration ====================
 
@@ -121,11 +122,7 @@ const checkCorrespondenceAccess = async (req, res, next) => {
     req.correspondence = correspondence;
     next();
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في التحقق من الصلاحيات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 };
 
@@ -227,11 +224,7 @@ router.get('/correspondences', authenticate, async (req, res) => {
       pagination: result.pagination,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في البحث عن المراسلات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -286,11 +279,7 @@ router.get('/correspondences/inbox', authenticate, async (req, res) => {
       unreadCount,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على صندوق الوارد',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -334,11 +323,7 @@ router.get('/correspondences/outbox', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على صندوق المرسل',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -362,11 +347,7 @@ router.get(
         count: correspondences.length,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل في الحصول على المراسلات المتأخرة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'administrative-communications');
     }
   }
 );
@@ -391,11 +372,7 @@ router.get('/correspondences/statistics', authenticate, async (req, res) => {
       data: statistics,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على الإحصائيات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -419,11 +396,7 @@ router.get('/correspondences/:id', authenticate, checkCorrespondenceAccess, asyn
       data: correspondence,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على المراسلة',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -748,11 +721,7 @@ router.get(
         data: thread,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل في الحصول على سلسلة المراسلات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'administrative-communications');
     }
   }
 );
@@ -779,11 +748,7 @@ router.get(
         data: actions,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل في الحصول على سجل الإجراءات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'administrative-communications');
     }
   }
 );
@@ -817,11 +782,7 @@ router.post('/correspondences/:id/read', authenticate, async (req, res) => {
       message: 'تم تحديد المراسلة كمقروءة',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تحديث حالة القراءة',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -841,11 +802,7 @@ router.get('/templates', authenticate, async (req, res) => {
       data: templates,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على القوالب',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -913,11 +870,7 @@ router.get('/external-entities', authenticate, async (req, res) => {
       data: entities,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في البحث عن الجهات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -970,11 +923,7 @@ router.get('/external-entities/:id', authenticate, async (req, res) => {
       data: entity,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الحصول على الجهة',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'administrative-communications');
   }
 });
 
@@ -1122,11 +1071,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل في التحديث الجماعي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'administrative-communications');
     }
   }
 );
@@ -1177,11 +1122,7 @@ router.post(
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل في الأرشفة الجماعية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'administrative-communications');
     }
   }
 );

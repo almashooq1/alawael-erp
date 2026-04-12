@@ -30,7 +30,7 @@ const therapySessionSchema = new mongoose.Schema(
 
     // Clinical references (optional for simple scheduling)
     plan: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticPlan' },
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile' },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary' },
     therapist: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
 
     // Scheduling

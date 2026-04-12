@@ -4,6 +4,7 @@ const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Communication = require('../models/Communication');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -17,8 +18,7 @@ router.get('/stats', async (req, res) => {
     ]);
     res.json({ success: true, data: { total, sent, received, pending: 0 } });
   } catch (err) {
-    logger.error('Communications stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إحصائيات المراسلات' });
+    safeError(res, err, 'Communications stats error');
   }
 });
 
@@ -35,8 +35,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Communications list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المراسلات' });
+    safeError(res, err, 'Communications list error');
   }
 });
 
@@ -48,8 +47,7 @@ router.get('/therapist', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Therapist comms error:', err);
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'Therapist comms error');
   }
 });
 
@@ -59,8 +57,7 @@ router.post('/', async (req, res) => {
     const comm = await Communication.create({ ...stripUpdateMeta(req.body), from: req.user?.id });
     res.status(201).json({ success: true, data: comm, message: 'تم إرسال المراسلة' });
   } catch (err) {
-    logger.error('Communication create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال المراسلة' });
+    safeError(res, err, 'Communication create error');
   }
 });
 
@@ -76,8 +73,7 @@ router.patch('/:id', async (req, res) => {
     if (!comm) return res.status(404).json({ success: false, message: 'المراسلة غير موجودة' });
     res.json({ success: true, data: comm });
   } catch (err) {
-    logger.error('Communication update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المراسلة' });
+    safeError(res, err, 'Communication update error');
   }
 });
 
@@ -87,8 +83,7 @@ router.delete('/:id', async (req, res) => {
     await Communication.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم حذف المراسلة' });
   } catch (err) {
-    logger.error('Communication delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المراسلة' });
+    safeError(res, err, 'Communication delete error');
   }
 });
 

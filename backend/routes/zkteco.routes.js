@@ -32,11 +32,7 @@ router.get('/devices', async (req, res) => {
       count: devices.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الأجهزة',
-      error: safeError(error),
-    });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -49,11 +45,7 @@ router.get('/stats', async (req, res) => {
     const stats = await ZKTecoService.getStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الإحصائيات',
-      error: safeError(error),
-    });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -188,10 +180,7 @@ router.post('/test-connection', roleMiddleware('admin', 'hr_manager'), async (re
     const result = await ZKTecoService.testConnection(ipAddress, port || 4370);
     res.json({ success: result.success, ...result });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: safeError(error),
-    });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -254,10 +243,7 @@ router.post('/sync-all', roleMiddleware('admin', 'hr_manager'), async (req, res)
       data: results,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: safeError(error),
-    });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -408,7 +394,7 @@ router.post('/health-check', roleMiddleware('admin', 'hr_manager'), async (req, 
     const results = await ZKTecoService.healthCheck();
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -421,7 +407,7 @@ router.get('/connections', async (req, res) => {
     const status = ZKTecoService.getConnectionsStatus();
     res.json({ success: true, data: status, count: status.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'zkteco');
   }
 });
 
@@ -434,7 +420,7 @@ router.get('/detailed-stats', async (req, res) => {
     const stats = await ZKTecoService.getDetailedStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'zkteco');
   }
 });
 

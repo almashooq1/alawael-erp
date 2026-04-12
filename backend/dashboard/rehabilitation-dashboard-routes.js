@@ -10,6 +10,7 @@ const {
   rehabilitationDashboardService,
   dashboardConfig,
 } = require('./rehabilitation-dashboard-service');
+const safeError = require('../utils/safeError');
 
 // ============ Configuration ============
 
@@ -43,7 +44,7 @@ router.get('/center/:centerId', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -55,7 +56,7 @@ router.get('/center/:centerId/overview', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -67,7 +68,7 @@ router.get('/center/:centerId/beneficiaries', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -79,7 +80,7 @@ router.get('/center/:centerId/staff', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -91,7 +92,7 @@ router.get('/center/:centerId/transport', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -105,7 +106,7 @@ router.get('/center/:centerId/charts/attendance', async (req, res) => {
     );
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -116,7 +117,7 @@ router.get('/center/:centerId/kpis', async (req, res) => {
     const data = await rehabilitationDashboardService.getKPIs(req.params.centerId);
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -127,7 +128,7 @@ router.get('/center/:centerId/realtime', async (req, res) => {
     const data = await rehabilitationDashboardService.getRealTimeMetrics(req.params.centerId);
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -138,7 +139,7 @@ router.get('/center/:centerId/alerts', async (req, res) => {
     const data = await rehabilitationDashboardService.getActiveAlerts(req.params.centerId);
     res.json({ success: true, data, count: data.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -150,7 +151,7 @@ router.post('/center/:centerId/alerts', async (req, res) => {
     });
     res.status(201).json({ success: true, data: alert, message: 'تم إنشاء التنبيه' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -160,7 +161,7 @@ router.put('/alerts/:alertId/acknowledge', async (req, res) => {
     if (!alert) return res.status(404).json({ success: false, error: 'Alert not found' });
     res.json({ success: true, data: alert, message: 'تم تأكيد التنبيه' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -171,7 +172,7 @@ router.get('/center/:centerId/widgets', async (req, res) => {
     const data = await rehabilitationDashboardService.getWidgets(req.params.centerId);
     res.json({ success: true, data, count: data.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 
@@ -183,7 +184,7 @@ router.post('/center/:centerId/widgets', async (req, res) => {
     });
     res.status(201).json({ success: true, data: widget, message: 'تم إنشاء البطاقة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-dashboard');
   }
 });
 

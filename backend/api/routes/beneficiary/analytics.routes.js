@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const AnalyticsService = require('../../../services/BeneficiaryManagement/AnalyticsService');
 const authenticate = require('../../../middleware/authMiddleware');
+const safeError = require('../../../utils/safeError');
 
 // Initialize service
 let analyticsService;
@@ -38,10 +39,7 @@ router.get('/:beneficiaryId/individual', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'analytics');
       timestamp: new Date(),
     });
   }
@@ -67,10 +65,7 @@ router.get('/group/comparison', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'analytics');
       timestamp: new Date(),
     });
   }
@@ -94,10 +89,7 @@ router.get('/:beneficiaryId/report', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'analytics');
       timestamp: new Date(),
     });
   }
@@ -117,10 +109,7 @@ router.get('/:beneficiaryId/predict-outcomes', authenticate, async (req, res) =>
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'analytics');
       timestamp: new Date(),
     });
   }
@@ -165,10 +154,7 @@ router.post('/:beneficiaryId/export-report', authenticate, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'analytics');
       timestamp: new Date(),
     });
   }

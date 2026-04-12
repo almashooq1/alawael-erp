@@ -15,6 +15,7 @@ const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../model
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // All kitchen routes require authentication
 router.use(authenticate);
@@ -112,8 +113,7 @@ router.get('/menu-items', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Kitchen] Menu items list error:', error.message);
-    res.status(500).json({ success: false });
+    safeError(res, error, '[Kitchen] Menu items list error');
   }
 });
 
@@ -123,7 +123,7 @@ router.get('/menu-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, data: item });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -162,7 +162,7 @@ router.delete('/menu-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, message: 'تم إلغاء تفعيل عنصر القائمة' });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -204,8 +204,7 @@ router.get('/daily-menus', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Kitchen] Daily menus list error:', error.message);
-    res.status(500).json({ success: false });
+    safeError(res, error, '[Kitchen] Daily menus list error');
   }
 });
 
@@ -226,7 +225,7 @@ router.get('/daily-menus/today', async (req, res) => {
     if (!menu) return res.json({ success: true, data: null, message: 'لا توجد قائمة طعام لليوم' });
     res.json({ success: true, data: menu });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -265,7 +264,7 @@ router.patch('/daily-menus/:id/approve', async (req, res) => {
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu, message: 'تمت الموافقة على القائمة' });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -309,7 +308,7 @@ router.get('/meal-service', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -373,7 +372,7 @@ router.get('/inventory', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -398,7 +397,7 @@ router.get('/inventory/alerts', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 
@@ -479,7 +478,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'kitchen');
   }
 });
 

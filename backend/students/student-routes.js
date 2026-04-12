@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { studentService, studentConfig } = require('./student-service');
+const safeError = require('../utils/safeError');
 
 // Centralized error handler for route catch blocks
 const handleRouteError = (res, error, context = '') => {
@@ -25,7 +26,7 @@ const handleRouteError = (res, error, context = '') => {
   if (error.message?.includes('طالبين')) {
     return res.status(400).json({ success: false, error: error.message });
   }
-  res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+  safeError(res, error, 'student');
 };
 
 // ============ Configuration ============

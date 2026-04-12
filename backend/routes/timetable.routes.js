@@ -63,7 +63,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
     if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
     res.json({ success: true, data: timetable });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجدول', error: safeError(error) });
+    safeError(res, error, 'timetable');
   }
 });
 
@@ -104,7 +104,7 @@ router.delete('/:id', validateObjectId('id'), authorize(['admin']), async (req, 
     if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
     res.json({ success: true, message: 'تم حذف الجدول بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الجدول', error: safeError(error) });
+    safeError(res, error, 'timetable');
   }
 });
 
@@ -245,7 +245,7 @@ router.patch('/:id/publish', validateObjectId('id'), authorize(['admin']), async
     if (!timetable) return res.status(404).json({ success: false, message: 'الجدول غير موجود' });
     res.json({ success: true, data: timetable, message: 'تم نشر الجدول بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في نشر الجدول', error: safeError(error) });
+    safeError(res, error, 'timetable');
   }
 });
 

@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const importExportService = require('../services/importExportPro.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -43,8 +44,7 @@ router.get('/export/excel', async (req, res) => {
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
-    logger.error('Export excel error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التصدير' });
+    safeError(res, err, 'Export excel error');
   }
 });
 
@@ -72,8 +72,7 @@ router.get('/export/pdf/:id', async (req, res) => {
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
-    logger.error('Export PDF error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تصدير PDF' });
+    safeError(res, err, 'Export PDF error');
   }
 });
 
@@ -100,8 +99,7 @@ router.post('/import/template', async (req, res) => {
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
-    logger.error('Import template error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القالب' });
+    safeError(res, err, 'Import template error');
   }
 });
 
@@ -131,8 +129,7 @@ router.post('/import/excel', async (req, res) => {
 
     return res.json({ success: true, data: result, message: 'تم استيراد البيانات' });
   } catch (err) {
-    logger.error('Import excel error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الاستيراد' });
+    safeError(res, err, 'Import excel error');
   }
 });
 

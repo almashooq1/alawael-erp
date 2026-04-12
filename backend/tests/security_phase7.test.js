@@ -1,8 +1,13 @@
 /* eslint-disable no-undef, no-unused-vars */
 const { securityService } = require('../services/securityService');
-const _saudiComplianceService = require('../services/saudiComplianceService');
+const SaudiComplianceService = require('../services/saudiComplianceService');
 
 // Mocks
+jest.mock('speakeasy', () => ({
+  totp: {
+    verify: jest.fn(({ token }) => token === '123456'),
+  },
+}));
 jest.mock('../models/User', () => {
   const mock = jest.fn();
   mock.find = jest.fn();
@@ -30,7 +35,7 @@ const _AuditLog = require('../models/AuditLog');
 
 // Initialize services
 const security = securityService;
-const compliance = new (require('../services/saudiComplianceService'))();
+const compliance = new SaudiComplianceService();
 
 describe('Phase 7: Security & Compliance', () => {
   afterEach(() => {
@@ -56,7 +61,7 @@ describe('Phase 7: Security & Compliance', () => {
       expect(isValid).toBe(true);
     });
 
-    test('verifyMfaToken should reject invalid code in production mode (mock)', async () => {
+    test('verifyMfaToken should reject invalid code', async () => {
       const isValid = await security.verifyMfaToken('user123', '999999', 'anySecret');
       expect(isValid).toBe(false);
     });
@@ -67,16 +72,13 @@ describe('Phase 7: Security & Compliance', () => {
       const mockVehicle = {
         _id: 'v123',
         plateNumber: 'ABC-1234',
+        registrationNumber: 'REG-1234',
         drivers: [],
-        violations: [], // Added violations array
-        assignedDriver: { driverId: 'd123' }, // Partially mock assignedDriver structure if accessed
-        save: jest.fn(),
+        violations: [],
+        assignedDriver: { driverId: null },
+        save: jest.fn().mockResolvedValue(true),
       };
       Vehicle.findById.mockResolvedValue(mockVehicle);
-      // Mock driver if service accesses it for points
-      const _mockDriver = { _id: 'd123', trafficPoints: 0, save: jest.fn() };
-      // Ensure Driver.findOne or Driver.findById is mocked if used.
-      // Reading service code implies checking assignedDriver. Let's start with just vehicle fix.
 
       const violationData = {
         violationCode: '301',
@@ -89,9 +91,6 @@ describe('Phase 7: Security & Compliance', () => {
       expect(Vehicle.findById).toHaveBeenCalledWith('v123');
       expect(result).toBeDefined();
       expect(result.success).toBe(true);
-
-      // Check specific logic from code 301
-      // Result structure is { success, message, violation: { fine, ... }, totalFines }
       expect(result.violation.fine).toBe(600);
       expect(result.violation.demeritPoints).toBe(4);
       expect(result.violation.description).toContain('السرعة الزائدة');

@@ -67,8 +67,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data: referrals, total });
   } catch (error) {
-    logger.error('[Referrals] List referrals error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالات', error: safeError(error) });
+    safeError(res, error, '[Referrals] List referrals error');
   }
 });
 
@@ -92,8 +91,7 @@ router.get('/:id', async (req, res) => {
 
     res.json({ success: true, data: { ...referral.toObject(), followUps } });
   } catch (error) {
-    logger.error('[Referrals] Get referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Get referral error');
   }
 });
 
@@ -108,8 +106,7 @@ router.post('/', async (req, res) => {
     logger.info(`[Referrals] Referral created: ${referral.referralNumber}`);
     res.status(201).json({ success: true, data: referral });
   } catch (error) {
-    logger.error('[Referrals] Create referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Create referral error');
   }
 });
 
@@ -122,8 +119,7 @@ router.put('/:id', async (req, res) => {
     if (!referral) return res.status(404).json({ success: false, message: 'الإحالة غير موجودة' });
     res.json({ success: true, data: referral });
   } catch (error) {
-    logger.error('[Referrals] Update referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Update referral error');
   }
 });
 
@@ -132,8 +128,7 @@ router.delete('/:id', async (req, res) => {
     await MedicalReferral.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف الإحالة بنجاح' });
   } catch (error) {
-    logger.error('[Referrals] Delete referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Delete referral error');
   }
 });
 
@@ -173,8 +168,7 @@ router.patch('/:id/reject', async (req, res) => {
     logger.info(`[Referrals] Referral rejected: ${referral.referralNumber}`);
     res.json({ success: true, data: referral });
   } catch (error) {
-    logger.error('[Referrals] Reject referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في رفض الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Reject referral error');
   }
 });
 
@@ -191,8 +185,7 @@ router.patch('/:id/send', async (req, res) => {
     await referral.save();
     res.json({ success: true, data: referral, message: 'تم إرسال الإحالة' });
   } catch (error) {
-    logger.error('[Referrals] Send referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إرسال الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Send referral error');
   }
 });
 
@@ -211,8 +204,7 @@ router.patch('/:id/complete', async (req, res) => {
     logger.info(`[Referrals] Referral completed: ${referral.referralNumber}`);
     res.json({ success: true, data: referral, message: 'تم إكمال الإحالة' });
   } catch (error) {
-    logger.error('[Referrals] Complete referral error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إكمال الإحالة', error: safeError(error) });
+    safeError(res, error, '[Referrals] Complete referral error');
   }
 });
 
@@ -333,8 +325,7 @@ router.get('/dashboard/stats', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Referrals] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
+    safeError(res, error, '[Referrals] Dashboard error');
   }
 });
 

@@ -46,8 +46,7 @@ router.get('/', requireAuth, async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    logger.error('Programs GET / error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs GET / error');
   }
 });
 
@@ -80,8 +79,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Programs GET /stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs GET /stats error');
   }
 });
 
@@ -91,8 +89,7 @@ router.get('/categories', requireAuth, async (req, res) => {
     const categories = await Program.distinct('category');
     res.json({ success: true, data: categories });
   } catch (err) {
-    logger.error('Programs GET /categories error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs GET /categories error');
   }
 });
 
@@ -105,8 +102,7 @@ router.get('/active', requireAuth, async (req, res) => {
       .lean();
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('Programs GET /active error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs GET /active error');
   }
 });
 
@@ -117,8 +113,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Programs GET /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs GET /:id error');
   }
 });
 
@@ -158,8 +153,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
-    logger.error('Programs DELETE /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs DELETE /:id error');
   }
 });
 
@@ -183,8 +177,7 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Programs PATCH /:id/status error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs PATCH /:id/status error');
   }
 });
 
@@ -208,8 +201,7 @@ router.patch('/:id/participants', requireAuth, async (req, res) => {
     await doc.save();
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Programs PATCH /:id/participants error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'Programs PATCH /:id/participants error');
   }
 });
 

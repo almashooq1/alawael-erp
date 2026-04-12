@@ -101,7 +101,7 @@ router.delete('/:id', validateObjectId('id'), authorize(['admin']), async (req, 
     if (!teacher) return res.status(404).json({ success: false, message: 'المعلم غير موجود' });
     res.json({ success: true, message: 'تم حذف المعلم بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف المعلم', error: safeError(error) });
+    safeError(res, error, 'teachers');
   }
 });
 

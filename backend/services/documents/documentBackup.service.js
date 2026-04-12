@@ -7,6 +7,7 @@
 
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const logger = require('../../utils/logger');
 
 /* ══════════════════════════════════════════════════════════════
    MODELS
@@ -226,7 +227,7 @@ class DocumentBackupService {
 
     // Start backup process
     this._runBackup(job._id).catch(err => {
-      console.error('Backup failed:', err);
+      logger.error('Backup failed:', err);
     });
 
     return { success: true, job };
@@ -408,7 +409,7 @@ class DocumentBackupService {
 
     // Run recovery
     this._runRecovery(recovery._id).catch(err => {
-      console.error('Recovery failed:', err);
+      logger.error('Recovery failed:', err);
     });
 
     return { success: true, recovery };

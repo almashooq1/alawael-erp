@@ -80,7 +80,7 @@ const assistiveDevices = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -93,7 +93,7 @@ const assistiveDevices = {
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       res.json({ success: true, data: device });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -116,7 +116,7 @@ const assistiveDevices = {
       if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
       res.json({ success: true, message: 'تم حذف الجهاز بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -128,7 +128,7 @@ const assistiveDevices = {
       });
       res.json({ success: true, data: devices });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -168,7 +168,7 @@ const assistiveDevices = {
       }).sort({ 'warranty.endDate': 1 });
       res.json({ success: true, data: devices, count: devices.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -183,7 +183,7 @@ const assistiveDevices = {
       }).sort({ 'maintenance.nextServiceDate': 1 });
       res.json({ success: true, data: devices, count: devices.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -221,7 +221,7 @@ const assistiveDevices = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -262,7 +262,7 @@ const vocationalRehab = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -275,7 +275,7 @@ const vocationalRehab = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -298,7 +298,7 @@ const vocationalRehab = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -372,7 +372,7 @@ const vocationalRehab = {
         .sort({ updatedAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -417,7 +417,7 @@ const vocationalRehab = {
         data: { total, byPlacement, byTraining, employmentRate: employmentRate[0] || { rate: 0 } },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -467,7 +467,7 @@ const disabilityRights = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -477,7 +477,7 @@ const disabilityRights = {
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -500,7 +500,7 @@ const disabilityRights = {
       if (!record) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
       res.json({ success: true, message: 'تم حذف القضية' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -597,7 +597,7 @@ const disabilityRights = {
         data: { total, byStatus, byType, byPriority, resolutionRate: resolutionRate[0]?.rate || 0 },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -635,7 +635,7 @@ const integrativeHealthcare = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -648,7 +648,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -671,7 +671,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -683,7 +683,7 @@ const integrativeHealthcare = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -756,7 +756,7 @@ const integrativeHealthcare = {
       }).populate('beneficiary', 'name email');
       res.json({ success: true, data: records, count: records.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -779,7 +779,7 @@ const integrativeHealthcare = {
         data: { total, mentalHealthStatus, medications: medications[0] || { avg: 0, total: 0 } },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -817,7 +817,7 @@ const communityIntegration = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -830,7 +830,7 @@ const communityIntegration = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -853,7 +853,7 @@ const communityIntegration = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -929,7 +929,7 @@ const communityIntegration = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -970,7 +970,7 @@ const caregiverSupport = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -983,7 +983,7 @@ const caregiverSupport = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1006,7 +1006,7 @@ const caregiverSupport = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1055,7 +1055,7 @@ const caregiverSupport = {
         .sort({ 'caregiverAssessment.burdenScale.score': -1 });
       res.json({ success: true, data: records, count: records.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1089,7 +1089,7 @@ const caregiverSupport = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -1153,7 +1153,7 @@ const accessibilityAudit = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1163,7 +1163,7 @@ const accessibilityAudit = {
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1186,7 +1186,7 @@ const accessibilityAudit = {
       if (!record) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
       res.json({ success: true, message: 'تم حذف التقرير' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1223,7 +1223,7 @@ const accessibilityAudit = {
       }).sort({ overallScore: 1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1261,7 +1261,7 @@ const accessibilityAudit = {
         data: { total, byFacilityType, byGrade, avgScore: avgScore[0]?.avg || 0, certifications },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -1305,7 +1305,7 @@ const earlyDetection = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1315,7 +1315,7 @@ const earlyDetection = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1338,7 +1338,7 @@ const earlyDetection = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1398,7 +1398,7 @@ const earlyDetection = {
       }).sort({ createdAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1410,7 +1410,7 @@ const earlyDetection = {
       }).sort({ 'developmentalScreening.nextScreeningDate': 1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1443,7 +1443,7 @@ const earlyDetection = {
         data: { total, byStatus, byRisk, byReferralSource, screeningTools },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -1483,7 +1483,7 @@ const outcomeMeasurement = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1496,7 +1496,7 @@ const outcomeMeasurement = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1519,7 +1519,7 @@ const outcomeMeasurement = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1531,7 +1531,7 @@ const outcomeMeasurement = {
         .lean();
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1544,7 +1544,7 @@ const outcomeMeasurement = {
         .sort({ 'period.startDate': 1 });
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1566,7 +1566,7 @@ const outcomeMeasurement = {
       ]);
       res.json({ success: true, data: data[0] || {} });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1611,7 +1611,7 @@ const outcomeMeasurement = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -1651,7 +1651,7 @@ const adaptiveHousing = {
         pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1664,7 +1664,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: record });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1687,7 +1687,7 @@ const adaptiveHousing = {
       if (!record) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, message: 'تم الحذف بنجاح' });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1755,7 +1755,7 @@ const adaptiveHousing = {
         .sort({ updatedAt: -1 });
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1769,7 +1769,7 @@ const adaptiveHousing = {
         .populate('beneficiary', 'name email');
       res.json({ success: true, data, count: data.length });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1821,7 +1821,7 @@ const adaptiveHousing = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };
@@ -1884,7 +1884,7 @@ const dashboard = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 
@@ -1944,7 +1944,7 @@ const dashboard = {
         },
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'rehab-expansion');
     }
   },
 };

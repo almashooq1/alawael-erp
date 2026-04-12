@@ -53,8 +53,7 @@ const createExport = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    logger.error('[ImportExport] Export error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Export error');
   }
 };
 
@@ -90,8 +89,7 @@ const previewExport = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[ImportExport] Preview error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Preview error');
   }
 };
 
@@ -119,8 +117,7 @@ const bulkExport = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    logger.error('[ImportExport] Bulk export error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Bulk export error');
   }
 };
 
@@ -162,8 +159,7 @@ const parseImportFile = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('[ImportExport] Parse error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Parse error');
   }
 };
 
@@ -202,8 +198,7 @@ const executeImport = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('[ImportExport] Execute import error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Execute import error');
   }
 };
 
@@ -240,8 +235,7 @@ const validateImport = async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('[ImportExport] Validation error:', { message: error.message });
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, '[ImportExport] Validation error');
   }
 };
 
@@ -268,7 +262,7 @@ const listTemplates = async (req, res) => {
 
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -289,7 +283,7 @@ const getTemplate = async (req, res) => {
 
     return res.json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -304,7 +298,7 @@ const createTemplate = async (req, res) => {
 
     return res.status(201).json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -327,7 +321,7 @@ const updateTemplate = async (req, res) => {
 
     return res.json({ success: true, data: template });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -350,7 +344,7 @@ const deleteTemplate = async (req, res) => {
 
     return res.json({ success: true, message: 'تم حذف القالب بنجاح' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -380,7 +374,7 @@ const downloadTemplate = async (req, res) => {
 
     return res.send(result.buffer);
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -410,7 +404,7 @@ const listJobs = async (req, res) => {
 
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -482,7 +476,7 @@ const listModules = async (req, res) => {
     const modules = importExportService.getAvailableModules();
     return res.json({ success: true, data: modules, count: modules.length });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -495,7 +489,7 @@ const getModuleFields = async (req, res) => {
     const fields = await importExportService.getModuleFields(req.params.module);
     return res.json({ success: true, data: fields, count: fields.length });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -519,7 +513,7 @@ const getStatistics = async (req, res) => {
 
     return res.json({ success: true, data: stats });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -558,7 +552,7 @@ const downloadFile = async (req, res) => {
 
     return res.status(404).json({ success: false, message: 'الملف غير موجود على الخادم' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -659,7 +653,7 @@ const listScheduledExports = async (req, res) => {
     const result = await importExportService.listScheduledExports({ userId, ...req.query });
     return res.json({ success: true, data: result });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -676,7 +670,7 @@ const executeScheduledExports = async (req, res) => {
       message: `تم تنفيذ ${result.executed} مهمة مجدولة`,
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 
@@ -760,7 +754,7 @@ const generateQualityReport = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: safeError(error) });
+    safeError(res, error, 'importExportPro');
   }
 };
 

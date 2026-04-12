@@ -9,6 +9,7 @@
 
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 /* ─── Calendar Event Model ───────────────────────────────────── */
 const calendarEventSchema = new mongoose.Schema(
@@ -533,7 +534,7 @@ class DocumentCalendarService extends EventEmitter {
   startReminderProcessor(intervalMs = 60000) {
     if (this._reminderInterval) return;
     this._reminderInterval = setInterval(() => {
-      this.processReminders().catch(err => console.error('Reminder processing error:', err));
+      this.processReminders().catch(err => logger.error('Reminder processing error:', err));
     }, intervalMs);
   }
 

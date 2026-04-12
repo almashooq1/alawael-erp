@@ -11,6 +11,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Meeting = require('../models/Meeting');
+const safeError = require('../utils/safeError');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -47,8 +48,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة الاجتماعات',
     });
   } catch (error) {
-    logger.error('Error fetching meetings:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاجتماعات' });
+    safeError(res, error, 'fetching meetings');
   }
 });
 
@@ -60,8 +60,7 @@ router.get('/:id', async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'بيانات الاجتماع' });
   } catch (error) {
-    logger.error('Error fetching meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاجتماع' });
+    safeError(res, error, 'fetching meeting');
   }
 });
 
@@ -128,8 +127,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: meeting, message: 'تم إنشاء الاجتماع بنجاح' });
     } catch (error) {
-      logger.error('Error creating meeting:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء الاجتماع' });
+      safeError(res, error, 'creating meeting');
     }
   }
 );
@@ -180,8 +178,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'تم تحديث الاجتماع بنجاح' });
   } catch (error) {
-    logger.error('Error updating meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الاجتماع' });
+    safeError(res, error, 'updating meeting');
   }
 });
 
@@ -193,8 +190,7 @@ router.delete('/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم حذف الاجتماع بنجاح' });
   } catch (error) {
-    logger.error('Error deleting meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الاجتماع' });
+    safeError(res, error, 'deleting meeting');
   }
 });
 
@@ -219,8 +215,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم إضافة محضر الاجتماع' });
     } catch (error) {
-      logger.error('Error adding minutes:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة المحضر' });
+      safeError(res, error, 'adding minutes');
     }
   }
 );
@@ -252,8 +247,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تسجيل الحضور' });
     } catch (error) {
-      logger.error('Error processing RSVP:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تسجيل الحضور' });
+      safeError(res, error, 'processing RSVP');
     }
   }
 );

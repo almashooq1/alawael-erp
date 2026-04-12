@@ -67,8 +67,7 @@ router.get('/', requireAuth, async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
-    logger.error('PortalNotifications GET / error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET / error');
   }
 });
 
@@ -110,8 +109,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('PortalNotifications GET /stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET /stats error');
   }
 });
 
@@ -122,8 +120,7 @@ router.get('/guardian/:guardianId', requireAuth, async (req, res) => {
     const data = await PortalNotification.getForGuardian(req.params.guardianId, Number(limit));
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('PortalNotifications GET /guardian/:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET /guardian/:id error');
   }
 });
 
@@ -134,8 +131,7 @@ router.get('/guardian/:guardianId/unread', requireAuth, async (req, res) => {
     const count = await PortalNotification.getUnreadCountForGuardian(req.params.guardianId);
     res.json({ success: true, data, count });
   } catch (err) {
-    logger.error('PortalNotifications GET /guardian/:id/unread error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET /guardian/:id/unread error');
   }
 });
 
@@ -145,8 +141,7 @@ router.get('/guardian/:guardianId/urgent', requireAuth, async (req, res) => {
     const data = await PortalNotification.getUrgentNotifications(req.params.guardianId);
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('PortalNotifications GET /guardian/:id/urgent error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET /guardian/:id/urgent error');
   }
 });
 
@@ -160,8 +155,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('PortalNotifications GET /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications GET /:id error');
   }
 });
 
@@ -235,8 +229,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, message: 'Notification deleted' });
   } catch (err) {
-    logger.error('PortalNotifications DELETE /:id error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications DELETE /:id error');
   }
 });
 
@@ -248,8 +241,7 @@ router.patch('/:id/read', requireAuth, async (req, res) => {
     await doc.markAsRead();
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('PortalNotifications PATCH /:id/read error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications PATCH /:id/read error');
   }
 });
 
@@ -261,8 +253,7 @@ router.patch('/:id/unread', requireAuth, async (req, res) => {
     await doc.markAsUnread();
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('PortalNotifications PATCH /:id/unread error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications PATCH /:id/unread error');
   }
 });
 
@@ -274,8 +265,7 @@ router.patch('/:id/archive', requireAuth, async (req, res) => {
     await doc.archive();
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('PortalNotifications PATCH /:id/archive error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications PATCH /:id/archive error');
   }
 });
 
@@ -287,8 +277,7 @@ router.patch('/:id/unarchive', requireAuth, async (req, res) => {
     await doc.unarchive();
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('PortalNotifications PATCH /:id/unarchive error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications PATCH /:id/unarchive error');
   }
 });
 
@@ -307,8 +296,7 @@ router.post('/mark-all-read', requireAuth, async (req, res) => {
 
     res.json({ success: true, modifiedCount: result.modifiedCount });
   } catch (err) {
-    logger.error('PortalNotifications POST /mark-all-read error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'PortalNotifications POST /mark-all-read error');
   }
 });
 

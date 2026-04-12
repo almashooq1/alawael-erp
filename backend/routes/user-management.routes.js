@@ -14,6 +14,7 @@ const logger = require('../utils/logger');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const Branch = require('../models/Branch');
+const safeError = require('../utils/safeError');
 
 // ─── Helper: Validate MongoDB ObjectId ────────────────────
 const isValidObjectId = id => mongoose.Types.ObjectId.isValid(id);
@@ -193,8 +194,7 @@ router.get('/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('User stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, err, 'User stats error');
   }
 });
 
@@ -289,8 +289,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('User list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المستخدمين' });
+    safeError(res, err, 'User list error');
   }
 });
 
@@ -330,8 +329,7 @@ router.get('/branches', async (_req, res) => {
       })),
     });
   } catch (err) {
-    logger.error('Get branches error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفروع' });
+    safeError(res, err, 'Get branches error');
   }
 });
 
@@ -371,8 +369,7 @@ router.get('/export/all', async (req, res) => {
 
     res.json({ success: true, data: exportData });
   } catch (err) {
-    logger.error('Export users error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تصدير المستخدمين' });
+    safeError(res, err, 'Export users error');
   }
 });
 
@@ -468,8 +465,7 @@ router.post('/bulk-action', async (req, res) => {
       message: `تم تنفيذ العملية على ${result.modifiedCount || 0} مستخدم`,
     });
   } catch (err) {
-    logger.error('Bulk action error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تنفيذ العملية الجماعية' });
+    safeError(res, err, 'Bulk action error');
   }
 });
 
@@ -545,8 +541,7 @@ router.post('/import', async (req, res) => {
       message: `تم استيراد ${results.created} مستخدم، تم تخطي ${results.skipped}`,
     });
   } catch (err) {
-    logger.error('Import users error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في استيراد المستخدمين' });
+    safeError(res, err, 'Import users error');
   }
 });
 
@@ -588,8 +583,7 @@ router.get('/:id', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('User detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات المستخدم' });
+    safeError(res, err, 'User detail error');
   }
 });
 
@@ -709,7 +703,7 @@ router.post('/', async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ success: false, message: 'البيانات مسجلة بالفعل (تكرار)' });
     }
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المستخدم' });
+    safeError(res, err, 'user-management');
   }
 });
 
@@ -782,7 +776,7 @@ router.put('/:id', async (req, res) => {
     if (err.code === 11000) {
       return res.status(400).json({ success: false, message: 'البيانات مسجلة بالفعل (تكرار)' });
     }
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المستخدم' });
+    safeError(res, err, 'user-management');
   }
 });
 
@@ -827,8 +821,7 @@ router.delete('/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم تعطيل المستخدم بنجاح' });
   } catch (err) {
-    logger.error('Deactivate user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تعطيل المستخدم' });
+    safeError(res, err, 'Deactivate user error');
   }
 });
 
@@ -864,8 +857,7 @@ router.patch('/:id/toggle-status', async (req, res) => {
       message: user.isActive ? 'تم تفعيل المستخدم' : 'تم تعطيل المستخدم',
     });
   } catch (err) {
-    logger.error('Toggle user status error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تغيير حالة المستخدم' });
+    safeError(res, err, 'Toggle user status error');
   }
 });
 
@@ -910,8 +902,7 @@ router.post('/:id/reset-password', async (req, res) => {
       message: 'تم إعادة تعيين كلمة المرور بنجاح',
     });
   } catch (err) {
-    logger.error('Reset password error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إعادة تعيين كلمة المرور' });
+    safeError(res, err, 'Reset password error');
   }
 });
 
@@ -941,8 +932,7 @@ router.post('/:id/unlock', async (req, res) => {
 
     res.json({ success: true, message: 'تم فك قفل الحساب بنجاح' });
   } catch (err) {
-    logger.error('Unlock user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في فك قفل الحساب' });
+    safeError(res, err, 'Unlock user error');
   }
 });
 
@@ -987,8 +977,7 @@ router.put('/:id/permissions', async (req, res) => {
       message: 'تم تحديث الصلاحيات بنجاح',
     });
   } catch (err) {
-    logger.error('Update permissions error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الصلاحيات' });
+    safeError(res, err, 'Update permissions error');
   }
 });
 
@@ -1022,8 +1011,7 @@ router.get('/:id/activity', async (req, res) => {
       pagination: { page: +page, limit: +limit, total },
     });
   } catch (err) {
-    logger.error('User activity error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل النشاط' });
+    safeError(res, err, 'User activity error');
   }
 });
 
@@ -1058,8 +1046,7 @@ router.get('/:id/login-history', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Login history error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل الدخول' });
+    safeError(res, err, 'Login history error');
   }
 });
 
@@ -1090,8 +1077,7 @@ router.patch('/:id/mfa/reset', async (req, res) => {
 
     res.json({ success: true, message: 'تم إعادة تعيين المصادقة الثنائية بنجاح' });
   } catch (err) {
-    logger.error('MFA reset error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إعادة تعيين المصادقة الثنائية' });
+    safeError(res, err, 'MFA reset error');
   }
 });
 
@@ -1128,8 +1114,7 @@ router.patch('/:id/verify', async (req, res) => {
       message: 'تم تحديث حالة التحقق',
     });
   } catch (err) {
-    logger.error('Verify status error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث حالة التحقق' });
+    safeError(res, err, 'Verify status error');
   }
 });
 

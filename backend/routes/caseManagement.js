@@ -8,6 +8,7 @@ const fs = require('fs').promises;
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 /** Safely parse JSON — returns fallback on invalid input */
 const safeJsonParse = (str, fallback = []) => {
@@ -132,11 +133,7 @@ router.post('/', authenticate, authorize(['admin', 'doctor', 'case_manager']), a
       data: newCase,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إنشاء الحالة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -191,11 +188,7 @@ router.get('/', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الحالات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -232,11 +225,7 @@ router.get('/statistics/overview', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب الإحصائيات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -270,11 +259,7 @@ router.get('/:id', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في جلب تفاصيل الحالة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -312,11 +297,7 @@ router.put(
         data: caseDoc,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في تحديث الحالة',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -338,11 +319,7 @@ router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
       message: 'تم حذف الحالة بنجاح',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في حذف الحالة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -382,11 +359,7 @@ router.post(
         data: caseDoc.diagnoses[caseDoc.diagnoses.length - 1],
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في إضافة التشخيص',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -426,11 +399,7 @@ router.put(
         data: diagnosis,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في تحديث التشخيص',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -476,11 +445,7 @@ router.post('/:id/files', authenticate, upload.single('file'), async (req, res) 
       data: caseDoc.medicalFiles[caseDoc.medicalFiles.length - 1],
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في رفع الملف',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -526,11 +491,7 @@ router.delete(
         message: 'تم حذف الملف بنجاح',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في حذف الملف',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -563,11 +524,7 @@ router.post(
         data: caseDoc.treatmentPlans[caseDoc.treatmentPlans.length - 1],
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في إنشاء خطة العلاج',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -607,11 +564,7 @@ router.put(
         data: plan,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في تحديث خطة العلاج',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -661,11 +614,7 @@ router.post(
         data: plan.sessions[plan.sessions.length - 1],
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في إضافة الجلسة',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'caseManagement');
     }
   }
 );
@@ -702,11 +651,7 @@ router.post('/:id/notes', authenticate, async (req, res) => {
       data: caseDoc.notes[caseDoc.notes.length - 1],
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إضافة الملاحظة',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 
@@ -769,11 +714,7 @@ router.get('/:id/report', authenticate, async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إنشاء التقرير',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'caseManagement');
   }
 });
 

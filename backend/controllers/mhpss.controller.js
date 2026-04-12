@@ -18,7 +18,7 @@ class MHPSSController {
       const result = await mhpssService.createSession(data);
       return res.status(result.success ? 201 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -33,6 +33,7 @@ class MHPSSController {
       if (beneficiary) filters.beneficiary = beneficiary;
       if (search) {
         const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
         const safeSearch = escapeRegex(search);
         filters.$or = [
           { chiefComplaint: { $regex: safeSearch, $options: 'i' } },
@@ -43,7 +44,7 @@ class MHPSSController {
       const result = await mhpssService.getSessions(filters, { page, limit, sortBy, sortOrder });
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -52,7 +53,7 @@ class MHPSSController {
       const result = await mhpssService.getSessionById(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -62,7 +63,7 @@ class MHPSSController {
       const result = await mhpssService.updateSession(req.params.id, data);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -71,7 +72,7 @@ class MHPSSController {
       const result = await mhpssService.deleteSession(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -80,7 +81,7 @@ class MHPSSController {
       const result = await mhpssService.getSessionStats();
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -92,7 +93,7 @@ class MHPSSController {
       const result = await mhpssService.createProgram(data);
       return res.status(result.success ? 201 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -116,7 +117,7 @@ class MHPSSController {
       const result = await mhpssService.getPrograms(filters, { page, limit, sortBy, sortOrder });
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -125,7 +126,7 @@ class MHPSSController {
       const result = await mhpssService.getProgramById(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -134,7 +135,7 @@ class MHPSSController {
       const result = await mhpssService.updateProgram(req.params.id, req.body);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -143,7 +144,7 @@ class MHPSSController {
       const result = await mhpssService.deleteProgram(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -156,7 +157,7 @@ class MHPSSController {
       const result = await mhpssService.enrollInProgram(req.params.id, beneficiaryId);
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -169,7 +170,7 @@ class MHPSSController {
       const result = await mhpssService.unenrollFromProgram(req.params.id, beneficiaryId);
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -185,7 +186,7 @@ class MHPSSController {
       const result = await mhpssService.createAssessment(data);
       return res.status(result.success ? 201 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -220,7 +221,7 @@ class MHPSSController {
       const result = await mhpssService.getAssessments(filters, { page, limit, sortBy, sortOrder });
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -229,7 +230,7 @@ class MHPSSController {
       const result = await mhpssService.getAssessmentById(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -238,7 +239,7 @@ class MHPSSController {
       const result = await mhpssService.updateAssessment(req.params.id, req.body);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -247,7 +248,7 @@ class MHPSSController {
       const result = await mhpssService.deleteAssessment(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -256,7 +257,7 @@ class MHPSSController {
       const result = await mhpssService.getBeneficiaryAssessmentHistory(req.params.beneficiaryId);
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -265,7 +266,7 @@ class MHPSSController {
       const result = await mhpssService.getAssessmentStats();
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -281,7 +282,7 @@ class MHPSSController {
       const result = await mhpssService.createCrisis(data);
       return res.status(result.success ? 201 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -316,7 +317,7 @@ class MHPSSController {
       const result = await mhpssService.getCrises(filters, { page, limit, sortBy, sortOrder });
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -325,7 +326,7 @@ class MHPSSController {
       const result = await mhpssService.getCrisisById(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -334,7 +335,7 @@ class MHPSSController {
       const result = await mhpssService.updateCrisis(req.params.id, req.body);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -343,7 +344,7 @@ class MHPSSController {
       const result = await mhpssService.deleteCrisis(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -353,7 +354,7 @@ class MHPSSController {
       const result = await mhpssService.addCrisisTimelineEvent(req.params.id, eventData);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -363,7 +364,7 @@ class MHPSSController {
       const result = await mhpssService.addCrisisFollowUp(req.params.id, followUpData);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -372,7 +373,7 @@ class MHPSSController {
       const result = await mhpssService.getCrisisStats();
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -384,7 +385,7 @@ class MHPSSController {
       const result = await mhpssService.createGroup(data);
       return res.status(result.success ? 201 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -407,7 +408,7 @@ class MHPSSController {
       const result = await mhpssService.getGroups(filters, { page, limit, sortBy, sortOrder });
       return res.status(result.success ? 200 : 500).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -416,7 +417,7 @@ class MHPSSController {
       const result = await mhpssService.getGroupById(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -425,7 +426,7 @@ class MHPSSController {
       const result = await mhpssService.updateGroup(req.params.id, req.body);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -434,7 +435,7 @@ class MHPSSController {
       const result = await mhpssService.deleteGroup(req.params.id);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -447,7 +448,7 @@ class MHPSSController {
       const result = await mhpssService.addGroupMember(req.params.id, beneficiaryId);
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -460,7 +461,7 @@ class MHPSSController {
       const result = await mhpssService.removeGroupMember(req.params.id, beneficiaryId);
       return res.status(result.success ? 200 : 400).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -469,7 +470,7 @@ class MHPSSController {
       const result = await mhpssService.addGroupSession(req.params.id, req.body);
       return res.status(result.success ? 200 : 404).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 
@@ -480,7 +481,7 @@ class MHPSSController {
       const result = await mhpssService.getDashboardStats();
       return res.status(200).json(result);
     } catch (error) {
-      return res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'mhpss');
     }
   }
 }

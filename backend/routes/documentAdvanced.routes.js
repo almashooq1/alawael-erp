@@ -30,6 +30,7 @@ const annotationService = require('../services/documentAnnotationService');
 const comparisonService = require('../services/documentComparisonService');
 const exportService = require('../services/documentExportService');
 const qrService = require('../services/documentQRService');
+const safeError = require('../utils/safeError');
 
 // ── Helper ───────────────────────────────────────────────────────────────────
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -953,8 +954,7 @@ router.get(
         message: 'تم جلب الإحصائيات بنجاح',
       });
     } catch (err) {
-      logger.error('Document advanced overview error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+      safeError(res, err, 'Document advanced overview error');
     }
   })
 );

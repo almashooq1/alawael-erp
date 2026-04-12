@@ -11,6 +11,7 @@ const { Router } = require('express');
 const Logger = require('../utils/logger');
 const tenantService = require('../services/tenant.service');
 const tenantIsolation = require('../services/tenantIsolation.service');
+const safeError = require('../utils/safeError');
 
 const router = Router();
 
@@ -59,11 +60,7 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error creating tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إنشاء الالتزام | Failed to create tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -98,11 +95,7 @@ router.get('/', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching tenants: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الالتزامات | Failed to fetch tenants',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -129,11 +122,7 @@ router.get('/:tenantId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الالتزام | Failed to fetch tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -162,11 +151,7 @@ router.put('/:tenantId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error updating tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تحديث الالتزام | Failed to update tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -196,11 +181,7 @@ router.delete('/:tenantId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error deleting tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في حذف الالتزام | Failed to delete tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -234,11 +215,7 @@ router.post('/:tenantId/suspend', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error suspending tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إيقاف الالتزام | Failed to suspend tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -266,11 +243,7 @@ router.post('/:tenantId/reactivate', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error reactivating tenant: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إعادة تنشيط الالتزام | Failed to reactivate tenant',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -310,11 +283,7 @@ router.post('/:tenantId/users', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error adding user: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إضافة المستخدم | Failed to add user',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -342,11 +311,7 @@ router.get('/:tenantId/users', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching tenant users: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب مستخدمي الالتزام | Failed to fetch users',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -373,11 +338,7 @@ router.delete('/:tenantId/users/:userId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error removing user: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إزالة المستخدم | Failed to remove user',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -406,11 +367,7 @@ router.get('/:tenantId/settings', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching settings: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الإعدادات | Failed to fetch settings',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -439,11 +396,7 @@ router.put('/:tenantId/settings', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error updating settings: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تحديث الإعدادات | Failed to update settings',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -472,11 +425,7 @@ router.get('/:tenantId/quota', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching quota: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الحصة | Failed to fetch quota',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -504,11 +453,7 @@ router.post('/:tenantId/api-calls', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error recording API call: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تسجيل استدعاء API | Failed to record API call',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -539,11 +484,7 @@ router.post('/:tenantId/storage', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error recording storage: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تسجيل التخزين | Failed to record storage',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -587,11 +528,7 @@ router.post('/:tenantId/upgrade', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error upgrading plan: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في ترقية الخطة | Failed to upgrade plan',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -620,11 +557,7 @@ router.get('/:tenantId/isolation', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error getting isolation report: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب التقرير | Failed to fetch report',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 
@@ -651,11 +584,7 @@ router.get('/stats/all', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching statistics: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الإحصائيات | Failed to fetch statistics',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'tenant');
   }
 });
 

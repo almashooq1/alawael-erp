@@ -10,6 +10,7 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 /* ─── Model ───────────────────────────────────────────────────── */
 const qrCodeSchema = new mongoose.Schema(
@@ -422,7 +423,7 @@ class DocumentQRCodeService extends EventEmitter {
 
     // Process in background
     this._processPrintJob(job._id).catch(err => {
-      console.error('Print job error:', err);
+      logger.error('Print job error:', err);
     });
 
     return { success: true, job };

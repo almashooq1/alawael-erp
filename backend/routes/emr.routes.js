@@ -272,8 +272,7 @@ router.get('/lab-results/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'نتيجة المختبر غير موجودة' });
     res.json({ success: true, data: result });
   } catch (error) {
-    logger.error('[EMR] Get lab result error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب النتيجة', error: safeError(error) });
+    safeError(res, error, '[EMR] Get lab result error');
   }
 });
 
@@ -300,8 +299,7 @@ router.put('/lab-results/:id', async (req, res) => {
     if (!result) return res.status(404).json({ success: false, message: 'النتيجة غير موجودة' });
     res.json({ success: true, data: result });
   } catch (error) {
-    logger.error('[EMR] Update lab result error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث النتيجة', error: safeError(error) });
+    safeError(res, error, '[EMR] Update lab result error');
   }
 });
 
@@ -367,8 +365,7 @@ router.get('/clinical-notes/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'الملاحظة السريرية غير موجودة' });
     res.json({ success: true, data: note });
   } catch (error) {
-    logger.error('[EMR] Get clinical note error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحظة', error: safeError(error) });
+    safeError(res, error, '[EMR] Get clinical note error');
   }
 });
 
@@ -474,8 +471,7 @@ router.get('/allergies', async (req, res) => {
     ]);
     res.json({ success: true, data: allergies, total });
   } catch (error) {
-    logger.error('[EMR] List allergies error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحساسية', error: safeError(error) });
+    safeError(res, error, '[EMR] List allergies error');
   }
 });
 
@@ -628,8 +624,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[EMR] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم', error: safeError(error) });
+    safeError(res, error, '[EMR] Dashboard error');
   }
 });
 

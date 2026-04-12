@@ -8,6 +8,7 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { archiveService, archiveConfig, archiveCategories } = require('./archive-service');
+const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
@@ -107,7 +108,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -127,7 +128,7 @@ router.get('/documents', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -169,7 +170,7 @@ router.get('/documents/number/:documentNumber', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -211,7 +212,7 @@ router.put('/documents/:id', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -247,7 +248,7 @@ router.post('/documents/:id/version', upload.single('file'), async (req, res) =>
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -267,7 +268,7 @@ router.post('/documents/:id/archive', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -287,7 +288,7 @@ router.delete('/documents/:id', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -307,7 +308,7 @@ router.get('/search', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -325,7 +326,7 @@ router.get('/statistics', async (req, res) => {
       statistics: stats,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -392,7 +393,7 @@ router.get('/stats', async (req, res) => {
       recentSearches: [],
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -432,7 +433,7 @@ router.get('/activity', async (req, res) => {
       activities,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -485,7 +486,7 @@ router.get('/retention-report', async (req, res) => {
       totalRetained,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -515,7 +516,7 @@ router.get('/expired', async (req, res) => {
       documents,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -533,7 +534,7 @@ router.post('/retention/process', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -553,7 +554,7 @@ router.post('/folders', async (req, res) => {
       folder,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -573,7 +574,7 @@ router.get('/folders/:id/contents', async (req, res) => {
       ...contents,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -591,7 +592,7 @@ router.post('/documents/:id/ocr', async (req, res) => {
       message: 'OCR processing started',
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -622,7 +623,7 @@ router.post('/documents/:id/related', async (req, res) => {
       document,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -642,7 +643,7 @@ router.get('/documents/:id/related', async (req, res) => {
       relatedDocuments: document.relatedDocuments,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -668,7 +669,7 @@ router.get('/documents/:id/history', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 
@@ -714,7 +715,7 @@ router.get('/export', async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'archive');
   }
 });
 

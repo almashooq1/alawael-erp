@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticate, _authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Mock database storage
 const communityData = {
@@ -101,10 +102,7 @@ router.post('/content', authenticate, (req, res) => {
       data: newContent,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -118,10 +116,7 @@ router.get('/content/popular', (req, res) => {
       data: popular,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -148,10 +143,7 @@ router.get('/content/category/:category', (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -179,10 +171,7 @@ router.get('/content/stats', (req, res) => {
       data: stats,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -205,10 +194,7 @@ router.get('/content', (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -231,10 +217,7 @@ router.get('/content/:id', (req, res) => {
       data: content,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -275,10 +258,7 @@ router.post('/content/:id/rate', (req, res) => {
       data: content,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -318,7 +298,7 @@ router.put('/content/:id', authenticate, (req, res) => {
       .status(200)
       .json({ success: true, message: 'Content updated successfully', data: content });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -335,7 +315,7 @@ router.delete('/content/:id', authenticate, (req, res) => {
     communityData.content.splice(index, 1);
     return res.status(200).json({ success: true, message: 'Content deleted successfully' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -357,7 +337,7 @@ router.get('/sessions/:id', (req, res) => {
 
     return res.status(200).json({ success: true, data: session });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -393,7 +373,7 @@ router.put('/sessions/:id', authenticate, (req, res) => {
       .status(200)
       .json({ success: true, message: 'Session updated successfully', data: session });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -410,7 +390,7 @@ router.delete('/sessions/:id', authenticate, (req, res) => {
     communityData.sessions.splice(index, 1);
     return res.status(200).json({ success: true, message: 'Session deleted successfully' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -427,7 +407,7 @@ router.get('/library/:id', (req, res) => {
 
     return res.status(200).json({ success: true, data: resource });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -456,7 +436,7 @@ router.put('/library/:id', authenticate, (req, res) => {
       .status(200)
       .json({ success: true, message: 'Resource updated successfully', data: resource });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -472,7 +452,7 @@ router.delete('/library/:id', authenticate, (req, res) => {
     communityData.library.splice(index, 1);
     return res.status(200).json({ success: true, message: 'Resource deleted successfully' });
   } catch (error) {
-    return res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'community');
   }
 });
 
@@ -509,10 +489,7 @@ router.post('/sessions', authenticate, (req, res) => {
       data: newSession,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -527,10 +504,7 @@ router.get('/sessions/upcoming', (req, res) => {
       data: upcoming,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -550,10 +524,7 @@ router.get('/sessions/stats', (req, res) => {
       data: stats,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -568,10 +539,7 @@ router.get('/sessions', (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -613,11 +581,7 @@ router.post('/sessions/:id/register', (req, res) => {
       data: session,
     });
   } catch (error) {
-    logger.error('Register session error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'Register session error');
   }
 });
 
@@ -651,10 +615,7 @@ router.post('/sessions/:id/feedback', (req, res) => {
       data: feedback,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -690,10 +651,7 @@ router.post('/library/upload', (req, res) => {
       data: newResource,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -727,10 +685,7 @@ router.post('/library', (req, res) => {
       data: newResource,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -761,10 +716,7 @@ router.get('/library/search', (req, res) => {
       data: results,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -781,10 +733,7 @@ router.get('/library/category/:category', (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -811,10 +760,7 @@ router.get('/library/stats', (req, res) => {
       data: stats,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -829,10 +775,7 @@ router.get('/library', (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -866,10 +809,7 @@ router.post('/library/:id/review', (req, res) => {
       data: review,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -893,10 +833,7 @@ router.post('/library/:id/download', (req, res) => {
       data: resource,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -931,10 +868,7 @@ router.get('/subscriptions/plans', (req, res) => {
       data: plans,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -961,10 +895,7 @@ router.post('/subscriptions/plans', (req, res) => {
       data: newPlan,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -990,10 +921,7 @@ router.post('/subscriptions/subscribe', (req, res) => {
       data: subscription,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -1015,10 +943,7 @@ router.get('/subscriptions/user', (req, res) => {
       data: subscription,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -1046,10 +971,7 @@ router.get('/subscriptions/stats', (req, res) => {
       data: stats,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -1075,10 +997,7 @@ router.post('/subscriptions', (req, res) => {
       data: subscription,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 
@@ -1101,10 +1020,7 @@ router.get('/subscriptions/:userId', (req, res) => {
       data: subscription,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'community');
   }
 });
 

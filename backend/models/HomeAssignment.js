@@ -11,7 +11,7 @@ const submissionSchema = new mongoose.Schema({
 
 const homeAssignmentSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assignedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Therapist
 
     title: { type: String, required: true }, // e.g., "Daily Stretching"

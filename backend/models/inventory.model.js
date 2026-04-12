@@ -1,3 +1,2 @@
-/* eslint-disable no-unused-vars */
-// Alias for Inventory.js - For compatibility with test imports
-module.exports = require('./Inventory') || require('./InventoryItem') || class {};
+// Stub — original archived in _archived/dead-models/ (P#38)
+module.exports = {};

@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 const ApiKey = require('../models/ApiKey');
+const safeError = require('../utils/safeError');
 
 /**
  * Authenticate using X-API-KEY header
@@ -44,7 +45,7 @@ const apiKeyAuth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).json({ message: 'API Key Validation Error' });
+    safeError(res, error, 'apiKey.middleware');
   }
 };
 

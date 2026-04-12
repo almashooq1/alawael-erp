@@ -24,8 +24,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Donors list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المتبرعين' });
+    safeError(res, err, 'Donors list error');
   }
 });
 
@@ -37,8 +36,7 @@ router.get('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المتبرع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Donor get error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المتبرع' });
+    safeError(res, err, 'Donor get error');
   }
 });
 
@@ -46,11 +44,11 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Donor = require('../models/Donor');
+const safeError = require('../utils/safeError');
     const data = await Donor.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data, message: 'تم إضافة المتبرع بنجاح' });
   } catch (err) {
-    logger.error('Donor create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة المتبرع' });
+    safeError(res, err, 'Donor create error');
   }
 });
 
@@ -62,8 +60,7 @@ router.put('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المتبرع غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المتبرع بنجاح' });
   } catch (err) {
-    logger.error('Donor update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المتبرع' });
+    safeError(res, err, 'Donor update error');
   }
 });
 
@@ -74,8 +71,7 @@ router.delete('/:id', async (req, res) => {
     await Donor.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف المتبرع بنجاح' });
   } catch (err) {
-    logger.error('Donor delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المتبرع' });
+    safeError(res, err, 'Donor delete error');
   }
 });
 

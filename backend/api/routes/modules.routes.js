@@ -9,6 +9,7 @@ const logger = require('../../utils/logger');
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
+const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
   logger.info('[Modules Routes] RBAC middleware loaded successfully');
 } catch (err) {
@@ -265,12 +266,7 @@ router.get('/:moduleKey', authenticateToken, createRBACMiddleware(['modules:read
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Error fetching module data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch module data',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching module data');
   }
 });
 
@@ -293,12 +289,7 @@ router.get('/', authenticateToken, createRBACMiddleware(['modules:read']), (req,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Error fetching modules list:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch modules list',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching modules list');
   }
 });
 
@@ -321,12 +312,7 @@ router.get('/elearning/courses', authenticateToken, (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Error fetching courses:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch courses',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching courses');
   }
 });
 

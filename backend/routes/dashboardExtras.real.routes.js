@@ -16,8 +16,7 @@ router.get('/summary-systems', async (req, res) => {
     ]);
     res.json({ success: true, data: { totalUsers: users, totalEmployees: employees, activeModules: 12, systemStatus: 'operational' } });
   } catch (err) {
-    logger.error('Dashboard summary-systems error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في ملخص الأنظمة' });
+    safeError(res, err, 'Dashboard summary-systems error');
   }
 });
 
@@ -25,11 +24,11 @@ router.get('/summary-systems', async (req, res) => {
 router.get('/top-kpis', async (req, res) => {
   try {
     const KPI = require('../models/KPI');
+const safeError = require('../utils/safeError');
     const data = await KPI.find().sort({ 'measurements.value': -1 }).limit(5).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Dashboard top-kpis error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في مؤشرات الأداء' });
+    safeError(res, err, 'Dashboard top-kpis error');
   }
 });
 

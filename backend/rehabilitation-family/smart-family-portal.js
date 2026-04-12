@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 const { Schema } = mongoose;
 
 // ─── Models ────────────────────────────────────────────────────────────────────
@@ -623,7 +624,7 @@ router.post('/notebook', async (req, res) => {
       data: entry,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -653,7 +654,7 @@ router.get('/notebook/:beneficiaryId', async (req, res) => {
       data: entries,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -676,7 +677,7 @@ router.patch('/notebook/:entryId/read', async (req, res) => {
 
     res.json({ success: true, message: 'تم تسجيل القراءة', data: entry });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -714,7 +715,7 @@ router.post('/activities/generate/:beneficiaryId', async (req, res) => {
       data: plan,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -744,7 +745,7 @@ router.get('/activities/:beneficiaryId/current', async (req, res) => {
       data: plan,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -778,7 +779,7 @@ router.patch('/activities/:planId/activity/:activityIndex/complete', async (req,
       completion_rate: plan.completion_rate,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -794,7 +795,7 @@ router.get('/report/:beneficiaryId/:iepId', async (req, res) => {
     );
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -812,7 +813,7 @@ router.get('/engagement/:beneficiaryId', async (req, res) => {
     );
     res.json({ success: true, data: engagement });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -879,7 +880,7 @@ router.get('/dashboard/:beneficiaryId', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 
@@ -926,7 +927,7 @@ router.get('/branch/:branchId/engagement-summary', async (req, res) => {
       distribution: summary,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-family-portal');
   }
 });
 

@@ -40,6 +40,7 @@ const { logSecurityEvent, getClientIP } = require('../../utils/security');
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
+const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[Users Route] RBAC module not available, using fallback');
@@ -128,12 +129,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Get users error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to fetch users',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
+    safeError(res, error, 'Get users error');
   }
 });
 
@@ -171,12 +167,7 @@ router.get('/:id', authenticateToken, requireAdmin, async (req, res) => {
       data: sanitizedUser,
     });
   } catch (error) {
-    logger.error('Get user error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to fetch user',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-    });
+    safeError(res, error, 'Get user error');
   }
 });
 
@@ -260,12 +251,7 @@ router.post(
         },
       });
     } catch (error) {
-      logger.error('Create user error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to create user',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      });
+      safeError(res, error, 'Create user error');
     }
   }
 );
@@ -316,12 +302,7 @@ router.put(
         },
       });
     } catch (error) {
-      logger.error('Update user error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to update user',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      });
+      safeError(res, error, 'Update user error');
     }
   }
 );
@@ -369,12 +350,7 @@ router.delete(
         message: 'User deleted successfully',
       });
     } catch (error) {
-      logger.error('Delete user error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to delete user',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      });
+      safeError(res, error, 'Delete user error');
     }
   }
 );

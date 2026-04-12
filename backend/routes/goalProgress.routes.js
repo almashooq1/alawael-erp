@@ -37,8 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('goalProgress list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalProgress list error');
   }
 });
 
@@ -52,8 +51,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
     res.json({ success: true, data: record });
   } catch (err) {
-    logger.error('goalProgress get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalProgress get error');
   }
 });
 
@@ -69,8 +67,7 @@ router.get('/plan/:planId/trend', requireAuth, async (req, res) => {
       .select('goalId percentage recordedDate note');
     res.json({ success: true, data: records });
   } catch (err) {
-    logger.error('goalProgress trend error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalProgress trend error');
   }
 });
 
@@ -108,8 +105,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
     res.json({ success: true, message: 'Record deleted' });
   } catch (err) {
-    logger.error('goalProgress delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalProgress delete error');
   }
 });
 

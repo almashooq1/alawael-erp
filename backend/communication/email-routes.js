@@ -21,6 +21,7 @@ const {
   EmailQueue,
 } = require('./email-models');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -162,11 +163,7 @@ router.post(
         messageId: result.messageId,
       });
     } catch (error) {
-      logger.error('Error sending email:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'sending email');
     }
   }
 );
@@ -216,11 +213,7 @@ router.post('/send-bulk', authenticate, rateLimiter(10), async (req, res) => {
       queueIds: queueItems,
     });
   } catch (error) {
-    logger.error('Error sending bulk emails:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'sending bulk emails');
   }
 });
 
@@ -273,11 +266,7 @@ router.post('/send-template', authenticate, rateLimiter(100), async (req, res) =
       emailId: result.emailId,
     });
   } catch (error) {
-    logger.error('Error sending template email:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'sending template email');
   }
 });
 
@@ -316,7 +305,7 @@ router.get('/templates', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -333,7 +322,7 @@ router.get('/templates/:id', authenticate, async (req, res) => {
     }
     res.json({ success: true, data: template });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -365,7 +354,7 @@ router.post('/templates', authenticate, async (req, res) => {
 
     res.status(201).json({ success: true, data: template });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -392,7 +381,7 @@ router.put('/templates/:id', authenticate, async (req, res) => {
 
     res.json({ success: true, data: template });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -409,7 +398,7 @@ router.delete('/templates/:id', authenticate, async (req, res) => {
     }
     res.json({ success: true, message: 'Template deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -453,7 +442,7 @@ router.get('/logs', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -470,7 +459,7 @@ router.get('/logs/:emailId', authenticate, async (req, res) => {
     }
     res.json({ success: true, data: log });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -538,7 +527,7 @@ router.post('/tracking/click/:emailId', async (req, res) => {
 
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -572,7 +561,7 @@ router.get('/campaigns', authenticate, async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -603,7 +592,7 @@ router.post('/campaigns', authenticate, async (req, res) => {
 
     res.status(201).json({ success: true, data: campaign });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -662,7 +651,7 @@ router.post('/campaigns/:id/send', authenticate, async (req, res) => {
       stats: campaign.stats,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -680,7 +669,7 @@ router.get('/lists', authenticate, async (req, res) => {
     const lists = await EmailList.find().sort({ createdAt: -1 });
     res.json({ success: true, data: lists });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -712,7 +701,7 @@ router.post('/lists', authenticate, async (req, res) => {
 
     res.status(201).json({ success: true, data: list });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -751,7 +740,7 @@ router.post('/lists/:id/subscribers', authenticate, async (req, res) => {
 
     res.json({ success: true, message: 'Subscriber added' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -778,7 +767,7 @@ router.delete('/lists/:id/subscribers/:email', authenticate, async (req, res) =>
 
     res.json({ success: true, message: 'Subscriber removed' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -796,7 +785,7 @@ router.get('/signatures', authenticate, async (req, res) => {
     const signatures = await EmailSignature.find({ isActive: true });
     res.json({ success: true, data: signatures });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -827,7 +816,7 @@ router.post('/signatures', authenticate, async (req, res) => {
 
     res.status(201).json({ success: true, data: signature });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -859,7 +848,7 @@ router.get('/queue', authenticate, async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -913,7 +902,7 @@ router.post('/queue/process', authenticate, async (req, res) => {
       stats: { processed, failed, total: pendingEmails.length },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -985,7 +974,7 @@ router.get('/stats', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'email');
   }
 });
 
@@ -1005,11 +994,7 @@ router.get('/health', authenticate, async (req, res) => {
       verification,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      status: 'unhealthy',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'email');
   }
 });
 

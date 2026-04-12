@@ -8,6 +8,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 const { validateUploadedFile } = require('../utils/uploadValidator');
+const safeError = require('../utils/safeError');
 
 /** Safely parse JSON — returns fallback on invalid input */
 const safeJsonParse = (str, fallback = []) => {
@@ -130,10 +131,7 @@ const handleMulterError = (err, _req, res, next) => {
   }
 
   if (err) {
-    return res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'medicalFiles');
   }
 
   next();
@@ -186,11 +184,7 @@ router.post(
         }
       }
 
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في رفع الملف',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, unlinkError, 'medicalFiles');
     }
   }
 );
@@ -246,11 +240,7 @@ router.post(
         }
       }
 
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في رفع الملفات',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'medicalFiles');
     }
   }
 );
@@ -281,11 +271,7 @@ router.get('/view/:fileType/:fileName', authenticate, async (req, res) => {
     // إرسال الملف
     res.sendFile(filePath);
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في عرض الملف',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'medicalFiles');
   }
 });
 
@@ -322,11 +308,7 @@ router.get('/download/:fileType/:fileName', authenticate, async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في تحميل الملف',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'medicalFiles');
   }
 });
 
@@ -365,11 +347,7 @@ router.delete(
         message: 'تم حذف الملف بنجاح',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في حذف الملف',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'medicalFiles');
     }
   }
 );
@@ -416,11 +394,7 @@ router.get('/info/:fileType/:fileName', authenticate, async (req, res) => {
       data: fileInfo,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في الحصول على معلومات الملف',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'medicalFiles');
   }
 });
 
@@ -475,11 +449,7 @@ router.get('/storage/statistics', authenticate, authorize(['admin']), async (req
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في الحصول على الإحصائيات',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'medicalFiles');
   }
 });
 

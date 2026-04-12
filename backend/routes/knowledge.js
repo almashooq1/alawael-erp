@@ -10,6 +10,7 @@ const {
   KnowledgeSearchLog,
   KnowledgeRating,
 } = require('../models/KnowledgeBase');
+const safeError = require('../utils/safeError');
 
 // ============ GET ENDPOINTS ============
 
@@ -49,7 +50,7 @@ router.get('/articles', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -80,7 +81,7 @@ router.get('/articles/:id', async (req, res) => {
 
     res.json({ success: true, data: article });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -120,7 +121,7 @@ router.get('/search', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -130,7 +131,7 @@ router.get('/categories', async (req, res) => {
     const categories = await KnowledgeCategory.find().sort({ order: 1 }).limit(200).lean();
     res.json({ success: true, data: categories });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -163,7 +164,7 @@ router.get('/categories/:category', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -179,7 +180,7 @@ router.get('/trending', async (req, res) => {
 
     res.json({ success: true, data: articles });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -195,7 +196,7 @@ router.get('/top-rated', async (req, res) => {
 
     res.json({ success: true, data: articles });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -278,7 +279,7 @@ router.delete('/categories/:id', authMiddleware, roleMiddleware(['admin']), asyn
       message: 'Category deleted successfully',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -478,7 +479,7 @@ router.get('/analytics/searches', authMiddleware, roleMiddleware(['admin']), asy
 
     res.json({ success: true, data: searches });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 
@@ -511,7 +512,7 @@ router.get('/analytics/stats', authMiddleware, roleMiddleware(['admin']), async 
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'knowledge');
   }
 });
 

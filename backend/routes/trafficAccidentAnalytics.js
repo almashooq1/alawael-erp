@@ -8,6 +8,7 @@ const trafficAccidentAnalytics = require('../services/trafficAccidentAnalytics')
 const logger = require('../utils/logger');
 const authenticate = require('../middleware/authenticate');
 const authorize = require('../middleware/authorize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -36,10 +37,7 @@ router.get('/timeline-trends', authorize('view_accident_analytics'), async (req,
     logger.error('Error analyzing timeline trends', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -58,11 +56,7 @@ router.get('/hotspots', authorize('view_accident_analytics'), async (req, res) =
       data: hotspots,
     });
   } catch (error) {
-    logger.error('Error analyzing hotspots', { error: error.message });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'analyzing hotspots');
   }
 });
 
@@ -82,10 +76,7 @@ router.get('/violations', authorize('view_accident_analytics'), async (req, res)
     logger.error('Error analyzing violation patterns', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -110,11 +101,7 @@ router.get('/injury-fatality-rates', authorize('view_accident_analytics'), async
       data: rates,
     });
   } catch (error) {
-    logger.error('Error analyzing injury rates', { error: error.message });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'analyzing injury rates');
   }
 });
 
@@ -143,10 +130,7 @@ router.get('/financial-impact', authorize('view_accident_analytics'), async (req
     logger.error('Error analyzing financial impact', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -166,10 +150,7 @@ router.get('/investigator-performance', authorize('view_accident_analytics'), as
     logger.error('Error analyzing investigator performance', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -189,10 +170,7 @@ router.get('/seasonal-trends', authorize('view_accident_analytics'), async (req,
     logger.error('Error analyzing seasonal trends', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -222,10 +200,7 @@ router.get('/comprehensive-summary', authorize('view_accident_analytics'), async
     logger.error('Error generating comprehensive summary', {
       error: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'trafficAccidentAnalytics');
   }
 });
 
@@ -252,11 +227,7 @@ router.get('/key-insights', authorize('view_accident_analytics'), async (req, re
       data: insights,
     });
   } catch (error) {
-    logger.error('Error extracting key insights', { error: error.message });
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'extracting key insights');
   }
 });
 

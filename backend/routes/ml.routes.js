@@ -10,6 +10,7 @@ const authenticate = require('../middleware/authenticate');
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const Product = require('../models/Product');
+const safeError = require('../utils/safeError');
 
 // Middleware
 router.use(authenticate);
@@ -52,7 +53,7 @@ router.post('/forecast/orders', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -94,7 +95,7 @@ router.post('/forecast/revenue', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -142,7 +143,7 @@ router.post('/churn/predict', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -222,7 +223,7 @@ router.post('/recommendations/products', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -282,7 +283,7 @@ router.post('/inventory/optimize', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -355,7 +356,7 @@ router.post('/anomalies/detect', async (req, res) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 
@@ -424,7 +425,7 @@ router.get('/insights/summary', async (req, res) => {
       lastUpdated: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ml');
   }
 });
 

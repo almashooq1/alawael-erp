@@ -15,6 +15,7 @@ router.get('/dashboard/stats', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
     const VendorEvaluation = require('../models/VendorEvaluation');
+const safeError = require('../utils/safeError');
 
     const [totalVendors, activeVendors, blacklisted, evaluations] = await Promise.all([
       Vendor.countDocuments({ isDeleted: { $ne: true } }),
@@ -49,8 +50,7 @@ router.get('/dashboard/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Vendors dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إحصائيات الموردين' });
+    safeError(res, err, 'Vendors dashboard error');
   }
 });
 
@@ -71,8 +71,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Vendors list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الموردين' });
+    safeError(res, err, 'Vendors list error');
   }
 });
 
@@ -84,8 +83,7 @@ router.get('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Vendor get error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المورد' });
+    safeError(res, err, 'Vendor get error');
   }
 });
 
@@ -96,8 +94,7 @@ router.post('/', async (req, res) => {
     const data = await Vendor.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data, message: 'تم إضافة المورد بنجاح' });
   } catch (err) {
-    logger.error('Vendor create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة المورد' });
+    safeError(res, err, 'Vendor create error');
   }
 });
 
@@ -111,8 +108,7 @@ router.put('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المورد غير موجود' });
     res.json({ success: true, data, message: 'تم تحديث المورد بنجاح' });
   } catch (err) {
-    logger.error('Vendor update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المورد' });
+    safeError(res, err, 'Vendor update error');
   }
 });
 
@@ -123,8 +119,7 @@ router.delete('/:id', async (req, res) => {
     await Vendor.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف المورد بنجاح' });
   } catch (err) {
-    logger.error('Vendor delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المورد' });
+    safeError(res, err, 'Vendor delete error');
   }
 });
 

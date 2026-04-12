@@ -2,6 +2,7 @@
 const PolicyService = require('../services/policyService');
 const { validationResult } = require('express-validator');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class PolicyController {
   // ==================== السياسات ====================
@@ -26,8 +27,7 @@ class PolicyController {
       const result = await PolicyService.createPolicy(policyData);
       res.status(201).json(result);
     } catch (error) {
-      logger.error(`Error in createPolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -48,8 +48,7 @@ class PolicyController {
       const result = await PolicyService.updatePolicy(policyId, updateData);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in updatePolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -85,8 +84,7 @@ class PolicyController {
       const result = await PolicyService.getPolicies(filters);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in getPolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -98,8 +96,7 @@ class PolicyController {
       const policies = await PolicyService.getActivePolicies();
       res.json({ success: true, data: policies });
     } catch (error) {
-      logger.error(`Error in getActivePolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -131,8 +128,7 @@ class PolicyController {
       const result = await PolicyService.submitForApproval(policyId, approvers);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in submitForApproval: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -149,8 +145,7 @@ class PolicyController {
       const result = await PolicyService.approvePolicy(policyId, approverRole, userName, comments);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in approvePolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -166,8 +161,7 @@ class PolicyController {
       const result = await PolicyService.rejectPolicy(policyId, approverRole, userName, reason);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in rejectPolicy: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -183,8 +177,7 @@ class PolicyController {
       });
       res.json(policies);
     } catch (error) {
-      logger.error(`Error in getPendingApprovals: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -201,8 +194,7 @@ class PolicyController {
       const result = await PolicyService.sendForAcknowledgement(policyId, employees);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in sendForAcknowledgement: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -218,8 +210,7 @@ class PolicyController {
       const result = await PolicyService.acknowledgePolicies(employeeId, policyIds, ipAddress);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in acknowledgePolicies: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -240,8 +231,7 @@ class PolicyController {
       const result = await PolicyService.getPendingAcknowledgements(filters);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in getPendingAcknowledgements: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -254,8 +244,7 @@ class PolicyController {
       const result = await PolicyService.getAcknowledgementReports(policyId);
       res.json(result);
     } catch (error) {
-      logger.error(`Error in getAcknowledgementReports: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 
@@ -318,8 +307,7 @@ class PolicyController {
 
       res.json({ success: true, stats });
     } catch (error) {
-      logger.error(`Error in getStatistics: ${error.message}`);
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'policyController');
     }
   }
 

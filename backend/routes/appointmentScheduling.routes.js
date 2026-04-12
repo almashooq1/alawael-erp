@@ -20,6 +20,7 @@ const {
   WaitlistEntry,
 } = require('../models/appointmentScheduling.model');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -82,8 +83,7 @@ router.get('/templates', async (req, res) => {
     ]);
     res.json({ success: true, data: templates, total });
   } catch (error) {
-    logger.error('[Scheduling] List templates error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, error, '[Scheduling] List templates error');
   }
 });
 
@@ -95,8 +95,7 @@ router.get('/templates/:id', async (req, res) => {
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (error) {
-    logger.error('[Scheduling] Get template error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب القالب' });
+    safeError(res, error, '[Scheduling] Get template error');
   }
 });
 
@@ -110,8 +109,7 @@ router.post('/templates', async (req, res) => {
     logger.info(`[Scheduling] Template created: ${template.name.ar}`);
     res.status(201).json({ success: true, data: template });
   } catch (error) {
-    logger.error('[Scheduling] Create template error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القالب' });
+    safeError(res, error, '[Scheduling] Create template error');
   }
 });
 
@@ -128,8 +126,7 @@ router.put('/templates/:id', async (req, res) => {
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: template });
   } catch (error) {
-    logger.error('[Scheduling] Update template error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث القالب' });
+    safeError(res, error, '[Scheduling] Update template error');
   }
 });
 
@@ -138,8 +135,7 @@ router.delete('/templates/:id', async (req, res) => {
     await ScheduleTemplate.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف القالب بنجاح' });
   } catch (error) {
-    logger.error('[Scheduling] Delete template error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف القالب' });
+    safeError(res, error, '[Scheduling] Delete template error');
   }
 });
 
@@ -199,8 +195,7 @@ router.post('/templates/:id/generate-slots', async (req, res) => {
       message: `تم إنشاء ${created.length} فترة`,
     });
   } catch (error) {
-    logger.error('[Scheduling] Generate slots error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الفترات' });
+    safeError(res, error, '[Scheduling] Generate slots error');
   }
 });
 
@@ -247,8 +242,7 @@ router.get('/slots', async (req, res) => {
     ]);
     res.json({ success: true, data: slots, total });
   } catch (error) {
-    logger.error('[Scheduling] List slots error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفترات' });
+    safeError(res, error, '[Scheduling] List slots error');
   }
 });
 
@@ -270,8 +264,7 @@ router.patch('/slots/:id/book', async (req, res) => {
 
     res.json({ success: true, data: slot, message: 'تم حجز الفترة بنجاح' });
   } catch (error) {
-    logger.error('[Scheduling] Book slot error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حجز الفترة' });
+    safeError(res, error, '[Scheduling] Book slot error');
   }
 });
 
@@ -291,8 +284,7 @@ router.patch('/slots/:id/cancel', async (req, res) => {
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot, message: 'تم إلغاء الحجز' });
   } catch (error) {
-    logger.error('[Scheduling] Cancel slot error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الحجز' });
+    safeError(res, error, '[Scheduling] Cancel slot error');
   }
 });
 
@@ -306,8 +298,7 @@ router.patch('/slots/:id/block', async (req, res) => {
     if (!slot) return res.status(404).json({ success: false, message: 'الفترة غير موجودة' });
     res.json({ success: true, data: slot });
   } catch (error) {
-    logger.error('[Scheduling] Block slot error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حظر الفترة' });
+    safeError(res, error, '[Scheduling] Block slot error');
   }
 });
 
@@ -339,8 +330,7 @@ router.get('/availability', async (req, res) => {
 
     res.json({ success: true, data: { slots, grouped, totalAvailable: slots.length } });
   } catch (error) {
-    logger.error('[Scheduling] Availability check error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في فحص التوفر' });
+    safeError(res, error, '[Scheduling] Availability check error');
   }
 });
 
@@ -366,8 +356,7 @@ router.get('/reminders', async (req, res) => {
     ]);
     res.json({ success: true, data: reminders, total });
   } catch (error) {
-    logger.error('[Scheduling] List reminders error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذكيرات' });
+    safeError(res, error, '[Scheduling] List reminders error');
   }
 });
 
@@ -377,8 +366,7 @@ router.post('/reminders', async (req, res) => {
     await reminder.save();
     res.status(201).json({ success: true, data: reminder });
   } catch (error) {
-    logger.error('[Scheduling] Create reminder error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التذكير' });
+    safeError(res, error, '[Scheduling] Create reminder error');
   }
 });
 
@@ -395,8 +383,7 @@ router.get('/reminders/pending', async (req, res) => {
       .limit(50);
     res.json({ success: true, data: reminders, count: reminders.length });
   } catch (error) {
-    logger.error('[Scheduling] Pending reminders error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذكيرات المعلقة' });
+    safeError(res, error, '[Scheduling] Pending reminders error');
   }
 });
 
@@ -424,8 +411,7 @@ router.get('/waitlist', async (req, res) => {
     ]);
     res.json({ success: true, data: entries, total });
   } catch (error) {
-    logger.error('[Scheduling] List waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب قائمة الانتظار' });
+    safeError(res, error, '[Scheduling] List waitlist error');
   }
 });
 
@@ -444,8 +430,7 @@ router.post('/waitlist', async (req, res) => {
     logger.info(`[Scheduling] Waitlist entry added, position: ${entry.position}`);
     res.status(201).json({ success: true, data: entry });
   } catch (error) {
-    logger.error('[Scheduling] Add waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الإضافة لقائمة الانتظار' });
+    safeError(res, error, '[Scheduling] Add waitlist error');
   }
 });
 
@@ -464,8 +449,7 @@ router.patch('/waitlist/:id/offer', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, message: 'سجل الانتظار غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    logger.error('[Scheduling] Offer waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في عرض الموعد' });
+    safeError(res, error, '[Scheduling] Offer waitlist error');
   }
 });
 
@@ -479,8 +463,7 @@ router.patch('/waitlist/:id/cancel', async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, message: 'سجل الانتظار غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    logger.error('[Scheduling] Cancel waitlist error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الانتظار' });
+    safeError(res, error, '[Scheduling] Cancel waitlist error');
   }
 });
 
@@ -552,8 +535,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Scheduling] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم' });
+    safeError(res, error, '[Scheduling] Dashboard error');
   }
 });
 

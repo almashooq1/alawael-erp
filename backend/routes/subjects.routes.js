@@ -56,7 +56,7 @@ router.get('/department/:department', async (req, res) => {
       .lean();
     res.json({ success: true, data: subjects });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المواد', error: safeError(error) });
+    safeError(res, error, 'subjects');
   }
 });
 
@@ -69,7 +69,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
     if (!subject) return res.status(404).json({ success: false, message: 'المادة غير موجودة' });
     res.json({ success: true, data: subject });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المادة', error: safeError(error) });
+    safeError(res, error, 'subjects');
   }
 });
 
@@ -113,7 +113,7 @@ router.delete('/:id', validateObjectId('id'), authorize(['admin']), async (req, 
     if (!subject) return res.status(404).json({ success: false, message: 'المادة غير موجودة' });
     res.json({ success: true, message: 'تم حذف المادة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف المادة', error: safeError(error) });
+    safeError(res, error, 'subjects');
   }
 });
 

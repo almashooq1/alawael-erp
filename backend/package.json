@@ -107,7 +107,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "3.1013.0",
     "@aws-sdk/lib-storage": "3.1013.0",
-    "@aws-sdk/s3-request-presigner": "3.1013.0",
     "@sendgrid/mail": "^8.1.6",
     "archiver": "7.0.1",
     "axios": "^1.13.2",
@@ -156,9 +155,9 @@
     "winston": "3.19.0"
   },
   "devDependencies": {
+    "@eslint/js": "9.39.4",
     "@faker-js/faker": "^10.2.0",
     "caniuse-lite": "1.0.30001781",
-    "@eslint/js": "9.39.4",
     "eslint": "10.1.0",
     "globals": "17.4.0",
     "jest": "^29.7.0",

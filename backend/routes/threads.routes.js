@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Authentication required for all thread routes
 router.use(authenticate);
@@ -69,11 +70,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
       message: 'Thread created successfully',
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to create thread',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'threads');
   }
 });
 
@@ -98,11 +95,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve threads',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'threads');
   }
 });
 
@@ -137,11 +130,7 @@ router.get('/:id', async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve thread',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'threads');
   }
 });
 
@@ -233,11 +222,7 @@ router.post('/:id/pin-message', authorize(['admin', 'manager']), (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to pin message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'threads');
   }
 });
 

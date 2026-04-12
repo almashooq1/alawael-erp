@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../../config/secrets');
+const safeError = require('../../utils/safeError');
 
 // Middleware للتحقق من المصادقة
 const authenticateToken = (req, res, next) => {
@@ -75,10 +76,7 @@ router.get('/workflows', authenticateToken, async (req, res) => {
       total: results.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -157,10 +155,7 @@ router.post('/workflows', authenticateToken, async (req, res) => {
       data: workflow,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -186,10 +181,7 @@ router.get('/workflows/:id', authenticateToken, async (req, res) => {
       data: workflow,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -294,10 +286,7 @@ router.post('/workflows/:id/approve', authenticateToken, async (req, res) => {
       message: `Workflow ${decision === 'approve' ? 'approved' : decision === 'reject' ? 'rejected' : decision === 'revise' ? 'revision-required' : 'delegated'} successfully`,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -356,10 +345,7 @@ router.post('/workflows/:id/delegate', authenticateToken, async (req, res) => {
       delegation,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -396,10 +382,7 @@ router.get('/analytics', authenticateToken, async (req, res) => {
       data: analytics,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -416,10 +399,7 @@ router.get('/templates', authenticateToken, async (req, res) => {
       data: templates,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 
@@ -446,10 +426,7 @@ router.get('/audit-log', authenticateToken, async (req, res) => {
       total: results.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'workflows');
   }
 });
 

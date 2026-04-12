@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticateToken);
@@ -33,11 +34,7 @@ router.patch('/:id/mark-read', async (req, res) => {
       readAt: new Date(),
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark conversation as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'conversations');
   }
 });
 

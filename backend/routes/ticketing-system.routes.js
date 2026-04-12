@@ -38,6 +38,7 @@ const {
 } = require('../models/TicketEnhanced');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -257,8 +258,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[Ticketing] list error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] list error');
   }
 });
 
@@ -393,8 +393,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[Ticketing] dashboard error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] dashboard error');
   }
 });
 
@@ -453,8 +452,7 @@ router.post('/', async (req, res) => {
       data: ticket,
     });
   } catch (err) {
-    logger.error('[Ticketing] create error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] create error');
   }
 });
 
@@ -492,8 +490,7 @@ router.get('/:id', async (req, res) => {
       data: { ...ticket, comments },
     });
   } catch (err) {
-    logger.error('[Ticketing] show error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] show error');
   }
 });
 
@@ -570,8 +567,7 @@ router.put('/:id/status', async (req, res) => {
       data: ticket,
     });
   } catch (err) {
-    logger.error('[Ticketing] update status error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] update status error');
   }
 });
 
@@ -611,8 +607,7 @@ router.put('/:id/assign', requireAdmin, async (req, res) => {
       data: ticket,
     });
   } catch (err) {
-    logger.error('[Ticketing] assign error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] assign error');
   }
 });
 
@@ -641,8 +636,7 @@ router.get('/:id/comments', async (req, res) => {
 
     return res.json({ success: true, data: comments, total: comments.length });
   } catch (err) {
-    logger.error('[Ticketing] comments list error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] comments list error');
   }
 });
 
@@ -688,8 +682,7 @@ router.post('/:id/comments', async (req, res) => {
       data: comment,
     });
   } catch (err) {
-    logger.error('[Ticketing] add comment error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] add comment error');
   }
 });
 
@@ -727,8 +720,7 @@ router.post('/:id/rate', async (req, res) => {
 
     return res.json({ success: true, message: 'شكراً لتقييمك' });
   } catch (err) {
-    logger.error('[Ticketing] rate error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] rate error');
   }
 });
 
@@ -742,8 +734,7 @@ router.get('/sla-configs', requireAdmin, async (req, res) => {
     const configs = await TicketSlaConfig.find().sort({ priority: 1 }).lean();
     return res.json({ success: true, data: configs, total: configs.length });
   } catch (err) {
-    logger.error('[Ticketing] sla configs error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] sla configs error');
   }
 });
 
@@ -780,8 +771,7 @@ router.post('/sla-configs', requireAdmin, async (req, res) => {
 
     return res.status(201).json({ success: true, message: 'تم إنشاء إعداد SLA', data: config });
   } catch (err) {
-    logger.error('[Ticketing] create sla config error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] create sla config error');
   }
 });
 
@@ -794,8 +784,7 @@ router.put('/sla-configs/:id', requireAdmin, async (req, res) => {
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     return res.json({ success: true, message: 'تم تحديث إعداد SLA', data: config });
   } catch (err) {
-    logger.error('[Ticketing] update sla config error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] update sla config error');
   }
 });
 
@@ -809,8 +798,7 @@ router.get('/escalation-rules', requireAdmin, async (req, res) => {
     const rules = await TicketEscalationRule.find().sort({ level: 1 }).lean();
     return res.json({ success: true, data: rules, total: rules.length });
   } catch (err) {
-    logger.error('[Ticketing] escalation rules error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] escalation rules error');
   }
 });
 
@@ -845,8 +833,7 @@ router.post('/escalation-rules', requireAdmin, async (req, res) => {
 
     return res.status(201).json({ success: true, message: 'تم إنشاء قاعدة التصعيد', data: rule });
   } catch (err) {
-    logger.error('[Ticketing] create escalation rule error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] create escalation rule error');
   }
 });
 
@@ -861,8 +848,7 @@ router.put('/escalation-rules/:id', requireAdmin, async (req, res) => {
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     return res.json({ success: true, message: 'تم تحديث قاعدة التصعيد', data: rule });
   } catch (err) {
-    logger.error('[Ticketing] update escalation rule error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] update escalation rule error');
   }
 });
 
@@ -876,8 +862,7 @@ router.get('/auto-assignments', requireAdmin, async (req, res) => {
     const rules = await TicketAutoAssignment.find().lean();
     return res.json({ success: true, data: rules, total: rules.length });
   } catch (err) {
-    logger.error('[Ticketing] auto assignments error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] auto assignments error');
   }
 });
 
@@ -903,8 +888,7 @@ router.post('/auto-assignments', requireAdmin, async (req, res) => {
 
     return res.status(201).json({ success: true, message: 'تم إنشاء قاعدة التعيين', data: rule });
   } catch (err) {
-    logger.error('[Ticketing] create auto assignment error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] create auto assignment error');
   }
 });
 
@@ -978,8 +962,7 @@ router.post('/check-sla', requireAdmin, async (req, res) => {
       escalated,
     });
   } catch (err) {
-    logger.error('[Ticketing] check-sla error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[Ticketing] check-sla error');
   }
 });
 

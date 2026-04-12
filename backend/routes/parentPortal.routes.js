@@ -48,6 +48,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secrets');
 
@@ -160,8 +161,7 @@ router.post('/auth/send-otp', parentOtpSendLimiter, async (req, res) => {
       ...(process.env.NODE_ENV !== 'production' && { otp_dev: otp }),
     });
   } catch (err) {
-    logger.error('send-otp error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, 'send-otp error');
   }
 });
 
@@ -258,8 +258,7 @@ router.post('/auth/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('verify-otp error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, 'verify-otp error');
   }
 });
 
@@ -369,8 +368,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('parent dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم' });
+    safeError(res, err, 'parent dashboard error');
   }
 });
 
@@ -396,8 +394,7 @@ router.get('/children', async (req, res) => {
 
     res.json({ success: true, data: children });
   } catch (err) {
-    logger.error('parent children error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأبناء' });
+    safeError(res, err, 'parent children error');
   }
 });
 
@@ -422,8 +419,7 @@ router.get('/children/:id', async (req, res) => {
 
     res.json({ success: true, data: child });
   } catch (err) {
-    logger.error('parent child detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات الابن' });
+    safeError(res, err, 'parent child detail error');
   }
 });
 
@@ -474,8 +470,7 @@ router.get('/children/:id/sessions', async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    logger.error('parent sessions error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجلسات' });
+    safeError(res, err, 'parent sessions error');
   }
 });
 
@@ -508,8 +503,7 @@ router.get('/children/:id/progress', async (req, res) => {
 
     res.json({ success: true, data: progressData });
   } catch (err) {
-    logger.error('parent progress error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات التقدم' });
+    safeError(res, err, 'parent progress error');
   }
 });
 
@@ -538,8 +532,7 @@ router.get('/appointments', async (req, res) => {
     }
     res.json({ success: true, data: appointments });
   } catch (err) {
-    logger.error('parent appointments error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المواعيد' });
+    safeError(res, err, 'parent appointments error');
   }
 });
 
@@ -585,8 +578,7 @@ router.post('/appointments/request', async (req, res) => {
       data: { requestId: message._id },
     });
   } catch (err) {
-    logger.error('appointment request error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الطلب' });
+    safeError(res, err, 'appointment request error');
   }
 });
 
@@ -617,7 +609,7 @@ router.put('/appointments/:id/cancel', async (req, res) => {
       updated,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الموعد' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -647,7 +639,7 @@ router.get('/transport/live', async (req, res) => {
     }
     res.json({ success: true, data: trips });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات النقل' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -679,7 +671,7 @@ router.get('/invoices', async (req, res) => {
     }
     res.json({ success: true, data: invoices, pagination: { page, limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفواتير' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -699,7 +691,7 @@ router.get('/invoices/:id', async (req, res) => {
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
     res.json({ success: true, data: invoice });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفاتورة' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -739,8 +731,7 @@ router.get('/messages', async (req, res) => {
 
     res.json({ success: true, data: messages, unreadCount, pagination: { page, limit, total } });
   } catch (err) {
-    logger.error('parent messages error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الرسائل' });
+    safeError(res, err, 'parent messages error');
   }
 });
 
@@ -798,8 +789,7 @@ router.post('/messages', async (req, res) => {
 
     res.status(201).json({ success: true, message: 'تم إرسال الرسالة بنجاح', data: message });
   } catch (err) {
-    logger.error('parent send message error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال الرسالة' });
+    safeError(res, err, 'parent send message error');
   }
 });
 
@@ -816,7 +806,7 @@ router.put('/messages/:id/read', async (req, res) => {
     );
     res.json({ success: true, message: 'تم التعليم كمقروء' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -849,7 +839,7 @@ router.get('/notifications', async (req, res) => {
     }
     res.json({ success: true, data: notifications, unreadCount });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإشعارات' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -878,7 +868,7 @@ router.put('/notifications/mark-read', async (req, res) => {
     }
     res.json({ success: true, message: 'تم التعليم كمقروء' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -911,8 +901,7 @@ router.get('/complaints', async (req, res) => {
 
     res.json({ success: true, data: complaints, pagination: { page, limit, total } });
   } catch (err) {
-    logger.error('parent complaints error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكاوى' });
+    safeError(res, err, 'parent complaints error');
   }
 });
 
@@ -982,8 +971,7 @@ router.post('/complaints', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('parent complaint submit error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الطلب' });
+    safeError(res, err, 'parent complaint submit error');
   }
 });
 
@@ -1004,7 +992,7 @@ router.get('/complaints/:id', async (req, res) => {
     if (!complaint) return res.status(404).json({ success: false, message: 'الشكوى غير موجودة' });
     res.json({ success: true, data: complaint });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكوى' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1035,7 +1023,7 @@ router.post('/complaints/:id/rate', async (req, res) => {
 
     res.json({ success: true, message: 'شكراً لتقييمك' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التقييم' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1077,7 +1065,7 @@ router.get('/settings', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإعدادات' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1103,7 +1091,7 @@ router.put('/settings', async (req, res) => {
 
     res.json({ success: true, message: 'تم حفظ الإعدادات بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حفظ الإعدادات' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1137,7 +1125,7 @@ router.post('/devices', async (req, res) => {
 
     res.json({ success: true, message: 'تم تسجيل الجهاز', data: device });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الجهاز' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1154,7 +1142,7 @@ router.delete('/devices/:token', async (req, res) => {
     );
     res.json({ success: true, message: 'تم إلغاء تسجيل الجهاز' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الجهاز' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1198,7 +1186,7 @@ router.get('/admin/complaints', async (req, res) => {
 
     res.json({ success: true, data: complaints, pagination: { page, limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشكاوى' });
+    safeError(res, err, 'parentPortal');
   }
 });
 
@@ -1243,7 +1231,7 @@ router.put('/admin/complaints/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم تحديث الشكوى', data: complaint });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الشكوى' });
+    safeError(res, err, 'parentPortal');
   }
 });
 

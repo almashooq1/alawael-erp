@@ -18,6 +18,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -56,8 +57,7 @@ router.get('/meetings', async (req, res) => {
       message: 'قائمة اجتماعات الفريق متعدد التخصصات',
     });
   } catch (error) {
-    logger.error('Error fetching MDT meetings:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاجتماعات' });
+    safeError(res, error, 'fetching MDT meetings');
   }
 });
 
@@ -73,8 +73,7 @@ router.get('/meetings/:id', async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'بيانات الاجتماع' });
   } catch (error) {
-    logger.error('Error fetching MDT meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاجتماع' });
+    safeError(res, error, 'fetching MDT meeting');
   }
 });
 
@@ -115,8 +114,7 @@ router.post(
         .status(201)
         .json({ success: true, data: meeting, message: 'تم إنشاء اجتماع الفريق بنجاح' });
     } catch (error) {
-      logger.error('Error creating MDT meeting:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء الاجتماع' });
+      safeError(res, error, 'creating MDT meeting');
     }
   }
 );
@@ -131,8 +129,7 @@ router.put('/meetings/:id', authorize(['admin', 'manager']), async (req, res) =>
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting, message: 'تم تحديث الاجتماع بنجاح' });
   } catch (error) {
-    logger.error('Error updating MDT meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الاجتماع' });
+    safeError(res, error, 'updating MDT meeting');
   }
 });
 
@@ -143,8 +140,7 @@ router.delete('/meetings/:id', authorize(['admin']), async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, message: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم حذف الاجتماع بنجاح' });
   } catch (error) {
-    logger.error('Error deleting MDT meeting:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الاجتماع' });
+    safeError(res, error, 'deleting MDT meeting');
   }
 });
 
@@ -165,8 +161,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تمت إضافة الحاضر بنجاح' });
     } catch (error) {
-      logger.error('Error adding attendee:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة الحاضر' });
+      safeError(res, error, 'adding attendee');
     }
   }
 );
@@ -188,8 +183,7 @@ router.patch(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث حضور العضو' });
     } catch (error) {
-      logger.error('Error updating attendance:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الحضور' });
+      safeError(res, error, 'updating attendance');
     }
   }
 );
@@ -211,8 +205,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تمت إضافة الحالة للاجتماع' });
     } catch (error) {
-      logger.error('Error adding case to meeting:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة الحالة' });
+      safeError(res, error, 'adding case to meeting');
     }
   }
 );
@@ -233,8 +226,7 @@ router.patch(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث بيانات الحالة' });
     } catch (error) {
-      logger.error('Error updating case:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الحالة' });
+      safeError(res, error, 'updating case');
     }
   }
 );
@@ -259,8 +251,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم إضافة القرار بنجاح' });
     } catch (error) {
-      logger.error('Error adding decision:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة القرار' });
+      safeError(res, error, 'adding decision');
     }
   }
 );
@@ -280,8 +271,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تمت إضافة بند جدول الأعمال' });
     } catch (error) {
-      logger.error('Error adding agenda item:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة بند جدول الأعمال' });
+      safeError(res, error, 'adding agenda item');
     }
   }
 );
@@ -332,8 +322,7 @@ router.get('/meetings-stats', async (req, res) => {
       message: 'إحصائيات الاجتماعات',
     });
   } catch (error) {
-    logger.error('Error fetching meeting stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching meeting stats');
   }
 });
 
@@ -372,8 +361,7 @@ router.get('/plans', async (req, res) => {
       message: 'قائمة خطط التأهيل الموحدة',
     });
   } catch (error) {
-    logger.error('Error fetching unified plans:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطط التأهيل' });
+    safeError(res, error, 'fetching unified plans');
   }
 });
 
@@ -390,8 +378,7 @@ router.get('/plans/:id', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
     res.json({ success: true, data: plan, message: 'بيانات خطة التأهيل' });
   } catch (error) {
-    logger.error('Error fetching unified plan:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب خطة التأهيل' });
+    safeError(res, error, 'fetching unified plan');
   }
 });
 
@@ -424,8 +411,7 @@ router.post(
         .status(201)
         .json({ success: true, data: plan, message: 'تم إنشاء خطة التأهيل الموحدة بنجاح' });
     } catch (error) {
-      logger.error('Error creating unified plan:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء خطة التأهيل' });
+      safeError(res, error, 'creating unified plan');
     }
   }
 );
@@ -440,8 +426,7 @@ router.put('/plans/:id', authorize(['admin', 'manager', 'therapist']), async (re
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
     res.json({ success: true, data: plan, message: 'تم تحديث خطة التأهيل بنجاح' });
   } catch (error) {
-    logger.error('Error updating unified plan:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث خطة التأهيل' });
+    safeError(res, error, 'updating unified plan');
   }
 });
 
@@ -452,8 +437,7 @@ router.delete('/plans/:id', authorize(['admin']), async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
     res.json({ success: true, message: 'تم حذف خطة التأهيل بنجاح' });
   } catch (error) {
-    logger.error('Error deleting unified plan:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف خطة التأهيل' });
+    safeError(res, error, 'deleting unified plan');
   }
 });
 
@@ -479,8 +463,7 @@ router.post(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تمت إضافة عضو الفريق بنجاح' });
     } catch (error) {
-      logger.error('Error adding team member:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة عضو الفريق' });
+      safeError(res, error, 'adding team member');
     }
   }
 );
@@ -498,8 +481,7 @@ router.delete(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تم إزالة عضو الفريق' });
     } catch (error) {
-      logger.error('Error removing team member:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إزالة عضو الفريق' });
+      safeError(res, error, 'removing team member');
     }
   }
 );
@@ -524,8 +506,7 @@ router.post(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تمت إضافة الهدف بنجاح' });
     } catch (error) {
-      logger.error('Error adding goal:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة الهدف' });
+      safeError(res, error, 'adding goal');
     }
   }
 );
@@ -560,8 +541,7 @@ router.patch(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تم تحديث تقدم الهدف' });
     } catch (error) {
-      logger.error('Error updating goal progress:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث تقدم الهدف' });
+      safeError(res, error, 'updating goal progress');
     }
   }
 );
@@ -582,8 +562,7 @@ router.put(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تم تحديث الهدف بنجاح' });
     } catch (error) {
-      logger.error('Error updating goal:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الهدف' });
+      safeError(res, error, 'updating goal');
     }
   }
 );
@@ -610,8 +589,7 @@ router.post(
       await plan.save();
       res.json({ success: true, data: plan, message: 'تمت إضافة المراجعة بنجاح' });
     } catch (error) {
-      logger.error('Error adding review:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة المراجعة' });
+      safeError(res, error, 'adding review');
     }
   }
 );
@@ -631,8 +609,7 @@ router.post('/plans/:id/approve', authorize(['admin', 'manager']), async (req, r
     await plan.save();
     res.json({ success: true, data: plan, message: 'تم اعتماد خطة التأهيل' });
   } catch (error) {
-    logger.error('Error approving plan:', error);
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الخطة' });
+    safeError(res, error, 'approving plan');
   }
 });
 
@@ -673,8 +650,7 @@ router.get('/plans-stats', async (req, res) => {
       message: 'إحصائيات خطط التأهيل',
     });
   } catch (error) {
-    logger.error('Error fetching plan stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching plan stats');
   }
 });
 
@@ -721,8 +697,7 @@ router.get('/referrals', async (req, res) => {
       message: 'قائمة تذاكر الإحالة الداخلية',
     });
   } catch (error) {
-    logger.error('Error fetching referral tickets:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تذاكر الإحالة' });
+    safeError(res, error, 'fetching referral tickets');
   }
 });
 
@@ -741,8 +716,7 @@ router.get('/referrals/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'بيانات تذكرة الإحالة' });
   } catch (error) {
-    logger.error('Error fetching referral ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تذكرة الإحالة' });
+    safeError(res, error, 'fetching referral ticket');
   }
 });
 
@@ -781,8 +755,7 @@ router.post(
         .status(201)
         .json({ success: true, data: ticket, message: 'تم إنشاء تذكرة الإحالة بنجاح' });
     } catch (error) {
-      logger.error('Error creating referral ticket:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء تذكرة الإحالة' });
+      safeError(res, error, 'creating referral ticket');
     }
   }
 );
@@ -798,8 +771,7 @@ router.put('/referrals/:id', authorize(['admin', 'manager']), async (req, res) =
       return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'تم تحديث تذكرة الإحالة بنجاح' });
   } catch (error) {
-    logger.error('Error updating referral ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث تذكرة الإحالة' });
+    safeError(res, error, 'updating referral ticket');
   }
 });
 
@@ -831,8 +803,7 @@ router.post(
       await ticket.save();
       res.json({ success: true, data: ticket, message: 'تم قبول الإحالة بنجاح' });
     } catch (error) {
-      logger.error('Error accepting referral:', error);
-      res.status(500).json({ success: false, message: 'خطأ في قبول الإحالة' });
+      safeError(res, error, 'accepting referral');
     }
   }
 );
@@ -866,8 +837,7 @@ router.post(
       await ticket.save();
       res.json({ success: true, data: ticket, message: 'تم رفض الإحالة' });
     } catch (error) {
-      logger.error('Error rejecting referral:', error);
-      res.status(500).json({ success: false, message: 'خطأ في رفض الإحالة' });
+      safeError(res, error, 'rejecting referral');
     }
   }
 );
@@ -904,8 +874,7 @@ router.post(
       await ticket.save();
       res.json({ success: true, data: ticket, message: 'تم إكمال الإحالة بنجاح' });
     } catch (error) {
-      logger.error('Error completing referral:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إكمال الإحالة' });
+      safeError(res, error, 'completing referral');
     }
   }
 );
@@ -918,8 +887,7 @@ router.delete('/referrals/:id', authorize(['admin']), async (req, res) => {
       return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
     res.json({ success: true, message: 'تم حذف تذكرة الإحالة' });
   } catch (error) {
-    logger.error('Error deleting referral:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف تذكرة الإحالة' });
+    safeError(res, error, 'deleting referral');
   }
 });
 
@@ -970,8 +938,7 @@ router.get('/referrals-stats', async (req, res) => {
       message: 'إحصائيات تذاكر الإحالة',
     });
   } catch (error) {
-    logger.error('Error fetching referral stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إحصائيات الإحالة' });
+    safeError(res, error, 'fetching referral stats');
   }
 });
 
@@ -1044,8 +1011,7 @@ router.get('/dashboard/beneficiary/:beneficiaryId', async (req, res) => {
       message: 'لوحة المتابعة المشتركة للمستفيد',
     });
   } catch (error) {
-    logger.error('Error fetching beneficiary dashboard:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة المتابعة' });
+    safeError(res, error, 'fetching beneficiary dashboard');
   }
 });
 
@@ -1086,8 +1052,7 @@ router.get('/dashboard/team-workload', authorize(['admin', 'manager']), async (r
       message: 'لوحة متابعة عبء العمل',
     });
   } catch (error) {
-    logger.error('Error fetching team workload:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات عبء العمل' });
+    safeError(res, error, 'fetching team workload');
   }
 });
 
@@ -1136,8 +1101,7 @@ router.get(
         message: `لوحة متابعة قسم ${department}`,
       });
     } catch (error) {
-      logger.error('Error fetching department dashboard:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب بيانات القسم' });
+      safeError(res, error, 'fetching department dashboard');
     }
   }
 );
@@ -1195,8 +1159,7 @@ router.get('/dashboard/overdue', authorize(['admin', 'manager']), async (req, re
       message: 'العناصر المتأخرة',
     });
   } catch (error) {
-    logger.error('Error fetching overdue items:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العناصر المتأخرة' });
+    safeError(res, error, 'fetching overdue items');
   }
 });
 
@@ -1224,8 +1187,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم إضافة محضر الاجتماع' });
     } catch (error) {
-      logger.error('Error adding minutes:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة المحضر' });
+      safeError(res, error, 'adding minutes');
     }
   }
 );
@@ -1247,8 +1209,7 @@ router.post('/meetings/:id/minutes/approve', authorize(['admin', 'manager']), as
     await meeting.save();
     res.json({ success: true, data: meeting, message: 'تم اعتماد محضر الاجتماع' });
   } catch (error) {
-    logger.error('Error approving minutes:', error);
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد المحضر' });
+    safeError(res, error, 'approving minutes');
   }
 });
 
@@ -1269,8 +1230,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم إضافة القرار بنجاح' });
     } catch (error) {
-      logger.error('Error adding decision:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة القرار' });
+      safeError(res, error, 'adding decision');
     }
   }
 );
@@ -1298,8 +1258,7 @@ router.patch(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث حالة القرار' });
     } catch (error) {
-      logger.error('Error updating decision status:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث حالة القرار' });
+      safeError(res, error, 'updating decision status');
     }
   }
 );
@@ -1321,8 +1280,7 @@ router.post(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تمت إضافة المهمة بنجاح' });
     } catch (error) {
-      logger.error('Error adding action item:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إضافة المهمة' });
+      safeError(res, error, 'adding action item');
     }
   }
 );
@@ -1350,8 +1308,7 @@ router.patch(
       await meeting.save();
       res.json({ success: true, data: meeting, message: 'تم تحديث حالة المهمة' });
     } catch (error) {
-      logger.error('Error updating action item:', error);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث المهمة' });
+      safeError(res, error, 'updating action item');
     }
   }
 );
@@ -1387,8 +1344,7 @@ router.get('/decisions-tracker', authorize(['admin', 'manager']), async (req, re
       message: 'متتبع القرارات',
     });
   } catch (error) {
-    logger.error('Error fetching decisions tracker:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب متتبع القرارات' });
+    safeError(res, error, 'fetching decisions tracker');
   }
 });
 
@@ -1427,8 +1383,7 @@ router.get('/action-items-tracker', authorize(['admin', 'manager']), async (req,
       message: 'متتبع المهام',
     });
   } catch (error) {
-    logger.error('Error fetching action items tracker:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب متتبع المهام' });
+    safeError(res, error, 'fetching action items tracker');
   }
 });
 
@@ -1506,8 +1461,7 @@ router.get('/dashboard/overview', async (req, res) => {
       message: 'لوحة المتابعة الشاملة',
     });
   } catch (error) {
-    logger.error('Error fetching dashboard overview:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات لوحة المتابعة' });
+    safeError(res, error, 'fetching dashboard overview');
   }
 });
 
@@ -1547,8 +1501,7 @@ router.get('/stats', authorize(['admin', 'manager']), async (req, res) => {
       message: 'إحصائيات نظام التنسيق الشاملة',
     });
   } catch (error) {
-    logger.error('Error fetching coordination stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات الشاملة' });
+    safeError(res, error, 'fetching coordination stats');
   }
 });
 

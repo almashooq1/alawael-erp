@@ -106,14 +106,14 @@ router.get('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
 router.post('/', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
-    if (!WH) return res.status(500).json({ success: false, message: 'النموذج غير متوفر' });
+    safeError(res, error, 'warehouse');
     const data = await WH.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data });
   } catch (err) {
@@ -146,7 +146,7 @@ router.delete('/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'المستودع غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف المستودع', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -170,7 +170,7 @@ router.get('/:warehouseId/items', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأصناف', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -180,7 +180,7 @@ router.post('/:warehouseId/items', async (req, res) => {
     const data = await WHItem.create({ ...req.body, warehouse: req.params.warehouseId });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الصنف', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -193,7 +193,7 @@ router.put('/items/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الصنف', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -217,7 +217,7 @@ router.get('/transactions/list', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحركات', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -232,7 +232,7 @@ router.post('/transactions', async (req, res) => {
     });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحركة', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 
@@ -262,7 +262,7 @@ router.put('/transactions/:id/complete', async (req, res) => {
     await tx.save();
     res.json({ success: true, data: tx });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إكمال الحركة', error: safeError(err) });
+    safeError(res, err, 'warehouse');
   }
 });
 

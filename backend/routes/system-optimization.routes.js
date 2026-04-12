@@ -5,6 +5,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // Apply authentication to all routes
@@ -161,10 +162,7 @@ router.post('/optimize', async (req, res) => {
       message: 'System optimization completed',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'system-optimization');
   }
 });
 

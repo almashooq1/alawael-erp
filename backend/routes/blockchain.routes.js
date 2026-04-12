@@ -20,6 +20,7 @@ const {
 const { authenticate } = require('../middleware/auth');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // ── Auth: all routes below require authentication ────────────────────────────
 router.use(authenticate);
@@ -62,7 +63,7 @@ router.get('/templates', async (req, res) => {
     const templates = await CertificateTemplate.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: templates });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -136,7 +137,7 @@ router.get('/certificates', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -150,7 +151,7 @@ router.get('/certificates/:id', async (req, res) => {
     if (!cert) return res.status(404).json({ success: false, error: 'الشهادة غير موجودة' });
     res.json({ success: true, data: cert });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -223,7 +224,7 @@ router.patch('/certificates/:id/issue', async (req, res) => {
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم إصدار الشهادة بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -248,7 +249,7 @@ router.patch('/certificates/:id/sign', async (req, res) => {
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم التوقيع بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -271,7 +272,7 @@ router.patch('/certificates/:id/revoke', async (req, res) => {
     await cert.save();
     res.json({ success: true, data: cert, message: 'تم إلغاء الشهادة' });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -342,7 +343,7 @@ router.get('/verify/:hash', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -363,7 +364,7 @@ router.get('/verify/number/:certNumber', async (req, res) => {
     }
     res.redirect(`/api/blockchain/verify/${safeHash}`);
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -375,7 +376,7 @@ router.get('/verify/:certId/logs', async (req, res) => {
       .lean();
     res.json({ success: true, data: logs });
   } catch (error) {
-    res.status(500).json({ success: false });
+    safeError(res, error, 'blockchain');
   }
 });
 
@@ -428,8 +429,7 @@ router.get('/dashboard', async (_req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Blockchain] Dashboard error:', error.message);
-    res.status(500).json({ success: false });
+    safeError(res, error, '[Blockchain] Dashboard error');
   }
 });
 

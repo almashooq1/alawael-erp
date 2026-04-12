@@ -1,0 +1,23 @@
+{
+  "metadata": {
+    "module": "beneficiaries",
+    "moduleName": "المستفيدين",
+    "moduleNameEn": "Beneficiaries",
+    "exportDate": "2026-04-10T16:36:38.042Z",
+    "totalRecords": 0,
+    "fields": [
+      "beneficiaryId",
+      "name",
+      "dateOfBirth",
+      "disabilityType",
+      "severity",
+      "guardian",
+      "phone",
+      "enrollmentDate",
+      "status"
+    ],
+    "system": "الأوائل - Al-Awael ERP",
+    "version": "2.0"
+  },
+  "data": []
+}

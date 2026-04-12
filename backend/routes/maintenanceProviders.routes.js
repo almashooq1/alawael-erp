@@ -35,8 +35,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('maintenanceProvider list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceProvider list error');
   }
 });
 
@@ -60,8 +59,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: { summary: stats[0] || {}, byType } });
   } catch (err) {
-    logger.error('maintenanceProvider stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceProvider stats error');
   }
 });
 
@@ -74,8 +72,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
     res.json({ success: true, data: provider });
   } catch (err) {
-    logger.error('maintenanceProvider get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceProvider get error');
   }
 });
 
@@ -127,8 +124,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
     res.json({ success: true, message: 'Provider deleted' });
   } catch (err) {
-    logger.error('maintenanceProvider delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceProvider delete error');
   }
 });
 

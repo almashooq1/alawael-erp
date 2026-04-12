@@ -47,6 +47,7 @@ router.use(authenticate);
 router.get('/attendance', async (req, res) => {
   try {
     const Attendance = require('../models/HR/Attendance');
+const safeError = require('../utils/safeError');
     const { page = 1, limit = 20, date } = req.query;
     const filter = {};
     if (date) filter.date = new Date(date);
@@ -57,8 +58,7 @@ router.get('/attendance', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('HR attendance error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات الحضور' });
+    safeError(res, err, 'HR attendance error');
   }
 });
 
@@ -76,8 +76,7 @@ router.get('/payroll', authorize(['admin', 'hr_manager', 'finance']), async (req
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('HR payroll error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات الرواتب' });
+    safeError(res, err, 'HR payroll error');
   }
 });
 
@@ -91,8 +90,7 @@ router.get('/leaves', async (req, res) => {
     const data = await Leave.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('HR leaves error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات الإجازات' });
+    safeError(res, err, 'HR leaves error');
   }
 });
 
@@ -128,8 +126,7 @@ router.post('/attendance/checkin', async (req, res) => {
 
     res.status(201).json({ success: true, data: record, message: 'تم تسجيل الحضور' });
   } catch (err) {
-    logger.error('HR checkin error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الحضور' });
+    safeError(res, err, 'HR checkin error');
   }
 });
 
@@ -155,8 +152,7 @@ router.post('/attendance/checkout', async (req, res) => {
     }
     res.json({ success: true, data: record, message: 'تم تسجيل الانصراف' });
   } catch (err) {
-    logger.error('HR checkout error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الانصراف' });
+    safeError(res, err, 'HR checkout error');
   }
 });
 
@@ -171,8 +167,7 @@ router.get('/performance-reviews', async (req, res) => {
     const data = await PerformanceEvaluation.find(filter).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('HR performance-reviews error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تقييمات الأداء' });
+    safeError(res, err, 'HR performance-reviews error');
   }
 });
 
@@ -209,8 +204,7 @@ router.post(
 
       res.status(201).json({ success: true, data: review, message: 'تم إنشاء تقييم الأداء' });
     } catch (err) {
-      logger.error('HR create performance-review error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم الأداء' });
+      safeError(res, err, 'HR create performance-review error');
     }
   }
 );
@@ -251,8 +245,7 @@ router.post('/leaves', async (req, res) => {
 
     res.status(201).json({ success: true, data: leave, message: 'تم تقديم طلب الإجازة' });
   } catch (err) {
-    logger.error('HR create leave error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تقديم طلب الإجازة' });
+    safeError(res, err, 'HR create leave error');
   }
 });
 
@@ -318,8 +311,7 @@ router.patch(
       const msg = status === 'approved' ? 'تمت الموافقة على الإجازة' : 'تم رفض طلب الإجازة';
       res.json({ success: true, data: leave, message: msg });
     } catch (err) {
-      logger.error('HR leave status update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث حالة الإجازة' });
+      safeError(res, err, 'HR leave status update error');
     }
   }
 );
@@ -371,8 +363,7 @@ router.post('/payroll/notify', authorize(['admin', 'hr_manager', 'finance']), as
       data: { total: payrolls.length, sent },
     });
   } catch (err) {
-    logger.error('HR payroll notify error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال إشعارات الرواتب' });
+    safeError(res, err, 'HR payroll notify error');
   }
 });
 

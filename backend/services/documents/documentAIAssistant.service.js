@@ -296,7 +296,9 @@ class DocumentAIAssistantService {
       for (const pattern of cat.patterns || []) {
         try {
           if (new RegExp(pattern, 'i').test(content)) score += 3;
-        } catch (_) {}
+        } catch (_) {
+          /* skip invalid regex pattern */
+        }
       }
 
       return {
@@ -745,7 +747,9 @@ class DocumentAIAssistantService {
             createdAt: doc.createdAt,
           };
         }
-      } catch (_) {}
+      } catch (_) {
+        /* best-effort: fall through to rule-based Q&A */
+      }
     }
 
     // Simple rule-based Q&A

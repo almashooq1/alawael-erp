@@ -184,7 +184,7 @@ describe('Authentication Middleware', () => {
 
       requireAdmin(mockReq, mockRes, mockNext);
 
-      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -193,7 +193,7 @@ describe('Authentication Middleware', () => {
 
       requireAdmin(mockReq, mockRes, mockNext);
 
-      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.status).toHaveBeenCalledWith(401);
       expect(mockNext).not.toHaveBeenCalled();
     });
   });

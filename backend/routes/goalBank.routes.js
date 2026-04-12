@@ -44,8 +44,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('goalBank list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalBank list error');
   }
 });
 
@@ -58,8 +57,7 @@ router.get('/domains', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: domains });
   } catch (err) {
-    logger.error('goalBank domains error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalBank domains error');
   }
 });
 
@@ -75,8 +73,7 @@ router.get('/categories', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: categories });
   } catch (err) {
-    logger.error('goalBank categories error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalBank categories error');
   }
 });
 
@@ -87,8 +84,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
     res.json({ success: true, data: goal });
   } catch (err) {
-    logger.error('goalBank get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalBank get error');
   }
 });
 
@@ -137,8 +133,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
     res.json({ success: true, message: 'Goal deleted' });
   } catch (err) {
-    logger.error('goalBank delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'goalBank delete error');
   }
 });
 

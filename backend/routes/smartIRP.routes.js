@@ -35,8 +35,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: irps, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('smart-irp list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp list error');
   }
 });
 
@@ -50,8 +49,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     res.json({ success: true, data: irp });
   } catch (err) {
-    logger.error('smart-irp get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp get error');
   }
 });
 
@@ -92,8 +90,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'manager']), async (req
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     res.json({ success: true, message: 'IRP archived', data: irp });
   } catch (err) {
-    logger.error('smart-irp archive error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp archive error');
   }
 });
 
@@ -156,8 +153,7 @@ router.get('/:id/analytics', requireAuth, async (req, res) => {
     const analytics = await SmartIRPService.getAnalytics(req.params.id);
     res.json({ success: true, data: analytics });
   } catch (err) {
-    logger.error('smart-irp analytics error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp analytics error');
   }
 });
 
@@ -169,8 +165,7 @@ router.get('/:id/family-report', requireAuth, async (req, res) => {
     const report = await SmartIRPService.generateFamilyReport(irp);
     res.json({ success: true, data: report });
   } catch (err) {
-    logger.error('smart-irp family-report error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp family-report error');
   }
 });
 
@@ -184,8 +179,7 @@ router.post(
       const irp = await SmartIRPService.performAutoReview(req.params.id);
       res.json({ success: true, data: irp });
     } catch (err) {
-      logger.error('smart-irp auto-review error:', err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'smart-irp auto-review error');
     }
   }
 );
@@ -196,8 +190,7 @@ router.post('/scheduled-reviews', requireAuth, requireRole(['admin']), async (re
     const results = await SmartIRPService.runScheduledReviews();
     res.json({ success: true, data: results });
   } catch (err) {
-    logger.error('smart-irp scheduled-reviews error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'smart-irp scheduled-reviews error');
   }
 });
 

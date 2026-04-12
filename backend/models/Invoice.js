@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const invoiceSchema = new mongoose.Schema(
   {
     invoiceNumber: { type: String, required: true, unique: true }, // INV-2024-0001
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     issuer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Employee who created it
 
     issueDate: { type: Date, default: Date.now },

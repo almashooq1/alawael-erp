@@ -40,6 +40,7 @@ if (!fs.existsSync(uploadsDir)) {
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
+const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   createRBACMiddleware = _permissions => (_req, _res, next) => next();
@@ -229,8 +230,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Documents] Dashboard error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة المعلومات' });
+    safeError(res, error, '[Documents] Dashboard error');
   }
 });
 
@@ -265,8 +265,7 @@ router.get('/stats', async (req, res) => {
       byCategory,
     });
   } catch (error) {
-    logger.error('[Documents] Stats error:', error);
-    res.status(500).json({ message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, '[Documents] Stats error');
   }
 });
 
@@ -315,8 +314,7 @@ router.get('/search', async (req, res) => {
 
     res.json({ total: documents.length, documents });
   } catch (error) {
-    logger.error('[Documents] Search error:', error);
-    res.status(500).json({ message: 'خطأ في البحث' });
+    safeError(res, error, '[Documents] Search error');
   }
 });
 
@@ -359,8 +357,7 @@ router.get('/search/advanced', async (req, res) => {
 
     res.json({ success: true, data: { results, count: results.length } });
   } catch (error) {
-    logger.error('[Documents] Advanced search error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في البحث المتقدم' });
+    safeError(res, error, '[Documents] Advanced search error');
   }
 });
 
@@ -380,8 +377,7 @@ router.get('/folders', async (req, res) => {
 
     res.json(folders);
   } catch (error) {
-    logger.error('[Documents] Folders error:', error);
-    res.status(500).json({ message: 'خطأ في جلب المجلدات' });
+    safeError(res, error, '[Documents] Folders error');
   }
 });
 
@@ -409,8 +405,7 @@ router.get('/categories/all', async (req, res) => {
 
     res.json({ success: true, data: categories });
   } catch (error) {
-    logger.error('[Documents] Categories error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفئات' });
+    safeError(res, error, '[Documents] Categories error');
   }
 });
 
@@ -442,8 +437,7 @@ router.get('/templates/all', async (req, res) => {
       ],
     });
   } catch (error) {
-    logger.error('[Documents] Templates error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, error, '[Documents] Templates error');
   }
 });
 
@@ -542,8 +536,7 @@ router.get('/reports/analytics', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Documents] Analytics error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التحليلات' });
+    safeError(res, error, '[Documents] Analytics error');
   }
 });
 
@@ -599,8 +592,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Documents] List error:', error);
-    res.status(500).json({ message: 'خطأ في جلب المستندات' });
+    safeError(res, error, '[Documents] List error');
   }
 });
 
@@ -655,8 +647,7 @@ router.get('/:id', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Documents] Get by ID error:', error);
-    res.status(500).json({ message: 'خطأ في جلب المستند' });
+    safeError(res, error, '[Documents] Get by ID error');
   }
 });
 
@@ -756,8 +747,7 @@ router.post(
       if (req.file && req.file.path && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
-      logger.error('[Documents] Upload error:', error);
-      res.status(500).json({ message: 'خطأ في تحميل المستند' });
+      safeError(res, error, '[Documents] Upload error');
     }
   }
 );
@@ -857,8 +847,7 @@ router.post(
         filesProcessed: uploaded.length,
       });
     } catch (error) {
-      logger.error('[Documents] Bulk upload error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في التحميل الجماعي' });
+      safeError(res, error, '[Documents] Bulk upload error');
     }
   }
 );
@@ -908,8 +897,7 @@ router.put('/:id', async (req, res) => {
 
     res.json({ message: 'تم تحديث المستند بنجاح', document });
   } catch (error) {
-    logger.error('[Documents] Update error:', error);
-    res.status(500).json({ message: 'خطأ في تحديث المستند' });
+    safeError(res, error, '[Documents] Update error');
   }
 });
 
@@ -945,8 +933,7 @@ router.delete('/:id', async (req, res) => {
 
     res.json({ message: 'تم حذف المستند. يمكنك استرجاعه خلال 30 يوماً', document });
   } catch (error) {
-    logger.error('[Documents] Delete error:', error);
-    res.status(500).json({ message: 'خطأ في حذف المستند' });
+    safeError(res, error, '[Documents] Delete error');
   }
 });
 
@@ -982,8 +969,7 @@ router.post('/:id/restore', async (req, res) => {
 
     res.json({ message: 'تم استرجاع المستند بنجاح', document });
   } catch (error) {
-    logger.error('[Documents] Restore error:', error);
-    res.status(500).json({ message: 'خطأ في استرجاع المستند' });
+    safeError(res, error, '[Documents] Restore error');
   }
 });
 
@@ -1035,8 +1021,7 @@ router.post('/:id/share', async (req, res) => {
 
     res.json({ message: 'تم مشاركة المستند بنجاح', document });
   } catch (error) {
-    logger.error('[Documents] Share error:', error);
-    res.status(500).json({ message: 'خطأ في مشاركة المستند' });
+    safeError(res, error, '[Documents] Share error');
   }
 });
 
@@ -1071,8 +1056,7 @@ router.delete('/:id/share/:shareId', async (req, res) => {
 
     res.json({ message: 'تم إزالة الوصول بنجاح', document });
   } catch (error) {
-    logger.error('[Documents] Revoke share error:', error);
-    res.status(500).json({ message: 'خطأ في إزالة الوصول' });
+    safeError(res, error, '[Documents] Revoke share error');
   }
 });
 
@@ -1124,8 +1108,7 @@ router.get('/:id/download', async (req, res) => {
       }
     });
   } catch (error) {
-    logger.error('[Documents] Download error:', error);
-    res.status(500).json({ message: 'خطأ في تنزيل المستند' });
+    safeError(res, error, '[Documents] Download error');
   }
 });
 
@@ -1213,8 +1196,7 @@ router.get('/:id/preview', async (req, res) => {
       fileStream.pipe(res);
     }
   } catch (error) {
-    logger.error('[Documents] Preview error:', error);
-    res.status(500).json({ message: 'خطأ في معاينة المستند' });
+    safeError(res, error, '[Documents] Preview error');
   }
 });
 
@@ -1251,8 +1233,7 @@ router.get('/:id/versions', async (req, res) => {
 
     res.json({ success: true, documentId: req.params.id, versions });
   } catch (error) {
-    logger.error('[Documents] Get versions error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب النسخ' });
+    safeError(res, error, '[Documents] Get versions error');
   }
 });
 
@@ -1340,8 +1321,7 @@ router.post(
         versionId: 'v' + document.version,
       });
     } catch (error) {
-      logger.error('[Documents] Upload version error:', error);
-      res.status(500).json({ success: false, message: 'خطأ في رفع النسخة الجديدة' });
+      safeError(res, error, '[Documents] Upload version error');
     }
   }
 );
@@ -1409,8 +1389,7 @@ router.post('/:id/versions/:versionId/restore', async (req, res) => {
       document,
     });
   } catch (error) {
-    logger.error('[Documents] Restore version error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في استرجاع النسخة' });
+    safeError(res, error, '[Documents] Restore version error');
   }
 });
 
@@ -1455,8 +1434,7 @@ router.get('/:id/versions/:versionId/compare', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Documents] Compare versions error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في مقارنة النسخ' });
+    safeError(res, error, '[Documents] Compare versions error');
   }
 });
 

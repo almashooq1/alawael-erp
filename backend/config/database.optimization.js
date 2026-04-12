@@ -122,7 +122,33 @@ const createIndexes = async () => {
     await safeIndex('Assessment', { beneficiaryId: 1, assessmentDate: -1 });
     await safeIndex('Assessment', { assessorId: 1, status: 1 });
 
-    logger.info('✅ Database indexes verified/created successfully');
+    logger.info('✅ Database indexes verified/created successfully (core models)');
+
+    // ────── DDD Model Indexes (auto-sync from schema definitions) ──────
+    // DDD models define their own indexes via .index() calls in schema files.
+    // In production (autoIndex: false), we need to explicitly create them.
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction || process.env.FORCE_DDD_INDEX_SYNC === 'true') {
+      const allModels = mongoose.modelNames();
+      const dddModels = allModels.filter(n => n.startsWith('DDD'));
+      let created = 0;
+      let skipped = 0;
+      for (const name of dddModels) {
+        try {
+          const Model = mongoose.model(name);
+          if (collectionNames.has(Model.collection.collectionName)) {
+            await Model.createIndexes();
+            created++;
+          } else {
+            skipped++;
+          }
+        } catch (e) {
+          logger.debug(`DDD index sync skip (${name}): ${e.message}`);
+          skipped++;
+        }
+      }
+      logger.info(`✅ DDD schema indexes synced: ${created} models, ${skipped} skipped`);
+    }
   } catch (error) {
     logger.error('❌ Error creating indexes:', error.message);
     // Don't throw - let the app continue even if indexes fail

@@ -11,9 +11,9 @@ const performance = require('../config/performance');
 
 describe('Configuration Modules', () => {
   describe('InMemoryDB Configuration', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Reset database before each test
-      inMemoryDB.write({
+      await inMemoryDB.write({
         users: [],
         employees: [],
         attendances: [],
@@ -22,34 +22,34 @@ describe('Configuration Modules', () => {
       });
     });
 
-    test('should read database', () => {
-      const data = inMemoryDB.read();
+    test('should read database', async () => {
+      const data = await inMemoryDB.read();
       expect(data).toBeDefined();
       expect(typeof data).toBe('object');
     });
 
-    test('should write database', () => {
+    test('should write database', async () => {
       const testData = { users: [{ id: 1, name: 'Test' }] };
-      inMemoryDB.write(testData);
-      const data = inMemoryDB.read();
+      await inMemoryDB.write(testData);
+      const data = await inMemoryDB.read();
       expect(data.users).toHaveLength(1);
       expect(data.users[0].name).toBe('Test');
     });
 
-    test('should preserve existing collections on write', () => {
-      const initial = inMemoryDB.read();
+    test('should preserve existing collections on write', async () => {
+      const initial = await inMemoryDB.read();
       initial.users = [{ id: 1 }];
       initial.employees = [{ id: 2 }];
-      inMemoryDB.write(initial);
+      await inMemoryDB.write(initial);
 
-      const updated = inMemoryDB.read();
+      const updated = await inMemoryDB.read();
       expect(updated.users).toHaveLength(1);
       expect(updated.employees).toHaveLength(1);
     });
 
-    test('should handle empty database', () => {
-      inMemoryDB.write({});
-      const data = inMemoryDB.read();
+    test('should handle empty database', async () => {
+      await inMemoryDB.write({});
+      const data = await inMemoryDB.read();
       expect(data).toBeDefined();
     });
   });
@@ -115,28 +115,30 @@ describe('Configuration Modules', () => {
   });
 
   describe('Config Edge Cases', () => {
-    test('should handle concurrent read operations', () => {
-      const reads = Array(10)
-        .fill(null)
-        .map(() => inMemoryDB.read());
+    test('should handle concurrent read operations', async () => {
+      const reads = await Promise.all(
+        Array(10)
+          .fill(null)
+          .map(() => inMemoryDB.read())
+      );
       reads.forEach(data => {
         expect(data).toBeDefined();
         expect(typeof data).toBe('object');
       });
     });
 
-    test('should handle large dataset writes', () => {
+    test('should handle large dataset writes', async () => {
       const largeData = {
         users: Array(1000)
           .fill(null)
           .map((_, i) => ({ id: i, name: `User${i}` })),
       };
-      expect(() => inMemoryDB.write(largeData)).not.toThrow();
-      const data = inMemoryDB.read();
+      await expect(inMemoryDB.write(largeData)).resolves.not.toThrow();
+      const data = await inMemoryDB.read();
       expect(data.users).toHaveLength(1000);
     });
 
-    test('should maintain data types on read/write', () => {
+    test('should maintain data types on read/write', async () => {
       const testData = {
         users: [
           {
@@ -148,8 +150,8 @@ describe('Configuration Modules', () => {
           },
         ],
       };
-      inMemoryDB.write(testData);
-      const data = inMemoryDB.read();
+      await inMemoryDB.write(testData);
+      const data = await inMemoryDB.read();
 
       expect(typeof data.users[0].id).toBe('number');
       expect(typeof data.users[0].active).toBe('boolean');

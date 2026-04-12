@@ -33,6 +33,7 @@ try {
     // إنشاء نموذج مبسط إذا لم يكن موجوداً
     const mongoose = require('mongoose');
     const escapeRegex = require('../utils/escapeRegex');
+const safeError = require('../utils/safeError');
     const auditSchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
@@ -219,8 +220,7 @@ router.get('/', requireAuditor, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[AuditTrail] list error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] list error');
   }
 });
 
@@ -322,8 +322,7 @@ router.get('/statistics', requireAuditor, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('[AuditTrail] statistics error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] statistics error');
   }
 });
 
@@ -354,8 +353,7 @@ router.get('/for-model', requireAuditor, async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[AuditTrail] for-model error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] for-model error');
   }
 });
 
@@ -393,8 +391,7 @@ router.get('/user/:userId', requireAuditor, async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[AuditTrail] user activity error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] user activity error');
   }
 });
 
@@ -424,8 +421,7 @@ router.get('/sensitive', requireAuditor, async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[AuditTrail] sensitive error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] sensitive error');
   }
 });
 
@@ -472,8 +468,7 @@ router.get('/login-attempts', requireAuditor, async (req, res) => {
       pagination: { page: Number(page), perPage: Number(perPage), total },
     });
   } catch (err) {
-    logger.error('[AuditTrail] login attempts error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] login attempts error');
   }
 });
 
@@ -536,8 +531,7 @@ router.get('/export', requireAuditor, async (req, res) => {
     );
     return res.json(exportData);
   } catch (err) {
-    logger.error('[AuditTrail] export error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] export error');
   }
 });
 
@@ -584,8 +578,7 @@ router.post('/log', async (req, res) => {
 
     return res.status(201).json({ success: true, data: log });
   } catch (err) {
-    logger.error('[AuditTrail] log error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] log error');
   }
 });
 
@@ -625,8 +618,7 @@ router.get('/:id', requireAuditor, async (req, res) => {
       changes,
     });
   } catch (err) {
-    logger.error('[AuditTrail] show error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] show error');
   }
 });
 
@@ -699,8 +691,7 @@ router.delete('/cleanup', async (req, res) => {
       message: 'تم تنظيف السجلات القديمة بنجاح',
     });
   } catch (err) {
-    logger.error('[AuditTrail] cleanup error', { error: err.message });
-    return res.status(500).json({ success: false, message: 'خطأ في الخادم' });
+    safeError(res, err, '[AuditTrail] cleanup error');
   }
 });
 

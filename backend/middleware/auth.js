@@ -19,6 +19,7 @@ function getUser() {
 }
 function getSession() {
   if (!_Session) _Session = require('../models/Session');
+  const safeError = require('../utils/safeError');
   return _Session;
 }
 
@@ -93,8 +94,7 @@ const authenticateToken = (req, res, next) => {
       next();
     });
   } catch (error) {
-    logger.error('Auth middleware error:', { error: error.message });
-    res.status(500).json({ success: false, message: 'Authentication failed' });
+    safeError(res, error, 'Auth middleware error');
   }
 };
 
@@ -194,15 +194,33 @@ const requirePermission = permission => {
       return res.status(401).json({ success: false, message: 'يجب تسجيل الدخول أولاً' });
     }
 
-    // Admin bypasses permission checks
+    // Super-admin bypasses all permission checks (wildcard role)
     const role = (req.user.role || '').toLowerCase();
-    if (role === 'admin' || role === 'superadmin' || role === 'super_admin') {
+    if (role === 'superadmin' || role === 'super_admin') {
       return next();
     }
 
     const userPermissions = req.user.permissions || [];
     if (userPermissions.includes('*:*') || userPermissions.includes(permission)) {
       return next();
+    }
+
+    // Admin: delegate to RBAC config engine (finite permission set, no blanket bypass)
+    if (role === 'admin') {
+      const [resource, action] = permission.includes(':')
+        ? permission.split(':')
+        : [permission, 'read'];
+      if (
+        configHasPermission(
+          role,
+          resource,
+          action,
+          req.user.customPermissions,
+          req.user.deniedPermissions
+        )
+      ) {
+        return next();
+      }
     }
 
     logger.warn(`Permission denied: user ${req.user.id} lacks [${permission}]`);
@@ -368,8 +386,7 @@ const refreshToken = (req, res) => {
 
     return res.json({ success: true, token: newToken, expiresIn: '1h' });
   } catch (error) {
-    logger.error('Token refresh failed:', error.message);
-    return res.status(500).json({ success: false, error: 'Token refresh failed' });
+    safeError(res, error, 'Token refresh failed');
   }
 };
 

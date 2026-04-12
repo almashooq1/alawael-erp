@@ -20,6 +20,7 @@ const router = express.Router();
 const messagingService = require('../services/messaging.service');
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // All routes require authentication
 router.use(authenticateToken);
@@ -40,12 +41,7 @@ router.get('/unread/count', async (req, res) => {
       userId: userId,
     });
   } catch (error) {
-    logger.error('Error getting unread count:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get unread count',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'getting unread count');
   }
 });
 
@@ -72,12 +68,7 @@ router.get('/search', async (req, res) => {
       count: results?.length || 0,
     });
   } catch (error) {
-    logger.error('Error searching messages:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to search messages',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'searching messages');
   }
 });
 
@@ -98,12 +89,7 @@ router.get('/stats', async (req, res) => {
       stats: stats,
     });
   } catch (error) {
-    logger.error('Error getting message statistics:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get statistics',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'getting message statistics');
   }
 });
 
@@ -123,12 +109,7 @@ router.get('/unread', async (req, res) => {
       count: Array.isArray(messages) ? messages.length : 0,
     });
   } catch (error) {
-    logger.error('Error retrieving unread messages:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve unread messages',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'retrieving unread messages');
   }
 });
 
@@ -156,12 +137,7 @@ router.post('/clear-unread', async (req, res) => {
       ...clearResult,
     });
   } catch (error) {
-    logger.error('Error clearing unread:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to clear unread status',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'clearing unread');
   }
 });
 
@@ -230,12 +206,7 @@ router.post('/', async (req, res) => {
       message: message,
     });
   } catch (error) {
-    logger.error('Error creating message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to create message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'creating message');
   }
 });
 
@@ -278,12 +249,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Error retrieving messages:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve messages',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'retrieving messages');
   }
 });
 
@@ -340,12 +306,7 @@ router.post('/group', async (req, res) => {
       message: message,
     });
   } catch (error) {
-    logger.error('Error creating group message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to create group message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'creating group message');
   }
 });
 
@@ -409,12 +370,7 @@ router.post('/schedule', async (req, res) => {
       message: message,
     });
   } catch (error) {
-    logger.error('Error scheduling message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to schedule message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'scheduling message');
   }
 });
 
@@ -467,12 +423,7 @@ router.get('/:id', async (req, res) => {
       message: message,
     });
   } catch (error) {
-    logger.error('Error retrieving message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to retrieve message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'retrieving message');
   }
 });
 
@@ -535,12 +486,7 @@ router.put('/:id', async (req, res) => {
       message: updated,
     });
   } catch (error) {
-    logger.error('Error updating message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to update message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'updating message');
   }
 });
 
@@ -578,12 +524,7 @@ router.post('/:id/mark-as-read', async (req, res) => {
       message: result,
     });
   } catch (error) {
-    logger.error('Error marking message as read:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark message as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'marking message as read');
   }
 });
 
@@ -616,12 +557,7 @@ router.patch('/:id/read', async (req, res) => {
       message: result,
     });
   } catch (error) {
-    logger.error('Error marking message as read:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark message as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'marking message as read');
   }
 });
 
@@ -654,12 +590,7 @@ router.patch('/mark-read', async (req, res) => {
       messages: results,
     });
   } catch (error) {
-    logger.error('Error bulk marking messages as read:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark messages as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'bulk marking messages as read');
   }
 });
 
@@ -700,12 +631,7 @@ router.post('/:id/react', async (req, res) => {
 
     return res.status(200).json(result);
   } catch (error) {
-    logger.error('Error adding reaction:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to add reaction',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'adding reaction');
   }
 });
 
@@ -762,12 +688,7 @@ router.post('/:id/forward', async (req, res) => {
       message: message,
     });
   } catch (error) {
-    logger.error('Error forwarding message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to forward message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'forwarding message');
   }
 });
 
@@ -822,12 +743,7 @@ router.delete('/:id', async (req, res) => {
       deletedId: id,
     });
   } catch (error) {
-    logger.error('Error deleting message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to delete message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'deleting message');
   }
 });
 
@@ -862,12 +778,7 @@ router.post('/delete-bulk', async (req, res) => {
       deletedIds: results,
     });
   } catch (error) {
-    logger.error('Error bulk deleting messages:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to delete messages',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'bulk deleting messages');
   }
 });
 
@@ -908,12 +819,7 @@ router.post('/send', async (req, res) => {
       data: result || { _id: `msg-${Date.now()}`, content, conversationId },
     });
   } catch (error) {
-    logger.error('Error sending message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to send message',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'sending message');
   }
 });
 
@@ -941,12 +847,7 @@ router.get('/conversation/:id', async (req, res) => {
       data: result || { messages: [], pagination: { total: 0 } },
     });
   } catch (error) {
-    logger.error('Error getting conversation messages:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to get conversation messages',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'getting conversation messages');
   }
 });
 
@@ -974,12 +875,7 @@ router.post('/mark-read/:conversationId', async (req, res) => {
       data: result || { success: true, conversationId },
     });
   } catch (error) {
-    logger.error('Error marking conversation as read:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark conversation as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'marking conversation as read');
   }
 });
 
@@ -1013,12 +909,7 @@ router.patch('/conversations/:id/mark-read', async (req, res) => {
       ...markResult,
     });
   } catch (error) {
-    logger.error('Error marking conversation as read:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to mark conversation as read',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'marking conversation as read');
   }
 });
 

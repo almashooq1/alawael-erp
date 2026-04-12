@@ -812,10 +812,7 @@ router.get('/reports/wps/:month/:year', authenticateToken, async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير WPS',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -833,10 +830,7 @@ router.get('/reports/gosi/:month/:year', authenticateToken, async (req, res) => 
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير GOSI',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -854,10 +848,7 @@ router.get('/reports/bank-transfer/:month/:year', authenticateToken, async (req,
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد ملف التحويل البنكي',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -875,10 +866,7 @@ router.get('/reports/department-comparison/:month/:year', authenticateToken, asy
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير مقارنة الأقسام',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -896,10 +884,7 @@ router.get('/reports/annual-summary/:year', authenticateToken, async (req, res) 
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد التقرير السنوي',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -917,10 +902,7 @@ router.get('/reports/variance/:month/:year', authenticateToken, async (req, res)
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير الفروقات',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -938,10 +920,7 @@ router.get('/reports/employee-cost/:employeeId/:year', authenticateToken, async 
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير تكلفة الموظف',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 
@@ -959,10 +938,7 @@ router.get('/reports/deductions/:month/:year', authenticateToken, async (req, re
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: safeError(error) || 'خطأ في توليد تقرير الخصومات',
-    });
+    safeError(res, error, 'payroll');
   }
 });
 

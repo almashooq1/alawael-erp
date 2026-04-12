@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router();
 const AttendanceService = require('../../../services/BeneficiaryManagement/AttendanceService');
 const authenticate = require('../../../middleware/authMiddleware');
+const safeError = require('../../../utils/safeError');
 
 // Initialize service
 let attendanceService;
@@ -46,10 +47,7 @@ router.post('/record', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'attendance');
       timestamp: new Date(),
     });
   }
@@ -77,10 +75,7 @@ router.get('/:beneficiaryId/report', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'attendance');
       timestamp: new Date(),
     });
   }
@@ -104,10 +99,7 @@ router.get('/:beneficiaryId/threshold-check', authenticate, async (req, res) => 
     const statusCode = result.status === 'success' ? 200 : 404;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'attendance');
       timestamp: new Date(),
     });
   }
@@ -136,10 +128,7 @@ router.post('/bulk-upload', authenticate, async (req, res) => {
     const statusCode = result.status === 'success' ? 201 : 400;
     return res.status(statusCode).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'attendance');
       timestamp: new Date(),
     });
   }
@@ -175,10 +164,7 @@ router.get('/:beneficiaryId/export', authenticate, async (req, res) => {
 
     return res.status(404).json(result);
   } catch (error) {
-    return res.status(500).json({
-      status: 'error',
-      message: 'حدث خطأ داخلي',
-      data: null,
+    safeError(res, error, 'attendance');
       timestamp: new Date(),
     });
   }

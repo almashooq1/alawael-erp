@@ -43,7 +43,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفصول', error: safeError(error) });
+    safeError(res, error, 'classrooms');
   }
 });
 
@@ -76,7 +76,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
     if (!classroom) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     res.json({ success: true, data: classroom });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفصل', error: safeError(error) });
+    safeError(res, error, 'classrooms');
   }
 });
 
@@ -119,7 +119,7 @@ router.delete('/:id', validateObjectId('id'), authorize(['admin']), async (req, 
     if (!classroom) return res.status(404).json({ success: false, message: 'الفصل غير موجود' });
     res.json({ success: true, message: 'تم حذف الفصل بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الفصل', error: safeError(error) });
+    safeError(res, error, 'classrooms');
   }
 });
 

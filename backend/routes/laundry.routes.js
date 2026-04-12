@@ -69,8 +69,7 @@ router.get('/orders', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Laundry] Orders list error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[Laundry] Orders list error');
   }
 });
 
@@ -83,7 +82,7 @@ router.get('/orders/:id', async (req, res) => {
     if (!order) return res.status(404).json({ success: false, error: 'الطلب غير موجود' });
     res.json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -141,7 +140,7 @@ router.patch('/orders/:id/status', async (req, res) => {
 
     res.json({ success: true, data: order, message: `تم تحديث حالة الطلب إلى ${status}` });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -169,7 +168,7 @@ router.patch('/orders/:id/assign-machine', async (req, res) => {
 
     res.json({ success: true, data: order, message: 'تم تعيين الجهاز بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -192,7 +191,7 @@ router.get('/machines', async (req, res) => {
 
     res.json({ success: true, data: machines });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -232,7 +231,7 @@ router.patch('/machines/:id/maintenance', async (req, res) => {
     if (!machine) return res.status(404).json({ success: false, error: 'الجهاز غير موجود' });
     res.json({ success: true, data: machine, message: 'تم إرسال الجهاز للصيانة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -256,7 +255,7 @@ router.get('/schedules', async (req, res) => {
 
     res.json({ success: true, data: schedules });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -296,7 +295,7 @@ router.delete('/schedules/:id', async (req, res) => {
     if (!schedule) return res.status(404).json({ success: false, error: 'الجدول غير موجود' });
     res.json({ success: true, message: 'تم إلغاء تفعيل الجدول' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 
@@ -345,7 +344,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'laundry');
   }
 });
 

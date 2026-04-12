@@ -46,7 +46,7 @@ const mchatItemSchema = new Schema(
 
 const MChatAssessmentSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -140,7 +140,7 @@ const sensoryItemSchema = new Schema(
 
 const SensoryProfileSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -256,7 +256,7 @@ const briefItemSchema = new Schema(
 
 const BRIEFAssessmentSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -321,7 +321,7 @@ BRIEFAssessmentSchema.index({ beneficiary: 1, assessment_date: -1 });
 
 const SRS2AssessmentSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -417,7 +417,7 @@ const portageItemSchema = new Schema(
 
 const PortageAssessmentSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -585,7 +585,7 @@ const abcRecordSchema = new Schema(
 
 const ABCDataCollectionSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     collection_period: {
       start_date: { type: Date, required: true },
@@ -662,7 +662,7 @@ ABCDataCollectionSchema.index({ beneficiary: 1, 'collection_period.start_date': 
 
 const FamilyNeedsSurveySchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     respondent_name: { type: String, required: true },
     respondent_relationship: {
       type: String,
@@ -756,7 +756,7 @@ FamilyNeedsSurveySchema.index({ beneficiary: 1, assessment_date: -1 });
 
 const QualityOfLifeSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -836,7 +836,7 @@ QualityOfLifeSchema.index({ beneficiary: 1, assessment_date: -1 });
 
 const TransitionReadinessSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -967,7 +967,7 @@ TransitionReadinessSchema.index({ beneficiary: 1, transition_type: 1 });
 
 const SaudiScreeningSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
     assessment_date: { type: Date, default: Date.now },
@@ -1060,7 +1060,7 @@ SaudiScreeningSchema.index({ beneficiary: 1, assessment_date: -1 });
 
 const BehavioralFunctionSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     assessor: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     bcba_supervisor: { type: Schema.Types.ObjectId, ref: 'User' },
     branch: { type: Schema.Types.ObjectId, ref: 'Branch' },
@@ -1208,7 +1208,7 @@ BehavioralFunctionSchema.index({ beneficiary: 1, assessment_date: -1 });
 
 const CaregiverBurdenSchema = new Schema(
   {
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     caregiver_name: { type: String, required: true },
     caregiver_relationship: {
       type: String,

@@ -17,6 +17,7 @@ const {
 
 const authMiddleware = require('../middleware/auth');
 const { checkPermission } = require('../permissions/permission-middleware');
+const safeError = require('../utils/safeError');
 
 const workflowEngine = new IntelligentWorkflowEngine();
 
@@ -56,7 +57,7 @@ router.get('/definitions', authMiddleware, checkPermission('workflow.view'), asy
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -81,7 +82,7 @@ router.get(
 
       res.json({ success: true, data: definition });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'workflow');
     }
   }
 );
@@ -176,7 +177,7 @@ router.delete(
 
       res.json({ success: true, message: 'تم أرشفة سير العمل' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'workflow');
     }
   }
 );
@@ -250,7 +251,7 @@ router.get('/instances', authMiddleware, checkPermission('workflow.view'), async
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -290,7 +291,7 @@ router.get('/instances/:id', authMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -360,7 +361,7 @@ router.get('/tasks', authMiddleware, async (req, res) => {
       counts: counts.reduce((acc, c) => ({ ...acc, [c._id]: c.count }), {}),
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -384,7 +385,7 @@ router.get('/tasks/:id', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: task });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -456,7 +457,7 @@ router.post('/tasks/:id/start', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: task, message: 'تم بدء العمل على المهمة' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -492,7 +493,7 @@ router.get('/statistics', authMiddleware, checkPermission('workflow.view'), asyn
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -557,7 +558,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 
@@ -575,7 +576,7 @@ router.post('/sla/check', async (req, res) => {
     const result = await workflowEngine.checkSLAViolations();
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+    safeError(res, error, 'workflow');
   }
 });
 

@@ -9,6 +9,7 @@ const router = express.Router();
 const validator = require('../services/validator');
 const responseFormatter = require('../services/responseFormatter');
 const { optionalAuth } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Register default schemas
 validator.registerSchema('user', {
@@ -67,7 +68,7 @@ router.post('/schema', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success({ valid: true }, 'Data validation successful'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -113,7 +114,7 @@ router.post('/custom', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success(null, 'Validation passed'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Custom validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -133,7 +134,7 @@ router.post('/sanitize', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success({ data: sanitized }, 'Data sanitized'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Sanitization failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -147,7 +148,7 @@ router.get('/schemas', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success(stats, 'Registered schemas'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Failed to retrieve schemas', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -169,7 +170,7 @@ router.post('/email', optionalAuth, (req, res) => {
       responseFormatter.success({ email, valid }, valid ? 'Email is valid' : 'Email is invalid')
     );
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Email validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -191,7 +192,7 @@ router.post('/phone', optionalAuth, (req, res) => {
       responseFormatter.success({ phone, valid }, valid ? 'Phone is valid' : 'Phone is invalid')
     );
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Phone validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -211,7 +212,7 @@ router.post('/url', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success({ url, valid }, valid ? 'URL is valid' : 'URL is invalid'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('URL validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -225,7 +226,7 @@ router.get('/email', optionalAuth, (req, res) => {
       responseFormatter.success({ email, valid }, valid ? 'Email is valid' : 'Email is invalid')
     );
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Email validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -238,7 +239,7 @@ router.get('/phone', optionalAuth, (req, res) => {
       responseFormatter.success({ phone, valid }, valid ? 'Phone is valid' : 'Phone is invalid')
     );
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Phone validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 
@@ -249,7 +250,7 @@ router.get('/url', optionalAuth, (req, res) => {
     const valid = validator.isValidUrl(url);
     res.json(responseFormatter.success({ url, valid }, valid ? 'URL is valid' : 'URL is invalid'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('URL validation failed', error));
+    safeError(res, error, 'validate');
   }
 });
 

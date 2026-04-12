@@ -32,6 +32,7 @@ try {
 let notificationModel;
 try {
   const modelModule = require('../models/Notification.memory');
+const safeError = require('../utils/safeError');
   notificationModel = modelModule.Notification || modelModule;
 } catch (e) {
   notificationModel = null;
@@ -92,10 +93,7 @@ router.get(
 
     // Handle server errors for testing
     if (req.query.triggerError === 'true') {
-      return res.status(500).json({
-        success: false,
-        message: 'Simulated server error',
-      });
+      safeError(res, error, 'notifications');
     }
 
     const filters = {

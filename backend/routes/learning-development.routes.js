@@ -47,8 +47,7 @@ router.get('/', authenticate, async (req, res) => {
     const data = service.listPrograms(req.query);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('List programs error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'List programs error');
   }
 });
 
@@ -143,8 +142,7 @@ router.get('/enrollments/mandatory/:employeeId', authenticate, async (req, res) 
     const data = service.trackMandatoryTraining(req.params.employeeId);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Track mandatory training error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Track mandatory training error');
   }
 });
 
@@ -160,8 +158,7 @@ router.get('/analytics/completion', authenticate, async (req, res) => {
     const data = service.getCompletionRates(req.query);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Completion rates error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Completion rates error');
   }
 });
 
@@ -173,8 +170,7 @@ router.get('/analytics/scores/:employeeId', authenticate, async (req, res) => {
     const data = service.getAssessmentScores(req.params.employeeId);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Assessment scores error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Assessment scores error');
   }
 });
 
@@ -186,8 +182,7 @@ router.get('/analytics/skills/:employeeId', authenticate, async (req, res) => {
     const data = service.trackSkillImprovement(req.params.employeeId);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Skill improvement error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Skill improvement error');
   }
 });
 
@@ -199,8 +194,7 @@ router.get('/analytics/roi/:programId', authenticate, async (req, res) => {
     const data = service.measureLearningROI(req.params.programId);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Learning ROI error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Learning ROI error');
   }
 });
 
@@ -212,8 +206,7 @@ router.get('/analytics/report', authenticate, async (req, res) => {
     const data = service.generateLearningReport(req.query);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Learning report error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Learning report error');
   }
 });
 

@@ -921,6 +921,5 @@ async function buildFinancialPrediction(branchId) {
 router.use((err, req, res, _next) => {
   logger.error('AI Analytics route error', { error: err.message, stack: err.stack });
   safeError(res, err);
-});
 
 module.exports = router;

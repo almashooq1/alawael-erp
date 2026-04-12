@@ -105,7 +105,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
     if (!entry) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: entry });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب السجل', error: safeError(error) });
+    safeError(res, error, 'gradebook');
   }
 });
 

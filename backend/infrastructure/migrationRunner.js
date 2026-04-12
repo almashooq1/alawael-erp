@@ -30,6 +30,7 @@ const crypto = require('crypto');
 let logger;
 try {
   logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 } catch {
   logger = {
     info: (...a) => console.log('[Migration]', ...a),
@@ -419,7 +420,7 @@ function mountMigrationRoutes(app) {
         migrations: status,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'migrationRunner');
     }
   });
 
@@ -429,7 +430,7 @@ function mountMigrationRoutes(app) {
       const result = await runner.up({ dryRun, steps });
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'migrationRunner');
     }
   });
 
@@ -439,7 +440,7 @@ function mountMigrationRoutes(app) {
       const result = await runner.down({ dryRun, steps });
       res.json({ success: true, ...result });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'migrationRunner');
     }
   });
 

@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { branchManagementService } = require('./branch-service');
+const safeError = require('../utils/safeError');
 
 /**
  * @route   GET /api/branches
@@ -33,10 +34,7 @@ router.get('/', async (req, res) => {
       count: branches.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -54,10 +52,7 @@ router.get('/hierarchy', async (req, res) => {
       data: hierarchy,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -76,10 +71,7 @@ router.get('/statistics', async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -98,10 +90,7 @@ router.get('/open', async (req, res) => {
       count: branches.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -132,10 +121,7 @@ router.get('/search', async (req, res) => {
       count: branches.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -154,10 +140,7 @@ router.get('/region/:region', async (req, res) => {
       count: branches.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -189,10 +172,7 @@ router.get('/nearby', async (req, res) => {
       count: branches.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -217,10 +197,7 @@ router.get('/:id', async (req, res) => {
       data: branch,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -245,10 +222,7 @@ router.get('/code/:code', async (req, res) => {
       data: branch,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -267,10 +241,7 @@ router.get('/:id/open', async (req, res) => {
       branchId: req.params.id,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -295,10 +266,7 @@ router.post('/', async (req, res) => {
       message: 'تم إنشاء الفرع بنجاح',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -328,10 +296,7 @@ router.put('/:id', async (req, res) => {
       message: 'تم تحديث الفرع بنجاح',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -371,10 +336,7 @@ router.put('/:id/status', async (req, res) => {
       message: 'تم تحديث حالة الفرع',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -400,10 +362,7 @@ router.put('/:id/manager', async (req, res) => {
       message: 'تم تعيين مدير الفرع',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -433,10 +392,7 @@ router.delete('/:id', async (req, res) => {
       message: 'تم إغلاق الفرع',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -461,10 +417,7 @@ router.get('/:branchId/transfers', async (req, res) => {
       count: transfers.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -489,10 +442,7 @@ router.post('/transfers', async (req, res) => {
       message: 'تم إنشاء طلب التحويل',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -518,10 +468,7 @@ router.put('/transfers/:transferId/approve', async (req, res) => {
       message: 'تم اعتماد التحويل',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -540,10 +487,7 @@ router.put('/transfers/:transferId/ship', async (req, res) => {
       message: 'تم شحن التحويل',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -566,10 +510,7 @@ router.put('/transfers/:transferId/receive', async (req, res) => {
       message: 'تم استلام التحويل',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -602,10 +543,7 @@ router.get('/:branchId/performance', async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 
@@ -629,10 +567,7 @@ router.post('/:branchId/performance', async (req, res) => {
       data: log,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'branch');
   }
 });
 

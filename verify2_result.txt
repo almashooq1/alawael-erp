@@ -1,7 +1,0 @@
-MAIN JS HEADERS: HTTP/1.1 200 OK
-Server: nginx/1.24.0 (Ubuntu)
-Date: Sun, 05 Apr 2026 23:28:23 GMT
-Content-Type: application/javascript
-Content-Length: 600083
-CHUNK COUNT: 984
-MAIN JS SIZE: 600083 /usr/share/nginx/html/static/js/main.9d68bd01.js

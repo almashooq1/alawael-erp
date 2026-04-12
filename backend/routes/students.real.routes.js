@@ -16,8 +16,7 @@ router.get('/:id/dashboard', async (req, res) => {
       data: { student, stats: { attendance: 0, assignments: 0, grades: 0 } },
     });
   } catch (err) {
-    logger.error('Student dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في لوحة تحكم الطالب' });
+    safeError(res, err, 'Student dashboard error');
   }
 });
 
@@ -28,8 +27,7 @@ router.get('/:id/schedule', async (req, res) => {
     const data = await Schedule.find({ studentId: req.params.id }).sort({ date: 1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Student schedule error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجدول' });
+    safeError(res, err, 'Student schedule error');
   }
 });
 
@@ -40,8 +38,7 @@ router.get('/:id/grades', async (req, res) => {
     const data = await BenMgmt.AcademicRecord.find({ beneficiaryId: req.params.id }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Student grades error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الدرجات' });
+    safeError(res, err, 'Student grades error');
   }
 });
 
@@ -49,13 +46,13 @@ router.get('/:id/grades', async (req, res) => {
 router.get('/:id/attendance', async (req, res) => {
   try {
     const BenMgmt = require('../models/BeneficiaryManagement');
+const safeError = require('../utils/safeError');
     const data = await BenMgmt.AttendanceRecord.find({ beneficiaryId: req.params.id })
       .sort({ date: -1 })
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Student attendance error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحضور' });
+    safeError(res, err, 'Student attendance error');
   }
 });
 
@@ -68,8 +65,7 @@ router.get('/:id/assignments', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Student assignments error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الواجبات' });
+    safeError(res, err, 'Student assignments error');
   }
 });
 
@@ -83,8 +79,7 @@ router.get('/:id/announcements', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Student announcements error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإعلانات' });
+    safeError(res, err, 'Student announcements error');
   }
 });
 
@@ -102,8 +97,7 @@ router.post('/:id/assignments/:assignmentId/submit', async (req, res) => {
     await assignment.save();
     res.json({ success: true, data: assignment, message: 'تم تسليم الواجب بنجاح' });
   } catch (err) {
-    logger.error('Student assignment submit error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسليم الواجب' });
+    safeError(res, err, 'Student assignment submit error');
   }
 });
 

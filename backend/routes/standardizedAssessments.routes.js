@@ -37,8 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('standardizedAssessment list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'standardizedAssessment list error');
   }
 });
 
@@ -51,8 +50,7 @@ router.get('/tools', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: tools });
   } catch (err) {
-    logger.error('standardizedAssessment tools error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'standardizedAssessment tools error');
   }
 });
 
@@ -69,8 +67,7 @@ router.get('/beneficiary/:beneficiaryId/history', requireAuth, async (req, res) 
       .select('name date totalScore interpretation');
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('standardizedAssessment history error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'standardizedAssessment history error');
   }
 });
 
@@ -84,8 +81,7 @@ router.get('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, data: assessment });
   } catch (err) {
-    logger.error('standardizedAssessment get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'standardizedAssessment get error');
   }
 });
 
@@ -126,8 +122,7 @@ router.delete('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (
       return res.status(404).json({ success: false, message: 'Assessment not found' });
     res.json({ success: true, message: 'Assessment deleted' });
   } catch (err) {
-    logger.error('standardizedAssessment delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'standardizedAssessment delete error');
   }
 });
 

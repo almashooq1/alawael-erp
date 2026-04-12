@@ -10,6 +10,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { BranchERPIntegrationService } = require('../integration/erp-branch-integration');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize integration service
 const integrationService = new BranchERPIntegrationService();
@@ -58,10 +59,7 @@ router.get('/health', (_req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      status: 'unhealthy',
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'branch-integration');
       timestamp: new Date().toISOString(),
     });
   }
@@ -95,9 +93,7 @@ router.get('/status', async (_req, res) => {
 
     return res.status(200).json(status);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'branch-integration');
       timestamp: new Date().toISOString(),
     });
   }
@@ -128,10 +124,7 @@ router.post('/sync/branches', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Sync error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Sync error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -161,10 +154,7 @@ router.get('/branches/:branchId/kpis', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('KPI retrieval error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'KPI retrieval error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -194,10 +184,7 @@ router.get('/branches/:branchId/inventory-sync', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Inventory retrieval error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Inventory retrieval error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -237,10 +224,7 @@ router.get('/branches/:branchId/reports/:reportType', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Report retrieval error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Report retrieval error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -271,10 +255,7 @@ router.get('/branches/:branchId/forecasts', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Forecast retrieval error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Forecast retrieval error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -323,10 +304,7 @@ router.get('/branches/:branchId/dashboard', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Dashboard retrieval error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Dashboard retrieval error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -355,10 +333,7 @@ router.post('/sync/start', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Sync start error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Sync start error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -378,10 +353,7 @@ router.post('/sync/stop', async (req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Sync stop error:', { message: error.message });
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'Sync stop error');
       timestamp: new Date().toISOString(),
     });
   }
@@ -407,9 +379,7 @@ router.get('/sync/status', async (req, res) => {
 
     return res.status(200).json(status);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'branch-integration');
       timestamp: new Date().toISOString(),
     });
   }
@@ -438,9 +408,7 @@ router.get('/validate', async (req, res) => {
 
     return res.status(200).json(validation);
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
+    safeError(res, error, 'branch-integration');
       timestamp: new Date().toISOString(),
     });
   }
@@ -453,9 +421,7 @@ router.get('/validate', async (req, res) => {
 router.use((err, _req, res, _next) => {
   logger.error('Integration route error:', { message: err.message });
 
-  res.status(500).json({
-    success: false,
-    error: 'حدث خطأ في الخادم' || 'Internal server error',
+  safeError(res, error, 'branch-integration');
     timestamp: new Date().toISOString(),
   });
 });

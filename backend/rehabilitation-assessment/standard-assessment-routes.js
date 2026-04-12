@@ -27,6 +27,7 @@ const {
   AssessmentHistoryService,
   DEVELOPMENTAL_MILESTONES_BANK,
 } = require('./standard-assessment-service');
+const safeError = require('../utils/safeError');
 
 // Middleware للتحقق من الأخطاء
 const validate = (req, res, next) => {
@@ -66,7 +67,7 @@ router.post(
         data: assessment,
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err, 'standard-assessment');
     }
   }
 );
@@ -84,7 +85,7 @@ router.post('/vabs3/:id/score', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -121,7 +122,7 @@ router.get('/vabs3/beneficiary/:beneficiaryId', async (req, res) => {
       data: { assessments, trend },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -138,7 +139,7 @@ router.get('/vabs3/:id', async (req, res) => {
     if (!assessment) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
     res.json({ success: true, data: assessment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -155,7 +156,7 @@ router.patch('/vabs3/:id/items', async (req, res) => {
     );
     res.json({ success: true, data: assessment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -184,7 +185,7 @@ router.post(
       await assessment.save();
       res.status(201).json({ success: true, data: assessment });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err, 'standard-assessment');
     }
   }
 );
@@ -202,7 +203,7 @@ router.post('/cars2/:id/score', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -219,7 +220,7 @@ router.get('/cars2/beneficiary/:beneficiaryId', async (req, res) => {
       .lean();
     res.json({ success: true, data: assessments });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -235,7 +236,7 @@ router.get('/cars2/:id', async (req, res) => {
     if (!assessment) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
     res.json({ success: true, data: assessment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -262,7 +263,7 @@ router.post(
       await assessment.save();
       res.status(201).json({ success: true, data: assessment });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err, 'standard-assessment');
     }
   }
 );
@@ -280,7 +281,7 @@ router.post('/pep3/:id/score', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -294,7 +295,7 @@ router.get('/pep3/beneficiary/:beneficiaryId', async (req, res) => {
       .lean();
     res.json({ success: true, data: assessments });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -314,7 +315,7 @@ router.post('/icf', [body('beneficiary_id').isMongoId()], validate, async (req, 
     await assessment.save();
     res.status(201).json({ success: true, data: assessment });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -328,7 +329,7 @@ router.get('/icf/beneficiary/:beneficiaryId', async (req, res) => {
       .lean();
     res.json({ success: true, data: assessments });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -420,7 +421,7 @@ router.post('/milestones/:beneficiaryId/initialize', async (req, res) => {
       data: record,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -454,7 +455,7 @@ router.get('/milestones/:beneficiaryId', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -505,7 +506,7 @@ router.patch(
         data: result,
       });
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      safeError(res, err, 'standard-assessment');
     }
   }
 );
@@ -566,7 +567,7 @@ router.get('/milestones/:beneficiaryId/chart', async (req, res) => {
 
     res.json({ success: true, data: chartData });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -583,7 +584,7 @@ router.get('/history/:beneficiaryId', async (req, res) => {
     const history = await AssessmentHistoryService.getBeneficiaryHistory(req.params.beneficiaryId);
     res.json({ success: true, data: history });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -604,7 +605,7 @@ router.get('/upcoming', async (req, res) => {
       data: upcoming,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 
@@ -690,7 +691,7 @@ router.get('/summary/:beneficiaryId', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'standard-assessment');
   }
 });
 

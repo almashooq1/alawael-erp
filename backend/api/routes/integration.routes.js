@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../../middleware/auth');
 const integrationService = require('../../services/externalIntegrationService');
+const safeError = require('../../utils/safeError');
 
 // Require authentication for all integration routes
 router.use(authenticateToken);
@@ -20,7 +21,7 @@ router.post('/integrations/slack/configure', async (req, res, next) => {
     const result = await integrationService.configureSlack(webhookUrl, channels);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -30,7 +31,7 @@ router.post('/integrations/slack/send', async (req, res, next) => {
     const result = await integrationService.sendSlackMessage(channel, message, options);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -45,7 +46,7 @@ router.post('/integrations/email/configure', async (req, res, next) => {
     const result = await integrationService.configureEmail(config);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -55,7 +56,7 @@ router.post('/integrations/email/send', async (req, res, next) => {
     const result = await integrationService.sendEmail(to, subject, body, options);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -65,7 +66,7 @@ router.post('/integrations/email/bulk', async (req, res, next) => {
     const result = await integrationService.sendBulkEmail(recipients, subject, template, data);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -77,7 +78,7 @@ router.post('/webhooks/register', (req, res, next) => {
     const result = integrationService.registerWebhook(event, url, options);
     res.status(201).json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -95,7 +96,7 @@ router.post('/webhooks/:id/trigger', async (req, res, next) => {
     const result = await integrationService.executeWebhook(webhook, data);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -104,7 +105,7 @@ router.delete('/webhooks/:id', (req, res, next) => {
     const result = integrationService.deleteWebhook(req.params.id);
     res.json(result);
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -117,7 +118,7 @@ router.get('/integrations/status', (req, res, next) => {
       : { connected: true };
     res.json({ success: true, status });
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 
@@ -129,7 +130,7 @@ router.get('/integrations/log', (req, res, next) => {
       : [];
     res.json({ success: true, log });
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'integration');
   }
 });
 

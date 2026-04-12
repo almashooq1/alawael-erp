@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { PerformanceAnalyticsService } = require('../services/performanceAnalyticsService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const analyticsService = new PerformanceAnalyticsService();
@@ -34,11 +35,7 @@ router.get(
         data: overview,
       });
     } catch (error) {
-      logger.error('Error fetching analytics overview:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
-      });
+      safeError(res, error, 'fetching analytics overview');
     }
   }
 );
@@ -59,11 +56,7 @@ router.get(
         data: dashboard,
       });
     } catch (error) {
-      logger.error('Error fetching dashboard:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch dashboard',
-      });
+      safeError(res, error, 'fetching dashboard');
     }
   }
 );
@@ -85,11 +78,7 @@ router.get(
         data: analytics,
       });
     } catch (error) {
-      logger.error('Error fetching module analytics:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
-      });
+      safeError(res, error, 'fetching module analytics');
     }
   }
 );
@@ -118,11 +107,7 @@ router.get(
         data: analytics,
       });
     } catch (error) {
-      logger.error('Error fetching user analytics:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch analytics',
-      });
+      safeError(res, error, 'fetching user analytics');
     }
   }
 );
@@ -144,11 +129,7 @@ router.get(
         data: trends,
       });
     } catch (error) {
-      logger.error('Error fetching trends:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch trends',
-      });
+      safeError(res, error, 'fetching trends');
     }
   }
 );
@@ -170,11 +151,7 @@ router.get(
         data: kpis,
       });
     } catch (error) {
-      logger.error('Error fetching KPIs:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch KPIs',
-      });
+      safeError(res, error, 'fetching KPIs');
     }
   }
 );
@@ -211,11 +188,7 @@ router.post(
         data: tracked,
       });
     } catch (error) {
-      logger.error('Error tracking event:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to track event',
-      });
+      safeError(res, error, 'tracking event');
     }
   }
 );
@@ -237,23 +210,13 @@ router.get(
         data: health,
       });
     } catch (error) {
-      logger.error('Error checking health:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to check health',
-      });
+      safeError(res, error, 'checking health');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

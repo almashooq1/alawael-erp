@@ -18,6 +18,7 @@
 'use strict';
 
 const EventEmitter = require('events');
+const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Constants
@@ -407,7 +408,7 @@ function mountModuleConnectorRoutes(app) {
       const health = await moduleConnector.healthCheck();
       res.json({ success: true, data: health });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'moduleConnector');
     }
   });
 

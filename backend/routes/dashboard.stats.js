@@ -11,6 +11,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { _authenticateToken, optionalAuth } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // ── Helpers ────────────────────────────────────────────────────────
 const getModel = name => {
@@ -638,12 +639,7 @@ router.get('/stats', optionalAuth, async (_req, res) => {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    logger.error('Dashboard stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب إحصائيات لوحة التحكم',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'Dashboard stats error');
   }
 });
 
@@ -678,7 +674,7 @@ router.get('/stats/quick', optionalAuth, async (_req, res) => {
       data: { users, beneficiaries, todaySessions, unreadNotifs, pendingLeaves, openIncidents },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dashboard.stats');
   }
 });
 
@@ -763,7 +759,7 @@ router.get('/stats/modules', optionalAuth, async (_req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'dashboard.stats');
   }
 });
 

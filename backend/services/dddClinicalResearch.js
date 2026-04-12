@@ -1,271 +1,48 @@
 'use strict';
 /**
- * DDD Clinical Research Service
- * ─────────────────────────────
- * Phase 35 – Clinical Research & Evidence-Based Practice (Module 1/4)
- *
- * Manages research studies, IRB approvals, ethics committee reviews,
- * research funding, informed consent, and principal investigator assignments.
+ * ClinicalResearch Service — Pure Business Logic
+ * Singleton export — use directly, do NOT call `new`.
+ * Models: ../models/DddClinicalResearch.js
  */
 
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const {
+  DDDResearchStudy,
+  DDDIrbSubmission,
+  DDDEthicsReview,
+  DDDResearchFunding,
+  RESEARCH_DOMAINS,
+  STUDY_STATUSES,
+  STUDY_DESIGNS,
+  IRB_REVIEW_TYPES,
+  ETHICS_CATEGORIES,
+  FUNDING_SOURCES,
+  BUILTIN_RESEARCH_CONFIGS,
+} = require('../models/DddClinicalResearch');
 
-/* ═══════════════════ Constants ═══════════════════ */
-const RESEARCH_DOMAINS = [
-  'physical_therapy',
-  'occupational_therapy',
-  'speech_therapy',
-  'behavioral_science',
-  'neuroscience',
-  'rehabilitation_engineering',
-  'assistive_technology',
-  'clinical_psychology',
-  'social_work',
-  'public_health',
-  'biomedical_informatics',
-  'epidemiology',
-];
+const BaseCrudService = require('./base/BaseCrudService');
 
-const STUDY_STATUSES = [
-  'draft',
-  'submitted',
-  'irb_review',
-  'approved',
-  'recruiting',
-  'active',
-  'data_collection',
-  'analysis',
-  'completed',
-  'suspended',
-  'terminated',
-  'withdrawn',
-];
-
-const STUDY_DESIGNS = [
-  'randomized_controlled',
-  'quasi_experimental',
-  'cohort',
-  'case_control',
-  'cross_sectional',
-  'longitudinal',
-  'single_case',
-  'mixed_methods',
-  'qualitative',
-  'systematic_review',
-  'meta_analysis',
-  'pragmatic_trial',
-];
-
-const IRB_REVIEW_TYPES = [
-  'full_board',
-  'expedited',
-  'exempt',
-  'continuing',
-  'amendment',
-  'adverse_event',
-  'protocol_deviation',
-  'closure',
-  'suspension',
-  'annual_renewal',
-];
-
-const ETHICS_CATEGORIES = [
-  'informed_consent',
-  'vulnerable_population',
-  'data_privacy',
-  'conflict_of_interest',
-  'risk_assessment',
-  'benefit_analysis',
-  'deception_debriefing',
-  'genetic_research',
-  'pediatric',
-  'disability_specific',
-];
-
-const FUNDING_SOURCES = [
-  'government_grant',
-  'institutional',
-  'private_foundation',
-  'industry_sponsored',
-  'crowdfunding',
-  'self_funded',
-  'international_agency',
-  'ngo',
-  'cooperative_agreement',
-  'fellowship',
-];
-
-const BUILTIN_RESEARCH_CONFIGS = [
-  {
-    code: 'RCT_STANDARD',
-    label: 'Standard RCT Protocol',
-    design: 'randomized_controlled',
-    minSample: 30,
-  },
-  { code: 'SINGLE_CASE', label: 'Single Case Experimental', design: 'single_case', minSample: 1 },
-  { code: 'COHORT_LONG', label: 'Longitudinal Cohort', design: 'longitudinal', minSample: 50 },
-  { code: 'MIXED_METHOD', label: 'Mixed Methods Study', design: 'mixed_methods', minSample: 20 },
-  { code: 'SYS_REVIEW', label: 'Systematic Review', design: 'systematic_review', minSample: 0 },
-  { code: 'META_ANAL', label: 'Meta-Analysis', design: 'meta_analysis', minSample: 0 },
-  { code: 'QUAL_STUDY', label: 'Qualitative Research', design: 'qualitative', minSample: 10 },
-  { code: 'QUASI_EXP', label: 'Quasi-Experimental', design: 'quasi_experimental', minSample: 20 },
-  { code: 'CROSS_SEC', label: 'Cross-Sectional Survey', design: 'cross_sectional', minSample: 100 },
-  { code: 'PRAGMATIC', label: 'Pragmatic Trial', design: 'pragmatic_trial', minSample: 40 },
-];
-
-/* ═══════════════════ Schemas ═══════════════════ */
-const researchStudySchema = new Schema(
-  {
-    title: { type: String, required: true },
-    domain: { type: String, enum: RESEARCH_DOMAINS, required: true },
-    status: { type: String, enum: STUDY_STATUSES, default: 'draft' },
-    designType: { type: String, enum: STUDY_DESIGNS },
-    principalInvestigator: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    coInvestigators: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-    abstract: { type: String },
-    hypothesis: { type: String },
-    sampleSize: { type: Number },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    fundingSource: { type: String, enum: FUNDING_SOURCES },
-    fundingAmount: { type: Number },
-    departmentId: { type: Schema.Types.ObjectId },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
-researchStudySchema.index({ domain: 1, status: 1 });
-researchStudySchema.index({ principalInvestigator: 1 });
-
-const irbSubmissionSchema = new Schema(
-  {
-    studyId: { type: Schema.Types.ObjectId, ref: 'DDDResearchStudy', required: true },
-    reviewType: { type: String, enum: IRB_REVIEW_TYPES, required: true },
-    submittedAt: { type: Date, default: Date.now },
-    reviewDate: { type: Date },
-    decision: {
-      type: String,
-      enum: ['approved', 'approved_with_conditions', 'deferred', 'disapproved', 'pending'],
-    },
-    conditions: [{ type: String }],
-    expirationDate: { type: Date },
-    irbNumber: { type: String },
-    reviewerNotes: { type: String },
-    submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-  },
-  { timestamps: true }
-);
-irbSubmissionSchema.index({ studyId: 1, reviewType: 1 });
-irbSubmissionSchema.index({ decision: 1, submittedAt: -1 });
-
-const ethicsReviewSchema = new Schema(
-  {
-    studyId: { type: Schema.Types.ObjectId, ref: 'DDDResearchStudy', required: true },
-    category: { type: String, enum: ETHICS_CATEGORIES, required: true },
-    riskLevel: {
-      type: String,
-      enum: ['minimal', 'low', 'moderate', 'high', 'very_high'],
-      default: 'minimal',
-    },
-    reviewDate: { type: Date },
-    reviewedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    outcome: {
-      type: String,
-      enum: ['cleared', 'concerns_raised', 'requires_modification', 'rejected', 'pending'],
-    },
-    findings: { type: String },
-    recommendations: [{ type: String }],
-    consentFormRef: { type: String },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-  },
-  { timestamps: true }
-);
-ethicsReviewSchema.index({ studyId: 1, category: 1 });
-
-const researchFundingSchema = new Schema(
-  {
-    studyId: { type: Schema.Types.ObjectId, ref: 'DDDResearchStudy', required: true },
-    source: { type: String, enum: FUNDING_SOURCES, required: true },
-    grantNumber: { type: String },
-    awardedAmount: { type: Number },
-    disbursedAmount: { type: Number, default: 0 },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    status: {
-      type: String,
-      enum: ['applied', 'awarded', 'active', 'expended', 'closed', 'revoked'],
-      default: 'applied',
-    },
-    reportingSchedule: { type: String },
-    managedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-  },
-  { timestamps: true }
-);
-researchFundingSchema.index({ studyId: 1, source: 1 });
-researchFundingSchema.index({ status: 1 });
-
-/* ═══════════════════ Models ═══════════════════ */
-const DDDResearchStudy =
-  mongoose.models.DDDResearchStudy || mongoose.model('DDDResearchStudy', researchStudySchema);
-const DDDIrbSubmission =
-  mongoose.models.DDDIrbSubmission || mongoose.model('DDDIrbSubmission', irbSubmissionSchema);
-const DDDEthicsReview =
-  mongoose.models.DDDEthicsReview || mongoose.model('DDDEthicsReview', ethicsReviewSchema);
-const DDDResearchFunding =
-  mongoose.models.DDDResearchFunding || mongoose.model('DDDResearchFunding', researchFundingSchema);
-
-/* ═══════════════════ Domain Class ═══════════════════ */
-class ClinicalResearch {
-  async createStudy(data) {
-    return DDDResearchStudy.create(data);
-  }
-  async listStudies(filter = {}, page = 1, limit = 20) {
-    return DDDResearchStudy.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
-  async updateStudy(id, data) {
-    return DDDResearchStudy.findByIdAndUpdate(id, data, { new: true }).lean();
+class ClinicalResearch extends BaseCrudService {
+  constructor() {
+    super('ClinicalResearch', {}, {
+      researchStudys: DDDResearchStudy,
+      irbSubmissions: DDDIrbSubmission,
+      ethicsReviews: DDDEthicsReview,
+      researchFundings: DDDResearchFunding,
+    });
   }
 
-  async submitIrb(data) {
-    return DDDIrbSubmission.create(data);
-  }
-  async listIrbSubmissions(filter = {}, page = 1, limit = 20) {
-    return DDDIrbSubmission.find(filter)
-      .sort({ submittedAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
+  async createStudy(data) { return this._create(DDDResearchStudy, data); }
+  async listStudies(filter = {}, page = 1, limit = 20) { return this._list(DDDResearchStudy, filter, { page: page, limit: limit, sort: { createdAt: -1 } }); }
+  async updateStudy(id, data) { return this._update(DDDResearchStudy, id, data); }
 
-  async createEthicsReview(data) {
-    return DDDEthicsReview.create(data);
-  }
-  async listEthicsReviews(filter = {}, page = 1, limit = 20) {
-    return DDDEthicsReview.find(filter)
-      .sort({ reviewDate: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
+  async submitIrb(data) { return this._create(DDDIrbSubmission, data); }
+  async listIrbSubmissions(filter = {}, page = 1, limit = 20) { return this._list(DDDIrbSubmission, filter, { page: page, limit: limit, sort: { submittedAt: -1 } }); }
 
-  async createFunding(data) {
-    return DDDResearchFunding.create(data);
-  }
-  async listFunding(filter = {}, page = 1, limit = 20) {
-    return DDDResearchFunding.find(filter)
-      .sort({ startDate: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
+  async createEthicsReview(data) { return this._create(DDDEthicsReview, data); }
+  async listEthicsReviews(filter = {}, page = 1, limit = 20) { return this._list(DDDEthicsReview, filter, { page: page, limit: limit, sort: { reviewDate: -1 } }); }
+
+  async createFunding(data) { return this._create(DDDResearchFunding, data); }
+  async listFunding(filter = {}, page = 1, limit = 20) { return this._list(DDDResearchFunding, filter, { page: page, limit: limit, sort: { startDate: -1 } }); }
 
   async getResearchStats() {
     const [studies, activeStudies, irbPending, fundingActive] = await Promise.all([
@@ -281,122 +58,7 @@ class ClinicalResearch {
       activeFunding: fundingActive,
     };
   }
-
-  async healthCheck() {
-    const [studies, irb, ethics, funding] = await Promise.all([
-      DDDResearchStudy.countDocuments(),
-      DDDIrbSubmission.countDocuments(),
-      DDDEthicsReview.countDocuments(),
-      DDDResearchFunding.countDocuments(),
-    ]);
-    return { status: 'ok', module: 'ClinicalResearch', counts: { studies, irb, ethics, funding } };
-  }
 }
 
-/* ═══════════════════ Router Factory ═══════════════════ */
-function createClinicalResearchRouter() {
-  const { Router } = require('express');
-  const router = Router();
-  const svc = new ClinicalResearch();
-
-  router.get('/clinical-research/health', async (_req, res) => {
-    try {
-      res.json(await svc.healthCheck());
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.post('/clinical-research/studies', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createStudy(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/clinical-research/studies', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...f } = req.query;
-      res.json(await svc.listStudies(f, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.put('/clinical-research/studies/:id', async (req, res) => {
-    try {
-      res.json(await svc.updateStudy(req.params.id, req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.post('/clinical-research/irb', async (req, res) => {
-    try {
-      res.status(201).json(await svc.submitIrb(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/clinical-research/irb', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...f } = req.query;
-      res.json(await svc.listIrbSubmissions(f, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.post('/clinical-research/ethics', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createEthicsReview(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/clinical-research/ethics', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...f } = req.query;
-      res.json(await svc.listEthicsReviews(f, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.post('/clinical-research/funding', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createFunding(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/clinical-research/funding', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...f } = req.query;
-      res.json(await svc.listFunding(f, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/clinical-research/stats', async (_req, res) => {
-    try {
-      res.json(await svc.getResearchStats());
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  return router;
-}
-
-/* ═══════════════════ Exports ═══════════════════ */
-module.exports = {
-  RESEARCH_DOMAINS,
-  STUDY_STATUSES,
-  STUDY_DESIGNS,
-  IRB_REVIEW_TYPES,
-  ETHICS_CATEGORIES,
-  FUNDING_SOURCES,
-  BUILTIN_RESEARCH_CONFIGS,
-  DDDResearchStudy,
-  DDDIrbSubmission,
-  DDDEthicsReview,
-  DDDResearchFunding,
-  ClinicalResearch,
-  createClinicalResearchRouter,
-};
+/* ═══════════════════ Singleton Export ═══════════════════ */
+module.exports = new ClinicalResearch();

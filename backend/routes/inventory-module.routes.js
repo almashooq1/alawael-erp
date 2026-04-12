@@ -11,6 +11,7 @@ const { authenticate } = require('../middleware/auth');
 const InventoryItem = require('../models/inventory/InventoryItem');
 const InventoryTransaction = require('../models/inventory/InventoryTransaction');
 const PurchaseOrder = require('../models/inventory/PurchaseOrder');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -35,7 +36,7 @@ router.get('/items', async (req, res) => {
     ]);
     res.json({ items, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -48,7 +49,7 @@ router.get('/items/low-stock', async (req, res) => {
     const items = await InventoryItem.find(filter).sort({ quantity_on_hand: 1 }).limit(50);
     res.json({ items, count: items.length });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -59,7 +60,7 @@ router.get('/items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ error: 'العنصر غير موجود' });
     res.json({ item });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -100,7 +101,7 @@ router.delete('/items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ error: 'العنصر غير موجود' });
     res.json({ message: 'تم حذف العنصر' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -141,7 +142,7 @@ router.get('/transactions', async (req, res) => {
     ]);
     res.json({ transactions, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -205,7 +206,7 @@ router.get('/transactions/:id', async (req, res) => {
     if (!txn) return res.status(404).json({ error: 'الحركة غير موجودة' });
     res.json({ transaction: txn });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -232,7 +233,7 @@ router.get('/purchase-orders', async (req, res) => {
     ]);
     res.json({ orders, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -256,7 +257,7 @@ router.get('/purchase-orders/:id', async (req, res) => {
     if (!po) return res.status(404).json({ error: 'أمر الشراء غير موجود' });
     res.json({ order: po });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -286,7 +287,7 @@ router.post('/purchase-orders/:id/submit', async (req, res) => {
     if (!po) return res.status(404).json({ error: 'لا يمكن إرسال هذا الأمر' });
     res.json({ order: po, message: 'تم إرسال أمر الشراء للاعتماد' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -301,7 +302,7 @@ router.post('/purchase-orders/:id/approve', async (req, res) => {
     if (!po) return res.status(404).json({ error: 'لا يمكن اعتماد هذا الأمر' });
     res.json({ order: po, message: 'تم اعتماد أمر الشراء' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -377,7 +378,7 @@ router.delete('/purchase-orders/:id', async (req, res) => {
     if (!po) return res.status(404).json({ error: 'لا يمكن حذف هذا الأمر' });
     res.json({ message: 'تم إلغاء أمر الشراء' });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 
@@ -418,7 +419,7 @@ router.get('/stats', async (req, res) => {
 
     res.json({ totalItems, lowStockItems, categorySummary, recentTransactions, pendingPOs });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    safeError(res, e, 'inventory-module');
   }
 });
 

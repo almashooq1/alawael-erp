@@ -42,6 +42,7 @@ router.get('/student-advanced', async (req, res, next) => {
     }
     // Lazy-require to avoid circular dep
     const { studentService } = require('../../students/student-service');
+const safeError = require('../../utils/safeError');
     const report = await studentService.getComprehensiveReport(student_id);
     res.status(200).json(report);
   } catch (error) {
@@ -283,7 +284,7 @@ router.post('/generate', (req, res, next) => {
       try {
         report = reportingService.generateReport(type, { period, ...allOptions });
       } catch (_serviceError) {
-        return res.status(500).json({ success: false, error: 'حدث خطأ في إنشاء التقرير' });
+        safeError(res, _serviceError, 'reporting');
       }
     }
 

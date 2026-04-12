@@ -9,6 +9,7 @@ const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
 const router = express.Router();
 const _crypto = require('crypto');
+const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticate);
@@ -47,10 +48,7 @@ router.post('/webhooks', authorize(['admin', 'system_admin']), (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -69,10 +67,7 @@ router.get('/webhooks', (req, res) => {
       webhooks,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -107,10 +102,7 @@ router.get('/webhooks/:id', (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -136,10 +128,7 @@ router.put('/webhooks/:id', authorize(['admin', 'system_admin']), (req, res) => 
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -166,10 +155,7 @@ router.delete('/webhooks/:id', authorize(['admin', 'system_admin']), (req, res) 
       message: `Webhook "${id}" deleted`,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -205,10 +191,7 @@ router.post('/events', authorize(['admin', 'system_admin']), (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -229,10 +212,7 @@ router.get('/events', (req, res) => {
       events: history,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -268,10 +248,7 @@ router.post('/connectors', authorize(['admin', 'system_admin']), (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -290,10 +267,7 @@ router.get('/connectors', (req, res) => {
       connectors,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -329,10 +303,7 @@ router.get('/connectors/:id', (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -359,10 +330,7 @@ router.delete('/connectors/:id', authorize(['admin', 'system_admin']), (req, res
       message: `Connector "${id}" deleted`,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -397,10 +365,7 @@ router.post('/apis', authorize(['admin', 'system_admin']), (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -419,10 +384,7 @@ router.get('/apis', (req, res) => {
       integrations,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -451,10 +413,7 @@ router.post('/apis/:name/call', authorize(['admin', 'system_admin']), (req, res)
       result,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -491,10 +450,7 @@ router.post('/zapier/receive', authorize(['admin', 'system_admin']), (req, res) 
       message: 'Event received and processed',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -509,10 +465,7 @@ router.get('/zapier/auth', (req, res) => {
       message: 'Authentication successful',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -550,10 +503,7 @@ router.post('/sync/:connectorId', authorize(['admin', 'system_admin']), (req, re
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -575,10 +525,7 @@ router.get('/stats', (req, res) => {
       stats,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -596,10 +543,7 @@ router.get('/health', (req, res) => {
       health,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 
@@ -619,10 +563,7 @@ router.get('/export', (req, res) => {
 
     res.send(JSON.stringify(config, null, 2));
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'integrations');
   }
 });
 

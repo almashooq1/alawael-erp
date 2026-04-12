@@ -6,6 +6,7 @@
 
 const AdvancedAnalyticsService = require('../services/advancedAnalytics.service');
 const Logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class AdvancedAnalyticsController {
   /**
@@ -33,9 +34,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Log event error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تسجيل الحدث',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to log event',
         error: 'حدث خطأ داخلي',
       });
@@ -68,9 +67,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Track metric error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تتبع المقياس',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to track metric',
         error: 'حدث خطأ داخلي',
       });
@@ -119,9 +116,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Generate report error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء التقرير',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to generate report',
         error: 'حدث خطأ داخلي',
       });
@@ -158,9 +153,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Predict values error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل التنبؤ',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to predict',
         error: 'حدث خطأ داخلي',
       });
@@ -191,9 +184,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Get anomalies error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الشذوذ',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to get anomalies',
         error: 'حدث خطأ داخلي',
       });
@@ -225,9 +216,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Get events error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الأحداث',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to get events',
         error: 'حدث خطأ داخلي',
       });
@@ -274,9 +263,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Create dashboard error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء لوحة المعلومات',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to create dashboard',
         error: 'حدث خطأ داخلي',
       });
@@ -309,9 +296,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Get dashboard error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب لوحة المعلومات',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to get dashboard',
         error: 'حدث خطأ داخلي',
       });
@@ -350,9 +335,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Add widget error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة الـ widget',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to add widget',
         error: 'حدث خطأ داخلي',
       });
@@ -391,9 +374,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Comparative analysis error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب التحليل',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to get analysis',
         error: 'حدث خطأ داخلي',
       });
@@ -430,9 +411,7 @@ class AdvancedAnalyticsController {
       res.send(exportData);
     } catch (error) {
       Logger.error(`Export report error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تصدير التقرير',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to export report',
         error: 'حدث خطأ داخلي',
       });
@@ -455,9 +434,7 @@ class AdvancedAnalyticsController {
       });
     } catch (error) {
       Logger.error(`Get statistics error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الإحصائيات',
+      safeError(res, error, 'advancedAnalytics');
         en: 'Failed to get statistics',
         error: 'حدث خطأ داخلي',
       });

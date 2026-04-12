@@ -12,6 +12,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const router = express.Router();
 const { getCacheStats, clearCache } = require('../utils/performance-optimizer');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticate);
@@ -35,12 +36,7 @@ router.get('/cache-stats', (req, res) => {
       message: 'Cache statistics retrieved successfully',
     });
   } catch (error) {
-    logger.error('[CACHE-STATS] Error:', { message: error.message });
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-      message: 'Failed to retrieve cache statistics',
-    });
+    safeError(res, error, '[CACHE-STATS] Error');
   }
 });
 
@@ -61,12 +57,7 @@ router.post('/cache/clear', authorize(['admin', 'system_admin']), (req, res) => 
       stats: stats,
     });
   } catch (error) {
-    logger.error('[CACHE-CLEAR] Error:', { message: error.message });
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-      message: 'Failed to clear cache',
-    });
+    safeError(res, error, '[CACHE-CLEAR] Error');
   }
 });
 

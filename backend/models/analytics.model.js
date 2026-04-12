@@ -1,50 +1,18 @@
+/**
+ * analytics.model.js — Compatibility Proxy
+ * ═════════════════════════════════════════
+ * CANONICAL MODEL: Analytics.js (event/API tracking, 14 fields, TTL 90d)
+ * This file re-exports the canonical model for production,
+ * and provides a mock class for test environments.
+ */
 /* eslint-disable no-unused-vars */
-const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 
 const useMock = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test';
 
 if (!useMock) {
-  const AnalyticsSchema = new mongoose.Schema({
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    metricType: {
-      type: String,
-      enum: ['performance', 'engagement', 'activity', 'behavior'],
-      required: true,
-    },
-    metricValue: {
-      type: Number,
-      required: true,
-    },
-    metadata: {
-      type: Map,
-      of: mongoose.Schema.Types.Mixed,
-      default: new Map(),
-    },
-    period: {
-      type: String,
-      enum: ['daily', 'weekly', 'monthly'],
-      default: 'daily',
-    },
-    timestamp: {
-      type: Date,
-      default: Date.now,
-    },
-    createdAt: { type: Date, default: Date.now },
-  });
-
-
-// ── Indexes ───────────────────────────────────────────────────────────────
-AnalyticsSchema.index({ userId: 1 });
-AnalyticsSchema.index({ metricType: 1 });
-AnalyticsSchema.index({ timestamp: -1 });
-AnalyticsSchema.index({ userId: 1, metricType: 1, timestamp: -1 });
-AnalyticsSchema.index({ period: 1 });
-  module.exports = mongoose.models.Analytics || mongoose.model('Analytics', AnalyticsSchema);
+  // Delegate to canonical Analytics.js
+  module.exports = require('./Analytics');
 } else {
   const store = [];
 

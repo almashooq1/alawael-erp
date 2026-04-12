@@ -11,6 +11,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Contract = require('../models/Contract.model');
+const safeError = require('../utils/safeError');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -47,8 +48,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة العقود',
     });
   } catch (error) {
-    logger.error('Error fetching contracts:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود' });
+    safeError(res, error, 'fetching contracts');
   }
 });
 
@@ -72,8 +72,7 @@ router.get('/stats/summary', async (req, res) => {
     });
     res.json({ success: true, data: stats, message: 'إحصائيات العقود' });
   } catch (error) {
-    logger.error('Error fetching contract stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching contract stats');
   }
 });
 
@@ -85,8 +84,7 @@ router.get('/:id', async (req, res) => {
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'بيانات العقد' });
   } catch (error) {
-    logger.error('Error fetching contract:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقد' });
+    safeError(res, error, 'fetching contract');
   }
 });
 
@@ -126,8 +124,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: contract, message: 'تم إنشاء العقد بنجاح' });
     } catch (error) {
-      logger.error('Error creating contract:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء العقد' });
+      safeError(res, error, 'creating contract');
     }
   }
 );
@@ -158,8 +155,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'تم تحديث العقد بنجاح' });
   } catch (error) {
-    logger.error('Error updating contract:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث العقد' });
+    safeError(res, error, 'updating contract');
   }
 });
 
@@ -171,8 +167,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, message: 'تم حذف العقد بنجاح' });
   } catch (error) {
-    logger.error('Error deleting contract:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف العقد' });
+    safeError(res, error, 'deleting contract');
   }
 });
 
@@ -192,8 +187,7 @@ router.post('/:id/renew', authorize(['admin', 'manager']), async (req, res) => {
     await contract.save();
     res.json({ success: true, data: contract, message: 'تم تجديد العقد بنجاح' });
   } catch (error) {
-    logger.error('Error renewing contract:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تجديد العقد' });
+    safeError(res, error, 'renewing contract');
   }
 });
 

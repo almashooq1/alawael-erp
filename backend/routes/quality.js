@@ -9,6 +9,7 @@ const {
   ComplianceTracking,
   QualityIndicator,
 } = require('../models/qualityManagement');
+const safeError = require('../utils/safeError');
 
 // ============================================
 // ROOT ENDPOINT — GET /api/quality
@@ -93,11 +94,7 @@ router.get('/standards', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching standards',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -120,11 +117,7 @@ router.get('/standards/:id', authenticate, async (req, res) => {
       data: standard,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching standard',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -214,11 +207,7 @@ router.delete('/standards/:id', authenticate, authorize(['admin']), async (req, 
       message: 'Standard deleted successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting standard',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -256,11 +245,7 @@ router.get('/accreditations', authenticate, async (req, res) => {
       data: accreditations,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching accreditations',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -283,11 +268,7 @@ router.get('/accreditations/:id', authenticate, async (req, res) => {
       data: accreditation,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching accreditation',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -406,11 +387,7 @@ router.delete('/accreditations/:id', authenticate, authorize(['admin']), async (
       message: 'Accreditation deleted successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting accreditation',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -444,11 +421,7 @@ router.get('/audits', authenticate, async (req, res) => {
       data: audits,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching audits',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -473,11 +446,7 @@ router.get('/audits/:id', authenticate, async (req, res) => {
       data: audit,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching audit',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -601,11 +570,7 @@ router.delete(
         message: 'Audit deleted successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error deleting audit',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'quality');
     }
   }
 );
@@ -707,11 +672,7 @@ router.get('/compliance', authenticate, async (req, res) => {
       data: trackings,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching compliance trackings',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -765,11 +726,7 @@ router.get('/compliance/:id', authenticate, async (req, res) => {
       data: tracking,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching compliance tracking',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -855,11 +812,7 @@ router.delete(
         message: 'Compliance tracking deleted successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error deleting compliance tracking',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'quality');
     }
   }
 );
@@ -926,11 +879,7 @@ router.get('/indicators', authenticate, async (req, res) => {
       data: indicators,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching indicators',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -954,11 +903,7 @@ router.get('/indicators/:id', authenticate, async (req, res) => {
       data: indicator,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching indicator',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -1073,11 +1018,7 @@ router.delete(
         message: 'Indicator deleted successfully',
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Error deleting indicator',
-        error: 'حدث خطأ في الخادم',
-      });
+      safeError(res, error, 'quality');
     }
   }
 );
@@ -1196,11 +1137,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching dashboard data',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -1237,11 +1174,7 @@ router.get('/reports/compliance-by-department', authenticate, async (req, res) =
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error generating compliance report',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 
@@ -1278,11 +1211,7 @@ router.get('/reports/findings-trend', authenticate, async (req, res) => {
       data: trend,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Error generating findings trend',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'quality');
   }
 });
 

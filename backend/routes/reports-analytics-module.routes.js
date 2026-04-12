@@ -267,9 +267,7 @@ router.post('/jobs', authenticate, async (req, res) => {
         completed_at: new Date(),
         error_message: execErr.message,
       });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل تنفيذ التقرير: ' + execErr.message,
+      safeError(res, error, 'reports-analytics-module');
         job_id: job._id,
       });
     }
@@ -371,7 +369,7 @@ router.get('/jobs/:id/download', authenticate, async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="report-${job.job_number}.${ext}"`);
     pipeline(fs.createReadStream(filePath), res, err => {
       if (err && !res.headersSent) {
-        res.status(500).json({ success: false, message: 'خطأ في قراءة الملف' });
+        safeError(res, error, 'reports-analytics-module');
       }
     });
   } catch (err) {

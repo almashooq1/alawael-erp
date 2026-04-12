@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { AssetManagementService } = require('../services/assetManagementService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const assetService = new AssetManagementService();
@@ -35,11 +36,7 @@ router.get(
         data: assets,
       });
     } catch (error) {
-      logger.error('Error fetching assets:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
-      });
+      safeError(res, error, 'fetching assets');
     }
   }
 );
@@ -79,11 +76,7 @@ router.post(
         data: asset,
       });
     } catch (error) {
-      logger.error('Error creating asset:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create asset',
-      });
+      safeError(res, error, 'creating asset');
     }
   }
 );
@@ -106,11 +99,7 @@ router.get(
         data: assets,
       });
     } catch (error) {
-      logger.error('Error fetching assets by category:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch assets',
-      });
+      safeError(res, error, 'fetching assets by category');
     }
   }
 );
@@ -132,11 +121,7 @@ router.get(
         data: report,
       });
     } catch (error) {
-      logger.error('Error generating depreciation report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to generate report',
-      });
+      safeError(res, error, 'generating depreciation report');
     }
   }
 );
@@ -165,11 +150,7 @@ router.get(
         data: asset,
       });
     } catch (error) {
-      logger.error('Error fetching asset:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch asset',
-      });
+      safeError(res, error, 'fetching asset');
     }
   }
 );
@@ -199,11 +180,7 @@ router.put(
         data: asset,
       });
     } catch (error) {
-      logger.error('Error updating asset:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to update asset',
-      });
+      safeError(res, error, 'updating asset');
     }
   }
 );
@@ -233,23 +210,13 @@ router.delete(
         message: 'Asset deleted successfully',
       });
     } catch (error) {
-      logger.error('Error deleting asset:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to delete asset',
-      });
+      safeError(res, error, 'deleting asset');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

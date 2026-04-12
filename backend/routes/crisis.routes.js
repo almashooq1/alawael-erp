@@ -118,8 +118,7 @@ router.get('/plans', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Crisis] Plans list error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[Crisis] Plans list error');
   }
 });
 
@@ -133,7 +132,7 @@ router.get('/plans/:id', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, data: plan });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -172,7 +171,7 @@ router.patch('/plans/:id/approve', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, data: plan, message: 'تمت الموافقة على الخطة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -186,7 +185,7 @@ router.delete('/plans/:id', async (req, res) => {
     if (!plan) return res.status(404).json({ success: false, error: 'الخطة غير موجودة' });
     res.json({ success: true, message: 'تم حذف الخطة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -226,8 +225,7 @@ router.get('/incidents', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Crisis] Incidents list error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[Crisis] Incidents list error');
   }
 });
 
@@ -243,7 +241,7 @@ router.get('/incidents/:id', async (req, res) => {
     if (!incident) return res.status(404).json({ success: false, error: 'الحادثة غير موجودة' });
     res.json({ success: true, data: incident });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -296,7 +294,7 @@ router.patch('/incidents/:id/status', async (req, res) => {
     await incident.save();
     res.json({ success: true, data: incident });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -368,7 +366,7 @@ router.get('/drills', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -417,7 +415,7 @@ router.patch('/drills/:id/complete', async (req, res) => {
     await drill.save();
     res.json({ success: true, data: drill, message: 'تم إكمال التمرين' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -440,7 +438,7 @@ router.get('/contacts', async (req, res) => {
 
     res.json({ success: true, data: contacts });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -476,7 +474,7 @@ router.delete('/contacts/:id', async (req, res) => {
     if (!contact) return res.status(404).json({ success: false, error: 'جهة الاتصال غير موجودة' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'crisis');
   }
 });
 
@@ -538,8 +536,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Crisis] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[Crisis] Dashboard error');
   }
 });
 

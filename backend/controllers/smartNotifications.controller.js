@@ -6,6 +6,7 @@
 
 const SmartNotificationsService = require('../services/smartNotifications.service');
 const Logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class SmartNotificationsController {
   /**
@@ -55,9 +56,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Create notification error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء الإشعار',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to create notification',
         error: 'حدث خطأ داخلي',
       });
@@ -110,9 +109,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Broadcast notification error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إرسال الإشعار المجموعي',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to broadcast notification',
         error: 'حدث خطأ داخلي',
       });
@@ -153,9 +150,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Get notifications error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الإشعارات',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to get notifications',
         error: 'حدث خطأ داخلي',
       });
@@ -183,9 +178,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Update preferences error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث التفضيلات',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to update preferences',
         error: 'حدث خطأ داخلي',
       });
@@ -218,9 +211,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Record interaction error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تسجيل التفاعل',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to record interaction',
         error: 'حدث خطأ داخلي',
       });
@@ -254,9 +245,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Delete notification error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف الإشعار',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to delete notification',
         error: 'حدث خطأ داخلي',
       });
@@ -283,9 +272,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Clear notifications error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف الإشعارات',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to clear notifications',
         error: 'حدث خطأ داخلي',
       });
@@ -310,9 +297,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Get stats error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الإحصائيات',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to get statistics',
         error: 'حدث خطأ داخلي',
       });
@@ -337,9 +322,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Get performance report error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب التقرير',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to get report',
         error: 'حدث خطأ داخلي',
       });
@@ -367,9 +350,7 @@ class SmartNotificationsController {
       });
     } catch (error) {
       Logger.error(`Process queue error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل معالجة الطابور',
+      safeError(res, error, 'smartNotifications');
         en: 'Failed to process queue',
         error: 'حدث خطأ داخلي',
       });

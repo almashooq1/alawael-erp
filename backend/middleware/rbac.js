@@ -14,6 +14,7 @@ const {
   hasPermission: configHasPermission,
   getRoleLevel,
 } = require('../config/rbac.config');
+const safeError = require('../utils/safeError');
 
 /**
  * Authorize middleware - checks if user has required roles
@@ -50,11 +51,7 @@ const authorize = (allowedRoles = []) => {
         message: `User role does not have permission. Required: ${roles.join(', ')}`,
       });
     } catch (error) {
-      logger.error('RBAC Authorization Error:', error);
-      return res.status(500).json({
-        error: 'SERVER_ERROR',
-        message: 'Error during authorization check',
-      });
+      safeError(res, error, 'RBAC Authorization Error');
     }
   };
 };

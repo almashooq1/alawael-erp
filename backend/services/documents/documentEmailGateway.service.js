@@ -10,6 +10,7 @@
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const EventEmitter = require('events');
+const logger = require('../../utils/logger');
 
 /* ─── Email Message Model ────────────────────────────────────── */
 const emailMessageSchema = new mongoose.Schema(
@@ -301,7 +302,7 @@ class DocumentEmailGatewayService extends EventEmitter {
     await message.save();
 
     // Simulate send
-    this._processSend(message._id).catch(err => console.error('Email send error:', err));
+    this._processSend(message._id).catch(err => logger.error('Email send error:', err));
 
     return { success: true, message };
   }

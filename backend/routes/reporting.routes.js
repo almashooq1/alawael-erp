@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { FinancialReport, AuditLog } = require('../models');
 const { authenticate, authorize } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // GET أحدث التقارير
 router.get('/latest', authenticate, async (req, res) => {
@@ -17,7 +18,7 @@ router.get('/latest', authenticate, async (req, res) => {
 
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'reporting');
   }
 });
 
@@ -38,7 +39,7 @@ router.get('/period', authenticate, async (req, res) => {
 
     res.json({ success: true, data: reports });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'reporting');
   }
 });
 
@@ -90,7 +91,7 @@ router.post(
 
       res.status(201).json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'reporting');
     }
   }
 );
@@ -129,7 +130,7 @@ router.put(
 
       res.json({ success: true, data: report });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'reporting');
     }
   }
 );
@@ -165,7 +166,7 @@ router.get('/comparison', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'reporting');
   }
 });
 
@@ -203,7 +204,7 @@ router.post(
 
       res.json({ success: true, data: report, message: 'تم اعتماد التقرير بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'reporting');
     }
   }
 );

@@ -12,6 +12,7 @@ const Room = require('../models/Room');
 const RoomBooking = require('../models/RoomBooking');
 const MaintenanceRequest = require('../models/MaintenanceRequest');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -40,8 +41,7 @@ router.get('/rooms', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Rooms list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الغرف' });
+    safeError(res, err, 'Rooms list error');
   }
 });
 
@@ -52,8 +52,7 @@ router.get('/rooms/:id', async (req, res) => {
     if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
     res.json({ success: true, data: room });
   } catch (err) {
-    logger.error('Room detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الغرفة' });
+    safeError(res, err, 'Room detail error');
   }
 });
 
@@ -68,8 +67,7 @@ router.post(
       await room.save();
       res.status(201).json({ success: true, data: room, message: 'تم إنشاء الغرفة بنجاح' });
     } catch (err) {
-      logger.error('Room create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء الغرفة' });
+      safeError(res, err, 'Room create error');
     }
   }
 );
@@ -95,8 +93,7 @@ router.put(
       if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
       res.json({ success: true, data: room, message: 'تم تحديث الغرفة بنجاح' });
     } catch (err) {
-      logger.error('Room update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الغرفة' });
+      safeError(res, err, 'Room update error');
     }
   }
 );
@@ -108,8 +105,7 @@ router.delete('/rooms/:id', authorize(['admin', 'super_admin']), async (req, res
     if (!room) return res.status(404).json({ success: false, message: 'الغرفة غير موجودة' });
     res.json({ success: true, message: 'تم حذف الغرفة بنجاح' });
   } catch (err) {
-    logger.error('Room delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الغرفة' });
+    safeError(res, err, 'Room delete error');
   }
 });
 
@@ -150,8 +146,7 @@ router.get('/bookings', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Bookings list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحجوزات' });
+    safeError(res, err, 'Bookings list error');
   }
 });
 
@@ -186,8 +181,7 @@ router.post(
       await booking.save();
       res.status(201).json({ success: true, data: booking, message: 'تم الحجز بنجاح' });
     } catch (err) {
-      logger.error('Booking create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في الحجز' });
+      safeError(res, err, 'Booking create error');
     }
   }
 );
@@ -234,8 +228,7 @@ router.put(
       if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
       res.json({ success: true, data: booking, message: 'تم تحديث الحجز بنجاح' });
     } catch (err) {
-      logger.error('Booking update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث الحجز' });
+      safeError(res, err, 'Booking update error');
     }
   }
 );
@@ -251,8 +244,7 @@ router.delete('/bookings/:id', authorize(['admin', 'super_admin', 'manager']), a
     if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, data: booking, message: 'تم إلغاء الحجز بنجاح' });
   } catch (err) {
-    logger.error('Booking cancel error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الحجز' });
+    safeError(res, err, 'Booking cancel error');
   }
 });
 
@@ -287,8 +279,7 @@ router.get('/maintenance', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Maintenance list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب طلبات الصيانة' });
+    safeError(res, err, 'Maintenance list error');
   }
 });
 
@@ -309,8 +300,7 @@ router.post(
       await mr.save();
       res.status(201).json({ success: true, data: mr, message: 'تم رفع طلب الصيانة بنجاح' });
     } catch (err) {
-      logger.error('Maintenance create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في رفع طلب الصيانة' });
+      safeError(res, err, 'Maintenance create error');
     }
   }
 );
@@ -339,8 +329,7 @@ router.put(
       if (!mr) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
       res.json({ success: true, data: mr, message: 'تم تحديث طلب الصيانة بنجاح' });
     } catch (err) {
-      logger.error('Maintenance update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث طلب الصيانة' });
+      safeError(res, err, 'Maintenance update error');
     }
   }
 );
@@ -355,8 +344,7 @@ router.delete(
       if (!mr) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
       res.json({ success: true, data: mr, message: 'تم حذف طلب الصيانة بنجاح' });
     } catch (err) {
-      logger.error('Maintenance delete error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في حذف طلب الصيانة' });
+      safeError(res, err, 'Maintenance delete error');
     }
   }
 );
@@ -405,8 +393,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Facility dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة المعلومات' });
+    safeError(res, err, 'Facility dashboard error');
   }
 });
 

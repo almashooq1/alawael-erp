@@ -10,6 +10,7 @@ const {
   CorrectivePreventiveAction,
   ClosureFollowUp,
 } = require('../models/internalAudit');
+const safeError = require('../utils/safeError');
 
 // ==========================================
 // 1. ANNUAL AUDIT PLAN ROUTES - خطط التدقيق السنوية
@@ -29,11 +30,7 @@ router.post('/audit-plans', authenticate, authorize('admin', 'audit_manager'), a
       data: plan,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'خطأ في إنشاء خطة التدقيق',
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -59,10 +56,7 @@ router.get('/audit-plans', authenticate, async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -78,7 +72,7 @@ router.get('/audit-plans/:planId', authenticate, async (req, res) => {
     }
     res.json({ success: true, data: plan });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -107,7 +101,7 @@ router.put(
         data: plan,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -125,7 +119,7 @@ router.delete(
       }
       res.json({ success: true, message: 'تم حذف خطة التدقيق بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -152,7 +146,7 @@ router.post(
         data: audit,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -179,7 +173,7 @@ router.get('/surprise-audits', authenticate, async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -195,7 +189,7 @@ router.get('/surprise-audits/:auditId', authenticate, async (req, res) => {
     }
     res.json({ success: true, data: audit });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -224,7 +218,7 @@ router.put(
         data: audit,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -242,7 +236,7 @@ router.delete(
       }
       res.json({ success: true, message: 'تم حذف عملية التدقيق بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -269,7 +263,7 @@ router.post(
         data: audit,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -293,7 +287,7 @@ router.post('/non-conformance-reports', authenticate, async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -320,7 +314,7 @@ router.get('/non-conformance-reports', authenticate, async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -336,7 +330,7 @@ router.get('/non-conformance-reports/:ncrId', authenticate, async (req, res) => 
     }
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -361,7 +355,7 @@ router.put('/non-conformance-reports/:ncrId', authenticate, async (req, res) => 
       data: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -392,7 +386,7 @@ router.put(
         data: report,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -422,7 +416,7 @@ router.put(
         data: report,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -445,7 +439,7 @@ router.post('/corrective-preventive-actions', authenticate, async (req, res) => 
       data: action,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -471,7 +465,7 @@ router.get('/corrective-preventive-actions', authenticate, async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -487,7 +481,7 @@ router.get('/corrective-preventive-actions/:actionId', authenticate, async (req,
     }
     res.json({ success: true, data: action });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -512,7 +506,7 @@ router.put('/corrective-preventive-actions/:actionId', authenticate, async (req,
       data: action,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -534,7 +528,7 @@ router.put('/corrective-preventive-actions/:actionId/progress', authenticate, as
       data: action,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -564,7 +558,7 @@ router.put(
         data: action,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -593,7 +587,7 @@ router.put(
         data: action,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -616,7 +610,7 @@ router.post('/closure-followups', authenticate, async (req, res) => {
       data: followUp,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -642,7 +636,7 @@ router.get('/closure-followups', authenticate, async (req, res) => {
       pages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -658,7 +652,7 @@ router.get('/closure-followups/:followUpId', authenticate, async (req, res) => {
     }
     res.json({ success: true, data: followUp });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -683,7 +677,7 @@ router.put('/closure-followups/:followUpId', authenticate, async (req, res) => {
       data: followUp,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -712,7 +706,7 @@ router.put(
         data: followUp,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -744,7 +738,7 @@ router.put(
         data: followUp,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -766,7 +760,7 @@ router.delete(
       }
       res.json({ success: true, message: 'تم حذف تقرير عدم المطابقة بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -786,7 +780,7 @@ router.delete(
       }
       res.json({ success: true, message: 'تم حذف الإجراء بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -806,7 +800,7 @@ router.delete(
       }
       res.json({ success: true, message: 'تم حذف متابعة الإغلاق بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'internalAudit');
     }
   }
 );
@@ -868,7 +862,7 @@ router.get('/internal-audit-dashboard', authenticate, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -905,7 +899,7 @@ router.get('/reports/compliance-by-department', authenticate, async (req, res) =
       data: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 
@@ -927,7 +921,7 @@ router.get('/reports/actions-status', authenticate, async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'internalAudit');
   }
 });
 

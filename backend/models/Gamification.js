@@ -21,7 +21,7 @@ const beneficiaryWalletSchema = new mongoose.Schema(
   {
     beneficiary: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'BeneficiaryFile',
+      ref: 'Beneficiary',
       required: true,
       unique: true,
     },

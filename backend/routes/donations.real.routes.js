@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -120,8 +121,7 @@ router.get('/dashboard/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Donations dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إحصائيات التبرعات' });
+    safeError(res, err, 'Donations dashboard error');
   }
 });
 
@@ -140,8 +140,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Donations list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التبرعات' });
+    safeError(res, err, 'Donations list error');
   }
 });
 
@@ -157,8 +156,7 @@ router.get('/donor/:donorId', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Donations by donor error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تبرعات المتبرع' });
+    safeError(res, err, 'Donations by donor error');
   }
 });
 
@@ -174,8 +172,7 @@ router.get('/campaign/:campaignId', async (req, res) => {
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Donations by campaign error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تبرعات الحملة' });
+    safeError(res, err, 'Donations by campaign error');
   }
 });
 
@@ -225,8 +222,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ success: true, data: donation, message: 'تم تسجيل التبرع بنجاح' });
   } catch (err) {
-    logger.error('Donation create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل التبرع' });
+    safeError(res, err, 'Donation create error');
   }
 });
 

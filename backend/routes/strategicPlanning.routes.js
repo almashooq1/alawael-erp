@@ -12,6 +12,7 @@ const StrategicGoal = require('../models/StrategicGoal');
 const StrategicInitiative = require('../models/StrategicInitiative');
 const StrategicKPI = require('../models/StrategicKPI');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -39,8 +40,7 @@ router.get('/goals', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Strategic goals list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأهداف الاستراتيجية' });
+    safeError(res, err, 'Strategic goals list error');
   }
 });
 
@@ -51,8 +51,7 @@ router.get('/goals/:id', async (req, res) => {
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data: goal });
   } catch (err) {
-    logger.error('Strategic goal detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الهدف' });
+    safeError(res, err, 'Strategic goal detail error');
   }
 });
 
@@ -72,8 +71,7 @@ router.post(
       await goal.save();
       res.status(201).json({ success: true, data: goal, message: 'تم إنشاء الهدف بنجاح' });
     } catch (err) {
-      logger.error('Strategic goal create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء الهدف' });
+      safeError(res, err, 'Strategic goal create error');
     }
   }
 );
@@ -88,8 +86,7 @@ router.put('/goals/:id', authorize(['admin', 'super_admin', 'manager']), async (
     if (!goal) return res.status(404).json({ success: false, message: 'الهدف غير موجود' });
     res.json({ success: true, data: goal, message: 'تم تحديث الهدف بنجاح' });
   } catch (err) {
-    logger.error('Strategic goal update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الهدف' });
+    safeError(res, err, 'Strategic goal update error');
   }
 });
 
@@ -105,8 +102,7 @@ router.delete('/goals/:id', authorize(['admin', 'super_admin']), async (req, res
     ]);
     res.json({ success: true, message: 'تم حذف الهدف بنجاح' });
   } catch (err) {
-    logger.error('Strategic goal delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الهدف' });
+    safeError(res, err, 'Strategic goal delete error');
   }
 });
 
@@ -138,8 +134,7 @@ router.get('/initiatives', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Initiatives list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المبادرات' });
+    safeError(res, err, 'Initiatives list error');
   }
 });
 
@@ -151,8 +146,7 @@ router.get('/initiatives/:id', async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    logger.error('Initiative detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المبادرة' });
+    safeError(res, err, 'Initiative detail error');
   }
 });
 
@@ -169,8 +163,7 @@ router.post(
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم إنشاء المبادرة بنجاح' });
     } catch (err) {
-      logger.error('Initiative create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء المبادرة' });
+      safeError(res, err, 'Initiative create error');
     }
   }
 );
@@ -184,8 +177,7 @@ router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), a
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, data: doc, message: 'تم تحديث المبادرة بنجاح' });
   } catch (err) {
-    logger.error('Initiative update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المبادرة' });
+    safeError(res, err, 'Initiative update error');
   }
 });
 
@@ -195,8 +187,7 @@ router.delete('/initiatives/:id', authorize(['admin', 'super_admin']), async (re
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, message: 'تم حذف المبادرة بنجاح' });
   } catch (err) {
-    logger.error('Initiative delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المبادرة' });
+    safeError(res, err, 'Initiative delete error');
   }
 });
 
@@ -228,8 +219,7 @@ router.get('/kpis', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('KPIs list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب مؤشرات الأداء' });
+    safeError(res, err, 'KPIs list error');
   }
 });
 
@@ -247,8 +237,7 @@ router.post(
       await doc.save();
       res.status(201).json({ success: true, data: doc, message: 'تم إنشاء المؤشر بنجاح' });
     } catch (err) {
-      logger.error('KPI create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء المؤشر' });
+      safeError(res, err, 'KPI create error');
     }
   }
 );
@@ -262,8 +251,7 @@ router.put('/kpis/:id', authorize(['admin', 'super_admin', 'manager']), async (r
     if (!doc) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });
     res.json({ success: true, data: doc, message: 'تم تحديث المؤشر بنجاح' });
   } catch (err) {
-    logger.error('KPI update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المؤشر' });
+    safeError(res, err, 'KPI update error');
   }
 });
 
@@ -273,8 +261,7 @@ router.delete('/kpis/:id', authorize(['admin', 'super_admin']), async (req, res)
     if (!doc) return res.status(404).json({ success: false, message: 'المؤشر غير موجود' });
     res.json({ success: true, message: 'تم حذف المؤشر بنجاح' });
   } catch (err) {
-    logger.error('KPI delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المؤشر' });
+    safeError(res, err, 'KPI delete error');
   }
 });
 
@@ -301,8 +288,7 @@ router.post(
       await kpi.save();
       res.json({ success: true, data: kpi, message: 'تم تسجيل القيمة بنجاح' });
     } catch (err) {
-      logger.error('KPI record error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تسجيل القيمة' });
+      safeError(res, err, 'KPI record error');
     }
   }
 );
@@ -342,8 +328,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Strategic dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة المعلومات' });
+    safeError(res, err, 'Strategic dashboard error');
   }
 });
 
@@ -362,8 +347,7 @@ router.get('/balanced-scorecard', async (req, res) => {
     );
     res.json({ success: true, data: bscData });
   } catch (err) {
-    logger.error('BSC error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب بيانات BSC' });
+    safeError(res, err, 'BSC error');
   }
 });
 
@@ -393,8 +377,7 @@ router.get('/progress-report', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Progress report error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تقرير التقدم' });
+    safeError(res, err, 'Progress report error');
   }
 });
 

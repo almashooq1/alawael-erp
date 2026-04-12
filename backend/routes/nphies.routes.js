@@ -7,9 +7,9 @@
 const express = require('express');
 const router = express.Router();
 const nphiesService = require('../services/nphies.service');
-const { authenticateToken } = require('../middleware/auth');
-const { checkPermission } = require('../middleware/permissions');
+const { authenticateToken, requirePermission } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // =========================================================================
 // 1. التحقق من الأهلية — Eligibility Verification
@@ -22,7 +22,7 @@ const logger = require('../utils/logger');
 router.post(
   '/eligibility/check',
   authenticateToken,
-  checkPermission('nphies:eligibility:check'),
+  requirePermission('nphies:eligibility:check'),
   async (req, res) => {
     try {
       const { patientData, coverageData, options = {} } = req.body;
@@ -52,12 +52,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Eligibility Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل التحقق من الأهلية',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Eligibility Error');
     }
   }
 );
@@ -73,7 +68,7 @@ router.post(
 router.post(
   '/prior-auth/request',
   authenticateToken,
-  checkPermission('nphies:prior-auth:request'),
+  requirePermission('nphies:prior-auth:request'),
   async (req, res) => {
     try {
       const { authData, options = {} } = req.body;
@@ -112,12 +107,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Prior Auth Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل طلب الموافقة المسبقة',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Prior Auth Error');
     }
   }
 );
@@ -133,7 +123,7 @@ router.post(
 router.post(
   '/claims/submit',
   authenticateToken,
-  checkPermission('nphies:claims:submit'),
+  requirePermission('nphies:claims:submit'),
   async (req, res) => {
     try {
       const { claimData, options = {} } = req.body;
@@ -172,12 +162,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Claim Submit Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل تقديم المطالبة',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Claim Submit Error');
     }
   }
 );
@@ -189,7 +174,7 @@ router.post(
 router.get(
   '/claims/:claimId/status',
   authenticateToken,
-  checkPermission('nphies:claims:read'),
+  requirePermission('nphies:claims:read'),
   async (req, res) => {
     try {
       const { claimId } = req.params;
@@ -210,12 +195,7 @@ router.get(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Claim Status Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل الاستعلام عن حالة المطالبة',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Claim Status Error');
     }
   }
 );
@@ -227,7 +207,7 @@ router.get(
 router.delete(
   '/claims/:claimId',
   authenticateToken,
-  checkPermission('nphies:claims:cancel'),
+  requirePermission('nphies:claims:cancel'),
   async (req, res) => {
     try {
       const { claimId } = req.params;
@@ -241,12 +221,7 @@ router.delete(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Claim Cancel Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل إلغاء المطالبة',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Claim Cancel Error');
     }
   }
 );
@@ -262,7 +237,7 @@ router.delete(
 router.post(
   '/communication/respond',
   authenticateToken,
-  checkPermission('nphies:communication:respond'),
+  requirePermission('nphies:communication:respond'),
   async (req, res) => {
     try {
       const { communicationData } = req.body;
@@ -291,12 +266,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Communication Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل إرسال الرد',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Communication Error');
     }
   }
 );
@@ -312,7 +282,7 @@ router.post(
 router.post(
   '/payment/reconcile',
   authenticateToken,
-  checkPermission('nphies:payment:reconcile'),
+  requirePermission('nphies:payment:reconcile'),
   async (req, res) => {
     try {
       const { paymentReference, payerId } = req.body;
@@ -332,12 +302,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('NPHIES Payment Reconciliation Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل استرجاع بيانات التسوية',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Payment Reconciliation Error');
     }
   }
 );
@@ -372,12 +337,7 @@ router.get('/cpt-codes', authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('NPHIES CPT Codes Error:', { error: error.message });
-    return res.status(500).json({
-      success: false,
-      message: 'فشل استرجاع رموز CPT',
-      error: error.message,
-    });
+    safeError(res, error, 'NPHIES CPT Codes Error');
   }
 });
 
@@ -405,12 +365,7 @@ router.get('/cpt-codes/:code', authenticateToken, async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('NPHIES CPT Code Lookup Error:', { error: error.message });
-    return res.status(500).json({
-      success: false,
-      message: 'فشل استرجاع بيانات رمز CPT',
-      error: error.message,
-    });
+    safeError(res, error, 'NPHIES CPT Code Lookup Error');
   }
 });
 
@@ -432,12 +387,7 @@ router.get('/status', authenticateToken, async (req, res) => {
       data: status,
     });
   } catch (error) {
-    logger.error('NPHIES Status Error:', { error: error.message });
-    return res.status(500).json({
-      success: false,
-      message: 'فشل استرجاع حالة الخدمة',
-      error: error.message,
-    });
+    safeError(res, error, 'NPHIES Status Error');
   }
 });
 
@@ -452,7 +402,7 @@ router.get('/status', authenticateToken, async (req, res) => {
 router.post(
   '/fhir/bundle',
   authenticateToken,
-  checkPermission('nphies:admin'),
+  requirePermission('nphies:admin'),
   async (req, res) => {
     try {
       const { messageType, resources, options = {} } = req.body;
@@ -490,12 +440,7 @@ router.post(
         data: bundle,
       });
     } catch (error) {
-      logger.error('NPHIES Bundle Builder Error:', { error: error.message });
-      return res.status(500).json({
-        success: false,
-        message: 'فشل بناء FHIR Bundle',
-        error: error.message,
-      });
+      safeError(res, error, 'NPHIES Bundle Builder Error');
     }
   }
 );

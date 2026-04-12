@@ -36,8 +36,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('therapyProgram list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyProgram list error');
   }
 });
 
@@ -47,8 +46,7 @@ router.get('/departments', requireAuth, async (req, res) => {
     const departments = await TherapyProgram.distinct('department', { isActive: true });
     res.json({ success: true, data: departments.filter(Boolean).sort() });
   } catch (err) {
-    logger.error('therapyProgram departments error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyProgram departments error');
   }
 });
 
@@ -59,8 +57,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: program });
   } catch (err) {
-    logger.error('therapyProgram get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyProgram get error');
   }
 });
 
@@ -101,8 +98,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
-    logger.error('therapyProgram delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyProgram delete error');
   }
 });
 
@@ -119,8 +115,7 @@ router.patch(
       await program.save();
       res.json({ success: true, data: program });
     } catch (err) {
-      logger.error('therapyProgram toggle error:', err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'therapyProgram toggle error');
     }
   }
 );

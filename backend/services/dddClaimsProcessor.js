@@ -1,434 +1,38 @@
+'use strict';
 /**
- * ═══════════════════════════════════════════════════════════════════════════════
- * DDD Claims Processor — Phase 16 · Financial & Billing Management
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * Insurance claims submission, adjudication tracking, EOB processing,
- * denial management, appeals workflow, batch claims, and NPHIES integration
- * for rehabilitation services.
- *
- * Aggregates
- *   DDDClaim          — individual insurance claim
- *   DDDClaimBatch     — batch submission of claims
- *   DDDClaimAppeal    — appeals for denied claims
- *   DDDEOB            — Explanation of Benefits records
- *
- * Canonical links
- *   beneficiaryId → Beneficiary Core
- *   invoiceId     → DDDInvoice
- *   policyId      → DDDInsurancePolicy
- *   preAuthId     → DDDPreAuthorization
- * ═══════════════════════════════════════════════════════════════════════════════
+ * ClaimsProcessor Service — Pure Business Logic
+ * Singleton export — use directly, do NOT call `new`.
+ * Models: ../models/DddClaimsProcessor.js
  */
 
-'use strict';
+const {
+  DDDClaim,
+  DDDClaimBatch,
+  DDDClaimAppeal,
+  DDDEOB,
+  CLAIM_STATUSES,
+  CLAIM_TYPES,
+  DENIAL_REASONS,
+  APPEAL_STATUSES,
+  APPEAL_LEVELS,
+  SUBMISSION_CHANNELS,
+  EOB_TYPES,
+  ADJUDICATION_TYPES,
+  BUILTIN_CLAIM_TEMPLATES,
+} = require('../models/DddClaimsProcessor');
 
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
-const { Router } = require('express');
+const BaseCrudService = require('./base/BaseCrudService');
 
-/** Lightweight base so every DDD module has .log() */
-class BaseDomainModule {
-  constructor(name, opts = {}) {
-    this.name = name;
-    this.opts = opts;
-  }
-  log(msg) {
-    console.log(`[${this.name}] ${msg}`);
-  }
-}
-
-/* ── helper ────────────────────────────────────────────────────────────────── */
-const model = name => {
-  try {
-    return mongoose.model(name);
-  } catch {
-    return null;
-  }
-};
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  CONSTANTS                                                                 */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-const CLAIM_STATUSES = [
-  'draft',
-  'validated',
-  'submitted',
-  'acknowledged',
-  'in_review',
-  'approved',
-  'partially_approved',
-  'denied',
-  'paid',
-  'partially_paid',
-  'appealed',
-  'resubmitted',
-  'cancelled',
-  'voided',
-];
-
-const CLAIM_TYPES = [
-  'professional',
-  'institutional',
-  'pharmacy',
-  'dental',
-  'vision',
-  'rehabilitation',
-  'mental_health',
-  'assistive_technology',
-  'home_health',
-  'transport',
-];
-
-const DENIAL_REASONS = [
-  'not_covered',
-  'pre_auth_missing',
-  'pre_auth_expired',
-  'benefit_exhausted',
-  'duplicate_claim',
-  'coding_error',
-  'untimely_filing',
-  'incomplete_documentation',
-  'out_of_network',
-  'non_medical_necessity',
-  'patient_ineligible',
-  'coordination_of_benefits',
-  'prior_treatment_required',
-  'experimental_treatment',
-];
-
-const APPEAL_STATUSES = [
-  'draft',
-  'submitted',
-  'under_review',
-  'approved',
-  'denied',
-  'escalated',
-  'withdrawn',
-  'expired',
-];
-
-const APPEAL_LEVELS = ['first_level', 'second_level', 'external_review', 'arbitration'];
-
-const SUBMISSION_CHANNELS = ['electronic', 'portal', 'nphies', 'fax', 'mail', 'manual'];
-
-const EOB_TYPES = ['payment', 'denial', 'adjustment', 'reversal'];
-
-const ADJUDICATION_TYPES = [
-  'eligible',
-  'copay',
-  'deductible',
-  'coinsurance',
-  'non_covered',
-  'benefit',
-  'tax',
-  'adjustment',
-];
-
-/* ── Built-in claim templates ───────────────────────────────────────────── */
-const BUILTIN_CLAIM_TEMPLATES = [
-  {
-    code: 'CLM-PT',
-    name: 'Physical Therapy Claim',
-    nameAr: 'مطالبة علاج طبيعي',
-    claimType: 'rehabilitation',
-  },
-  {
-    code: 'CLM-OT',
-    name: 'Occupational Therapy Claim',
-    nameAr: 'مطالبة علاج وظيفي',
-    claimType: 'rehabilitation',
-  },
-  {
-    code: 'CLM-SLP',
-    name: 'Speech Therapy Claim',
-    nameAr: 'مطالبة نطق ولغة',
-    claimType: 'rehabilitation',
-  },
-  {
-    code: 'CLM-PSY',
-    name: 'Psychological Services Claim',
-    nameAr: 'مطالبة خدمات نفسية',
-    claimType: 'mental_health',
-  },
-  {
-    code: 'CLM-ASSESS',
-    name: 'Assessment Claim',
-    nameAr: 'مطالبة تقييم',
-    claimType: 'professional',
-  },
-  {
-    code: 'CLM-TELE',
-    name: 'Tele-Rehab Claim',
-    nameAr: 'مطالبة تأهيل عن بعد',
-    claimType: 'rehabilitation',
-  },
-  {
-    code: 'CLM-DEVICE',
-    name: 'Assistive Device Claim',
-    nameAr: 'مطالبة أجهزة مساعدة',
-    claimType: 'assistive_technology',
-  },
-  {
-    code: 'CLM-HOME',
-    name: 'Home Health Claim',
-    nameAr: 'مطالبة رعاية منزلية',
-    claimType: 'home_health',
-  },
-  {
-    code: 'CLM-GROUP',
-    name: 'Group Therapy Claim',
-    nameAr: 'مطالبة علاج جماعي',
-    claimType: 'rehabilitation',
-  },
-  {
-    code: 'CLM-TRANS',
-    name: 'Medical Transport Claim',
-    nameAr: 'مطالبة نقل طبي',
-    claimType: 'transport',
-  },
-];
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  SCHEMAS                                                                   */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-/* ── Claim ─────────────────────────────────────────────────────────────── */
-const claimLineSchema = new Schema(
-  {
-    lineNumber: { type: Number, required: true },
-    serviceCode: { type: String, required: true },
-    description: { type: String, required: true },
-    descriptionAr: { type: String },
-    serviceDate: { type: Date, required: true },
-    quantity: { type: Number, default: 1 },
-    unitPrice: { type: Number, required: true },
-    totalCharge: { type: Number, required: true },
-    diagnosisRef: [{ type: String }],
-    providerId: { type: Schema.Types.ObjectId, ref: 'User' },
-    modifier: [{ type: String }],
-    placeOfService: { type: String },
-    adjudication: [
-      {
-        type: { type: String, enum: ADJUDICATION_TYPES },
-        amount: { type: Number },
-        reason: { type: String },
-      },
-    ],
-    approvedAmount: { type: Number },
-    deniedAmount: { type: Number },
-    notes: { type: String },
-  },
-  { _id: true }
-);
-
-const claimSchema = new Schema(
-  {
-    claimNumber: { type: String, unique: true, required: true },
-    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true, index: true },
-    policyId: {
-      type: Schema.Types.ObjectId,
-      ref: 'DDDInsurancePolicy',
-      required: true,
-      index: true,
-    },
-    providerId: { type: Schema.Types.ObjectId, ref: 'DDDInsuranceProvider', required: true },
-    invoiceId: { type: Schema.Types.ObjectId, ref: 'DDDInvoice', index: true },
-    preAuthId: { type: Schema.Types.ObjectId, ref: 'DDDPreAuthorization' },
-    episodeId: { type: Schema.Types.ObjectId, index: true },
-    batchId: { type: Schema.Types.ObjectId, ref: 'DDDClaimBatch' },
-    claimType: { type: String, enum: CLAIM_TYPES, required: true },
-    status: { type: String, enum: CLAIM_STATUSES, default: 'draft' },
-    priority: { type: String, enum: ['normal', 'high', 'urgent'], default: 'normal' },
-    submissionChannel: { type: String, enum: SUBMISSION_CHANNELS, default: 'electronic' },
-    serviceFrom: { type: Date, required: true },
-    serviceTo: { type: Date },
-    diagnosis: [
-      {
-        code: { type: String, required: true },
-        system: { type: String, default: 'ICD-10' },
-        description: { type: String },
-        isPrimary: { type: Boolean, default: false },
-      },
-    ],
-    lines: [claimLineSchema],
-    totalCharged: { type: Number, default: 0 },
-    totalApproved: { type: Number, default: 0 },
-    totalDenied: { type: Number, default: 0 },
-    totalPaid: { type: Number, default: 0 },
-    patientShare: { type: Number, default: 0 },
-    insuranceShare: { type: Number, default: 0 },
-    submittedAt: { type: Date },
-    submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    acknowledgedAt: { type: Date },
-    adjudicatedAt: { type: Date },
-    paidAt: { type: Date },
-    deniedAt: { type: Date },
-    denialReasons: [{ type: String, enum: DENIAL_REASONS }],
-    denialNotes: { type: String },
-    payerClaimRef: { type: String },
-    nphiesRef: { type: String },
-    eobId: { type: Schema.Types.ObjectId, ref: 'DDDEOB' },
-    filingDeadline: { type: Date },
-    attachments: [{ name: String, url: String, type: String }],
-    history: [
-      {
-        action: { type: String },
-        date: { type: Date, default: Date.now },
-        actor: { type: String },
-        notes: { type: String },
-      },
-    ],
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-claimSchema.index({ status: 1, claimType: 1 });
-claimSchema.index({ submittedAt: -1 });
-claimSchema.index({ claimNumber: 1 });
-
-const DDDClaim = mongoose.models.DDDClaim || mongoose.model('DDDClaim', claimSchema);
-
-/* ── Claim Batch ───────────────────────────────────────────────────────── */
-const claimBatchSchema = new Schema(
-  {
-    batchNumber: { type: String, unique: true, required: true },
-    providerId: { type: Schema.Types.ObjectId, ref: 'DDDInsuranceProvider', required: true },
-    status: {
-      type: String,
-      enum: [
-        'draft',
-        'validated',
-        'submitted',
-        'processing',
-        'completed',
-        'partially_completed',
-        'failed',
-      ],
-      default: 'draft',
-    },
-    channel: { type: String, enum: SUBMISSION_CHANNELS, default: 'electronic' },
-    claimIds: [{ type: Schema.Types.ObjectId, ref: 'DDDClaim' }],
-    totalClaims: { type: Number, default: 0 },
-    totalCharged: { type: Number, default: 0 },
-    totalApproved: { type: Number, default: 0 },
-    totalDenied: { type: Number, default: 0 },
-    submittedAt: { type: Date },
-    submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    completedAt: { type: Date },
-    responseRef: { type: String },
-    errors: [
-      {
-        claimId: { type: Schema.Types.ObjectId },
-        code: { type: String },
-        message: { type: String },
-      },
-    ],
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-const DDDClaimBatch =
-  mongoose.models.DDDClaimBatch || mongoose.model('DDDClaimBatch', claimBatchSchema);
-
-/* ── Claim Appeal ──────────────────────────────────────────────────────── */
-const claimAppealSchema = new Schema(
-  {
-    appealNumber: { type: String, unique: true, required: true },
-    claimId: { type: Schema.Types.ObjectId, ref: 'DDDClaim', required: true, index: true },
-    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
-    policyId: { type: Schema.Types.ObjectId, ref: 'DDDInsurancePolicy' },
-    providerId: { type: Schema.Types.ObjectId, ref: 'DDDInsuranceProvider' },
-    status: { type: String, enum: APPEAL_STATUSES, default: 'draft' },
-    level: { type: String, enum: APPEAL_LEVELS, default: 'first_level' },
-    denialReasons: [{ type: String, enum: DENIAL_REASONS }],
-    appealReason: { type: String, required: true },
-    clinicalJustification: { type: String },
-    supportingDocs: [{ name: String, url: String, type: String }],
-    requestedAmount: { type: Number },
-    approvedAmount: { type: Number },
-    submittedAt: { type: Date },
-    submittedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    reviewedAt: { type: Date },
-    reviewedBy: { type: String },
-    resolvedAt: { type: Date },
-    deadline: { type: Date },
-    history: [
-      {
-        action: { type: String },
-        date: { type: Date, default: Date.now },
-        actor: { type: String },
-        notes: { type: String },
-      },
-    ],
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-claimAppealSchema.index({ status: 1, level: 1 });
-
-const DDDClaimAppeal =
-  mongoose.models.DDDClaimAppeal || mongoose.model('DDDClaimAppeal', claimAppealSchema);
-
-/* ── Explanation of Benefits (EOB) ─────────────────────────────────────── */
-const eobSchema = new Schema(
-  {
-    eobNumber: { type: String, unique: true, required: true },
-    claimId: { type: Schema.Types.ObjectId, ref: 'DDDClaim', required: true, index: true },
-    beneficiaryId: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
-    policyId: { type: Schema.Types.ObjectId, ref: 'DDDInsurancePolicy' },
-    providerId: { type: Schema.Types.ObjectId, ref: 'DDDInsuranceProvider' },
-    type: { type: String, enum: EOB_TYPES, default: 'payment' },
-    processedDate: { type: Date, default: Date.now },
-    serviceFrom: { type: Date },
-    serviceTo: { type: Date },
-    totalCharged: { type: Number },
-    allowedAmount: { type: Number },
-    paidAmount: { type: Number },
-    patientResponsibility: { type: Number },
-    adjustments: [
-      {
-        type: { type: String, enum: ADJUDICATION_TYPES },
-        amount: { type: Number },
-        reason: { type: String },
-      },
-    ],
-    lineDetails: [
-      {
-        serviceCode: { type: String },
-        charged: { type: Number },
-        allowed: { type: Number },
-        paid: { type: Number },
-        adjustment: { type: Number },
-        remark: { type: String },
-      },
-    ],
-    paymentRef: { type: String },
-    checkNumber: { type: String },
-    paymentDate: { type: Date },
-    remarks: [{ code: String, description: String }],
-    metadata: { type: Map, of: Schema.Types.Mixed },
-  },
-  { timestamps: true }
-);
-
-const DDDEOB = mongoose.models.DDDEOB || mongoose.model('DDDEOB', eobSchema);
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  DOMAIN MODULE                                                             */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-class ClaimsProcessor extends BaseDomainModule {
+class ClaimsProcessor extends BaseCrudService {
   constructor() {
     super('ClaimsProcessor', {
       description: 'Claims submission, adjudication, denial management, appeals & EOB processing',
       version: '1.0.0',
-    });
+    }, {
+      claims: DDDClaim,
+      claimBatchs: DDDClaimBatch,
+      claimAppeals: DDDClaimAppeal,
+    })
   }
 
   async initialize() {
@@ -470,9 +74,7 @@ class ClaimsProcessor extends BaseDomainModule {
     return DDDClaim.find(q).sort({ createdAt: -1 }).lean();
   }
 
-  async getClaim(id) {
-    return DDDClaim.findById(id).lean();
-  }
+  async getClaim(id) { return this._getById(DDDClaim, id); }
 
   async createClaim(data) {
     data.claimNumber = data.claimNumber || (await this._nextClaimNumber());
@@ -487,9 +89,7 @@ class ClaimsProcessor extends BaseDomainModule {
     return DDDClaim.create(data);
   }
 
-  async updateClaim(id, data) {
-    return DDDClaim.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-  }
+  async updateClaim(id, data) { return this._update(DDDClaim, id, data, { runValidators: true }); }
 
   async validateClaim(id) {
     const claim = await DDDClaim.findById(id);
@@ -584,9 +184,7 @@ class ClaimsProcessor extends BaseDomainModule {
     return DDDClaimBatch.find(q).sort({ createdAt: -1 }).lean();
   }
 
-  async getBatch(id) {
-    return DDDClaimBatch.findById(id).lean();
-  }
+  async getBatch(id) { return this._getById(DDDClaimBatch, id); }
 
   async createBatch(data) {
     data.batchNumber = data.batchNumber || (await this._nextBatchNumber());
@@ -618,9 +216,7 @@ class ClaimsProcessor extends BaseDomainModule {
     if (filters.level) q.level = filters.level;
     return DDDClaimAppeal.find(q).sort({ createdAt: -1 }).lean();
   }
-  async getAppeal(id) {
-    return DDDClaimAppeal.findById(id).lean();
-  }
+  async getAppeal(id) { return this._getById(DDDClaimAppeal, id); }
 
   async createAppeal(data) {
     data.appealNumber = data.appealNumber || (await this._nextAppealNumber());
@@ -643,7 +239,7 @@ class ClaimsProcessor extends BaseDomainModule {
         $push: { history: { action: 'submitted', date: new Date(), actor: String(userId) } },
       },
       { new: true }
-    );
+    ).lean();
   }
 
   async resolveAppeal(id, resolution) {
@@ -661,7 +257,7 @@ class ClaimsProcessor extends BaseDomainModule {
       },
     };
     if (resolution.approvedAmount) update.approvedAmount = resolution.approvedAmount;
-    return DDDClaimAppeal.findByIdAndUpdate(id, update, { new: true });
+    return DDDClaimAppeal.findByIdAndUpdate(id, update, { new: true }).lean();
   }
 
   /* ── EOBs ── */
@@ -672,9 +268,7 @@ class ClaimsProcessor extends BaseDomainModule {
     if (filters.type) q.type = filters.type;
     return DDDEOB.find(q).sort({ processedDate: -1 }).lean();
   }
-  async getEOB(id) {
-    return DDDEOB.findById(id).lean();
-  }
+  async getEOB(id) { return this._getById(DDDEOB, id); }
 
   async createEOB(data) {
     data.eobNumber = data.eobNumber || (await this._nextEOBNumber());
@@ -741,230 +335,7 @@ class ClaimsProcessor extends BaseDomainModule {
     return results;
   }
 
-  /* ── Health Check ── */
-  async healthCheck() {
-    const [claims, batches, appeals, eobs] = await Promise.all([
-      DDDClaim.countDocuments(),
-      DDDClaimBatch.countDocuments(),
-      DDDClaimAppeal.countDocuments(),
-      DDDEOB.countDocuments(),
-    ]);
-    return { status: 'healthy', claims, batches, appeals, eobs };
-  }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  ROUTER                                                                    */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-function createClaimsProcessorRouter() {
-  const router = Router();
-  const proc = new ClaimsProcessor();
-
-  /* ── Claims ── */
-  router.get('/claims', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.listClaims(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/summary', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.getClaimsSummary(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/aging', async (_req, res) => {
-    try {
-      res.json({ success: true, data: await proc.getAgingReport() });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/:id', async (req, res) => {
-    try {
-      const d = await proc.getClaim(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await proc.createClaim(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.put('/claims/:id', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.updateClaim(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/:id/validate', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.validateClaim(req.params.id) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/:id/submit', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.submitClaim(req.params.id, req.body.userId) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/:id/adjudicate', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.adjudicateClaim(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/:id/mark-paid', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.markClaimPaid(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Batches ── */
-  router.get('/claims/batches/list', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.listBatches(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/batches/:id', async (req, res) => {
-    try {
-      const d = await proc.getBatch(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/batches', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await proc.createBatch(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/batches/:id/submit', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.submitBatch(req.params.id, req.body.userId) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Appeals ── */
-  router.get('/claims/appeals/list', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.listAppeals(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/appeals/:id', async (req, res) => {
-    try {
-      const d = await proc.getAppeal(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/appeals', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await proc.createAppeal(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/appeals/:id/submit', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.submitAppeal(req.params.id, req.body.userId) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/appeals/:id/resolve', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.resolveAppeal(req.params.id, req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── EOBs ── */
-  router.get('/claims/eobs', async (req, res) => {
-    try {
-      res.json({ success: true, data: await proc.listEOBs(req.query) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.get('/claims/eobs/:id', async (req, res) => {
-    try {
-      const d = await proc.getEOB(req.params.id);
-      d
-        ? res.json({ success: true, data: d })
-        : res.status(404).json({ success: false, error: 'Not found' });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-  router.post('/claims/eobs', async (req, res) => {
-    try {
-      res.status(201).json({ success: true, data: await proc.createEOB(req.body) });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  /* ── Health ── */
-  router.get('/claims/health', async (_req, res) => {
-    try {
-      res.json({ success: true, data: await proc.healthCheck() });
-    } catch (e) {
-      res.status(500).json({ success: false, error: e.message });
-    }
-  });
-
-  return router;
-}
-
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  EXPORTS                                                                   */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-
-module.exports = {
-  ClaimsProcessor,
-  DDDClaim,
-  DDDClaimBatch,
-  DDDClaimAppeal,
-  DDDEOB,
-  CLAIM_STATUSES,
-  CLAIM_TYPES,
-  DENIAL_REASONS,
-  APPEAL_STATUSES,
-  APPEAL_LEVELS,
-  SUBMISSION_CHANNELS,
-  EOB_TYPES,
-  ADJUDICATION_TYPES,
-  BUILTIN_CLAIM_TEMPLATES,
-  createClaimsProcessorRouter,
-};
+/* ═══════════════════ Singleton Export ═══════════════════ */
+module.exports = new ClaimsProcessor();

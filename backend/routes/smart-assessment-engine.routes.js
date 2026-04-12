@@ -1356,7 +1356,9 @@ router.get(
         (await Beneficiary.findById(beneficiaryId)
           .select('name fileNumber dateOfBirth diagnosis')
           .lean()) || {};
-    } catch (_) {}
+    } catch (_) {
+      /* best-effort: proceed with empty beneficiaryInfo */
+    }
 
     const report = AssessmentReportGenerator.generateBeneficiaryFullReport(
       allAssessments,

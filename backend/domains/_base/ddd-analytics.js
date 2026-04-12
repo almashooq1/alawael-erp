@@ -18,6 +18,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const safeError = require('../../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Helper: Safe model accessor
@@ -495,7 +496,7 @@ function createAnalyticsRouter() {
       const data = await executiveSummary();
       res.json({ success: true, ...data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -508,7 +509,7 @@ function createAnalyticsRouter() {
       ]);
       res.json({ success: true, distribution, trend });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -520,7 +521,7 @@ function createAnalyticsRouter() {
       ]);
       res.json({ success: true, phases, duration });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -535,7 +536,7 @@ function createAnalyticsRouter() {
       ]);
       res.json({ success: true, utilization, types, productivity });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -544,7 +545,7 @@ function createAnalyticsRouter() {
       const data = await goalAchievementRate();
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -554,7 +555,7 @@ function createAnalyticsRouter() {
       const data = await qualityComplianceRate(months);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -563,7 +564,7 @@ function createAnalyticsRouter() {
       const data = await riskScoreDistribution();
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -573,7 +574,7 @@ function createAnalyticsRouter() {
       const data = await behaviorTrend(months);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 
@@ -583,7 +584,7 @@ function createAnalyticsRouter() {
       const data = await teleRehabStats(months);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'ddd-analytics');
     }
   });
 

@@ -133,8 +133,7 @@ router.get(
       const result = await earlyInterventionService.getChildren(filters, pagination);
       res.json({ success: true, message: 'تم جلب قائمة الأطفال بنجاح', ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching children:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching children');
     }
   }
 );
@@ -309,8 +308,7 @@ router.get(
       const result = await earlyInterventionService.getScreenings(filters, pagination);
       res.json({ success: true, message: 'تم جلب قائمة الفحوصات بنجاح', ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching screenings:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching screenings');
     }
   }
 );
@@ -352,8 +350,7 @@ router.get(
       });
       res.json({ success: true, ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching child screenings:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching child screenings');
     }
   }
 );
@@ -458,8 +455,7 @@ router.get(
       const result = await earlyInterventionService.getMilestones(filters, pagination);
       res.json({ success: true, message: 'تم جلب المعالم التنموية بنجاح', ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching milestones:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching milestones');
     }
   }
 );
@@ -498,8 +494,7 @@ router.get(
       const milestones = await earlyInterventionService.getMilestonesByChild(req.params.childId);
       res.json({ success: true, data: milestones });
     } catch (error) {
-      logger.error('[EIS] Error fetching child milestones:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching child milestones');
     }
   }
 );
@@ -518,8 +513,7 @@ router.get(
       const report = await earlyInterventionService.getMilestoneReport(req.params.childId);
       res.json({ success: true, message: 'تم إنشاء تقرير المعالم التنموية', data: report });
     } catch (error) {
-      logger.error('[EIS] Error generating milestone report:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء التقرير' });
+      safeError(res, error, '[EIS] Error generating milestone report');
     }
   }
 );
@@ -626,8 +620,7 @@ router.get(
       const result = await earlyInterventionService.getIFSPs(filters, pagination);
       res.json({ success: true, message: 'تم جلب قائمة الخطط بنجاح', ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching IFSPs:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching IFSPs');
     }
   }
 );
@@ -666,8 +659,7 @@ router.get(
       const ifsps = await earlyInterventionService.getIFSPsByChild(req.params.childId);
       res.json({ success: true, data: ifsps });
     } catch (error) {
-      logger.error('[EIS] Error fetching child IFSPs:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching child IFSPs');
     }
   }
 );
@@ -825,8 +817,7 @@ router.get(
       const result = await earlyInterventionService.getReferrals(filters, pagination);
       res.json({ success: true, message: 'تم جلب قائمة الإحالات بنجاح', ...result });
     } catch (error) {
-      logger.error('[EIS] Error fetching referrals:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching referrals');
     }
   }
 );
@@ -865,8 +856,7 @@ router.get(
       const referrals = await earlyInterventionService.getReferralsByChild(req.params.childId);
       res.json({ success: true, data: referrals });
     } catch (error) {
-      logger.error('[EIS] Error fetching child referrals:', error);
-      res.status(500).json({ success: false, message: 'خطأ في جلب البيانات' });
+      safeError(res, error, '[EIS] Error fetching child referrals');
     }
   }
 );
@@ -983,8 +973,7 @@ router.get('/dashboard', authenticate, authorize(EIS_ROLES), async (req, res) =>
       data: stats,
     });
   } catch (error) {
-    logger.error('[EIS] Error fetching dashboard:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, '[EIS] Error fetching dashboard');
   }
 });
 

@@ -20,8 +20,7 @@ router.get('/badges', requireAuth, async (req, res) => {
     const badges = await Badge.find().sort({ category: 1, threshold: 1 });
     res.json({ success: true, data: badges, count: badges.length });
   } catch (err) {
-    logger.error('gamification badges list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification badges list error');
   }
 });
 
@@ -58,8 +57,7 @@ router.delete('/badges/:id', requireAuth, requireRole(['admin']), async (req, re
     if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
     res.json({ success: true, message: 'Badge deleted' });
   } catch (err) {
-    logger.error('gamification badge delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification badge delete error');
   }
 });
 
@@ -70,8 +68,7 @@ router.post('/badges/seed', requireAuth, requireRole(['admin']), async (req, res
     const count = await Badge.countDocuments();
     res.json({ success: true, message: 'Badges seeded', count });
   } catch (err) {
-    logger.error('gamification seed error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification seed error');
   }
 });
 
@@ -92,8 +89,7 @@ router.get('/wallets', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: wallets, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('gamification wallets list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification wallets list error');
   }
 });
 
@@ -106,8 +102,7 @@ router.get('/wallets/:beneficiaryId', requireAuth, async (req, res) => {
     if (!wallet) return res.status(404).json({ success: false, message: 'Wallet not found' });
     res.json({ success: true, data: wallet });
   } catch (err) {
-    logger.error('gamification wallet get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification wallet get error');
   }
 });
 
@@ -127,8 +122,7 @@ router.post('/award', requireAuth, async (req, res) => {
     );
     res.json({ success: true, data: result });
   } catch (err) {
-    logger.error('gamification award error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification award error');
   }
 });
 
@@ -142,8 +136,7 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
       .limit(+limit);
     res.json({ success: true, data: leaders });
   } catch (err) {
-    logger.error('gamification leaderboard error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'gamification leaderboard error');
   }
 });
 

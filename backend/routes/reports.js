@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { ReportService } = require('../services/reportService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const reportService = new ReportService();
@@ -35,11 +36,7 @@ router.get(
         data: reports,
       });
     } catch (error) {
-      logger.error('Error fetching reports:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch reports',
-      });
+      safeError(res, error, 'fetching reports');
     }
   }
 );
@@ -76,11 +73,7 @@ router.post(
         data: report,
       });
     } catch (error) {
-      logger.error('Error generating report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to generate report',
-      });
+      safeError(res, error, 'generating report');
     }
   }
 );
@@ -102,11 +95,7 @@ router.get(
         data: report,
       });
     } catch (error) {
-      logger.error('Error fetching disability summary:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
-      });
+      safeError(res, error, 'fetching disability summary');
     }
   }
 );
@@ -128,11 +117,7 @@ router.get(
         data: report,
       });
     } catch (error) {
-      logger.error('Error fetching maintenance report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
-      });
+      safeError(res, error, 'fetching maintenance report');
     }
   }
 );
@@ -161,11 +146,7 @@ router.get(
         data: report,
       });
     } catch (error) {
-      logger.error('Error fetching report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch report',
-      });
+      safeError(res, error, 'fetching report');
     }
   }
 );
@@ -194,11 +175,7 @@ router.get(
       res.setHeader('Content-Disposition', `attachment; filename="${safeName}"`);
       res.send(file.data);
     } catch (error) {
-      logger.error('Error downloading report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to download report',
-      });
+      safeError(res, error, 'downloading report');
     }
   }
 );
@@ -228,11 +205,7 @@ router.delete(
         message: 'Report deleted successfully',
       });
     } catch (error) {
-      logger.error('Error deleting report:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to delete report',
-      });
+      safeError(res, error, 'deleting report');
     }
   }
 );
@@ -270,11 +243,7 @@ router.post(
         data: batch,
       });
     } catch (error) {
-      logger.error('Error exporting batch:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to export batch',
-      });
+      safeError(res, error, 'exporting batch');
     }
   }
 );
@@ -303,23 +272,13 @@ router.get(
         data: schedule,
       });
     } catch (error) {
-      logger.error('Error fetching schedule:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch schedule',
-      });
+      safeError(res, error, 'fetching schedule');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

@@ -18,15 +18,11 @@ const logger = require('../utils/logger');
 router.use(authenticate);
 router.use(authorize(['admin', 'system_admin']));
 
-// Import advanced RBAC components
-const AdvancedRBACSystem = require('../services/advanced-rbac.system');
-const RBACPolicyEngine = require('../services/rbac-policy-engine');
-const RBACAuditingService = require('../services/rbac-auditing.service');
-
-// Initialize RBAC components
-const rbacSystem = new AdvancedRBACSystem();
-const policyEngine = new RBACPolicyEngine();
-const auditingService = new RBACAuditingService();
+// Import advanced RBAC components (each module exports a singleton instance)
+const rbacSystem = require('../services/advanced-rbac.system');
+const policyEngine = require('../services/rbac-policy-engine');
+const auditingService = require('../services/rbac-auditing.service');
+const safeError = require('../utils/safeError');
 
 // Track initialization state
 let rbacInitialized = false;
@@ -265,10 +261,7 @@ router.post('/roles', (req, res) => {
       data: { roleId, name },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -285,10 +278,7 @@ router.get('/roles', (req, res) => {
       count: roles.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -313,10 +303,7 @@ router.get('/roles/:roleId', (req, res) => {
       data: role,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -350,10 +337,7 @@ router.put('/roles/:roleId', (req, res) => {
       message: 'Role updated successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -381,10 +365,7 @@ router.delete('/roles/:roleId', (req, res) => {
       message: 'Role deleted successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -430,10 +411,7 @@ router.post('/permissions', (req, res) => {
       data: { permissionId },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -462,10 +440,7 @@ router.post('/roles/:roleId/permissions/:permId', (req, res) => {
       message: 'Permission assigned to role',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -494,10 +469,7 @@ router.delete('/roles/:roleId/permissions/:permId', (req, res) => {
       message: 'Permission removed from role',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -531,10 +503,7 @@ router.post('/users/:userId/roles/:roleId', (req, res) => {
       message: 'Role assigned to user',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -563,10 +532,7 @@ router.delete('/users/:userId/roles/:roleId', (req, res) => {
       message: 'Role removed from user',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -585,10 +551,7 @@ router.get('/users/:userId/roles', (req, res) => {
       count: roles.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -607,10 +570,7 @@ router.get('/users/:userId/permissions', (req, res) => {
       count: permissions.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -632,10 +592,7 @@ router.get('/users/:userId/permissions/:permId/check', (req, res) => {
       hasPermission,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -683,10 +640,7 @@ router.post('/policies', (req, res) => {
       data: { policyId },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -703,10 +657,7 @@ router.get('/policies', (req, res) => {
       count: policies.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -735,10 +686,7 @@ router.post('/users/:userId/evaluate-policies', (req, res) => {
       evaluationTime: new Date().toISOString(),
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -768,10 +716,7 @@ router.post('/users/:userId/access-decision', (req, res) => {
       decision,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -799,10 +744,7 @@ router.get('/audit-logs', (req, res) => {
       count: logs.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -821,10 +763,7 @@ router.post('/audit-report', (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -842,10 +781,7 @@ router.get('/security-incidents', (req, res) => {
       count: incidents.length,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -862,10 +798,7 @@ router.get('/security-summary', (req, res) => {
       data: summary,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -893,10 +826,7 @@ router.get('/system-stats', (req, res) => {
       data: stats,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -913,10 +843,7 @@ router.get('/export', (req, res) => {
       data,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 
@@ -951,10 +878,7 @@ router.post('/import', (req, res) => {
       message: 'Data imported successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'rbac-advanced');
   }
 });
 

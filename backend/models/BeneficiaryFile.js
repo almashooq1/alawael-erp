@@ -1,65 +1,19 @@
-/* eslint-disable no-unused-vars */
-const mongoose = require('mongoose');
-
-const medicalRecordSchema = new mongoose.Schema({
-  date: { type: Date, default: Date.now },
-  doctor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  diagnosis: String,
-  treatmentPlan: String,
-  prescription: [
-    {
-      medication: String,
-      dosage: String,
-      duration: String,
-    },
-  ],
-  attachments: [String], // URLs to images/PDFs
-});
-
-const beneficiaryFileSchema = new mongoose.Schema(
-  {
-    fileNumber: { type: String, required: true, unique: true }, // e.g. PAT-2024-555
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Link to Login
-
-    // Demographics
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    dob: { type: Date },
-    gender: { type: String, enum: ['MALE', 'FEMALE'] },
-    bloodType: String,
-
-    // Contact
-    phone: String,
-    address: String,
-    emergencyContact: {
-      name: String,
-      relation: String,
-      phone: String,
-    },
-
-    // Insurance
-    insurance: {
-      provider: { type: mongoose.Schema.Types.ObjectId, ref: 'InsuranceProvider' },
-      policyNumber: String,
-      expiryDate: Date,
-    },
-
-    // Medical
-    medicalHistory: [medicalRecordSchema],
-    allergies: [String],
-    disabilities: [String],
-
-    // Rehabilitation
-    currentPlanId: { type: mongoose.Schema.Types.ObjectId }, // Link to Rehab Plan Module
-    programStatus: {
-      type: String,
-      enum: ['ACTIVE', 'COMPLETED', 'HOLD', 'ASSESSMENT'],
-      default: 'ASSESSMENT',
-    },
-
-    balance: { type: Number, default: 0 }, // Financial Balance
-  },
-  { timestamps: true }
-);
-
-module.exports = mongoose.models.BeneficiaryFile || mongoose.model('BeneficiaryFile', beneficiaryFileSchema);
+/**
+ * BeneficiaryFile — BACKWARD-COMPATIBLE ALIAS
+ * ══════════════════════════════════════════════════════════════════════════
+ * DEPRECATED: This file now re-exports the canonical Beneficiary model.
+ *
+ * The canonical model is: require('./Beneficiary') → 'Beneficiary'
+ * All 42 code references have been migrated (2025-06-10).
+ *
+ * This file is kept ONLY for:
+ *   - Any missed require('./BeneficiaryFile') still lurking in codebase
+ *   - models/index.js backward compatibility
+ *
+ * The old BeneficiaryFile schema (80 lines) is preserved in:
+ *   scripts/archive/BeneficiaryFile.schema.backup.js
+ *
+ * DO NOT create new references to this file — use require('./Beneficiary').
+ * ══════════════════════════════════════════════════════════════════════════
+ */
+module.exports = require('./Beneficiary');

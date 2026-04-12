@@ -17,6 +17,7 @@ const CrmSegment = require('../models/CrmSegment');
 const CrmSurvey = require('../models/CrmSurvey');
 const CrmReferralCommission = require('../models/CrmReferralCommission');
 const escapeRegex = require('../utils/escapeRegex');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -75,8 +76,7 @@ router.get('/leads', async (req, res) => {
 
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('CRM leads list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العملاء المحتملين' });
+    safeError(res, err, 'CRM leads list error');
   }
 });
 
@@ -128,8 +128,7 @@ router.get('/leads/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('CRM leads stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإحصائيات' });
+    safeError(res, err, 'CRM leads stats error');
   }
 });
 
@@ -154,8 +153,7 @@ router.get('/leads/pipeline', async (req, res) => {
 
     res.json({ success: true, data: pipeline });
   } catch (err) {
-    logger.error('CRM pipeline error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في عرض pipeline' });
+    safeError(res, err, 'CRM pipeline error');
   }
 });
 
@@ -201,8 +199,7 @@ router.get('/leads/form-options', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('CRM form options error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في خيارات النموذج' });
+    safeError(res, err, 'CRM form options error');
   }
 });
 
@@ -221,8 +218,7 @@ router.get('/leads/:id', async (req, res) => {
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
     res.json({ success: true, data: lead });
   } catch (err) {
-    logger.error('CRM lead detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العميل' });
+    safeError(res, err, 'CRM lead detail error');
   }
 });
 
@@ -253,8 +249,7 @@ router.post('/leads', async (req, res) => {
 
     res.status(201).json({ success: true, data: lead, message: 'تم إنشاء العميل المحتمل بنجاح' });
   } catch (err) {
-    logger.error('CRM lead create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء العميل' });
+    safeError(res, err, 'CRM lead create error');
   }
 });
 
@@ -293,8 +288,7 @@ router.put('/leads/:id', async (req, res) => {
     await lead.save();
     res.json({ success: true, data: lead, message: 'تم تحديث العميل بنجاح' });
   } catch (err) {
-    logger.error('CRM lead update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث العميل' });
+    safeError(res, err, 'CRM lead update error');
   }
 });
 
@@ -312,8 +306,7 @@ router.delete('/leads/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     if (!lead) return res.status(404).json({ success: false, message: 'العميل غير موجود' });
     res.json({ success: true, message: 'تم حذف العميل بنجاح' });
   } catch (err) {
-    logger.error('CRM lead delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'CRM lead delete error');
   }
 });
 
@@ -353,8 +346,7 @@ router.post('/leads/:id/activity', async (req, res) => {
       message: 'تم تسجيل النشاط بنجاح',
     });
   } catch (err) {
-    logger.error('CRM activity log error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل النشاط' });
+    safeError(res, err, 'CRM activity log error');
   }
 });
 
@@ -373,8 +365,7 @@ router.post('/leads/:id/enroll', async (req, res) => {
 
     res.json({ success: true, data: lead, message: 'تم تسجيل العميل بنجاح' });
   } catch (err) {
-    logger.error('CRM enroll error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل العميل' });
+    safeError(res, err, 'CRM enroll error');
   }
 });
 
@@ -398,8 +389,7 @@ router.get('/partners', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('CRM partners list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشركاء' });
+    safeError(res, err, 'CRM partners list error');
   }
 });
 
@@ -420,8 +410,7 @@ router.get('/partners/stats', async (req, res) => {
 
     res.json({ success: true, data: { total, active, byType } });
   } catch (err) {
-    logger.error('CRM partners stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإحصائيات' });
+    safeError(res, err, 'CRM partners stats error');
   }
 });
 
@@ -434,8 +423,7 @@ router.get('/partners/:id', async (req, res) => {
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, data: partner });
   } catch (err) {
-    logger.error('CRM partner detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشريك' });
+    safeError(res, err, 'CRM partner detail error');
   }
 });
 
@@ -450,8 +438,7 @@ router.post('/partners', authorize(['admin', 'super_admin', 'manager']), async (
     });
     res.status(201).json({ success: true, data: partner, message: 'تم إنشاء الشريك بنجاح' });
   } catch (err) {
-    logger.error('CRM partner create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الشريك' });
+    safeError(res, err, 'CRM partner create error');
   }
 });
 
@@ -468,8 +455,7 @@ router.put('/partners/:id', authorize(['admin', 'super_admin', 'manager']), asyn
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, data: partner, message: 'تم تحديث الشريك بنجاح' });
   } catch (err) {
-    logger.error('CRM partner update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الشريك' });
+    safeError(res, err, 'CRM partner update error');
   }
 });
 
@@ -486,8 +472,7 @@ router.delete('/partners/:id', authorize(['admin', 'super_admin']), async (req, 
     if (!partner) return res.status(404).json({ success: false, message: 'الشريك غير موجود' });
     res.json({ success: true, message: 'تم حذف الشريك بنجاح' });
   } catch (err) {
-    logger.error('CRM partner delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'CRM partner delete error');
   }
 });
 
@@ -511,8 +496,7 @@ router.get('/campaigns', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('CRM campaigns list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحملات' });
+    safeError(res, err, 'CRM campaigns list error');
   }
 });
 
@@ -540,8 +524,7 @@ router.get('/campaigns/stats', async (req, res) => {
     ]);
     res.json({ success: true, data: { total, running, completed, scheduled, byType } });
   } catch (err) {
-    logger.error('CRM campaigns stats error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإحصائيات' });
+    safeError(res, err, 'CRM campaigns stats error');
   }
 });
 
@@ -554,8 +537,7 @@ router.get('/campaigns/:id', async (req, res) => {
     if (!campaign) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data: campaign });
   } catch (err) {
-    logger.error('CRM campaign detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحملة' });
+    safeError(res, err, 'CRM campaign detail error');
   }
 });
 
@@ -570,8 +552,7 @@ router.post('/campaigns', authorize(['admin', 'super_admin', 'manager']), async 
     });
     res.status(201).json({ success: true, data: campaign, message: 'تم إنشاء الحملة بنجاح' });
   } catch (err) {
-    logger.error('CRM campaign create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحملة' });
+    safeError(res, err, 'CRM campaign create error');
   }
 });
 
@@ -590,8 +571,7 @@ router.put('/campaigns/:id', authorize(['admin', 'super_admin', 'manager']), asy
     await campaign.save();
     res.json({ success: true, data: campaign, message: 'تم تحديث الحملة بنجاح' });
   } catch (err) {
-    logger.error('CRM campaign update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الحملة' });
+    safeError(res, err, 'CRM campaign update error');
   }
 });
 
@@ -616,8 +596,7 @@ router.post(
 
       res.json({ success: true, data: campaign, message: 'تم إطلاق الحملة بنجاح' });
     } catch (err) {
-      logger.error('CRM campaign launch error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إطلاق الحملة' });
+      safeError(res, err, 'CRM campaign launch error');
     }
   }
 );
@@ -634,8 +613,7 @@ router.delete('/campaigns/:id', authorize(['admin', 'super_admin']), async (req,
     await campaign.updateOne({ deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الحملة بنجاح' });
   } catch (err) {
-    logger.error('CRM campaign delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'CRM campaign delete error');
   }
 });
 
@@ -653,8 +631,7 @@ router.get('/segments', async (req, res) => {
     const data = await CrmSegment.find(filter).sort({ sortOrder: 1, createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('CRM segments list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشرائح' });
+    safeError(res, err, 'CRM segments list error');
   }
 });
 
@@ -667,8 +644,7 @@ router.get('/segments/:id', async (req, res) => {
     if (!segment) return res.status(404).json({ success: false, message: 'الشريحة غير موجودة' });
     res.json({ success: true, data: segment });
   } catch (err) {
-    logger.error('CRM segment detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الشريحة' });
+    safeError(res, err, 'CRM segment detail error');
   }
 });
 
@@ -683,8 +659,7 @@ router.post('/segments', async (req, res) => {
     });
     res.status(201).json({ success: true, data: segment, message: 'تم إنشاء الشريحة بنجاح' });
   } catch (err) {
-    logger.error('CRM segment create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الشريحة' });
+    safeError(res, err, 'CRM segment create error');
   }
 });
 
@@ -701,8 +676,7 @@ router.put('/segments/:id', async (req, res) => {
     if (!segment) return res.status(404).json({ success: false, message: 'الشريحة غير موجودة' });
     res.json({ success: true, data: segment, message: 'تم تحديث الشريحة بنجاح' });
   } catch (err) {
-    logger.error('CRM segment update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الشريحة' });
+    safeError(res, err, 'CRM segment update error');
   }
 });
 
@@ -714,8 +688,7 @@ router.delete('/segments/:id', authorize(['admin', 'super_admin']), async (req, 
     await CrmSegment.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الشريحة بنجاح' });
   } catch (err) {
-    logger.error('CRM segment delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'CRM segment delete error');
   }
 });
 
@@ -734,8 +707,7 @@ router.get('/surveys', async (req, res) => {
     const data = await CrmSurvey.find(filter).select('-responses').sort({ createdAt: -1 }).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('CRM surveys list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاستطلاعات' });
+    safeError(res, err, 'CRM surveys list error');
   }
 });
 
@@ -748,8 +720,7 @@ router.get('/surveys/:id', async (req, res) => {
     if (!survey) return res.status(404).json({ success: false, message: 'الاستطلاع غير موجود' });
     res.json({ success: true, data: survey });
   } catch (err) {
-    logger.error('CRM survey detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الاستطلاع' });
+    safeError(res, err, 'CRM survey detail error');
   }
 });
 
@@ -764,8 +735,7 @@ router.post('/surveys', async (req, res) => {
     });
     res.status(201).json({ success: true, data: survey, message: 'تم إنشاء الاستطلاع بنجاح' });
   } catch (err) {
-    logger.error('CRM survey create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الاستطلاع' });
+    safeError(res, err, 'CRM survey create error');
   }
 });
 
@@ -812,8 +782,7 @@ router.post('/surveys/:id/respond', async (req, res) => {
     await survey.save();
     res.json({ success: true, message: 'شكرًا على مشاركتك' });
   } catch (err) {
-    logger.error('CRM survey respond error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الرد' });
+    safeError(res, err, 'CRM survey respond error');
   }
 });
 
@@ -825,8 +794,7 @@ router.delete('/surveys/:id', authorize(['admin', 'super_admin']), async (req, r
     await CrmSurvey.findByIdAndUpdate(req.params.id, { deletedAt: new Date() });
     res.json({ success: true, message: 'تم حذف الاستطلاع بنجاح' });
   } catch (err) {
-    logger.error('CRM survey delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'CRM survey delete error');
   }
 });
 
@@ -857,8 +825,7 @@ router.get('/commissions', async (req, res) => {
 
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('CRM commissions list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العمولات' });
+    safeError(res, err, 'CRM commissions list error');
   }
 });
 
@@ -878,8 +845,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: commission, message: 'تم إنشاء العمولة بنجاح' });
     } catch (err) {
-      logger.error('CRM commission create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء العمولة' });
+      safeError(res, err, 'CRM commission create error');
     }
   }
 );
@@ -901,8 +867,7 @@ router.put(
         return res.status(404).json({ success: false, message: 'العمولة غير موجودة' });
       res.json({ success: true, data: commission, message: 'تم تحديث العمولة بنجاح' });
     } catch (err) {
-      logger.error('CRM commission update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث العمولة' });
+      safeError(res, err, 'CRM commission update error');
     }
   }
 );

@@ -48,12 +48,7 @@ class DisabilityRehabilitationController {
       }
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in createProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إنشاء برنامج التأهيل',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in createProgram');
     }
   }
 
@@ -73,12 +68,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getProgramById:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب بيانات البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getProgramById');
     }
   }
 
@@ -109,12 +99,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getAllPrograms:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب قائمة البرامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getAllPrograms');
     }
   }
 
@@ -140,12 +125,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateProgram');
     }
   }
 
@@ -171,12 +151,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addSession:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة الجلسة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addSession');
     }
   }
 
@@ -208,12 +183,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateGoalStatus:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث حالة الهدف',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateGoalStatus');
     }
   }
 
@@ -239,12 +209,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addAssessment:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addAssessment');
     }
   }
 
@@ -270,12 +235,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in completeProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إنهاء البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in completeProgram');
     }
   }
 
@@ -300,12 +260,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in deleteProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء حذف البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in deleteProgram');
     }
   }
 
@@ -325,12 +280,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getStatistics:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب الإحصائيات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getStatistics');
     }
   }
 
@@ -350,12 +300,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getMonthlyPerformance:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب تقرير الأداء',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getMonthlyPerformance');
     }
   }
 
@@ -372,12 +317,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getBeneficiaryPrograms:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب برامج المستفيد',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getBeneficiaryPrograms');
     }
   }
 
@@ -398,12 +338,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getDetailedReport:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إنشاء التقرير',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getDetailedReport');
     }
   }
 
@@ -438,12 +373,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in suspendProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تعليق البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in suspendProgram');
     }
   }
 
@@ -468,12 +398,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in resumeProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء استئناف البرنامج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in resumeProgram');
     }
   }
 
@@ -505,12 +430,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in transferProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحويل المستفيد',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in transferProgram');
     }
   }
 
@@ -536,12 +456,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateRiskAssessment:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث تقييم المخاطر',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateRiskAssessment');
     }
   }
 
@@ -567,12 +482,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateQualityOfLife:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث تقييم جودة الحياة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateQualityOfLife');
     }
   }
 
@@ -602,12 +512,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateTransitionPlan:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث خطة الانتقال',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateTransitionPlan');
     }
   }
 
@@ -633,12 +538,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in manageMedications:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إدارة الأدوية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in manageMedications');
     }
   }
 
@@ -665,12 +565,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addTeamCommunication:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة رسالة الفريق',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addTeamCommunication');
     }
   }
 
@@ -692,12 +587,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addSatisfactionSurvey:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء حفظ استبيان الرضا',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addSatisfactionSurvey');
     }
   }
 
@@ -723,12 +613,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateDischargePlan:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث خطة التخريج',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateDischargePlan');
     }
   }
 
@@ -754,12 +639,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateHomeProgram:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث البرنامج المنزلي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateHomeProgram');
     }
   }
 
@@ -785,12 +665,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addVitals:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة القياسات الحيوية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addVitals');
     }
   }
 
@@ -816,12 +691,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateIEP:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث الخطة التعليمية الفردية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateIEP');
     }
   }
 
@@ -842,12 +712,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getProgressSummary:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب ملخص التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getProgressSummary');
     }
   }
 
@@ -868,12 +733,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getWaitingList:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب قائمة الانتظار',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getWaitingList');
     }
   }
 
@@ -888,12 +748,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getDashboard:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب لوحة المعلومات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getDashboard');
     }
   }
 
@@ -915,12 +770,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in exportProgramReport:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تصدير التقرير',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in exportProgramReport');
     }
   }
 
@@ -951,12 +801,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addBehavioralPlan:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة خطة التدخل السلوكي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addBehavioralPlan');
     }
   }
 
@@ -987,12 +832,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateBehavioralPlan:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث خطة التدخل السلوكي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateBehavioralPlan');
     }
   }
 
@@ -1019,12 +859,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addIncidentReport:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة تقرير الحادثة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addIncidentReport');
     }
   }
 
@@ -1055,12 +890,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateIncidentReport:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث تقرير الحادثة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateIncidentReport');
     }
   }
 
@@ -1086,12 +916,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addAppointment:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة الموعد',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addAppointment');
     }
   }
 
@@ -1122,12 +947,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateAppointment:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث الموعد',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateAppointment');
     }
   }
 
@@ -1153,12 +973,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addDocument:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة المستند',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addDocument');
     }
   }
 
@@ -1183,12 +998,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in deleteDocument:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء حذف المستند',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in deleteDocument');
     }
   }
 
@@ -1215,12 +1025,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addGroupActivity:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة نشاط المجموعة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addGroupActivity');
     }
   }
 
@@ -1250,12 +1055,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateEmergencyContacts:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث جهات اتصال الطوارئ',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateEmergencyContacts');
     }
   }
 
@@ -1281,12 +1081,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateCulturalPreferences:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث التفضيلات الثقافية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateCulturalPreferences');
     }
   }
 
@@ -1316,12 +1111,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in updateAttendanceSummary:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تحديث ملخص الحضور',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in updateAttendanceSummary');
     }
   }
 
@@ -1347,12 +1137,7 @@ class DisabilityRehabilitationController {
 
       return res.status(201).json(result);
     } catch (error) {
-      logger.error('Error in addAlert:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء إضافة التنبيه',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in addAlert');
     }
   }
 
@@ -1373,12 +1158,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in dismissAlert:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء تجاهل التنبيه',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in dismissAlert');
     }
   }
 
@@ -1399,12 +1179,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getAnalytics:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب التحليلات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getAnalytics');
     }
   }
 
@@ -1421,12 +1196,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getUpcomingAppointments:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب المواعيد القادمة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getUpcomingAppointments');
     }
   }
 
@@ -1441,12 +1211,7 @@ class DisabilityRehabilitationController {
 
       return res.status(200).json(result);
     } catch (error) {
-      logger.error('Error in getActiveAlerts:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'حدث خطأ أثناء جلب التنبيهات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'in getActiveAlerts');
     }
   }
 

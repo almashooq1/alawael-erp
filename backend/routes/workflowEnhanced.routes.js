@@ -123,7 +123,7 @@ router.get('/comments/task/:taskId', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: comments });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -188,7 +188,7 @@ router.put('/comments/:id', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: populated });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -202,7 +202,7 @@ router.delete('/comments/:id', authMiddleware, async (req, res) => {
     await comment.save();
     res.json({ success: true, message: 'تم حذف التعليق' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -215,7 +215,7 @@ router.post('/comments/:id/pin', authMiddleware, async (req, res) => {
     await comment.save();
     res.json({ success: true, data: { isPinned: comment.isPinned } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -238,7 +238,7 @@ router.post('/comments/:id/react', authMiddleware, async (req, res) => {
     await comment.save();
     res.json({ success: true, data: comment.reactions });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -274,7 +274,7 @@ router.get('/favorites', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: expanded });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -307,7 +307,7 @@ router.post('/favorites/toggle', authMiddleware, async (req, res) => {
       message: 'تمت الإضافة للمفضلة',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -321,7 +321,7 @@ router.get('/favorites/check/:targetType/:targetId', authMiddleware, async (req,
     });
     res.json({ success: true, data: { isFavorite: !!exists } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -335,7 +335,7 @@ router.put('/favorites/reorder', authMiddleware, async (req, res) => {
     await Promise.all(ops);
     res.json({ success: true, message: 'تم إعادة الترتيب' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -363,7 +363,7 @@ router.get('/delegations', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: delegations });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -448,7 +448,7 @@ router.post('/delegations/:id/cancel', authMiddleware, async (req, res) => {
 
     res.json({ success: true, message: 'تم إلغاء التفويض' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -467,7 +467,7 @@ router.get('/delegations/active/:userId', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: delegation });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -493,7 +493,7 @@ router.post('/delegations/process', authMiddleware, async (req, res) => {
       data: { activated: activated.modifiedCount, expired: expired.modifiedCount },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -512,7 +512,7 @@ router.get('/reminders', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: reminders });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -554,7 +554,7 @@ router.post('/reminders', authMiddleware, async (req, res) => {
 
     res.status(201).json({ success: true, data: reminder, message: 'تم إنشاء التذكير' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -567,7 +567,7 @@ router.delete('/reminders/:id', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, message: 'تم إلغاء التذكير' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -602,7 +602,7 @@ router.post('/reminders/process', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: { processed: sent } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -630,7 +630,7 @@ router.get('/webhooks', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: webhooks });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -643,7 +643,7 @@ router.get('/webhooks/:id', authMiddleware, async (req, res) => {
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -665,7 +665,7 @@ router.post('/webhooks', authMiddleware, async (req, res) => {
     });
     res.status(201).json({ success: true, data: wh, message: 'تم إنشاء الـ Webhook' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -685,7 +685,7 @@ router.put('/webhooks/:id', authMiddleware, async (req, res) => {
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -695,7 +695,7 @@ router.delete('/webhooks/:id', authMiddleware, async (req, res) => {
     await WorkflowWebhook.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -753,7 +753,7 @@ router.post('/webhooks/:id/test', authMiddleware, async (req, res) => {
       res.json({ success: false, message: 'فشل الاختبار', error: safeError(err) });
     }
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -773,7 +773,7 @@ router.get('/webhooks/:id/logs', authMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -793,7 +793,7 @@ router.get('/reports', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: reports });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -808,7 +808,7 @@ router.get('/reports/:id', authMiddleware, async (req, res) => {
     if (!report) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -821,7 +821,7 @@ router.post('/reports', authMiddleware, async (req, res) => {
     });
     res.status(201).json({ success: true, data: report, message: 'تم حفظ التقرير' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -836,7 +836,7 @@ router.put('/reports/:id', authMiddleware, async (req, res) => {
     if (!report) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: report });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -846,7 +846,7 @@ router.delete('/reports/:id', authMiddleware, async (req, res) => {
     await WorkflowSavedReport.findOneAndDelete({ _id: req.params.id, createdBy: uid(req) });
     res.json({ success: true, message: 'تم حذف التقرير' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1065,7 +1065,7 @@ router.get('/tags', authMiddleware, async (req, res) => {
     const tags = await WorkflowTag.find(query).sort({ usageCount: -1, name: 1 }).lean();
     res.json({ success: true, data: tags });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1078,7 +1078,7 @@ router.post('/tags', authMiddleware, async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ success: false, message: 'الوسم موجود بالفعل' });
     }
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1089,7 +1089,7 @@ router.put('/tags/:id', authMiddleware, async (req, res) => {
     if (!tag) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: tag });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1099,7 +1099,7 @@ router.delete('/tags/:id', authMiddleware, async (req, res) => {
     await WorkflowTag.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم حذف الوسم' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1121,7 +1121,7 @@ router.post('/tags/assign/:instanceId', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: { tags: instance.tags } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1138,7 +1138,7 @@ router.delete('/tags/assign/:instanceId/:tagName', authMiddleware, async (req, r
 
     res.json({ success: true, data: { tags: instance.tags } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1155,7 +1155,7 @@ router.get('/versions/:definitionId', authMiddleware, async (req, res) => {
       .lean();
     res.json({ success: true, data: versions });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1171,7 +1171,7 @@ router.get('/versions/:definitionId/:version', authMiddleware, async (req, res) 
     if (!ver) return res.status(404).json({ success: false, message: 'الإصدار غير موجود' });
     res.json({ success: true, data: ver });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1197,7 +1197,7 @@ router.post('/versions/:definitionId', authMiddleware, async (req, res) => {
 
     res.status(201).json({ success: true, data: ver });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1244,7 +1244,7 @@ router.get('/versions/:definitionId/compare/:v1/:v2', authMiddleware, async (req
 
     res.json({ success: true, data: diff });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1281,7 +1281,7 @@ router.post('/versions/:definitionId/:version/restore', authMiddleware, async (r
 
     res.json({ success: true, message: `تم استعادة الإصدار ${ver.version}` });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1299,7 +1299,7 @@ router.get('/notification-prefs', authMiddleware, async (req, res) => {
     }
     res.json({ success: true, data: prefs });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -1313,7 +1313,7 @@ router.put('/notification-prefs', authMiddleware, async (req, res) => {
     );
     res.json({ success: true, data: prefs, message: 'تم تحديث تفضيلات الإشعارات' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2666,7 +2666,7 @@ router.get('/templates/extended', authMiddleware, async (_req, res) => {
     }));
     res.json({ success: true, data: templates, total: templates.length });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2677,7 +2677,7 @@ router.get('/templates/extended/:templateId', authMiddleware, async (req, res) =
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: tmpl });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2718,7 +2718,7 @@ router.post('/templates/extended/:templateId/deploy', authMiddleware, async (req
       message: `تم نشر قالب "${tmpl.nameAr}" بنجاح`,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ', error: safeError(error) });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2756,7 +2756,7 @@ router.post('/batch/reassign', authMiddleware, async (req, res) => {
       message: 'تم إعادة التعيين بنجاح',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2797,7 +2797,7 @@ router.post('/batch/cancel-instances', authMiddleware, async (req, res) => {
       message: 'تم الإلغاء بنجاح',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2813,7 +2813,7 @@ router.post('/batch/update-priority', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: { modified: result.modifiedCount } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -2832,7 +2832,7 @@ router.post('/batch/add-tags', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: { modified: result.modifiedCount } });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -3006,7 +3006,7 @@ router.get('/stats/workload', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: workload });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 
@@ -3060,7 +3060,7 @@ router.get('/search', authMiddleware, async (req, res) => {
 
     res.json({ success: true, data: results, total });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'حدث خطأ في البحث' });
+    safeError(res, error, 'workflowEnhanced');
   }
 });
 

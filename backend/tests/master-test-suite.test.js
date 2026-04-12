@@ -38,9 +38,12 @@ describe('🚀 MASTER TEST SUITE - PROJECT-WIDE', () => {
 
     test('should configure test timeouts appropriately', async () => {
       const start = Date.now();
-      await new Promise(resolve => { setTimeout(resolve, 100); });
+      await new Promise(resolve => {
+        setTimeout(resolve, 100);
+      });
       const duration = Date.now() - start;
-      expect(duration).toBeGreaterThanOrEqual(100);
+      // Allow 2ms tolerance for OS timer resolution jitter
+      expect(duration).toBeGreaterThanOrEqual(98);
     });
   });
 
@@ -87,7 +90,9 @@ describe('🚀 MASTER TEST SUITE - PROJECT-WIDE', () => {
     test('should initialize quickly', async () => {
       const start = Date.now();
       // Simulate initialization
-      await new Promise(r => { setTimeout(r, 10); });
+      await new Promise(r => {
+        setTimeout(r, 10);
+      });
       const duration = Date.now() - start;
       expect(duration).toBeLessThan(5000);
     });

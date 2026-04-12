@@ -12,6 +12,7 @@ function safeModel(name) {
   } catch {
     try {
       return require(`../models/${name}`);
+const safeError = require('../utils/safeError');
     } catch {
       return null;
     }
@@ -125,7 +126,7 @@ router.get('/dashboard', async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في لوحة الشؤون القانونية' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -147,7 +148,7 @@ router.get('/cases', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -158,7 +159,7 @@ router.get('/cases/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -168,7 +169,7 @@ router.post('/cases', async (req, res) => {
     const data = await LC.create(pick(req.body, CASE_FIELDS));
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القضية' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -182,7 +183,7 @@ router.put('/cases/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -197,7 +198,7 @@ router.delete('/cases/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'القضية غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -218,7 +219,7 @@ router.get('/consultations', async (req, res) => {
       .lean();
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -233,7 +234,7 @@ router.post('/consultations', async (req, res) => {
     });
     res.status(201).json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الاستشارة' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -246,7 +247,7 @@ router.put('/consultations/:id', async (req, res) => {
     if (!data) return res.status(404).json({ success: false, message: 'الاستشارة غير موجودة' });
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 
@@ -290,7 +291,7 @@ router.get('/calendar', async (req, res) => {
 
     res.json({ success: true, data: events });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'legal-affairs');
   }
 });
 

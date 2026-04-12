@@ -45,8 +45,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('maintenanceTask list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceTask list error');
   }
 });
 
@@ -82,8 +81,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: { summary: stats[0] || {}, byCategory } });
   } catch (err) {
-    logger.error('maintenanceTask stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceTask stats error');
   }
 });
 
@@ -99,8 +97,7 @@ router.get('/overdue', requireAuth, async (req, res) => {
       .sort({ scheduledDate: 1 });
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('maintenanceTask overdue error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceTask overdue error');
   }
 });
 
@@ -114,8 +111,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
   } catch (err) {
-    logger.error('maintenanceTask get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceTask get error');
   }
 });
 
@@ -157,8 +153,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, message: 'Task deleted' });
   } catch (err) {
-    logger.error('maintenanceTask delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceTask delete error');
   }
 });
 

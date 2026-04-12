@@ -26,6 +26,7 @@ const logger = require('../utils/logger');
 function getWebhookService() {
   try {
     return require('../services/webhookService');
+const safeError = require('../utils/safeError');
   } catch {
     return null;
   }
@@ -331,7 +332,7 @@ function createWebhookRouter() {
       const webhooks = await DDDWebhook.find({}).sort({ createdAt: -1 }).lean();
       res.json({ success: true, webhooks });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddWebhookDispatcher');
     }
   });
 
@@ -380,7 +381,7 @@ function createWebhookRouter() {
       await DDDWebhook.findByIdAndDelete(req.params.id);
       res.json({ success: true, message: 'Webhook deleted' });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddWebhookDispatcher');
     }
   });
 
@@ -393,7 +394,7 @@ function createWebhookRouter() {
       await wh.save();
       res.json({ success: true, webhook: wh });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddWebhookDispatcher');
     }
   });
 
@@ -407,7 +408,7 @@ function createWebhookRouter() {
       });
       res.json({ success: true, ...data });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddWebhookDispatcher');
     }
   });
 
@@ -430,7 +431,7 @@ function createWebhookRouter() {
 
       res.json({ success: true, result });
     } catch (err) {
-      res.status(500).json({ success: false, error: err.message });
+      safeError(res, err, 'dddWebhookDispatcher');
     }
   });
 

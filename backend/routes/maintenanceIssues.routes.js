@@ -46,8 +46,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('maintenanceIssue list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceIssue list error');
   }
 });
 
@@ -74,8 +73,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: { summary: stats[0] || {}, byCategory } });
   } catch (err) {
-    logger.error('maintenanceIssue stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceIssue stats error');
   }
 });
 
@@ -92,8 +90,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, data: issue });
   } catch (err) {
-    logger.error('maintenanceIssue get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceIssue get error');
   }
 });
 
@@ -131,8 +128,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, message: 'Issue deleted' });
   } catch (err) {
-    logger.error('maintenanceIssue delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceIssue delete error');
   }
 });
 

@@ -8,6 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 const { Schema } = mongoose;
 
 // ─── Model ──────────────────────────────────────────────────────────────────────
@@ -663,7 +664,7 @@ router.post('/recommendations/generate', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'recommendation-engine');
   }
 });
 
@@ -679,7 +680,7 @@ router.get('/recommendations/:beneficiaryId/latest', async (req, res) => {
     if (!report) return res.status(404).json({ success: false, error: 'لا توجد توصيات محفوظة' });
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'recommendation-engine');
   }
 });
 
@@ -695,7 +696,7 @@ router.get('/recommendations/:beneficiaryId/history', async (req, res) => {
       .limit(10);
     res.json({ success: true, count: reports.length, data: reports });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'recommendation-engine');
   }
 });
 

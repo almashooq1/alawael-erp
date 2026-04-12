@@ -10,7 +10,7 @@ const sectionSchema = new mongoose.Schema({
 
 const standardizedAssessmentSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     evaluator: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
 
     // Test Details

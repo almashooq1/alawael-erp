@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Mock AI Service for development
 const mockAiService = {
@@ -38,10 +39,7 @@ router.post('/predict-performance', authenticate, async (req, res) => {
       data: prediction,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم' || 'Failed to predict performance',
-    });
+    safeError(res, error, 'predictions');
   }
 });
 
@@ -60,10 +58,7 @@ router.post('/predict-absence/:employeeId', authenticate, async (req, res) => {
       data: prediction,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم' || 'Failed to predict absence',
-    });
+    safeError(res, error, 'predictions');
   }
 });
 
@@ -90,10 +85,7 @@ router.post('/predict-trend', authenticate, async (req, res) => {
       data: prediction,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم' || 'Failed to predict trend',
-    });
+    safeError(res, error, 'predictions');
   }
 });
 
@@ -112,10 +104,7 @@ router.post('/forecast-revenue', authenticate, async (req, res) => {
       data: forecast,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم' || 'Failed to forecast revenue',
-    });
+    safeError(res, error, 'predictions');
   }
 });
 

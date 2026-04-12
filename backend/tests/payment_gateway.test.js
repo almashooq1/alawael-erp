@@ -6,10 +6,10 @@ const Payment = require('../models/payment.model');
 const Invoice = require('../models/invoice.model');
 const Subscription = require('../models/subscription.model');
 
-// Mock Mongoose Models
-jest.mock('../models/payment.model');
-jest.mock('../models/invoice.model');
-jest.mock('../models/subscription.model');
+// Mock Mongoose Models — explicit constructor mocks for .mockImplementation()
+jest.mock('../models/payment.model', () => jest.fn());
+jest.mock('../models/invoice.model', () => jest.fn());
+jest.mock('../models/subscription.model', () => jest.fn());
 
 describe('Payment Gateway Service', () => {
   let saveMock;

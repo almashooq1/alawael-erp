@@ -305,8 +305,7 @@ router.get('/at-risk', async (req, res) => {
 
     res.json({ success: true, data: riskData, total: riskData.length });
   } catch (error) {
-    logger.error('Beneficiaries at-risk error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل المستفيدين المعرضين للخطر' });
+    safeError(res, error, 'Beneficiaries at-risk error');
   }
 });
 
@@ -323,8 +322,7 @@ router.get('/cities', async (req, res) => {
     });
     res.json({ success: true, data: cities.filter(Boolean).sort() });
   } catch (error) {
-    logger.error('Beneficiaries cities error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل المدن' });
+    safeError(res, error, 'Beneficiaries cities error');
   }
 });
 
@@ -345,8 +343,7 @@ router.get('/recent', async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    logger.error('Beneficiaries recent error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل آخر المستفيدين' });
+    safeError(res, error, 'Beneficiaries recent error');
   }
 });
 
@@ -381,8 +378,7 @@ router.get('/export', async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    logger.error('Beneficiaries export error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تصدير البيانات' });
+    safeError(res, error, 'Beneficiaries export error');
   }
 });
 
@@ -422,8 +418,7 @@ router.get('/:id', validateObjectId('id'), async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('Beneficiary detail error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل بيانات المستفيد' });
+    safeError(res, error, 'Beneficiary detail error');
   }
 });
 
@@ -609,8 +604,7 @@ router.delete('/:id', validateObjectId('id'), async (req, res) => {
       message: 'تم أرشفة المستفيد بنجاح',
     });
   } catch (error) {
-    logger.error('Beneficiary delete error:', error);
-    res.status(500).json({ success: false, message: 'فشل في حذف المستفيد' });
+    safeError(res, error, 'Beneficiary delete error');
   }
 });
 
@@ -633,8 +627,7 @@ router.patch('/:id/restore', validateObjectId('id'), async (req, res) => {
       data: beneficiary,
     });
   } catch (error) {
-    logger.error('Beneficiary restore error:', error);
-    res.status(500).json({ success: false, message: 'فشل في استعادة المستفيد' });
+    safeError(res, error, 'Beneficiary restore error');
   }
 });
 
@@ -665,8 +658,7 @@ router.patch('/:id/status', validateObjectId('id'), async (req, res) => {
       data: { id: beneficiary._id, status: beneficiary.status },
     });
   } catch (error) {
-    logger.error('Beneficiary status update error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحديث الحالة' });
+    safeError(res, error, 'Beneficiary status update error');
   }
 });
 
@@ -717,8 +709,7 @@ router.post('/bulk-action', async (req, res) => {
       data: { modifiedCount: result.modifiedCount },
     });
   } catch (error) {
-    logger.error('Beneficiary bulk action error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تنفيذ العملية الجماعية' });
+    safeError(res, error, 'Beneficiary bulk action error');
   }
 });
 
@@ -815,8 +806,7 @@ router.post('/:id/progress', validateObjectId('id'), async (req, res) => {
       data: progress,
     });
   } catch (error) {
-    logger.error('Beneficiary progress error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تسجيل التقدم' });
+    safeError(res, error, 'Beneficiary progress error');
   }
 });
 
@@ -834,8 +824,7 @@ router.get('/:id/progress', validateObjectId('id'), async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    logger.error('Beneficiary progress list error:', error);
-    res.status(500).json({ success: false, message: 'فشل في تحميل سجل التقدم' });
+    safeError(res, error, 'Beneficiary progress list error');
   }
 });
 

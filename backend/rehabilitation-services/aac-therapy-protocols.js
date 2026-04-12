@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 const { Schema } = mongoose;
 
 // ══════════════════════════════════════════════════════════════
@@ -578,7 +579,7 @@ router.post('/aac/profiles', async (req, res) => {
     await profile.save();
     res.status(201).json({ success: true, message: 'تم إنشاء ملف AAC', data: profile });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -588,7 +589,7 @@ router.get('/aac/profiles/:beneficiaryId', async (req, res) => {
     if (!profile) return res.status(404).json({ success: false, error: 'ملف AAC غير موجود' });
     res.json({ success: true, data: profile });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -602,7 +603,7 @@ router.patch('/aac/profiles/:beneficiaryId', async (req, res) => {
     if (!profile) return res.status(404).json({ success: false, error: 'الملف غير موجود' });
     res.json({ success: true, message: 'تم تحديث ملف AAC', data: profile });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -616,7 +617,7 @@ router.post('/aac/profiles/:beneficiaryId/vocabulary', async (req, res) => {
     await profile.save();
     res.status(201).json({ success: true, message: 'تم إضافة الكلمة', data: word });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -632,7 +633,7 @@ router.patch('/aac/profiles/:beneficiaryId/vocabulary/:wordId/mastered', async (
     await profile.save();
     res.json({ success: true, message: 'تم تسجيل إتقان الكلمة' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -646,7 +647,7 @@ router.post('/aac/profiles/:beneficiaryId/progress', async (req, res) => {
     await profile.save();
     res.status(201).json({ success: true, message: 'تم تسجيل التقدم' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -670,7 +671,7 @@ router.post('/protocols/seed', async (req, res) => {
     }
     res.json({ success: true, message: `تم تهيئة ${seeded} بروتوكولات`, seeded });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -692,7 +693,7 @@ router.get('/protocols', async (req, res) => {
       .sort({ usage_count: -1 });
     res.json({ success: true, count: protocols.length, data: protocols });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -703,7 +704,7 @@ router.get('/protocols/:id', async (req, res) => {
     await TherapyProtocol.findByIdAndUpdate(req.params.id, { $inc: { usage_count: 1 } });
     res.json({ success: true, data: protocol });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -713,7 +714,7 @@ router.post('/protocols', async (req, res) => {
     await protocol.save();
     res.status(201).json({ success: true, message: 'تم إنشاء البروتوكول', data: protocol });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -732,7 +733,7 @@ router.post('/protocols/:id/rate', async (req, res) => {
     });
     res.json({ success: true, new_rating: Math.round(newRating * 10) / 10 });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 
@@ -757,7 +758,7 @@ router.get('/protocols/search/:beneficiaryId', async (req, res) => {
       .limit(10);
     res.json({ success: true, count: protocols.length, data: protocols });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'aac-therapy-protocols');
   }
 });
 

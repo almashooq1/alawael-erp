@@ -2,6 +2,11 @@
 const crypto = require('crypto');
 
 // ── Mocks ───────────────────────────────────────────────────────────
+jest.mock('speakeasy', () => ({
+  totp: {
+    verify: jest.fn(({ token }) => token === '123456'),
+  },
+}));
 jest.mock('../models/User', () => {
   const mock = jest.fn();
   mock.find = jest.fn();

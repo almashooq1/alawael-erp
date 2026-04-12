@@ -8,6 +8,7 @@ const Driver = require('../models/Driver');
 const User = require('../models/User');
 const DriverManagementService = require('../services/driverManagement.service');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 class DriverController {
   /**
@@ -126,11 +127,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب السائقين',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -159,11 +156,7 @@ class DriverController {
         data: driver,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب السائق',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -241,11 +234,7 @@ class DriverController {
         data: driver,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف السائق',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -265,11 +254,7 @@ class DriverController {
         data: report,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب تقرير الأداء',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -306,11 +291,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل تسجيل الانتهاك',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -338,11 +319,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الانتهاكات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -444,11 +421,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب السائقين الذين يحتاجون تدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -470,11 +443,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب أفضل السائقين',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -494,11 +463,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب رخصات القيادة التي ستنتهي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -517,11 +482,7 @@ class DriverController {
         data: prediction,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب التنبؤ بمعدل الغياب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -540,11 +501,7 @@ class DriverController {
         data: trend,
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب اتجاه الأداء',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 
@@ -583,11 +540,7 @@ class DriverController {
         },
       });
     } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الإحصائيات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'driver');
     }
   }
 }

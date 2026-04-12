@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const waitlistSchema = new mongoose.Schema(
   {
-    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
 
     // Preferences
     department: { type: String, required: true }, // SPEECH, OT, etc.

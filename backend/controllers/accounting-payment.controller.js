@@ -9,6 +9,7 @@ const AccountingPayment = require('../models/AccountingPayment');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 const PDFDocument = require('pdfkit');
+const safeError = require('../utils/safeError');
 
 // @desc    Get all payments
 // @route   GET /api/accounting/payments
@@ -40,12 +41,7 @@ exports.getAllPayments = async (req, res) => {
       data: payments,
     });
   } catch (error) {
-    logger.error('Error fetching payments:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب المدفوعات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching payments');
   }
 };
 
@@ -114,12 +110,7 @@ exports.getPaymentStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    logger.error('Error fetching payment stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب الإحصائيات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching payment stats');
   }
 };
 
@@ -144,12 +135,7 @@ exports.getPaymentById = async (req, res) => {
       data: payment,
     });
   } catch (error) {
-    logger.error('Error fetching payment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب الدفعة',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching payment');
   }
 };
 
@@ -255,12 +241,7 @@ exports.deletePayment = async (req, res) => {
       message: 'تم حذف الدفعة بنجاح',
     });
   } catch (error) {
-    logger.error('Error deleting payment:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء حذف الدفعة',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'deleting payment');
   }
 };
 
@@ -319,11 +300,6 @@ exports.downloadReceipt = async (req, res) => {
 
     doc.end();
   } catch (error) {
-    logger.error('Error generating receipt:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء إنشاء الإيصال',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'generating receipt');
   }
 };

@@ -12,6 +12,7 @@ const { protect } = require('../middleware/auth');
 let rbacManager;
 try {
   rbacManager = require('../services/rbacManager.service');
+const safeError = require('../utils/safeError');
 } catch (_e) {
   rbacManager = {};
 }
@@ -117,7 +118,7 @@ router.put('/roles/:id', (req, res) => {
       message: 'تم تحديث الدور بنجاح',
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الدور' });
+    safeError(res, error, 'rbac');
   }
 });
 
@@ -129,7 +130,7 @@ router.delete('/roles/:id', (req, res) => {
   try {
     res.json({ success: true, message: 'تم حذف الدور بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الدور' });
+    safeError(res, error, 'rbac');
   }
 });
 

@@ -11,6 +11,7 @@ const DatabaseBackupService = require('../services/database-backup-service');
 const { seedDatabase, clearDatabase } = require('../database/seeders/database-seeder');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // حماية جميع مسارات قاعدة البيانات - Admin/System Admin فقط
 router.use(authenticate);
@@ -49,7 +50,7 @@ router.get('/migrations', async (req, res) => {
     const migrations = await migrationService.getMigrations();
     res.json({ success: true, data: migrations });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -59,7 +60,7 @@ router.get('/migrations/pending', async (req, res) => {
     const pending = await migrationService.getPendingMigrations();
     res.json({ success: true, data: pending });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -69,7 +70,7 @@ router.get('/migrations/stats', async (req, res) => {
     const stats = await migrationService.getStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -80,7 +81,7 @@ router.post('/migrations/create', async (req, res) => {
     const migration = await migrationService.createMigration(name, { description });
     res.json({ success: true, data: migration });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -90,7 +91,7 @@ router.post('/migrations/run/:name', async (req, res) => {
     const result = await migrationService.runMigration(req.params.name, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -100,7 +101,7 @@ router.post('/migrations/run-pending', async (req, res) => {
     const results = await migrationService.runPendingMigrations(req.body);
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -110,7 +111,7 @@ router.post('/migrations/rollback/:name', async (req, res) => {
     const result = await migrationService.rollback(req.params.name, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -120,7 +121,7 @@ router.get('/migrations/verify', async (req, res) => {
     const verification = await migrationService.verifyMigrations();
     res.json({ success: true, data: verification });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -134,7 +135,7 @@ router.post('/backup', async (req, res) => {
     const backup = await backupService.createFullBackup(req.body);
     res.json({ success: true, data: backup });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -144,7 +145,7 @@ router.get('/backup/list', async (req, res) => {
     const backups = await backupService.listBackups(req.query);
     res.json({ success: true, data: backups });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -154,7 +155,7 @@ router.get('/backup/info', async (req, res) => {
     const info = await backupService.getBackupInfo(req.query.path);
     res.json({ success: true, data: info });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -164,7 +165,7 @@ router.post('/backup/restore', async (req, res) => {
     const result = await backupService.restoreBackup(req.body.path, req.body.options);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -174,7 +175,7 @@ router.get('/backup/stats', async (req, res) => {
     const stats = await backupService.getStats();
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -184,7 +185,7 @@ router.post('/backup/cleanup', async (req, res) => {
     const result = await backupService.cleanupOldBackups();
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -203,7 +204,7 @@ router.post('/seed', async (req, res) => {
     const result = await seedDatabase();
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -223,7 +224,7 @@ router.delete('/clear', async (req, res) => {
     await clearDatabase();
     res.json({ success: true, message: 'تم مسح جميع البيانات' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 
@@ -286,7 +287,7 @@ router.get('/status', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'database');
   }
 });
 

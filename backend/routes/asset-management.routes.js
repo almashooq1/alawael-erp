@@ -30,6 +30,7 @@ const ResourceBooking = require('../models/ResourceBooking');
 const AssetInventory = require('../models/AssetInventory');
 const AssetInventoryItem = require('../models/AssetInventoryItem');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const MAX_LIMIT = 100;
@@ -68,8 +69,7 @@ router.get('/categories', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('categories list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التصنيفات' });
+    safeError(res, err, 'categories list error');
   }
 });
 
@@ -87,8 +87,7 @@ router.post('/categories', authorize(['admin', 'manager']), async (req, res) => 
   } catch (err) {
     if (err.code === 11000)
       return res.status(409).json({ success: false, message: 'الكود مستخدم مسبقاً' });
-    logger.error('categories create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التصنيف' });
+    safeError(res, err, 'categories create error');
   }
 });
 
@@ -103,8 +102,7 @@ router.put('/categories/:id', authorize(['admin', 'manager']), async (req, res) 
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
     res.json({ success: true, data: category, message: 'تم التحديث' });
   } catch (err) {
-    logger.error('categories update error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'categories update error');
   }
 });
 
@@ -115,8 +113,7 @@ router.delete('/categories/:id', authorize(['admin']), async (req, res) => {
     if (!category) return res.status(404).json({ success: false, message: 'التصنيف غير موجود' });
     res.json({ success: true, message: 'تم حذف التصنيف' });
   } catch (err) {
-    logger.error('categories delete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'categories delete error');
   }
 });
 
@@ -145,8 +142,7 @@ router.get('/assets/stats', async (req, res) => {
     });
     res.json({ success: true, data: stats });
   } catch (err) {
-    logger.error('assets stats error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, err, 'assets stats error');
   }
 });
 
@@ -172,8 +168,7 @@ router.get('/assets', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('assets list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأصول' });
+    safeError(res, err, 'assets list error');
   }
 });
 
@@ -185,8 +180,7 @@ router.post('/assets', authorize(['admin', 'manager']), async (req, res) => {
     const asset = await Asset.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data: asset, message: 'تم إضافة الأصل' });
   } catch (err) {
-    logger.error('assets create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الأصل' });
+    safeError(res, err, 'assets create error');
   }
 });
 
@@ -197,8 +191,7 @@ router.get('/assets/:id', async (req, res) => {
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset });
   } catch (err) {
-    logger.error('asset get error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأصل' });
+    safeError(res, err, 'asset get error');
   }
 });
 
@@ -213,8 +206,7 @@ router.put('/assets/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!asset) return res.status(404).json({ success: false, message: 'الأصل غير موجود' });
     res.json({ success: true, data: asset, message: 'تم تحديث الأصل' });
   } catch (err) {
-    logger.error('asset update error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'asset update error');
   }
 });
 
@@ -228,8 +220,7 @@ router.delete('/assets/:id', authorize(['admin']), async (req, res) => {
     await asset.deleteOne();
     res.json({ success: true, message: 'تم حذف الأصل' });
   } catch (err) {
-    logger.error('asset delete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'asset delete error');
   }
 });
 
@@ -242,8 +233,7 @@ router.get('/assets/scan/:barcode', async (req, res) => {
     if (!asset) return res.status(404).json({ success: false, message: 'لم يُعثر على الأصل' });
     res.json({ success: true, data: asset });
   } catch (err) {
-    logger.error('barcode scan error', err);
-    res.status(500).json({ success: false, message: 'خطأ في المسح' });
+    safeError(res, err, 'barcode scan error');
   }
 });
 
@@ -271,8 +261,7 @@ router.get('/depreciation', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('depreciation list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب جدول الإهلاك' });
+    safeError(res, err, 'depreciation list error');
   }
 });
 
@@ -296,8 +285,7 @@ router.post('/depreciation', authorize(['admin', 'manager']), async (req, res) =
     });
     res.status(201).json({ success: true, data: schedule, message: 'تم إنشاء جدول الإهلاك' });
   } catch (err) {
-    logger.error('depreciation create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء جدول الإهلاك' });
+    safeError(res, err, 'depreciation create error');
   }
 });
 
@@ -313,8 +301,7 @@ router.patch('/depreciation/:id/post', authorize(['admin', 'manager']), async (r
     if (!schedule) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
     res.json({ success: true, data: schedule, message: 'تم ترحيل الإهلاك' });
   } catch (err) {
-    logger.error('depreciation post error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الترحيل' });
+    safeError(res, err, 'depreciation post error');
   }
 });
 
@@ -358,8 +345,7 @@ router.get('/work-orders', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('work-orders list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب أوامر العمل' });
+    safeError(res, err, 'work-orders list error');
   }
 });
 
@@ -384,8 +370,7 @@ router.post('/work-orders', authorize(['admin', 'manager', 'technician']), async
     }
     res.status(201).json({ success: true, data: workOrder, message: 'تم إنشاء أمر العمل' });
   } catch (err) {
-    logger.error('work-orders create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء أمر العمل' });
+    safeError(res, err, 'work-orders create error');
   }
 });
 
@@ -399,8 +384,7 @@ router.get('/work-orders/:id', async (req, res) => {
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, data: wo });
   } catch (err) {
-    logger.error('work-order get error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب أمر العمل' });
+    safeError(res, err, 'work-order get error');
   }
 });
 
@@ -415,8 +399,7 @@ router.put('/work-orders/:id', authorize(['admin', 'manager', 'technician']), as
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, data: wo, message: 'تم التحديث' });
   } catch (err) {
-    logger.error('work-order update error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'work-order update error');
   }
 });
 
@@ -452,8 +435,7 @@ router.patch(
       });
       res.json({ success: true, data: wo, message: 'تم إتمام أمر العمل' });
     } catch (err) {
-      logger.error('work-order complete error', err);
-      res.status(500).json({ success: false, message: 'خطأ في إتمام أمر العمل' });
+      safeError(res, err, 'work-order complete error');
     }
   }
 );
@@ -465,8 +447,7 @@ router.delete('/work-orders/:id', authorize(['admin']), async (req, res) => {
     if (!wo) return res.status(404).json({ success: false, message: 'أمر العمل غير موجود' });
     res.json({ success: true, message: 'تم الحذف' });
   } catch (err) {
-    logger.error('work-order delete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'work-order delete error');
   }
 });
 
@@ -496,8 +477,7 @@ router.get('/transfers', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('transfers list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب طلبات النقل' });
+    safeError(res, err, 'transfers list error');
   }
 });
 
@@ -517,8 +497,7 @@ router.post('/transfers', authorize(['admin', 'manager']), async (req, res) => {
     });
     res.status(201).json({ success: true, data: transfer, message: 'تم إنشاء طلب النقل' });
   } catch (err) {
-    logger.error('transfers create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء طلب النقل' });
+    safeError(res, err, 'transfers create error');
   }
 });
 
@@ -533,8 +512,7 @@ router.patch('/transfers/:id/approve', authorize(['admin', 'manager']), async (r
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     res.json({ success: true, data: transfer, message: 'تمت الموافقة على النقل' });
   } catch (err) {
-    logger.error('transfers approve error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة' });
+    safeError(res, err, 'transfers approve error');
   }
 });
 
@@ -554,8 +532,7 @@ router.patch('/transfers/:id/receive', authorize(['admin', 'manager']), async (r
     });
     res.json({ success: true, data: transfer, message: 'تم استلام الأصل' });
   } catch (err) {
-    logger.error('transfers receive error', err);
-    res.status(500).json({ success: false, message: 'خطأ في تأكيد الاستلام' });
+    safeError(res, err, 'transfers receive error');
   }
 });
 
@@ -570,8 +547,7 @@ router.patch('/transfers/:id/reject', authorize(['admin', 'manager']), async (re
     if (!transfer) return res.status(404).json({ success: false, message: 'طلب النقل غير موجود' });
     res.json({ success: true, data: transfer, message: 'تم رفض طلب النقل' });
   } catch (err) {
-    logger.error('transfers reject error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الرفض' });
+    safeError(res, err, 'transfers reject error');
   }
 });
 
@@ -600,8 +576,7 @@ router.get('/bookings', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('bookings list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الحجوزات' });
+    safeError(res, err, 'bookings list error');
   }
 });
 
@@ -630,8 +605,7 @@ router.post('/bookings', async (req, res) => {
     });
     res.status(201).json({ success: true, data: booking, message: 'تم إنشاء الحجز' });
   } catch (err) {
-    logger.error('bookings create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الحجز' });
+    safeError(res, err, 'bookings create error');
   }
 });
 
@@ -646,8 +620,7 @@ router.patch('/bookings/:id/cancel', async (req, res) => {
     if (!booking) return res.status(404).json({ success: false, message: 'الحجز غير موجود' });
     res.json({ success: true, data: booking, message: 'تم إلغاء الحجز' });
   } catch (err) {
-    logger.error('bookings cancel error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الإلغاء' });
+    safeError(res, err, 'bookings cancel error');
   }
 });
 
@@ -673,8 +646,7 @@ router.get('/inventories', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('inventories list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجرد' });
+    safeError(res, err, 'inventories list error');
   }
 });
 
@@ -692,8 +664,7 @@ router.post('/inventories', authorize(['admin', 'manager']), async (req, res) =>
     });
     res.status(201).json({ success: true, data: inventory, message: 'تم إنشاء سجل الجرد' });
   } catch (err) {
-    logger.error('inventories create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الجرد' });
+    safeError(res, err, 'inventories create error');
   }
 });
 
@@ -709,8 +680,7 @@ router.get('/inventories/:id', async (req, res) => {
       .lean();
     res.json({ success: true, data: { ...inventory, items } });
   } catch (err) {
-    logger.error('inventory get error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجرد' });
+    safeError(res, err, 'inventory get error');
   }
 });
 
@@ -736,8 +706,7 @@ router.post('/inventories/:id/items', async (req, res) => {
     });
     res.status(201).json({ success: true, data: item, message: 'تم تسجيل بند الجرد' });
   } catch (err) {
-    logger.error('inventory item create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل بند الجرد' });
+    safeError(res, err, 'inventory item create error');
   }
 });
 
@@ -765,8 +734,7 @@ router.patch('/inventories/:id/complete', authorize(['admin', 'manager']), async
     if (!inventory) return res.status(404).json({ success: false, message: 'الجرد غير موجود' });
     res.json({ success: true, data: inventory, message: 'تم إتمام الجرد' });
   } catch (err) {
-    logger.error('inventory complete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إتمام الجرد' });
+    safeError(res, err, 'inventory complete error');
   }
 });
 
@@ -824,8 +792,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('dashboard error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة التحكم' });
+    safeError(res, err, 'dashboard error');
   }
 });
 

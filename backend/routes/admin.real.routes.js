@@ -6,6 +6,7 @@ const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
 const Notification = require('../models/Notification');
 const systemSettingsService = require('../services/systemSettingsService');
+const safeError = require('../utils/safeError');
 
 // Allowed roles that can be assigned via admin panel
 const ALLOWED_ROLES = [
@@ -37,8 +38,7 @@ router.get('/overview', async (req, res) => {
       data: { totalUsers, activeUsers, recentActivity: recentLogs, systemHealth: 'healthy' },
     });
   } catch (err) {
-    logger.error('Admin overview error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب نظرة عامة' });
+    safeError(res, err, 'Admin overview error');
   }
 });
 
@@ -62,8 +62,7 @@ router.get('/users', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: safeLimit, total } });
   } catch (err) {
-    logger.error('Admin users error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المستخدمين' });
+    safeError(res, err, 'Admin users error');
   }
 });
 
@@ -76,8 +75,7 @@ router.get('/alerts', async (req, res) => {
       .lean();
     res.json({ success: true, data: alerts });
   } catch (err) {
-    logger.error('Admin alerts error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التنبيهات' });
+    safeError(res, err, 'Admin alerts error');
   }
 });
 
@@ -89,8 +87,7 @@ router.get('/settings', async (req, res) => {
     const data = await systemSettingsService.getSettings();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Admin settings error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإعدادات' });
+    safeError(res, err, 'Admin settings error');
   }
 });
 
@@ -100,8 +97,7 @@ router.get('/settings/full', async (req, res) => {
     const data = await systemSettingsService.getSettingsFull();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Admin settings full error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإعدادات الكاملة' });
+    safeError(res, err, 'Admin settings full error');
   }
 });
 
@@ -111,8 +107,7 @@ router.put('/settings', async (req, res) => {
     const data = await systemSettingsService.updateAll(req.body, req.user?.id);
     res.json({ success: true, data, message: 'تم حفظ جميع الإعدادات بنجاح' });
   } catch (err) {
-    logger.error('Admin settings update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حفظ الإعدادات' });
+    safeError(res, err, 'Admin settings update error');
   }
 });
 
@@ -126,8 +121,7 @@ router.put('/settings/:section', async (req, res) => {
     );
     res.json({ success: true, data, message: `تم تحديث قسم ${req.params.section} بنجاح` });
   } catch (err) {
-    logger.error(`Admin settings section update error (${req.params.section}):`, err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث قسم الإعدادات' });
+    safeError(res, err, 'admin.real');
   }
 });
 
@@ -137,8 +131,7 @@ router.post('/settings/reset', async (req, res) => {
     const data = await systemSettingsService.resetAll(req.user?.id);
     res.json({ success: true, data, message: 'تم إعادة تعيين جميع الإعدادات إلى الوضع الافتراضي' });
   } catch (err) {
-    logger.error('Admin settings reset error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إعادة تعيين الإعدادات' });
+    safeError(res, err, 'Admin settings reset error');
   }
 });
 
@@ -148,8 +141,7 @@ router.post('/settings/reset/:section', async (req, res) => {
     const data = await systemSettingsService.resetSection(req.params.section, req.user?.id);
     res.json({ success: true, data, message: `تم إعادة تعيين قسم ${req.params.section}` });
   } catch (err) {
-    logger.error(`Admin settings section reset error (${req.params.section}):`, err);
-    res.status(500).json({ success: false, message: 'خطأ في إعادة تعيين القسم' });
+    safeError(res, err, 'admin.real');
   }
 });
 
@@ -159,8 +151,7 @@ router.post('/settings/export', async (req, res) => {
     const data = await systemSettingsService.exportSettings();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Admin settings export error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تصدير الإعدادات' });
+    safeError(res, err, 'Admin settings export error');
   }
 });
 
@@ -170,8 +161,7 @@ router.post('/settings/import', async (req, res) => {
     const data = await systemSettingsService.importSettings(req.body, req.user?.id);
     res.json({ success: true, data, message: 'تم استيراد الإعدادات بنجاح' });
   } catch (err) {
-    logger.error('Admin settings import error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في استيراد الإعدادات' });
+    safeError(res, err, 'Admin settings import error');
   }
 });
 
@@ -182,8 +172,7 @@ router.get('/settings/history', async (req, res) => {
     const data = await systemSettingsService.getChangeHistory(limit);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Admin settings history error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل التغييرات' });
+    safeError(res, err, 'Admin settings history error');
   }
 });
 
@@ -198,8 +187,7 @@ router.post('/settings/maintenance', async (req, res) => {
       message: enabled ? 'تم تفعيل وضع الصيانة' : 'تم إيقاف وضع الصيانة',
     });
   } catch (err) {
-    logger.error('Admin maintenance toggle error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تبديل وضع الصيانة' });
+    safeError(res, err, 'Admin maintenance toggle error');
   }
 });
 
@@ -209,8 +197,7 @@ router.post('/settings/test-email', async (req, res) => {
     const result = await systemSettingsService.testEmailConfig();
     res.json({ success: result.success, message: result.message });
   } catch (err) {
-    logger.error('Admin test email error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في اختبار البريد الإلكتروني' });
+    safeError(res, err, 'Admin test email error');
   }
 });
 
@@ -220,8 +207,7 @@ router.post('/settings/backup', async (req, res) => {
     const result = await systemSettingsService.triggerBackup(req.user?.id);
     res.json({ success: true, data: result, message: result.message });
   } catch (err) {
-    logger.error('Admin trigger backup error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في بدء النسخ الاحتياطي' });
+    safeError(res, err, 'Admin trigger backup error');
   }
 });
 
@@ -232,8 +218,7 @@ router.get('/reports', async (req, res) => {
     const reports = await Report.find().sort({ createdAt: -1 }).limit(20).lean();
     res.json({ success: true, data: reports });
   } catch (err) {
-    logger.error('Admin reports error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التقارير' });
+    safeError(res, err, 'Admin reports error');
   }
 });
 
@@ -250,8 +235,7 @@ router.get('/audit-logs', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Admin audit-logs error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات التدقيق' });
+    safeError(res, err, 'Admin audit-logs error');
   }
 });
 
@@ -262,8 +246,7 @@ router.get('/clinics', async (req, res) => {
     const clinics = await Branch.find().limit(200).lean();
     res.json({ success: true, data: clinics });
   } catch (err) {
-    logger.error('Admin clinics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العيادات' });
+    safeError(res, err, 'Admin clinics error');
   }
 });
 
@@ -273,8 +256,7 @@ router.get('/notifications', async (req, res) => {
     const data = await Notification.find().sort({ createdAt: -1 }).limit(30).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Admin notifications error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإشعارات' });
+    safeError(res, err, 'Admin notifications error');
   }
 });
 
@@ -302,8 +284,7 @@ router.post('/users', async (req, res) => {
     const safeUser = await User.findById(user._id).select('-password').lean();
     res.status(201).json({ success: true, data: safeUser, message: 'تم إنشاء المستخدم' });
   } catch (err) {
-    logger.error('Admin create user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء المستخدم' });
+    safeError(res, err, 'Admin create user error');
   }
 });
 
@@ -324,8 +305,7 @@ router.put('/users/:id', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
     res.json({ success: true, data: user, message: 'تم تحديث المستخدم' });
   } catch (err) {
-    logger.error('Admin update user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث المستخدم' });
+    safeError(res, err, 'Admin update user error');
   }
 });
 
@@ -341,8 +321,7 @@ router.delete('/users/:id', async (req, res) => {
     logger.info(`User soft-deleted: ${user._id} by ${req.user?._id}`);
     res.json({ success: true, message: 'تم تعطيل المستخدم' });
   } catch (err) {
-    logger.error('Admin delete user error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تعطيل المستخدم' });
+    safeError(res, err, 'Admin delete user error');
   }
 });
 
@@ -359,8 +338,7 @@ router.delete('/payments/:id', async (req, res) => {
     logger.info(`Payment soft-deleted: ${payment._id} by ${req.user?._id}`);
     res.json({ success: true, message: 'تم إلغاء المدفوعة' });
   } catch (err) {
-    logger.error('Admin delete payment error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء المدفوعة' });
+    safeError(res, err, 'Admin delete payment error');
   }
 });
 

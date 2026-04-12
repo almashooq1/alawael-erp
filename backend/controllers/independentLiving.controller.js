@@ -36,11 +36,7 @@ class IndependentLivingController {
           error: safeError(error),
         });
       }
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'independentLiving');
     }
   }
 
@@ -57,12 +53,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error fetching ADL assessments:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب التقييمات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching ADL assessments');
     }
   }
 
@@ -85,12 +76,7 @@ class IndependentLivingController {
         data: assessment,
       });
     } catch (error) {
-      logger.error('Error fetching ADL assessment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching ADL assessment');
     }
   }
 
@@ -114,12 +100,7 @@ class IndependentLivingController {
         data: assessment,
       });
     } catch (error) {
-      logger.error('Error updating ADL assessment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating ADL assessment');
     }
   }
 
@@ -142,12 +123,7 @@ class IndependentLivingController {
         message: 'تم حذف التقييم بنجاح',
       });
     } catch (error) {
-      logger.error('Error deleting ADL assessment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'deleting ADL assessment');
     }
   }
 
@@ -176,12 +152,7 @@ class IndependentLivingController {
         data: assessment,
       });
     } catch (error) {
-      logger.error('Error reviewing ADL assessment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل مراجعة التقييم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'reviewing ADL assessment');
     }
   }
 
@@ -198,12 +169,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error comparing assessments:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل مقارنة التقييمات',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'comparing assessments');
     }
   }
 
@@ -234,11 +200,7 @@ class IndependentLivingController {
           error: safeError(error),
         });
       }
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء خطة التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'independentLiving');
     }
   }
 
@@ -255,12 +217,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error fetching training plans:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب خطط التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching training plans');
     }
   }
 
@@ -283,12 +240,7 @@ class IndependentLivingController {
         data: plan,
       });
     } catch (error) {
-      logger.error('Error fetching training plan:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب خطة التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching training plan');
     }
   }
 
@@ -312,12 +264,7 @@ class IndependentLivingController {
         data: plan,
       });
     } catch (error) {
-      logger.error('Error updating training plan:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث خطة التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating training plan');
     }
   }
 
@@ -340,12 +287,7 @@ class IndependentLivingController {
         message: 'تم حذف خطة التدريب بنجاح',
       });
     } catch (error) {
-      logger.error('Error deleting training plan:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف خطة التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'deleting training plan');
     }
   }
 
@@ -370,12 +312,7 @@ class IndependentLivingController {
         data: plan,
       });
     } catch (error) {
-      logger.error('Error adding training session:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة جلسة التدريب',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'adding training session');
     }
   }
 
@@ -403,12 +340,7 @@ class IndependentLivingController {
         data: plan,
       });
     } catch (error) {
-      logger.error('Error updating training goal:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث الهدف التدريبي',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating training goal');
     }
   }
 
@@ -433,12 +365,7 @@ class IndependentLivingController {
         data: plan,
       });
     } catch (error) {
-      logger.error('Error adding plan review:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة المراجعة',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'adding plan review');
     }
   }
 
@@ -469,11 +396,7 @@ class IndependentLivingController {
           error: safeError(error),
         });
       }
-      res.status(500).json({
-        success: false,
-        message: 'فشل تسجيل التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'independentLiving');
     }
   }
 
@@ -490,12 +413,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error fetching progress records:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب سجلات التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching progress records');
     }
   }
 
@@ -518,12 +436,7 @@ class IndependentLivingController {
         data: progress,
       });
     } catch (error) {
-      logger.error('Error fetching progress record:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب سجل التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching progress record');
     }
   }
 
@@ -547,12 +460,7 @@ class IndependentLivingController {
         data: progress,
       });
     } catch (error) {
-      logger.error('Error updating progress record:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث سجل التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating progress record');
     }
   }
 
@@ -575,12 +483,7 @@ class IndependentLivingController {
         message: 'تم حذف سجل التقدم بنجاح',
       });
     } catch (error) {
-      logger.error('Error deleting progress record:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف سجل التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'deleting progress record');
     }
   }
 
@@ -600,12 +503,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error fetching progress timeline:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب منحنى التقدم',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching progress timeline');
     }
   }
 
@@ -635,11 +533,7 @@ class IndependentLivingController {
           error: safeError(error),
         });
       }
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء برنامج الإسكان',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'independentLiving');
     }
   }
 
@@ -656,12 +550,7 @@ class IndependentLivingController {
         data: result,
       });
     } catch (error) {
-      logger.error('Error fetching housing programs:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب برامج الإسكان',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching housing programs');
     }
   }
 
@@ -684,12 +573,7 @@ class IndependentLivingController {
         data: program,
       });
     } catch (error) {
-      logger.error('Error fetching housing program:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب برنامج الإسكان',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching housing program');
     }
   }
 
@@ -713,12 +597,7 @@ class IndependentLivingController {
         data: program,
       });
     } catch (error) {
-      logger.error('Error updating housing program:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث برنامج الإسكان',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating housing program');
     }
   }
 
@@ -741,12 +620,7 @@ class IndependentLivingController {
         message: 'تم حذف برنامج الإسكان بنجاح',
       });
     } catch (error) {
-      logger.error('Error deleting housing program:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل حذف برنامج الإسكان',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'deleting housing program');
     }
   }
 
@@ -774,12 +648,7 @@ class IndependentLivingController {
         data: program,
       });
     } catch (error) {
-      logger.error('Error adding readiness assessment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة تقييم الجاهزية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'adding readiness assessment');
     }
   }
 
@@ -804,12 +673,7 @@ class IndependentLivingController {
         data: program,
       });
     } catch (error) {
-      logger.error('Error adding home visit:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة الزيارة المنزلية',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'adding home visit');
     }
   }
 
@@ -833,12 +697,7 @@ class IndependentLivingController {
         data: program,
       });
     } catch (error) {
-      logger.error('Error adding satisfaction survey:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تسجيل استبيان الرضا',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'adding satisfaction survey');
     }
   }
 
@@ -859,12 +718,7 @@ class IndependentLivingController {
         data: stats,
       });
     } catch (error) {
-      logger.error('Error fetching dashboard stats:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب إحصائيات النظام',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching dashboard stats');
     }
   }
 
@@ -881,12 +735,7 @@ class IndependentLivingController {
         data: report,
       });
     } catch (error) {
-      logger.error('Error fetching beneficiary report:', error);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب تقرير المستفيد',
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'fetching beneficiary report');
     }
   }
 }

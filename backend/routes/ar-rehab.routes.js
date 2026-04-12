@@ -192,7 +192,7 @@ router.post('/bci/decode', (req, res) => {
     const command = bciReady.decodeBCICommand(req.body.signals);
     res.json({ success: true, data: command });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'ar-rehab');
   }
 });
 
@@ -202,7 +202,7 @@ router.post('/bci/train', (req, res) => {
     const result = bciReady.trainBCIModel(trainingId, req.body);
     res.json({ success: true, data: result });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'ar-rehab');
   }
 });
 
@@ -211,7 +211,7 @@ router.get('/bci/capabilities', (_req, res) => {
     const capabilities = bciReady.getBCICapabilities();
     res.json({ success: true, data: capabilities });
   } catch (error) {
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, 'ar-rehab');
   }
 });
 
@@ -348,8 +348,7 @@ router.get('/dashboard', (_req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[AR-Rehab] Dashboard error:', error.message);
-    res.status(500).json({ success: false, error: safeError(error) });
+    safeError(res, error, '[AR-Rehab] Dashboard error');
   }
 });
 

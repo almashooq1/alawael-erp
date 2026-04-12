@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
 const { Schema } = mongoose;
 
 // ══════════════════════════════════════════════════════════════
@@ -433,7 +434,7 @@ router.post('/mdt/meetings', async (req, res) => {
     await meeting.save();
     res.status(201).json({ success: true, message: 'تم جدولة اجتماع الفريق', data: meeting });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -444,7 +445,7 @@ router.get('/mdt/meetings/beneficiary/:id', async (req, res) => {
     });
     res.json({ success: true, count: meetings.length, data: meetings });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -454,7 +455,7 @@ router.get('/mdt/meetings/:id', async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, data: meeting });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -464,7 +465,7 @@ router.patch('/mdt/meetings/:id', async (req, res) => {
     if (!meeting) return res.status(404).json({ success: false, error: 'الاجتماع غير موجود' });
     res.json({ success: true, message: 'تم تحديث الاجتماع', data: meeting });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -479,7 +480,7 @@ router.post('/mdt/meetings/:id/decisions/:decisionIndex/complete', async (req, r
     }
     res.json({ success: true, message: 'تم تسجيل إنجاز القرار' });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -494,7 +495,7 @@ router.get('/mdt/branch/:branchId/upcoming', async (req, res) => {
       .limit(20);
     res.json({ success: true, count: meetings.length, data: meetings });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -518,7 +519,7 @@ router.post('/transition/plans', async (req, res) => {
     await plan.save();
     res.status(201).json({ success: true, message: 'تم إنشاء خطة الانتقال', data: plan });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -529,7 +530,7 @@ router.get('/transition/plans/beneficiary/:id', async (req, res) => {
     });
     res.json({ success: true, count: plans.length, data: plans });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -540,7 +541,7 @@ router.get('/transition/plans/:id', async (req, res) => {
     const readiness = plan.calculateReadiness();
     res.json({ success: true, readiness_percentage: readiness, data: plan });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -552,7 +553,7 @@ router.patch('/transition/plans/:id', async (req, res) => {
     await plan.save();
     res.json({ success: true, message: 'تم تحديث خطة الانتقال', data: plan });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -573,7 +574,7 @@ router.patch('/transition/plans/:id/readiness/:itemIndex', async (req, res) => {
       message: 'تم تحديث قائمة الجاهزية',
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -587,7 +588,7 @@ router.get('/quality/kpis/:branchId', async (req, res) => {
     const kpi = await KPICalculator.calculateBranchKPIs(req.params.branchId, currentPeriod);
     res.json({ success: true, data: kpi });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -598,7 +599,7 @@ router.get('/quality/kpis/:branchId/history', async (req, res) => {
       .limit(8);
     res.json({ success: true, data: history });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -630,7 +631,7 @@ router.get('/quality/dashboard/network', async (req, res) => {
       data: allKPIs,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 
@@ -648,7 +649,7 @@ router.post('/quality/kpis/:branchId/action-plans', async (req, res) => {
       return res.status(404).json({ success: false, error: 'لا توجد بيانات جودة لهذه الفترة' });
     res.json({ success: true, message: 'تم إضافة خطة التحسين', data: kpi });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'mdt-transition-quality');
   }
 });
 

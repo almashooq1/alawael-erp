@@ -32,8 +32,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('groupProgram list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'groupProgram list error');
   }
 });
 
@@ -48,8 +47,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: program });
   } catch (err) {
-    logger.error('groupProgram get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'groupProgram get error');
   }
 });
 
@@ -100,8 +98,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, message: 'Program deleted' });
   } catch (err) {
-    logger.error('groupProgram delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'groupProgram delete error');
   }
 });
 
@@ -146,8 +143,7 @@ router.delete(
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       res.json({ success: true, data: program });
     } catch (err) {
-      logger.error('groupProgram removeStudent error:', err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'groupProgram removeStudent error');
     }
   }
 );
@@ -180,8 +176,7 @@ router.get('/:id/sessions', requireAuth, async (req, res) => {
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: program.sessions, total: program.sessions.length });
   } catch (err) {
-    logger.error('groupProgram sessions error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'groupProgram sessions error');
   }
 });
 

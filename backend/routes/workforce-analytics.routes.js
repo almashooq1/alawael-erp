@@ -37,8 +37,7 @@ router.get('/health-score', authenticate, async (req, res) => {
     const data = service.getWorkforceHealthScore();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Workforce health-score error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Workforce health-score error');
   }
 });
 
@@ -50,8 +49,7 @@ router.get('/analytics/department/:departmentId', authenticate, async (req, res)
     const data = service.getDepartmentAnalytics(req.params.departmentId);
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Department analytics error:', err.message);
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'Department analytics error');
   }
 });
 
@@ -84,7 +82,7 @@ router.get('/headcount-plans', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.headcountPlans || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'workforce-analytics');
   }
 });
 
@@ -135,7 +133,7 @@ router.get('/forecasts', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.forecasts || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'workforce-analytics');
   }
 });
 
@@ -181,7 +179,7 @@ router.get('/succession-plans', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.successionPlans || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'workforce-analytics');
   }
 });
 
@@ -292,7 +290,7 @@ router.get('/salary-bands', authenticate, async (_req, res) => {
   try {
     res.json({ success: true, data: service.salaryBands || [] });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'workforce-analytics');
   }
 });
 

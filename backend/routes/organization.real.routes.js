@@ -20,6 +20,7 @@ router.get('/structure', async (req, res) => {
     // Try Mongoose org model first
     try {
       const Organization = require('../models/organization.model');
+const safeError = require('../utils/safeError');
       const org = await Organization.findOne().lean();
       if (org) return res.json({ success: true, data: org });
     } catch (_) {
@@ -64,8 +65,7 @@ router.get('/structure', async (req, res) => {
       });
     }
   } catch (err) {
-    logger.error('Organization structure error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الهيكل التنظيمي' });
+    safeError(res, err, 'Organization structure error');
   }
 });
 
@@ -98,8 +98,7 @@ router.get('/departments', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Departments list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأقسام' });
+    safeError(res, err, 'Departments list error');
   }
 });
 
@@ -126,8 +125,7 @@ router.post(
       await dept.save();
       res.status(201).json({ success: true, data: dept, message: 'تم إنشاء القسم بنجاح' });
     } catch (err) {
-      logger.error('Department create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء القسم' });
+      safeError(res, err, 'Department create error');
     }
   }
 );
@@ -152,8 +150,7 @@ router.put(
       if (!dept) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
       res.json({ success: true, data: dept, message: 'تم تحديث القسم بنجاح' });
     } catch (err) {
-      logger.error('Department update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث القسم' });
+      safeError(res, err, 'Department update error');
     }
   }
 );
@@ -173,8 +170,7 @@ router.delete('/departments/:id', authorize(['admin', 'super_admin']), async (re
     if (!dept) return res.status(404).json({ success: false, message: 'القسم غير موجود' });
     res.json({ success: true, message: 'تم حذف القسم بنجاح' });
   } catch (err) {
-    logger.error('Department delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف القسم' });
+    safeError(res, err, 'Department delete error');
   }
 });
 
@@ -208,8 +204,7 @@ router.get('/positions', async (req, res) => {
       pagination: { page: parseInt(page), limit: parseInt(limit), total },
     });
   } catch (err) {
-    logger.error('Positions list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المناصب' });
+    safeError(res, err, 'Positions list error');
   }
 });
 
@@ -238,8 +233,7 @@ router.post(
       await pos.save();
       res.status(201).json({ success: true, data: pos, message: 'تم إنشاء المنصب بنجاح' });
     } catch (err) {
-      logger.error('Position create error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء المنصب' });
+      safeError(res, err, 'Position create error');
     }
   }
 );
@@ -265,8 +259,7 @@ router.put(
       if (!pos) return res.status(404).json({ success: false, message: 'المنصب غير موجود' });
       res.json({ success: true, data: pos, message: 'تم تحديث المنصب بنجاح' });
     } catch (err) {
-      logger.error('Position update error:', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث المنصب' });
+      safeError(res, err, 'Position update error');
     }
   }
 );
@@ -278,8 +271,7 @@ router.delete('/positions/:id', authorize(['admin', 'super_admin']), async (req,
     if (!pos) return res.status(404).json({ success: false, message: 'المنصب غير موجود' });
     res.json({ success: true, message: 'تم حذف المنصب بنجاح' });
   } catch (err) {
-    logger.error('Position delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف المنصب' });
+    safeError(res, err, 'Position delete error');
   }
 });
 

@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const Budget = require('../models/Budget');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -38,8 +39,7 @@ router.get('/stats/overview', async (req, res) => {
       message: 'نظرة عامة على الميزانية',
     });
   } catch (error) {
-    logger.error('Error fetching budget overview:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب النظرة العامة' });
+    safeError(res, error, 'fetching budget overview');
   }
 });
 
@@ -62,8 +62,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة الميزانيات',
     });
   } catch (error) {
-    logger.error('Error fetching budgets:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الميزانيات' });
+    safeError(res, error, 'fetching budgets');
   }
 });
 
@@ -74,8 +73,7 @@ router.get('/:id', async (req, res) => {
     if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
     res.json({ success: true, data: budget, message: 'بيانات الميزانية' });
   } catch (error) {
-    logger.error('Error fetching budget:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الميزانية' });
+    safeError(res, error, 'fetching budget');
   }
 });
 
@@ -102,8 +100,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
     });
     res.status(201).json({ success: true, data: budget, message: 'تم إنشاء الميزانية بنجاح' });
   } catch (error) {
-    logger.error('Error creating budget:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الميزانية' });
+    safeError(res, error, 'creating budget');
   }
 });
 
@@ -119,8 +116,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!budget) return res.status(404).json({ success: false, message: 'الميزانية غير موجودة' });
     res.json({ success: true, data: budget, message: 'تم تحديث الميزانية بنجاح' });
   } catch (error) {
-    logger.error('Error updating budget:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الميزانية' });
+    safeError(res, error, 'updating budget');
   }
 });
 
@@ -159,8 +155,7 @@ router.post('/:id/allocate', authorize(['admin', 'manager']), async (req, res) =
     await budget.save();
     res.json({ success: true, data: budget, message: 'تم تخصيص المبلغ بنجاح' });
   } catch (error) {
-    logger.error('Error allocating funds:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تخصيص المبلغ' });
+    safeError(res, error, 'allocating funds');
   }
 });
 
@@ -185,8 +180,7 @@ router.get('/:id/variance', async (req, res) => {
       message: 'تقرير الانحراف',
     });
   } catch (error) {
-    logger.error('Error fetching variance:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تقرير الانحراف' });
+    safeError(res, error, 'fetching variance');
   }
 });
 

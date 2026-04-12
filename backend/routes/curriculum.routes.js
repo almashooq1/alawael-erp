@@ -72,7 +72,7 @@ router.get('/:id', async (req, res) => {
     if (!curriculum) return res.status(404).json({ success: false, message: 'المنهج غير موجود' });
     res.json({ success: true, data: curriculum });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب المنهج', error: safeError(error) });
+    safeError(res, error, 'curriculum');
   }
 });
 
@@ -123,7 +123,7 @@ router.delete('/:id', async (req, res) => {
     if (!curriculum) return res.status(404).json({ success: false, message: 'المنهج غير موجود' });
     res.json({ success: true, message: 'تم حذف المنهج بنجاح' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف المنهج', error: safeError(error) });
+    safeError(res, error, 'curriculum');
   }
 });
 
@@ -221,7 +221,7 @@ router.get('/:id/progress', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'خطأ في جلب التقدم', error: safeError(error) });
+    safeError(res, error, 'curriculum');
   }
 });
 

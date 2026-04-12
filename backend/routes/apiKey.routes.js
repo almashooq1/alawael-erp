@@ -8,6 +8,7 @@ const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const ApiKey = require('../models/ApiKey');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /** GET /api/api-keys — list all API keys (admin) */
 router.get('/', requireAuth, requireRole(['admin']), async (req, res) => {
@@ -18,8 +19,7 @@ router.get('/', requireAuth, requireRole(['admin']), async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, data: keys, count: keys.length });
   } catch (err) {
-    logger.error('api-keys list error:', err);
-    res.status(500).json({ success: false });
+    safeError(res, err, 'api-keys list error');
   }
 });
 
@@ -30,8 +30,7 @@ router.get('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
     res.json({ success: true, data: key });
   } catch (err) {
-    logger.error('api-key get error:', err);
-    res.status(500).json({ success: false });
+    safeError(res, err, 'api-key get error');
   }
 });
 
@@ -92,8 +91,7 @@ router.put('/:id/revoke', requireAuth, requireRole(['admin']), async (req, res) 
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
     res.json({ success: true, message: 'API key revoked', data: key });
   } catch (err) {
-    logger.error('api-key revoke error:', err);
-    res.status(500).json({ success: false });
+    safeError(res, err, 'api-key revoke error');
   }
 });
 
@@ -104,8 +102,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
     res.json({ success: true, message: 'API key deleted permanently' });
   } catch (err) {
-    logger.error('api-key delete error:', err);
-    res.status(500).json({ success: false });
+    safeError(res, err, 'api-key delete error');
   }
 });
 

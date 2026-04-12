@@ -29,6 +29,7 @@ function safeModel(name) {
 
 // ── Auth middleware ────────────────────────────────────────────────
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 router.use(authenticate);
 
 // ═══════════════════════════════════════════════════════════════════
@@ -98,8 +99,7 @@ router.get('/overview', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI overview error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل النظرة التنفيذية' });
+    safeError(res, err, 'BI overview error');
   }
 });
 
@@ -124,8 +124,7 @@ router.get('/kpis', async (req, res) => {
     const kpis = await calculateDynamicKPIs();
     res.json({ success: true, data: kpis });
   } catch (err) {
-    logger.error('BI KPIs error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل مؤشرات الأداء' });
+    safeError(res, err, 'BI KPIs error');
   }
 });
 
@@ -141,8 +140,7 @@ router.get('/kpis/:code', async (req, res) => {
     }
     res.json({ success: true, data: kpi });
   } catch (err) {
-    logger.error('BI KPI detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل تفاصيل المؤشر' });
+    safeError(res, err, 'BI KPI detail error');
   }
 });
 
@@ -186,8 +184,7 @@ router.post('/kpis', async (req, res) => {
     await kpi.save();
     res.status(201).json({ success: true, data: kpi, message: 'تم إنشاء مؤشر الأداء بنجاح' });
   } catch (err) {
-    logger.error('BI KPI create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء مؤشر الأداء' });
+    safeError(res, err, 'BI KPI create error');
   }
 });
 
@@ -206,8 +203,7 @@ router.put('/kpis/:code', async (req, res) => {
     }
     res.json({ success: true, data: kpi, message: 'تم تحديث مؤشر الأداء بنجاح' });
   } catch (err) {
-    logger.error('BI KPI update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث مؤشر الأداء' });
+    safeError(res, err, 'BI KPI update error');
   }
 });
 
@@ -296,8 +292,7 @@ router.get('/finance/analytics', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI finance analytics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحليلات المالية' });
+    safeError(res, err, 'BI finance analytics error');
   }
 });
 
@@ -340,8 +335,7 @@ router.get('/finance/cashflow', async (req, res) => {
 
     res.json({ success: true, data: { cashflow } });
   } catch (err) {
-    logger.error('BI cashflow error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحليل التدفق النقدي' });
+    safeError(res, err, 'BI cashflow error');
   }
 });
 
@@ -456,8 +450,7 @@ router.get('/hr/analytics', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI HR analytics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحليلات الموارد البشرية' });
+    safeError(res, err, 'BI HR analytics error');
   }
 });
 
@@ -529,8 +522,7 @@ router.get('/operations/analytics', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI operations analytics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحليلات التشغيلية' });
+    safeError(res, err, 'BI operations analytics error');
   }
 });
 
@@ -586,8 +578,7 @@ router.get('/trends', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI trends error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحليل الاتجاهات' });
+    safeError(res, err, 'BI trends error');
   }
 });
 
@@ -617,8 +608,7 @@ router.get('/reports', async (req, res) => {
 
     res.json({ success: true, data: reports });
   } catch (err) {
-    logger.error('BI reports list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل التقارير' });
+    safeError(res, err, 'BI reports list error');
   }
 });
 
@@ -665,8 +655,7 @@ router.post('/reports', async (req, res) => {
       message: 'تم إنشاء التقرير بنجاح',
     });
   } catch (err) {
-    logger.error('BI report create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التقرير' });
+    safeError(res, err, 'BI report create error');
   }
 });
 
@@ -682,8 +671,7 @@ router.get('/reports/:id', async (req, res) => {
     }
     res.json({ success: true, data: report });
   } catch (err) {
-    logger.error('BI report detail error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل التقرير' });
+    safeError(res, err, 'BI report detail error');
   }
 });
 
@@ -717,8 +705,7 @@ router.put('/reports/:id', async (req, res) => {
     }
     res.json({ success: true, data: report, message: 'تم تحديث التقرير بنجاح' });
   } catch (err) {
-    logger.error('BI report update error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التقرير' });
+    safeError(res, err, 'BI report update error');
   }
 });
 
@@ -738,8 +725,7 @@ router.delete('/reports/:id', async (req, res) => {
     }
     res.json({ success: true, message: 'تم أرشفة التقرير بنجاح' });
   } catch (err) {
-    logger.error('BI report delete error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في حذف التقرير' });
+    safeError(res, err, 'BI report delete error');
   }
 });
 
@@ -794,8 +780,7 @@ router.get('/departments/comparison', async (req, res) => {
 
     res.json({ success: true, data: comparison });
   } catch (err) {
-    logger.error('BI department comparison error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في مقارنة الأقسام' });
+    safeError(res, err, 'BI department comparison error');
   }
 });
 
@@ -835,8 +820,7 @@ router.get('/realtime', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('BI realtime error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المقاييس الآنية' });
+    safeError(res, err, 'BI realtime error');
   }
 });
 
@@ -845,7 +829,7 @@ router.get('/realtime', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════
 
 async function aggregateBeneficiaries(startDate, prevStartDate) {
-  const Model = safeModel('BeneficiaryFile');
+  const Model = safeModel('Beneficiary');
   if (!Model) return { total: 0, active: 0, new: 0, trend: 0 };
 
   const [total, active, newCount, prevCount] = await Promise.all([
@@ -1003,7 +987,7 @@ async function getMetricValue(metric, start, end) {
       return result[0]?.total || 0;
     }
     case 'beneficiaries': {
-      const BF = safeModel('BeneficiaryFile');
+      const BF = safeModel('Beneficiary');
       return BF ? BF.countDocuments({ createdAt: dateFilter }) : 0;
     }
     case 'sessions': {
@@ -1041,7 +1025,7 @@ async function calculateDynamicKPIs() {
       category: 'operational',
       unit: 'number',
       currentValue: await (async () => {
-        const M = safeModel('BeneficiaryFile');
+        const M = safeModel('Beneficiary');
         return M ? M.countDocuments() : 0;
       })(),
     },

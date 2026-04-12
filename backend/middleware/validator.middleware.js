@@ -23,7 +23,7 @@ const validateEmployee = (req, res, next) => {
     }
 
     // التحقق من الهاتف
-    if (phone && /^[\d\s\-+()]+$/.test(phone)) {
+    if (phone && !/^[\d\s\-+()]+$/.test(phone)) {
       return res.error('Invalid phone format', 400);
     }
 

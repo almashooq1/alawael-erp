@@ -22,6 +22,7 @@ const crypto = require('crypto');
 /* ─── PDF & QR libs (already in package.json) ────────────────────────────── */
 const { PDFDocument, rgb, StandardFonts } = require('pdf-lib');
 const QRCode = require('qrcode');
+const safeError = require('../utils/safeError');
 
 /* ─── Multer config for document uploads ─────────────────────────────────── */
 const storage = multer.diskStorage({
@@ -113,8 +114,7 @@ router.get('/public/verify/:code', async (req, res) => {
       message: 'رمز التحقق غير صالح',
     });
   } catch (error) {
-    logger.error('Public verify error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
+    safeError(res, error, 'Public verify error');
   }
 });
 
@@ -184,8 +184,7 @@ router.post('/upload-document', upload.single('document'), async (req, res) => {
       message: 'تم رفع المستند بنجاح',
     });
   } catch (error) {
-    logger.error('Document upload error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في رفع المستند' });
+    safeError(res, error, 'Document upload error');
   }
 });
 
@@ -438,8 +437,7 @@ router.post('/generate/:id', async (req, res) => {
       message: 'تم توليد شهادة التوقيع بنجاح',
     });
   } catch (error) {
-    logger.error('PDF generation error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في توليد PDF' });
+    safeError(res, error, 'PDF generation error');
   }
 });
 
@@ -467,8 +465,7 @@ router.get('/download/:id', async (req, res) => {
 
     res.download(filePath, `${doc.requestId}-certificate.pdf`);
   } catch (error) {
-    logger.error('PDF download error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تنزيل PDF' });
+    safeError(res, error, 'PDF download error');
   }
 });
 
@@ -495,8 +492,7 @@ router.get('/stamped/:stampId', async (req, res) => {
 
     res.download(filePath, `${stamp.stampId}-stamped.pdf`);
   } catch (error) {
-    logger.error('Stamped PDF download error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تنزيل المستند المختوم' });
+    safeError(res, error, 'Stamped PDF download error');
   }
 });
 
@@ -666,8 +662,7 @@ router.post('/stamp-pdf/:stampId', upload.single('document'), async (req, res) =
       message: 'تم ختم المستند بنجاح',
     });
   } catch (error) {
-    logger.error('Stamp PDF error:', error);
-    res.status(500).json({ success: false, message: 'خطأ في ختم المستند' });
+    safeError(res, error, 'Stamp PDF error');
   }
 });
 

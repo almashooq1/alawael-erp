@@ -83,8 +83,7 @@ class ICFAssessmentController {
 
       res.json({ success: true, ...result });
     } catch (err) {
-      logger.error('ICF list error:', err.message);
-      res.status(500).json({ success: false, message: 'خطأ في جلب التقييمات', error: safeError(err) });
+      safeError(res, err, 'ICF list error');
     }
   }
 
@@ -186,7 +185,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.getBeneficiaryTimeline(req.params.beneficiaryId);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -226,7 +225,7 @@ class ICFAssessmentController {
       });
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -239,7 +238,7 @@ class ICFAssessmentController {
       const result = await ICFAssessmentService.getDomainDistribution(req.query);
       res.json({ success: true, data: result });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -256,7 +255,7 @@ class ICFAssessmentController {
       const codes = await ICFAssessmentService.searchCodes(req.query);
       res.json({ success: true, data: codes });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -269,7 +268,7 @@ class ICFAssessmentController {
       const tree = await ICFAssessmentService.getCodeTree(req.params.component);
       res.json({ success: true, data: tree });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -286,7 +285,7 @@ class ICFAssessmentController {
       const data = await ICFAssessmentService.listBenchmarks(req.query);
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 
@@ -369,7 +368,7 @@ class ICFAssessmentController {
       const report = await ICFReportService.generateOrganizationReport(req.query);
       res.json({ success: true, data: report });
     } catch (err) {
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'icfAssessment');
     }
   }
 }

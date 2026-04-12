@@ -68,8 +68,7 @@ router.get('/contracts', async (req, res) => {
     ]);
     res.json({ success: true, data: contracts, total });
   } catch (error) {
-    logger.error('[InsuranceClaims] List contracts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود', error: safeError(error) });
+    safeError(res, error, '[InsuranceClaims] List contracts error');
   }
 });
 
@@ -79,8 +78,7 @@ router.get('/contracts/:id', async (req, res) => {
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract });
   } catch (error) {
-    logger.error('[InsuranceClaims] Get contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقد', error: safeError(error) });
+    safeError(res, error, '[InsuranceClaims] Get contract error');
   }
 });
 
@@ -128,8 +126,7 @@ router.delete('/contracts/:id', async (req, res) => {
     await InsuranceContract.findByIdAndUpdate(req.params.id, { isDeleted: true });
     res.json({ success: true, message: 'تم حذف العقد بنجاح' });
   } catch (error) {
-    logger.error('[InsuranceClaims] Delete contract error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف العقد', error: safeError(error) });
+    safeError(res, error, '[InsuranceClaims] Delete contract error');
   }
 });
 
@@ -214,12 +211,7 @@ router.post(
       logger.info(`[InsuranceClaims] Pre-auth created: ${preAuth.preAuthNumber}`);
       res.status(201).json({ success: true, data: preAuth });
     } catch (error) {
-      logger.error('[InsuranceClaims] Create pre-auth error:', { message: error.message });
-      res.status(500).json({
-        success: false,
-        message: 'خطأ في إنشاء الموافقة المسبقة',
-        error: safeError(error),
-      });
+      safeError(res, error, '[InsuranceClaims] Create pre-auth error');
     }
   }
 );
@@ -242,8 +234,7 @@ router.patch('/pre-auth/:id/approve', [mongoId('id'), validate], async (req, res
     logger.info(`[InsuranceClaims] Pre-auth approved: ${preAuth.preAuthNumber}`);
     res.json({ success: true, data: preAuth, message: 'تمت الموافقة بنجاح' });
   } catch (error) {
-    logger.error('[InsuranceClaims] Approve pre-auth error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة', error: safeError(error) });
+    safeError(res, error, '[InsuranceClaims] Approve pre-auth error');
   }
 });
 
@@ -262,8 +253,7 @@ router.patch(
       logger.info(`[InsuranceClaims] Pre-auth denied: ${preAuth.preAuthNumber}`);
       res.json({ success: true, data: preAuth });
     } catch (error) {
-      logger.error('[InsuranceClaims] Deny pre-auth error:', { message: error.message });
-      res.status(500).json({ success: false, message: 'خطأ في الرفض', error: safeError(error) });
+      safeError(res, error, '[InsuranceClaims] Deny pre-auth error');
     }
   }
 );
@@ -538,8 +528,7 @@ router.delete('/claim-items/:id', async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'البند غير موجود' });
     res.json({ success: true, message: 'تم حذف البند بنجاح' });
   } catch (error) {
-    logger.error('[InsuranceClaims] Delete claim item error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف البند', error: safeError(error) });
+    safeError(res, error, '[InsuranceClaims] Delete claim item error');
   }
 });
 

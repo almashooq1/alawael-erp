@@ -22,6 +22,23 @@ jest.mock('../models/user.model');
 
 let service;
 
+// Chainable query helper for Mongoose-like chaining (must be file-scoped)
+const makeChainableQuery = (resolvedValue = []) => {
+  const chain = {
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    skip: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockReturnThis(),
+    populate: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue(resolvedValue),
+    then: function (resolve, reject) {
+      return Promise.resolve(resolvedValue).then(resolve, reject);
+    },
+  };
+  return chain;
+};
+
 const mockAnalyticsData = [
   { userId: 'user-123', value: 80, date: new Date('2026-01-01'), metric: 'performance' },
   { userId: 'user-123', value: 90, date: new Date('2026-01-02'), metric: 'performance' },
@@ -44,8 +61,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 
   // Mock Prediction model methods
-  Prediction.findById = jest.fn();
-  Prediction.find = jest.fn();
+  Prediction.findById = jest.fn().mockReturnValue(makeChainableQuery(null));
+  Prediction.find = jest.fn().mockReturnValue(makeChainableQuery([]));
   Prediction.create = jest.fn();
   Prediction.updateOne = jest.fn();
 
@@ -380,11 +397,13 @@ perfDescribe('🦰 Model Training & Validation', () => {
   });
 
   test('should recommend model updates', async () => {
-    Prediction.find.mockResolvedValue(
-      Array.from({ length: 50 }, () => ({
-        createdAt: new Date(),
-        prediction: { value: 85 },
-      }))
+    Prediction.find.mockReturnValue(
+      makeChainableQuery(
+        Array.from({ length: 50 }, () => ({
+          createdAt: new Date(),
+          prediction: { value: 85 },
+        }))
+      )
     );
 
     const result = await service.recommendModelUpdate();
@@ -630,12 +649,19 @@ perfDescribe('🔥 Edge Cases & Error Handling', () => {
 
   test('should timeout long-running predictions', async () => {
     Analytics.find.mockImplementation(
-      () => new Promise(resolve => setTimeout(() => { resolve(mockAnalyticsData); }, 15000))
+      () =>
+        new Promise(resolve =>
+          setTimeout(() => {
+            resolve(mockAnalyticsData);
+          }, 15000)
+        )
     );
 
     const result = await Promise.race([
       service.predictPerformance('user-123'),
-      new Promise((_, reject) => { setTimeout(() => reject(new Error('Timeout')), 10000); }),
+      new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Timeout')), 10000);
+      }),
     ]).catch(e => ({ error: e.message }));
 
     expect(result.error).toBe('Timeout');

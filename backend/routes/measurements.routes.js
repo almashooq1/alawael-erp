@@ -61,7 +61,7 @@ router.get('/types', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -110,7 +110,7 @@ router.get('/masters', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -149,7 +149,7 @@ router.get('/masters/:id', async (req, res) => {
       data: master,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -191,7 +191,7 @@ router.get('/results/:beneficiaryId', async (req, res) => {
       data: results,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -211,7 +211,7 @@ router.get('/results/:beneficiaryId/compare/:typeId', async (req, res) => {
       data: comparison,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -240,7 +240,7 @@ router.put('/results/:resultId/approve', async (req, res) => {
       data: updated,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -289,7 +289,7 @@ router.get('/:beneficiaryId', async (req, res) => {
       data: plan,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -336,7 +336,7 @@ router.put('/:planId/approve', async (req, res) => {
       data: updated,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -359,7 +359,7 @@ router.get('/categories', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -387,7 +387,7 @@ router.get('/programs', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -410,7 +410,7 @@ router.get('/programs/:programId', async (req, res) => {
       data: program,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -458,7 +458,7 @@ router.get('/sessions/:beneficiaryId/:programId', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -479,7 +479,7 @@ router.get('/reports/:beneficiaryId/comprehensive', async (req, res) => {
       data: report,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -497,7 +497,7 @@ router.get('/programs/effectiveness/:progressId', async (req, res) => {
       data: effectiveness,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -523,7 +523,7 @@ router.get('/active/:beneficiaryId', async (req, res) => {
       ...meta,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -592,7 +592,7 @@ router.get('/dashboard', async (req, res) => {
 
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -611,7 +611,7 @@ router.get('/trend/:beneficiaryId/:typeId', async (req, res) => {
 
     res.json({ success: true, data: trend });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -627,7 +627,7 @@ router.get('/quick-assessment/stats/:beneficiaryId', async (req, res) => {
 
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -671,7 +671,7 @@ router.delete('/types/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم إلغاء تفعيل نوع المقياس' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -715,7 +715,7 @@ router.delete('/masters/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم إلغاء تفعيل المقياس' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 
@@ -778,7 +778,7 @@ router.get('/rehab-plan/:beneficiaryId/progress', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'measurements');
   }
 });
 

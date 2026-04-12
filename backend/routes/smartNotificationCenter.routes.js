@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const SmartNotification = require('../models/SmartNotification');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -25,8 +26,7 @@ router.get('/', async (req, res) => {
     const unreadCount = await SmartNotification.countDocuments({ recipient: req.user.id, isRead: false });
     res.json({ success: true, data, unreadCount, pagination: { page: +page, limit: +limit, total }, message: 'قائمة الإشعارات' });
   } catch (error) {
-    logger.error('Error fetching notifications:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإشعارات' });
+    safeError(res, error, 'fetching notifications');
   }
 });
 
@@ -41,8 +41,7 @@ router.put('/:id/read', async (req, res) => {
     if (!notif) return res.status(404).json({ success: false, message: 'الإشعار غير موجود' });
     res.json({ success: true, data: notif, message: 'تم تحديد الإشعار كمقروء' });
   } catch (error) {
-    logger.error('Error marking notification read:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الإشعار' });
+    safeError(res, error, 'marking notification read');
   }
 });
 
@@ -55,8 +54,7 @@ router.put('/read-all', async (req, res) => {
     );
     res.json({ success: true, data: { modifiedCount: result.modifiedCount }, message: 'تم تحديد جميع الإشعارات كمقروءة' });
   } catch (error) {
-    logger.error('Error marking all read:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الإشعارات' });
+    safeError(res, error, 'marking all read');
   }
 });
 
@@ -67,8 +65,7 @@ router.delete('/:id', async (req, res) => {
     if (!notif) return res.status(404).json({ success: false, message: 'الإشعار غير موجود' });
     res.json({ success: true, message: 'تم حذف الإشعار' });
   } catch (error) {
-    logger.error('Error deleting notification:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف الإشعار' });
+    safeError(res, error, 'deleting notification');
   }
 });
 
@@ -81,8 +78,7 @@ router.get('/preferences', async (req, res) => {
       message: 'تفضيلات الإشعارات',
     });
   } catch (error) {
-    logger.error('Error fetching preferences:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التفضيلات' });
+    safeError(res, error, 'fetching preferences');
   }
 });
 
@@ -91,8 +87,7 @@ router.put('/preferences', async (req, res) => {
   try {
     res.json({ success: true, data: req.body, message: 'تم تحديث التفضيلات' });
   } catch (error) {
-    logger.error('Error updating preferences:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التفضيلات' });
+    safeError(res, error, 'updating preferences');
   }
 });
 
@@ -110,8 +105,7 @@ router.post('/send', authorize(['admin', 'manager']), async (req, res) => {
     });
     res.status(201).json({ success: true, data: notif, message: 'تم إرسال الإشعار' });
   } catch (error) {
-    logger.error('Error sending notification:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال الإشعار' });
+    safeError(res, error, 'sending notification');
   }
 });
 
@@ -128,8 +122,7 @@ router.get('/templates', async (req, res) => {
       message: 'قوالب الإشعارات',
     });
   } catch (error) {
-    logger.error('Error fetching templates:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, error, 'fetching templates');
   }
 });
 

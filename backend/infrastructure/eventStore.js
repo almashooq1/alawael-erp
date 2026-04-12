@@ -16,6 +16,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // ─── Event Schema ────────────────────────────────────────────────────────────
 
@@ -423,7 +424,7 @@ function mountEventStoreRoutes(app) {
       });
       res.json({ success: true, events, count: events.length });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'eventStore');
     }
   });
 
@@ -440,7 +441,7 @@ function mountEventStoreRoutes(app) {
       });
       res.json({ success: true, events, count: events.length });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'eventStore');
     }
   });
 
@@ -450,7 +451,7 @@ function mountEventStoreRoutes(app) {
       const stats = await eventStore.getStats();
       res.json({ success: true, ...stats });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'eventStore');
     }
   });
 

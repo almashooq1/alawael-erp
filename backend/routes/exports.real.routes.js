@@ -8,6 +8,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const importExportService = require('../services/importExportPro.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -60,8 +61,7 @@ router.get('/:format', async (req, res) => {
     res.setHeader('Content-Length', result.buffer.length);
     return res.send(result.buffer);
   } catch (err) {
-    logger.error('Export format error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في التصدير' });
+    safeError(res, err, 'Export format error');
   }
 });
 

@@ -11,6 +11,7 @@ const {
   nationalAddressConfig,
   AIRouteOptimizer,
 } = require('./rehabilitation-transport-service');
+const safeError = require('../utils/safeError');
 
 // ============ Configuration ============
 
@@ -37,7 +38,7 @@ router.get('/statistics/:centerId', async (req, res) => {
     const stats = await rehabilitationTransportService.getTransportStatistics(req.params.centerId);
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -48,7 +49,7 @@ router.get('/branches/center/:centerId', async (req, res) => {
     const branches = await rehabilitationTransportService.getBranchesByCenter(req.params.centerId);
     res.json({ success: true, data: branches, count: branches.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -58,7 +59,7 @@ router.get('/branches/:branchId', async (req, res) => {
     if (!branch) return res.status(404).json({ success: false, error: 'Branch not found' });
     res.json({ success: true, data: branch });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -70,7 +71,7 @@ router.post('/branches', async (req, res) => {
     });
     res.status(201).json({ success: true, data: branch, message: 'تم إضافة الفرع' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -83,7 +84,7 @@ router.get('/beneficiaries/center/:centerId', async (req, res) => {
     );
     res.json({ success: true, data: beneficiaries, count: beneficiaries.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -96,7 +97,7 @@ router.get('/beneficiaries/branch/:branchId', async (req, res) => {
     );
     res.json({ success: true, data: beneficiaries, count: beneficiaries.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -109,7 +110,7 @@ router.get('/beneficiaries/:beneficiaryId', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Beneficiary not found' });
     res.json({ success: true, data: beneficiary });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -121,7 +122,7 @@ router.post('/beneficiaries', async (req, res) => {
     });
     res.status(201).json({ success: true, data: beneficiary, message: 'تم تسجيل المستفيد' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -137,7 +138,7 @@ router.post('/routes/optimize/:branchId/:shiftType', async (req, res) => {
       message: 'تم تحسين المسار بالذكاء الاصطناعي',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -146,7 +147,7 @@ router.get('/routes/branch/:branchId', async (req, res) => {
     const routes = await rehabilitationTransportService.getBranchRoutes(req.params.branchId);
     res.json({ success: true, data: routes, count: routes.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -155,7 +156,7 @@ router.get('/routes/today/:centerId', async (req, res) => {
     const routes = await rehabilitationTransportService.getTodayRoutes(req.params.centerId);
     res.json({ success: true, data: routes, count: routes.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -174,7 +175,7 @@ router.post('/routes/preview', async (req, res) => {
       message: 'معاينة المسار المحسن',
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -199,7 +200,7 @@ router.get('/beneficiaries/nearby', async (req, res) => {
 
     res.json({ success: true, data: beneficiaries, count: beneficiaries.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 
@@ -218,7 +219,7 @@ router.post('/cluster', async (req, res) => {
       message: `تم تقسيم المستفيدين إلى ${clusters.length} مجموعات`,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'rehabilitation-transport');
   }
 });
 

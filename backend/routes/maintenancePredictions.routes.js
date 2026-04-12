@@ -34,8 +34,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('maintenancePrediction list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenancePrediction list error');
   }
 });
 
@@ -62,8 +61,7 @@ router.get('/dashboard', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: { byStatus, byRisk, byUrgency, upcoming } });
   } catch (err) {
-    logger.error('maintenancePrediction dashboard error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenancePrediction dashboard error');
   }
 });
 
@@ -77,8 +75,7 @@ router.get('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Prediction not found' });
     res.json({ success: true, data: prediction });
   } catch (err) {
-    logger.error('maintenancePrediction get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenancePrediction get error');
   }
 });
 
@@ -126,8 +123,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
       return res.status(404).json({ success: false, message: 'Prediction not found' });
     res.json({ success: true, message: 'Prediction deleted' });
   } catch (err) {
-    logger.error('maintenancePrediction delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenancePrediction delete error');
   }
 });
 

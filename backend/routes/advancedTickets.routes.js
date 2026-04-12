@@ -8,6 +8,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const AdvancedTicket = require('../models/AdvancedTicket');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -23,8 +24,7 @@ router.get('/stats/sla', async (req, res) => {
     byPriority.forEach((p) => { stats.byPriority[p._id] = p.count; });
     res.json({ success: true, data: stats, message: 'إحصائيات SLA' });
   } catch (error) {
-    logger.error('Error fetching SLA stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إحصائيات SLA' });
+    safeError(res, error, 'fetching SLA stats');
   }
 });
 
@@ -44,8 +44,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total }, message: 'قائمة التذاكر' });
   } catch (error) {
-    logger.error('Error fetching tickets:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذاكر' });
+    safeError(res, error, 'fetching tickets');
   }
 });
 
@@ -56,8 +55,7 @@ router.get('/:id', async (req, res) => {
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'بيانات التذكرة' });
   } catch (error) {
-    logger.error('Error fetching ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التذكرة' });
+    safeError(res, error, 'fetching ticket');
   }
 });
 
@@ -79,8 +77,7 @@ router.post('/', async (req, res) => {
     });
     res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
   } catch (error) {
-    logger.error('Error creating ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التذكرة' });
+    safeError(res, error, 'creating ticket');
   }
 });
 
@@ -95,8 +92,7 @@ router.put('/:id', async (req, res) => {
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'تم تحديث التذكرة بنجاح' });
   } catch (error) {
-    logger.error('Error updating ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التذكرة' });
+    safeError(res, error, 'updating ticket');
   }
 });
 
@@ -116,8 +112,7 @@ router.post('/:id/escalate', authorize(['admin', 'manager']), async (req, res) =
     await ticket.save();
     res.json({ success: true, data: ticket, message: 'تم تصعيد التذكرة' });
   } catch (error) {
-    logger.error('Error escalating ticket:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تصعيد التذكرة' });
+    safeError(res, error, 'escalating ticket');
   }
 });
 
@@ -139,8 +134,7 @@ router.post('/:id/comments', async (req, res) => {
     await ticket.save();
     res.status(201).json({ success: true, data: ticket, message: 'تم إضافة التعليق' });
   } catch (error) {
-    logger.error('Error adding comment:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التعليق' });
+    safeError(res, error, 'adding comment');
   }
 });
 

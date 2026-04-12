@@ -4,6 +4,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { _validateRequest } = require('../middleware/validation');
 const { DisabilityRehabilitationService } = require('../services/disabilityRehabilitationService');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const disabilityService = new DisabilityRehabilitationService();
@@ -38,11 +39,7 @@ router.get(
         data: programs,
       });
     } catch (error) {
-      logger.error('Error fetching programs:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch programs',
-      });
+      safeError(res, error, 'fetching programs');
     }
   }
 );
@@ -80,11 +77,7 @@ router.post(
         data: program,
       });
     } catch (error) {
-      logger.error('Error creating program:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create program',
-      });
+      safeError(res, error, 'creating program');
     }
   }
 );
@@ -112,11 +105,7 @@ router.get(
         data: program,
       });
     } catch (error) {
-      logger.error('Error fetching program:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch program',
-      });
+      safeError(res, error, 'fetching program');
     }
   }
 );
@@ -145,11 +134,7 @@ router.put(
         data: program,
       });
     } catch (error) {
-      logger.error('Error updating program:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to update program',
-      });
+      safeError(res, error, 'updating program');
     }
   }
 );
@@ -178,11 +163,7 @@ router.delete(
         message: 'Program deleted successfully',
       });
     } catch (error) {
-      logger.error('Error deleting program:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to delete program',
-      });
+      safeError(res, error, 'deleting program');
     }
   }
 );
@@ -220,11 +201,7 @@ router.post(
         data: session,
       });
     } catch (error) {
-      logger.error('Error creating session:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create session',
-      });
+      safeError(res, error, 'creating session');
     }
   }
 );
@@ -246,11 +223,7 @@ router.get(
         data: sessions,
       });
     } catch (error) {
-      logger.error('Error fetching sessions:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch sessions',
-      });
+      safeError(res, error, 'fetching sessions');
     }
   }
 );
@@ -278,11 +251,7 @@ router.get(
         data: session,
       });
     } catch (error) {
-      logger.error('Error fetching session:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch session',
-      });
+      safeError(res, error, 'fetching session');
     }
   }
 );
@@ -311,11 +280,7 @@ router.put(
         data: session,
       });
     } catch (error) {
-      logger.error('Error updating session:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to update session',
-      });
+      safeError(res, error, 'updating session');
     }
   }
 );
@@ -353,11 +318,7 @@ router.post(
         data: goal,
       });
     } catch (error) {
-      logger.error('Error creating goal:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create goal',
-      });
+      safeError(res, error, 'creating goal');
     }
   }
 );
@@ -385,11 +346,7 @@ router.get(
         data: goal,
       });
     } catch (error) {
-      logger.error('Error fetching goal:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch goal',
-      });
+      safeError(res, error, 'fetching goal');
     }
   }
 );
@@ -427,11 +384,7 @@ router.post(
         data: assessment,
       });
     } catch (error) {
-      logger.error('Error creating assessment:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to create assessment',
-      });
+      safeError(res, error, 'creating assessment');
     }
   }
 );
@@ -459,11 +412,7 @@ router.get(
         data: assessment,
       });
     } catch (error) {
-      logger.error('Error fetching assessment:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch assessment',
-      });
+      safeError(res, error, 'fetching assessment');
     }
   }
 );
@@ -493,23 +442,13 @@ router.get(
         data: performance,
       });
     } catch (error) {
-      logger.error('Error fetching performance:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ في الخادم' || 'Failed to fetch performance data',
-      });
+      safeError(res, error, 'fetching performance');
     }
   }
 );
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  logger.error('Router error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'An unexpected error occurred',
-    message: 'حدث خطأ في الخادم',
-  });
-});
+  safeError(res, error, 'Router error');
 
 module.exports = router;

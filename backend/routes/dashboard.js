@@ -9,6 +9,7 @@ const router = express.Router();
 const systemDashboard = require('../services/systemDashboard');
 const responseFormatter = require('../services/responseFormatter');
 const { requireAdmin, optionalAuth } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 /**
  * GET /api/dashboard/health
@@ -19,7 +20,7 @@ router.get('/health', optionalAuth, (_req, res) => {
     const health = systemDashboard.getSystemHealth();
     res.json(responseFormatter.success(health, 'System health status'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Health check failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -32,7 +33,7 @@ router.get('/summary', optionalAuth, (_req, res) => {
     const summary = systemDashboard.getDashboardSummary();
     res.json(responseFormatter.success(summary, 'Dashboard summary'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Summary retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -45,7 +46,7 @@ router.get('/services', optionalAuth, (_req, res) => {
     const health = systemDashboard.getSystemHealth();
     res.json(responseFormatter.list(health.services, 'Services status'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Services retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -64,7 +65,7 @@ router.get('/services/:name', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success(status, `Service ${name} status`));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Service check failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -77,7 +78,7 @@ router.get('/integrations', optionalAuth, (req, res) => {
     const health = systemDashboard.getSystemHealth();
     res.json(responseFormatter.success(health.integrations, 'Integrations status'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Integrations retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -90,7 +91,7 @@ router.get('/performance', optionalAuth, (req, res) => {
     const health = systemDashboard.getSystemHealth();
     res.json(responseFormatter.analytics(health.performance, 'current', 'Performance metrics'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Performance metrics failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -103,7 +104,7 @@ router.get('/alerts', requireAdmin, (req, res) => {
     const summary = systemDashboard.getDashboardSummary();
     res.json(responseFormatter.list(summary.recentAlerts, 'Recent alerts'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Alerts retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -116,7 +117,7 @@ router.get('/events', requireAdmin, (req, res) => {
     const summary = systemDashboard.getDashboardSummary();
     res.json(responseFormatter.list(summary.recentEvents, 'Recent events'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Events retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -137,7 +138,7 @@ router.post('/alert', requireAdmin, (req, res) => {
     const alert = systemDashboard.addAlert(severity, message, details);
     res.status(201).json(responseFormatter.created(alert, 'Alert created'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Alert creation failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -152,7 +153,7 @@ router.get('/export', requireAdmin, (req, res) => {
     res.setHeader('Content-Disposition', 'attachment; filename=metrics.json');
     res.json(metrics);
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Export failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -171,7 +172,7 @@ router.get('/config', requireAdmin, (req, res) => {
     };
     res.json(responseFormatter.success(sanitized, 'System configuration'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('Config retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 
@@ -194,7 +195,7 @@ router.get('/kpis', optionalAuth, (req, res) => {
 
     res.json(responseFormatter.success(kpis, 'KPI Metrics'));
   } catch (error) {
-    res.status(500).json(responseFormatter.serverError('KPI retrieval failed', error));
+    safeError(res, error, 'dashboard');
   }
 });
 

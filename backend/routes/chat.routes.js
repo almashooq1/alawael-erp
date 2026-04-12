@@ -25,6 +25,7 @@ const _logger = require('../utils/logger');
 
 // ── Service ──
 const chat = require('../services/chat.service');
+const safeError = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -63,7 +64,7 @@ router.get('/users', authenticate, async (req, res) => {
     const data = chat.getUsers(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false });
+    safeError(res, err, 'chat');
   }
 });
 
@@ -72,7 +73,7 @@ router.get('/users/online', authenticate, async (req, res) => {
     const data = chat.getOnlineUsers();
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false });
+    safeError(res, err, 'chat');
   }
 });
 
@@ -115,7 +116,7 @@ router.get('/conversations', authenticate, async (req, res) => {
     const data = chat.getConversations(getUserId(req));
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false });
+    safeError(res, err, 'chat');
   }
 });
 
@@ -396,7 +397,7 @@ router.get('/unread', authenticate, async (req, res) => {
     const data = chat.getUnreadCount(getUserId(req));
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false });
+    safeError(res, err, 'chat');
   }
 });
 
@@ -539,7 +540,7 @@ router.get(
       const data = chat.getTypingUsers(req.params.id, getUserId(req));
       res.json({ success: true, data });
     } catch (err) {
-      res.status(500).json({ success: false });
+      safeError(res, err, 'chat');
     }
   }
 );
@@ -553,7 +554,7 @@ router.get('/blocked', authenticate, async (req, res) => {
     const data = chat.getBlockedUsers(getUserId(req));
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false });
+    safeError(res, err, 'chat');
   }
 });
 

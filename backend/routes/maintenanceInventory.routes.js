@@ -38,8 +38,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('maintenanceInventory list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceInventory list error');
   }
 });
 
@@ -65,8 +64,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data: { summary: stats[0] || {}, categoryBreakdown } });
   } catch (err) {
-    logger.error('maintenanceInventory stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceInventory stats error');
   }
 });
 
@@ -80,8 +78,7 @@ router.get('/low-stock', requireAuth, async (req, res) => {
       .sort({ currentStock: 1 });
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('maintenanceInventory lowStock error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceInventory lowStock error');
   }
 });
 
@@ -96,8 +93,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
     res.json({ success: true, data: item });
   } catch (err) {
-    logger.error('maintenanceInventory get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceInventory get error');
   }
 });
 
@@ -146,8 +142,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
     res.json({ success: true, message: 'Item deleted' });
   } catch (err) {
-    logger.error('maintenanceInventory delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'maintenanceInventory delete error');
   }
 });
 

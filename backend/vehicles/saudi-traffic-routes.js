@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { saudiTrafficService, trafficConfig } = require('./saudi-traffic-service');
+const safeError = require('../utils/safeError');
 
 // ============ Configuration ============
 
@@ -29,7 +30,7 @@ router.get('/statistics', async (req, res) => {
     const stats = await saudiTrafficService.getTrafficStatistics(req.user?.tenantId);
     res.json({ success: true, data: stats });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -48,7 +49,7 @@ router.get('/licenses', async (req, res) => {
 
     res.json({ success: true, data: licenses, count: licenses.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -58,7 +59,7 @@ router.get('/licenses/expiring', async (req, res) => {
     const licenses = await saudiTrafficService.getExpiringLicenses(days);
     res.json({ success: true, data: licenses, count: licenses.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -68,7 +69,7 @@ router.get('/licenses/national-id/:nationalId', async (req, res) => {
     if (!license) return res.status(404).json({ success: false, error: 'License not found' });
     res.json({ success: true, data: license });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -78,7 +79,7 @@ router.get('/licenses/:id', async (req, res) => {
     if (!license) return res.status(404).json({ success: false, error: 'License not found' });
     res.json({ success: true, data: license });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -90,7 +91,7 @@ router.post('/licenses', async (req, res) => {
     });
     res.status(201).json({ success: true, data: license, message: 'تم إصدار الرخصة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -99,7 +100,7 @@ router.put('/licenses/:id/renew', async (req, res) => {
     const license = await saudiTrafficService.renewLicense(req.params.id, req.body);
     res.json({ success: true, data: license, message: 'تم تجديد الرخصة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -118,7 +119,7 @@ router.get('/violations', async (req, res) => {
 
     res.json({ success: true, data: violations, count: violations.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -127,7 +128,7 @@ router.get('/violations/driver/:nationalId', async (req, res) => {
     const violations = await saudiTrafficService.getViolationsByDriver(req.params.nationalId);
     res.json({ success: true, data: violations, count: violations.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -139,7 +140,7 @@ router.get('/violations/vehicle/:plateNumber/:plateLetters', async (req, res) =>
     );
     res.json({ success: true, data: violations, count: violations.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -151,7 +152,7 @@ router.get('/violations/:violationId', async (req, res) => {
     if (!violation) return res.status(404).json({ success: false, error: 'Violation not found' });
     res.json({ success: true, data: violation });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -163,7 +164,7 @@ router.post('/violations', async (req, res) => {
     });
     res.status(201).json({ success: true, data: violation, message: 'تم تسجيل المخالفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -172,7 +173,7 @@ router.put('/violations/:violationId/pay', async (req, res) => {
     const violation = await saudiTrafficService.payViolation(req.params.violationId, req.body);
     res.json({ success: true, data: violation, message: 'تم سداد المخالفة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -181,7 +182,7 @@ router.put('/violations/:violationId/dispute', async (req, res) => {
     const violation = await saudiTrafficService.submitDispute(req.params.violationId, req.body);
     res.json({ success: true, data: violation, message: 'تم تقديم الاعتراض' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -200,7 +201,7 @@ router.get('/accidents', async (req, res) => {
 
     res.json({ success: true, data: accidents, count: accidents.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -209,7 +210,7 @@ router.get('/accidents/vehicle/:plateNumber', async (req, res) => {
     const accidents = await saudiTrafficService.getAccidentsByVehicle(req.params.plateNumber);
     res.json({ success: true, data: accidents, count: accidents.length });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -219,7 +220,7 @@ router.get('/accidents/:accidentId', async (req, res) => {
     if (!accident) return res.status(404).json({ success: false, error: 'Accident not found' });
     res.json({ success: true, data: accident });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -231,7 +232,7 @@ router.post('/accidents', async (req, res) => {
     });
     res.status(201).json({ success: true, data: accident, message: 'تم تسجيل الحادث' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 
@@ -245,7 +246,7 @@ router.put('/accidents/:accidentId/status', async (req, res) => {
     );
     res.json({ success: true, data: accident, message: 'تم تحديث الحالة' });
   } catch (error) {
-    res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+    safeError(res, error, 'saudi-traffic');
   }
 });
 

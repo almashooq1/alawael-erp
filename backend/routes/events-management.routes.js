@@ -46,7 +46,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -69,7 +69,7 @@ router.get('/', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -79,7 +79,7 @@ router.post('/', authenticate, async (req, res) => {
     const doc = await Ev.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -90,7 +90,7 @@ router.put('/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الفعالية غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -100,7 +100,7 @@ router.delete('/:id', authenticate, async (req, res) => {
     await Ev.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -111,7 +111,7 @@ router.get('/:eventId/registrations', authenticate, async (req, res) => {
     const docs = await Reg.find({ event: req.params.eventId }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 
@@ -121,7 +121,7 @@ router.post('/:eventId/registrations', authenticate, async (req, res) => {
     const doc = await Reg.create({ ...req.body, event: req.params.eventId });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'events-management');
   }
 });
 

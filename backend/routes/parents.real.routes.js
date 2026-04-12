@@ -12,8 +12,7 @@ router.get('/:parentId/dashboard', async (req, res) => {
     const parent = await Guardian.findById(req.params.parentId).lean();
     res.json({ success: true, data: { parent, children: [], recentActivity: [] } });
   } catch (err) {
-    logger.error('Parent dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في لوحة تحكم ولي الأمر' });
+    safeError(res, err, 'Parent dashboard error');
   }
 });
 
@@ -44,6 +43,7 @@ router.get('/attendance', async (req, res) => {
 router.get('/payments', async (req, res) => {
   try {
     const PortalPayment = require('../models/PortalPayment');
+const safeError = require('../utils/safeError');
     const data = await PortalPayment.find({ guardianId: req.user?.id }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: data || [] });
   } catch (err) {

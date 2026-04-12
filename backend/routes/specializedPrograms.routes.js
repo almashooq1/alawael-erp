@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -21,8 +22,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة البرامج المتخصصة',
     });
   } catch (error) {
-    logger.error('Error fetching specialized programs:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب البرامج' });
+    safeError(res, error, 'fetching specialized programs');
   }
 });
 
@@ -35,8 +35,7 @@ router.get('/:id', async (req, res) => {
       message: 'بيانات البرنامج',
     });
   } catch (error) {
-    logger.error('Error fetching program:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب البرنامج' });
+    safeError(res, error, 'fetching program');
   }
 });
 
@@ -63,8 +62,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم إنشاء البرنامج بنجاح',
     });
   } catch (error) {
-    logger.error('Error creating program:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء البرنامج' });
+    safeError(res, error, 'creating program');
   }
 });
 
@@ -77,8 +75,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم تحديث البرنامج بنجاح',
     });
   } catch (error) {
-    logger.error('Error updating program:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث البرنامج' });
+    safeError(res, error, 'updating program');
   }
 });
 
@@ -87,8 +84,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
   try {
     res.json({ success: true, message: 'تم حذف البرنامج بنجاح' });
   } catch (error) {
-    logger.error('Error deleting program:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف البرنامج' });
+    safeError(res, error, 'deleting program');
   }
 });
 

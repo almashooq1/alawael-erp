@@ -12,8 +12,7 @@ router.get('/predictions/:userId', async (req, res) => {
     const data = await Prediction.find({ userId: req.params.userId }).sort({ createdAt: -1 }).limit(10).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('AI predictions error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التوقعات' });
+    safeError(res, err, 'AI predictions error');
   }
 });
 
@@ -21,11 +20,11 @@ router.get('/predictions/:userId', async (req, res) => {
 router.get('/recommendations/:userId', async (req, res) => {
   try {
     const Prediction = require('../models/prediction.model');
+const safeError = require('../utils/safeError');
     const data = await Prediction.find({ userId: req.params.userId, type: 'recommendation' }).sort({ createdAt: -1 }).limit(10).lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('AI recommendations error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التوصيات' });
+    safeError(res, err, 'AI recommendations error');
   }
 });
 

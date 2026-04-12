@@ -37,6 +37,7 @@ const {
   ProjectTask,
   ProjectTimeLog,
 } = require('../models/EnterprisePro');
+const safeError = require('../utils/safeError');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -228,8 +229,7 @@ router.get('/audit-hub/trail', authenticateToken, async (req, res) => {
     ]);
     res.json({ entries, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -242,8 +242,7 @@ router.get('/audit-hub/trail/:id', authenticateToken, async (req, res) => {
     if (!entry) return res.status(404).json({ error: 'Not found' });
     res.json(entry);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -258,8 +257,7 @@ router.get('/audit-hub/trail/entity/:type/:id', authenticateToken, async (req, r
       .populate('performedBy', 'name email');
     res.json(entries);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -281,8 +279,7 @@ router.get('/audit-hub/stats', authenticateToken, async (req, res) => {
     ]);
     res.json({ byModule, byAction, bySeverity, recentCount });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -291,8 +288,7 @@ router.get('/audit-hub/modules', authenticateToken, async (_req, res) => {
     const modules = await AuditTrailEntry.distinct('module');
     res.json(modules);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -309,8 +305,7 @@ router.get('/audit-hub/checklists', authenticateToken, async (req, res) => {
       .lean();
     res.json(lists);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -324,8 +319,7 @@ router.get('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
     if (!cl) return res.status(404).json({ error: 'Not found' });
     res.json(cl);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -337,8 +331,7 @@ router.post('/audit-hub/checklists', authenticateToken, async (req, res) => {
     });
     res.status(201).json(cl);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -354,8 +347,7 @@ router.put('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
     const cl = await ComplianceChecklist.findByIdAndUpdate(req.params.id, data, { new: true });
     res.json(cl);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -364,8 +356,7 @@ router.delete('/audit-hub/checklists/:id', authenticateToken, async (req, res) =
     await ComplianceChecklist.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -407,8 +398,7 @@ router.get('/audit-hub/compliance-dashboard', authenticateToken, async (_req, re
       byCategory,
     });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -425,8 +415,7 @@ router.get('/audit-hub/alerts', authenticateToken, async (req, res) => {
       .lean();
     res.json(alerts);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -439,8 +428,7 @@ router.post('/audit-hub/alerts/:id/resolve', authenticateToken, async (req, res)
     );
     res.json(alert);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -461,8 +449,7 @@ router.get('/report-builder/templates', authenticateToken, async (req, res) => {
       .lean();
     res.json(templates);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -475,8 +462,7 @@ router.get('/report-builder/templates/:id', authenticateToken, async (req, res) 
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -488,8 +474,7 @@ router.post('/report-builder/templates', authenticateToken, async (req, res) => 
     });
     res.status(201).json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -500,8 +485,7 @@ router.put('/report-builder/templates/:id', authenticateToken, async (req, res) 
     });
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -510,8 +494,7 @@ router.delete('/report-builder/templates/:id', authenticateToken, async (req, re
     await ReportTemplate.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -528,8 +511,7 @@ router.post('/report-builder/templates/:id/clone', authenticateToken, async (req
     const clone = await ReportTemplate.create(src);
     res.status(201).json(clone);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -548,8 +530,7 @@ router.post('/report-builder/execute/:id', authenticateToken, async (req, res) =
     });
     res.status(201).json(execution);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -570,8 +551,7 @@ router.get('/report-builder/executions', authenticateToken, async (req, res) => 
     ]);
     res.json({ executions: execs, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -591,8 +571,7 @@ router.get('/report-builder/modules', authenticateToken, async (_req, res) => {
     ];
     res.json(mods.map(m => ({ key: m, label: m.charAt(0).toUpperCase() + m.slice(1) })));
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -605,8 +584,7 @@ router.get('/report-builder/stats', authenticateToken, async (_req, res) => {
     ]);
     res.json({ templateCount, executionCount, byModule });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -631,8 +609,7 @@ router.get('/calendar-hub/events', authenticateToken, async (req, res) => {
       .lean();
     res.json(events);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -645,8 +622,7 @@ router.get('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
     if (!ev) return res.status(404).json({ error: 'Not found' });
     res.json(ev);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -655,8 +631,7 @@ router.post('/calendar-hub/events', authenticateToken, async (req, res) => {
     const ev = await CalendarEvent.create({ ...pick(req.body, FIELDS.event), createdBy: uid(req) });
     res.status(201).json(ev);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -667,8 +642,7 @@ router.put('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
     });
     res.json(ev);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -677,8 +651,7 @@ router.delete('/calendar-hub/events/:id', authenticateToken, async (req, res) =>
     await CalendarEvent.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -692,8 +665,7 @@ router.post('/calendar-hub/events/:id/rsvp', authenticateToken, async (req, res)
     await ev.save();
     res.json(ev);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -707,8 +679,7 @@ router.get('/calendar-hub/my-events', authenticateToken, async (req, res) => {
       .limit(50);
     res.json(events);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -724,8 +695,7 @@ router.get('/calendar-hub/today', authenticateToken, async (_req, res) => {
       .lean();
     res.json(events);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -735,8 +705,7 @@ router.get('/calendar-hub/rooms', authenticateToken, async (_req, res) => {
     const rooms = await RoomBooking.distinct('room');
     res.json(rooms);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -753,8 +722,7 @@ router.get('/calendar-hub/room-bookings', authenticateToken, async (req, res) =>
       .lean();
     res.json(bookings);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -773,8 +741,7 @@ router.post('/calendar-hub/room-bookings', authenticateToken, async (req, res) =
     });
     res.status(201).json(booking);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -783,8 +750,7 @@ router.delete('/calendar-hub/room-bookings/:id', authenticateToken, async (req, 
     await RoomBooking.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -808,8 +774,7 @@ router.get('/calendar-hub/stats', authenticateToken, async (_req, res) => {
     ]);
     res.json({ totalEvents, upcomingEvents, todayEvents, byType });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -843,8 +808,7 @@ router.get('/crm-pro/contacts', authenticateToken, async (req, res) => {
     ]);
     res.json({ contacts, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -854,8 +818,7 @@ router.get('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
     if (!c) return res.status(404).json({ error: 'Not found' });
     res.json(c);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -864,8 +827,7 @@ router.post('/crm-pro/contacts', authenticateToken, async (req, res) => {
     const c = await CRMContact.create({ ...pick(req.body, FIELDS.contact), createdBy: uid(req) });
     res.status(201).json(c);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -876,8 +838,7 @@ router.put('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
     });
     res.json(c);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -886,8 +847,7 @@ router.delete('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
     await CRMContact.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -897,8 +857,7 @@ router.get('/crm-pro/pipelines', authenticateToken, async (_req, res) => {
     const pipes = await CRMPipeline.find({ isActive: true }).sort({ updatedAt: -1 }).lean();
     res.json(pipes);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -908,8 +867,7 @@ router.get('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
     if (!p) return res.status(404).json({ error: 'Not found' });
     res.json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -918,8 +876,7 @@ router.post('/crm-pro/pipelines', authenticateToken, async (req, res) => {
     const p = await CRMPipeline.create({ ...pick(req.body, FIELDS.pipeline), createdBy: uid(req) });
     res.status(201).json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -930,8 +887,7 @@ router.put('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
     });
     res.json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -940,8 +896,7 @@ router.delete('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
     await CRMPipeline.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -965,8 +920,7 @@ router.get('/crm-pro/deals', authenticateToken, async (req, res) => {
     ]);
     res.json({ deals, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -980,8 +934,7 @@ router.get('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
     if (!d) return res.status(404).json({ error: 'Not found' });
     res.json(d);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -990,8 +943,7 @@ router.post('/crm-pro/deals', authenticateToken, async (req, res) => {
     const d = await CRMDeal.create({ ...pick(req.body, FIELDS.deal), createdBy: uid(req) });
     res.status(201).json(d);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1002,8 +954,7 @@ router.put('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
     });
     res.json(d);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1012,8 +963,7 @@ router.delete('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
     await CRMDeal.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1026,8 +976,7 @@ router.put('/crm-pro/deals/:id/move', authenticateToken, async (req, res) => {
     );
     res.json(d);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1045,8 +994,7 @@ router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, async (req,
     }));
     res.json({ pipeline, board });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1067,8 +1015,7 @@ router.get('/crm-pro/activities', authenticateToken, async (req, res) => {
       .lean();
     res.json(acts);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1080,8 +1027,7 @@ router.post('/crm-pro/activities', authenticateToken, async (req, res) => {
     });
     res.status(201).json(a);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1092,8 +1038,7 @@ router.put('/crm-pro/activities/:id', authenticateToken, async (req, res) => {
     });
     res.json(a);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1121,8 +1066,7 @@ router.get('/crm-pro/dashboard', authenticateToken, async (_req, res) => {
       bySource,
     });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1140,8 +1084,7 @@ router.get('/warehouse-intel/warehouses', authenticateToken, async (req, res) =>
     const whs = await Warehouse.find(q).sort({ name: 1 }).populate('manager', 'name').lean();
     res.json(whs);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1151,8 +1094,7 @@ router.get('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res
     if (!wh) return res.status(404).json({ error: 'Not found' });
     res.json(wh);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1161,8 +1103,7 @@ router.post('/warehouse-intel/warehouses', authenticateToken, async (req, res) =
     const wh = await Warehouse.create(pick(req.body, FIELDS.warehouse));
     res.status(201).json(wh);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1173,8 +1114,7 @@ router.put('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res
     });
     res.json(wh);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1183,8 +1123,7 @@ router.delete('/warehouse-intel/warehouses/:id', authenticateToken, async (req, 
     await Warehouse.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1197,8 +1136,7 @@ router.get('/warehouse-intel/bins', authenticateToken, async (req, res) => {
     const bins = await WarehouseBin.find(q).sort({ fullPath: 1 }).lean();
     res.json(bins);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1207,8 +1145,7 @@ router.post('/warehouse-intel/bins', authenticateToken, async (req, res) => {
     const bin = await WarehouseBin.create(pick(req.body, FIELDS.bin));
     res.status(201).json(bin);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1219,8 +1156,7 @@ router.put('/warehouse-intel/bins/:id', authenticateToken, async (req, res) => {
     });
     res.json(bin);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1242,8 +1178,7 @@ router.get('/warehouse-intel/stock', authenticateToken, async (req, res) => {
     ]);
     res.json({ stock, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1260,8 +1195,7 @@ router.put('/warehouse-intel/stock/:id', authenticateToken, async (req, res) => 
     );
     res.json(sl);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1281,8 +1215,7 @@ router.get('/warehouse-intel/alerts', authenticateToken, async (req, res) => {
       .lean();
     res.json(alerts);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1295,8 +1228,7 @@ router.post('/warehouse-intel/alerts/:id/resolve', authenticateToken, async (req
     );
     res.json(a);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1318,8 +1250,7 @@ router.get('/warehouse-intel/transfers', authenticateToken, async (req, res) => 
     ]);
     res.json({ transfers, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1334,8 +1265,7 @@ router.post('/warehouse-intel/transfers', authenticateToken, async (req, res) =>
     });
     res.status(201).json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1348,8 +1278,7 @@ router.put('/warehouse-intel/transfers/:id', authenticateToken, async (req, res)
     );
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1362,8 +1291,7 @@ router.post('/warehouse-intel/transfers/:id/approve', authenticateToken, async (
     );
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1376,8 +1304,7 @@ router.post('/warehouse-intel/transfers/:id/ship', authenticateToken, async (req
     );
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1390,8 +1317,7 @@ router.post('/warehouse-intel/transfers/:id/receive', authenticateToken, async (
     );
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1423,8 +1349,7 @@ router.get('/warehouse-intel/dashboard', authenticateToken, async (_req, res) =>
       pendingTransfers: transferCount,
     });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1451,8 +1376,7 @@ router.get('/project-pro/projects', authenticateToken, async (req, res) => {
     ]);
     res.json({ projects, total, page: +page, pages: Math.ceil(total / limit) });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1465,8 +1389,7 @@ router.get('/project-pro/projects/:id', authenticateToken, async (req, res) => {
     if (!p) return res.status(404).json({ error: 'Not found' });
     res.json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1481,8 +1404,7 @@ router.post('/project-pro/projects', authenticateToken, async (req, res) => {
     });
     res.status(201).json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1493,8 +1415,7 @@ router.put('/project-pro/projects/:id', authenticateToken, async (req, res) => {
     });
     res.json(p);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1504,8 +1425,7 @@ router.delete('/project-pro/projects/:id', authenticateToken, async (req, res) =
     await ProjectTask.deleteMany({ project: req.params.id });
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1539,8 +1459,7 @@ router.post('/project-pro/projects/:id/clone', authenticateToken, async (req, re
     }
     res.status(201).json(clone);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1562,8 +1481,7 @@ router.get('/project-pro/tasks', authenticateToken, async (req, res) => {
       .lean();
     res.json(tasks);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1578,8 +1496,7 @@ router.get('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
     if (!t) return res.status(404).json({ error: 'Not found' });
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1588,8 +1505,7 @@ router.post('/project-pro/tasks', authenticateToken, async (req, res) => {
     const t = await ProjectTask.create({ ...pick(req.body, FIELDS.task), reporter: uid(req) });
     res.status(201).json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1607,8 +1523,7 @@ router.put('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
     }
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1617,8 +1532,7 @@ router.delete('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
     await ProjectTask.findByIdAndDelete(req.params.id);
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1630,8 +1544,7 @@ router.post('/project-pro/tasks/:id/comment', authenticateToken, async (req, res
     await t.save();
     res.json(t);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1646,8 +1559,7 @@ router.put('/project-pro/tasks/reorder', authenticateToken, async (req, res) => 
     }
     res.json({ success: true });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1664,8 +1576,7 @@ router.get('/project-pro/kanban/:projectId', authenticateToken, async (req, res)
     });
     res.json(board);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1690,8 +1601,7 @@ router.get('/project-pro/timelogs', authenticateToken, async (req, res) => {
       .lean();
     res.json(logs);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1708,8 +1618,7 @@ router.post('/project-pro/timelogs', authenticateToken, async (req, res) => {
     }
     res.status(201).json(log);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1745,8 +1654,7 @@ router.get('/project-pro/dashboard', authenticateToken, async (_req, res) => {
       byPriority,
     });
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 
@@ -1758,8 +1666,7 @@ router.get('/project-pro/my-tasks', authenticateToken, async (req, res) => {
       .lean();
     res.json(tasks);
   } catch (e) {
-    logger.error('[EnterprisePro]', { message: e.message, stack: e.stack });
-    res.status(500).json({ success: false, message: 'حدث خطأ في الخادم' });
+    safeError(res, e, '[EnterprisePro]');
   }
 });
 

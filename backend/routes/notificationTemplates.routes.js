@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -21,8 +22,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة قوالب الإشعارات',
     });
   } catch (error) {
-    logger.error('Error fetching notification templates:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, error, 'fetching notification templates');
   }
 });
 
@@ -44,8 +44,7 @@ router.get('/:id', async (req, res) => {
       message: 'بيانات القالب',
     });
   } catch (error) {
-    logger.error('Error fetching template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القالب' });
+    safeError(res, error, 'fetching template');
   }
 });
 
@@ -73,8 +72,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم إنشاء القالب بنجاح',
     });
   } catch (error) {
-    logger.error('Error creating template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القالب' });
+    safeError(res, error, 'creating template');
   }
 });
 
@@ -87,8 +85,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم تحديث القالب بنجاح',
     });
   } catch (error) {
-    logger.error('Error updating template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث القالب' });
+    safeError(res, error, 'updating template');
   }
 });
 
@@ -97,8 +94,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
   try {
     res.json({ success: true, message: 'تم حذف القالب بنجاح' });
   } catch (error) {
-    logger.error('Error deleting template:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف القالب' });
+    safeError(res, error, 'deleting template');
   }
 });
 

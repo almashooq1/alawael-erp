@@ -1,3 +1,2 @@
-/* eslint-disable no-unused-vars */
-// Alias for backward compatibility
-module.exports = require('./Lead') || class {};
+// Stub — original archived in _archived/dead-models/ (P#38)
+module.exports = {};

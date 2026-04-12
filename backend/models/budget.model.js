@@ -1,3 +1,2 @@
-/* eslint-disable no-unused-vars */
-// Alias for Budget.js - For compatibility with test imports
-module.exports = require('./Budget') || class {};
+// Stub — original archived in _archived/dead-models/ (P#38)
+module.exports = {};

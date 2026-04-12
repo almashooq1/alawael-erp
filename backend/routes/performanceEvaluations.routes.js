@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -21,8 +22,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة تقييمات الأداء',
     });
   } catch (error) {
-    logger.error('Error fetching evaluations:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التقييمات' });
+    safeError(res, error, 'fetching evaluations');
   }
 });
 
@@ -43,8 +43,7 @@ router.get('/:id', async (req, res) => {
       message: 'بيانات التقييم',
     });
   } catch (error) {
-    logger.error('Error fetching evaluation:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التقييم' });
+    safeError(res, error, 'fetching evaluation');
   }
 });
 
@@ -71,8 +70,7 @@ router.post('/', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم إنشاء التقييم بنجاح',
     });
   } catch (error) {
-    logger.error('Error creating evaluation:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء التقييم' });
+    safeError(res, error, 'creating evaluation');
   }
 });
 
@@ -85,8 +83,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
       message: 'تم تحديث التقييم بنجاح',
     });
   } catch (error) {
-    logger.error('Error updating evaluation:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث التقييم' });
+    safeError(res, error, 'updating evaluation');
   }
 });
 
@@ -95,8 +92,7 @@ router.delete('/:id', authorize(['admin']), async (req, res) => {
   try {
     res.json({ success: true, message: 'تم حذف التقييم بنجاح' });
   } catch (error) {
-    logger.error('Error deleting evaluation:', error);
-    res.status(500).json({ success: false, message: 'خطأ في حذف التقييم' });
+    safeError(res, error, 'deleting evaluation');
   }
 });
 

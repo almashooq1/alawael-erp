@@ -56,7 +56,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -80,7 +80,7 @@ router.get('/courses', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -90,7 +90,7 @@ router.post('/courses', authenticate, async (req, res) => {
     const doc = await Course.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -102,7 +102,7 @@ router.put('/courses/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الدورة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -112,7 +112,7 @@ router.delete('/courses/:id', authenticate, async (req, res) => {
     const _Course = safeModel('TrainingCourse');
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -140,7 +140,7 @@ router.get('/sessions', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -150,7 +150,7 @@ router.post('/sessions', authenticate, async (req, res) => {
     const doc = await Session.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -162,7 +162,7 @@ router.put('/sessions/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الجلسة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -173,7 +173,7 @@ router.get('/plans', authenticate, async (req, res) => {
     const docs = await Plan.find().sort({ year: -1 }).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -183,7 +183,7 @@ router.post('/plans', authenticate, async (req, res) => {
     const doc = await Plan.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 
@@ -195,7 +195,7 @@ router.put('/plans/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'training');
   }
 });
 

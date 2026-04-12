@@ -11,6 +11,7 @@ const { Router } = require('express');
 const Logger = require('../utils/logger');
 const aiModels = require('../services/aiModels.service');
 const recommendationsEngine = require('../services/recommendationsEngine.service');
+const safeError = require('../utils/safeError');
 
 const router = Router();
 
@@ -47,11 +48,7 @@ router.post('/', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error generating recommendations: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في توليد التوصيات | Failed to generate recommendations',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -83,11 +80,7 @@ router.post('/tenant/personalize', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error personalizing: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في الشخصنة | Personalization failed',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -115,11 +108,7 @@ router.get('/:userId/history', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching history: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب السجل | Failed to fetch history',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -159,11 +148,7 @@ router.post('/feedback/record', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error recording feedback: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تسجيل ردود الفعل | Failed to record feedback',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -185,11 +170,7 @@ router.get('/feedback/:userId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching feedback: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب ردود الفعل | Failed to fetch feedback',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -212,11 +193,7 @@ router.get('/preferences/:userId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching preferences: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب التفضيلات | Failed to fetch preferences',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -243,11 +220,7 @@ router.put('/preferences/:userId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error updating preferences: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تحديث التفضيلات | Failed to update preferences',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -301,11 +274,7 @@ router.post('/models/register', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error registering model: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تسجيل النموذج | Failed to register model',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -326,11 +295,7 @@ router.get('/models/all', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching models: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب النماذج | Failed to fetch models',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -357,11 +322,7 @@ router.get('/models/:modelId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching model: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب النموذج | Failed to fetch model',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -382,11 +343,7 @@ router.get('/models/type/:type', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching models by type: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب النماذج | Failed to fetch models',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -407,11 +364,7 @@ router.post('/models/:modelId/deploy', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error deploying model: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في نشر النموذج | Failed to deploy model',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -438,11 +391,7 @@ router.post('/models/:modelId/undeploy', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error undeploying model: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إزالة نشر النموذج | Failed to undeploy model',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -469,11 +418,7 @@ router.get('/models/:modelId/metrics', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching metrics: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب المقاييس | Failed to fetch metrics',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -495,11 +440,7 @@ router.post('/models/:modelId/train', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error training model: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تدريب النموذج | Failed to train model',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -521,11 +462,7 @@ router.post('/models/:modelId/predict', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error making prediction: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إجراء التنبؤ | Failed to make prediction',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -550,11 +487,7 @@ router.post('/tests/create', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error creating A/B test: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في إنشاء الاختبار | Failed to create test',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -584,11 +517,7 @@ router.post('/tests/:testId/event', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error recording event: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في تسجيل الحدث | Failed to record event',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -615,11 +544,7 @@ router.get('/tests/:testId', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching test results: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب نتائج الاختبار | Failed to fetch test results',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -646,11 +571,7 @@ router.get('/stats/all', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching statistics: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب الإحصائيات | Failed to fetch statistics',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 
@@ -671,11 +592,7 @@ router.get('/models/active/list', async (req, res) => {
     });
   } catch (error) {
     Logger.error(`Error fetching active models: ${error.message}`);
-    res.status(500).json({
-      success: false,
-      message: 'فشل في جلب النماذج النشطة | Failed to fetch active models',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'aiRecommendations');
   }
 });
 

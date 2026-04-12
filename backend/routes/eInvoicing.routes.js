@@ -9,6 +9,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const EInvoice = require('../models/EInvoice');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -29,8 +30,7 @@ router.get('/stats/summary', async (req, res) => {
     });
     res.json({ success: true, data: stats, message: 'إحصائيات الفواتير' });
   } catch (error) {
-    logger.error('Error fetching invoice stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching invoice stats');
   }
 });
 
@@ -53,8 +53,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة الفواتير',
     });
   } catch (error) {
-    logger.error('Error fetching invoices:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفواتير' });
+    safeError(res, error, 'fetching invoices');
   }
 });
 
@@ -65,8 +64,7 @@ router.get('/:id', async (req, res) => {
     if (!invoice) return res.status(404).json({ success: false, message: 'الفاتورة غير موجودة' });
     res.json({ success: true, data: invoice, message: 'بيانات الفاتورة' });
   } catch (error) {
-    logger.error('Error fetching invoice:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الفاتورة' });
+    safeError(res, error, 'fetching invoice');
   }
 });
 
@@ -102,8 +100,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: invoice, message: 'تم إنشاء الفاتورة بنجاح' });
     } catch (error) {
-      logger.error('Error creating invoice:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء الفاتورة' });
+      safeError(res, error, 'creating invoice');
     }
   }
 );
@@ -119,8 +116,7 @@ router.post('/:id/submit-zatca', authorize(['admin', 'manager']), async (req, re
     await invoice.save();
     res.json({ success: true, data: invoice, message: 'تم إرسال الفاتورة إلى زاتكا' });
   } catch (error) {
-    logger.error('Error submitting to ZATCA:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إرسال الفاتورة إلى زاتكا' });
+    safeError(res, error, 'submitting to ZATCA');
   }
 });
 
@@ -144,8 +140,7 @@ router.get('/:id/qr', async (req, res) => {
       message: 'رمز QR للفاتورة',
     });
   } catch (error) {
-    logger.error('Error generating QR:', error);
-    res.status(500).json({ success: false, message: 'خطأ في توليد رمز QR' });
+    safeError(res, error, 'generating QR');
   }
 });
 

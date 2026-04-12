@@ -14,6 +14,7 @@ router.get('/security', async (req, res) => {
       .select('twoFactorEnabled lastPasswordChange email')
       .lean();
     const MFA = require('../models/mfa.models');
+const safeError = require('../utils/safeError');
     let mfaSettings = null;
     try {
       mfaSettings = await MFA.MFASettings.findOne({ userId: req.user?.id }).lean();
@@ -29,8 +30,7 @@ router.get('/security', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('Account security GET error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب إعدادات الأمان' });
+    safeError(res, err, 'Account security GET error');
   }
 });
 
@@ -45,8 +45,7 @@ router.put('/security', async (req, res) => {
       .lean();
     res.json({ success: true, data: user, message: 'تم تحديث إعدادات الأمان' });
   } catch (err) {
-    logger.error('Account security PUT error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث إعدادات الأمان' });
+    safeError(res, err, 'Account security PUT error');
   }
 });
 
@@ -56,8 +55,7 @@ router.get('/sessions', async (req, res) => {
     const sessions = await Session.find({ userId: req.user?.id }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: sessions });
   } catch (err) {
-    logger.error('Account sessions error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الجلسات' });
+    safeError(res, err, 'Account sessions error');
   }
 });
 
@@ -67,8 +65,7 @@ router.delete('/sessions/:id', async (req, res) => {
     await Session.findOneAndDelete({ _id: req.params.id, userId: req.user?.id });
     res.json({ success: true, message: 'تم إنهاء الجلسة' });
   } catch (err) {
-    logger.error('Account delete session error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنهاء الجلسة' });
+    safeError(res, err, 'Account delete session error');
   }
 });
 
@@ -78,8 +75,7 @@ router.post('/sessions/logout-all', async (req, res) => {
     await Session.deleteMany({ userId: req.user?.id });
     res.json({ success: true, message: 'تم تسجيل الخروج من جميع الجلسات' });
   } catch (err) {
-    logger.error('Account logout-all error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الخروج' });
+    safeError(res, err, 'Account logout-all error');
   }
 });
 

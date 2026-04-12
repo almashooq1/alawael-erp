@@ -28,8 +28,7 @@ router.get('/', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
   } catch (err) {
-    logger.error('Evaluations list error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب التقييمات' });
+    safeError(res, err, 'Evaluations list error');
   }
 });
 
@@ -37,13 +36,13 @@ router.get('/', async (req, res) => {
 router.get('/vendor/:vendorId', async (req, res) => {
   try {
     const VendorEvaluation = require('../models/VendorEvaluation');
+const safeError = require('../utils/safeError');
     const data = await VendorEvaluation.find({ vendorId: req.params.vendorId })
       .sort({ date: -1 })
       .lean();
     res.json({ success: true, data });
   } catch (err) {
-    logger.error('Vendor evaluations error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب تقييمات المورد' });
+    safeError(res, err, 'Vendor evaluations error');
   }
 });
 
@@ -84,8 +83,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ success: true, data, message: 'تم إضافة التقييم بنجاح' });
   } catch (err) {
-    logger.error('Evaluation create error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التقييم' });
+    safeError(res, err, 'Evaluation create error');
   }
 });
 

@@ -20,6 +20,7 @@
 
 const { EventEmitter } = require('events');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -490,7 +491,7 @@ function mountIntegrationBusRoutes(app) {
       });
       res.json({ success: true, events });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'systemIntegrationBus');
     }
   });
 
@@ -509,7 +510,7 @@ function mountIntegrationBusRoutes(app) {
       });
       res.json({ success: true, result });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      safeError(res, error, 'systemIntegrationBus');
     }
   });
 

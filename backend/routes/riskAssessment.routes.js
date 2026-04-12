@@ -9,6 +9,7 @@ const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const RiskAssessment = require('../models/RiskAssessment');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -44,8 +45,7 @@ router.get('/matrix/overview', async (req, res) => {
     const matrix = { critical: data.critical, high: data.high, medium: data.medium, low: data.low };
     res.json({ success: true, data: { matrix, total: data.total }, message: 'مصفوفة المخاطر' });
   } catch (error) {
-    logger.error('Error fetching risk matrix:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب مصفوفة المخاطر' });
+    safeError(res, error, 'fetching risk matrix');
   }
 });
 
@@ -63,8 +63,7 @@ router.get('/stats/summary', async (req, res) => {
     });
     res.json({ success: true, data: stats, message: 'إحصائيات المخاطر' });
   } catch (error) {
-    logger.error('Error fetching risk stats:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, error, 'fetching risk stats');
   }
 });
 
@@ -87,8 +86,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة المخاطر',
     });
   } catch (error) {
-    logger.error('Error fetching risks:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المخاطر' });
+    safeError(res, error, 'fetching risks');
   }
 });
 
@@ -99,8 +97,7 @@ router.get('/:id', async (req, res) => {
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk, message: 'بيانات المخاطرة' });
   } catch (error) {
-    logger.error('Error fetching risk:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المخاطرة' });
+    safeError(res, error, 'fetching risk');
   }
 });
 
@@ -142,8 +139,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: risk, message: 'تم إنشاء تقييم المخاطرة' });
     } catch (error) {
-      logger.error('Error creating risk:', error);
-      res.status(500).json({ success: false, message: 'خطأ في إنشاء تقييم المخاطرة' });
+      safeError(res, error, 'creating risk');
     }
   }
 );
@@ -164,8 +160,7 @@ router.put('/:id', authorize(['admin', 'manager']), async (req, res) => {
     if (!risk) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: risk, message: 'تم تحديث تقييم المخاطرة' });
   } catch (error) {
-    logger.error('Error updating risk:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث تقييم المخاطرة' });
+    safeError(res, error, 'updating risk');
   }
 });
 

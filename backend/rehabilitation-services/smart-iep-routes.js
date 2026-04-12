@@ -13,6 +13,7 @@ const { GoalsBank, SmartIEP, SessionLog } = require('../models/SmartIEP');
 
 // Import services
 const { GoalsBankService, SmartIEPService, SessionLogService } = require('./smart-iep-service');
+const safeError = require('../utils/safeError');
 
 // ─── Goals Bank Routes ─────────────────────────────────────────────────────────
 
@@ -29,7 +30,7 @@ router.post('/goals-bank/seed', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -55,7 +56,7 @@ router.get('/goals-bank/search', async (req, res) => {
       data: goals,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -78,7 +79,7 @@ router.post('/goals-bank/suggest', async (req, res) => {
       domains: suggestions,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -95,7 +96,7 @@ router.get('/goals-bank', async (req, res) => {
       .sort({ domain: 1, goal_code: 1 });
     res.json({ success: true, count: goals.length, data: goals });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -121,7 +122,7 @@ router.get('/goals-bank/domains', async (req, res) => {
       data: domains.map(d => ({ value: d, label: domainLabels[d] || d })),
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -145,7 +146,7 @@ router.post('/iep', async (req, res) => {
       data: iep,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -160,7 +161,7 @@ router.get('/iep/beneficiary/:beneficiaryId', async (req, res) => {
       .sort({ createdAt: -1 });
     res.json({ success: true, count: ieps.length, data: ieps });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -192,7 +193,7 @@ router.get('/iep/:id', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -222,7 +223,7 @@ router.patch('/iep/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم تحديث الخطة بنجاح', data: iep });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -262,7 +263,7 @@ router.post('/iep/:id/goals', async (req, res) => {
       data: iep.annual_goals[iep.annual_goals.length - 1],
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -311,7 +312,7 @@ router.patch('/iep/:id/goals/:goalId/progress', async (req, res) => {
       current_accuracy: goal.current_accuracy,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -324,7 +325,7 @@ router.get('/iep/:id/report', async (req, res) => {
     const report = await SmartIEPService.generateProgressReport(req.params.id);
     res.json({ success: true, data: report });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -337,7 +338,7 @@ router.post('/iep/:id/analyze', async (req, res) => {
     const analysis = await SmartIEPService.analyzeIEP(req.params.id);
     res.json({ success: true, data: analysis });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -365,7 +366,7 @@ router.post('/iep/:id/meetings', async (req, res) => {
       data: iep.meetings[iep.meetings.length - 1],
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -389,7 +390,7 @@ router.post('/sessions', async (req, res) => {
       data: session,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -404,7 +405,7 @@ router.get('/sessions/beneficiary/:beneficiaryId/analytics', async (req, res) =>
     const analytics = await SessionLogService.getSessionAnalytics(req.params.beneficiaryId, weeks);
     res.json({ success: true, data: analytics });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -432,7 +433,7 @@ router.get('/sessions/beneficiary/:beneficiaryId', async (req, res) => {
       data: sessions,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -465,7 +466,7 @@ router.get('/sessions/:sessionId', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -481,7 +482,7 @@ router.get('/sessions/iep/:iepId', async (req, res) => {
 
     res.json({ success: true, count: sessions.length, data: sessions });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -496,7 +497,7 @@ router.get('/sessions/abc-analysis/:beneficiaryId', async (req, res) => {
     const analysis = await SessionLogService.summarizeABCData(req.params.beneficiaryId, days);
     res.json({ success: true, data: analysis });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 
@@ -538,7 +539,7 @@ router.get('/iep/branch/:branchId/summary', async (req, res) => {
 
     res.json({ success: true, data: summary });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    safeError(res, err, 'smart-iep');
   }
 });
 

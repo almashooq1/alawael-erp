@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 
@@ -21,8 +22,7 @@ router.get('/', async (req, res) => {
       message: 'قائمة طلبات الموافقة',
     });
   } catch (error) {
-    logger.error('Error fetching approval requests:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الطلبات' });
+    safeError(res, error, 'fetching approval requests');
   }
 });
 
@@ -43,8 +43,7 @@ router.get('/:id', async (req, res) => {
       message: 'بيانات الطلب',
     });
   } catch (error) {
-    logger.error('Error fetching approval request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الطلب' });
+    safeError(res, error, 'fetching approval request');
   }
 });
 
@@ -69,8 +68,7 @@ router.post('/', async (req, res) => {
       message: 'تم إنشاء طلب الموافقة بنجاح',
     });
   } catch (error) {
-    logger.error('Error creating approval request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الطلب' });
+    safeError(res, error, 'creating approval request');
   }
 });
 
@@ -90,8 +88,7 @@ router.post('/:id/approve', authorize(['admin', 'manager']), async (req, res) =>
       message: 'تمت الموافقة على الطلب بنجاح',
     });
   } catch (error) {
-    logger.error('Error approving request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في الموافقة على الطلب' });
+    safeError(res, error, 'approving request');
   }
 });
 
@@ -111,8 +108,7 @@ router.post('/:id/reject', authorize(['admin', 'manager']), async (req, res) => 
       message: 'تم رفض الطلب',
     });
   } catch (error) {
-    logger.error('Error rejecting request:', error);
-    res.status(500).json({ success: false, message: 'خطأ في رفض الطلب' });
+    safeError(res, error, 'rejecting request');
   }
 });
 

@@ -22,8 +22,7 @@ router.get('/', requireAuth, async (req, res) => {
     const data = await TherapyRoom.find(filter).sort({ type: 1, name: 1 });
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('therapyRoom list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyRoom list error');
   }
 });
 
@@ -38,8 +37,7 @@ router.get('/available', requireAuth, async (req, res) => {
     const data = await TherapyRoom.find(filter).sort({ type: 1, name: 1 });
     res.json({ success: true, data, count: data.length });
   } catch (err) {
-    logger.error('therapyRoom available error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyRoom available error');
   }
 });
 
@@ -50,8 +48,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
     res.json({ success: true, data: room });
   } catch (err) {
-    logger.error('therapyRoom get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyRoom get error');
   }
 });
 
@@ -88,8 +85,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
     res.json({ success: true, message: 'Room deleted' });
   } catch (err) {
-    logger.error('therapyRoom delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'therapyRoom delete error');
   }
 });
 
@@ -106,8 +102,7 @@ router.patch(
       await room.save();
       res.json({ success: true, data: room });
     } catch (err) {
-      logger.error('therapyRoom maintenance toggle error:', err);
-      res.status(500).json({ success: false, message: safeError(err) });
+      safeError(res, err, 'therapyRoom maintenance toggle error');
     }
   }
 );

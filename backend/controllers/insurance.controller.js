@@ -115,8 +115,7 @@ class InsuranceController {
         },
       });
     } catch (error) {
-      logger.error(`خطأ في جلب وثائق التأمين: ${error.message}`);
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -127,7 +126,7 @@ class InsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
       res.json({ success: true, data: policy });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -153,7 +152,7 @@ class InsuranceController {
       if (!policy) return res.status(404).json({ success: false, message: 'الوثيقة غير موجودة' });
       res.json({ success: true, message: 'تم حذف الوثيقة بنجاح' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ في الحذف' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -283,7 +282,7 @@ class InsuranceController {
         },
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -389,8 +388,7 @@ class InsuranceController {
         },
       });
     } catch (error) {
-      logger.error(`خطأ في إحصائيات التأمين: ${error.message}`);
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -416,7 +414,7 @@ class InsuranceController {
         count: policies.length,
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -578,8 +576,7 @@ class InsuranceController {
         },
       });
     } catch (error) {
-      logger.error(`خطأ في عرض الأسعار: ${error.message}`);
-      res.status(500).json({ success: false, message: 'فشل الحصول على عروض الأسعار' });
+      safeError(res, error, 'insurance');
     }
   }
 
@@ -640,7 +637,7 @@ class InsuranceController {
           : 'لا توجد وثيقة تأمين سارية لهذه المركبة',
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'حدث خطأ داخلي' });
+      safeError(res, error, 'insurance');
     }
   }
 }

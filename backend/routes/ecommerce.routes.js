@@ -14,6 +14,7 @@ const logger = require('../utils/logger');
 let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
+const safeError = require('../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[E-Commerce Routes] RBAC module not available, using fallback');
@@ -63,7 +64,7 @@ router.get('/products', createRBACMiddleware(['ecommerce:read']), async (req, re
       data: result,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -87,7 +88,7 @@ router.get(
         data: results,
       });
     } catch (error) {
-      res.status(500).json({ error: 'حدث خطأ في الخادم' });
+      safeError(res, error, 'ecommerce');
     }
   }
 );
@@ -108,7 +109,7 @@ router.get('/products/featured', createRBACMiddleware(['ecommerce:read']), async
       data: featured,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -127,7 +128,7 @@ router.get('/products/new', async (req, res) => {
       data: newProducts,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -166,7 +167,7 @@ router.get('/products/:id/similar', async (req, res) => {
       data: similar,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -234,7 +235,7 @@ router.get('/cart', authenticate, async (req, res) => {
       data: cart,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -299,7 +300,7 @@ router.delete('/cart', authenticate, async (req, res) => {
       message: 'Cart cleared',
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -421,7 +422,7 @@ router.get('/wishlist', authenticate, async (req, res) => {
       data: wishlist,
     });
   } catch (error) {
-    res.status(500).json({ error: 'حدث خطأ في الخادم' });
+    safeError(res, error, 'ecommerce');
   }
 });
 
@@ -486,8 +487,7 @@ router.get('/orders', async (req, res) => {
       message: 'قائمة الطلبات',
     });
   } catch (error) {
-    logger.error('Error fetching orders:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الطلبات' });
+    safeError(res, error, 'fetching orders');
   }
 });
 
@@ -509,8 +509,7 @@ router.get('/orders/:id', async (req, res) => {
       message: 'بيانات الطلب',
     });
   } catch (error) {
-    logger.error('Error fetching order:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الطلب' });
+    safeError(res, error, 'fetching order');
   }
 });
 

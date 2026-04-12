@@ -47,7 +47,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -70,7 +70,7 @@ router.get('/media', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -80,7 +80,7 @@ router.post('/media', authenticate, async (req, res) => {
     const doc = await Media.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -91,7 +91,7 @@ router.put('/media/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -101,7 +101,7 @@ router.delete('/media/:id', authenticate, async (req, res) => {
     await Media.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -123,7 +123,7 @@ router.get('/campaigns', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -133,7 +133,7 @@ router.post('/campaigns', authenticate, async (req, res) => {
     const doc = await Camp.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -144,7 +144,7 @@ router.put('/campaigns/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -155,7 +155,7 @@ router.get('/partnerships', authenticate, async (req, res) => {
     const docs = await Part.find().sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -165,7 +165,7 @@ router.post('/partnerships', authenticate, async (req, res) => {
     const doc = await Part.create({ ...req.body, createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 
@@ -176,7 +176,7 @@ router.put('/partnerships/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'public-relations');
   }
 });
 

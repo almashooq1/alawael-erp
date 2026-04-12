@@ -24,8 +24,7 @@ router.get('/dashboard', async (req, res) => {
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
     res.json({ success: true, data: { ...metrics, database: dbStatus, timestamp: new Date() } });
   } catch (err) {
-    logger.error('Monitoring dashboard error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في لوحة المراقبة' });
+    safeError(res, err, 'Monitoring dashboard error');
   }
 });
 
@@ -33,6 +32,7 @@ router.get('/dashboard', async (req, res) => {
 router.get('/cache', async (req, res) => {
   try {
     const AnalyticsCache = require('../models/AnalyticsCache');
+const safeError = require('../utils/safeError');
     const entries = await AnalyticsCache.find().sort({ updatedAt: -1 }).limit(20).lean();
     res.json({ success: true, data: { entries, totalKeys: entries.length } });
   } catch (err) {
@@ -45,8 +45,7 @@ router.get('/queries', async (req, res) => {
   try {
     res.json({ success: true, data: { slowQueries: [], averageResponseTime: 0 } });
   } catch (err) {
-    logger.error('Monitoring queries error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المراقبة' });
+    safeError(res, err, 'Monitoring queries error');
   }
 });
 
@@ -59,8 +58,7 @@ router.get('/realtime', async (req, res) => {
       data: { ...metrics, activeConnections: 0, requestsPerMinute: 0, timestamp: new Date() },
     });
   } catch (err) {
-    logger.error('Monitoring realtime error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المراقبة' });
+    safeError(res, err, 'Monitoring realtime error');
   }
 });
 
@@ -74,8 +72,7 @@ router.get('/health', async (req, res) => {
       data: { status: dbOk ? 'healthy' : 'degraded', database: dbOk, uptime: process.uptime() },
     });
   } catch (err) {
-    logger.error('Monitoring health error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المراقبة' });
+    safeError(res, err, 'Monitoring health error');
   }
 });
 
@@ -84,8 +81,7 @@ router.get('/metrics', async (req, res) => {
   try {
     res.json({ success: true, data: getSystemMetrics() });
   } catch (err) {
-    logger.error('Monitoring metrics error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المراقبة' });
+    safeError(res, err, 'Monitoring metrics error');
   }
 });
 
@@ -97,8 +93,7 @@ router.get('/endpoints', async (req, res) => {
       data: { totalEndpoints: 0, note: 'Endpoint discovery not implemented' },
     });
   } catch (err) {
-    logger.error('Monitoring endpoints error:', err);
-    res.status(500).json({ success: false, message: 'خطأ في المراقبة' });
+    safeError(res, err, 'Monitoring endpoints error');
   }
 });
 

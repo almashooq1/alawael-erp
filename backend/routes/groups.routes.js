@@ -14,6 +14,7 @@ const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const Group = require('../models/Group');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // حماية جميع المسارات
 router.use(authenticate);
@@ -44,8 +45,7 @@ router.get('/', async (req, res) => {
 
     res.json({ success: true, data: groups });
   } catch (err) {
-    logger.error('Groups list error:', err);
-    res.status(500).json({ success: false, error: 'خطأ في جلب المجموعات' });
+    safeError(res, err, 'Groups list error');
   }
 });
 
@@ -75,8 +75,7 @@ router.get('/contacts', async (req, res) => {
 
     res.json({ success: true, data: [] });
   } catch (err) {
-    logger.error('Groups contacts error:', err);
-    res.status(500).json({ success: false, error: 'خطأ في جلب جهات الاتصال' });
+    safeError(res, err, 'Groups contacts error');
   }
 });
 
@@ -89,8 +88,7 @@ router.get('/:id', async (req, res) => {
     }
     res.json({ success: true, data: group });
   } catch (err) {
-    logger.error('Group detail error:', err);
-    res.status(500).json({ success: false, error: 'خطأ في جلب تفاصيل المجموعة' });
+    safeError(res, err, 'Group detail error');
   }
 });
 
@@ -141,7 +139,7 @@ router.post(
       if (err.name === 'ValidationError') {
         return res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
       }
-      res.status(500).json({ success: false, error: 'خطأ في إنشاء المجموعة' });
+      safeError(res, err, 'groups');
     }
   }
 );
@@ -172,8 +170,7 @@ router.put(
 
       res.json({ success: true, data: group });
     } catch (err) {
-      logger.error('Group update error:', err);
-      res.status(500).json({ success: false, error: 'خطأ في تحديث المجموعة' });
+      safeError(res, err, 'Group update error');
     }
   }
 );
@@ -193,8 +190,7 @@ router.delete('/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم حذف المجموعة بنجاح' });
   } catch (err) {
-    logger.error('Group delete error:', err);
-    res.status(500).json({ success: false, error: 'خطأ في حذف المجموعة' });
+    safeError(res, err, 'Group delete error');
   }
 });
 
@@ -233,8 +229,7 @@ router.post(
       await group.save();
       res.json({ success: true, data: group });
     } catch (err) {
-      logger.error('Add member error:', err);
-      res.status(500).json({ success: false, error: 'خطأ في إضافة العضو' });
+      safeError(res, err, 'Add member error');
     }
   }
 );
@@ -257,8 +252,7 @@ router.delete('/:id/members/:memberIndex', async (req, res) => {
 
     res.json({ success: true, data: group });
   } catch (err) {
-    logger.error('Remove member error:', err);
-    res.status(500).json({ success: false, error: 'خطأ في إزالة العضو' });
+    safeError(res, err, 'Remove member error');
   }
 });
 

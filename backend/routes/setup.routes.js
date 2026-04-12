@@ -22,6 +22,7 @@ const logger = require('../utils/logger');
 router.get('/status', async (req, res) => {
   try {
     const mongoose = require('mongoose');
+const safeError = require('../utils/safeError');
     const dbState = mongoose.connection.readyState;
     const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
 
@@ -59,11 +60,7 @@ router.post('/init-admin', async (req, res) => {
     // ─── التحقق من المفتاح السري (إلزامي — بدون fallback) ────────────────
     const SETUP_SECRET = process.env.SETUP_SECRET_KEY;
     if (!SETUP_SECRET) {
-      logger.error('[setup] SETUP_SECRET_KEY env var is not set');
-      return res.status(500).json({
-        success: false,
-        message: 'Server misconfiguration — SETUP_SECRET_KEY not set',
-      });
+      safeError(res, error, '[setup] SETUP_SECRET_KEY env var is not set');
     }
 
     const providedKey = req.body?.secretKey || req.headers['x-setup-key'];
@@ -78,10 +75,7 @@ router.post('/init-admin', async (req, res) => {
     // ─── التحقق من ADMIN_PASSWORD (إلزامي — بدون fallback) ────────────────
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
     if (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 8) {
-      return res.status(500).json({
-        success: false,
-        message: 'Server misconfiguration — ADMIN_PASSWORD not set or too short (min 8 chars)',
-      });
+      safeError(res, error, 'setup');
     }
 
     const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
@@ -91,7 +85,7 @@ router.post('/init-admin', async (req, res) => {
     try {
       User = require('../models/User');
     } catch (err) {
-      return res.status(500).json({ success: false, message: 'User model not available' });
+      safeError(res, err, 'setup');
     }
 
     // ─── التحقق من اتصال MongoDB ─────────────────────────────────────────
@@ -136,11 +130,7 @@ router.post('/init-admin', async (req, res) => {
       email: ADMIN_EMAIL,
     });
   } catch (err) {
-    logger.error('[setup] init-admin error:', err.message);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal error',
-    });
+    safeError(res, err, '[setup] init-admin error');
   }
 });
 

@@ -4,39 +4,27 @@
  * Tests complete workflows across multiple phases of the system
  * Ensures seamless integration between components
  * Framework v21.0+ with 23 phases
+ *
+ * Fixed: Removed MongoMemoryServer dep (mongoose already mocked by jest.setup.js).
+ *        Made caching calls async (set/get are async in AdvancedCachingService).
+ *        Replaced mongoose.Types.ObjectId with simple string IDs.
  */
 
-const _request = require('supertest');
-const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const _AuditLogService = require('../../services/auditLog.service');
 const RealtimeMonitoringService = require('../../services/realtimeMonitoring.service');
 const CachingService = require('../../services/advancedCaching.service');
 const MLModelService = require('../../services/mlIntegration.service');
 
-let mongoServer;
 let auditService;
 let monitoringService;
 let cachingService;
 let mlService;
 
 describe('Cross-Phase Integration Workflows', () => {
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    const mongoUri = mongoServer.getUri();
-    await mongoose.connect(mongoUri);
-  });
-
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
-
   beforeEach(() => {
-    // Mock AuditLogService
+    // Mock AuditLogService (simple jest.fn — no DB needed)
     auditService = {
       createAuditLog: jest.fn(async data => ({
-        _id: new mongoose.Types.ObjectId(),
+        _id: 'audit_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8),
         action: data.action,
         user: data.user,
         data: data.data,
@@ -71,10 +59,10 @@ describe('Cross-Phase Integration Workflows', () => {
       const metrics = monitoringService.getMetrics();
       expect(metrics.length).toBeGreaterThan(0);
 
-      // Phase 22: Cache results
+      // Phase 22: Cache results (async)
       const cacheKey = `result_${auditLog._id}`;
-      cachingService.set(cacheKey, { success: true, logId: auditLog._id.toString() }, 3600);
-      const cached = cachingService.get(cacheKey);
+      await cachingService.set(cacheKey, { success: true, logId: auditLog._id.toString() }, 3600);
+      const cached = await cachingService.get(cacheKey);
       expect(cached).toBeDefined();
       expect(cached.logId).toBe(auditLog._id.toString());
 
@@ -110,8 +98,8 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric('workflow_step_1_memory', 70);
       workflow.metrics.push(...monitoringService.getMetrics());
 
-      // Step 3: Cache step results
-      cachingService.set('workflow_step1', { completed: true }, 1800);
+      // Step 3: Cache step results (async)
+      await cachingService.set('workflow_step1', { completed: true }, 1800);
 
       // Step 4: Repeat for more steps
       for (let i = 2; i <= 5; i++) {
@@ -124,12 +112,13 @@ describe('Cross-Phase Integration Workflows', () => {
         monitoringService.recordMetric(`workflow_step_${i}_duration`, 50 + i * 5);
         monitoringService.recordMetric(`workflow_step_${i}_memory`, 70 + i * 2);
 
-        cachingService.set(`workflow_step${i}`, { completed: true, step: i }, 1800);
+        await cachingService.set(`workflow_step${i}`, { completed: true, step: i }, 1800);
       }
 
       expect(workflow.steps.length).toBe(5);
       expect(workflow.metrics.length).toBeGreaterThan(0);
-      expect(cachingService.get('workflow_step5')).toBeDefined();
+      const step5 = await cachingService.get('workflow_step5');
+      expect(step5).toBeDefined();
     });
   });
 
@@ -152,10 +141,10 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric('data_value2', testData.value2);
       monitoringService.recordMetric('data_value3', testData.value3);
 
-      // Cache the data
+      // Cache the data (async)
       const cacheKey = `dataflow_${auditEntry._id}`;
-      cachingService.set(cacheKey, testData, 3600);
-      const cachedData = cachingService.get(cacheKey);
+      await cachingService.set(cacheKey, testData, 3600);
+      const cachedData = await cachingService.get(cacheKey);
 
       // Train ML on the data
       mlService.addTrainingData([testData.value1, testData.value2], testData.value3 / 1000);
@@ -184,9 +173,10 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric('consistency_value', initialValue);
       phases.push({ phase: 2, metrics: monitoringService.getMetrics().length });
 
-      // Phase 3: Caching
-      cachingService.set('consistency_test', { value: initialValue }, 3600);
-      phases.push({ phase: 3, cached: cachingService.get('consistency_test').value });
+      // Phase 3: Caching (async)
+      await cachingService.set('consistency_test', { value: initialValue }, 3600);
+      const cachedItem = await cachingService.get('consistency_test');
+      phases.push({ phase: 3, cached: cachedItem.value });
 
       // Phase 4: ML
       mlService.addTrainingData([initialValue], 0.5);
@@ -230,9 +220,10 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric('recovery_success', 1);
       expect(monitoringService.getMetrics().length).toBeGreaterThan(0);
 
-      // Continue caching
-      cachingService.set('recovery_status', { recovered: true }, 1800);
-      expect(cachingService.get('recovery_status').recovered).toBe(true);
+      // Continue caching (async)
+      await cachingService.set('recovery_status', { recovered: true }, 1800);
+      const recoveryStatus = await cachingService.get('recovery_status');
+      expect(recoveryStatus.recovered).toBe(true);
     });
 
     test('should maintain audit trail during multi-phase errors', async () => {
@@ -255,8 +246,8 @@ describe('Cross-Phase Integration Workflows', () => {
       // Monitor the recovery
       monitoringService.recordMetric('error_recovered', 1);
 
-      // Cache recovery status
-      cachingService.set(
+      // Cache recovery status (async)
+      await cachingService.set(
         'last_error_recovery',
         {
           timestamp: new Date(),
@@ -267,7 +258,8 @@ describe('Cross-Phase Integration Workflows', () => {
 
       expect(errorLog.length).toBeGreaterThan(0);
       expect(auditEntry._id).toBeDefined();
-      expect(cachingService.get('last_error_recovery')).toBeDefined();
+      const lastRecovery = await cachingService.get('last_error_recovery');
+      expect(lastRecovery).toBeDefined();
     });
   });
 
@@ -287,9 +279,9 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric('perf_test', 1);
       timing.monitor = Date.now() - t2;
 
-      // Time caching operation
+      // Time caching operation (async)
       const t3 = Date.now();
-      cachingService.set('perf_test', { value: 1 }, 3600);
+      await cachingService.set('perf_test', { value: 1 }, 3600);
       timing.cache = Date.now() - t3;
 
       // Time ML operation
@@ -328,12 +320,7 @@ describe('Cross-Phase Integration Workflows', () => {
             resolve(true);
           })
         );
-        operations.push(
-          new Promise(resolve => {
-            cachingService.set(`concurrent_${i}`, { index: i }, 1800);
-            resolve(true);
-          })
-        );
+        operations.push(cachingService.set(`concurrent_${i}`, { index: i }, 1800));
       }
 
       const start = Date.now();
@@ -361,7 +348,7 @@ describe('Cross-Phase Integration Workflows', () => {
         workflowId,
         state,
       });
-      cachingService.set(workflowId, state, 7200);
+      await cachingService.set(workflowId, state, 7200);
 
       // Process
       state.processing = true;
@@ -383,19 +370,10 @@ describe('Cross-Phase Integration Workflows', () => {
       monitoringService.recordMetric(`workflow_${workflowId}_completed`, 1);
 
       // Verify state progression
-      const cachedState = cachingService.get(workflowId);
+      const cachedState = await cachingService.get(workflowId);
       expect(cachedState.initialized).toBe(true);
       expect(cachedState.completed).toBe(true);
       expect(cachedState.processing).toBe(false);
     });
   });
 });
-
-console.log('\n✅ Cross-Phase Integration Workflows Test Suite Complete\n');
-console.log('📊 Test Statistics:');
-console.log('   - User Journey Workflows: 2 tests');
-console.log('   - Data Flow Integration: 2 tests');
-console.log('   - Error Recovery: 2 tests');
-console.log('   - Performance Across Phases: 2 tests');
-console.log('   - State Consistency: 1 test');
-console.log('   - Total: 9 integration tests\n');

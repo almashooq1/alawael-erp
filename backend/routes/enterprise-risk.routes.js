@@ -50,7 +50,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -78,7 +78,7 @@ router.get('/risks', authenticate, async (req, res) => {
       pagination: { total, page: Number(page), pages: Math.ceil(total / limit) },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -88,7 +88,7 @@ router.post('/risks', authenticate, async (req, res) => {
     const doc = await Risk.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -102,7 +102,7 @@ router.put('/risks/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'المخاطرة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -112,7 +112,7 @@ router.delete('/risks/:id', authenticate, async (req, res) => {
     await Risk.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -127,7 +127,7 @@ router.post('/risks/:id/mitigations', authenticate, async (req, res) => {
     await risk.save();
     res.status(201).json({ success: true, data: risk });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -138,7 +138,7 @@ router.get('/assessments', authenticate, async (req, res) => {
     const docs = await Assessment.find().sort({ assessmentDate: -1 }).limit(200).lean();
     res.json({ success: true, data: docs });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -148,7 +148,7 @@ router.post('/assessments', authenticate, async (req, res) => {
     const doc = await Assessment.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 
@@ -159,7 +159,7 @@ router.put('/assessments/:id', authenticate, async (req, res) => {
     if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'enterprise-risk');
   }
 });
 

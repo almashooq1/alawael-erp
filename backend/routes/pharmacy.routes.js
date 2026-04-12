@@ -22,6 +22,7 @@ const {
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // All pharmacy routes require authentication
 router.use(authenticate);
@@ -122,8 +123,7 @@ router.get('/medications', async (req, res) => {
       limit: parseInt(limit),
     });
   } catch (error) {
-    logger.error('[Pharmacy] List medications error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأدوية' });
+    safeError(res, error, '[Pharmacy] List medications error');
   }
 });
 
@@ -133,8 +133,7 @@ router.get('/medications/:id', async (req, res) => {
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, data: medication });
   } catch (error) {
-    logger.error('[Pharmacy] Get medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الدواء' });
+    safeError(res, error, '[Pharmacy] Get medication error');
   }
 });
 
@@ -148,8 +147,7 @@ router.post('/medications', async (req, res) => {
     logger.info(`[Pharmacy] Medication created: ${medication.code}`);
     res.status(201).json({ success: true, data: medication });
   } catch (error) {
-    logger.error('[Pharmacy] Create medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الدواء' });
+    safeError(res, error, '[Pharmacy] Create medication error');
   }
 });
 
@@ -163,8 +161,7 @@ router.put('/medications/:id', async (req, res) => {
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, data: medication });
   } catch (error) {
-    logger.error('[Pharmacy] Update medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الدواء' });
+    safeError(res, error, '[Pharmacy] Update medication error');
   }
 });
 
@@ -178,8 +175,7 @@ router.delete('/medications/:id', async (req, res) => {
     if (!medication) return res.status(404).json({ success: false, message: 'الدواء غير موجود' });
     res.json({ success: true, message: 'تم حذف الدواء بنجاح' });
   } catch (error) {
-    logger.error('[Pharmacy] Delete medication error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في حذف الدواء' });
+    safeError(res, error, '[Pharmacy] Delete medication error');
   }
 });
 
@@ -214,8 +210,7 @@ router.get('/prescriptions', async (req, res) => {
       limit: parseInt(limit),
     });
   } catch (error) {
-    logger.error('[Pharmacy] List prescriptions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفات' });
+    safeError(res, error, '[Pharmacy] List prescriptions error');
   }
 });
 
@@ -229,8 +224,7 @@ router.get('/prescriptions/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
-    logger.error('[Pharmacy] Get prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب الوصفة' });
+    safeError(res, error, '[Pharmacy] Get prescription error');
   }
 });
 
@@ -244,8 +238,7 @@ router.post('/prescriptions', async (req, res) => {
     logger.info(`[Pharmacy] Prescription created: ${prescription.prescriptionNumber}`);
     res.status(201).json({ success: true, data: prescription });
   } catch (error) {
-    logger.error('[Pharmacy] Create prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الوصفة' });
+    safeError(res, error, '[Pharmacy] Create prescription error');
   }
 });
 
@@ -259,8 +252,7 @@ router.put('/prescriptions/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
-    logger.error('[Pharmacy] Update prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الوصفة' });
+    safeError(res, error, '[Pharmacy] Update prescription error');
   }
 });
 
@@ -281,8 +273,7 @@ router.patch('/prescriptions/:id/verify', async (req, res) => {
     logger.info(`[Pharmacy] Prescription verified: ${prescription.prescriptionNumber}`);
     res.json({ success: true, data: prescription });
   } catch (error) {
-    logger.error('[Pharmacy] Verify prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في التحقق من الوصفة' });
+    safeError(res, error, '[Pharmacy] Verify prescription error');
   }
 });
 
@@ -297,8 +288,7 @@ router.patch('/prescriptions/:id/cancel', async (req, res) => {
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });
   } catch (error) {
-    logger.error('[Pharmacy] Cancel prescription error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إلغاء الوصفة' });
+    safeError(res, error, '[Pharmacy] Cancel prescription error');
   }
 });
 
@@ -326,8 +316,7 @@ router.get('/dispensing', async (req, res) => {
     ]);
     res.json({ success: true, data: records, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
-    logger.error('[Pharmacy] List dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجلات الصرف' });
+    safeError(res, error, '[Pharmacy] List dispensing error');
   }
 });
 
@@ -371,8 +360,7 @@ router.post('/dispensing', async (req, res) => {
     logger.info(`[Pharmacy] Dispensing recorded: ${dispensing.dispensingNumber}`);
     res.status(201).json({ success: true, data: dispensing });
   } catch (error) {
-    logger.error('[Pharmacy] Create dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الصرف' });
+    safeError(res, error, '[Pharmacy] Create dispensing error');
   }
 });
 
@@ -396,8 +384,7 @@ router.patch('/dispensing/:id/return', async (req, res) => {
     }
     res.json({ success: true, data: dispensing, message: 'تم إرجاع الأدوية بنجاح' });
   } catch (error) {
-    logger.error('[Pharmacy] Return dispensing error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إرجاع الأدوية' });
+    safeError(res, error, '[Pharmacy] Return dispensing error');
   }
 });
 
@@ -428,8 +415,7 @@ router.get('/inventory', async (req, res) => {
     ]);
     res.json({ success: true, data: batches, total, page: parseInt(page), limit: parseInt(limit) });
   } catch (error) {
-    logger.error('[Pharmacy] List inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب المخزون' });
+    safeError(res, error, '[Pharmacy] List inventory error');
   }
 });
 
@@ -443,8 +429,7 @@ router.post('/inventory', async (req, res) => {
     logger.info(`[Pharmacy] Inventory batch added: ${batch.batchNumber}`);
     res.status(201).json({ success: true, data: batch });
   } catch (error) {
-    logger.error('[Pharmacy] Add inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الدفعة' });
+    safeError(res, error, '[Pharmacy] Add inventory error');
   }
 });
 
@@ -474,8 +459,7 @@ router.put('/inventory/:id', async (req, res) => {
     if (!batch) return res.status(404).json({ success: false, message: 'الدفعة غير موجودة' });
     res.json({ success: true, data: batch });
   } catch (error) {
-    logger.error('[Pharmacy] Update inventory error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الدفعة' });
+    safeError(res, error, '[Pharmacy] Update inventory error');
   }
 });
 
@@ -516,8 +500,7 @@ router.get('/inventory/expiry-alerts', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Pharmacy] Expiry alerts error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب تنبيهات الانتهاء' });
+    safeError(res, error, '[Pharmacy] Expiry alerts error');
   }
 });
 
@@ -542,8 +525,7 @@ router.get('/interactions', async (req, res) => {
     ]);
     res.json({ success: true, data: interactions, total });
   } catch (error) {
-    logger.error('[Pharmacy] List interactions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في جلب التفاعلات' });
+    safeError(res, error, '[Pharmacy] List interactions error');
   }
 });
 
@@ -556,8 +538,7 @@ router.post('/interactions', async (req, res) => {
     await interaction.save();
     res.status(201).json({ success: true, data: interaction });
   } catch (error) {
-    logger.error('[Pharmacy] Create interaction error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في إضافة التفاعل' });
+    safeError(res, error, '[Pharmacy] Create interaction error');
   }
 });
 
@@ -590,8 +571,7 @@ router.post('/interactions/check', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Pharmacy] Check interactions error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في فحص التفاعلات' });
+    safeError(res, error, '[Pharmacy] Check interactions error');
   }
 });
 
@@ -659,8 +639,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error('[Pharmacy] Dashboard error:', { message: error.message });
-    res.status(500).json({ success: false, message: 'خطأ في لوحة التحكم' });
+    safeError(res, error, '[Pharmacy] Dashboard error');
   }
 });
 

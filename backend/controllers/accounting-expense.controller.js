@@ -9,6 +9,7 @@ const AccountingExpense = require('../models/AccountingExpense');
 const JournalEntry = require('../models/JournalEntry');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // @desc    Get all expenses
 // @route   GET /api/accounting/expenses
@@ -57,12 +58,7 @@ exports.getAllExpenses = async (req, res) => {
       data: expenses,
     });
   } catch (error) {
-    logger.error('Error fetching expenses:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب المصروفات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching expenses');
   }
 };
 
@@ -132,12 +128,7 @@ exports.getExpenseStats = async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    logger.error('Error fetching expense stats:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب الإحصائيات',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching expense stats');
   }
 };
 
@@ -163,12 +154,7 @@ exports.getExpenseById = async (req, res) => {
       data: expense,
     });
   } catch (error) {
-    logger.error('Error fetching expense:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء جلب المصروف',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'fetching expense');
   }
 };
 
@@ -273,12 +259,7 @@ exports.deleteExpense = async (req, res) => {
       message: 'تم حذف المصروف بنجاح',
     });
   } catch (error) {
-    logger.error('Error deleting expense:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء حذف المصروف',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'deleting expense');
   }
 };
 
@@ -385,12 +366,7 @@ exports.approveExpense = async (req, res) => {
       message: 'تم الموافقة على المصروف بنجاح',
     });
   } catch (error) {
-    logger.error('Error approving expense:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء الموافقة على المصروف',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'approving expense');
   }
 };
 
@@ -433,11 +409,6 @@ exports.rejectExpense = async (req, res) => {
       message: 'تم رفض المصروف',
     });
   } catch (error) {
-    logger.error('Error rejecting expense:', error);
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ أثناء رفض المصروف',
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'rejecting expense');
   }
 };

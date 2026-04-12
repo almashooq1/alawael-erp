@@ -11,6 +11,7 @@ const {
 } = require('./electronic-directives-service');
 const authMiddleware = require('../middleware/advancedAuth');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authMiddleware.authenticate);
@@ -70,10 +71,7 @@ router.get('/', async (req, res) => {
       ...result,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -90,10 +88,7 @@ router.get('/overdue', async (req, res) => {
       data: overdueActions,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -111,10 +106,7 @@ router.get('/statistics', async (req, res) => {
       data: stats,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -137,10 +129,7 @@ router.get('/:id', async (req, res) => {
       data: directive,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -183,10 +172,7 @@ router.put('/:id', async (req, res) => {
       data: directive,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -443,10 +429,7 @@ router.post('/:id/attachments', async (req, res) => {
       data: directive.attachments[directive.attachments.length - 1],
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 
@@ -483,10 +466,7 @@ router.delete('/:id/attachments/:attachmentId', async (req, res) => {
       message: 'Attachment removed successfully',
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'electronic-directives');
   }
 });
 

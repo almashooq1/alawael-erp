@@ -6,6 +6,7 @@
 
 const RealtimeCollaborationService = require('../services/realTimeCollaboration.service');
 const Logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class RealtimeCollaborationController {
   /**
@@ -45,9 +46,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Create session error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إنشاء جلسة التعاون',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to create collaboration session',
         error: 'حدث خطأ داخلي',
       });
@@ -122,9 +121,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Apply change error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تطبيق التغيير',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to apply change',
         error: 'حدث خطأ داخلي',
       });
@@ -154,9 +151,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Update presence error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث الموضع',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to update presence',
         error: 'حدث خطأ داخلي',
       });
@@ -182,9 +177,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Update typing status error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تحديث الحالة',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to update typing status',
         error: 'حدث خطأ داخلي',
       });
@@ -249,9 +242,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Reply to comment error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل إضافة الرد',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to add reply',
         error: 'حدث خطأ داخلي',
       });
@@ -340,9 +331,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Get snapshot error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب النسخة',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to get snapshot',
         error: 'حدث خطأ داخلي',
       });
@@ -371,9 +360,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Get active users error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب المستخدمين',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to get users',
         error: 'حدث خطأ داخلي',
       });
@@ -400,9 +387,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Leave session error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل مغادرة الجلسة',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to leave session',
         error: 'حدث خطأ داخلي',
       });
@@ -435,9 +420,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Get stats error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل جلب الإحصائيات',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to get statistics',
         error: 'حدث خطأ داخلي',
       });
@@ -471,9 +454,7 @@ class RealtimeCollaborationController {
       });
     } catch (error) {
       Logger.error(`Export history error: ${error.message}`);
-      res.status(500).json({
-        success: false,
-        message: 'فشل تصدير السجل',
+      safeError(res, error, 'realtimeCollaboration');
         en: 'Failed to export history',
         error: 'حدث خطأ داخلي',
       });

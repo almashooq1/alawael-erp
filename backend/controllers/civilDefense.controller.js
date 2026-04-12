@@ -15,6 +15,7 @@ const {
   CivilDefenseDocuments,
 } = require('../models/civilDefense.model');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class CivilDefenseController {
   /**
@@ -64,11 +65,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error requesting certificate:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'requesting certificate');
     }
   }
 
@@ -99,11 +96,7 @@ class CivilDefenseController {
         data: apiStatus,
       });
     } catch (error) {
-      logger.error('Error getting certificate status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting certificate status');
     }
   }
 
@@ -159,11 +152,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error renewing certificate:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'renewing certificate');
     }
   }
 
@@ -187,11 +176,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting certificates:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting certificates');
     }
   }
 
@@ -227,11 +212,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error listing certificates:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'listing certificates');
     }
   }
 
@@ -278,11 +259,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error scheduling audit:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'scheduling audit');
     }
   }
 
@@ -306,11 +283,7 @@ class CivilDefenseController {
         data: audit,
       });
     } catch (error) {
-      logger.error('Error getting audit details:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting audit details');
     }
   }
 
@@ -333,11 +306,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting audits:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting audits');
     }
   }
 
@@ -359,11 +328,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting audit slots:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting audit slots');
     }
   }
 
@@ -399,11 +364,7 @@ class CivilDefenseController {
         data: audit,
       });
     } catch (error) {
-      logger.error('Error completing audit:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'completing audit');
     }
   }
 
@@ -432,11 +393,7 @@ class CivilDefenseController {
         data: complianceStatus,
       });
     } catch (error) {
-      logger.error('Error getting compliance status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting compliance status');
     }
   }
 
@@ -454,11 +411,7 @@ class CivilDefenseController {
         data: violations,
       });
     } catch (error) {
-      logger.error('Error getting violations:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting violations');
     }
   }
 
@@ -487,11 +440,7 @@ class CivilDefenseController {
         data: { violationId, status: 'resolved' },
       });
     } catch (error) {
-      logger.error('Error resolving violation:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'resolving violation');
     }
   }
 
@@ -531,11 +480,7 @@ class CivilDefenseController {
         data: report,
       });
     } catch (error) {
-      logger.error('Error generating compliance report:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'generating compliance report');
     }
   }
 
@@ -558,11 +503,7 @@ class CivilDefenseController {
         data: response,
       });
     } catch (error) {
-      logger.error('Error scheduling fire inspection:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'scheduling fire inspection');
     }
   }
 
@@ -586,11 +527,7 @@ class CivilDefenseController {
         data: fireSafetyStatus,
       });
     } catch (error) {
-      logger.error('Error getting fire safety status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting fire safety status');
     }
   }
 
@@ -633,11 +570,7 @@ class CivilDefenseController {
         data: fireSafety,
       });
     } catch (error) {
-      logger.error('Error updating equipment:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating equipment');
     }
   }
 
@@ -672,11 +605,7 @@ class CivilDefenseController {
         data: fireSafety,
       });
     } catch (error) {
-      logger.error('Error logging maintenance:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'logging maintenance');
     }
   }
 
@@ -713,11 +642,7 @@ class CivilDefenseController {
         data: drillResponse,
       });
     } catch (error) {
-      logger.error('Error scheduling drill:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'scheduling drill');
     }
   }
 
@@ -735,11 +660,7 @@ class CivilDefenseController {
         data: results,
       });
     } catch (error) {
-      logger.error('Error getting drill results:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting drill results');
     }
   }
 
@@ -762,11 +683,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting drills:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting drills');
     }
   }
 
@@ -800,11 +717,7 @@ class CivilDefenseController {
         data: drill,
       });
     } catch (error) {
-      logger.error('Error completing drill:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'completing drill');
     }
   }
 
@@ -852,11 +765,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error uploading documents:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'uploading documents');
     }
   }
 
@@ -878,11 +787,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting documents:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting documents');
     }
   }
 
@@ -907,11 +812,7 @@ class CivilDefenseController {
         message: 'Document deleted',
       });
     } catch (error) {
-      logger.error('Error deleting document:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'deleting document');
     }
   }
 
@@ -933,11 +834,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting document requirements:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting document requirements');
     }
   }
 
@@ -984,11 +881,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting notifications:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting notifications');
     }
   }
 
@@ -1004,11 +897,7 @@ class CivilDefenseController {
         message: 'Notification acknowledged',
       });
     } catch (error) {
-      logger.error('Error acknowledging notification:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'acknowledging notification');
     }
   }
 
@@ -1049,11 +938,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting dashboard data:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting dashboard data');
     }
   }
 
@@ -1087,11 +972,7 @@ class CivilDefenseController {
         data: report,
       });
     } catch (error) {
-      logger.error('Error generating report:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'generating report');
     }
   }
 
@@ -1111,11 +992,7 @@ class CivilDefenseController {
         data: report,
       });
     } catch (error) {
-      logger.error('Error exporting report:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'exporting report');
     }
   }
 
@@ -1137,11 +1014,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting settings:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting settings');
     }
   }
 
@@ -1158,11 +1031,7 @@ class CivilDefenseController {
         data: settings,
       });
     } catch (error) {
-      logger.error('Error updating settings:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'updating settings');
     }
   }
 
@@ -1180,11 +1049,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error checking health:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'checking health');
     }
   }
 
@@ -1226,11 +1091,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error searching:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'searching');
     }
   }
 
@@ -1254,11 +1115,7 @@ class CivilDefenseController {
         },
       });
     } catch (error) {
-      logger.error('Error getting compliance summary:', error);
-      res.status(500).json({
-        success: false,
-        message: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'getting compliance summary');
     }
   }
 

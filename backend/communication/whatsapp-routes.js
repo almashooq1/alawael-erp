@@ -36,6 +36,7 @@ const {
 
 // OTP model for real verification
 const { OTP: WhatsAppOTP } = require('./whatsapp-models');
+const safeError = require('../utils/safeError');
 
 /**
  * Simple schema-based request validation middleware.
@@ -145,8 +146,7 @@ router.get('/webhook', async (req, res) => {
     logger.info('❌ WhatsApp webhook verification failed');
     return res.status(403).json({ error: 'Verification failed' });
   } catch (error) {
-    logger.error('Webhook verification error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    safeError(res, error, 'Webhook verification error');
   }
 });
 
@@ -228,11 +228,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('Send WhatsApp error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'Send WhatsApp error');
     }
   }
 );
@@ -267,11 +263,7 @@ router.post('/send/text', authenticate, whatsappLimiter, async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Send text error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send text error');
   }
 });
 
@@ -303,11 +295,7 @@ router.post(
         data: result,
       });
     } catch (error) {
-      logger.error('Send template error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'Send template error');
     }
   }
 );
@@ -335,11 +323,7 @@ router.post('/send/image', authenticate, whatsappLimiter, async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Send image error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send image error');
   }
 });
 
@@ -366,11 +350,7 @@ router.post('/send/document', authenticate, whatsappLimiter, async (req, res) =>
       data: result,
     });
   } catch (error) {
-    logger.error('Send document error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send document error');
   }
 });
 
@@ -402,11 +382,7 @@ router.post('/send/video', authenticate, whatsappLimiter, async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Send video error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send video error');
   }
 });
 
@@ -438,11 +414,7 @@ router.post('/send/location', authenticate, whatsappLimiter, async (req, res) =>
       data: result,
     });
   } catch (error) {
-    logger.error('Send location error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send location error');
   }
 });
 
@@ -474,11 +446,7 @@ router.post('/send/interactive', authenticate, whatsappLimiter, async (req, res)
       data: result,
     });
   } catch (error) {
-    logger.error('Send interactive error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send interactive error');
   }
 });
 
@@ -534,11 +502,7 @@ router.post(
         },
       });
     } catch (error) {
-      logger.error('Send bulk error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'حدث خطأ داخلي',
-      });
+      safeError(res, error, 'Send bulk error');
     }
   }
 );
@@ -584,11 +548,7 @@ router.post('/otp/send', otpLimiter, async (req, res) => {
       expiresIn: expiry * 60, // seconds
     });
   } catch (error) {
-    logger.error('Send OTP error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send OTP error');
   }
 });
 
@@ -656,11 +616,7 @@ router.post('/otp/verify', whatsappLimiter, async (req, res) => {
       message: 'OTP verified successfully',
     });
   } catch (error) {
-    logger.error('Verify OTP error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Verify OTP error');
   }
 });
 
@@ -710,11 +666,7 @@ router.post('/notify', authenticate, whatsappLimiter, async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Send notification error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Send notification error');
   }
 });
 
@@ -743,11 +695,7 @@ router.get('/conversations', authenticate, async (req, res) => {
       data: conversations,
     });
   } catch (error) {
-    logger.error('Get conversations error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Get conversations error');
   }
 });
 
@@ -773,11 +721,7 @@ router.get('/conversations/:conversationId/messages', authenticate, async (req, 
       data: messages,
     });
   } catch (error) {
-    logger.error('Get messages error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Get messages error');
   }
 });
 
@@ -805,11 +749,7 @@ router.get('/stats', authenticate, authorize('admin', 'manager'), async (req, re
       data: stats,
     });
   } catch (error) {
-    logger.error('Get stats error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Get stats error');
   }
 });
 
@@ -833,11 +773,7 @@ router.get('/media/:mediaId', authenticate, async (req, res) => {
       data: { mediaUrl },
     });
   } catch (error) {
-    logger.error('Get media error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Get media error');
   }
 });
 
@@ -855,11 +791,7 @@ router.post('/media/upload', authenticate, async (req, res) => {
       message: 'Media upload endpoint ready',
     });
   } catch (error) {
-    logger.error('Upload media error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Upload media error');
   }
 });
 
@@ -883,11 +815,7 @@ router.post('/messages/:messageId/read', authenticate, async (req, res) => {
       data: result,
     });
   } catch (error) {
-    logger.error('Mark as read error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Mark as read error');
   }
 });
 
@@ -918,11 +846,7 @@ router.post('/interactive/buttons', authenticate, async (req, res) => {
       data: interactive,
     });
   } catch (error) {
-    logger.error('Build buttons error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Build buttons error');
   }
 });
 
@@ -949,11 +873,7 @@ router.post('/interactive/list', authenticate, async (req, res) => {
       data: interactive,
     });
   } catch (error) {
-    logger.error('Build list error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Build list error');
   }
 });
 
@@ -971,11 +891,7 @@ router.get('/templates', authenticate, async (req, res) => {
       data: templates,
     });
   } catch (error) {
-    logger.error('Get templates error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ داخلي',
-    });
+    safeError(res, error, 'Get templates error');
   }
 });
 
@@ -1016,8 +932,7 @@ router.post(
       const result = await whatsappIntegration.sendAppointmentReminder(appointment);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Appointment reminder error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Appointment reminder error');
     }
   }
 );
@@ -1040,8 +955,7 @@ router.post(
       const result = await whatsappIntegration.sendSessionReminder(session);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Session reminder error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Session reminder error');
     }
   }
 );
@@ -1064,8 +978,7 @@ router.post(
       const result = await whatsappIntegration.sendAppointmentConfirmation(appointment);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Appointment confirmation error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Appointment confirmation error');
     }
   }
 );
@@ -1088,8 +1001,7 @@ router.post(
       const result = await whatsappIntegration.sendSessionSummary(session, guardianPhone);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Session summary error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Session summary error');
     }
   }
 );
@@ -1114,8 +1026,7 @@ router.post(
       const result = await whatsappIntegration.sendLeaveStatusUpdate(employee, leaveData);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Leave status error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Leave status error');
     }
   }
 );
@@ -1140,8 +1051,7 @@ router.post(
       const result = await whatsappIntegration.sendSalaryNotification(employee, salaryData);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Salary notification error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Salary notification error');
     }
   }
 );
@@ -1164,8 +1074,7 @@ router.post(
       const result = await whatsappIntegration.sendPaymentReminder(invoiceData);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Payment reminder error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Payment reminder error');
     }
   }
 );
@@ -1188,8 +1097,7 @@ router.post(
       const result = await whatsappIntegration.sendOrderConfirmation(orderData);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Order confirmation error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Order confirmation error');
     }
   }
 );
@@ -1212,8 +1120,7 @@ router.post(
       const result = await whatsappIntegration.sendWelcomeMessage(user);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Welcome message error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Welcome message error');
     }
   }
 );
@@ -1239,8 +1146,7 @@ router.post(
       const result = await whatsappIntegration.sendBulkNotification(recipients, message, options);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Bulk notification error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Bulk notification error');
     }
   }
 );
@@ -1261,8 +1167,7 @@ router.post(
       const result = await whatsappIntegration.processReminders(appointmentService);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Process reminders error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Process reminders error');
     }
   }
 );
@@ -1281,8 +1186,7 @@ router.get(
       const stats = await whatsappIntegration.getQueueStats();
       res.json({ success: true, data: stats });
     } catch (error) {
-      logger.error('Queue stats error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Queue stats error');
     }
   }
 );
@@ -1305,8 +1209,7 @@ router.post(
       const result = await whatsappIntegration.sendGovDocumentUpdate(user, docData);
       res.json({ success: true, data: result });
     } catch (error) {
-      logger.error('Gov document update error:', error);
-      res.status(500).json({ success: false, error: 'حدث خطأ داخلي' });
+      safeError(res, error, 'Gov document update error');
     }
   }
 );

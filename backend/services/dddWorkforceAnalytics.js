@@ -4,428 +4,376 @@
  * ────────────────────────────────
  * Phase 29 – Workforce & Professional Development (Module 1/4)
  *
- * Tracks workforce composition, staffing ratios, turnover metrics,
- * workload distribution, and productivity analytics across the platform.
+ * Pure business-logic service — DB-backed via Mongoose models.
+ * Models live in ../models/WorkforceAnalytics.js
+ * Routes  live in ../routes/ddd-workforce-analytics.routes.js
+ *
+ * Singleton export — use directly, do NOT call `new`.
  */
 
-const mongoose = require('mongoose');
-const { Schema } = mongoose;
+const {
+  DDDWorkforceSnapshot,
+  DDDStaffProfile,
+  DDDWorkloadEntry,
+  DDDKPIRecord,
+  DEPARTMENT_TYPES,
+  BUILTIN_KPI_TEMPLATES,
+} = require('../models/WorkforceAnalytics');
 
-/* ═══════════════════ Constants ═══════════════════ */
-const WORKFORCE_METRIC_TYPES = [
-  'headcount',
-  'fte',
-  'turnover_rate',
-  'retention_rate',
-  'absenteeism',
-  'overtime_hours',
-  'productivity_index',
-  'caseload_ratio',
-  'burnout_score',
-  'satisfaction_score',
-  'training_hours',
-  'certification_rate',
-];
+const BaseCrudService = require('./base/BaseCrudService');
 
-const WORKFORCE_STATUSES = [
-  'active',
-  'on_leave',
-  'suspended',
-  'terminated',
-  'retired',
-  'probation',
-  'contract_ended',
-  'transferred',
-  'secondment',
-  'resigned',
-];
+/* ═══════════════════ Helpers ═══════════════════ */
 
-const DEPARTMENT_TYPES = [
-  'physiotherapy',
-  'occupational_therapy',
-  'speech_therapy',
-  'psychology',
-  'social_work',
-  'nursing',
-  'medical',
-  'administration',
-  'it',
-  'finance',
-  'quality',
-  'research',
-];
+/** Build pagination metadata for list endpoints */
+function paginationMeta(total, page, limit) {
+  const pages = Math.ceil(total / limit) || 1;
+  return { total, page, limit, pages, hasNext: page < pages, hasPrev: page > 1 };
+}
 
-const SKILL_LEVELS = [
-  'trainee',
-  'junior',
-  'mid_level',
-  'senior',
-  'specialist',
-  'consultant',
-  'expert',
-  'lead',
-  'director',
-  'fellow',
-];
+/* ═══════════════════ Domain Service ═══════════════════ */
+class WorkforceAnalyticsService extends BaseCrudService {
+  constructor() {
+    super('WorkforceAnalyticsService', {}, {
+      workforceSnapshots: DDDWorkforceSnapshot,
+      staffProfiles: DDDStaffProfile,
+      workloadEntrys: DDDWorkloadEntry,
+      kPIRecords: DDDKPIRecord,
+    });
+  }
 
-const WORKLOAD_CATEGORIES = [
-  'under_capacity',
-  'optimal',
-  'near_capacity',
-  'over_capacity',
-  'critical',
-  'redistributing',
-  'on_hold',
-  'transitioning',
-  'ramping_up',
-  'winding_down',
-];
+  /* ─────────────────── Snapshots ─────────────────── */
 
-const ANALYTICS_PERIODS = [
-  'daily',
-  'weekly',
-  'biweekly',
-  'monthly',
-  'quarterly',
-  'semi_annual',
-  'annual',
-  'ytd',
-  'rolling_12m',
-  'custom',
-];
-
-const BUILTIN_KPI_TEMPLATES = [
-  { code: 'STAFF_PATIENT_RATIO', name: 'Staff-to-Patient Ratio', target: 5.0 },
-  { code: 'AVG_CASELOAD', name: 'Average Caseload per Therapist', target: 25 },
-  { code: 'TURNOVER_RATE', name: 'Annual Turnover Rate %', target: 10 },
-  { code: 'TRAINING_COMPLIANCE', name: 'Training Compliance %', target: 95 },
-  { code: 'OVERTIME_PCT', name: 'Overtime Percentage', target: 5 },
-  { code: 'VACANCY_RATE', name: 'Vacancy Rate %', target: 8 },
-  { code: 'RETENTION_90D', name: '90-Day Retention Rate', target: 90 },
-  { code: 'SATISFACTION_IDX', name: 'Staff Satisfaction Index', target: 4.0 },
-  { code: 'ABSENTEEISM_RATE', name: 'Absenteeism Rate %', target: 3 },
-  { code: 'PRODUCTIVITY_IDX', name: 'Productivity Index', target: 85 },
-];
-
-/* ═══════════════════ Schemas ═══════════════════ */
-const workforceSnapshotSchema = new Schema(
-  {
-    period: { type: String, enum: ANALYTICS_PERIODS, required: true },
-    periodStart: { type: Date, required: true },
-    periodEnd: { type: Date, required: true },
-    department: { type: String, enum: DEPARTMENT_TYPES },
-    totalHeadcount: { type: Number, default: 0 },
-    activeFTE: { type: Number, default: 0 },
-    vacancies: { type: Number, default: 0 },
-    newHires: { type: Number, default: 0 },
-    separations: { type: Number, default: 0 },
-    turnoverRate: { type: Number, default: 0 },
-    retentionRate: { type: Number, default: 0 },
-    avgCaseload: { type: Number, default: 0 },
-    overtimeHours: { type: Number, default: 0 },
-    trainingHours: { type: Number, default: 0 },
-    satisfactionScore: { type: Number, min: 0, max: 5 },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
-workforceSnapshotSchema.index({ period: 1, periodStart: -1 });
-workforceSnapshotSchema.index({ department: 1, periodStart: -1 });
-
-const staffProfileSchema = new Schema(
-  {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    employeeId: { type: String, required: true, unique: true },
-    department: { type: String, enum: DEPARTMENT_TYPES, required: true },
-    status: { type: String, enum: WORKFORCE_STATUSES, default: 'active' },
-    skillLevel: { type: String, enum: SKILL_LEVELS, default: 'mid_level' },
-    hireDate: { type: Date, required: true },
-    currentCaseload: { type: Number, default: 0 },
-    maxCaseload: { type: Number, default: 30 },
-    workloadCategory: { type: String, enum: WORKLOAD_CATEGORIES, default: 'optimal' },
-    specializations: [{ type: String }],
-    certifications: [{ name: String, issuer: String, expiryDate: Date }],
-    performanceRating: { type: Number, min: 0, max: 5 },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
-staffProfileSchema.index({ department: 1, status: 1 });
-staffProfileSchema.index({ userId: 1 }, { unique: true });
-
-const workloadEntrySchema = new Schema(
-  {
-    staffId: { type: Schema.Types.ObjectId, ref: 'DDDStaffProfile', required: true },
-    date: { type: Date, required: true },
-    scheduledHours: { type: Number, default: 8 },
-    actualHours: { type: Number, default: 0 },
-    sessionsCompleted: { type: Number, default: 0 },
-    documentationTime: { type: Number, default: 0 },
-    adminTime: { type: Number, default: 0 },
-    travelTime: { type: Number, default: 0 },
-    overtimeHours: { type: Number, default: 0 },
-    productivityScore: { type: Number, min: 0, max: 100 },
-    notes: { type: String },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
-workloadEntrySchema.index({ staffId: 1, date: -1 });
-
-const kpiRecordSchema = new Schema(
-  {
-    kpiCode: { type: String, required: true },
-    kpiName: { type: String, required: true },
-    department: { type: String, enum: DEPARTMENT_TYPES },
-    period: { type: String, enum: ANALYTICS_PERIODS, required: true },
-    periodDate: { type: Date, required: true },
-    targetValue: { type: Number },
-    actualValue: { type: Number, required: true },
-    variance: { type: Number },
-    trend: { type: String, enum: ['improving', 'stable', 'declining'] },
-    alertLevel: { type: String, enum: ['normal', 'warning', 'critical'] },
-    metadata: { type: Schema.Types.Mixed, default: {} },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-  },
-  { timestamps: true }
-);
-kpiRecordSchema.index({ kpiCode: 1, periodDate: -1 });
-kpiRecordSchema.index({ department: 1, kpiCode: 1 });
-
-/* ═══════════════════ Models ═══════════════════ */
-const DDDWorkforceSnapshot =
-  mongoose.models.DDDWorkforceSnapshot ||
-  mongoose.model('DDDWorkforceSnapshot', workforceSnapshotSchema);
-const DDDStaffProfile =
-  mongoose.models.DDDStaffProfile || mongoose.model('DDDStaffProfile', staffProfileSchema);
-const DDDWorkloadEntry =
-  mongoose.models.DDDWorkloadEntry || mongoose.model('DDDWorkloadEntry', workloadEntrySchema);
-const DDDKPIRecord =
-  mongoose.models.DDDKPIRecord || mongoose.model('DDDKPIRecord', kpiRecordSchema);
-
-/* ═══════════════════ Domain Class ═══════════════════ */
-class WorkforceAnalytics {
-  /* ── Snapshots ── */
-  async createSnapshot(data) {
+  async createSnapshot(data, userId) {
+    if (!data.period || !data.periodStart || !data.periodEnd) {
+      throw Object.assign(new Error('period, periodStart, periodEnd are required'), {
+        status: 400,
+      });
+    }
+    // Auto-compute turnover if headcount provided
+    if (data.totalHeadcount > 0 && data.separations != null) {
+      data.turnoverRate = +((data.separations / data.totalHeadcount) * 100).toFixed(2);
+      data.retentionRate = +(100 - data.turnoverRate).toFixed(2);
+    }
+    data.createdBy = userId;
     return DDDWorkforceSnapshot.create(data);
   }
+
   async listSnapshots(filter = {}, page = 1, limit = 20) {
-    return DDDWorkforceSnapshot.find(filter)
-      .sort({ periodStart: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
-  async getSnapshotById(id) {
-    return DDDWorkforceSnapshot.findById(id).lean();
+    const [docs, total] = await Promise.all([
+      DDDWorkforceSnapshot.find(filter)
+        .sort({ periodStart: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      DDDWorkforceSnapshot.countDocuments(filter),
+    ]);
+    return { data: docs, pagination: paginationMeta(total, page, limit) };
   }
 
-  /* ── Staff Profiles ── */
-  async createStaffProfile(data) {
+  async getSnapshotById(id) {
+    const doc = await DDDWorkforceSnapshot.findById(id).lean();
+    if (!doc) throw Object.assign(new Error('Snapshot not found'), { status: 404 });
+    return doc;
+  }
+
+  /* ─────────────────── Staff Profiles ─────────────────── */
+
+  async createStaffProfile(data, userId) {
+    if (!data.userId || !data.employeeId || !data.department || !data.hireDate) {
+      throw Object.assign(new Error('userId, employeeId, department, hireDate are required'), {
+        status: 400,
+      });
+    }
+    if (!DEPARTMENT_TYPES.includes(data.department)) {
+      throw Object.assign(new Error(`Invalid department: ${data.department}`), { status: 400 });
+    }
+    data.createdBy = userId;
     return DDDStaffProfile.create(data);
   }
+
   async listStaffProfiles(filter = {}, page = 1, limit = 20) {
-    return DDDStaffProfile.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
-  }
-  async getStaffProfileById(id) {
-    return DDDStaffProfile.findById(id).lean();
-  }
-  async updateStaffProfile(id, data) {
-    return DDDStaffProfile.findByIdAndUpdate(id, data, { new: true }).lean();
+    const [docs, total] = await Promise.all([
+      DDDStaffProfile.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      DDDStaffProfile.countDocuments(filter),
+    ]);
+    return { data: docs, pagination: paginationMeta(total, page, limit) };
   }
 
-  /* ── Workload Entries ── */
-  async createWorkloadEntry(data) {
+  async getStaffProfileById(id) {
+    const doc = await DDDStaffProfile.findById(id).lean();
+    if (!doc) throw Object.assign(new Error('Staff profile not found'), { status: 404 });
+    return doc;
+  }
+
+  async updateStaffProfile(id, data, userId) {
+    data.updatedBy = userId;
+    const doc = await DDDStaffProfile.findByIdAndUpdate(id, data, {
+      new: true,
+      runValidators: true,
+    }).lean();
+    if (!doc) throw Object.assign(new Error('Staff profile not found'), { status: 404 });
+    return doc;
+  }
+
+  async deleteStaffProfile(id) {
+    const doc = await DDDStaffProfile.findByIdAndDelete(id);
+    if (!doc) throw Object.assign(new Error('Staff profile not found'), { status: 404 });
+    return { deleted: true, id };
+  }
+
+  /* ─────────────────── Workload Entries ─────────────────── */
+
+  async createWorkloadEntry(data, userId) {
+    if (!data.staffId || !data.date) {
+      throw Object.assign(new Error('staffId, date are required'), { status: 400 });
+    }
+    // Auto-compute overtime
+    if (data.actualHours > data.scheduledHours) {
+      data.overtimeHours = +(data.actualHours - data.scheduledHours).toFixed(2);
+    }
+    // Auto-compute productivity score
+    if (data.scheduledHours > 0 && data.sessionsCompleted != null) {
+      const utilization = ((data.actualHours || 0) / data.scheduledHours) * 100;
+      data.productivityScore = Math.min(100, Math.round(utilization));
+    }
+    data.createdBy = userId;
     return DDDWorkloadEntry.create(data);
   }
+
   async listWorkloadEntries(filter = {}, page = 1, limit = 20) {
-    return DDDWorkloadEntry.find(filter)
-      .sort({ date: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    const [docs, total] = await Promise.all([
+      DDDWorkloadEntry.find(filter)
+        .sort({ date: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('staffId', 'employeeId department skillLevel')
+        .lean(),
+      DDDWorkloadEntry.countDocuments(filter),
+    ]);
+    return { data: docs, pagination: paginationMeta(total, page, limit) };
   }
 
-  /* ── KPI Records ── */
-  async createKPIRecord(data) {
-    if (data.targetValue != null && data.actualValue != null) {
-      data.variance = data.actualValue - data.targetValue;
+  /* ─────────────────── KPI Records ─────────────────── */
+
+  async createKPIRecord(data, userId) {
+    if (!data.kpiCode || !data.period || !data.periodDate || data.actualValue == null) {
+      throw Object.assign(new Error('kpiCode, period, periodDate, actualValue are required'), {
+        status: 400,
+      });
     }
+    // Auto-fill name from built-in templates
+    const template = BUILTIN_KPI_TEMPLATES.find(t => t.code === data.kpiCode);
+    if (template) {
+      data.kpiName = data.kpiName || template.name;
+      data.targetValue = data.targetValue ?? template.target;
+    }
+    // Compute variance & alert level
+    if (data.targetValue != null) {
+      data.variance = +(data.actualValue - data.targetValue).toFixed(2);
+      const pctDeviation = Math.abs(data.variance / data.targetValue) * 100;
+      data.alertLevel = pctDeviation > 25 ? 'critical' : pctDeviation > 10 ? 'warning' : 'normal';
+    }
+    data.createdBy = userId;
     return DDDKPIRecord.create(data);
   }
+
   async listKPIRecords(filter = {}, page = 1, limit = 20) {
-    return DDDKPIRecord.find(filter)
-      .sort({ periodDate: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .lean();
+    const [docs, total] = await Promise.all([
+      DDDKPIRecord.find(filter)
+        .sort({ periodDate: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+      DDDKPIRecord.countDocuments(filter),
+    ]);
+    return { data: docs, pagination: paginationMeta(total, page, limit) };
   }
 
-  /* ── Analytics ── */
+  /** Get KPI dashboard — latest value per KPI code for a department */
+  async getKPIDashboard(department) {
+    const pipeline = [
+      ...(department ? [{ $match: { department } }] : []),
+      { $sort: { periodDate: -1 } },
+      {
+        $group: {
+          _id: '$kpiCode',
+          kpiName: { $first: '$kpiName' },
+          latestValue: { $first: '$actualValue' },
+          target: { $first: '$targetValue' },
+          variance: { $first: '$variance' },
+          trend: { $first: '$trend' },
+          alertLevel: { $first: '$alertLevel' },
+          asOf: { $first: '$periodDate' },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ];
+    return DDDKPIRecord.aggregate(pipeline);
+  }
+
+  /* ─────────────────── Analytics ─────────────────── */
+
   async getDepartmentSummary(department) {
-    const profiles = await DDDStaffProfile.find({ department, status: 'active' }).lean();
+    if (!DEPARTMENT_TYPES.includes(department)) {
+      throw Object.assign(new Error(`Invalid department: ${department}`), { status: 400 });
+    }
+    const [profiles, recentKPIs, workloadDist] = await Promise.all([
+      DDDStaffProfile.find({ department, status: 'active' }).lean(),
+      DDDKPIRecord.find({ department }).sort({ periodDate: -1 }).limit(10).lean(),
+      DDDStaffProfile.aggregate([
+        { $match: { department, status: 'active' } },
+        { $group: { _id: '$workloadCategory', count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const count = profiles.length || 1;
     return {
       department,
       totalStaff: profiles.length,
-      avgCaseload:
-        profiles.reduce((s, p) => s + (p.currentCaseload || 0), 0) / (profiles.length || 1),
-      avgRating:
-        profiles.reduce((s, p) => s + (p.performanceRating || 0), 0) / (profiles.length || 1),
+      avgCaseload: +(profiles.reduce((s, p) => s + (p.currentCaseload || 0), 0) / count).toFixed(1),
+      avgRating: +(profiles.reduce((s, p) => s + (p.performanceRating || 0), 0) / count).toFixed(2),
+      workloadDistribution: workloadDist,
+      recentKPIs,
+      atCapacityCount: profiles.filter(
+        p => p.workloadCategory === 'over_capacity' || p.workloadCategory === 'critical'
+      ).length,
     };
   }
 
   async getWorkloadDistribution() {
     return DDDStaffProfile.aggregate([
       { $match: { status: 'active' } },
-      { $group: { _id: '$workloadCategory', count: { $sum: 1 } } },
+      {
+        $group: {
+          _id: '$workloadCategory',
+          count: { $sum: 1 },
+          avgCaseload: { $avg: '$currentCaseload' },
+          avgRating: { $avg: '$performanceRating' },
+        },
+      },
       { $sort: { count: -1 } },
     ]);
   }
 
-  /* ── Health ── */
-  async healthCheck() {
-    const [snapshots, profiles, workloads, kpis] = await Promise.all([
-      DDDWorkforceSnapshot.countDocuments(),
-      DDDStaffProfile.countDocuments(),
-      DDDWorkloadEntry.countDocuments(),
-      DDDKPIRecord.countDocuments(),
+  /** Turnover trend — monthly separations vs headcount over last 12 snapshots */
+  async getTurnoverTrend(department, monthsBack = 12) {
+    const filter = { period: 'monthly' };
+    if (department) filter.department = department;
+
+    return DDDWorkforceSnapshot.find(filter)
+      .sort({ periodStart: -1 })
+      .limit(monthsBack)
+      .select('periodStart department totalHeadcount separations turnoverRate retentionRate')
+      .lean();
+  }
+
+  /** Overtime analysis per department */
+  async getOvertimeAnalysis() {
+    return DDDWorkloadEntry.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalOvertime: { $sum: '$overtimeHours' },
+          avgOvertime: { $avg: '$overtimeHours' },
+          totalScheduled: { $sum: '$scheduledHours' },
+          totalActual: { $sum: '$actualHours' },
+          entries: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          totalOvertime: 1,
+          avgOvertime: { $round: ['$avgOvertime', 2] },
+          overtimePercent: {
+            $round: [
+              {
+                $multiply: [{ $divide: ['$totalOvertime', { $max: ['$totalScheduled', 1] }] }, 100],
+              },
+              2,
+            ],
+          },
+          entries: 1,
+        },
+      },
     ]);
+  }
+
+  /* ─────────────────── Retention Analysis (DB-backed) ─────────────────── */
+
+  async predictAttritionRisk(staffId) {
+    const profile = await DDDStaffProfile.findById(staffId).lean();
+    if (!profile) throw Object.assign(new Error('Staff profile not found'), { status: 404 });
+
+    let riskScore = 0;
+
+    // Tenure factor
+    const tenureYears =
+      (Date.now() - new Date(profile.hireDate).getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+    if (tenureYears < 1) riskScore += 30;
+    else if (tenureYears < 2) riskScore += 20;
+    else if (tenureYears < 5) riskScore += 10;
+
+    // Performance factor (high performers = higher market risk)
+    if ((profile.performanceRating || 3) > 4) riskScore += 20;
+    if ((profile.performanceRating || 3) < 2.5) riskScore -= 10;
+
+    // Workload factor
+    if (profile.workloadCategory === 'over_capacity') riskScore += 15;
+    if (profile.workloadCategory === 'critical') riskScore += 25;
+
+    // Caseload factor
+    if (profile.currentCaseload > profile.maxCaseload) riskScore += 15;
+
+    riskScore = Math.max(0, Math.min(100, riskScore));
+    const riskLevel = riskScore > 70 ? 'high' : riskScore > 40 ? 'medium' : 'low';
+
     return {
-      status: 'ok',
-      module: 'WorkforceAnalytics',
-      counts: { snapshots, profiles, workloads, kpis },
+      staffId: profile._id,
+      employeeId: profile.employeeId,
+      department: profile.department,
+      riskScore,
+      riskLevel,
+      factors: {
+        tenureYears: +tenureYears.toFixed(1),
+        performanceRating: profile.performanceRating,
+        workloadCategory: profile.workloadCategory,
+        caseloadRatio: profile.maxCaseload
+          ? +(profile.currentCaseload / profile.maxCaseload).toFixed(2)
+          : null,
+      },
+      retentionActions: this._suggestRetentionActions(riskScore),
+      analyzedAt: new Date(),
     };
   }
+
+  _suggestRetentionActions(riskScore) {
+    if (riskScore > 70) {
+      return [
+        'immediate-conversation',
+        'compensation-review',
+        'career-planning',
+        'workload-rebalance',
+      ];
+    }
+    if (riskScore > 40) {
+      return ['regular-check-in', 'development-plan', 'recognition', 'flexibility-options'];
+    }
+    return ['standard-engagement'];
+  }
+
+  /* ─────────────────── KPI Templates ─────────────────── */
+
+  getKPITemplates() {
+    return BUILTIN_KPI_TEMPLATES;
+  }
+
 }
 
-/* ═══════════════════ Router Factory ═══════════════════ */
-function createWorkforceAnalyticsRouter() {
-  const { Router } = require('express');
-  const router = Router();
-  const svc = new WorkforceAnalytics();
-
-  router.get('/workforce-analytics/health', async (_req, res) => {
-    try {
-      res.json(await svc.healthCheck());
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  /* Snapshots */
-  router.post('/workforce-analytics/snapshots', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createSnapshot(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/workforce-analytics/snapshots', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...filter } = req.query;
-      res.json(await svc.listSnapshots(filter, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  /* Staff Profiles */
-  router.post('/workforce-analytics/staff', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createStaffProfile(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/workforce-analytics/staff', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...filter } = req.query;
-      res.json(await svc.listStaffProfiles(filter, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.put('/workforce-analytics/staff/:id', async (req, res) => {
-    try {
-      res.json(await svc.updateStaffProfile(req.params.id, req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  /* Workload Entries */
-  router.post('/workforce-analytics/workload', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createWorkloadEntry(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/workforce-analytics/workload', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...filter } = req.query;
-      res.json(await svc.listWorkloadEntries(filter, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  /* KPI Records */
-  router.post('/workforce-analytics/kpis', async (req, res) => {
-    try {
-      res.status(201).json(await svc.createKPIRecord(req.body));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/workforce-analytics/kpis', async (req, res) => {
-    try {
-      const { page = 1, limit = 20, ...filter } = req.query;
-      res.json(await svc.listKPIRecords(filter, +page, +limit));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  /* Analytics */
-  router.get('/workforce-analytics/departments/:dept/summary', async (req, res) => {
-    try {
-      res.json(await svc.getDepartmentSummary(req.params.dept));
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-  router.get('/workforce-analytics/distribution', async (req, res) => {
-    try {
-      res.json(await svc.getWorkloadDistribution());
-    } catch (e) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
-  return router;
-}
-
-/* ═══════════════════ Exports ═══════════════════ */
-module.exports = {
-  WORKFORCE_METRIC_TYPES,
-  WORKFORCE_STATUSES,
-  DEPARTMENT_TYPES,
-  SKILL_LEVELS,
-  WORKLOAD_CATEGORIES,
-  ANALYTICS_PERIODS,
-  BUILTIN_KPI_TEMPLATES,
-  DDDWorkforceSnapshot,
-  DDDStaffProfile,
-  DDDWorkloadEntry,
-  DDDKPIRecord,
-  WorkforceAnalytics,
-  createWorkforceAnalyticsRouter,
-};
+/* ═══════════════════ Singleton Export ═══════════════════ */
+// Service exports singleton — use directly, do NOT call `new`
+module.exports = new WorkforceAnalyticsService();

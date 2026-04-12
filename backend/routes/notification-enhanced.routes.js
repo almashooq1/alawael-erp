@@ -5,6 +5,8 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
+// Service exports singleton instance — use directly (no `new`)
+const notifSvc = require('../services/notifications/notification-enhanced.service');
 
 // ============================================================
 // قوالب الإشعارات — تستخدم النموذج مباشرةً
@@ -78,9 +80,7 @@ router.delete('/templates/:id', authenticate, async (req, res) => {
 // اختبار إرسال قالب
 router.post('/templates/:code/test', authenticate, async (req, res) => {
   try {
-    const notifService = require('../services/notifications/notification-enhanced.service');
-    const svc = new notifService();
-    const result = await svc.sendFromTemplate(
+    const result = await notifSvc.sendFromTemplate(
       req.params.code,
       req.body.recipient || req.user,
       req.body.data || {},
@@ -97,9 +97,7 @@ router.post('/templates/:code/test', authenticate, async (req, res) => {
 // ============================================================
 router.get('/', authenticate, async (req, res) => {
   try {
-    const notifService = require('../services/notifications/notification-enhanced.service');
-    const svc = new notifService();
-    const result = await svc.getNotifications(req.user._id, req.query);
+    const result = await notifSvc.getNotifications(req.user._id, req.query);
     res.json({ success: true, ...result });
   } catch (err) {
     safeError(res, err);
@@ -209,9 +207,7 @@ router.post('/broadcasts/:id/approve', authenticate, async (req, res) => {
 
 router.post('/broadcasts/:id/send', authenticate, async (req, res) => {
   try {
-    const notifService = require('../services/notifications/notification-enhanced.service');
-    const svc = new notifService();
-    const result = await svc.sendBroadcast(req.params.id);
+    const result = await notifSvc.sendBroadcast(req.params.id);
     res.json({ success: true, data: result });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -327,9 +323,7 @@ router.put('/escalations/:id/resolve', authenticate, async (req, res) => {
 
 router.post('/escalations/:id/auto-escalate', authenticate, async (req, res) => {
   try {
-    const notifService = require('../services/notifications/notification-enhanced.service');
-    const svc = new notifService();
-    const escalation = await svc.autoEscalate(req.params.id);
+    const escalation = await notifSvc.autoEscalate(req.params.id);
     res.json({ success: true, data: escalation });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

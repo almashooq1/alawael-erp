@@ -46,7 +46,7 @@ router.get('/dashboard/overview', authenticate, async (req, res) => {
     const data = reportBuilder.getDashboard(req.user?.id);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -59,7 +59,7 @@ router.get('/data-sources', authenticate, async (req, res) => {
     const data = reportBuilder.getDataSources();
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -83,7 +83,7 @@ router.get('/reports', authenticate, async (req, res) => {
     const data = reportBuilder.getAllReports(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -391,7 +391,7 @@ router.get('/reports/:id/executions', authenticate, [param('id').notEmpty()], as
     const data = reportBuilder.getExecutionHistory(req.params.id, req.query);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -404,7 +404,7 @@ router.get('/templates', authenticate, async (req, res) => {
     const data = reportBuilder.getTemplates(req.query);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -488,7 +488,7 @@ router.get('/schedules', authenticate, async (req, res) => {
     const data = reportBuilder.getSchedules(req.query.reportId);
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -578,7 +578,7 @@ router.get('/reports/:id/shares', authenticate, [param('id').notEmpty()], async 
     const data = reportBuilder.getReportShares(req.params.id);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -602,7 +602,7 @@ router.get('/favorites', authenticate, async (req, res) => {
     const data = reportBuilder.getUserFavorites(req.user?.id || 'u1');
     res.json({ success: true, data, total: data.length });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 
@@ -616,7 +616,7 @@ router.get('/reports/:id/versions', authenticate, [param('id').notEmpty()], asyn
     const data = reportBuilder.getReportVersions(req.params.id);
     res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ success: false, error: safeError(err) });
+    safeError(res, err, 'reportBuilder');
   }
 });
 

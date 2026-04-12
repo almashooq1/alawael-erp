@@ -307,19 +307,27 @@ jest.mock(
       Schema: SchemaConstructor,
       models: mockModels,
       model: createModelFn,
+      plugin: jest.fn(),
+      set: jest.fn(),
+      get: jest.fn(),
       connect: jest.fn(async () => ({ connected: true })),
       disconnect: jest.fn(async () => ({})),
       connection: {
+        readyState: 0,
         on: jest.fn(),
         once: jest.fn(),
         off: jest.fn(),
         removeListener: jest.fn(),
-        close: jest.fn(),
-        db: { admin: jest.fn() },
+        close: jest.fn(async () => {}),
+        db: {
+          admin: jest.fn(() => ({ ping: jest.fn(async () => ({ ok: 1 })) })),
+          collection: jest.fn(() => ({})),
+        },
         getClient: jest.fn(() => ({
           db: jest.fn(() => ({
             collection: jest.fn(() => ({})),
           })),
+          topology: { s: { pool: {} } },
         })),
       },
       startSession: jest.fn(async () => ({

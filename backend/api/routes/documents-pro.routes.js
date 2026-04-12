@@ -24,6 +24,7 @@ const notificationService = require('../../services/documents/documentNotificati
 let authenticateToken;
 try {
   authenticateToken = require('../../middleware/auth');
+const safeError = require('../../utils/safeError');
   if (typeof authenticateToken !== 'function') {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;
@@ -161,8 +162,7 @@ router.post('/intelligence/classify', async (req, res) => {
 
     res.json({ success: true, classification: result });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في التصنيف: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في التصنيف', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -208,8 +208,7 @@ router.post('/intelligence/classify-bulk', async (req, res) => {
 
     res.json({ success: true, classified: results.length, results });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في التصنيف الجماعي: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في التصنيف الجماعي', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -243,8 +242,7 @@ router.post('/intelligence/duplicates', async (req, res) => {
 
     res.json({ success: true, documentId, duplicatesCount: duplicates.length, duplicates });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في فحص التكرار: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في فحص التكرار', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -280,8 +278,7 @@ router.post('/intelligence/summarize', async (req, res) => {
 
     res.json({ success: true, summary });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في التلخيص: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في التلخيص', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -299,8 +296,7 @@ router.get('/intelligence/recommendations/:documentId', async (req, res) => {
 
     res.json({ success: true, documentId: doc._id, recommendations });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في التوصيات: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -315,8 +311,7 @@ router.get('/intelligence/analytics', async (req, res) => {
     const analytics = intelligenceService.analyzeDocumentCollection(documents);
     res.json({ success: true, analytics });
   } catch (err) {
-    logger.error(`[Intelligence] خطأ في التحليلات: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في التحليلات', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -384,8 +379,7 @@ router.post('/workflow/create', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    logger.error(`[Workflow] خطأ: ${err.message}`);
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -440,8 +434,7 @@ router.post('/workflow/:workflowId/transition', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    logger.error(`[Workflow] خطأ في الانتقال: ${err.message}`);
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -454,7 +447,7 @@ router.get('/workflow/document/:documentId', async (req, res) => {
     const workflow = await workflowEngine.getWorkflow(req.params.documentId);
     res.json({ success: true, workflow });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -471,7 +464,7 @@ router.get('/workflow/pending', async (req, res) => {
     });
     res.json({ success: true, tasks, total: tasks.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -493,7 +486,7 @@ router.post('/workflow/:workflowId/delegate', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -510,7 +503,7 @@ router.post('/workflow/:workflowId/escalate', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -526,7 +519,7 @@ router.get('/workflow/stats', async (req, res) => {
     });
     res.json({ success: true, stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -580,8 +573,7 @@ router.get('/search', async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    logger.error(`[Search] خطأ: ${err.message}`);
-    res.status(500).json({ success: false, message: 'خطأ في البحث', error: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -599,7 +591,7 @@ router.get('/search/quick', async (req, res) => {
     );
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -616,7 +608,7 @@ router.get('/search/content', async (req, res) => {
     );
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -630,7 +622,7 @@ router.post('/search/save', async (req, res) => {
     const result = await searchEngine.saveSearch(userId, req.body);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -644,7 +636,7 @@ router.get('/search/saved', async (req, res) => {
     const searches = await searchEngine.getSavedSearches(userId);
     res.json({ success: true, searches });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -658,7 +650,7 @@ router.post('/search/saved/:searchId/execute', async (req, res) => {
     const result = await searchEngine.executeSavedSearch(userId, req.params.searchId, req.body);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -672,7 +664,7 @@ router.delete('/search/saved/:searchId', async (req, res) => {
     const result = await searchEngine.deleteSavedSearch(userId, req.params.searchId);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -696,7 +688,7 @@ router.get('/notifications', async (req, res) => {
     });
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -710,7 +702,7 @@ router.get('/notifications/summary', async (req, res) => {
     const summary = await notificationService.getNotificationSummary(userId);
     res.json({ success: true, ...summary });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -724,7 +716,7 @@ router.put('/notifications/:notificationId/read', async (req, res) => {
     const notification = await notificationService.markAsRead(req.params.notificationId, userId);
     res.json({ success: true, notification });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -738,7 +730,7 @@ router.put('/notifications/read-all', async (req, res) => {
     const result = await notificationService.markAllAsRead(userId);
     res.json({ success: true, ...result });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -752,7 +744,7 @@ router.delete('/notifications/:notificationId', async (req, res) => {
     const result = await notificationService.deleteNotification(req.params.notificationId, userId);
     res.json(result);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -766,7 +758,7 @@ router.get('/notifications/preferences', async (req, res) => {
     const prefs = await notificationService.getPreferences(userId);
     res.json({ success: true, preferences: prefs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 
@@ -780,7 +772,7 @@ router.put('/notifications/preferences', async (req, res) => {
     const prefs = await notificationService.updatePreferences(userId, req.body);
     res.json({ success: true, preferences: prefs });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'documents-pro');
   }
 });
 

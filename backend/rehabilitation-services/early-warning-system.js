@@ -8,6 +8,7 @@
 
 const mongoose = require('mongoose');
 const { SmartIEP, SessionLog } = require('../models/SmartIEP');
+const safeError = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════
 // نموذج تنبيهات الإنذار المبكر
@@ -508,7 +509,7 @@ router.post('/scan', async (req, res) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 
@@ -520,7 +521,7 @@ router.get('/beneficiary/:id', async (req, res) => {
     const alerts = await EarlyWarningService.getBeneficiaryAlerts(req.params.id, req.query.status);
     res.json({ success: true, count: alerts.length, data: alerts });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 
@@ -532,7 +533,7 @@ router.get('/branch/:branchId', async (req, res) => {
     const alerts = await EarlyWarningService.getBranchAlerts(req.params.branchId, req.query.status);
     res.json({ success: true, data: alerts });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 
@@ -544,7 +545,7 @@ router.get('/dashboard', async (req, res) => {
     const stats = await EarlyWarningService.getDashboardStats(req.query.branch_id);
     res.json({ success: true, data: stats });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 
@@ -560,7 +561,7 @@ router.patch('/:id/acknowledge', async (req, res) => {
     );
     res.json({ success: true, data: alert });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 
@@ -576,7 +577,7 @@ router.patch('/:id/resolve', async (req, res) => {
     );
     res.json({ success: true, data: alert });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    safeError(res, err, 'early-warning-system');
   }
 });
 

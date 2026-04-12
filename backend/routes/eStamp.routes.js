@@ -32,6 +32,7 @@ const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
 const { escapeRegex } = require('../utils/sanitize');
 const _validateObjectId = require('../middleware/validateObjectId');
+const safeError = require('../utils/safeError');
 
 const MAX_PAGE_LIMIT = 100;
 
@@ -102,7 +103,7 @@ router.get('/verify/:code', async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في التحقق' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -206,8 +207,7 @@ router.get('/stats', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('E-Stamp stats error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل الإحصائيات' });
+    safeError(res, err, 'E-Stamp stats error: %s');
   }
 });
 
@@ -279,8 +279,7 @@ router.get('/', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('E-Stamp list error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في تحميل الأختام' });
+    safeError(res, err, 'E-Stamp list error: %s');
   }
 });
 
@@ -321,8 +320,7 @@ router.post('/', async (req, res) => {
       message: 'تم إنشاء الختم بنجاح',
     });
   } catch (err) {
-    logger.error('E-Stamp create error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء الختم' });
+    safeError(res, err, 'E-Stamp create error: %s');
   }
 });
 
@@ -353,8 +351,7 @@ router.post('/:id/upload-image', stampImageUpload.single('stampImage'), async (r
       message: 'تم رفع صورة الختم بنجاح',
     });
   } catch (err) {
-    logger.error('Stamp image upload error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في رفع الصورة' });
+    safeError(res, err, 'Stamp image upload error: %s');
   }
 });
 
@@ -369,7 +366,7 @@ router.get('/:id', async (req, res) => {
     }
     res.json({ success: true, data: stamp });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحميل الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -421,7 +418,7 @@ router.put('/:id', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: 'تم تحديث الختم بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -444,7 +441,7 @@ router.post('/:id/submit-approval', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: 'تم تقديم الختم للاعتماد' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الختم للاعتماد' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -468,7 +465,7 @@ router.post('/:id/approve', authorize(['admin', 'manager', 'director']), async (
 
     res.json({ success: true, data: stamp, message: 'تم اعتماد الختم بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في اعتماد الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -488,7 +485,7 @@ router.post('/:id/reject', authorize(['admin', 'manager', 'director']), async (r
 
     res.json({ success: true, data: stamp, message: 'تم رفض الختم' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في رفض الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -505,7 +502,7 @@ router.post('/:id/activate', async (req, res) => {
     await stamp.save();
     res.json({ success: true, data: stamp, message: 'تم تفعيل الختم' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -519,7 +516,7 @@ router.post('/:id/deactivate', async (req, res) => {
     await stamp.save();
     res.json({ success: true, data: stamp, message: 'تم تعليق الختم' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -533,7 +530,7 @@ router.post('/:id/revoke', authorize(['admin', 'manager', 'director']), async (r
     await stamp.save();
     res.json({ success: true, data: stamp, message: 'تم إلغاء الختم نهائياً' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -557,7 +554,7 @@ router.post('/:id/renew', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: 'تم تجديد الختم بنجاح' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في تجديد الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -640,8 +637,7 @@ router.post('/:id/apply', async (req, res) => {
       message: 'تم تطبيق الختم بنجاح',
     });
   } catch (err) {
-    logger.error('E-Stamp apply error: %s', err.message);
-    res.status(500).json({ success: false, message: 'خطأ في تطبيق الختم' });
+    safeError(res, err, 'E-Stamp apply error: %s');
   }
 });
 
@@ -661,7 +657,7 @@ router.get('/:id/usage', async (req, res) => {
 
     res.json({ success: true, data: { ...stamp, usageHistory: usage } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -679,7 +675,7 @@ router.get('/:id/audit', async (req, res) => {
 
     res.json({ success: true, data: { ...stamp, auditTrail: trail } });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -718,7 +714,7 @@ router.post('/:id/authorize', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: `تم تفويض ${name}` });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -743,7 +739,7 @@ router.delete('/:id/authorize/:userId', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: 'تم إزالة التفويض' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -785,7 +781,7 @@ router.post('/:id/transfer', async (req, res) => {
 
     res.json({ success: true, data: stamp, message: `تم نقل الملكية إلى ${name}` });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ' });
+    safeError(res, err, 'eStamp');
   }
 });
 
@@ -803,7 +799,7 @@ router.delete('/:id', async (req, res) => {
 
     res.json({ success: true, message: 'تم حذف الختم' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'خطأ في حذف الختم' });
+    safeError(res, err, 'eStamp');
   }
 });
 

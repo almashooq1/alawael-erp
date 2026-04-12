@@ -1,33 +1,42 @@
 /**
- * app.js — Express Application Configuration
+ * app.js — Express Application Configuration (Orchestrator)
+ * ═══════════════════════════════════════════════════════════
+ * Thin orchestrator that delegates to startup/ modules.
  *
- * Responsible for:
- *  - Middleware stack (security, CORS, body parsing, logging, etc.)
- *  - Route mounting (via routes/_registry)
- *  - Error handling
+ * Startup modules:
+ *   startup/middleware.js      — Security, CORS, body parsing, logging, etc.
+ *   startup/healthProbes.js    — /health, /readiness, /api/info, root endpoint
+ *   startup/adminEndpoints.js  — /api/_init, /api/_diag (emergency admin)
+ *   startup/schedulers.js      — AI Scheduler, SLA Scheduler, shutdown hooks
+ *   startup/integrationBus.js  — Cross-module event-driven architecture
  *
  * Server startup, Socket.IO, and database initialisation live in server.js.
  */
 
-require('express-async-errors'); // global async error catching — no more silent promise rejections
+require('express-async-errors');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-// Fallback: also load from project root if backend/.env not present
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 const { validateEnv } = require('./config/validateEnv');
-validateEnv(); // fail-fast on bad config
+validateEnv();
 
 const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
 const mongoose = require('mongoose');
+const logger = require('./utils/logger');
 
-// Default to in-memory DB when no Mongo URI is provided (developer-friendly)
+const {
+  errorHandler,
+  notFoundHandler,
+  uncaughtExceptionHandler,
+  unhandledRejectionHandler,
+} = require('./errors/errorHandler');
+const safeError = require('./utils/safeError');
+
+// ─── Environment Setup ───────────────────────────────────────────────────────
 if (!process.env.MONGODB_URI && !process.env.USE_MOCK_DB) {
   process.env.USE_MOCK_DB = 'true';
 }
 
-// Force predictable behaviour in tests (no real DB/socket side effects)
 const isTestEnv = process.env.NODE_ENV === 'test' || !!process.env.JEST_WORKER_ID;
 if (isTestEnv) {
   process.env.USE_MOCK_DB = 'true';
@@ -36,669 +45,57 @@ if (isTestEnv) {
   process.env.CSRF_DISABLE = 'true';
 }
 
-// ─── Utilities & Config ──────────────────────────────────────────────────────
-const logger = require('./utils/logger');
-const { shutdownMiddleware, registerShutdownHook } = require('./utils/gracefulShutdown');
-const {
-  errorHandler,
-  notFoundHandler,
-  uncaughtExceptionHandler,
-  unhandledRejectionHandler,
-} = require('./errors/errorHandler');
-const { sanitizeInput: requestValidationSanitize } = require('./middleware/requestValidation');
-
-// Security middleware
-const sanitizeInput = require('./middleware/sanitize');
-const { apiLimiter } = require('./middleware/rateLimiter');
-const { suspiciousActivityDetector } = require('./utils/security');
-const responseHandler = require('./middleware/responseHandler');
-const { maintenanceMiddleware } = require('./middleware/maintenance.middleware');
-const apiKeyAuth = require('./middleware/apiKey.middleware');
-
-// Professional Middleware (v2)
-const { apiVersionMiddleware } = require('./middleware/apiVersion.middleware');
-const { requestContext } = require('./middleware/dto.middleware');
-const { auditMiddleware } = require('./middleware/auditTrail.middleware');
-const { metricsMiddleware, metricsHandler } = require('./middleware/metrics.middleware');
-
-// Advanced Security
-const {
-  authRateLimiter,
-  mongoSanitizeMiddleware,
-  requestLogger,
-} = require('./config/security.advanced');
-
-// On-demand imports (used in routes, not at top-level)
-// const { requirePermission, requireRole, ROLES } = require('./middleware/rbac.v2.middleware');
-// const { ApiResponse } = require('./middleware/dto.middleware');
-const securityHeaders = require('./middleware/securityHeaders');
-const csrfProtection = require('./middleware/csrfProtection');
-const { jsonDepthLimiter, validateSecurityConfig } = require('./middleware/securityHardening');
-const sanitizeErrorResponse = require('./middleware/sanitizeErrorResponse');
-
-// Run security config audit at startup (logs warnings for risky settings)
-validateSecurityConfig();
-
-// Performance optimization modules
-const {
-  initializeRedis,
-  compressionMiddleware,
-  requestTimerMiddleware,
-  cacheMiddleware,
-} = require('./config/performance');
-const { initializePerformanceOptimizations } = require('./utils/performance-optimizer');
-
-// Request ID middleware for traceability
-const { requestIdMiddleware } = require('./middleware/requestId.middleware');
-const { requestLoggerMiddleware } = require('./middleware/requestLogger.middleware');
-
-// Centralised route registry (replaces 100+ inline imports)
-const { mountAllRoutes } = require('./routes/_registry');
-
-// ─── Infrastructure (Phase II – Technical Improvements) ──────────────────────
-const { mountEventStoreRoutes } = require('./infrastructure/eventStore');
-const { mountMessageQueueRoutes } = require('./infrastructure/messageQueue');
-const { mountMigrationRoutes } = require('./infrastructure/migrationRunner');
-const {
-  getVersionRouter: _getVersionRouter,
-  mountOnVersions: _mountOnVersions,
-} = require('./api/versionRouter');
-const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
-
-// ─── Integration Layer (cross-module event-driven architecture) ──────────────
-const { integrationBus, mountIntegrationBusRoutes } = require('./integration/systemIntegrationBus');
-const { moduleConnector, mountModuleConnectorRoutes } = require('./integration/moduleConnector');
-const {
-  createIntegrationContextMiddleware,
-  mountIntegrationContextRoutes,
-} = require('./middleware/integrationContext.middleware');
-const { initializeCrossModuleSubscribers } = require('./integration/crossModuleSubscribers');
-const { ALL_CONTRACTS } = require('./events/contracts/domainEventContracts');
+const isProd = process.env.NODE_ENV === 'production';
 
 // ─── Create Express App ──────────────────────────────────────────────────────
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// ─── Startup Modules ─────────────────────────────────────────────────────────
+const { setupMiddleware } = require('./startup/middleware');
+const { setupHealthProbes } = require('./startup/healthProbes');
+const { setupAdminEndpoints } = require('./startup/adminEndpoints');
+const { setupSchedulers } = require('./startup/schedulers');
+const { setupIntegrationBus } = require('./startup/integrationBus');
+
+// Centralised route registry
+const { mountAllRoutes } = require('./routes/_registry');
+const { authRateLimiter } = require('./config/security.advanced');
+
+// Infrastructure (Phase II)
+const { mountEventStoreRoutes } = require('./infrastructure/eventStore');
+const { mountMessageQueueRoutes } = require('./infrastructure/messageQueue');
+const { mountMigrationRoutes } = require('./infrastructure/migrationRunner');
+require('./api/versionRouter'); // side-effects only
+const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
+
 // ═══════════════════════════════════════════════════════════════════════════
-// 🧪 DEV-ONLY TEST ENDPOINTS (BEFORE ALL MIDDLEWARE)
+// 1. MIDDLEWARE STACK
 // ═══════════════════════════════════════════════════════════════════════════
-if (process.env.NODE_ENV === 'development') {
-  app.get('/test-first', (req, res) => {
-    res.json({
-      success: true,
-      message: 'FIRST ENDPOINT WORKS! (Super Early)',
-      timestamp: new Date(),
-    });
-  });
-
-  app.get('/api/test', (req, res) => {
-    res.json({ success: true, message: '/api/test works! (Super Early)', timestamp: new Date() });
-  });
-
-  logger.debug('Dev test endpoints mounted: /test-first, /api/test');
-}
+setupMiddleware(app, { isTestEnv, isProd });
 
 // ═══════════════════════════════════════════════════════════════════════════
-// 🔓 DEV BYPASS: Skip auth/security for Phase 29-33 (public for testing)
+// 2. HEALTH PROBES (public — no auth required)
 // ═══════════════════════════════════════════════════════════════════════════
-if (process.env.PHASE2933_PUBLIC === 'true') {
-  app.use((req, res, next) => {
-    if (req.path.startsWith('/api/phases-29-33')) {
-      req.isPhase2933Public = true;
-    }
-    next();
-  });
-}
+setupHealthProbes(app, { isTestEnv, isProd });
 
-// Service worker — served from static file
-app.get('/service-worker.js', (req, res) => {
-  const swPath = require('path').join(__dirname, 'public', 'service-worker.js');
-  res.type('application/javascript').sendFile(swPath);
-});
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. ADMIN ENDPOINTS (emergency — before route registry)
+// ═══════════════════════════════════════════════════════════════════════════
+setupAdminEndpoints(app, { isProd });
 
-// ─── Trust proxy ─────────────────────────────────────────────────────────────
-// When behind a reverse proxy (Nginx, AWS ALB, Cloudflare, etc.), Express needs
-// to trust the X-Forwarded-* headers so that:
-//   • req.ip returns the real client IP (not the proxy's IP)
-//   • req.protocol reflects the original scheme (https)
-//   • Rate-limiters count per real client instead of per proxy
-//
-// Value of 1 means "trust the first hop" — correct for a single Nginx/ALB.
-// For multiple proxies set this to the hop count or use 'loopback' for local.
-// See: https://expressjs.com/en/guide/behind-proxies.html
-app.set('trust proxy', 1);
-
-// ─── Request ID (traceability — must be before everything else) ──────────────
-app.use(requestIdMiddleware);
-app.use(requestLoggerMiddleware); // attach req.log (child logger with requestId)
-
-// ─── Security Middleware (MUST be first) ──────────────────────────────────────
-app.use(securityHeaders); // Helmet with hardened CSP + Permissions-Policy
-app.use(sanitizeErrorResponse); // Strip internal error details in production
-app.use(suspiciousActivityDetector);
-app.use(mongoSanitizeMiddleware);
-app.use(shutdownMiddleware);
-app.use(apiKeyAuth);
-app.use(maintenanceMiddleware);
-
-// ─── CORS ────────────────────────────────────────────────────────────────────
-const devOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://localhost:3002',
-  'http://localhost:3004',
-  'http://localhost:3005',
-];
-// Support both CORS_ORIGINS (plural) and CORS_ORIGIN (singular) env vars
-const prodOriginsRaw = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || '';
-const prodOrigins = prodOriginsRaw
-  ? prodOriginsRaw
-      .split(',')
-      .map(o => o.trim())
-      .filter(Boolean)
-  : [];
-
-const isProd = process.env.NODE_ENV === 'production';
-if (isProd && !prodOrigins.length) {
-  logger.warn(
-    '⚠️  WARNING: No CORS_ORIGINS or CORS_ORIGIN set in production. ' +
-      'Falling back to FRONTEND_URL or rejecting cross-origin requests.'
-  );
-}
-
-const corsOptions = {
-  origin: isProd
-    ? prodOrigins.length
-      ? prodOrigins
-      : process.env.FRONTEND_URL
-        ? [process.env.FRONTEND_URL]
-        : false
-    : [process.env.FRONTEND_URL || 'http://localhost:3004', ...devOrigins],
-  credentials: true,
-  optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'X-CSRF-Token',
-    'X-Request-Id',
-  ],
-  exposedHeaders: ['X-Request-Id', 'X-Response-Time', 'X-Cache', 'X-RateLimit-Remaining'],
-  maxAge: 86400, // preflight cache duration (24h)
-};
-app.use(cors(corsOptions));
-
-// ─── Body Parsing ────────────────────────────────────────────────────────────
-// Upload routes allow larger payloads; API routes default to 1 MB
-app.use('/api/upload', express.json({ limit: '10mb' }));
-app.use('/api/upload', express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true, limit: '1mb' }));
-
-// ─── JSON Depth Limiter (DoS protection against deeply nested payloads) ──────
-app.use(jsonDepthLimiter);
-
-// ─── Input Sanitization ─────────────────────────────────────────────────────
-app.use(sanitizeInput);
-app.use(requestValidationSanitize);
-
-// ─── HTTP Parameter Pollution (HPP) Protection ───────────────────────────────
-// When a query param appears multiple times (?sort=name&sort=DROP), Express parses
-// it as an array, which can confuse downstream code. This middleware keeps only the
-// last value for every query parameter, neutralising HPP attacks.
-const hppProtection = (req, _res, next) => {
-  if (req.query) {
-    for (const key of Object.keys(req.query)) {
-      if (Array.isArray(req.query[key])) {
-        req.query[key] = req.query[key][req.query[key].length - 1];
-      }
-    }
-  }
-  next();
-};
-app.use(hppProtection);
-
-// ─── Pagination Cap (prevent DoS via ?limit=999999) ─────────────────────────
-const capPagination = require('./middleware/capPagination');
-app.use(capPagination());
-
-// ─── CSRF Protection ────────────────────────────────────────────────────────
-app.use(csrfProtection);
-
-// ─── Performance ─────────────────────────────────────────────────────────────
-app.use(compressionMiddleware);
-app.use(requestTimerMiddleware);
-app.use(cacheMiddleware(300, 'api'));
-
-if (!isTestEnv) {
-  initializeRedis();
-}
-initializePerformanceOptimizations(app);
-
-// ─── API Versioning & Request Context ────────────────────────────────────────
-app.use(apiVersionMiddleware);
-app.use(requestContext);
-app.use(metricsMiddleware);
-
-// Prometheus metrics endpoint (protected by token in production)
-app.get(
-  '/metrics',
-  (req, res, next) => {
-    const token = process.env.METRICS_TOKEN;
-    if (token && req.headers.authorization !== `Bearer ${token}`) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
-    }
-    next();
-  },
-  metricsHandler
-);
-// ─── Audit Trail (auto-audit write operations) ───────────────────────────────
-app.use(auditMiddleware());
-
-// ─── Response Helper & Logging ───────────────────────────────────────────────
-app.use(responseHandler);
-
-// Custom morgan token that strips sensitive query params (tokens, passwords, keys)
-// to prevent credential leakage in access logs
-const SENSITIVE_QS_KEYS =
-  /(?:^|&)(token|password|secret|key|authorization|api_key|apikey|access_token|refresh_token)=[^&]*/gi;
-morgan.token('safe-url', req => {
-  const url = req.originalUrl || req.url || '';
-  const qIdx = url.indexOf('?');
-  if (qIdx === -1) return url;
-  const pathPart = url.substring(0, qIdx);
-  const qs = url
-    .substring(qIdx + 1)
-    .replace(SENSITIVE_QS_KEYS, (m, k) => (m.startsWith('&') ? '&' : '') + `${k}=[REDACTED]`);
-  return `${pathPart}?${qs}`;
-});
-app.use(morgan(':method :safe-url :status :response-time ms'));
-app.use(requestLogger);
-
-// ─── Test Mode: Mock User ────────────────────────────────────────────────────
-const { Types } = mongoose;
-let requestCount = 0;
-const mockUserId = new Types.ObjectId();
-
-app.use((req, res, next) => {
-  if (process.env.NODE_ENV === 'test' || !!process.env.JEST_WORKER_ID) {
-    requestCount++;
-    req.user = {
-      _id: mockUserId,
-      id: mockUserId.toString(),
-      email: 'test@alawael.local',
-      role: 'admin',
-      name: 'Test User',
-      permissions: ['read', 'write', 'delete', 'admin'],
-    };
-    if (requestCount <= 3) {
-      logger.info(
-        `[TEST MODE ${requestCount}] ${req.method} ${req.path} - User injected:`,
-        req.user.email
-      );
-    }
-  }
-  next();
-});
-if (isTestEnv) {
-  logger.info('✅ Test mode: DYNAMIC mock user middleware registered for test requests');
-}
-
-// ─── Rate Limiting ───────────────────────────────────────────────────────────
-const apiLimiterWithPhase2933Skip = (req, res, next) => {
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    process.env.PHASE2933_PUBLIC === 'true' &&
-    (req.path.startsWith('/phases-29-33') || req.path.startsWith('/api/phases-29-33'))
-  ) {
-    return next();
-  }
-  apiLimiter(req, res, next);
-};
-
-// Single rate limiter for /api — removed duplicate advancedApiLimiter (same 60req/min)
-app.use('/api', apiLimiterWithPhase2933Skip);
-
-// ─── Swagger (consolidated via config/swagger.config.js) ─────────────────────
-const { setupSwagger } = require('./config/swagger.config');
-// Enable Swagger in all environments except test; controlled via ENABLE_SWAGGER env var
-const enableSwagger = process.env.ENABLE_SWAGGER
-  ? process.env.ENABLE_SWAGGER === 'true'
-  : process.env.NODE_ENV !== 'test';
-if (enableSwagger) {
-  setupSwagger(app);
-}
-
-// ─── Public Health Endpoints ─────────────────────────────────────────────────
-const { getRedisStatus } = require('./config/performance');
-
-/**
- * Liveness probe — checks API + database + Redis connectivity.
- * Returns 200 when healthy or degraded, 503 only in production when fully unhealthy.
- */
-app.get('/health', (_req, res) => {
-  const mongoStates = ['disconnected', 'connected', 'connecting', 'disconnecting'];
-  const dbState = isTestEnv
-    ? 'connected'
-    : mongoStates[mongoose.connection.readyState] || 'unknown';
-  const redisState = getRedisStatus();
-  const dbOk = dbState === 'connected' || dbState === 'connecting';
-  const redisOk = redisState === 'connected' || redisState === 'disabled'; // disabled is OK (mock mode)
-
-  let overall;
-  if (dbOk && redisOk) {
-    overall = 'ok';
-  } else if (dbOk || redisOk) {
-    overall = 'degraded';
-  } else {
-    overall = 'unhealthy';
-  }
-
-  // 503 only when fully unhealthy; degraded services still return 200
-  const statusCode = overall === 'unhealthy' ? 503 : 200;
-  res.status(statusCode).json({
-    status: overall,
-    message: 'AlAwael ERP Backend is running',
-    timestamp: new Date().toISOString(),
-    version: '3.0.0',
-    environment: process.env.NODE_ENV || 'development',
-    services: {
-      api: 'up',
-      database: dbState,
-      redis: redisState,
-      websocket: 'up',
-    },
-  });
-});
-
-// NOTE: /api/health removed — use /health liveness probe instead (L316)
-// Kubernetes readiness probe — DB + Redis must be ready
-app.get('/readiness', (req, res) => {
-  const dbReady = isTestEnv || mongoose.connection.readyState === 1;
-  const redisReady = getRedisStatus() === 'connected' || getRedisStatus() === 'disabled';
-  const isReady = dbReady && redisReady;
-  if (isReady) {
-    return res.status(200).json({ status: 'ready', db: 'ok', redis: getRedisStatus() });
-  }
-  return res
-    .status(503)
-    .json({ status: 'not-ready', db: dbReady ? 'ok' : 'down', redis: getRedisStatus() });
-});
-
-// System info — restricted in production (no internal flags exposed)
-app.get('/api/info', (req, res) => {
-  res.json({
-    status: 'OK',
-    version: '3.0.0',
-    timestamp: new Date().toISOString(),
-    // Internal diagnostics — development/staging only
-    ...(isProd
-      ? {}
-      : {
-          environment: process.env.NODE_ENV || 'development',
-          port: process.env.PORT || 3001,
-          useMockDb: process.env.USE_MOCK_DB === 'true',
-          redisDisabled: process.env.DISABLE_REDIS === 'true',
-          smartTestMode: process.env.SMART_TEST_MODE === 'true',
-        }),
-  });
-});
-
-// Serve static files — with security headers and immutable cache for hashed assets
-app.use(
-  express.static('public', {
-    maxAge: '1d',
-    setHeaders: (res, filePath) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff');
-      // Immutable cache for fingerprinted/hashed assets
-      if (/\.[a-f0-9]{8,}\./i.test(filePath)) {
-        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-      }
-    },
-  })
-);
-
-// ─── Integration Context Middleware (distributed tracing) ────────────────────
-app.use(createIntegrationContextMiddleware({ integrationBus, serviceName: 'alawael-erp' }));
-
-// ─── Cache-Control for API responses (prevent accidental proxy caching) ──────
-app.use('/api', (_req, res, next) => {
-  res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.set('Pragma', 'no-cache');
-  next();
-});
-
-// ─── Pagination Defaults (cap ?limit to prevent DB dumps) ────────────────────
-const { paginationDefaults } = require('./middleware/paginationDefaults');
-app.use('/api', paginationDefaults({ max: 100 }));
-
-// ─── Global Validation (safety-net: ObjectId params, query hygiene, body scan)
-const { globalValidation } = require('./middleware/globalValidation');
-app.use('/api', globalValidation());
-
-// ─── Emergency Admin Reset (guaranteed — before route registry) ─────────────
-// URL: POST /api/_init (POST only for safety — never GET for state-changing ops)
-// يستخدم native MongoDB driver مباشرة — تجاوز كل Mongoose hooks
-// ⚠️  SECURITY: Disabled in production unless ALLOW_ADMIN_INIT=true
-app.post('/api/_init', async (req, res) => {
-  // Block in production unless explicitly allowed
-  if (isProd && process.env.ALLOW_ADMIN_INIT !== 'true') {
-    return res.status(403).json({ success: false, message: 'Disabled in production' });
-  }
-
-  const SECRET = process.env.SETUP_SECRET_KEY;
-  if (!SECRET) {
-    return res.status(500).json({ success: false, message: 'SETUP_SECRET_KEY not configured' });
-  }
-
-  const key = req.headers['x-init-key'] || req.body?.secretKey;
-  if (!key || key !== SECRET) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-  try {
-    const bcrypt = require('bcryptjs');
-    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
-    const password = process.env.ADMIN_PASSWORD;
-    if (!password) {
-      return res.status(500).json({ success: false, message: 'ADMIN_PASSWORD not configured' });
-    }
-
-    const hash = await bcrypt.hash(password, 12);
-    const verifyOk = await bcrypt.compare(password, hash);
-    if (!verifyOk) throw new Error('bcrypt hash verification failed');
-
-    const collection = mongoose.connection.db.collection('users');
-    const now = new Date();
-
-    const result = await collection.findOneAndUpdate(
-      { email },
-      {
-        $set: {
-          email,
-          password: hash,
-          fullName: 'مدير النظام',
-          role: 'admin',
-          isActive: true,
-          emailVerified: true,
-          failedLoginAttempts: 0,
-          tokenVersion: 0,
-          updatedAt: now,
-          requirePasswordChange: true, // Force password change on first login
-        },
-        $unset: { lockUntil: '', resetPasswordToken: '', resetPasswordExpires: '' },
-        $setOnInsert: {
-          createdAt: now,
-          loginHistory: [],
-          customPermissions: [],
-          deniedPermissions: [],
-        },
-      },
-      { upsert: true, returnDocument: 'after' }
-    );
-
-    const wasNew = result?.lastErrorObject?.updatedExisting === false;
-
-    // ⚠️ Never return the password in the response
-    return res.json({
-      success: true,
-      action: wasNew ? 'created' : 'updated',
-      email,
-      requirePasswordChange: true,
-    });
-  } catch (err) {
-    logger.error('[/api/_init] Error:', err.message);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-// ─── Admin Diagnostic Endpoint ───────────────────────────────────────────────
-// URL: GET /api/_diag (header: X-Init-Key)
-// يُظهر حالة حساب المدير دون تعديل — للتشخيص فقط
-// ⚠️  SECURITY: Disabled in production. Never expose password hashes or internal state.
-app.get('/api/_diag', async (req, res) => {
-  // Block in production entirely
-  if (isProd) {
-    return res.status(403).json({ success: false, message: 'Disabled in production' });
-  }
-
-  const SECRET = process.env.SETUP_SECRET_KEY;
-  if (!SECRET) {
-    return res.status(500).json({ success: false, message: 'SETUP_SECRET_KEY not configured' });
-  }
-
-  const key = req.headers['x-init-key'];
-  if (!key || key !== SECRET) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-  try {
-    const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();
-    const collection = mongoose.connection.db.collection('users');
-
-    const user = await collection.findOne({ email });
-    const adminCount = await collection.countDocuments({ role: 'admin' });
-
-    return res.json({
-      success: true,
-      targetEmail: email,
-      userFound: !!user,
-      role: user?.role,
-      isActive: user?.isActive,
-      hasPassword: !!user?.password,
-      // ⚠️ Never expose passwordHashPrefix or passwordValid
-      failedLoginAttempts: user?.failedLoginAttempts,
-      isLocked: !!(user?.lockUntil && user.lockUntil > new Date()),
-      totalAdmins: adminCount,
-      mongoState: mongoose.connection.readyState,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err) {
-    logger.error('[/api/_diag] Error:', err.message);
-    return res.status(500).json({ success: false, error: 'Internal server error' });
-  }
-});
-
-// ─── Global ObjectId Param Validation (Round 38) ────────────────────────────
-// Validates every :id param across ALL routes — catches malformed IDs
-// before they reach Mongoose and trigger CastError / info-leak.
-const mongoose_paramCheck = require('mongoose');
-app.param('id', (req, res, next, value) => {
-  if (value && !mongoose_paramCheck.isValidObjectId(value)) {
-    return res.status(400).json({
-      success: false,
-      message: 'معرّف غير صالح',
-      message_en: 'Invalid id format',
-    });
-  }
-  next();
-});
-
-// ─── Route Mounting (centralised in routes/_registry.js) ─────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. ROUTE MOUNTING (centralised in routes/_registry.js)
+// ═══════════════════════════════════════════════════════════════════════════
 try {
   mountAllRoutes(app, { authRateLimiter });
 } catch (err) {
   logger.warn('[Routes] Some routes failed to mount:', err.message);
-  // Ensure auth routes are always available even if other routes fail
 }
 
-// ─── AI Scheduler — جدولة فحوصات الذكاء الاصطناعي اليومية (البرومبت 20) ──────
-if (!isTestEnv) {
-  try {
-    const { startScheduler, stopScheduler } = require('./services/ai/aiScheduler');
-    // تسجيل hook الإيقاف السلس — حتى لو لم يبدأ بعد (setTimeout)
-    registerShutdownHook('AI Scheduler', stopScheduler);
-    // تأخير 30 ثانية بعد البدء للسماح لقاعدة البيانات بالاتصال
-    const aiSchedulerTimer = setTimeout(() => {
-      startScheduler();
-      logger.info(
-        '✅ prompt_20 AI Scheduler started (daily checks at 06:00, monthly reports on 1st)'
-      );
-    }, 30000);
-    if (aiSchedulerTimer.unref) aiSchedulerTimer.unref();
-  } catch (err) {
-    logger.warn('⚠️  AI Scheduler could not start', { error: err.message });
-  }
-}
-
-// ─── SLA Scheduler — جدولة فحص SLA تذاكر الدعم الفني (البرومبت 22) ───────────
-if (!isTestEnv) {
-  try {
-    const { startSlaScheduler, stopSlaScheduler } = require('./services/ticketSlaScheduler');
-    // تسجيل hook الإيقاف السلس
-    registerShutdownHook('SLA Scheduler', stopSlaScheduler);
-    // تأخير 35 ثانية لضمان اتصال قاعدة البيانات
-    setTimeout(() => {
-      startSlaScheduler();
-      logger.info(
-        '✅ prompt_22 SLA Scheduler started (every 15 min: response + resolution breach checks)'
-      );
-    }, 35000);
-  } catch (err) {
-    logger.warn('⚠️  SLA Scheduler could not start', { error: err.message });
-  }
-}
-
-// ─── Shutdown Hooks — تسجيل إيقاف سلس لجميع الخدمات ذات المؤقتات ────────────
-if (!isTestEnv) {
-  const shutdownServices = [
-    ['HealthCheck', () => require('./services/HealthCheck').shutdown()],
-    ['AlertService', () => require('./services/AlertService').shutdown()],
-    ['CachingService', () => require('./services/cachingService').shutdown()],
-    ['RealtimeDashboard', () => require('./services/realtimeDashboardService').shutdown()],
-    ['NotificationAnalytics', () => require('./services/notificationAnalyticsSystem').shutdown()],
-    ['BackupAnalytics', () => require('./services/backup-analytics.service').shutdown()],
-    ['BackupPerformance', () => require('./services/backup-performance.service').shutdown()],
-    ['BackupSync', () => require('./services/backup-sync.service').shutdown()],
-    ['BackupSecurity', () => require('./services/backup-security.service').shutdown()],
-    ['DatabaseMaintenance', () => require('./services/database-maintenance-service').stop()],
-    ['DatabaseReplication', () => require('./services/database-replication-service').stop()],
-  ];
-
-  for (const [name, fn] of shutdownServices) {
-    registerShutdownHook(name, async () => {
-      try {
-        await fn();
-      } catch {
-        /* service may not have been initialised — ignore */
-      }
-    });
-  }
-}
-
-// ─── Settings Seed — تهيئة الإعدادات الافتراضية (البرومبت 24) ────────────────
-if (!isTestEnv) {
-  setTimeout(async () => {
-    try {
-      const settingsService = require('./services/settingsService');
-      await settingsService.seedDefaultSettings();
-      logger.info('✅ prompt_24 Default settings seeded (GlobalSetting collection)');
-    } catch (err) {
-      logger.warn('⚠️  Settings seed failed', { error: err.message });
-    }
-  }, 40000);
-}
-
-// ─── Infrastructure API Routes (v2) ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. INFRASTRUCTURE & DOMAIN ROUTES (v2)
+// ═══════════════════════════════════════════════════════════════════════════
 try {
   mountEventStoreRoutes(app);
   mountMessageQueueRoutes(app);
@@ -707,7 +104,6 @@ try {
   logger.warn('[Infrastructure] Some infrastructure routes failed to mount:', err.message);
 }
 
-// ─── Domain Registry (v2) ────────────────────────────────────────────────────
 try {
   mountAllDomains(app);
 } catch (err) {
@@ -718,11 +114,11 @@ app.get('/api/v2/domains/health', async (_req, res) => {
     const health = await domainHealthCheck();
     res.json({ success: true, domains: health });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    safeError(res, error, 'app');
   }
 });
 
-// ─── Platform Health & Stats (DDD unified rehabilitation platform) ───────────
+// Platform Health & Stats (DDD unified rehabilitation platform)
 try {
   const platformRoutes = require('./routes/platform.routes');
   app.use('/api/v1/platform', platformRoutes);
@@ -732,117 +128,19 @@ try {
   logger.warn('[Platform] Platform routes skipped:', err.message);
 }
 
-// ─── Integration Bus Initialization (cross-module event-driven architecture) ─
-try {
-  // Initialize the integration bus with existing infrastructure singletons
-  const { eventStore } = require('./infrastructure/eventStore');
-  const { getMessageQueue } = require('./infrastructure/messageQueue');
-  const socketEmitter = (() => {
-    try {
-      return require('./utils/socketEmitter');
-    } catch {
-      return null;
-    }
-  })();
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. INTEGRATION BUS (cross-module event-driven architecture)
+// ═══════════════════════════════════════════════════════════════════════════
+setupIntegrationBus(app);
 
-  integrationBus.initialize({
-    eventStore,
-    messageQueue: getMessageQueue(),
-    socketEmitter,
-  });
-
-  // Register all domain event contracts
-  for (const [domain, contracts] of Object.entries(ALL_CONTRACTS)) {
-    const events = Object.values(contracts).map(c => c.eventType);
-    integrationBus.registerDomain(domain, { version: '1.0.0', events });
-  }
-
-  // Register DDD rehabilitation domain event contracts (20 domains, 37 events)
-  try {
-    const { DDD_CONTRACTS } = require('./events/contracts/dddEventContracts');
-    for (const [domain, contracts] of Object.entries(DDD_CONTRACTS)) {
-      const events = Object.values(contracts).map(c => c.eventType);
-      integrationBus.registerDomain(`ddd:${domain}`, { version: '1.0.0', events });
-    }
-    logger.info('[Integration] ✓ DDD rehabilitation event contracts registered');
-  } catch (dddErr) {
-    logger.warn('[Integration] DDD event contracts skipped:', dddErr.message);
-  }
-
-  // Initialize the module connector
-  moduleConnector.initialize({ integrationBus });
-
-  // Wire cross-module subscribers
-  initializeCrossModuleSubscribers(integrationBus, moduleConnector);
-
-  // Wire DDD rehabilitation cross-domain subscribers (16 event flows)
-  try {
-    const { initializeDDDSubscribers } = require('./integration/dddCrossModuleSubscribers');
-    initializeDDDSubscribers(integrationBus, moduleConnector);
-    logger.info('[Integration] ✓ DDD cross-domain subscribers wired');
-  } catch (dddSubErr) {
-    logger.warn('[Integration] DDD subscribers skipped:', dddSubErr.message);
-  }
-
-  // Wire DDD notification triggers (10 notification rules)
-  try {
-    const { initializeDDDNotifications } = require('./integration/dddNotificationTriggers');
-    initializeDDDNotifications(integrationBus);
-    logger.info('[Integration] ✓ DDD notification triggers wired');
-  } catch (dddNotifErr) {
-    logger.warn('[Integration] DDD notifications skipped:', dddNotifErr.message);
-  }
-
-  // Wire DDD workflow automations (Phase 4 — 12 automation rules)
-  try {
-    const { initializeDDDAutomations } = require('./integration/dddWorkflowAutomations');
-    initializeDDDAutomations(integrationBus);
-    logger.info('[Integration] ✓ DDD workflow automations wired');
-  } catch (dddAutoErr) {
-    logger.warn('[Integration] DDD automations skipped:', dddAutoErr.message);
-  }
-
-  // Initialize DDD scheduled jobs (Phase 4 — 6 cron jobs)
-  try {
-    const { initializeDDDScheduler } = require('./services/dddScheduler');
-    initializeDDDScheduler();
-    logger.info('[Integration] ✓ DDD scheduler initialized');
-  } catch (dddSchedErr) {
-    logger.warn('[Integration] DDD scheduler skipped:', dddSchedErr.message);
-  }
-
-  // Wire DDD webhook dispatcher (Phase 5 — external webhook bridge)
-  try {
-    const { initializeDDDWebhooks } = require('./integration/dddWebhookDispatcher');
-    initializeDDDWebhooks(integrationBus);
-    logger.info('[Integration] ✓ DDD webhook dispatcher wired');
-  } catch (dddWhErr) {
-    logger.warn('[Integration] DDD webhook dispatcher skipped:', dddWhErr.message);
-  }
-
-  // Mount integration API routes
-  mountIntegrationBusRoutes(app);
-  mountModuleConnectorRoutes(app);
-  mountIntegrationContextRoutes(app);
-
-  logger.info('[Integration] ✓ System integration bus initialized successfully');
-} catch (err) {
-  logger.warn('[Integration] Integration bus initialization skipped:', err.message);
-}
-
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    name: 'AlAwael ERP API',
-    version: '1.0.0',
-    description: 'Rehabilitation Center Management System',
-    endpoints: { health: '/health', readiness: '/readiness', api: '/api', docs: '/api-docs' },
-  });
-});
+// ═══════════════════════════════════════════════════════════════════════════
+// 7. SCHEDULERS & SHUTDOWN HOOKS
+// ═══════════════════════════════════════════════════════════════════════════
+setupSchedulers({ isTestEnv });
 
 // ─── Error Handling (MUST be after all routes) ───────────────────────────────
-app.use(notFoundHandler); // 404 for unmatched routes (regular middleware)
-app.use(errorHandler); // centralised error handler (4-arg middleware)
+app.use(notFoundHandler);
+app.use(errorHandler);
 uncaughtExceptionHandler();
 unhandledRejectionHandler();
 

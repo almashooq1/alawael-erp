@@ -43,8 +43,7 @@ router.get('/', requireAuth, async (req, res) => {
     ]);
     res.json({ success: true, data, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
-    logger.error('feedback list error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'feedback list error');
   }
 });
 
@@ -122,8 +121,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('feedback stats error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'feedback stats error');
   }
 });
 
@@ -137,8 +135,7 @@ router.get('/:id', requireAuth, async (req, res) => {
     if (!feedback) return res.status(404).json({ success: false, message: 'Feedback not found' });
     res.json({ success: true, data: feedback });
   } catch (err) {
-    logger.error('feedback get error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'feedback get error');
   }
 });
 
@@ -175,8 +172,7 @@ router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
     if (!feedback) return res.status(404).json({ success: false, message: 'Feedback not found' });
     res.json({ success: true, message: 'Feedback deleted' });
   } catch (err) {
-    logger.error('feedback delete error:', err);
-    res.status(500).json({ success: false, message: safeError(err) });
+    safeError(res, err, 'feedback delete error');
   }
 });
 

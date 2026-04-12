@@ -9,6 +9,7 @@ const router = express.Router();
 const MOIPassportService = require('../services/moi-passport.service');
 const Logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
 
 // Initialize service
 const passportService = new MOIPassportService();
@@ -28,10 +29,7 @@ const passportVerificationMiddleware = (req, res, next) => {
     Logger.error('[MOI-MIDDLEWARE] passportVerificationMiddleware error:', {
       message: 'حدث خطأ داخلي',
     });
-    res.status(500).json({
-      success: false,
-      error: 'Service initialization failed',
-    });
+    safeError(res, error, 'moi-passport');
   }
 };
 
@@ -350,10 +348,7 @@ router.get('/cache/stats', (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'moi-passport');
   }
 });
 
@@ -372,10 +367,7 @@ router.post('/cache/clear', (req, res) => {
       message: `Cache cleared: ${result.cleared || 'all'} items removed`,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'moi-passport');
   }
 });
 
@@ -415,10 +407,7 @@ router.get('/metrics', (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'moi-passport');
   }
 });
 
@@ -474,10 +463,7 @@ router.get('/audit-logs', (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: 'حدث خطأ في الخادم',
-    });
+    safeError(res, error, 'moi-passport');
   }
 });
 

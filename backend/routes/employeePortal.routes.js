@@ -65,8 +65,7 @@ router.get('/profile', async (req, res) => {
     }
     res.json({ success: true, data: employee, message: 'بيانات الملف الشخصي' });
   } catch (error) {
-    logger.error('Error fetching profile:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملف الشخصي' });
+    safeError(res, error, 'fetching profile');
   }
 });
 
@@ -87,8 +86,7 @@ router.put('/profile', async (req, res) => {
     }
     res.json({ success: true, data: employee, message: 'تم تحديث الملف الشخصي' });
   } catch (error) {
-    logger.error('Error updating profile:', error);
-    res.status(500).json({ success: false, message: 'خطأ في تحديث الملف الشخصي' });
+    safeError(res, error, 'updating profile');
   }
 });
 
@@ -136,8 +134,7 @@ router.get('/leaves/balance', async (req, res) => {
 
     res.json({ success: true, data: balance, message: 'رصيد الإجازات' });
   } catch (error) {
-    logger.error('Error fetching leave balance:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب رصيد الإجازات' });
+    safeError(res, error, 'fetching leave balance');
   }
 });
 
@@ -183,7 +180,7 @@ router.post('/leaves', async (req, res) => {
     if (error.name === 'ValidationError') {
       return res.status(400).json({ success: false, message: safeError(error) });
     }
-    res.status(500).json({ success: false, message: 'خطأ في تقديم طلب الإجازة' });
+    safeError(res, error, 'employeePortal');
   }
 });
 
@@ -212,8 +209,7 @@ router.get('/leaves', async (req, res) => {
       message: 'قائمة الإجازات',
     });
   } catch (error) {
-    logger.error('Error fetching leaves:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإجازات' });
+    safeError(res, error, 'fetching leaves');
   }
 });
 
@@ -245,8 +241,7 @@ router.get('/payslips', async (req, res) => {
       message: 'قسائم الرواتب',
     });
   } catch (error) {
-    logger.error('Error fetching payslips:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب قسائم الرواتب' });
+    safeError(res, error, 'fetching payslips');
   }
 });
 
@@ -282,8 +277,7 @@ router.get('/documents', async (req, res) => {
       message: 'المستندات',
     });
   } catch (error) {
-    logger.error('Error fetching documents:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب المستندات' });
+    safeError(res, error, 'fetching documents');
   }
 });
 
@@ -315,7 +309,7 @@ router.post('/requests', async (req, res) => {
     if (error.name === 'ValidationError') {
       return res.status(400).json({ success: false, message: safeError(error) });
     }
-    res.status(500).json({ success: false, message: 'خطأ في تقديم الطلب' });
+    safeError(res, error, 'employeePortal');
   }
 });
 
@@ -344,8 +338,7 @@ router.get('/requests', async (req, res) => {
       message: 'قائمة الطلبات',
     });
   } catch (error) {
-    logger.error('Error fetching requests:', error);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الطلبات' });
+    safeError(res, error, 'fetching requests');
   }
 });
 

@@ -146,7 +146,7 @@ const prescriptionItemSchema = new Schema({
 const prescriptionSchema = new Schema(
   {
     prescriptionNumber: { type: String, unique: true },
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     beneficiaryName: String,
     prescriber: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     prescriberName: String,
@@ -228,7 +228,7 @@ const dispensingSchema = new Schema(
   {
     dispensingNumber: { type: String, unique: true },
     prescription: { type: Schema.Types.ObjectId, ref: 'Prescription', required: true },
-    beneficiary: { type: Schema.Types.ObjectId, ref: 'BeneficiaryFile', required: true },
+    beneficiary: { type: Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     items: [dispensingItemSchema],
     pharmacist: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     status: {

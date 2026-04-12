@@ -8,6 +8,7 @@ const helmet = require('helmet');
 const crypto = require('crypto');
 const { URL } = require('url');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /**
  * OWASP Top 10 (2021) Compliance Module
@@ -793,8 +794,7 @@ const ssrfMiddleware = (req, res, next) => {
         next();
       })
       .catch(error => {
-        res.status(500).json({
-          success: false,
+        safeError(res, error, 'owasp-compliance');
           code: 'SSRF_ERROR',
           message: 'URL validation error',
         });

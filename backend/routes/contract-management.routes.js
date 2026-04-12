@@ -27,6 +27,7 @@ const ContractApproval = require('../models/ContractApproval');
 const ContractAmendment = require('../models/ContractAmendment');
 const ContractNegotiation = require('../models/ContractNegotiation');
 const escapeRegex = require('../utils/escapeRegex');
+const safeError = require('../utils/safeError');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const MAX_LIMIT = 100;
@@ -70,8 +71,7 @@ router.get('/templates', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('templates list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القوالب' });
+    safeError(res, err, 'templates list error');
   }
 });
 
@@ -82,8 +82,7 @@ router.get('/templates/:id', async (req, res) => {
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: tmpl });
   } catch (err) {
-    logger.error('template get error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب القالب' });
+    safeError(res, err, 'template get error');
   }
 });
 
@@ -97,8 +96,7 @@ router.post('/templates', authorize(['admin', 'manager']), async (req, res) => {
   } catch (err) {
     if (err.code === 11000)
       return res.status(409).json({ success: false, message: 'الكود مستخدم مسبقاً' });
-    logger.error('template create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء القالب' });
+    safeError(res, err, 'template create error');
   }
 });
 
@@ -113,8 +111,7 @@ router.put('/templates/:id', authorize(['admin', 'manager']), async (req, res) =
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, data: tmpl, message: 'تم تحديث القالب' });
   } catch (err) {
-    logger.error('template update error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'template update error');
   }
 });
 
@@ -125,8 +122,7 @@ router.delete('/templates/:id', authorize(['admin']), async (req, res) => {
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
     res.json({ success: true, message: 'تم حذف القالب' });
   } catch (err) {
-    logger.error('template delete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'template delete error');
   }
 });
 
@@ -150,8 +146,7 @@ router.get('/contracts/stats', async (req, res) => {
     });
     res.json({ success: true, data: stats });
   } catch (err) {
-    logger.error('contracts stats error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الإحصائيات' });
+    safeError(res, err, 'contracts stats error');
   }
 });
 
@@ -181,8 +176,7 @@ router.get('/contracts', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('contracts list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود' });
+    safeError(res, err, 'contracts list error');
   }
 });
 
@@ -213,8 +207,7 @@ router.post('/contracts', authorize(['admin', 'manager']), async (req, res) => {
     }
     res.status(201).json({ success: true, data: contract, message: 'تم إنشاء العقد' });
   } catch (err) {
-    logger.error('contracts create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنشاء العقد' });
+    safeError(res, err, 'contracts create error');
   }
 });
 
@@ -237,8 +230,7 @@ router.get('/contracts/:id', async (req, res) => {
       data: { ...contract, parties, approvals, amendments, negotiations },
     });
   } catch (err) {
-    logger.error('contract get error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقد' });
+    safeError(res, err, 'contract get error');
   }
 });
 
@@ -257,8 +249,7 @@ router.put('/contracts/:id', authorize(['admin', 'manager']), async (req, res) =
     ).lean();
     res.json({ success: true, data: contract, message: 'تم تحديث العقد' });
   } catch (err) {
-    logger.error('contract update error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التحديث' });
+    safeError(res, err, 'contract update error');
   }
 });
 
@@ -272,8 +263,7 @@ router.delete('/contracts/:id', authorize(['admin']), async (req, res) => {
     await contract.deleteOne();
     res.json({ success: true, message: 'تم حذف العقد' });
   } catch (err) {
-    logger.error('contract delete error', err);
-    res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+    safeError(res, err, 'contract delete error');
   }
 });
 
@@ -297,8 +287,7 @@ router.post('/contracts/:id/submit-approval', authorize(['admin', 'manager']), a
     });
     res.json({ success: true, data: contract, message: 'تم رفع العقد للاعتماد' });
   } catch (err) {
-    logger.error('submit approval error', err);
-    res.status(500).json({ success: false, message: 'خطأ في رفع العقد' });
+    safeError(res, err, 'submit approval error');
   }
 });
 
@@ -331,8 +320,7 @@ router.post(
       }
       res.json({ success: true, data: approval, message: 'تم تسجيل القرار' });
     } catch (err) {
-      logger.error('process approval error', err);
-      res.status(500).json({ success: false, message: 'خطأ في تسجيل القرار' });
+      safeError(res, err, 'process approval error');
     }
   }
 );
@@ -369,8 +357,7 @@ router.post('/contracts/:id/sign', async (req, res) => {
     }
     res.json({ success: true, data: party, message: 'تم التوقيع' });
   } catch (err) {
-    logger.error('sign contract error', err);
-    res.status(500).json({ success: false, message: 'خطأ في التوقيع' });
+    safeError(res, err, 'sign contract error');
   }
 });
 
@@ -391,8 +378,7 @@ router.post('/contracts/:id/renew', authorize(['admin', 'manager']), async (req,
     await contract.save();
     res.json({ success: true, data: contract, message: 'تم تجديد العقد' });
   } catch (err) {
-    logger.error('renew contract error', err);
-    res.status(500).json({ success: false, message: 'خطأ في تجديد العقد' });
+    safeError(res, err, 'renew contract error');
   }
 });
 
@@ -410,8 +396,7 @@ router.post('/contracts/:id/terminate', authorize(['admin', 'manager']), async (
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract, message: 'تم إنهاء العقد' });
   } catch (err) {
-    logger.error('terminate contract error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إنهاء العقد' });
+    safeError(res, err, 'terminate contract error');
   }
 });
 
@@ -427,8 +412,7 @@ router.get('/contracts/:id/parties', async (req, res) => {
       .lean();
     res.json({ success: true, data: parties });
   } catch (err) {
-    logger.error('parties list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الأطراف' });
+    safeError(res, err, 'parties list error');
   }
 });
 
@@ -445,8 +429,7 @@ router.post('/contracts/:id/parties', authorize(['admin', 'manager']), async (re
     });
     res.status(201).json({ success: true, data: party, message: 'تم إضافة الطرف' });
   } catch (err) {
-    logger.error('party create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الطرف' });
+    safeError(res, err, 'party create error');
   }
 });
 
@@ -459,8 +442,7 @@ router.delete(
       if (!party) return res.status(404).json({ success: false, message: 'الطرف غير موجود' });
       res.json({ success: true, message: 'تم حذف الطرف' });
     } catch (err) {
-      logger.error('party delete error', err);
-      res.status(500).json({ success: false, message: 'خطأ في الحذف' });
+      safeError(res, err, 'party delete error');
     }
   }
 );
@@ -477,8 +459,7 @@ router.get('/contracts/:id/amendments', async (req, res) => {
       .lean();
     res.json({ success: true, data: amendments });
   } catch (err) {
-    logger.error('amendments list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب الملاحق' });
+    safeError(res, err, 'amendments list error');
   }
 });
 
@@ -501,8 +482,7 @@ router.post('/contracts/:id/amendments', authorize(['admin', 'manager']), async 
     }
     res.status(201).json({ success: true, data: amendment, message: 'تم إضافة الملحق' });
   } catch (err) {
-    logger.error('amendment create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في إضافة الملحق' });
+    safeError(res, err, 'amendment create error');
   }
 });
 
@@ -529,8 +509,7 @@ router.get('/contracts/:id/negotiations', async (req, res) => {
     ]);
     res.json({ success: true, data, pagination: { page: +page, limit, total } });
   } catch (err) {
-    logger.error('negotiations list error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب سجل التفاوض' });
+    safeError(res, err, 'negotiations list error');
   }
 });
 
@@ -548,8 +527,7 @@ router.post('/contracts/:id/negotiations', async (req, res) => {
     });
     res.status(201).json({ success: true, data: negotiation, message: 'تم تسجيل الملاحظة' });
   } catch (err) {
-    logger.error('negotiation create error', err);
-    res.status(500).json({ success: false, message: 'خطأ في تسجيل الملاحظة' });
+    safeError(res, err, 'negotiation create error');
   }
 });
 
@@ -566,8 +544,7 @@ router.patch(
       if (!neg) return res.status(404).json({ success: false, message: 'السجل غير موجود' });
       res.json({ success: true, data: neg, message: 'تم حل النقطة التفاوضية' });
     } catch (err) {
-      logger.error('negotiation resolve error', err);
-      res.status(500).json({ success: false, message: 'خطأ في تحديث السجل' });
+      safeError(res, err, 'negotiation resolve error');
     }
   }
 );
@@ -622,8 +599,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (err) {
-    logger.error('dashboard error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب لوحة التحكم' });
+    safeError(res, err, 'dashboard error');
   }
 });
 
@@ -642,8 +618,7 @@ router.get('/expiring-soon', async (req, res) => {
       .lean();
     res.json({ success: true, data: contracts, count: contracts.length });
   } catch (err) {
-    logger.error('expiring soon error', err);
-    res.status(500).json({ success: false, message: 'خطأ في جلب العقود المنتهية قريباً' });
+    safeError(res, err, 'expiring soon error');
   }
 });
 

@@ -5,7 +5,9 @@
 const svc = require('../../services/dddScheduler');
 
 describe('dddScheduler service', () => {
-  test('JOB_SCHEDULE is an array', () => { expect(Array.isArray(svc.JOB_SCHEDULE)).toBe(true); });
+  test('JOB_SCHEDULE is an array', () => {
+    expect(Array.isArray(svc.JOB_SCHEDULE)).toBe(true);
+  });
   test('jobKPISnapshots runs without crash', async () => {
     await svc.jobKPISnapshots(); // returns undefined if models missing — OK
   });
@@ -27,9 +29,9 @@ describe('dddScheduler service', () => {
   test('runJobManually is callable', () => {
     expect(typeof svc.runJobManually).toBe('function');
   });
-  test('getSchedulerDashboard returns health object', async () => {
-    const d = await svc.getSchedulerDashboard();
-    expect(d).toHaveProperty('status', 'healthy');
-    expect(d).toHaveProperty('timestamp');
+  test('getSchedulerStatus returns status object', () => {
+    const d = svc.getSchedulerStatus();
+    expect(d).toHaveProperty('active');
+    expect(d).toHaveProperty('jobs');
   });
 });

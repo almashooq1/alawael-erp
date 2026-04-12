@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 .alawael/.cache/
 .alawael/.tmp/
 .alawael/deployments/
+
+# Export artifacts
+exports/

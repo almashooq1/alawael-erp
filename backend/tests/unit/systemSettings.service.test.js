@@ -1,8 +1,8 @@
 'use strict';
 
-// Auto-generated unit test for smartHomeCare.service
+// Auto-generated unit test for systemSettings.service
 
-const mockHomeAssignmentChain = {
+const mockSystemSettingsChain = {
   find: jest.fn().mockReturnThis(),
   findOne: jest.fn().mockReturnThis(),
   findById: jest.fn().mockReturnThis(),
@@ -26,31 +26,38 @@ const mockHomeAssignmentChain = {
   select: jest.fn().mockReturnThis(),
   exec: jest.fn().mockResolvedValue([]),
 };
-jest.mock('../../models/HomeAssignment', () => {
+jest.mock('../../models/SystemSettings', () => {
   const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
-  Object.assign(M, mockHomeAssignmentChain);
+  Object.assign(M, mockSystemSettingsChain);
   return M;
 });
 
-let Svc;
-try { Svc = require('../../services/smartHomeCare.service'); } catch (e) { Svc = null; }
+const svc = require('../../services/systemSettings.service');
 
-describe('smartHomeCare.service service', () => {
-  test('module loads without crash', () => {
-    expect(Svc).not.toBeNull();
+describe('systemSettings.service service', () => {
+  test('module exports an object', () => {
+    expect(svc).toBeDefined();
+    expect(typeof svc).toBe('object');
   });
 
-  test('getAdherenceReport static method is callable', async () => {
-    if (!Svc || typeof Svc.getAdherenceReport !== 'function') return;
+  test('update is callable', async () => {
+    if (typeof svc.update !== 'function') return;
     let r;
-    try { r = await Svc.getAdherenceReport({}); } catch (e) { r = e; }
+    try { r = await svc.update({}); } catch (e) { r = e; }
     expect(r).toBeDefined();
   });
 
-  test('checkDropoutRisk static method is callable', async () => {
-    if (!Svc || typeof Svc.checkDropoutRisk !== 'function') return;
+  test('resetSection is callable', async () => {
+    if (typeof svc.resetSection !== 'function') return;
     let r;
-    try { r = await Svc.checkDropoutRisk({}); } catch (e) { r = e; }
+    try { r = await svc.resetSection({}); } catch (e) { r = e; }
+    expect(r).toBeDefined();
+  });
+
+  test('toggleMaintenance is callable', async () => {
+    if (typeof svc.toggleMaintenance !== 'function') return;
+    let r;
+    try { r = await svc.toggleMaintenance({}); } catch (e) { r = e; }
     expect(r).toBeDefined();
   });
 

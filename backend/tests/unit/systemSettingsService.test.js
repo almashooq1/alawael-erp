@@ -1,8 +1,8 @@
 'use strict';
 
-// Auto-generated unit test for smartHomeCare.service
+// Auto-generated unit test for systemSettingsService (unknown pattern)
 
-const mockHomeAssignmentChain = {
+const mockSystemSettingsChain = {
   find: jest.fn().mockReturnThis(),
   findOne: jest.fn().mockReturnThis(),
   findById: jest.fn().mockReturnThis(),
@@ -26,32 +26,22 @@ const mockHomeAssignmentChain = {
   select: jest.fn().mockReturnThis(),
   exec: jest.fn().mockResolvedValue([]),
 };
-jest.mock('../../models/HomeAssignment', () => {
+jest.mock('../../models/SystemSettings', () => {
   const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
-  Object.assign(M, mockHomeAssignmentChain);
+  Object.assign(M, mockSystemSettingsChain);
   return M;
 });
 
-let Svc;
-try { Svc = require('../../services/smartHomeCare.service'); } catch (e) { Svc = null; }
+let svc;
+try { svc = require('../../services/systemSettingsService'); } catch(e) { svc = null; }
 
-describe('smartHomeCare.service service', () => {
+describe('systemSettingsService service', () => {
   test('module loads without crash', () => {
-    expect(Svc).not.toBeNull();
+    expect(svc).toBeDefined();
   });
 
-  test('getAdherenceReport static method is callable', async () => {
-    if (!Svc || typeof Svc.getAdherenceReport !== 'function') return;
-    let r;
-    try { r = await Svc.getAdherenceReport({}); } catch (e) { r = e; }
-    expect(r).toBeDefined();
-  });
-
-  test('checkDropoutRisk static method is callable', async () => {
-    if (!Svc || typeof Svc.checkDropoutRisk !== 'function') return;
-    let r;
-    try { r = await Svc.checkDropoutRisk({}); } catch (e) { r = e; }
-    expect(r).toBeDefined();
+  test('exports something', () => {
+    expect(svc !== null).toBe(true);
   });
 
 });

@@ -1,6 +1,6 @@
 /**
  * خطاف بيانات الرسوم البيانية للمستفيدين
- * Chart data hooks for Beneficiaries page
+ * Chart data hooks for Beneficiaries page (Recharts format)
  */
 
 import { useMemo } from 'react';
@@ -22,39 +22,34 @@ const MONTH_NAMES = [
   'ديسمبر',
 ];
 
+/** Color used for the monthly-trend line */
+export const TREND_COLOR = brandColors?.primaryStart || '#667eea';
+export const TREND_FILL = 'rgba(102,126,234,0.15)';
+
 /**
- * Hook that derives Chart.js-ready datasets from the beneficiaries array.
+ * Hook that derives Recharts-ready data arrays from the beneficiaries array.
  * @param {Array} beneficiaries — raw beneficiary list from API
- * @returns {{ monthlyTrendData: object, categoryDistData: object }}
+ * @returns {{ monthlyTrendData: Array, categoryDistData: Array }}
  */
 export function useBeneficiariesChartData(beneficiaries) {
   // ── Dynamic Monthly Trend (from real join dates) ──
   const monthlyTrendData = useMemo(() => {
     const now = new Date();
-    const monthCounts = Array(6).fill(0);
-    const labels = [];
+    const result = [];
     for (let i = 5; i >= 0; i--) {
       const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      labels.push(MONTH_NAMES[m.getMonth()]);
-      monthCounts[5 - i] = beneficiaries.filter(b => {
+      const count = beneficiaries.filter(b => {
         const d = new Date(b.joinDate || b.createdAt);
         return d.getMonth() === m.getMonth() && d.getFullYear() === m.getFullYear();
       }).length;
+      result.push({ name: MONTH_NAMES[m.getMonth()], value: count });
     }
-    const hasRealData = monthCounts.some(c => c > 0);
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'مستفيدين جدد',
-          fill: true,
-          tension: 0.4,
-          data: hasRealData ? monthCounts : [12, 19, 15, 25, 22, 30],
-          borderColor: brandColors?.primaryStart || '#667eea',
-          backgroundColor: 'rgba(102,126,234,0.15)',
-        },
-      ],
-    };
+    const hasRealData = result.some(r => r.value > 0);
+    if (!hasRealData) {
+      const fallback = [12, 19, 15, 25, 22, 30];
+      result.forEach((r, idx) => { r.value = fallback[idx]; });
+    }
+    return result;
   }, [beneficiaries]);
 
   // ── Dynamic Category Distribution ─────────────
@@ -64,18 +59,13 @@ export function useBeneficiariesChartData(beneficiaries) {
       cats[b.category] = (cats[b.category] || 0) + 1;
     });
     const hasReal = Object.values(cats).some(v => v > 0);
-    const values = hasReal ? Object.values(cats) : [35, 25, 18, 12, 10];
-    return {
-      labels: Object.values(CATEGORY_LABELS),
-      datasets: [
-        {
-          data: values,
-          backgroundColor: Object.values(CATEGORY_COLORS).map(c => c + 'cc'),
-          borderWidth: 2,
-          borderColor: '#fff',
-        },
-      ],
-    };
+    const fallback = [35, 25, 18, 12, 10];
+    const keys = Object.keys(cats);
+    return keys.map((key, idx) => ({
+      name: CATEGORY_LABELS[key],
+      value: hasReal ? cats[key] : fallback[idx],
+      fill: (CATEGORY_COLORS[key] || '#ccc') + 'cc',
+    }));
   }, [beneficiaries]);
 
   return { monthlyTrendData, categoryDistData };

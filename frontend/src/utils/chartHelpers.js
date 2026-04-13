@@ -1,5 +1,5 @@
 /**
- * chartHelpers — Recharts / Chart.js configuration presets.
+ * chartHelpers — Recharts configuration presets.
  * أدوات تهيئة الرسوم البيانية
  */
 

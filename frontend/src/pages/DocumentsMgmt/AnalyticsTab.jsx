@@ -24,8 +24,11 @@ import {
   LinearProgress,
   Alert,
 } from '@mui/material';
-import { Pie } from 'react-chartjs-2';
+import {
+  PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import { chartColors } from '../../theme/palette';
+import { tooltipStyle, ARABIC_LEGEND_PROPS } from '../../utils/chartHelpers';
 
 export const TemplatesTab = () => (
   <Grid container spacing={3}>
@@ -92,17 +95,29 @@ const AnalyticsTab = ({ analyticsData }) => {
             <Typography variant="h6" gutterBottom>
               المستندات حسب التصنيف
             </Typography>
-            <Pie
-              data={{
-                labels: (analyticsData.documentsByCategory || []).map((c) => c.category),
-                datasets: [
-                  {
-                    data: (analyticsData.documentsByCategory || []).map((c) => c.count),
-                    backgroundColor: chartColors.category.slice(0, 6),
-                  },
-                ],
-              }}
-            />
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={(analyticsData.documentsByCategory || []).map((c, i) => ({
+                    name: c.category,
+                    value: c.count,
+                    fill: (chartColors.main || chartColors)[i % 6],
+                  }))}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                >
+                  {(analyticsData.documentsByCategory || []).map((_, i) => (
+                    <Cell key={i} fill={(chartColors.main || chartColors)[i % 6]} />
+                  ))}
+                </Pie>
+                <RechartsTooltip {...tooltipStyle()} />
+                <Legend {...ARABIC_LEGEND_PROPS} />
+              </PieChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
       </Grid>

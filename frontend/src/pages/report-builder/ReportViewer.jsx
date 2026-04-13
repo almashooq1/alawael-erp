@@ -224,7 +224,7 @@ export default function ReportViewer() {
             نوع: {report.chartConfig.type} • محور X: {report.chartConfig.xAxis || '—'} • محور Y: {report.chartConfig.yAxis || '—'}
           </Typography>
           <Alert severity="info" sx={{ mt: 1 }}>
-            سيتم عرض الرسم البياني التفاعلي (Chart.js / Recharts) في النسخة الكاملة
+            سيتم عرض الرسم البياني التفاعلي (Recharts) في النسخة الكاملة
           </Alert>
         </Paper>
       )}

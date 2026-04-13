@@ -12,37 +12,12 @@
 
 import { Box, Container, Typography, Button, Paper, Tab, Tabs } from '@mui/material';
 import { CloudUpload as UploadIcon, Description as DocumentIcon } from '@mui/icons-material';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  BarElement,
-  Title,
-  Tooltip as ChartTooltip,
-  Legend,
-} from 'chart.js';
 import { gradients } from '../../theme/palette';
 import useDocumentsPage from './useDocumentsPage';
 import DashboardTab from './DashboardTab';
 import DocumentsListTab from './DocumentsListTab';
 import AnalyticsTab, { TemplatesTab } from './AnalyticsTab';
 import { UploadDialog, DetailsDialog } from './DocumentDialogs';
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  ArcElement,
-  BarElement,
-  Title,
-  ChartTooltip,
-  Legend
-);
 
 function DocumentsPage() {
   const {

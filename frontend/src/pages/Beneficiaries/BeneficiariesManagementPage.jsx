@@ -60,32 +60,18 @@ import {
   Groups,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { Line, Doughnut } from 'react-chartjs-2';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip as ChartTooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
+  LineChart, Line, XAxis, YAxis, CartesianGrid,
+  Tooltip as RechartsTooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell,
+} from 'recharts';
+import { GRID_PROPS, X_AXIS_PROPS, Y_AXIS_PROPS, ARABIC_LEGEND_PROPS, tooltipStyle } from 'utils/chartHelpers';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
 import { PAGE_SIZE, GradientHeader, KpiCard } from './beneficiariesConstants';
-import { useBeneficiariesChartData } from './useBeneficiariesChartData';
+import { useBeneficiariesChartData, TREND_COLOR, TREND_FILL } from './useBeneficiariesChartData';
 import BeneficiaryCard from './BeneficiaryCard';
-
-// ── Register ChartJS ────────────────────────────
-ChartJS.register(
-  CategoryScale, LinearScale, PointElement, LineElement, BarElement,
-  ArcElement, Title, ChartTooltip, Legend, Filler,
-);
 
 // ═════════════════════════════════════════════════
 //  COMPONENT
@@ -335,11 +321,25 @@ const BeneficiariesManagementPage = () => {
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   اتجاه التسجيل الشهري
                 </Typography>
-                <Line data={monthlyTrendData} options={{
-                  responsive: true,
-                  plugins: { legend: { position: 'top', rtl: true } },
-                  scales: { y: { beginAtZero: true } },
-                }} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={monthlyTrendData}>
+                    <CartesianGrid {...GRID_PROPS} />
+                    <XAxis dataKey="name" {...X_AXIS_PROPS} />
+                    <YAxis {...Y_AXIS_PROPS} />
+                    <RechartsTooltip {...tooltipStyle()} />
+                    <Legend {...ARABIC_LEGEND_PROPS} />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      name="مستفيدين جدد"
+                      stroke={TREND_COLOR}
+                      fill={TREND_FILL}
+                      strokeWidth={2}
+                      dot={{ r: 4, strokeWidth: 2 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </Grid>
@@ -349,10 +349,28 @@ const BeneficiariesManagementPage = () => {
                 <Typography variant="h6" fontWeight={700} gutterBottom>
                   توزيع الفئات
                 </Typography>
-                <Doughnut data={categoryDistData} options={{
-                  responsive: true,
-                  plugins: { legend: { position: 'bottom', rtl: true } },
-                }} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={categoryDistData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={90}
+                      strokeWidth={2}
+                      stroke="#fff"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {categoryDistData.map((entry, idx) => (
+                        <Cell key={idx} fill={entry.fill} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip {...tooltipStyle()} />
+                    <Legend {...ARABIC_LEGEND_PROPS} layout="horizontal" align="center" verticalAlign="bottom" />
+                  </PieChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </Grid>

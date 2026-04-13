@@ -2,10 +2,7 @@
  * قوالب المراسلات وإدارة المحتوى والحملات
  * Messaging, CMS & Campaigns Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

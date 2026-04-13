@@ -1,10 +1,7 @@
 /**
  * قوالب طباعة الجودة والسلامة — Quality, HSE & Internal Audit Print Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

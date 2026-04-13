@@ -2,25 +2,9 @@
  * ScaleAdministration — إدارة وتطبيق المقاييس التشخيصية
  * Scale Administration & Scoring
  */
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Container,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Paper,
-  FormControl,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Slider,
-  Divider,
-  Alert,
-} from '@mui/material';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import { useState } from 'react';
+
+
 
 const STEPS = ['اختيار المقياس', 'بيانات المستفيد', 'تطبيق المقياس', 'النتائج'];
 

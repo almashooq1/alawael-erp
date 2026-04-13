@@ -5,26 +5,10 @@
  * 6 Tabs: Dashboard | WAF Rules | IP Management | Rate Limits | Incidents | Logs
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Tabs, Tab, Paper, Button, Chip, Table, TableHead,
-  TableRow, TableCell, TableBody, TextField, IconButton, Switch, Dialog,
-  DialogTitle, DialogContent, DialogActions, Card, CardContent, Grid,
-  Alert, CircularProgress, MenuItem, Select, InputLabel, FormControl,
-  Tooltip, LinearProgress,
-} from '@mui/material';
-import {
-  Security as SecurityIcon,
-  Shield as ShieldIcon,
-  Block as BlockIcon,
-  Speed as SpeedIcon,
-  Warning as WarningIcon,
-  BugReport as BugIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  CheckCircle as CheckIcon,
-  } from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 import wafService from '../../services/wafRateLimitService';
 
 /* ── helper ── */

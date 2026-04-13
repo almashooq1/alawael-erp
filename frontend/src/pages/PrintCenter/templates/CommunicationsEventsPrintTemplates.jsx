@@ -2,10 +2,7 @@
  * قوالب طباعة الاتصالات والفعاليات — Communications & Events Print Templates
  * يشمل: المراسلات، الاجتماعات، العلاقات العامة، الفعاليات
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

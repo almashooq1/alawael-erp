@@ -2,8 +2,7 @@
  * LoginPage — Premium Professional Login v2
  * Glassmorphism, floating particles, social login, rich brand panel
  */
-import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

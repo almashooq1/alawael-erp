@@ -3,24 +3,11 @@
  *
  * View completed sessions, session reports, recordings, engagement analysis.
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Grid, Paper, Typography, Button, TextField, Chip, IconButton,
-  Alert, LinearProgress, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Card, CardContent, Dialog, DialogTitle,
-  DialogContent, DialogActions, Divider, Rating, Tooltip,
-  InputAdornment,
+import { useState, useEffect, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
-import {
-  Assessment as ReportIcon,
-  PlayCircle as PlayIcon,
-  VideoLibrary as RecordingIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  Star as StarIcon,
-  Timer as TimerIcon,
-  Psychology as AIIcon,
-  } from '@mui/icons-material';
+
+
 import telehealthService from '../../services/telehealthService';
 
 export default function TelehealthRecordingsPage() {

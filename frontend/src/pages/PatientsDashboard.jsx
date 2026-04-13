@@ -2,35 +2,9 @@
  * PatientsDashboard.jsx — لوحة إدارة المرضى المتقدمة
  * تصميم Glassmorphism بريميوم | Framer Motion | RTL | Dark/Light
  */
-import React, { useState, useEffect, useCallback, memo } from 'react';
-import {
-  Box, Typography, Grid, Avatar, Chip, LinearProgress,
-  Skeleton, Tooltip, IconButton, Badge, Divider,
-  Table, TableBody, TableCell, TableHead, TableRow,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, useTheme, alpha,
+import { useState, useEffect, useCallback, memo } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import HealingIcon from '@mui/icons-material/Healing';
-import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
-import StarIcon from '@mui/icons-material/Star';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import FilterListIcon from '@mui/icons-material/FilterList';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {

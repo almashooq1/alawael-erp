@@ -7,24 +7,10 @@
  *  - Chat messages
  *  - Session timer & controls
  */
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box, Grid, Paper, Typography, Button, TextField, Chip, IconButton,
-  Alert, LinearProgress, Tooltip, Card, CardContent, Tab, Tabs,
-} from '@mui/material';
-import {
-  VideoCall as VideoCallIcon,
-  CallEnd as EndCallIcon,
-  Mic as MicIcon, MicOff as MicOffIcon,
-  Videocam as CamIcon, VideocamOff as CamOffIcon,
-  ScreenShare as ScreenShareIcon,
-  Chat as ChatIcon, NoteAdd as NoteIcon,
-  FavoriteOutlined as HeartIcon,
-  Thermostat as TempIcon,
-  Send as SendIcon,
-  Timer as TimerIcon,
-  ArrowBack as BackIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+
+
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import telehealthService from '../../services/telehealthService';
 

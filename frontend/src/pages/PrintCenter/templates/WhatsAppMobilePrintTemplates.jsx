@@ -2,10 +2,7 @@
  * قوالب واتساب والموبايل
  * WhatsApp & Mobile Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

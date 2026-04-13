@@ -2,40 +2,10 @@
  * FormDesigner — مصمم النماذج الديناميكية
  * إنشاء وتعديل قوالب النماذج بحقول متعددة الأنواع
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Dialog, DialogTitle, DialogContent, DialogActions, Button,
-  TextField, Select, MenuItem, FormControl, InputLabel, IconButton,
-  Tooltip, Stack, Paper, Typography, Chip, Divider, Grid,
-  Switch, FormControlLabel, Accordion, AccordionSummary, AccordionDetails,
-  Alert, List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  DragIndicator as DragIcon,
-  Settings as SettingsIcon,
-  Preview as PreviewIcon,
-  Save as SaveIcon,
-  ExpandMore as ExpandMoreIcon,
-  TextFields as TextIcon,
-  Numbers as NumberIcon,
-  CalendarMonth as DateIcon,
-  ArrowDropDownCircle as SelectIcon,
-  CheckBox as CheckboxIcon,
-  RadioButtonChecked as RadioIcon,
-  AttachFile as FileIcon,
-  Draw as SignatureIcon,
-  LocationOn as LocationIcon,
-  Star as RatingIcon,
-  FormatListBulleted as TextareaIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon,
-  Link as UrlIcon,
-  ArrowUpward as UpIcon,
-  ArrowDownward as DownIcon,
-  ContentCopy as CloneIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
 
 const FIELD_TYPES = [
   { type: 'text', label: 'نص', icon: <TextIcon /> },

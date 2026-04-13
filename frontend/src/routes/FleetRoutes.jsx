@@ -1,7 +1,6 @@
 /**
  * Fleet Management Routes — مسارات إدارة الأسطول
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const FleetDashboard = lazyWithRetry(() => import('../pages/Fleet/FleetDashboard'));

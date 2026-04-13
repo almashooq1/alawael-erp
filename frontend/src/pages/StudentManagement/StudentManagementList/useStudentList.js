@@ -2,7 +2,6 @@
  * useStudentList — all state, fetch, filter, sort, and handlers
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { People, CheckCircle, TrendingUp, Warning } from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 

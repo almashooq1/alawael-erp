@@ -5,17 +5,9 @@
  * Gradient: #ec4899 → #8b5cf6 → #06b6d4
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, IconButton, Tooltip,
+import { useTheme, alpha, TableRow,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import PeopleIcon from '@mui/icons-material/People';
@@ -23,11 +15,6 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 
 /* ═══════════════════════════════════════════════════════════════════ */

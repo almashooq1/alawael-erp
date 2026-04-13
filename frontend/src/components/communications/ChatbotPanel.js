@@ -1,26 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  IconButton,
-  Avatar,
-  Chip,
-  CircularProgress,
-  Fade,
-  Tooltip,
-} from '@mui/material';
-import {
-  Send as SendIcon,
-  SmartToy as BotIcon,
-  ThumbUp as LikeIcon,
-  ThumbDown as DislikeIcon,
-  Refresh as RefreshIcon,
-  Psychology as AIIcon,
-  TipsAndUpdates as TipIcon,
-  QuestionAnswer as QuestionIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { getToken } from 'utils/tokenStorage';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';

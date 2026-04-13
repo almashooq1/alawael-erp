@@ -2,29 +2,12 @@
  * AI Diagnostic Dashboard — لوحة تحكم الذكاء الاصطناعي
  * Phase 17
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent,
-  Chip, Alert, Snackbar, TextField, InputAdornment,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Avatar, MenuItem, Select,
-  FormControl, InputLabel, CircularProgress,
+  Paper,
 } from '@mui/material';
-import {
-  Psychology as PsychologyIcon,
-  People as PeopleIcon,
-  Assessment as AssessmentIcon,
-  TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
-  Search as SearchIcon,
-  Visibility as ViewIcon,
-  AutoAwesome as AIIcon,
-  MedicalServices as MedicalIcon,
-  Speed as SpeedIcon,
-  NotificationsActive as AlertIcon,
-  BarChart as ChartIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+
+
 import { useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
 

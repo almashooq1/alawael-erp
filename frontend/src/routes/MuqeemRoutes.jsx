@@ -2,7 +2,6 @@
  * Muqeem Routes — مسارات مقيم (إدارة الإقامات)
  * وزارة الداخلية — إقامات الموظفين الأجانب
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MuqeemPage = lazyWithRetry(

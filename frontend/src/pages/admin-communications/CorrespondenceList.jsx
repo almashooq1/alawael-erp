@@ -1,53 +1,12 @@
 /**
  * Correspondence List — قائمة المراسلات (الوارد / الصادر / الكل)
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Chip,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Avatar,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Divider,
-  Badge,
-  FormControl,
-  InputLabel,
-  Select,
-  Stack,
-  Skeleton,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search,
-  Refresh,
-  MoreVert,
-  Visibility,
-  Forward,
-  CheckCircle,
-  Archive,
-  Reply,
-  CallReceived,
-  CallMade,
-  DoneAll,
-  Mail,
-  MailOutline,
-  ArrowBack,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 import adminCommunicationsService from '../../services/adminCommunications.service';

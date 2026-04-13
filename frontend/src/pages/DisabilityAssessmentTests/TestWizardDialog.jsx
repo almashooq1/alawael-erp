@@ -1,20 +1,9 @@
 /**
  * TestWizardDialog – multi-step test wizard dialog
  */
-import {
-  Box, Dialog, DialogTitle, DialogContent, DialogActions,
-  Typography, Button, IconButton, Alert, Paper, TextField,
-  Stepper, Step, StepLabel, Radio, RadioGroup,
-  FormControl, FormControlLabel, FormLabel, InputLabel, Select, MenuItem,
-  Chip, Divider, LinearProgress,
-} from '@mui/material';
-import {
-  Quiz as QuizIcon,
-  Close as CloseIcon,
-  NavigateNext as NextIcon,
-  NavigateBefore as BackIcon,
-  CheckCircle as DoneIcon,
-} from '@mui/icons-material';
+
+
+
 import assessmentService from '../../services/assessmentService';
 import { surfaceColors } from '../../theme/palette';
 import { TEST_ICONS } from './constants';

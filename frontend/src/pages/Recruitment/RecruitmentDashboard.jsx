@@ -1,20 +1,12 @@
 /**
  * لوحة تحكم التوظيف — Recruitment Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  Work as JobIcon,
-  PersonAdd as ApplicantIcon,
-  EventAvailable as InterviewIcon,
-  } from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
+
 import { getDashboard } from '../../services/recruitment.service';
 
 const stageLabels = {

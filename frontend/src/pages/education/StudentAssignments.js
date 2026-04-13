@@ -4,40 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Chip,
-  LinearProgress,
-  Button,
-  Stack,
-  Avatar,
-  Divider,
-  IconButton,
-  Alert,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tab,
-  Tabs,
-} from '@mui/material';
-import {
-  Assignment as AssignmentIcon,
-  CheckCircle as CompletedIcon,
-  Schedule as PendingIcon,
-  Warning as OverdueIcon,
-  Upload as UploadIcon,
-  Download as DownloadIcon,
-  AttachFile as AttachFileIcon,
-  CalendarToday as CalendarIcon,
-  Person as TeacherIcon,
-} from '@mui/icons-material';
+
+
+
+
 import studentPortalService from 'services/studentPortalService';
 import { getStatusHexColor } from 'utils/statusColors';
 import logger from 'utils/logger';

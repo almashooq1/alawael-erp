@@ -1,29 +1,11 @@
 /**
  * PermissionsDialog — حوار إدارة الصلاحيات
  */
-import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Checkbox,
-  FormControlLabel,
-  FormGroup,
-  TextField,
-  Chip,
-  Divider,
-  Paper,
-  Grid,
-  Alert,
-} from '@mui/material';
+
+
 import { useState, useEffect, useMemo } from 'react';
-import {
-  Security as SecurityIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+
+
 
 // الصلاحيات الافتراضية مجمعة حسب الوحدة
 const PERMISSION_GROUPS = {

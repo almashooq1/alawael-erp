@@ -1,44 +1,11 @@
 /**
  * UsersTable — جدول المستخدمين مع التحديد والإجراءات
  */
-import {
-  Box,
-  Card,
-  CardHeader,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TableSortLabel,
-  Checkbox,
-  Chip,
-  IconButton,
-  Tooltip,
-  Typography,
-  Avatar,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Skeleton,
-} from '@mui/material';
+
+
 import { useState } from 'react';
-import {
-  Edit as EditIcon,
-  Visibility as ViewIcon,
-  Delete as DeleteIcon,
-  MoreVert as MoreIcon,
-  LockReset as ResetPassIcon,
-  LockOpen as UnlockIcon,
-  ToggleOn as ToggleIcon,
-  Security as PermIcon,
-  CheckCircle as ActiveIcon,
-  Cancel as InactiveIcon,
-  Lock as LockedIcon,
-} from '@mui/icons-material';
+
+
 import { getRoleColor, getRoleLabel } from './constants';
 
 const COLUMNS = [

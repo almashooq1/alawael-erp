@@ -7,29 +7,11 @@
  * - إحصائيات ومخططات الاستخدام
  * - تصدير السجلات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Grid, Button, TextField,
-  Alert, CircularProgress, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, MenuItem,
-  Pagination, IconButton, Tooltip, Collapse,
+import { useState, useEffect, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
-import {
-  ManageSearch as AuditIcon,
-  Refresh as RefreshIcon,
-  Download as ExportIcon,
-  FilterList as FilterIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon,
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Security as SecurityIcon,
-  Receipt as ZatcaIcon,
-  HealthAndSafety as NphiesIcon,
-  CreditCard as MuqeemIcon,
-  AccountBalance as GosiIcon,
-} from '@mui/icons-material';
+
+
 import axios from 'axios';
 
 const API = axios.create({ baseURL: '/api/audit-logs', withCredentials: true });

@@ -1,38 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import eInvoicingService from '../../services/eInvoicing.service';
 import {
-  Box,
-  Typography,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Tabs,
-  Tab,
-  Tooltip,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Receipt as InvoiceIcon,
-  QrCode as QrIcon,
-  Send as SendIcon,
-  PictureAsPdf as PdfIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
 

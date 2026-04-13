@@ -7,26 +7,13 @@
 
 import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, LinearProgress, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  useTheme, alpha, IconButton, Tooltip,
+  useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadarChart,
-  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import Diversity3Icon from '@mui/icons-material/Diversity3';
 import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import PsychologyIcon from '@mui/icons-material/Psychology';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
 
 // ─── Gradient Palette ───────────────────────────────────────────────────────
 const GRADIENT = 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f59e0b 100%)';

@@ -4,23 +4,13 @@
  * Gradient: #06b6d4 → #8b5cf6 → #ec4899
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress,
+import { useTheme,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import RadiologyIcon from '@mui/icons-material/CoronavirusOutlined';
 import ScannerIcon from '@mui/icons-material/Scanner';
 import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 const kpiData = [

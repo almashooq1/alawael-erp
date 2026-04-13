@@ -1,21 +1,12 @@
 /**
  * لوحة تحكم الأصول — Asset Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  Inventory as AssetIcon,
-  CheckCircle as ActiveIcon,
-  Build as MaintIcon,
-  DeleteForever as DisposedIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
+
 import { getDashboard } from '../../services/assetManagement.service';
 
 const statusMap = {

@@ -2,11 +2,8 @@
  * FleetTable.jsx — Dynamic table for the active fleet entity tab
  * جدول بيانات الأسطول الديناميكي
  */
-import {
-  Typography, Paper, Chip, IconButton, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+import { Paper,
 } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { STATUS_CHIP_COLORS, TABS, COLUMNS, HEADERS } from './fleetManagement.constants';
 import { surfaceColors } from '../../theme/palette';
 

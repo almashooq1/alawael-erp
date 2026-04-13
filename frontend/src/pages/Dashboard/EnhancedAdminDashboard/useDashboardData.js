@@ -3,7 +3,6 @@
  * Manages all state, API fetching, and WebSocket connection.
  */
 import { useState, useEffect, useCallback } from 'react';
-import { People, CheckCircle, AttachMoney, Warning, Assessment } from '@mui/icons-material';
 import notificationService from 'services/notificationService';
 import dashboardService from 'services/dashboardService';
 import { WS_URL } from 'config/apiConfig';
@@ -251,7 +250,7 @@ const useDashboardData = () => {
         notificationService.disconnect?.();
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   return {

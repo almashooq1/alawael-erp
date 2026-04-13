@@ -4,18 +4,11 @@
  * Sections: Performance Score · Trends · 7-Day Forecast · Anomalies · AI Recommendations · Targets
  */
 
-import React, { useState, useMemo, memo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import {
-  Box, Typography, IconButton, Tooltip, Avatar, LinearProgress,
-  useTheme, alpha, Skeleton, Divider,
+  useTheme, alpha,
 } from '@mui/material';
-import {
-  TrendingUp, TrendingDown, TrendingFlat, SmartToy,
-  NotificationsActive, GpsFixed, BarChart, BubbleChart,
-  AutoGraph, Psychology, Warning, CheckCircle, Star,
-  Analytics, Bolt, ArrowUpward, ArrowDownward,
-} from '@mui/icons-material';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   useBranchAnalytics,
   useBranchKPIs,

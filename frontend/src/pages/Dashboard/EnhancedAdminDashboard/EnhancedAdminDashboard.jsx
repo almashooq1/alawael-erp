@@ -6,21 +6,8 @@
  * RevenueChart, SessionsPieChart, WeeklyProgressChart,
  * QuickActionsPanel, RecentActivities, UpcomingAppointments
  */
-import { Container, Grid, Card, CardContent, Typography, Box, Button } from '@mui/material';
-import { Assessment } from '@mui/icons-material';
-import AdvancedChartsComponent from 'components/AdvancedChartsComponent';
-import SmartReportsDashboard from 'components/SmartReportsDashboard';
 import exportService from 'services/exportService';
-import DashboardErrorBoundary from '../../../components/dashboard/shared/DashboardErrorBoundary';
 import useDashboardData from './useDashboardData';
-import DashboardHeader from './DashboardHeader';
-import StatisticsCards from './StatisticsCards';
-import RevenueChart from './RevenueChart';
-import SessionsPieChart from './SessionsPieChart';
-import WeeklyProgressChart from './WeeklyProgressChart';
-import QuickActionsPanel from './QuickActionsPanel';
-import RecentActivities from './RecentActivities';
-import UpcomingAppointments from './UpcomingAppointments';
 
 const EnhancedAdminDashboard = () => {
   const {

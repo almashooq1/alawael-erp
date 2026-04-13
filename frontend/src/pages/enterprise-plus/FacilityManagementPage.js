@@ -2,46 +2,12 @@
  * Facility & Real Estate Management — إدارة المرافق والعقارات
  * Facilities, Space Bookings, Lease Contracts, Utility Readings
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  IconButton,
-  Chip,
-  Avatar,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  MenuItem,
-  Tab,
-  Tabs,
-  Card,
-  CardContent,
-  LinearProgress,
-  Stack,
-} from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 import { alpha } from '@mui/material/styles';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Business as BuildingIcon,
-  MeetingRoom as RoomIcon,
-  Description as LeaseIcon,
-  ElectricBolt as UtilityIcon,
-  Close as CloseIcon,
-  LocationOn as LocationIcon,
-  CheckCircle as ActiveIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

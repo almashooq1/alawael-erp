@@ -2,35 +2,13 @@
  * EStampEdit — تعديل الختم الإلكتروني
  * Loads existing stamp and allows editing basic info, design, and security settings.
  */
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  TextField,
-  MenuItem,  Chip,
-  FormControlLabel,
-  Switch,
-  Divider,
-  CircularProgress,
-  ToggleButton,
-  ToggleButtonGroup,
-  Slider,
-  Alert,
-} from '@mui/material';
-import {
-  ArrowBack,
-  Save,
-  Delete,
-  Circle,
-  Square,
-  CloudUpload,
-  DesignServices,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

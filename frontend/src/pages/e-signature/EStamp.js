@@ -1,47 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Avatar,
-  CircularProgress,
-  Tooltip,
-  Menu,
-  MenuItem,  Checkbox,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search,
-  Refresh,
-  Verified,
-  Block,
-  MoreVert,
-  Visibility,
-  CheckCircle,
-  Cancel,
-  PendingActions,  BarChart,
-  Delete as DeleteIcon,
-  Edit,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

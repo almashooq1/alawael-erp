@@ -9,34 +9,13 @@
  *   BottomRow.jsx      – Leaves list + Reviews list
  *   index.js           – this file (layout + wiring)
  */
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Grid,
-  Paper,
-  Box,  CircularProgress,  LinearProgress,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  People as PeopleIcon,
-  EventAvailable as AttendanceIcon,
-  AccountBalanceWallet as PayrollIcon,
-  BeachAccess as LeaveIcon,
-  TrendingUp as PerformanceIcon,
-  PersonAdd as AddEmployeeIcon,
-  Assessment as ReportIcon,
-  Schedule as ClockIcon,
-  Cancel as CancelIcon,
-  Refresh as RefreshIcon,
-  } from '@mui/icons-material';
+
+
+
+
 import { gradients } from '../../theme/palette';
 import useHRDashboard from './useHRDashboard';
-import { KPICard, QuickAction } from './KPICard';
-import ChartsRow from './ChartsRow';
-import BottomRow from './BottomRow';
 
 const HRAdvancedDashboard = () => {
   const navigate = useNavigate();

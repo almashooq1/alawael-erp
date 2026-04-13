@@ -1,33 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,  Tabs,
-  Tab,
+import {  Paper,
 } from '@mui/material';
-import {
-  Assessment as AssessmentIcon,
-  BarChart as ChartIcon,
-  Delete as DeleteIcon,
-  Category as CategoryIcon,
-} from '@mui/icons-material';
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

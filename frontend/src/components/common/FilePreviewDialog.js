@@ -17,31 +17,10 @@
 
 import { useState, useEffect } from 'react';
 import { triggerUrlDownload } from 'utils/downloadHelper';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  IconButton,
-  Box,
-  Typography,
-  CircularProgress,
-  Alert,
-  Tooltip,
-  Stack,
-  Chip,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Download as DownloadIcon,
-  ZoomIn as ZoomInIcon,
-  ZoomOut as ZoomOutIcon,
-  NavigateBefore as NavigateBeforeIcon,
-  NavigateNext as NavigateNextIcon,
-  RotateRight as RotateRightIcon,
-  Print as PrintIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients, surfaceColors } from 'theme/palette';
 
 const FilePreviewDialog = ({ open, onClose, file, files = [], currentIndex = 0, onNavigate }) => {

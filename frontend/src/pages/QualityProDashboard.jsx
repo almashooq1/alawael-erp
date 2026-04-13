@@ -5,18 +5,9 @@
  * Gradient: #8b5cf6 → #06b6d4 → #10b981
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, IconButton, Tooltip,
+import { useTheme, alpha, TableRow,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  Area, PieChart, Pie, Cell, BarChart, Bar,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  ComposedChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 
 import VerifiedIcon from '@mui/icons-material/Verified';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
@@ -24,14 +15,8 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import GavelIcon from '@mui/icons-material/Gavel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ShieldIcon from '@mui/icons-material/Shield';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import StarIcon from '@mui/icons-material/Star';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 /*  Constants                                                          */

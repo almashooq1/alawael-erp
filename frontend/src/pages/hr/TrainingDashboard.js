@@ -4,53 +4,12 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Avatar,
-  Paper,
-  Tab,
-  Tabs,
-  LinearProgress,
-  IconButton,
-  Tooltip,
-  List,
-  ListItem,
-  ListItemText,
   useTheme,
 } from '@mui/material';
-import {
-  School as SchoolIcon,
-  People as PeopleIcon,
-  AccessTime as TimeIcon,
-  Star as StarIcon,
-  TrendingUp as TrendIcon,
-  AccountBalanceWallet as BudgetIcon,
-  Refresh as RefreshIcon,
-  } from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ReTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Legend,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-} from 'recharts';
+
+
+
+
 import { trainingReportsService, MOCK_TRAINING_DASHBOARD } from 'services/trainingService';
 
 const COLORS = ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#AB47BC', '#26A69A'];

@@ -1,33 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  Tabs,
-  Tab,
-  Chip,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  List,
-  ListItem,
-  Avatar,
-  IconButton,
-} from '@mui/material';
-import {
-  Message as MessageIcon,
-  Reply as ReplyIcon,
-  StarBorder as StarBorderIcon,
-  Send as SendIcon,
-  AttachFile as AttachFileIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { parentService } from 'services/parentService';
 import messagesService from 'services/messagesService';
 import logger from 'utils/logger';

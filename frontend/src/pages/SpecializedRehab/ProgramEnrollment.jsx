@@ -2,26 +2,9 @@
  * ProgramEnrollment — تسجيل المستفيدين في البرامج التأهيلية
  * Program Enrollment Management
  */
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Container,
-  Stepper,
-  Step,
-  StepLabel,
-  Button,
-  Paper,
-  TextField,
-  Grid,
-  Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Divider,
-} from '@mui/material';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { useState } from 'react';
+
+
 
 const STEPS = ['اختيار البرنامج', 'بيانات المستفيد', 'الجدول الزمني', 'التأكيد'];
 

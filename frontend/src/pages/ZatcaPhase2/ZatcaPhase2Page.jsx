@@ -4,21 +4,11 @@
  * هيئة الزكاة والضريبة والجمارك — Integration Phase (FATOORA)
  * UBL 2.1 XML + SHA-256 Hash + TLV QR Code + Reporting/Clearance API
  */
-import React, { useState, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Grid, Button, TextField,
-  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
-  Tabs, Tab, Chip, Divider, Paper, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow,
+import { useState, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
 import {
-  Receipt as InvoiceIcon,
-  QrCode as QrIcon,
-  Send as SendIcon,
   CheckCircle as ClearedIcon,
-  Code as XmlIcon,
-  Refresh as RefreshIcon,
-  Info as InfoIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
 

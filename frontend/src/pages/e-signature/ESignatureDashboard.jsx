@@ -4,19 +4,12 @@
  */
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress,
-  Button, IconButton, Tooltip,
-} from '@mui/material';
+
 import {
   Draw, Approval as Stamp, Verified, PendingActions,
-  TrendingUp, Speed, Description, Refresh, ArrowForward,
+  TrendingUp, Speed, Description,
 } from '@mui/icons-material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip as ChartTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import eSignatureService from '../../services/eSignature.service';
 import eStampService from '../../services/eStamp.service';
 

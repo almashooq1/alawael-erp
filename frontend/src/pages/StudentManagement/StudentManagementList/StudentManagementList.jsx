@@ -5,14 +5,7 @@
  * studentManagement.styles, StudentStatsCards, StudentToolbar,
  * StudentTable, DeleteStudentDialog
  */
-import { Box, Container, Typography, Avatar, Alert, Button, Snackbar, Slide } from '@mui/material';
-import { School } from '@mui/icons-material';
 import useStudentList from './useStudentList';
-import { GradientHeader } from './studentManagement.styles';
-import StudentStatsCards from './StudentStatsCards';
-import StudentToolbar from './StudentToolbar';
-import StudentTable from './StudentTable';
-import DeleteStudentDialog from './DeleteStudentDialog';
 
 const StudentManagementList = () => {
   const {

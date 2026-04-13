@@ -2,10 +2,7 @@
  * قوالب طباعة الموارد البشرية الموسعة — Extended HR Print Templates
  * يشمل: التوظيف، الإجازات، الرواتب، التأمين، الأداء
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, formatMoney, today,
 } from '../shared/PrintTemplateShared';
 

@@ -5,38 +5,8 @@
  */
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  TrendingUp as TrendingUpIcon,
-  Shield as ShieldIcon,
-  AccountTree as AccountTreeIcon,
-  Groups as GroupsIcon,
-  AccessTime as AccessTimeIcon,
-  QueryStats as QueryStatsIcon,
-  Home as HomeIcon,
-  ErrorOutline as ErrorOutlineIcon,
-  CalendarMonth as CalendarIcon,
-  Bolt as BoltIcon,
-  AutoAwesome as SparkleIcon,
-  KeyboardArrowLeft,
-  OpenInNew as OpenInNewIcon,
-  Search as SearchIcon,
-  Dashboard as DashboardIcon,
-  LocalHospital as RehabIcon,
-  People as PeopleIcon,
-  AccountBalance as FinanceIcon,
-  Settings as OperationsIcon,
-  Message as CommunicationsIcon,
-  Description as DocumentsIcon,
-  Analytics as AnalyticsIcon,
-  Business as BusinessIcon,
-  School as PortalIcon,
-  Policy as GovernmentIcon,
-  Flag as AdministrativeIcon,
-  AdminPanelSettings as SystemAdminIcon,
-  ExpandMore as ExpandMoreIcon,
-  Apps as AppsIcon,
-  Close as CloseIcon,
-} from '@mui/icons-material';
+
+
 import moduleMocks from 'data/moduleMocks';
 import { useRealTimeKPIs } from 'contexts/SocketContext';
 import { dashboardAPI } from 'services/api';

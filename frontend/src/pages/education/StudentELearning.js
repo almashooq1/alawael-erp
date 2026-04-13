@@ -4,47 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Chip,
-  Stack,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  LinearProgress,
-  Tabs,
-  Tab,
-  TextField,
-  Rating,
-  Alert,
-  InputAdornment,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import {
-  School as SchoolIcon,
-  PlayCircle as PlayIcon,
-  MenuBook as BookIcon,
-  Quiz as QuizIcon,
-  Search as SearchIcon,
-  CheckCircle as CheckIcon,
-  Close as CloseIcon,
-  Timer as TimerIcon,
-  PersonOutline as InstructorIcon,
-  Lock as LockIcon,
-  People as PeopleIcon,
-  AttachFile as AttachIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';

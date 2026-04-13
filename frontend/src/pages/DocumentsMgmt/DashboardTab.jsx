@@ -10,7 +10,6 @@
  * تبويب لوحة التحكم: بطاقات الإحصائيات والتصنيفات
  */
 
-import { Box, Grid, Card, CardContent, Typography } from '@mui/material';
 import { statusColors } from '../../theme/palette';
 
 const DashboardTab = ({ stats, categories, setSelectedCategory, setActiveTab }) => (

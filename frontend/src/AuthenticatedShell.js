@@ -3,15 +3,7 @@
  * Only loaded AFTER successful login (lazy import from App.js).
  * This keeps the login page fast and lightweight.
  */
-import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { SocketProvider } from './contexts/SocketContext';
-import { NotificationProvider } from './contexts/NotificationContext';
-import { SessionTimeoutGuard } from './components/guards/RouteGuards';
-import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
-import { ToastProvider } from './components/ui/NotificationToast';
 import { lazyWithRetry } from './utils/lazyLoader';
-import ProLayout from './components/Layout/ProLayout';
 import logger from './utils/logger';
 
 // Route Modules
@@ -115,8 +107,6 @@ import {
 } from './routes';
 
 // Pages
-import Home from './pages/common/Home';
-import NotFound from './pages/common/NotFound';
 
 // Lazy pages
 const Dashboard = lazyWithRetry(() => import('./pages/common/SimpleDashboard'));

@@ -1,54 +1,13 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
 import eSignaturePdfService from '../../services/eSignaturePdf.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Tabs,
-  Tab,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Avatar,
-  Divider,
-  LinearProgress,
-  Alert,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
-import {
-  Draw as DrawIcon,
-  CheckCircle,
-  Cancel,
-  ArrowBack,
-  History,
-  Comment as CommentIcon,
-  Person,
-  VerifiedUser,
-  Refresh,
-  Download,
-  Visibility,
-  PictureAsPdf,
-  QrCode2,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
-import SignaturePad from '../../components/common/SignaturePad';
 
 /* ═══ Status Map ═════════════════════════════════════════════════════════ */
 const statusMap = {

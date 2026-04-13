@@ -2,37 +2,10 @@
  * ApprovalChainVisualizer — عارض ومصمم سلاسل الموافقات
  * إنشاء/تعديل/عرض سلاسل الموافقات المتعددة المراحل
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Dialog, DialogTitle, DialogContent, DialogActions, Button,
-  TextField, Select, MenuItem, FormControl, InputLabel, IconButton,
-  Tooltip, Stack, Paper, Typography, Chip, Divider, Grid,
-  Switch, FormControlLabel, Stepper, Step, StepLabel, StepContent,
-  Avatar, Alert, Card, CardContent, Badge
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Save as SaveIcon,
-  PersonAdd as AddApproverIcon,
-  ArrowUpward as UpIcon,
-  ArrowDownward as DownIcon,
-  ContentCopy as CloneIcon,
-  DragIndicator as DragIcon,
-  Person as PersonIcon,
-  Group as GroupIcon,
-  AccountTree as TreeIcon,
-  CheckCircle as ApprovedIcon,
-  Cancel as RejectedIcon,
-  HourglassTop as PendingIcon,
-  PlayArrow as InProgressIcon,
-  Warning as WarningIcon,
-  Timer as TimerIcon,
-  Speed as SLAIcon,
-  Repeat as ParallelIcon,
-  LinearScale as SequentialIcon,
-  CallSplit as ConditionalIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
 
 const STEP_TYPES = [
   { type: 'sequential', label: 'تسلسلي', icon: <SequentialIcon />, desc: 'موافقة على التوالي' },

@@ -1,34 +1,10 @@
 /* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,  Divider,
-  Chip,
-  LinearProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import {
-  Dashboard,
-  TrendingUp,  AccountBalance,
-  Warning,
-  CheckCircle,
-  Info,
-  MonetizationOn,
-  Receipt,
-  Assessment,
-  Speed,
-  ArrowUpward,
-  ArrowDownward,
-  RemoveCircle,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

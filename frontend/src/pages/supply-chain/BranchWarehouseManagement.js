@@ -2,54 +2,12 @@
  * 🏢 إدارة مخازن الفروع — Branch Warehouse Management
  * AlAwael ERP — Multi-Branch Inventory Overview
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Tabs,
-  Tab,
-  TextField,
-  InputAdornment,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,  Avatar,
-  Divider,
-  Stack,
-  Alert,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Warehouse as WarehouseIcon,
-  Store as StoreIcon,
-  Inventory as InventoryIcon,
-  LocalShipping as ShippingIcon,
-  LocationOn as LocationIcon,
-  Person as PersonIcon,
-  Refresh as RefreshIcon,
-  TrendingUp as TrendUpIcon,
-  Warning as WarningIcon,
-  } from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors } from 'theme/palette';
 import { branchService, warehouseService } from 'services/branchWarehouseService';

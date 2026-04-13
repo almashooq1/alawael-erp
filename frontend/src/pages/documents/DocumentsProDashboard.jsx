@@ -5,71 +5,13 @@
  * إشعارات، وتوصيات ذكية
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Container,
-  Grid,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  CardHeader,
-  IconButton,
-  Chip,
-  Button,
-  TextField,
-  InputAdornment,
-  Avatar,
-  Badge,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-  LinearProgress,
-  CircularProgress,
-  Tooltip,
-  Alert,
-  AlertTitle,
-  Tab,
-  Tabs,
-  Fade,
-  Skeleton,
   useTheme,
 } from '@mui/material';
 
-import {
-  Search as SearchIcon,
-  Description as DocIcon,
-  CloudUpload as UploadIcon,
-  Analytics as AnalyticsIcon,
-  Notifications as NotifIcon,
-  Assignment as TaskIcon,
-  TrendingUp as TrendIcon,
-  Security as SecurityIcon,
-  Speed as SpeedIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Refresh as RefreshIcon,
-  BarChart as ChartIcon,
-  FolderOpen as FolderIcon,
-  Timer as TimerIcon,
-  WorkspacePremium as PremiumIcon,
-  AutoAwesome as AIIcon,
-  ManageSearch as SmartSearchIcon,
-  AccountTree as WorkflowIcon,
-  Summarize as SummaryIcon,
-  ContentCopy as DuplicateIcon,
-  Label as TagIcon,
-  StarBorder as StarIcon,
-  ArrowForward as ArrowIcon,
-  MoreVert as MoreIcon,
-  InfoOutlined as InfoIcon,
-  PieChart as PieIcon,
-} from '@mui/icons-material';
+
+
 
 import documentProService from '../../services/documentProService';
 

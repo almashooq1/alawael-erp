@@ -1,43 +1,12 @@
 /**
  * Promotions & Transfers Management — إدارة الترقيات والتنقلات
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,  Alert,
-  Snackbar,
-  CircularProgress,
-  Stepper,
-  Step,
-  StepLabel,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  TrendingUp as PromoteIcon,
-  SwapHoriz as TransferIcon,
-  ThumbUp as ApproveIcon,
-  PlayArrow as ExecuteIcon,
-} from '@mui/icons-material';
+
+
 import {
   getPromotionTransfers,
   createPromotionTransfer,

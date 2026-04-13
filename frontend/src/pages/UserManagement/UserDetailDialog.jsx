@@ -1,54 +1,18 @@
 /**
  * UserDetailDialog — حوار عرض تفاصيل المستخدم
  */
-import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  Chip,
-  Grid,
-  Avatar,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Tab,
-  Tabs,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tooltip,
-} from '@mui/material';
+
+
 import { useState, useEffect, useCallback } from 'react';
 import {
   Person as PersonIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
   CalendarToday as DateIcon,
-  Security as SecurityIcon,
-  History as HistoryIcon,
   Badge as RoleIcon,
   Business as BranchIcon,
   Login as LoginIcon,
-  CheckCircle as ActiveIcon,
-  Cancel as InactiveIcon,
   Lock as LockedIcon,
-  Laptop as DeviceIcon,
-  LocationOn as LocationIcon,
-  Fingerprint as MfaIcon,
-  VerifiedUser as VerifiedIcon,
-  GppBad as NotVerifiedIcon,
-  Shield as ShieldIcon,
-  Router as IpIcon,
 } from '@mui/icons-material';
 import { getRoleColor, getRoleLabel } from './constants';
 import userManagementService from 'services/userManagementService';

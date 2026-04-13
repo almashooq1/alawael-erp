@@ -5,16 +5,9 @@
  * Gradient: #06b6d4 → #6366f1 → #10b981
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
+import { useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import FolderSharedIcon from '@mui/icons-material/FolderShared';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';

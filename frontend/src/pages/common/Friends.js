@@ -1,19 +1,6 @@
 import { useState, useEffect } from 'react';
-import {
-  Container,
-  Typography,
-  Paper,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Avatar,
-  Chip,
-  CircularProgress,
-  TextField,
-  InputAdornment,
-} from '@mui/material';
-import { People as PeopleIcon, Search as SearchIcon } from '@mui/icons-material';
+
+
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
 

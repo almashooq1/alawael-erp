@@ -1,15 +1,8 @@
 /**
  * Operations constants — statusColors, tabs config, column maps, dialog fields
  */
-import React from 'react';
-import {
-  Business as AssetIcon,
-  Build as EquipmentIcon,
-  Engineering as MaintenanceIcon,
-  Schedule as ScheduleIcon,
-  Badge as LicenseIcon,
-  AccountTree as BranchIcon,
-} from '@mui/icons-material';
+
+
 
 export const OP_STATUS_COLORS = {
   active: 'success',

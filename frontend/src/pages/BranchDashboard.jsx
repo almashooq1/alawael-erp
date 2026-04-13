@@ -10,21 +10,11 @@
  *         GET /api/branch-management/:branch_code/transport
  */
 
-import React, { useState, useEffect, useCallback, memo } from 'react';
-import {
-  Box, Typography, Chip, IconButton, Tooltip, Skeleton,
-  InputBase, Select, MenuItem, LinearProgress, Tabs, Tab,
-  Avatar, Badge, Collapse, useTheme, alpha, Divider, Paper,
+import { useState, useEffect, useCallback, memo } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import {
-  Refresh, Search, CheckCircle, Cancel, Groups, MeetingRoom,
-  DirectionsBus, TrendingUp, TrendingDown, TrendingFlat,
-  NotificationsActive, Schedule, Person, ArrowBack,
-  FiberManualRecord, Bolt, LocalHospital, BarChart,
-  KeyboardArrowDown, KeyboardArrowUp, Star,
-} from '@mui/icons-material';
+
 import { getToken } from '../utils/tokenStorage';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API_BASE = '/api/branch-management';

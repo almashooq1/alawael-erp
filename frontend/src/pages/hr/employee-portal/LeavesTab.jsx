@@ -1,22 +1,6 @@
-import React from 'react';
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Grid,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
   Paper,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
 
 const LEAVE_TYPE_LABELS = {
   annual: 'سنوية',

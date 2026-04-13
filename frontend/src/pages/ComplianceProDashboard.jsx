@@ -5,17 +5,9 @@
  * Gradient: #8b5cf6 → #06b6d4 → #22c55e
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
+import { useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import GavelIcon from '@mui/icons-material/Gavel';
+
 import PolicyIcon from '@mui/icons-material/Policy';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import AssuredWorkloadIcon from '@mui/icons-material/AssuredWorkload';

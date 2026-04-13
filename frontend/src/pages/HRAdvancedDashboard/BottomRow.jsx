@@ -2,8 +2,6 @@
  * BottomRow – Pending leaves list + Performance reviews list.
  */
 import React from 'react';
-import { Grid, Paper, Typography, Box, Button, Chip, Divider } from '@mui/material';
-import { ArrowForward as ArrowIcon } from '@mui/icons-material';
 import { statusColors } from '../../theme/palette';
 import { STATUS_MAP } from './constants';
 

@@ -9,21 +9,9 @@
  */
 
 import { memo } from 'react';
-import { Box, Typography, Button, useTheme, alpha } from '@mui/material';
-import {
-  SearchOff,
-  CloudOff,
-  FolderOff,
-  PeopleOutlined,
-  BarChartOutlined,
-  AssignmentOutlined,
-  AddCircleOutline,
-  RefreshOutlined,
-  InboxOutlined,
-  WarningAmberOutlined,
-  LockOutlined,
-  WifiOff,
-} from '@mui/icons-material';
+import { useTheme, alpha } from '@mui/material';
+
+
 
 // ─── Illustration SVGs ────────────────────────────────────────────────────────
 const illustrations = {

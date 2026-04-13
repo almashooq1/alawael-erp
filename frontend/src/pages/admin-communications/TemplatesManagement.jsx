@@ -1,42 +1,11 @@
 /**
  * Correspondence Templates Management — إدارة قوالب المراسلات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  Card,
-  CardContent,
-  CardActions,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Divider,
-  Tooltip,
-  Alert,
-  Snackbar,
-  Skeleton,
-  InputAdornment,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  ContentCopy as CopyIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Description as TemplateIcon,
-  Visibility as PreviewIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import adminCommunicationsService from '../../services/adminCommunications.service';
 import { CORRESPONDENCE_TYPES } from './constants';
 

@@ -2,48 +2,10 @@
  * Documents Pro Phase 6 — لوحة تحكم المرحلة السادسة
  * OCR • الأرشفة والامتثال • محرك التقارير • بوابة البريد • المساعد الذكي
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Tabs, Tab, Paper, Typography, Grid, Card, CardContent,
-  Button, TextField, IconButton, Chip, Alert, CircularProgress,
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider,
-  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
-  Switch, Tooltip, Badge, Avatar, LinearProgress, Snackbar,
-  Table, TableHead, TableRow, TableCell, TableBody,
-  FormControl, InputLabel, Select, MenuItem
-} from '@mui/material';
-import {
-  DocumentScanner as OCRIcon,
-  Archive as ArchiveIcon,
-  Assessment as ReportIcon,
-  Email as EmailIcon,
-  SmartToy as AIIcon,
-  Upload as UploadIcon,
-  Search as SearchIcon,
-  PlayArrow as RunIcon,
-  Send as SendIcon,
-  Chat as ChatIcon,
-  Refresh as RefreshIcon,
-  CheckCircle as CheckIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Visibility as ViewIcon,
-  Download as DownloadIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Gavel as LegalIcon,
-  VerifiedUser as ComplianceIcon,
-  Schedule as ScheduleIcon,
-  ForwardToInbox as ForwardIcon,
-  Psychology as BrainIcon,
-  AutoFixHigh as AutoIcon,
-  ContentCopy as DuplicateIcon,
-  Summarize as SummarizeIcon,
-  Category as ClassifyIcon,
-  DataObject as ExtractIcon,
-  Dashboard as DashIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 
 import { ocrApi, archiveApi, reportApi, emailApi, aiApi, getDashboard }
   from '../../services/documentProPhase6Service';

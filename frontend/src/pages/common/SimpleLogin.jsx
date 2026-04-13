@@ -11,36 +11,12 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  InputAdornment,
-  IconButton,
-  CircularProgress,
-  Checkbox,
-  FormControlLabel,
-  Divider,
-  Link,
   useTheme,
   useMediaQuery,
   alpha,
-  Fade,
-  Slide,
 } from '@mui/material';
-import {
-  Email,
-  Lock,
-  Visibility,
-  VisibilityOff,
-  Login as LoginIcon,
-  Shield as ShieldIcon,
-  AutoAwesome,
-  TrendingUp,
-  Groups,
-  CheckCircle,
-} from '@mui/icons-material';
+
+
 import { useAuth } from 'contexts/AuthContext';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';

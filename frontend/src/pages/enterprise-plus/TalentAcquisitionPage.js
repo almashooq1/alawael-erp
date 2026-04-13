@@ -2,53 +2,12 @@
  * Talent Acquisition & ATS — التوظيف واستقطاب المواهب
  * Full ATS: Job Postings, Candidates, Applications Pipeline, Interviews
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Button,
-  TextField,
-  IconButton,
-  Chip,
-  Avatar,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  MenuItem,
-  Tab,
-  Tabs,
-  Card,
-  CardContent,
-  LinearProgress,
-  InputAdornment,
-  Tooltip,
-  Badge,
-  Stack,
-} from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 import { alpha } from '@mui/material/styles';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Work as WorkIcon,
-  Person as PersonIcon,
-  Schedule as ScheduleIcon,
-  Assessment as AssessmentIcon,
-  Business as BusinessIcon,
-  ArrowForward as ArrowIcon,
-  Close as CloseIcon,
-  CheckCircle as CheckIcon,
-  Cancel as RejectIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

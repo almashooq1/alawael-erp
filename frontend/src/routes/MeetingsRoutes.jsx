@@ -1,7 +1,6 @@
 /**
  * Meetings Routes — مسارات إدارة الاجتماعات
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MeetingsDashboard = lazyWithRetry(() => import('../pages/meetings/MeetingsDashboard'));

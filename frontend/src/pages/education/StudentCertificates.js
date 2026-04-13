@@ -4,38 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Chip,
-  Stack,
-  Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  LinearProgress,
-  Divider,
-  Tabs,
-  Tab,
-  Avatar,
-} from '@mui/material';
-import {
-  School as CertIcon,
-  Download as DownloadIcon,
-  Add as AddIcon,
-  Verified as VerifiedIcon,
-  Schedule as PendingIcon,
-  Close as CloseIcon,
-  Print as PrintIcon,
-  Description as DocIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

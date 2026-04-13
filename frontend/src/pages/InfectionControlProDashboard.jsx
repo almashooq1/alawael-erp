@@ -7,26 +7,12 @@
 
 import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, LinearProgress, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  useTheme, alpha, IconButton, Tooltip,
+  useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadarChart,
-  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import CoronavirusIcon from '@mui/icons-material/Coronavirus';
 import CleanHandsIcon from '@mui/icons-material/CleanHands';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorIcon from '@mui/icons-material/Error';
-import BiotechIcon from '@mui/icons-material/Biotech';
 import ShieldIcon from '@mui/icons-material/Shield';
 
 // ─── Gradient Palette ───────────────────────────────────────────────────────

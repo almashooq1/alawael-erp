@@ -4,13 +4,8 @@
  */
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  SettingsOutlined,
-  LogoutOutlined,
-  MoreVert as MoreIcon,
-  AccountCircleOutlined,
-  KeyboardArrowUp,
-} from '@mui/icons-material';
+
+
 import { useAuth } from 'contexts/AuthContext';
 
 export default function SidebarUserFooter({ collapsed }) {

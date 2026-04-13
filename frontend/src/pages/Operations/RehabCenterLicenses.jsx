@@ -2,53 +2,11 @@
  * Rehab Center Licenses Dashboard - لوحة تحكم تراخيص مراكز ذوي الإعاقة
  * الصفحة الرئيسية الشاملة لإدارة جميع التراخيص والرخص والسجلات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Container, Box, Typography, Grid, Card, CardContent, Paper, Tabs, Tab,
-  Button, Chip, LinearProgress, Alert, IconButton, Tooltip, TextField,
-  MenuItem, Select, FormControl, InputLabel, InputAdornment, Badge,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  TablePagination, Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, Divider, Avatar, Stack, CircularProgress,
+import { useState, useEffect, useCallback } from 'react';
+import { Paper,
 } from '@mui/material';
-import {
-  Add as AddIcon, Refresh as RefreshIcon, Search as SearchIcon,
-  Notifications as AlertIcon, Warning as WarningIcon, CheckCircle,
-  Cancel as CancelIcon, Delete as DeleteIcon,
-  Visibility as ViewIcon, AutorenewOutlined as RenewIcon,
-  Assessment as StatsIcon, FileDownload as ExportIcon, CalendarMonth as CalendarIcon, LocalPolice as GovIcon,
-  LocationCity as MunicipalIcon, Receipt as CommercialIcon,
-  People as EmploymentIcon, School as ProfessionalIcon,
-  Shield as InsuranceIcon, Star as QualityIcon,
-  Computer as TechIcon,
-  NotificationsActive as AlertActiveIcon, Description as DocIcon,
-  ErrorOutline as ErrorIcon,
-  Gavel as PenaltyIcon, Security as RiskIcon,
-  Archive as ArchiveIcon, Checklist as ChecklistIcon,
-  AccountTree as WorkflowIcon, PersonOutline as DelegateIcon,
-  LocationOn as BranchIcon,
-  AssignmentTurnedIn as ComplianceIcon, Unarchive as UnarchiveIcon,
-  TaskAlt as TaskIcon, Comment as CommentIcon, HealthAndSafety as HealthIcon,
-  Speed as KpiIcon, EventNote as EventIcon,
-  ContactPhone as ContactIcon,
-  FileCopy as CloneIcon, Favorite as HeartIcon,
-  PlaylistAddCheck as ChecklistDoneIcon, MonetizationOn as ExpenseIcon,
-  // Round 4 icons
-  CompareArrows as CompareIcon,
-  ConfirmationNumber as TicketIcon, AutoFixHigh as AutomationIcon,
-  Summarize as SummaryIcon, Analytics as AnalyticsIcon,
-  History as HistoryIcon, Inventory as TemplateIcon,
-  Visibility as WatchIcon,
-  Timer as SlaIcon,
-  FactCheck as VersionIcon,
-  // Round 5 icons
-  NotificationsActive as ScheduleNotifIcon,
-  ThumbUp as SurveyIcon, Draw as SignatureIcon,
-  Groups as MeetingIcon, IntegrationInstructions as IntegrationIcon,
-  School as TrainingIcon,
-  BuildCircle as RemediationIcon, Store as VendorIcon,
-  Feedback as ComplaintIcon,
-} from '@mui/icons-material';
+
+
 import rehabLicenseService from '../../services/rehabLicense.service';
 
 // ==================== ثوابت ====================

@@ -5,19 +5,8 @@
  * attendance trends, turnover rate, and performance metrics.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  CircularProgress,
-  LinearProgress,
-  IconButton,
-  Tooltip,
-  Alert,
   useTheme,
   alpha,
 } from '@mui/material';
@@ -26,29 +15,9 @@ import {
   PersonOff,
   EventAvailable,
   Star,
-  Refresh,
 } from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  RadarChart,
-  Radar,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartTooltip,
-  Legend,
-  LineChart,
-  Line,
-} from 'recharts';
-import { motion } from 'framer-motion';
+
+
 import { getHRAnalytics, getDepartmentComparison } from '../../services/biDashboard.service';
 
 const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#00BCD4', '#FF5722', '#795548', '#607D8B', '#E91E63'];

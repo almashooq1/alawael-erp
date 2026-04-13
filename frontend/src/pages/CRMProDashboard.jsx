@@ -5,17 +5,10 @@
  * Gradient: #6366f1 → #06b6d4 → #10b981
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  IconButton, Tooltip,
+import { useTheme, alpha, TableRow,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
-  ComposedChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
+
 
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import PeopleIcon from '@mui/icons-material/People';
@@ -24,11 +17,6 @@ import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import StarIcon from '@mui/icons-material/Star';
 import EmailIcon from '@mui/icons-material/Email';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import RefreshIcon from '@mui/icons-material/Refresh';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 const GRAD = ['#6366f1', '#06b6d4', '#10b981'];

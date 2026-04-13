@@ -1,73 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  Typography,
-  Avatar,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Chip,
-  LinearProgress,
-  Tabs,
-  Tab,
-  IconButton,
-  Tooltip,
-  Badge,
-  Divider,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   alpha,
 } from '@mui/material';
-import {
-  Person as PersonIcon,
-  TrendingUp as TrendingUpIcon,
-  Verified as VerifiedUserIcon,
-  Event as EventIcon,
-  Assignment as CasesIcon,
-  Description as DocsIcon,
-  Assessment as ReportsIcon,
-  Message as MessageIcon,
-  Speed as SpeedIcon,
-  Notifications as NotifIcon,
-  ArrowForward as ArrowIcon,
-  Schedule as ScheduleIcon,
-  PlayArrow as PlayIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  FiberManualRecord as DotIcon,
-  Psychology as AIIcon,
-  Refresh as RefreshIcon,
-  CalendarMonth as CalendarIcon,
-  AccessTime as ClockIcon,
-  Star as StarIcon,
-} from '@mui/icons-material';
-import {
-  AreaChart,
-  Area,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';

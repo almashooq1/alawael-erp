@@ -4,63 +4,13 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Avatar,
-  Button,
-  IconButton,
-  Tooltip,
-  TextField,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
   Paper,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  LinearProgress,
-  InputAdornment,
-  Tabs,
-  Tab,
   useTheme,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  Build as BuildIcon,
-  Close as CloseIcon,
-  Visibility as ViewIcon,
-  CheckCircle as CompleteIcon,
-  Schedule as ScheduleIcon,
-  } from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RTooltip,
-  ResponsiveContainer,
-  Legend,
-} from 'recharts';
+
+
+
+
 import {
   workOrdersService,
   preventiveService,

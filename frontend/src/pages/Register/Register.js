@@ -7,32 +7,12 @@
  */
 
 import { Link } from 'react-router-dom';
-import {
-  Container,
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Link as MuiLink,
-  Alert,
-  CircularProgress,
-  Stepper,
-  Step,
-  StepLabel,
-  LinearProgress,
-  Slide,
-  Avatar,
-} from '@mui/material';
-import { CheckCircle, ArrowForward, ArrowBack } from '@mui/icons-material';
+
+
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
-import { GradientHeader, StyledStepConnector } from './Register.styled';
 import CustomStepIcon from './CustomStepIcon';
 import { STEPS } from './registerConstants';
 import useRegisterForm from './useRegisterForm';
-import SuccessView from './SuccessView';
-import StepBasicInfo from './StepBasicInfo';
-import StepPassword from './StepPassword';
-import StepRoleSelection from './StepRoleSelection';
 
 // ═══════════════════════════════════════════════════
 //  Register Component

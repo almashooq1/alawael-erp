@@ -2,12 +2,8 @@
  * Knowledge Center Dashboard — لوحة تحكم مركز المعرفة
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
-} from '@mui/material';
+
 import { MenuBook, Category, TrendingUp, Bookmark } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#1976d2', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4'];

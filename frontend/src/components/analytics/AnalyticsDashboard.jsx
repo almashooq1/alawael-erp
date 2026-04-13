@@ -3,33 +3,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Chip,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  LinearProgress,
-  Avatar,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import {
-  TrendingUp as TrendIcon,
-  People as PeopleIcon,
-  Assessment as AssessmentIcon,
-  Timeline as TimelineIcon,
-  BarChart as BarChartIcon,
-  Download as DownloadIcon,
-  CalendarMonth as CalendarIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+
+
+
+
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { statusColors } from '../../theme/palette';

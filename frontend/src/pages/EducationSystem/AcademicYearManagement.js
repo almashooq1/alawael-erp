@@ -2,47 +2,11 @@
  * إدارة الأعوام الدراسية
  * Academic Year Management
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Button,  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  Alert,  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  Divider,  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  CalendarMonth as CalendarIcon,
-  ArrowBack as BackIcon,
-  CheckCircle as ActiveIcon,
-  RadioButtonUnchecked as InactiveIcon,
-  DateRange as SemesterIcon,
-  } from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

@@ -5,28 +5,8 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Avatar,
-  Chip,
   useTheme,
-  Tabs,
-  Tab,
-  ButtonBase,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import PersonIcon from '@mui/icons-material/Person';
-import EditRoundedIcon from '@mui/icons-material/EditRounded';
-import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import LoginRoundedIcon from '@mui/icons-material/LoginRounded';
-import SecurityRoundedIcon from '@mui/icons-material/SecurityRounded';
-import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
-import HistoryRoundedIcon from '@mui/icons-material/HistoryRounded';
-import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
-import DynamicFeedRoundedIcon from '@mui/icons-material/DynamicFeedRounded';
-import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 
 /* ─────────────────────────────────────── */
 const ACTION_CONFIG = {

@@ -3,12 +3,9 @@
  * 12 نموذج: كشف راتب، شهادة تعريف، عقد عمل، إجازة، إنذار، ترقية، تقييم أداء،
  *           حضور شهري، بطاقة موظف، إخلاء طرف، نهاية خدمة، شهادة تدريب
  */
-import { Box, Typography, Divider, Grid, Avatar, Chip } from '@mui/material';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
   fieldRow, labelSx, bodyPad, pageWrapper, formatDate,
-  formatMoney, today, RefDateLine, ConfidentialBanner, DeclarationBox,
-  NotesBox, PrintTable, EmptyTable,
+  formatMoney, today,
 } from '../shared/PrintTemplateShared';
 
 /* ════════════════════════════════════════════════════

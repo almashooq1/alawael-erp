@@ -11,16 +11,10 @@
  * - WelcomeCard: Personalized greeting banner
  */
 
-import { Box, Card, CardContent, Typography, Chip, Avatar,
-  List, ListItem, ListItemAvatar, ListItemText, LinearProgress,
-  useTheme, alpha, Grid, Button, Stack } from '@mui/material';
 import {
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  TrendingFlat as TrendFlatIcon,
-  ArrowForward as ArrowIcon,
-  Circle as DotIcon,
-} from '@mui/icons-material';
+  useTheme, alpha } from '@mui/material';
+
+
 import { motion } from 'framer-motion';
 
 // ─── STAT CARD ───────────────────────────────────────────────────────────────

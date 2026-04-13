@@ -2,10 +2,7 @@
  * قوالب طباعة التعليم والطلاب — Education & Students Print Templates
  * يشمل: إدارة الطلاب، التعليم، مونتيسوري
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, PrintTable, EmptyTable, RefDateLine, DeclarationBox,
   headerStyle, sectionTitle, fieldRow, bodyPad, pageWrapper,
   formatDate, today,
 } from '../shared/PrintTemplateShared';

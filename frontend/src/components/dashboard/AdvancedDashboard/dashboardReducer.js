@@ -2,7 +2,6 @@
  * Dashboard reducer & initial state
  * Extracted from AdvancedDashboard monolith
  */
-import { Skeleton } from '@mui/material';
 
 /** Lightweight fallback while lazy chunks load */
 export const SectionSkeleton = ({ height = 200 }) => (

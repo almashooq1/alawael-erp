@@ -6,72 +6,12 @@
  * Trash, Annotations, Comparison, Export/Import, QR Codes
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Paper,
-  Typography,
-  Tabs,
-  Tab,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  IconButton,
-  TextField,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Divider,  Tooltip,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,} from '@mui/material';
+  Paper,} from '@mui/material';
 
-import {
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  History as HistoryIcon,
-  Approval as ApprovalIcon,
-  Timer as TimerIcon,
-  Delete as DeleteIcon,
-  RestoreFromTrash as RestoreIcon,
-  Comment as CommentIcon,
-  Compare as CompareIcon,
-  CloudDownload as ExportIcon,
-  CloudUpload as ImportIcon,
-  QrCode2 as QrCodeIcon,
-  Dashboard as DashboardIcon,
-  Refresh as RefreshIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Add as AddIcon,
-  GetApp as DownloadIcon,
-  BrandingWatermark as WatermarkIcon,
-  Verified as VerifiedIcon,
-  Cancel as CancelIcon,
-  Schedule as ScheduleIcon,
-  DeleteForever as PermanentDeleteIcon,
-  Bookmark as BookmarkIcon,
-  } from '@mui/icons-material';
+
+
 
 import documentAdvancedService from '../../services/documentAdvancedService';
 

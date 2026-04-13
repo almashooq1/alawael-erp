@@ -2,41 +2,14 @@
  * 📊 تقارير التأهيل الشاملة — Disability Rehabilitation Reports
  * AlAwael ERP — Program effectiveness, therapist performance, goal achievement, trends
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  LinearProgress,  Button,
-  Tab,
-  Tabs,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Stack,
-  CircularProgress,
   useTheme,
   alpha,
-  Rating,
 } from '@mui/material';
-import {
-  Assessment as ReportIcon,
-  TrendingUp as TrendIcon,
-  People as PeopleIcon,
-  EmojiEvents as GoalIcon,
-  Download as DownloadIcon,
-  Refresh as RefreshIcon,
-  Star as StarIcon,
-  CheckCircle as CheckIcon,
-  } from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
 import {
   rehabReportService,

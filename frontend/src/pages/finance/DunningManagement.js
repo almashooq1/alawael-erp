@@ -1,45 +1,10 @@
 /* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  Grid,
-  Tabs,
-  Tab,
-  Badge,
-} from '@mui/material';
-import {
-  NotificationsActive,
-  Refresh,  Send,
-  Warning,
-  Schedule,
-  PhoneCallback,
-  Email,
-  Sms,
-  TrendingUp,
-  Gavel,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -109,7 +74,7 @@ const DunningManagement = () => {
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [fetchData]);
 
   const handleSendReminder = async () => {

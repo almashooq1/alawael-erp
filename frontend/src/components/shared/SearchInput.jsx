@@ -1,5 +1,3 @@
-import { TextField, InputAdornment, IconButton } from '@mui/material';
-import { Search as SearchIcon, Clear as ClearIcon } from '@mui/icons-material';
 import { useState, useEffect, useRef } from 'react';
 
 /**

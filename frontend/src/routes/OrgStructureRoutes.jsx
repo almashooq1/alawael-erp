@@ -1,7 +1,6 @@
 /**
  * Org Structure Routes — مسارات الهيكل التنظيمي
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const OrgDashboard = lazyWithRetry(() => import('../pages/org-structure/OrgDashboard'));

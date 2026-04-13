@@ -5,45 +5,10 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Chip,
-  IconButton,
-  Tooltip,
-  Paper,
   useTheme,
-  Badge,
-  Popper,
-  Grow,
-  ClickAwayListener,
-  MenuList,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Button,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CircleIcon from '@mui/icons-material/Circle';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
-import PeopleIcon from '@mui/icons-material/People';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import CachedIcon from '@mui/icons-material/Cached';
 import WbSunnyRoundedIcon from '@mui/icons-material/WbSunnyRounded';
 import NightsStayRoundedIcon from '@mui/icons-material/NightsStayRounded';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
 import { formatCurrency, formatNumber, getGreeting, getArabicDate } from 'services/dashboardService';

@@ -2,36 +2,11 @@
  * UserFormDialog — حوار إنشاء / تعديل مستخدم
  * يدعم: البيانات الأساسية + الفرع + إعدادات الحساب + قوة كلمة المرور
  */
-import {
-  Box,
-  TextField,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  FormControlLabel,
-  Switch,
-  Grid,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Divider,
-  Alert,
-  LinearProgress,
-} from '@mui/material';
+
+
 import { useState, useEffect } from 'react';
-import {
-  Visibility as ShowIcon,
-  VisibilityOff as HideIcon,
-  Person as PersonIcon,
-  ContentCopy as CopyIcon,
-  AutoFixHigh as GenerateIcon,
-} from '@mui/icons-material';
+
+
 import { ROLE_OPTIONS, getRoleColor } from './constants';
 import userManagementService from 'services/userManagementService';
 

@@ -3,8 +3,7 @@
  * تذييل لوحة التحكم — شريط الحالة مع الاتصال ومصدر البيانات ومعلومات الجلسة
  */
 
-import { Box, Typography, Chip, useTheme } from '@mui/material';
-import { motion } from 'framer-motion';
+import { useTheme } from '@mui/material';
 import { brandColors, statusColors } from '../../theme/palette';
 
 export default function DashboardFooter({

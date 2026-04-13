@@ -2,54 +2,11 @@
  * AiAnalyticsDashboard — لوحة تحكم الذكاء الاصطناعي والتحليلات التنبؤية
  * البرومبت 20: AI & Predictive Analytics Module
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Chip,
-  Button,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  TextField,
-  IconButton,
-  Tabs,
-  Tab,
-  Badge,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Alert,
-  Tooltip,
-  Snackbar,
-} from '@mui/material';
-import {
-  NotificationsActive,
-  TrendingUp,
-  Warning,
-  AttachMoney,
-  PlayArrow,
-  CheckCircle,
-  Download,
-  ThumbUp,
-  ThumbDown,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import apiClient from 'services/api.client';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

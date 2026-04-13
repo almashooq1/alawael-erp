@@ -4,16 +4,10 @@
  */
 
 import {
-  Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Checkbox, IconButton, Chip, Typography, Tooltip, CircularProgress, Stack,
+  Paper,
 } from '@mui/material';
-import {
-  MoreVert as MoreVertIcon,
-  Edit as EditIcon,
-  Visibility as VisibilityIcon,
-  FolderOpen as FolderOpenIcon,
-  SelectAll as SelectAllIcon,
-} from '@mui/icons-material';
+
+
 import documentService from 'services/documentService';
 import { gradients, surfaceColors, brandColors, neutralColors } from 'theme/palette';
 import { getCategoryColor } from './documentListConstants';

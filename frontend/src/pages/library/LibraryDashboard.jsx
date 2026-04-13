@@ -1,18 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Grid, Card, CardContent, Paper, Tabs, Tab,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Button, IconButton, TextField, Dialog, DialogTitle, DialogContent,
-  DialogActions, FormControl, InputLabel, Select, MenuItem, Chip,
-  Alert, CircularProgress, Tooltip, InputAdornment, Badge, Rating, Divider, Avatar, Stack, Snackbar,
-} from '@mui/material';
-import {
-  MenuBook, Healing, School, VideoLibrary, Accessibility,
-  SportsEsports, Article, Description, Add, Edit, Delete,
-  Search, QrCode, Assignment, Person, Refresh,
-  Category, LocalLibrary, TrendingUp, Warning,
-  CheckCircle, Schedule, Star,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 import { useNavigate } from 'react-router-dom';
 import libraryService from '../../services/libraryService';
 

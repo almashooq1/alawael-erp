@@ -2,21 +2,10 @@
  * OCR Viewer Component — عارض نتائج استخراج النصوص
  * عرض النص المستخرج مع مناطق التعرف ومستوى الثقة
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Paper, Typography, Grid, Chip, CircularProgress,
-  LinearProgress, Divider, Table, TableHead, TableRow,
-  TableCell, TableBody, IconButton, Tooltip, Alert, Tabs, Tab,
-} from '@mui/material';
-import {
-  DocumentScanner as OCRIcon,
-  Translate as LangIcon,
-  GridOn as TableIcon,
-  TextFields as TextIcon,
-  Speed as ConfidenceIcon,
-  Refresh as RefreshIcon,
-  ContentCopy as CopyIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
 
 import { ocrApi } from '../../services/documentProPhase6Service';
 

@@ -2,22 +2,9 @@
  * SpecializedScalesLibrary — مكتبة مقاييس التأهيل المتخصصة
  * Specialized Assessment Scales Library
  */
-import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Chip,
-  TextField,
-  InputAdornment,
-  Container,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import AssessmentIcon from '@mui/icons-material/Assessment';
+import { useState } from 'react';
+
+
 
 const SCALES = [
   { id: 1, name: 'Functional Independence Measure (FIM)', category: 'وظيفي', items: 18, time: '30 دقيقة' },

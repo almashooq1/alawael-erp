@@ -4,58 +4,13 @@
  * AlAwael ERP — للموظفين والمدراء فقط
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Chip,
-  IconButton,
-  Button,
-  TextField,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tabs,
-  Tab,
-  Badge,
-  Avatar,
-  Tooltip,
-  Alert,
-  LinearProgress,
-  Divider,
 } from '@mui/material';
-import {
-  People as PeopleIcon,
-  Message as MessageIcon,
-  Report as ReportIcon,
-  CheckCircle as CheckCircleIcon,
-  Schedule as ScheduleIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  FilterList as FilterIcon,
-  Reply as ReplyIcon,
-  Assignment as AssignmentIcon,
-  Star as StarIcon,
-  Warning as WarningIcon,
-  Close as CloseIcon,
-  Send as SendIcon,
-} from '@mui/icons-material';
+
+
 import axios from 'axios';
 
 // ─── الثوابت ─────────────────────────────────────────────────────────────────

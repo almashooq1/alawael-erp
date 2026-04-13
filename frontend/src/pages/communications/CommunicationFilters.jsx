@@ -2,8 +2,6 @@
  * CommunicationFilters — Search bar + filter selects
  */
 
-import { Card, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Chip } from '@mui/material';
-import { Search as SearchIcon, FilterList as FilterIcon } from '@mui/icons-material';
 import {
   COMMUNICATION_TYPES,
   COMMUNICATION_STATUS,

@@ -1,14 +1,9 @@
 /**
  * Legal Cases — إدارة القضايا
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
-  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
+import { useState, useEffect, useCallback } from 'react';
+import { TableRow, useTheme, alpha,
 } from '@mui/material';
-import { Refresh, Add, Edit, Gavel } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 import { getLegalCases, createLegalCase, updateLegalCase } from '../../services/legalAffairs.service';
 
 const TYPE_LABELS = { litigation: 'تقاضي', arbitration: 'تحكيم', labor: 'عمالية', commercial: 'تجارية', administrative: 'إدارية', regulatory: 'تنظيمية', other: 'أخرى' };

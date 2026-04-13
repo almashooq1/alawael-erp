@@ -21,14 +21,10 @@
 
 import { memo } from 'react';
 import {
-  Box, Card, CardContent, Typography, Avatar, Grid, Skeleton,
   alpha, useTheme,
 } from '@mui/material';
-import {
-  TrendingUp as UpIcon,
-  TrendingDown as DownIcon,
-  TrendingFlat as FlatIcon,
-} from '@mui/icons-material';
+
+
 
 // ─── Loading skeleton card ────────────────────────────────────────────────────
 function StatSkeleton({ compact }) {

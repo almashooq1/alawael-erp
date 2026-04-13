@@ -1,32 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  TextField,
-  MenuItem,
-  Stepper,
-  Step,
-  StepLabel,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  FormControlLabel,
-  Switch,
-  IconButton,
-  Divider,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  Autocomplete,
-} from '@mui/material';
-import { ArrowBack, ArrowForward, Save, Send, Gavel, People } from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

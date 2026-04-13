@@ -4,7 +4,7 @@
  * Provides real-time updates for KPIs, notifications, and alerts
  */
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import io from 'socket.io-client';
 import { getToken } from '../utils/tokenStorage';
 

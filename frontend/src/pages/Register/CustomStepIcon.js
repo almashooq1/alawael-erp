@@ -1,8 +1,6 @@
 /**
  * Register Page — Custom Step Icon Component
  */
-import { Person, Lock, Badge, CheckCircle } from '@mui/icons-material';
-import { StepIconRoot } from './Register.styled';
 
 export default function CustomStepIcon(props) {
   const { active, completed, icon } = props;

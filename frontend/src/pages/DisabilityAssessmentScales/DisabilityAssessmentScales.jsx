@@ -7,18 +7,7 @@
  * analytics/comparison, and viewing historical results with domain-level scoring.
  */
 
-import { Container, LinearProgress, Typography } from '@mui/material';
 import useDisabilityAssessment from './useDisabilityAssessment';
-import PageHeader from './PageHeader';
-import ScaleCardsTab from './ScaleCardsTab';
-import RecentResultsTab from './RecentResultsTab';
-import AnalyticsTab from './AnalyticsTab';
-import AssessmentDialog from './AssessmentDialog';
-import HistoryDialog from './HistoryDialog';
-import DetailDialog from './DetailDialog';
-import BatchAssessmentDialog from './BatchAssessmentDialog';
-import ProgressDialog from './ProgressDialog';
-import RecommendedScalesDialog from './RecommendedScalesDialog';
 
 const DisabilityAssessmentScales = () => {
   const state = useDisabilityAssessment();

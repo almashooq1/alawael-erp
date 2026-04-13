@@ -2,10 +2,7 @@
  * قوالب البوابات والتوجيهات والمستودعات والتدريب والأداء
  * Portals, Directives, Warehouse, Training & Performance Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

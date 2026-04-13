@@ -1,13 +1,12 @@
 /**
  * TelehealthDashboard — لوحة تحكم الطب عن بعد
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getConsultations,
   getTelehealthStats,
   cancelConsultation,
   STATUS_LABELS,
-  STATUS_COLORS,
   TYPE_LABELS,
   PRIORITY_LABELS,
 } from '../../services/telehealthService';

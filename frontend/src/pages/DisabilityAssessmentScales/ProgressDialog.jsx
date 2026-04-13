@@ -3,33 +3,10 @@
  * Shows historical scores for a single scale/beneficiary over time.
  */
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  LinearProgress,
-  Paper,
-  Chip,
-  Grid,
-  Divider,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Timeline as TimelineIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  TrendingFlat as TrendingFlatIcon,
-} from '@mui/icons-material';
+
+
+
+
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 

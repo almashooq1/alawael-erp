@@ -1,21 +1,11 @@
 /**
  * لوحة تحكم شؤون الموظفين — Employee Affairs Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress, Chip,
-  Table, TableHead, TableRow, TableCell, TableBody,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  People as StaffIcon,
-  EventAvailable as LeaveIcon,
-  TrendingUp as PromoIcon,
-  Description as DocIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
 import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];

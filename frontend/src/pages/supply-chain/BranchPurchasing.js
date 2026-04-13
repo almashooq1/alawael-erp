@@ -2,56 +2,12 @@
  * 🛒 مشتريات الفروع — Branch Purchasing Management
  * AlAwael ERP — Multi-Branch Purchase Requests, Receipts & Contracts
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Tabs,
-  Tab,
-  TextField,
-  InputAdornment,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Chip,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,
-  Avatar,
-  Divider,  Tooltip,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Add as AddIcon,
-  ShoppingCart as PurchaseIcon,
-  Assignment as RequestIcon,
-  Receipt as ReceiptIcon,
-  Description as ContractIcon,
-  CheckCircle as ApproveIcon,
-  Cancel as RejectIcon,
-  Send as SubmitIcon,
-  Refresh as RefreshIcon,
-  Store as BranchIcon,
-  Visibility as ViewIcon,
-  Edit as EditIcon,
-  PriorityHigh as UrgentIcon,
-  Schedule as PendingIcon,
-  } from '@mui/icons-material';
+
+
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
 import {

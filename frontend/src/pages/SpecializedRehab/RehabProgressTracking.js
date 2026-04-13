@@ -2,51 +2,14 @@
  * 📊 متابعة تقدم التأهيل — Rehab Progress Tracking
  * AlAwael ERP — Enrollment progress, session trends, goal outcomes, comparative analytics
  */
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Avatar,
-  Chip,
-  Button,
-  Tabs,
-  Tab,
-  Stack,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   useTheme,
   alpha,
-  LinearProgress,
-  Alert,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import {
-  Timeline as TimelineIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  ShowChart as ChartIcon,
-  Assessment as AssessIcon,
-  CheckCircle as DoneIcon,
-  Speed as SpeedIcon,
-  EmojiEvents as TrophyIcon,
-  Group as GroupIcon,
-  Star as StarIcon,
-  CalendarToday as CalendarIcon,
-  ArrowUpward as ArrowUpIcon,
-  ArrowDownward as ArrowDownIcon,
-  Remove as FlatIcon,
-} from '@mui/icons-material';
+
+
 
 /* ── Demo enrollments ── */
 const DEMO_ENROLLMENTS = [

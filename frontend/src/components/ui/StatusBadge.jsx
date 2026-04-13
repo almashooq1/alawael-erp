@@ -11,7 +11,7 @@
  *  - General: success, warning, error, info, neutral, draft
  */
 
-import { Chip, Tooltip, Box, Typography, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import {
   CheckCircle,
   Cancel,

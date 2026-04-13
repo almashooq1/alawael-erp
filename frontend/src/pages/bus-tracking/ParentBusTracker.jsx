@@ -1,44 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Card,
-  CardContent,
-  Chip,
-  Button,
-  LinearProgress,
-  Alert,
-  TextField,
-  Divider,
-  Badge,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Avatar,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import {
-  DirectionsBus as BusIcon,
-  People as PeopleIcon,
-  LocationOn as LocationIcon,
-  Notifications as NotifIcon,
-  NotificationsActive as NotifActiveIcon,
-  Schedule as ScheduleIcon,
-  CheckCircle as CheckIcon,
-  School as SchoolIcon,
-  MyLocation as GPSIcon,
-  Phone as PhoneIcon,
-  Person as PersonIcon,
-  Refresh as RefreshIcon,
-  DoneAll as DoneAllIcon,
-  ArrowForward as ArrowIcon,
-  AccessTime as TimeIcon,
-  NearMe as ETAIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import busTrackingService from '../../services/busTrackingService';
 
 export default function ParentBusTracker() {

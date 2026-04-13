@@ -2,21 +2,9 @@
  * UserManagement — صفحة إدارة المستخدمين الرئيسية
  * نظام شامل لإدارة المستخدمين، الأدوار، الصلاحيات والعمليات الجماعية
  */
-import { Box, Typography, Alert, Breadcrumbs, Link } from '@mui/material';
-import {
-  People as PeopleIcon,
-  Home as HomeIcon,
-  AdminPanelSettings as AdminIcon,
-} from '@mui/icons-material';
-import ConfirmDialog from 'components/common/ConfirmDialog';
+
+
 import useUserManagement from './useUserManagement';
-import StatsCards from './StatsCards';
-import UsersToolbar from './UsersToolbar';
-import UsersTable from './UsersTable';
-import UserFormDialog from './UserFormDialog';
-import UserDetailDialog from './UserDetailDialog';
-import ResetPasswordDialog from './ResetPasswordDialog';
-import PermissionsDialog from './PermissionsDialog';
 
 const UserManagement = () => {
   const {

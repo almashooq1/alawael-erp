@@ -1,13 +1,9 @@
 /**
  * Events List — قائمة الفعاليات
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
-  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
+import { useState, useEffect, useCallback } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { Refresh, Add, Edit, Delete, Event as EventIcon } from '@mui/icons-material';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../../services/events.service';
 
 const TYPE_LABELS = { conference: 'مؤتمر', seminar: 'ندوة', workshop: 'ورشة عمل', ceremony: 'حفل', exhibition: 'معرض', meeting: 'اجتماع', training: 'تدريب', social: 'اجتماعي', sports: 'رياضي', other: 'أخرى' };

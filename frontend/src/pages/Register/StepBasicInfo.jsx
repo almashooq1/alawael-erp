@@ -2,8 +2,6 @@
  * StepBasicInfo — Step 0: Name, email, phone, national ID
  */
 
-import { Box, Typography, TextField, InputAdornment, Fade } from '@mui/material';
-import { Person, Email, Phone, Badge } from '@mui/icons-material';
 import { brandColors } from 'theme/palette';
 
 const StepBasicInfo = ({ formData, fieldErrors, handleChange }) => (

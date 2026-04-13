@@ -1,43 +1,9 @@
-/* eslint-disable no-console */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Chip,
-  Button,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  LinearProgress,
-  TextField,
-  InputAdornment,
-  IconButton,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tabs,
-  Tab,
-} from '@mui/material';
-import {
-  Business as AssetIcon,
-  Search as SearchIcon,
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  } from '@mui/icons-material';
+ 
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

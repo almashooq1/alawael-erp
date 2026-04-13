@@ -2,10 +2,7 @@
  * قوالب التخطيط المالي والخزينة
  * Financial Planning & Treasury Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, formatMoney, today,
 } from '../shared/PrintTemplateShared';
 

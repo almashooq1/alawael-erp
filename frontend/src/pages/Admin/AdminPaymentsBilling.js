@@ -1,41 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  TextField,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  Tooltip,
-  LinearProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
-import {
-  Payment as PaymentIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  FileDownload as FileDownloadIcon,
-  Visibility as VisibilityIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
 import { getStatusColor } from 'utils/statusColors';
@@ -43,7 +10,7 @@ import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
-import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
+import { useConfirmDialog } from 'components/common/ConfirmDialog';
 
 const AdminPaymentsBilling = () => {
   const { currentUser } = useAuth();

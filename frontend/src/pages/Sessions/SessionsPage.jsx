@@ -4,25 +4,13 @@
  * عرض تقويمي وقائمي للجلسات مع إمكانية الفلترة والإنشاء
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
-  Button, IconButton, TextField, InputAdornment, Select,
-  FormControl, InputLabel, MenuItem, Pagination, Stack,
-  LinearProgress, Alert, Tooltip, Tab, Tabs,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemText, ListItemAvatar, Divider,
+  Paper,
 } from '@mui/material';
-import {
-  Search as SearchIcon, Add as AddIcon, Refresh as RefreshIcon,
-  CalendarToday as CalendarIcon, ViewList as ListIcon,
-  Schedule as ScheduleIcon, Person as PersonIcon,
-  CheckCircle as DoneIcon, Cancel as CancelIcon,
-  PlayCircle as InProgressIcon, Timer as TimerIcon,
-  Videocam as VideoIcon, Groups as GroupIcon,
-} from '@mui/icons-material';
+
+
 
 import { sessionsAPI } from '../../services/ddd';
 

@@ -1,9 +1,6 @@
-import React, { useState, useEffect, memo } from 'react';
-import {
-  Box, Typography, Grid, Skeleton, Chip, Tooltip
-} from '@mui/material';
+import { useState, useEffect, memo } from 'react';
+
 import { useTheme } from '@mui/material/styles';
-import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx, ...rest }) => {

@@ -4,62 +4,12 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Chip,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider,
-  Paper,
-  Tab,
-  Tabs,
-  LinearProgress,
-  IconButton,
-  Tooltip,
   useTheme,
-  Button,
-  Alert,
-  Snackbar,
 } from '@mui/material';
-import {
-  People as PeopleIcon,
-  TrendingUp as TrendingUpIcon,
-  MonetizationOn as MoneyIcon,
-  Handshake as HandshakeIcon,
-  PersonAdd as PersonAddIcon,
-  PhoneCallback as PhoneIcon,
-  EmojiEvents as TrophyIcon,
-  Refresh as RefreshIcon,
-  ArrowUpward as ArrowUpIcon,
-  ArrowDownward as ArrowDownIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  FiberNew as NewIcon,
-  Storage as SeedIcon,
-  Warning as WarningIcon,
-  CalendarMonth as CalendarIcon,
-} from '@mui/icons-material';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ReTooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Legend,
-} from 'recharts';
+
+
+
+
 import { MOCK_CRM_DASHBOARD, crmReportsService, seedService } from 'services/crmService';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];

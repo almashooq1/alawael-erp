@@ -4,22 +4,9 @@
  */
 
 import React from 'react';
-import { Box, Paper, Typography, Grid, ButtonBase, useTheme, Chip, alpha } from '@mui/material';
-import { motion } from 'framer-motion';
+import { useTheme, alpha } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from 'theme/palette';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import GroupsIcon from '@mui/icons-material/Groups';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SchoolIcon from '@mui/icons-material/School';
-import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
-import BadgeIcon from '@mui/icons-material/Badge';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import BoltIcon from '@mui/icons-material/Bolt';
 
 const QUICK_ACTIONS = [
   {

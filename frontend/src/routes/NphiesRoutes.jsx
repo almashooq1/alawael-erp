@@ -2,7 +2,6 @@
  * NPHIES Routes — مسارات التأمين الصحي
  * المنصة الوطنية لتبادل المعلومات الصحية والتأمينية — HL7 FHIR R4
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const NphiesPage = lazyWithRetry(

@@ -1,41 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  Chip,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
-  InputAdornment,
-  ToggleButton,
-  ToggleButtonGroup,
-  LinearProgress,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  Visibility as VisibilityIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  LocationOn as LocationIcon,
-  Add as AddIcon,
-  ViewList as ViewListIcon,
-  ViewAgenda as ViewAgendaIcon,
-} from '@mui/icons-material';
+
+
 import { therapistService } from 'services/therapistService';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';

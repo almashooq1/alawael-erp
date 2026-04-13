@@ -6,13 +6,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { triggerBlobDownload } from 'utils/downloadHelper';
-import {
-  Assessment as AssessmentIcon,
-  TrendingUp as TrendingUpIcon,
-  Psychology as PsychologyIcon,
-  WarningAmber as WarningAmberIcon,
-  CheckCircle as CheckCircleIcon,
-} from '@mui/icons-material';
+
+
 import studentPortalService from 'services/studentPortalService';
 import apiClient from 'services/api.client';
 import { formatNumber } from 'utils/formatters';

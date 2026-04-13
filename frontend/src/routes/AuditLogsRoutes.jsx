@@ -2,7 +2,6 @@
  * Audit Logs Routes — مسارات سجلات التدقيق
  * Enhanced Audit Trail — تتبع جميع عمليات النظام
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AuditLogsPage = lazyWithRetry(

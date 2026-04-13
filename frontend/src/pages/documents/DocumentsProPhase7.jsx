@@ -2,60 +2,12 @@
  * DocumentsProPhase7 — لوحة المرحلة السابعة
  * العلامات المائية • الاستيراد/التصدير • الامتثال • الرسم البياني المعرفي • الأتمتة
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Tabs, Tab, Paper, Typography, Button, Chip, Grid, Card, CardContent,
-  CardActions, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Select, MenuItem, FormControl, InputLabel,
-  Switch, FormControlLabel, Alert, CircularProgress, LinearProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Divider, Stack, Badge, Snackbar, List, ListItem, ListItemIcon,
-  ListItemText, Accordion, AccordionSummary, AccordionDetails, Slider,
-  ToggleButton, ToggleButtonGroup, Autocomplete
+import { useState, useEffect, useCallback } from 'react';
+import { Paper
 } from '@mui/material';
-import {
-  BrandingWatermark as WatermarkIcon,
-  ImportExport as ImportExportIcon,
-  VerifiedUser as ComplianceIcon,
-  AccountTree as GraphIcon,
-  SmartToy as AutomationIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  PlayArrow as PlayIcon,
-  Stop as StopIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Visibility as ViewIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  ExpandMore as ExpandMoreIcon,
-  Security as SecurityIcon,
-  Assessment as AssessmentIcon,
-  ContentCopy as CopyIcon,
-  Schedule as ScheduleIcon,
-  Webhook as WebhookIcon,
-  RuleFolder as RuleIcon,
-  Timeline as TimelineIcon,
-  Hub as HubIcon,
-  ScannerOutlined as ScanIcon,
-  AutoFixHigh as AutoFixIcon,
-  Palette as PaletteIcon,
-  TextFields as TextFieldsIcon,
-  Image as ImageIcon,
-  QrCode as QrCodeIcon,
-  VisibilityOff as InvisibleIcon,
-  FileDownload as ExportFileIcon,
-  FileUpload as ImportFileIcon,
-  DataObject as JsonIcon,
-  TableChart as CsvIcon,
-  Code as XmlIcon,
-} from '@mui/icons-material';
+
+
 import { watermarkApi, importExportApi, complianceApi, graphApi, automationApi, getDashboard } from '../../services/documentProPhase7Service';
-import WatermarkDesigner from '../../components/documents/WatermarkDesigner';
-import AutomationBuilder from '../../components/documents/AutomationBuilder';
 import logger from '../../utils/logger';
 
 /* ─── Style ──────────────────────────────────────────────── */

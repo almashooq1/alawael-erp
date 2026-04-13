@@ -2,19 +2,10 @@
  * لوحة تحكم نظام التعليم
  * Education System Dashboard
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+
+
 import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActionArea,
-  LinearProgress,  Avatar,} from '@mui/material';
-import {
-  School as SchoolIcon,
   CalendarMonth as CalendarIcon,
   MenuBook as SubjectIcon,
   Person as TeacherIcon,

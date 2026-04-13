@@ -3,36 +3,14 @@
  * BeneficiariesTableBody – table head, rows, and pagination
  */
 
-import { Fragment } from 'react';
-import {
-  Box,
-  Card,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  TableSortLabel,
-  Checkbox,
-  Chip,
-  Avatar,
-  IconButton,
-  Typography,
-  LinearProgress,
-} from '@mui/material';
-import {
-  MoreVert,
-  KeyboardArrowDown,
-  KeyboardArrowUp,
-  Star,
-} from '@mui/icons-material';
+
+
+
+
 import { visuallyHidden } from '@mui/utils';
 import { getStatusColor } from 'utils/statusColors';
 import { columns } from './beneficiariesTableConstants';
 import { getStatusLabel, getCategoryLabel } from './beneficiariesLabelHelpers';
-import BeneficiariesRowDetail from './BeneficiariesRowDetail';
 
 const BeneficiariesTableBody = ({
   sortedData,

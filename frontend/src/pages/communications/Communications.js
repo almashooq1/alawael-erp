@@ -1,37 +1,12 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Tabs,
-  Tab,
-  Badge,
-  IconButton,
-  Button,
-  CircularProgress,
-  Tooltip,
-} from '@mui/material';
-import {
-  ChatBubble as ChatIcon,
-  Email as EmailIcon,
-  Forum as ForumIcon,
-  SmartToy as BotIcon,
-  Notifications as NotificationsIcon,
-  Add as AddIcon,
-  AccessTime as TimeIcon,
-  TrendingUp as TrendingIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from 'contexts/SocketContext';
 
 // المكونات الفرعية
-import MessagingPanel from 'components/communications/MessagingPanel';
-import ChatbotPanel from 'components/communications/ChatbotPanel';
-import EmailPanel from 'components/communications/EmailPanel';
-import AnalyticsDashboard from 'components/communications/AnalyticsDashboard';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import communicationsService from 'services/communicationsService';

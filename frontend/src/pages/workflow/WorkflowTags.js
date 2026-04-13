@@ -2,44 +2,12 @@
  * WorkflowTags – إدارة التصنيفات
  * Tag management for workflow instances — create, edit, assign, search.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Grid,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-  Tooltip,
-  Chip,
-  Card,
-  CardContent,
-  Skeleton,  alpha,
-  Avatar,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
+import {  alpha,
 } from '@mui/material';
-import {
-  ArrowBack,
-  Refresh,
-  Add,
-  Label,
-  Edit,
-  Delete,
-  LocalOffer,  Tag,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

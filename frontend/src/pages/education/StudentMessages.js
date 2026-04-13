@@ -3,42 +3,11 @@
  * صفحة الرسائل والمحادثات للطالب
  */
 
-import { useState, useEffect, useCallback, useMemo, Fragment } from 'react';
-import {
-  Box,
-  Grid,
-  Typography,
-  TextField,
-  InputAdornment,
-  Button,
-  Stack,
-  Avatar,
-  Paper,
-  List,
-  ListItemAvatar,
-  ListItemText,
-  ListItemButton,
-  Badge,
-  Divider,
-  IconButton,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-} from '@mui/material';
-import {
-  Message as MessageIcon,
-  Search as SearchIcon,
-  Send as SendIcon,
-  AttachFile as AttachFileIcon,
-  MoreVert as MoreIcon,
-  StarBorder as StarIcon,
-  Star as StarFilledIcon,
-  People as GroupIcon,
-  Person as PersonIcon,
-  School as TeacherIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+
+
+
+
 import { gradients, brandColors, surfaceColors, rankColors } from 'theme/palette';
 import messagesService from 'services/messagesService';
 import { useSnackbar } from '../../contexts/SnackbarContext';

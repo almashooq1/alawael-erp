@@ -2,22 +2,9 @@
  * CompensationStructureCard — Expandable structure card with details
  */
 
-import {
-  Card, CardContent, Grid, Paper, Box, Typography, Chip, IconButton, Tooltip,
-  Button, Divider, Collapse,
-} from '@mui/material';
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ExpandMore as ExpandIcon,
-  ExpandLess as CollapseIcon,
-  ContentCopy as CopyIcon,
-  CheckCircle as ActiveIcon,
-  Cancel as InactiveIcon,
-  MonetizationOn as MoneyIcon,
-  LocalAtm as AllowanceIcon,
-  RemoveCircle as DeductionIcon,
-} from '@mui/icons-material';
+
+
+
 import { statusColors, neutralColors } from 'theme/palette';
 import { SCOPE_LABELS, INCENTIVE_LABELS } from './compensationConstants';
 

@@ -8,13 +8,9 @@
 
 import { useState } from 'react';
 import {
-  Box, Typography, Grid, Card, CardActionArea, Chip,
-  useTheme, alpha, TextField, InputAdornment,
+  useTheme, alpha,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import PeopleIcon from '@mui/icons-material/People';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -26,8 +22,6 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import SecurityIcon from '@mui/icons-material/Security';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import SettingsIcon from '@mui/icons-material/Settings';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import StarIcon from '@mui/icons-material/Star';
 import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
 import SpeedIcon from '@mui/icons-material/Speed';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';

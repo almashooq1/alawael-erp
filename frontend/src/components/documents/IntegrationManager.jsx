@@ -1,22 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
-  CircularProgress, Alert, Paper, Grid, List, ListItem, ListItemAvatar,
-  ListItemText, Divider, Dialog, DialogTitle, DialogContent, DialogActions,
-  TextField, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel,
-  Badge, Tooltip,
-} from '@mui/material';
-import {
-  Webhook as WebhookIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  PlayArrow as TestIcon,
-  PowerSettingsNew as ToggleIcon,
-  Delete as DeleteIcon,
-  History as LogsIcon,
-  CheckCircle as SuccessIcon,
-  Error as ErrorIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 import { integrationsApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
 

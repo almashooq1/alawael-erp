@@ -4,12 +4,8 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Typography, Paper, useTheme } from '@mui/material';
-import { motion } from 'framer-motion';
+import { useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BadgeIcon from '@mui/icons-material/Badge';

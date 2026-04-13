@@ -1,44 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,
-  Avatar,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  HourglassTop as WaitIcon,
-  Delete as DeleteIcon,
-  Close as CloseIcon,
-  Edit as EditIcon,
-  Phone as PhoneIcon,
-  CalendarToday as DateIcon,
-  ArrowUpward as HighIcon,
-  ArrowDownward as LowIcon,
-  DragHandle as MediumIcon,
-  CheckCircle as AdmittedIcon,
-  NotificationsActive as ContactedIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

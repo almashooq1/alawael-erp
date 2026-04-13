@@ -1,7 +1,6 @@
 /**
  * Supply Chain Routes — مسارات سلسلة الإمداد
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const SupplyChainDashboard = lazyWithRetry(() => import('../pages/supply-chain/SupplyChainDashboard'));

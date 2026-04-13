@@ -1,21 +1,11 @@
 /**
  * لوحة تحكم المشتريات — Procurement Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Typography, Card, CardContent, CircularProgress, Fade, Grow, Chip,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  ShoppingCart as OrderIcon,
-  Store as VendorIcon,
-  Assignment as RequestIcon,
-  AttachMoney as SpendIcon,
-  TrendingUp as TrendingUpIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
 import { motion } from 'framer-motion';
 import { getDashboard } from '../../services/procurement.service';
 

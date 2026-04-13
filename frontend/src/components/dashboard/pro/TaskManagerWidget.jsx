@@ -2,21 +2,10 @@
  * ✅ TaskManagerWidget — مدير المهام المتقدم
  * Professional task management with kanban-style view, priorities, and drag support
  */
-import React, { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
-  Box, Paper, Typography, Grid, Chip, IconButton,
-  TextField, Button, LinearProgress,
-  useTheme, Divider, InputAdornment,
-  Dialog, DialogTitle, DialogContent, DialogActions,
+  useTheme,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import { gradients, statusColors, brandColors } from 'theme/palette';
 
 const PRIORITY_CONFIG = {

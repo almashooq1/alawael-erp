@@ -1,7 +1,6 @@
 /**
  * Warehouse Management Routes — مسارات إدارة المستودعات
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const WarehouseDashboard = lazyWithRetry(() => import('../pages/Warehouse/WarehouseDashboard'));

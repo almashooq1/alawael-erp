@@ -1,7 +1,6 @@
 /**
  * Medical Files Routes — مسارات السجلات الطبية
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MedicalFilesDashboard = lazyWithRetry(() => import('../pages/medical-files/MedicalFilesDashboard'));

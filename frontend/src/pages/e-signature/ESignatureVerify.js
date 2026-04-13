@@ -1,39 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eSignatureService from '../../services/eSignature.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  TextField,
-  InputAdornment,
-  Avatar,
-  Divider,
-  Alert,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  IconButton,
-} from '@mui/material';
-import {
-  Verified,  GppBad,
-  Search,
-  ArrowBack,
-  CheckCircle,
-  Cancel,
-  Person,
-  Schedule,
-  Description,
-  Shield,
-  History,
-  ContentCopy,} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

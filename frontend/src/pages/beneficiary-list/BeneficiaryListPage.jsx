@@ -5,28 +5,13 @@
  * مع إمكانية الانتقال لملف 360°
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box, Card, CardContent, Typography, TextField, InputAdornment,
-  Chip, Avatar, Button, IconButton, Pagination, Grid,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, ToggleButtonGroup, ToggleButton, Stack, Skeleton,
-  Alert, Menu, MenuItem, Select, FormControl, InputLabel,
-  Tooltip, Badge, LinearProgress,
+  Paper,
 } from '@mui/material';
-import {
-  Search as SearchIcon,
-  ViewList as ListIcon,
-  ViewModule as GridIcon,
-  FilterList as FilterIcon,
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Person as PersonIcon,
-  Download as DownloadIcon,
-  Refresh as RefreshIcon,
-  Clear as ClearIcon,
-} from '@mui/icons-material';
+
+
 
 import { coreAPI } from '../../services/ddd';
 

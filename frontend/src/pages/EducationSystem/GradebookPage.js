@@ -2,39 +2,11 @@
  * سجل الدرجات
  * Gradebook Page
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Container,
-  Grid,
-  Paper,
-  Box,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Chip,
-  IconButton,  LinearProgress,
-  Alert,  Avatar,  Divider,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Grade as GradeIcon,
-  ArrowBack as BackIcon,
-  Lock as FinalizeIcon,
-  Person as StudentIcon,
-  } from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

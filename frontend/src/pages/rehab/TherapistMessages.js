@@ -1,39 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Avatar,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  TextField,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  InputAdornment,
-  Grid,
-  Paper,
-  IconButton,
-  Tooltip,
-  Badge,
-} from '@mui/material';
-import {
-  Send as SendIcon,
-  AttachFile as AttachFileIcon,
-  Search as SearchIcon,
-  Add as AddIcon,
-  More as MoreIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  EmojiEmotions as EmojiEmotionsIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import messagesService from 'services/messagesService';
 import logger from 'utils/logger';

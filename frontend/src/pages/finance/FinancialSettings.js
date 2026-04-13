@@ -1,36 +1,10 @@
 /* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  Button,
-  TextField,
-  MenuItem,
-  Switch,
-  FormControlLabel,
-  Tabs,
-  Tab,
-  Divider,
-  Alert,
-  Snackbar,
-  Chip,
-} from '@mui/material';
-import {
-  Save,
-  Settings,
-  Receipt,
-  AccountBalance,
-  Notifications,
-  Assessment,
-  Backup,
-  Business,
-  Preview,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -71,7 +45,7 @@ const FinancialSettings = () => {
 
   useEffect(() => {
     fetchSettings();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [fetchSettings]);
 
   const handleSave = async () => {

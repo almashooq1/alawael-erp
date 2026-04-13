@@ -1,5 +1,3 @@
-import { Grid, CardContent, Typography, Box, Avatar, Skeleton, Fade } from '@mui/material';
-import { StatCard } from './studentManagement.styles';
 
 /** 4 KPI stat cards for student management */
 const StudentStatsCards = ({ statCards, loading }) => (

@@ -4,32 +4,9 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Container,
-  Typography,  Button,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Tabs,
-  Tab,
-  LinearProgress,
-  Stack,
-  Alert,} from '@mui/material';
-import {
-  AccountBalance as FinanceIcon,
-  Receipt as InvoiceIcon,
-  MenuBook as JournalIcon,
-  AccountBalanceWallet as PettyCashIcon,
-  TrendingUp as CashFlowIcon,
-  CreditCard as ChequeIcon,
-  SyncAlt as ReconIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+  Paper,} from '@mui/material';
+
+
 import financeOperationsService from '../../services/financeOperationsService';
 
 const STATUS_MAP = {

@@ -1,40 +1,11 @@
 /**
  * Employee Loans Management — إدارة السلف والقروض
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  LinearProgress,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  ThumbUp as ApproveIcon,
-} from '@mui/icons-material';
+  Paper,} from '@mui/material';
+
+
 import {
   getLoans,
   createLoan,

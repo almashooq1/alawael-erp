@@ -1,45 +1,10 @@
 /* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Button,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  MenuItem,
-  IconButton,
-  Tooltip,
-  Grid,
-  Tabs,
-  Tab,
-  Alert,
-} from '@mui/material';
-import {
-  SwapHoriz,
-  Refresh,
-  Add,
-  PlayArrow,
-  CheckCircle,
-  Receipt,
-  AccountBalance,
-  CompareArrows,
-  Business,
-} from '@mui/icons-material';
+
+
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -123,7 +88,7 @@ const IntercompanySettlement = () => {
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [fetchData]);
 
   const handleCreateInvoice = async () => {

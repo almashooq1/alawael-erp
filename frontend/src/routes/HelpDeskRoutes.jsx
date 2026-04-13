@@ -1,7 +1,6 @@
 /**
  * Help Desk Routes — مسارات مكتب المساعدة
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const HelpDeskDashboard = lazyWithRetry(() => import('../pages/HelpDesk/HelpDeskDashboard'));

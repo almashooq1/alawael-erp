@@ -2,35 +2,10 @@
  * Beneficiary AI Analysis — تحليل المستفيد بالذكاء الاصطناعي
  * Phase 17
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Grid, Card, CardContent, Chip, LinearProgress,
-  Alert, Snackbar, Tabs, Tab, Paper, Avatar, IconButton,
-  Tooltip, CircularProgress, List, ListItem, ListItemIcon, ListItemText,
-  Accordion, AccordionSummary, AccordionDetails, Button, Table,
-  TableBody, TableCell, TableContainer, TableHead, TableRow,
-} from '@mui/material';
-import {
-  Psychology as PsychologyIcon,
-  ArrowBack as BackIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  TrendingFlat as FlatIcon,
-  Lightbulb as RecommendIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  RadioButtonUnchecked as UncheckedIcon,
-  ExpandMore as ExpandIcon,
-  Assessment as AssessmentIcon,
-  Timeline as TimelineIcon,
-  Security as ShieldIcon,
-  AutoFixHigh as OptimizeIcon,
-  BugReport as PatternIcon,
-  Article as ReportIcon,
-  Refresh as RefreshIcon,
-  Star as StarIcon,
-  Flag as FlagIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 import { useParams, useNavigate } from 'react-router-dom';
 import aiDiagnosticService from '../../services/aiDiagnosticService';
 

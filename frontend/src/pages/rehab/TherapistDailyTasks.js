@@ -1,40 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Tooltip,
-  Paper,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  CheckCircle as CheckIcon,
-  RadioButtonUnchecked as UncheckedIcon,
-  Delete as DeleteIcon,
-  Flag as FlagIcon,
-  Schedule as ScheduleIcon,
-  Assignment as TaskIcon,
-  Close as CloseIcon,
-  Warning as WarningIcon,
-  PlayArrow as PlayIcon,
-  Done as DoneIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -78,7 +46,7 @@ const TherapistDailyTasks = () => {
 
   useEffect(() => {
     loadTasks();
-  }, []); // eslint-disable-line
+  }, []);  
 
   const loadTasks = async () => {
     try {

@@ -2,10 +2,7 @@
  * قوالب طباعة المشتريات وسلسلة الإمداد — Procurement & Supply Chain Print Templates
  * يشمل: المشتريات، سلسلة الإمداد، المستودعات
  */
-import React from 'react';
-import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, PrintTable, EmptyTable, RefDateLine, fieldRow, bodyPad, pageWrapper,
+import { fieldRow, bodyPad, pageWrapper,
   formatDate, formatMoney, today,
 } from '../shared/PrintTemplateShared';
 

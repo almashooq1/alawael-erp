@@ -2,10 +2,7 @@
  * قوالب طباعة الملفات الطبية والسريرية — Medical & Clinical Print Templates
  * يشمل: الملفات الطبية، ICF، MDT، الطب عن بعد، الدعم النفسي
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

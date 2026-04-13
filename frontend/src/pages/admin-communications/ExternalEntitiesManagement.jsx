@@ -1,55 +1,12 @@
 /**
  * External Entities Management — إدارة الجهات الخارجية
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Button,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  IconButton,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,  Tooltip,
-  Alert,
-  Snackbar,
-  Skeleton,
-  InputAdornment,
-  Avatar,
-  Switch,
-  FormControlLabel,
-  Tabs,
-  Tab,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Search as SearchIcon,
-  Business as BusinessIcon,
-  AccountBalance as GovIcon,
-  Store as PrivateIcon,
-  Public as InternationalIcon,
-  VolunteerActivism as NonProfitIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Language as WebIcon,
-  LocationOn as LocationIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+
+
 import adminCommunicationsService from '../../services/adminCommunications.service';
 
 const ENTITY_TYPES = {

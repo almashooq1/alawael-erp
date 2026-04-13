@@ -2,31 +2,9 @@
  * ScheduleDashboard.jsx — لوحة الجدول الزمني والمواعيد
  * تصميم Glassmorphism بريميوم | Framer Motion | RTL | Dark/Light
  */
-import React, { useState, useEffect, useCallback, memo } from 'react';
-import {
-  Box, Typography, Grid, Avatar, Chip, LinearProgress,
-  Skeleton, Tooltip, IconButton, Badge, Divider,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, MenuItem, useTheme, alpha,
+import { useState, useEffect, useCallback, memo } from 'react';
+import { useTheme, alpha,
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import TrendingDownIcon from '@mui/icons-material/TrendingDown';
-import EventNoteIcon from '@mui/icons-material/EventNote';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
-import EventBusyIcon from '@mui/icons-material/EventBusy';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import AddIcon from '@mui/icons-material/Add';
-import PersonIcon from '@mui/icons-material/Person';
-import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import PendingActionsIcon from '@mui/icons-material/PendingActions';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {

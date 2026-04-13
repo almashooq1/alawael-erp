@@ -12,16 +12,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Container, Grid, Card, CardContent, CardActions, Typography, Button,
-  Stack, Chip, Avatar, TextField, InputAdornment, IconButton,
-  Dialog, DialogTitle, DialogContent, DialogActions, Skeleton,
-  ToggleButton, ToggleButtonGroup, Divider, Alert,
+  Box, Card,
 } from '@mui/material';
-import {
-  Print, PictureAsPdf, Description, Badge, Assignment, FamilyRestroom, TransferWithinAStation, Search,
-  Close, AssignmentInd,
-  LocalHospital, EmojiEvents,
-} from '@mui/icons-material';
+
 import { styled } from '@mui/material/styles';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';

@@ -1,27 +1,7 @@
-import { Box, Grid, Card, CardContent, Typography, LinearProgress } from '@mui/material';
-import {
-  TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
-  Message as MessageIcon,
-  Schedule as ScheduleIcon,
-  CheckCircle as CheckIcon,
-  SmartToy as BotIcon,
-} from '@mui/icons-material';
-import {
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+
+
+
+
 import { brandColors } from 'theme/palette';
 
 const AnalyticsDashboard = ({ stats }) => {

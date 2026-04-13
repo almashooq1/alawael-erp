@@ -48,7 +48,7 @@ export function useAsync(apiFn, options = {}) {
         if (mountedRef.current) setLoading(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [apiFn]
   );
 

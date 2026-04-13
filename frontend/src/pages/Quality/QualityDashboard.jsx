@@ -1,21 +1,12 @@
 /**
  * لوحة تحكم الجودة والامتثال — Quality & Compliance Dashboard
  */
-import React, { useState, useEffect } from 'react';
-import {
-  Box, Grid, Typography, Card, CardContent, CircularProgress, Chip, Fade, Grow,
-  Table, TableHead, TableRow, TableCell, TableBody, TableContainer, LinearProgress,
-} from '@mui/material';
-import {
-  PieChart, Pie, Cell,
-  Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
-import {
-  VerifiedUser as QualityIcon,
-  Gavel as ComplianceIcon,
-  Assessment as AuditIcon,
-  TrendingUp as IndicatorIcon,
-} from '@mui/icons-material';
+import { useState, useEffect } from 'react';
+
+
+
+
+
 import { motion } from 'framer-motion';
 import apiClient from '../../services/api';
 

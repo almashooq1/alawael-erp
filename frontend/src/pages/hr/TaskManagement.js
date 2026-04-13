@@ -1,40 +1,11 @@
 /**
  * Task Management — إدارة المهام والتكليفات
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  LinearProgress,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Flag as FlagIcon,
-  } from '@mui/icons-material';
+  Paper,} from '@mui/material';
+
+
 import {
   getTasks,
   createTask,

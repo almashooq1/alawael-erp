@@ -1,17 +1,5 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Chip,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Stack,
-} from '@mui/material';
-import { Schedule } from '@mui/icons-material';
+
+
 import { statusColors } from 'theme/palette';
 
 /** Upcoming appointments list card */

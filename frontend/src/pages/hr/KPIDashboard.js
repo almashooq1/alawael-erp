@@ -1,39 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import kpiDashboardService from '../../services/kpiDashboard.service';
 import { useRealTimeKPIs } from '../../contexts/SocketContext';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  Chip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  LinearProgress,
-  CircularProgress,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Speed as KPIIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  TrackChanges as TargetIcon,
-  BarChart as ChartIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, assessmentColors, surfaceColors } from '../../theme/palette';
 

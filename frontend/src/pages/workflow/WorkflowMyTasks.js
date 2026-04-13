@@ -4,52 +4,13 @@
  * Task inbox with SLA countdown, priority indicators, filters,
  * bulk actions, complete/reassign dialogs, and overdue highlighting.
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  Chip,
-  IconButton,
-  TextField,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Checkbox,
-  Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Badge,
-  Tabs,
-  Tab,
   alpha,
-  LinearProgress,
-  InputAdornment,
 } from '@mui/material';
-import {
-  Assignment as TaskIcon,
-  CheckCircle as CompleteIcon,
-  PlayArrow as StartIcon,
-  SwapHoriz as ReassignIcon,
-  Timer as SLAIcon,
-  Warning as OverdueIcon,
-  Search as SearchIcon,
-  Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
-  Person as PersonIcon,
-  ThumbUp as ApproveIcon,
-  ThumbDown as RejectIcon,
-  Undo as ReturnIcon,
-  AccountTree as WorkflowIcon,
-} from '@mui/icons-material';
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

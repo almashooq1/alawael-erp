@@ -1,41 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  TextField,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Paper,
-  Tooltip,} from '@mui/material';
-import {
-  Add as AddIcon,
-  Search as SearchIcon,
-  MedicalServices as PrescriptionIcon,
-  LocalHospital as HospitalIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Print as PrintIcon,
-  Timer as TimerIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarningIcon,
-  FitnessCenter as ExerciseIcon,
-  Psychology as PsychologyIcon,
-  Healing as HealingIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

@@ -4,34 +4,10 @@
  *
  * Contains: BulkEditDialog, PreviewDialog, EditDialog, DetailsDialog
  */
-import {
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Stack,
-  Paper,
-  Chip,
-  Divider,
-  Avatar,
-  Alert,
-} from '@mui/material';
-import {
-  Download as DownloadIcon,
-  Edit as EditIcon,
-  Visibility as VisibilityIcon,
-  Info as InfoIcon,
-  LocalOffer as LocalOfferIcon,
-  Category as CategoryIcon,
-} from '@mui/icons-material';
+
+
+
+
 import documentService from 'services/documentService';
 import { gradients, surfaceColors } from 'theme/palette';
 import { CATEGORIES, getCategoryColor } from './documentListConstants';

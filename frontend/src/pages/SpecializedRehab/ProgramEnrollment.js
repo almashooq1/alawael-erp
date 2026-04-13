@@ -2,51 +2,13 @@
  * 📝 تسجيل ومتابعة البرنامج — Program Enrollment & Session Tracking
  * AlAwael ERP — Enroll beneficiaries, log sessions, track goals
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  TextField,
-  Button,
-  Avatar,
-  Tabs,
-  Tab,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Divider,
-  Stack,
-  LinearProgress,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   useTheme,
   alpha,
-  CircularProgress,
-  Alert,
-  InputAdornment,
 } from '@mui/material';
-import {
-  PersonAdd as EnrollIcon,
-  Person as PersonIcon,
-  Assessment as AssessmentIcon,
-  EventNote as SessionIcon,
-  Flag as GoalIcon,
-  Save as SaveIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon,
-  Close as CloseIcon,
-  CalendarToday as CalendarIcon,
-  ArrowBack as BackIcon,
-} from '@mui/icons-material';
+
+
 import {
   REHAB_PROGRAM_TEMPLATES_CATALOG,
   PROGRAM_CATEGORY_LABELS,

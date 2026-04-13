@@ -1,10 +1,7 @@
 /**
  * DeleteConfirmDialog — Session deletion confirmation
  */
-import React from 'react';
-import {
-  Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button,
-} from '@mui/material';
+
 
 const DeleteConfirmDialog = ({ target, onClose, onConfirm }) => (
   <Dialog open={!!target} onClose={onClose} maxWidth="xs" fullWidth>

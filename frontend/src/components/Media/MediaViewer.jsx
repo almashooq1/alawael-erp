@@ -12,36 +12,10 @@
  */
 
 import React, { useState } from 'react';
-import {
-  Dialog, DialogContent, Box, Typography, IconButton,
-  Avatar, Chip, Button, Divider, Tooltip,
-  TextField, Select, MenuItem, FormControl, InputLabel,
-  Slide,
-} from '@mui/material';
-import {
-  Close as CloseIcon,
-  Download as DownloadIcon,
-  Star as StarIcon,
-  StarBorder as StarBorderIcon,
-  Delete as DeleteIcon,
-  Edit as EditIcon,
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-  Fullscreen as FullscreenIcon,
-  Image as ImageIcon,
-  Videocam as VideoIcon,
-  AudioFile as AudioIcon,
-  Description as DocIcon,
-  Archive as ArchiveIcon,
-  InsertDriveFile as FileIcon,
-  Info as InfoIcon,
-  Label as TagIcon,
-  Visibility as ViewsIcon,
-  CalendarMonth as DateIcon,
-  Person as PersonIcon,
-  FolderOpen as FolderIcon,
-  Storage as SizeIcon,
-} from '@mui/icons-material';
+
+
+
+
 import {  statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import mediaService from '../../services/mediaService';
 

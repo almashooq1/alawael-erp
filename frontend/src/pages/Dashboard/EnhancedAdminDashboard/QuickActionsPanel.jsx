@@ -1,12 +1,5 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Paper,
-  Avatar,
-} from '@mui/material';
-import { People, CalendarToday, Assessment, School } from '@mui/icons-material';
+
+
 import { useNavigate } from 'react-router-dom';
 import { statusColors } from 'theme/palette';
 

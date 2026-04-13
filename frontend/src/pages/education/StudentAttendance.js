@@ -4,36 +4,10 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Paper,
-  Chip,
-  LinearProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Alert,
-  Stack,
-  Avatar,
-  Tooltip,
-} from '@mui/material';
-import {
-  CheckCircle as PresentIcon,
-  Cancel as AbsentIcon,
-  AccessTime as LateIcon,
-  EventAvailable as AttendanceIcon,
-  TrendingUp as TrendingUpIcon,
-  CalendarMonth as CalendarIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-} from '@mui/icons-material';
+
+
+
+
 import studentPortalService from 'services/studentPortalService';
 import { getStatusHexColor } from 'utils/statusColors';
 import logger from 'utils/logger';

@@ -6,50 +6,12 @@
  * attendance, behavior, medical, AI insights — with print support.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Paper,
-  Chip,
-  Stack,
-  Button,
-  Avatar,
-  Divider,
-  LinearProgress,
-  Alert,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableContainer,
-} from '@mui/material';
-import {
-  Print as PrintIcon,
-  ArrowBack as ArrowBackIcon,
-  Person as PersonIcon,
-  Accessible as AccessibleIcon,
-  School as SchoolIcon,
-  Assignment as AssignmentIcon,
-  EventNote as EventNoteIcon,
-  TrendingUp as TrendingUpIcon,
-  EmojiEvents as EmojiEventsIcon,
-  LocalHospital as MedicalIcon,
-  Psychology as PsychologyIcon,
-  Description as DescriptionIcon,
-  Phone as PhoneIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckCircleIcon,
-  Timeline as TimelineIcon,
-  FamilyRestroom as FamilyIcon,
-  Lightbulb as LightbulbIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import logger from 'utils/logger';

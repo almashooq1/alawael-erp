@@ -1,25 +1,10 @@
 /**
  * ProfileTab — بوابة الموظف: تبويب الملف الشخصي
  */
-import React from 'react';
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Divider,
-} from '@mui/material';
-import {
-  Person as PersonIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  Business as DeptIcon,
-  Work as WorkIcon,
-  Badge as BadgeIcon,
-  CalendarMonth as CalendarIcon,
-  AccountBalance as BankIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { statusColors } from '../../theme/palette';
 import { fmt } from './employeePortalData';
 

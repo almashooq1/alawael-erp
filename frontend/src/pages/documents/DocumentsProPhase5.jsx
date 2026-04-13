@@ -1,28 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
-  CircularProgress, Alert, Tabs, Tab, Paper, Grid, Divider, Tooltip,
-  TextField, Dialog, DialogTitle, DialogContent, DialogActions,
-  List, ListItem, ListItemAvatar, ListItemText, Badge,
-  Select, MenuItem, FormControl, InputLabel, LinearProgress,
-} from '@mui/material';
-import {
-  QrCode2 as QrCodeIcon,
-  CalendarMonth as CalendarIcon,
-  CompareArrows as CompareIcon,
-  Webhook as IntegrationsIcon,
-  Dashboard as DashboardIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon,
-  Event as EventIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
-  Print as PrintIcon,
-  QrCodeScanner as ScanIcon,
-  AccessTime as TimeIcon,
-  TrendingUp as TrendIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 import { qrApi, calendarApi, comparisonApi, integrationsApi, dashboardApi, overviewApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
 

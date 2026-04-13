@@ -2,33 +2,9 @@
  * 🎨 DashboardCustomizer — أداة تخصيص لوحة التحكم
  * Professional dashboard layout customizer with drag-and-drop widget management
  */
-import React, { useState, useCallback } from 'react';
-import {
-  Box, Typography, Grid, Switch, FormControlLabel,
-  IconButton, useTheme, Divider, Button, Drawer,
-  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
-  Slider, ToggleButton, ToggleButtonGroup, Avatar,
+import { useState, useCallback } from 'react';
+import { useTheme,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import SettingsIcon from '@mui/icons-material/Settings';
-import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
-import ViewModuleIcon from '@mui/icons-material/ViewModule';
-import ViewStreamIcon from '@mui/icons-material/ViewStream';
-import ViewCompactIcon from '@mui/icons-material/ViewCompact';
-import GridViewIcon from '@mui/icons-material/GridView';
-import PaletteIcon from '@mui/icons-material/Palette';
-import TextFieldsIcon from '@mui/icons-material/TextFields';
-import RestoreIcon from '@mui/icons-material/Restore';
-import SaveIcon from '@mui/icons-material/Save';
-import CloseIcon from '@mui/icons-material/Close';
-import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import PersonIcon from '@mui/icons-material/Person';
-import SpeedIcon from '@mui/icons-material/Speed';
-import AnalyticsIcon from '@mui/icons-material/Analytics';
-import SecurityIcon from '@mui/icons-material/Security';
 import { gradients, brandColors } from 'theme/palette';
 
 const WIDGETS = [

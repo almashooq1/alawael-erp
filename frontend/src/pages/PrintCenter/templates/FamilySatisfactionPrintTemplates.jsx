@@ -2,10 +2,7 @@
  * قوالب رضا الأسر والنتائج التأهيلية والمتابعة
  * Family Satisfaction, Rehab Outcomes & Follow-Up Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

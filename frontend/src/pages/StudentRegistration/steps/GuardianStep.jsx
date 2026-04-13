@@ -2,13 +2,7 @@
  * Student Registration — Step 2: Guardian / Parent Info
  */
 
-import React from 'react';
-import {
-  Box, Grid, TextField, Typography, InputAdornment, Divider,
-  Accordion, AccordionSummary, AccordionDetails, Fade,
-} from '@mui/material';
-import { Person, FamilyRestroom, Badge, Phone, Email, ExpandMore } from '@mui/icons-material';
-import { SectionTitle } from '../StyledComponents';
+
 import { statusColors } from 'theme/palette';
 
 const GuardianStep = ({ formData, fieldErrors, handleChange }) => (

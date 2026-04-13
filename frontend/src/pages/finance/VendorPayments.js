@@ -1,25 +1,8 @@
 /* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  CircularProgress,
-  Button,
-  Chip,
-  Tooltip,
-  Tab,
-  Tabs,} from '@mui/material';
-import { LocalShipping, Warning, Refresh, TrendingDown, CalendarMonth } from '@mui/icons-material';
+
+
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -58,7 +41,7 @@ const VendorPayments = () => {
 
   useEffect(() => {
     fetchAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [fetchAll]);
 
   const fc = v =>

@@ -5,16 +5,9 @@
  * Gradient: #f59e0b → #ef4444 → #6366f1
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
+import { useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
-} from 'recharts';
+
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import DirectionsBusIcon from '@mui/icons-material/DirectionsBus';
 import RouteIcon from '@mui/icons-material/Route';

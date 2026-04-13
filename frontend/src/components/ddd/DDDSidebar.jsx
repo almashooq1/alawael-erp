@@ -5,37 +5,12 @@
  * تستخدم DDD_NAV_ITEMS من DDDRoutes
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import {
-  Box, Drawer, List, ListItem, ListItemButton, ListItemIcon,
-  ListItemText, Collapse, Typography, Divider, Avatar,
-  IconButton, Tooltip, Chip, useMediaQuery, useTheme,
+import { useMediaQuery, useTheme,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  People as PeopleIcon,
-  EventNote as EpisodeIcon,
-  CalendarToday as SessionIcon,
-  Assignment as AssessmentIcon,
-  ListAlt as PlanIcon,
-  TrackChanges as GoalIcon,
-  Groups as GroupIcon,
-  Videocam as TeleIcon,
-  Vrpano as VrIcon,
-  Psychology as BehaviorIcon,
-  FamilyRestroom as FamilyIcon,
-  School as ProgramIcon,
-  AccountTree as WorkflowIcon,
-  VerifiedUser as QualityIcon,
-  AutoAwesome as AIIcon,
-  BarChart as ReportIcon,
-  Biotech as ResearchIcon,
-  ModelTraining as TrainingIcon,
-  ExpandLess, ExpandMore,
-  ChevronRight as CollapseIcon,
-  Menu as MenuIcon,
-} from '@mui/icons-material';
+
+
 
 const DRAWER_WIDTH = 260;
 

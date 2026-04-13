@@ -5,29 +5,16 @@
  * Gradient: #f59e0b → #ec4899 → #8b5cf6
  */
 
-import {
-  Box, Typography, Grid, Card, useTheme, alpha, Chip, Avatar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  LinearProgress, IconButton, Tooltip,
+import { useTheme, alpha, TableRow,
 } from '@mui/material';
-import { motion } from 'framer-motion';
-import {
-  AreaChart, Area, PieChart, Pie, Cell, BarChart, Bar,
-  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
-} from 'recharts';
 
-import ModelTrainingIcon from '@mui/icons-material/ModelTraining';
+
 import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TimerIcon from '@mui/icons-material/Timer';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import PendingIcon from '@mui/icons-material/Pending';
-import PlayCircleIcon from '@mui/icons-material/PlayCircle';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import StarIcon from '@mui/icons-material/Star';
 
 /* ═══════════════════════════════════════════════════════════════════ */

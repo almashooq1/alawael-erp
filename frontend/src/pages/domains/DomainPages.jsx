@@ -5,20 +5,12 @@
  * يتم تصدير جميع الصفحات من هنا لسهولة الاستيراد
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
-  Button, IconButton, Stack, LinearProgress, Alert, TextField,
-  InputAdornment, Pagination, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Paper, List, ListItem,
-  ListItemText, ListItemIcon, Dialog, DialogTitle, DialogContent,
-  DialogActions, Divider,
+import { Paper,
 } from '@mui/material';
-import {
-  Search as SearchIcon, Refresh as RefreshIcon, Add as AddIcon,
-  Visibility as ViewIcon,
-} from '@mui/icons-material';
+
+
 
 /* ── Generic Domain Page Factory ── */
 function createDomainPage({ title, titleEn, icon, apiModule, columns, detailFields, statsConfig }) {
@@ -190,15 +182,7 @@ import {
   volunteerManagementAPI, communityOutreachAPI, donorRelationsAPI, advocacyProgramAPI,
 } from '../../services/ddd';
 
-import {
-  Assignment as AssessIcon, ListAlt as PlanIcon,
-  TrackChanges as GoalIcon, Groups as GroupIcon,
-  Videocam as VideoIcon, Vrpano as VrIcon,
-  Psychology as BehaviorIcon, FamilyRestroom as FamilyIcon,
-  School as ProgramIcon, AutoAwesome as AIIcon,
-  Biotech as ResearchIcon, ModelTraining as TrainingIcon,
-  CheckCircle as CheckIcon, Warning as WarnIcon,
-} from '@mui/icons-material';
+
 
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '-';
 

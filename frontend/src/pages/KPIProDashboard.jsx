@@ -5,26 +5,16 @@
  */
 
 import {
-  Box, Typography, Grid, Paper, Chip, LinearProgress,
-  Table, TableHead, TableBody, TableRow, TableCell,
   useTheme,
 } from '@mui/material';
-import { motion } from 'framer-motion';
 import {
-  SpeedOutlined,
   TrendingUpOutlined,
   TrendingDownOutlined,
   RemoveOutlined,
   WarningAmberOutlined,
   CheckCircleOutlined,
-  FlagOutlined,
-  InsightsOutlined,
 } from '@mui/icons-material';
-import {
-  ComposedChart, Bar, Line, Area, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
-  RadarChart, PolarGrid, PolarAngleAxis, Radar,
-} from 'recharts';
+
 
 const GRAD = 'linear-gradient(135deg, #f59e0b 0%, #ec4899 50%, #6366f1 100%)';
 const G1 = '#f59e0b';

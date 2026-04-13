@@ -1,42 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import administrationService from '../../services/administration.service';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  Avatar,
-  CircularProgress,
-  Tooltip,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Divider,
-} from '@mui/material';
-import {
-  Business,
-  Add as AddIcon,
-  Refresh,
-  Description,
-  Mail,
-  Assignment,
-  CheckCircle,
-  PendingActions,
-  WarningAmber,
-  ArrowForward,
-  Gavel,
-  MailOutline,
-  SwapHoriz,
-} from '@mui/icons-material';
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

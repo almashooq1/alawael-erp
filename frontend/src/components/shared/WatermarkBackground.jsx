@@ -11,7 +11,7 @@
  */
 
 import { memo, useMemo } from 'react';
-import { Box, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 
 // ─── Density presets ──────────────────────────────────────────────────────────
 const DENSITY = {

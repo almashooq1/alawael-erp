@@ -2,45 +2,12 @@
  * Overtime Management — إدارة العمل الإضافي
  * Saudi Labor Law Article 107 compliant
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Button,
-  Chip,
-  TextField,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Grid,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  IconButton,
-  Tooltip,
-  Card,
-  CardContent,
-  Alert,
-  Snackbar,
-  CircularProgress,
-  Divider,
 } from '@mui/material';
-import {
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  AccessTime as ClockIcon,
-  ThumbUp as ApproveIcon,
-  NightsStay as NightIcon,
-  Weekend as WeekendIcon,
-  Celebration as HolidayIcon,
-} from '@mui/icons-material';
+
+
 import {
   getOvertimeRequests,
   createOvertimeRequest,

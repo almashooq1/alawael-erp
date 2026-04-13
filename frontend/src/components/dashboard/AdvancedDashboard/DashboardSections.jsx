@@ -1,15 +1,7 @@
 /**
  * DashboardSections — All 8 collapsible dashboard section blocks + Pro Tools
  */
-import React, { lazy, Suspense } from 'react';
-import { Grid, Collapse, Box } from '@mui/material';
-import { RegistrationChart, ActivityChart, RoleDistributionChart, SessionStatusChart } from '../DashboardCharts';
-import ActivityFeed from '../ActivityFeed';
-import QuickActions from '../QuickActions';
-import SystemHealth from '../SystemHealth';
-import SectionErrorFallback from '../shared/SectionErrorFallback';
-import { SectionDivider } from '../DashboardNavigation';
-import { SectionSkeleton } from './dashboardReducer';
+import { lazy } from 'react';
 
 const FinanceOverview = lazy(() => import('../FinanceOverview'));
 const ClinicalOverview = lazy(() => import('../ClinicalOverview'));

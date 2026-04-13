@@ -4,65 +4,13 @@
  * المرحلة 2: التوقيع الرقمي، القوالب، الإصدارات، التدقيق، العمليات المجمعة
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
+
 import {
-  Box,
-  Paper,
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  Button,
-  Chip,
-  CircularProgress,
-  Alert,
-  Tabs,
-  Tab,
-  Divider,
-  Avatar,
-  Stack,
-  IconButton,
-  Tooltip,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemAvatar,
-  ListItemSecondaryAction,
-  Badge,
-  LinearProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-} from '@mui/material';
-import {
-  Draw as SignIcon,
-  History as VersionIcon,
-  Description as TemplateIcon,
-  Security as AuditIcon,
-  ContentCopy as BulkIcon,
-  Dashboard as DashboardIcon,
-  VerifiedUser as VerifiedIcon,
-  Warning as WarningIcon,
-  CheckCircle as CheckIcon,
-  Schedule as ScheduleIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon,
-  Visibility as ViewIcon,
-  Download as DownloadIcon,
-  PlayArrow as PlayIcon,
-  Article as ArticleIcon,
-  Shield as ShieldIcon,
-  TrendingUp as TrendIcon,
-} from '@mui/icons-material';
-import documentProExtService, {
   signatureApi,
-  versionApi,
   templateApi,
   auditApi,
   bulkApi,

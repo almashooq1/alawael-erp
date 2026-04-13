@@ -4,22 +4,11 @@
  * عرض وإدارة جميع حلقات الرعاية مع مخطط المراحل 12-phase
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
-  Button, IconButton, TextField, InputAdornment, Select,
-  FormControl, InputLabel, MenuItem, Pagination, Stack,
-  Stepper, Step, StepLabel, LinearProgress, Alert, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Dialog, DialogTitle, DialogContent, DialogActions,
-} from '@mui/material';
-import {
-  Search as SearchIcon, Add as AddIcon, Refresh as RefreshIcon,
-  ArrowForward as ArrowIcon, Person as PersonIcon,
-  EventNote as EpisodeIcon, CheckCircle as CheckIcon,
-  PlayArrow as PlayIcon, Pause as PauseIcon,
-} from '@mui/icons-material';
+
+
+
 
 import { episodesAPI } from '../../services/ddd';
 

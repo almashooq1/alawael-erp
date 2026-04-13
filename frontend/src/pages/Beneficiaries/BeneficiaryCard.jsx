@@ -3,29 +3,11 @@
  * Beneficiary Card — grid & list view mode
  */
 
-import {
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  Chip,
-  Avatar,
-  Divider,
-  Stack,
-  Tooltip,
-  LinearProgress,
-  Fade,
-} from '@mui/material';
-import {
-  Edit,
-  Visibility,
-  Star,
-  StarBorder,
-  CalendarMonth,
-} from '@mui/icons-material';
-import { statusColors, neutralColors } from 'theme/palette';
+
+
+
+
+import { neutralColors } from 'theme/palette';
 import {
   STATUS_LABELS, STATUS_COLORS, CATEGORY_LABELS, CATEGORY_COLORS,
 } from './beneficiariesConstants';

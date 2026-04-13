@@ -1,4 +1,4 @@
-/* eslint-disable import/no-anonymous-default-export */
+ 
 /**
  * Specialized Rehabilitation Service
  * خدمات مقاييس التقييم المتخصصة وبرامج التأهيل

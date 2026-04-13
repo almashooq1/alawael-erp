@@ -2,21 +2,9 @@
  * Reports & Analytics Page — صفحة التقارير والتحليلات
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Card, CardContent, CardActions, Typography, Chip, Grid, Avatar,
-  Button, IconButton, Stack, LinearProgress, Alert, TextField,
-  InputAdornment, Select, FormControl, InputLabel, MenuItem,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-} from '@mui/material';
-import {
-  BarChart as ChartIcon, Description as ReportIcon,
-  Download as DownloadIcon, Add as AddIcon,
-  Refresh as RefreshIcon, Search as SearchIcon,
-  Schedule as ScheduleIcon, PictureAsPdf as PdfIcon,
-  TableChart as ExcelIcon, Print as PrintIcon,
-  Visibility as PreviewIcon, Star as StarIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
 
 import { reportsAPI } from '../../services/ddd';
 

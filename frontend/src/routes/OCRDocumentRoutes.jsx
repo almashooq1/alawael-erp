@@ -2,8 +2,6 @@
  * OCR Document Routes — مسارات الواجهة الأمامية لمعالجة المستندات
  * Phase 18
  */
-import React from 'react';
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const OCRDashboard = lazyWithRetry(() => import('../pages/ocr-documents/OCRDashboard'));

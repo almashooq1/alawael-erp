@@ -2,13 +2,7 @@
  * Student Registration — Step 0: Personal Info
  */
 
-import React from 'react';
-import {
-  Box, Grid, TextField, Typography, FormControl, InputLabel,
-  Select, MenuItem, InputAdornment, Divider, Fade,
-} from '@mui/material';
-import { Person, Badge, Cake, Wc, Flag, Home } from '@mui/icons-material';
-import { SectionTitle } from '../StyledComponents';
+
 
 const PersonalInfoStep = ({ formData, fieldErrors, handleChange, calculatedAge }) => (
   <Fade in timeout={400}>

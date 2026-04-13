@@ -4,49 +4,11 @@
  * مكون شامل للتوقيع الإلكتروني مع دعم الرسم والطباعة
  */
 
-import React, { useState, useRef, useCallback } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  Button,
-  IconButton,
-  TextField,
-  Chip,
-  Avatar,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Tab,
-  Tabs,
-  Alert,
-  CircularProgress,
-  Tooltip,
-  Stack,
-  Divider,
-  Card,
-  CardContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  ListItemSecondaryAction,
-} from '@mui/material';
-import {
-  Draw as DrawIcon,
-  TextFields as TextIcon,
-  CheckCircle as CheckIcon,
-  Cancel as CancelIcon,
-  Delete as DeleteIcon,
-  Undo as UndoIcon,
-  VerifiedUser as VerifiedIcon,
-  Warning as WarningIcon,
-  Person as PersonIcon,
-  Schedule as ScheduleIcon,
-  Send as SendIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+import { useState, useRef, useCallback } from 'react';
+
+
+
+
 
 // ── التوقيع بالرسم ──────────────────────────────
 

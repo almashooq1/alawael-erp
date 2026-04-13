@@ -3,34 +3,10 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Grid,
-  Tabs,
-  Tab,
-  Chip,
-  Button,
-  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Divider,
-  LinearProgress,
-} from '@mui/material';
-import {
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-  Security as SecurityIcon,
-  Storage as StorageIcon,
-  Assessment as ReportIcon,
-  Notifications as NotifIcon,
-  Speed as SpeedIcon,
-  CloudDone as CloudIcon,
-} from '@mui/icons-material';
+
+
+
+
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { gradients, statusColors } from '../../theme/palette';

@@ -2,7 +2,6 @@
  * Education System Routes
  * مسارات النظام التعليمي
  */
-import { Route, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Education System Module

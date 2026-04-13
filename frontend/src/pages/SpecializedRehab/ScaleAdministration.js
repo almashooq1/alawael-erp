@@ -2,49 +2,14 @@
  * 📝 تطبيق المقاييس المتخصصة — Scale Administration
  * AlAwael ERP — Administer a specialized scale, record results, view history
  */
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  Box,
-  Typography,
   Paper,
-  Grid,
-  Card,
-  CardContent,
-  Chip,
-  TextField,
-  Button,
-  Avatar,
-  Tabs,
-  Tab,
-  Divider,
-  Stack,
-  LinearProgress,
-  Stepper,
-  Step,
-  StepLabel,
-  Slider,
-  Alert,
   useTheme,
   alpha,
-  InputAdornment,
-  CircularProgress,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
 } from '@mui/material';
-import {
-  Save as SaveIcon,
-  Person as PersonIcon,
-  Assessment as AssessmentIcon,
-  History as HistoryIcon,
-  Timer as TimerIcon,
-  Refresh as RefreshIcon,
-  ArrowBack as BackIcon,
-  ArrowForward as ForwardIcon,
-} from '@mui/icons-material';
+
+
 import {
   SPECIALIZED_SCALES_CATALOG,
   SCALE_CATEGORY_LABELS,

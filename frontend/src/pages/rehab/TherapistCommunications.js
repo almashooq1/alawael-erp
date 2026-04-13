@@ -1,35 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  CardHeader,
-  Typography,
-  Avatar,
-  Button,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  InputAdornment,
-  Divider,
-  Badge,
-  IconButton,
-  Menu,
-  MenuItem,
-} from '@mui/material';
-import {
-  Message as MessageIcon,
-  Send as SendIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon,
-  AttachFile as AttachFileIcon,
-  Search as SearchIcon,
-  MoreVert as MoreVertIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';

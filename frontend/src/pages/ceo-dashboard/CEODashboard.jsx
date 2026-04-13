@@ -2,36 +2,12 @@
  * CEO Executive Dashboard — لوحة تحكم الإدارة التنفيذية
  * Phase 19 — شاشة واحدة شاملة بمؤشرات أداء حية
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Grid, Card, CardContent,
-  Chip, LinearProgress, Alert, Snackbar,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, IconButton, Tooltip, Divider, Badge, CircularProgress, Tab, Tabs, Avatar,
+  Paper,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  AttachMoney as MoneyIcon,
-  TrendingUp as TrendUpIcon,
-  TrendingDown as TrendDownIcon,
-  People as PeopleIcon,
-  Accessibility as BeneficiaryIcon,
-  Hotel as OccupancyIcon,
-  VerifiedUser as ComplianceIcon,
-  SentimentSatisfied as SatisfactionIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Flag as GoalIcon,
-  Business as DeptIcon,
-  Speed as SpeedIcon,
-  Refresh as RefreshIcon,
-  CheckCircle as CheckIcon,
-  Timer as TimerIcon,
-  AccountBalance as FinanceIcon,
-  Analytics as AnalyticsIcon,
-  Notifications as AlertIcon,
-  } from '@mui/icons-material';
+
+
 import ceoDashboardService from '../../services/ceoDashboardService';
 
 /* ════════════════════════════════════════════════════════════════════

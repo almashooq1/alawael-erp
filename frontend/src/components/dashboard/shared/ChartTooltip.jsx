@@ -8,7 +8,7 @@
  *   <Tooltip content={<FinanceChartTooltip />} />
  */
 
-import { Box, Typography, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { formatCurrency } from 'services/dashboardService';
 
 /**

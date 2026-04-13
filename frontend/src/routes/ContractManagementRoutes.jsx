@@ -1,7 +1,6 @@
 /**
  * Contract Management Routes — مسارات إدارة العقود
  */
-import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ContractDashboard = lazyWithRetry(() => import('../pages/Contracts/ContractDashboard'));

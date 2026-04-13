@@ -4,21 +4,10 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
-  MenuItem, Alert, LinearProgress, Stack, IconButton,
+  Paper,
 } from '@mui/material';
-import {
-  Gavel as GavelIcon,
-  Add as AddIcon,
-  Event as EventIcon,
-  Description as DescriptionIcon,
-  Warning as WarningIcon,
-  AccountBalance as CourtIcon,
-  Assignment as FilingIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
+
+
 import * as legalService from '../../services/enterpriseUltra.service';
 
 const statusColors = {

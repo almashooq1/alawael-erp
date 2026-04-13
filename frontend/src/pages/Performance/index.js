@@ -4,19 +4,9 @@
  *
  * Composes the extracted sub-components via usePerformanceData hook.
  */
-import { Box, Tabs, Tab } from '@mui/material';
-import {
-  Assessment as AssessmentIcon,
-  TrendingUp as TrendingUpIcon,
-  Groups as GroupsIcon,
-  CalendarMonth as CalendarIcon,
-} from '@mui/icons-material';
-import PerformanceTable from './PerformanceTable';
-import PerformanceStatsCards from './PerformanceStatsCards';
-import PerformanceHeader from './PerformanceHeader';
-import PerformanceDialog from './PerformanceDialog';
+
+
 import usePerformanceData from './usePerformanceData';
-import ConfirmDialog from '../../components/common/ConfirmDialog';
 
 const TAB_LABELS = [
   { label: 'التقييمات', icon: <AssessmentIcon /> },

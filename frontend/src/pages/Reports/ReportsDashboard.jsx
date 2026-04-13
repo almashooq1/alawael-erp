@@ -2,12 +2,7 @@
  * Reports Center Dashboard — لوحة تحكم مركز التقارير
  */
 import { useState, useEffect } from 'react';
-import {
-  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, Chip, LinearProgress, Fade, Grow,
-} from '@mui/material';
-import { Summarize, Schedule, Download, Assessment } from '@mui/icons-material';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+
 import { motion } from 'framer-motion';
 import apiClient from '../../services/api';
 

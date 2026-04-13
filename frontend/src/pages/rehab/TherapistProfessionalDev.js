@@ -1,40 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Button,
-  Chip,  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Paper,  LinearProgress,  Avatar,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  School as SchoolIcon,
-  EmojiEvents as TrophyIcon,
-  CardMembership as CertIcon,
-  Groups as GroupsIcon,
-  Science as ScienceIcon,
-  Build as BuildIcon,
-  TrendingUp as TrendingUpIcon,
-  Timer as TimerIcon,
-  Star as StarIcon,
-  CheckCircle as CheckIcon,
-} from '@mui/icons-material';
+
+
+
+
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

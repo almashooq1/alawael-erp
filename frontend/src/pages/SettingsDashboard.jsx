@@ -1,25 +1,8 @@
-import React, { useState, useEffect, memo, useCallback } from 'react';
-import {
-  Box, Typography, Grid, Avatar, Chip, Switch, Slider,
-  TextField, Select, MenuItem, FormControl, InputLabel,
-  Button, IconButton, Tooltip, LinearProgress, Divider,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Alert, Snackbar,
-} from '@mui/material';
+import { useState, useEffect, memo, useCallback } from 'react';
+
 import { useTheme } from '@mui/material/styles';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Settings, Person, Palette, Notifications, Security,
-  Backup, Language, Business, SaveAlt, RestartAlt,
-  CheckCircle, Warning, Error as ErrorIcon,
-  Brightness4, Brightness7, Storage,
-  CloudUpload, Schedule, Lock,
-  Wifi, Speed, Memory, Dns, AddCircle, DeleteOutline,
-  Edit, PhotoCamera,
-  VpnKey, Shield, History, Download,
-  NotificationsActive, NotificationsOff, Email, Sms,
-  Tune, ColorLens, TextFields, FormatSize,
-} from '@mui/icons-material';
+
+
 
 /* ─────────────────── Glass component ─────────────────── */
 const Glass = memo(({ children, sx, ...rest }) => {

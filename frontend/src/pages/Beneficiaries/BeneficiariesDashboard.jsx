@@ -1,32 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
-import {
-  Container, Typography, Grid, Paper, Box,
-  Chip, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, LinearProgress, Button,
-} from '@mui/material';
-import {
-  Accessibility as BenIcon,
-  People as PeopleIcon,
-  PersonAdd as NewIcon,
-  CheckCircle as ActiveIcon,
-  HourglassEmpty as PendingIcon,
-  TrendingUp as TrendUpIcon,
-  ArrowForward as ArrowForwardIcon,
-} from '@mui/icons-material';
-import {
-  BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area,
-  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
-  ResponsiveContainer, Legend,
-} from 'recharts';
+
+
+
+
+
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, brandColors, progressColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import beneficiaryService from '../../services/beneficiaryService';
 import { useNavigate } from 'react-router-dom';
-import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
-import EmptyState from '../../components/dashboard/shared/EmptyState';
-import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── ثوابت ──────── */
 const CATEGORY_LABELS = { physical: 'حركية', mental: 'ذهنية', sensory: 'حسية', multiple: 'متعددة', other: 'أخرى' };

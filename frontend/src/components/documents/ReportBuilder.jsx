@@ -2,29 +2,10 @@
  * Report Builder Component — مُنشئ التقارير
  * إنشاء تقارير مخصصة مع فلاتر وجداول ورسوم بيانية
  */
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  Box, Paper, Typography, Grid, Button, TextField, Chip, Alert,
-  CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions,
-  FormControl, InputLabel, Select, MenuItem, IconButton, Tooltip,
-  Table, TableHead, TableRow, TableCell, TableBody, Divider,
-  Stepper, Step, StepLabel, Card, CardContent, Switch, FormControlLabel,
-} from '@mui/material';
-import {
-  Assessment as ReportIcon,
-  PlayArrow as RunIcon,
-  Download as DownloadIcon,
-  Add as AddIcon,
-  Schedule as ScheduleIcon,
-  FilterList as FilterIcon,
-  Save as SaveIcon,
-  Delete as DeleteIcon,
-  BarChart as ChartIcon,
-  TableChart as TableChartIcon,
-  PictureAsPdf as PdfIcon,
-  Description as CsvIcon,
-  Code as JsonIcon,
-} from '@mui/icons-material';
+import { useState, useEffect, useCallback } from 'react';
+
+
+
 
 import { reportApi } from '../../services/documentProPhase6Service';
 

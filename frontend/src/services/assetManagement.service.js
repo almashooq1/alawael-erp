@@ -1,4 +1,4 @@
-/* eslint-disable import/no-anonymous-default-export */
+ 
 /**
  * Asset Management Service — خدمة إدارة الأصول
  */

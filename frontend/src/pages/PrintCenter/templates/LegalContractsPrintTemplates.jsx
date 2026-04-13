@@ -1,10 +1,7 @@
 /**
  * قوالب طباعة الشؤون القانونية والعقود — Legal & Contracts Print Templates
  */
-import React from 'react';
 import {
-  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
-  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, formatMoney,
 } from '../shared/PrintTemplateShared';
 

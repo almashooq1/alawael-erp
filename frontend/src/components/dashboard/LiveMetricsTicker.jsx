@@ -3,9 +3,8 @@
  * Premium live metrics scrolling ticker with real-time pulse indicators
  */
 
-import React, { useEffect, useRef } from 'react';
-import { Box, Typography, useTheme } from '@mui/material';
-import { motion } from 'framer-motion';
+import React from 'react';
+import { useTheme } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 import TrendingFlatIcon from '@mui/icons-material/TrendingFlat';

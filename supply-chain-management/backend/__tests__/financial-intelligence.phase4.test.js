@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 const request = require('supertest');
 const mongoose = require('mongoose');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 // Mock the models and service
 jest.mock('../models/Transaction');
@@ -517,8 +517,8 @@ describe('Financial Intelligence System - Phase 4', () => {
     });
 
     test('should calculate due dates', () => {
-      const issueDate = moment('2026-01-01');
-      financialService.calculateDueDate.mockReturnValue(moment('2026-01-31').toDate());
+      const issueDate = dayjs('2026-01-01');
+      financialService.calculateDueDate.mockReturnValue(dayjs('2026-01-31').toDate());
 
       const dueDate = financialService.calculateDueDate(issueDate, 'net30');
       expect(dueDate).toBeDefined();

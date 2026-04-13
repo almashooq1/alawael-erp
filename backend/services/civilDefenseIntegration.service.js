@@ -17,7 +17,7 @@
 
 const axios = require('axios');
 const nodemailer = require('nodemailer');
-const moment = require('moment');
+const dayjs = require('dayjs');
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 
@@ -238,7 +238,7 @@ class CivilDefenseIntegrationService {
       const response = await axios.get(`${this.apiBaseUrl}/audits/available-slots`, {
         params: {
           facility_id: facilityId,
-          date: moment(date).format('YYYY-MM-DD'),
+          date: dayjs(date).format('YYYY-MM-DD'),
         },
         headers: this.getAuthHeaders(),
         timeout: this.requestTimeout,
@@ -580,8 +580,8 @@ class CivilDefenseIntegrationService {
         <h2>تأكيد جدولة فحص السلامة - Civil Defense Safety Audit Confirmation</h2>
         <p>رقم الفحص: ${auditData.audit_id}</p>
         <p>Audit Reference: ${auditData.audit_id}</p>
-        <p>التاريخ المجدول: ${moment(auditData.scheduled_date).format('DD-MM-YYYY')}</p>
-        <p>Scheduled Date: ${moment(auditData.scheduled_date).format('DD-MM-YYYY')}</p>
+        <p>التاريخ المجدول: ${dayjs(auditData.scheduled_date).format('DD-MM-YYYY')}</p>
+        <p>Scheduled Date: ${dayjs(auditData.scheduled_date).format('DD-MM-YYYY')}</p>
         <p>اسم المفتش: ${auditData.inspector_name}</p>
         <p>Inspector Name: ${auditData.inspector_name}</p>
         <p>رقم الهاتف: ${auditData.inspector_phone}</p>
@@ -615,8 +615,8 @@ class CivilDefenseIntegrationService {
         <p>An emergency drill has been scheduled at your facility</p>
         <p>رقم التمرين: ${drillData.drill_id}</p>
         <p>Drill ID: ${drillData.drill_id}</p>
-        <p>التاريخ: ${moment(drillData.scheduled_date).format('DD-MM-YYYY')}</p>
-        <p>Date: ${moment(drillData.scheduled_date).format('DD-MM-YYYY')}</p>
+        <p>التاريخ: ${dayjs(drillData.scheduled_date).format('DD-MM-YYYY')}</p>
+        <p>Date: ${dayjs(drillData.scheduled_date).format('DD-MM-YYYY')}</p>
         <p>الساعة: ${drillData.scheduled_time}</p>
         <p>Time: ${drillData.scheduled_time}</p>
       `;
@@ -709,7 +709,7 @@ class CivilDefenseIntegrationService {
       }
     });
 
-    if (data.preferredDate && moment(data.preferredDate).isBefore(moment())) {
+    if (data.preferredDate && dayjs(data.preferredDate).isBefore(dayjs())) {
       errors.push('Preferred date must be in the future');
     }
 
@@ -751,7 +751,7 @@ class CivilDefenseIntegrationService {
     };
 
     const days = daysToAdd[buildingType] || 10;
-    return moment().add(days, 'days').toDate();
+    return dayjs().add(days, 'day').toDate();
   }
 
   /**
@@ -759,7 +759,7 @@ class CivilDefenseIntegrationService {
    */
   calculateDaysRemaining(expiryDate) {
     if (!expiryDate) return 0;
-    return moment(expiryDate).diff(moment(), 'days');
+    return dayjs(expiryDate).diff(dayjs(), 'day');
   }
 
   /**

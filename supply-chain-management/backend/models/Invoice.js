@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 /**
  * Invoice Schema
@@ -273,7 +273,7 @@ InvoiceSchema.index({ dueDate: 1 });
  * Days until due
  */
 InvoiceSchema.virtual('daysUntilDue').get(function () {
-  return moment(this.dueDate).diff(moment(), 'days');
+  return dayjs(this.dueDate).diff(dayjs(), 'day');
 });
 
 /**

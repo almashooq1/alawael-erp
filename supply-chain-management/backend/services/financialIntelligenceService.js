@@ -2,7 +2,7 @@ const Transaction = require('../models/Transaction');
 const Invoice = require('../models/Invoice');
 const Budget = require('../models/Budget');
 const { EventEmitter } = require('events');
-const moment = require('moment');
+const dayjs = require('dayjs');
 const crypto = require('crypto');
 
 /**
@@ -239,10 +239,10 @@ class FinancialIntelligenceService extends EventEmitter {
       const totalAmount = subtotal + taxAmount + (invoiceData.shippingCost || 0) - (invoiceData.discountAmount || 0);
 
       // Generate invoice number
-      const invoiceNumber = `INV-${moment().format('YYYYMMDD')}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+      const invoiceNumber = `INV-${dayjs().format('YYYYMMDD')}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 
       // Calculate due date if not provided
-      const calculatedDueDate = dueDate || this.calculateDueDate(moment(), paymentTerms);
+      const calculatedDueDate = dueDate || this.calculateDueDate(dayjs(), paymentTerms);
 
       const invoice = new Invoice({
         invoiceNumber,
@@ -253,7 +253,7 @@ class FinancialIntelligenceService extends EventEmitter {
         taxAmount,
         totalAmount,
         amountDue: totalAmount,
-        issueDate: moment().toDate(),
+        issueDate: dayjs().toDate(),
         dueDate: calculatedDueDate,
         paymentTerms,
         poNumber,
@@ -343,7 +343,7 @@ class FinancialIntelligenceService extends EventEmitter {
       this.emit('reminder-sent', {
         invoiceId,
         invoiceNumber: invoice.invoiceNumber,
-        daysOverdue: -moment(invoice.dueDate).diff(moment(), 'days'),
+        daysOverdue: -dayjs(invoice.dueDate).diff(dayjs(), 'day'),
       });
 
       return invoice;
@@ -539,8 +539,8 @@ class FinancialIntelligenceService extends EventEmitter {
    */
   async getCashFlowForecast(days = 30) {
     try {
-      const startDate = moment().toDate();
-      const endDate = moment().add(days, 'days').toDate();
+      const startDate = dayjs().toDate();
+      const endDate = dayjs().add(days, 'day').toDate();
 
       const pendingInvoices = await Invoice.find({
         dueDate: { $gte: startDate, $lte: endDate },
@@ -550,7 +550,7 @@ class FinancialIntelligenceService extends EventEmitter {
 
       const forecast = {};
       for (const invoice of pendingInvoices) {
-        const date = moment(invoice.dueDate).format('YYYY-MM-DD');
+        const date = dayjs(invoice.dueDate).format('YYYY-MM-DD');
         if (!forecast[date]) {
           forecast[date] = { expected: 0, invoices: [] };
         }
@@ -666,7 +666,7 @@ class FinancialIntelligenceService extends EventEmitter {
     };
 
     const days = termDays[paymentTerms] || 30;
-    return moment(issueDate).add(days, 'days').toDate();
+    return dayjs(issueDate).add(days, 'day').toDate();
   }
 
   /**
@@ -677,7 +677,7 @@ class FinancialIntelligenceService extends EventEmitter {
     if (paidInvoices.length === 0) return 0;
 
     const totalDays = paidInvoices.reduce((sum, invoice) => {
-      const days = moment(invoice.paidDate).diff(moment(invoice.issueDate), 'days');
+      const days = dayjs(invoice.paidDate).diff(dayjs(invoice.issueDate), 'day');
       return sum + days;
     }, 0);
 

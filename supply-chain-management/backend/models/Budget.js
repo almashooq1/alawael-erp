@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 /**
  * Budget Schema
@@ -267,14 +267,14 @@ BudgetSchema.index({ projectId: 1 });
  * Days remaining in budget period
  */
 BudgetSchema.virtual('daysRemaining').get(function () {
-  return moment(this.endDate).diff(moment(), 'days');
+  return dayjs(this.endDate).diff(dayjs(), 'day');
 });
 
 /**
  * Is budget expired
  */
 BudgetSchema.virtual('isExpired').get(function () {
-  return moment() > moment(this.endDate);
+  return dayjs() > dayjs(this.endDate);
 });
 
 /**

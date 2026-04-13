@@ -8,7 +8,7 @@ const { EventEmitter } = require('events');
 const Analytics = require('../models/Analytics');
 const Prediction = require('../models/Prediction');
 const Insight = require('../models/Insight');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 class MLService extends EventEmitter {
   constructor() {

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 /**
  * Transaction Schema
@@ -242,7 +242,7 @@ TransactionSchema.virtual('isRefundable').get(function () {
 
 // Virtual for is_disputable
 TransactionSchema.virtual('isDisputable').get(function () {
-  const daysSince = moment().diff(moment(this.createdAt), 'days');
+  const daysSince = dayjs().diff(dayjs(this.createdAt), 'day');
   return daysSince <= 120 && ['completed', 'refunded'].includes(this.status);
 });
 
@@ -355,7 +355,7 @@ TransactionSchema.statics.getPendingReconciliation = function () {
  * Get failed transactions
  */
 TransactionSchema.statics.getFailedTransactions = function (days = 7) {
-  const sinceDate = moment().subtract(days, 'days').toDate();
+  const sinceDate = dayjs().subtract(days, 'day').toDate();
   return this.find({
     status: 'failed',
     createdAt: { $gte: sinceDate },

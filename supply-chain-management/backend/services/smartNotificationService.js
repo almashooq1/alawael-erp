@@ -1,7 +1,7 @@
 const Notification = require('../models/Notification');
 const NotificationTemplate = require('../models/NotificationTemplate');
 const { EventEmitter } = require('events');
-const moment = require('moment');
+const dayjs = require('dayjs');
 
 /**
  * SmartNotificationService

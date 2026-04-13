@@ -49,7 +49,7 @@ const createRateLimiter = (options = {}) => {
 // Strict rate limiter for auth endpoints
 const authRateLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 5 : 50, // relaxed in dev
+  max: process.env.NODE_ENV === 'production' ? 15 : 50, // 15 in prod (shared IPs), relaxed in dev
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true,
 });

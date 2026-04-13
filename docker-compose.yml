@@ -173,7 +173,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
       MONGO_INITDB_DATABASE: alawael_erp
     ports:
-      - "${MONGO_PORT:-27017}:27017"
+      # DB port exposed for dev only — remove or bind to 127.0.0.1 in production
+      - "${MONGO_PORT:-127.0.0.1:27017}:27017"
     volumes:
       - mongodb-data:/data/db
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
@@ -200,7 +201,8 @@ services:
         --appendonly yes
         --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
     ports:
-      - "${REDIS_PORT:-6379}:6379"
+      # Redis port exposed for dev only — remove or bind to 127.0.0.1 in production
+      - "${REDIS_PORT:-127.0.0.1:6379}:6379"
     volumes:
       - redis-data:/data
     networks:
@@ -1064,7 +1066,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-alawael_erp}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      # Postgres port exposed for dev only — bind to 127.0.0.1 in production
+      - "${POSTGRES_PORT:-127.0.0.1:5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
@@ -1083,7 +1086,7 @@ services:
 
   # ─── Elasticsearch 8 ───────────────────────────────────────────────────
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.17.0
     container_name: alawael-elasticsearch
     profiles: ["optional", "all"]
     <<: *restart-policy
@@ -1092,7 +1095,8 @@ services:
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - "${ELASTICSEARCH_PORT:-9200}:9200"
+      # ES port exposed for dev only — bind to 127.0.0.1 in production
+      - "${ELASTICSEARCH_PORT:-127.0.0.1:9200}:9200"
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
     networks:

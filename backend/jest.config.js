@@ -155,8 +155,8 @@ module.exports = {
   // Module file extensions
   moduleFileExtensions: ['js', 'json', 'node'],
 
-  // Timeout settings
-  testTimeout: 120000,
+  // Timeout settings — 30s default; use jest.setTimeout() for slow tests
+  testTimeout: 30000,
 
   // Verbose output
   verbose: true,
@@ -176,9 +176,8 @@ module.exports = {
   // Other settings
   bail: 0,
   forceExit: true,
-  // Disable open handle detection - causes issues with services that use setInterval
-  // (e.g. MOIPassportService) which are loaded via routes during test setup
-  detectOpenHandles: false,
+  // Enable open handle detection to find leaked connections/timers
+  detectOpenHandles: true,
   passWithNoTests: true,
 
   // Cache for faster re-runs

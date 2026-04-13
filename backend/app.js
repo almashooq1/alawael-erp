@@ -13,6 +13,7 @@
  * Server startup, Socket.IO, and database initialisation live in server.js.
  */
 
+require('module-alias/register');
 require('express-async-errors');
 const path = require('path');
 // Load backend/.env first; parent .env fills in gaps (override: false)

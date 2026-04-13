@@ -104,6 +104,17 @@
     "cleanup:run": "node scripts/cleanup.js --run --all",
     "predev": "node scripts/check-services.js"
   },
+  "_moduleAliases": {
+    "@": ".",
+    "@utils": "utils",
+    "@models": "models",
+    "@services": "services",
+    "@controllers": "controllers",
+    "@config": "config",
+    "@middleware": "middleware",
+    "@errors": "errors",
+    "@routes": "routes"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1013.0",
     "@aws-sdk/lib-storage": "3.1013.0",

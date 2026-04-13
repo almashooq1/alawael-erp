@@ -17,36 +17,36 @@ describe('../../utils/mailer.js', () => {
     src = fs.readFileSync(filePath, 'utf8');
   });
 
-    test('source file is readable', () => {
-      expect(src.length).toBeGreaterThan(0);
-    });
+  test('source file is readable', () => {
+    expect(src.length).toBeGreaterThan(0);
+  });
 
-    test('has no obvious syntax issues', () => {
-      // Unmatched template literals or unterminated strings
-      const backtickCount = (src.match(/`/g) || []).length;
-      expect(backtickCount % 2).toBe(0);
-    });
+  test('has no obvious syntax issues', () => {
+    // Unmatched template literals or unterminated strings
+    const backtickCount = (src.match(/`/g) || []).length;
+    expect(backtickCount % 2).toBe(0);
+  });
 
-    test('has exports or module pattern', () => {
-      const hasExport = /module\.exports|exports\.|export\s+(default|const|function|async|class|{)/m.test(src);
-      const hasIIFE = /\(function|\(\(\)|=>/.test(src);
-      const hasExpressApp = /app\.(get|post|use|listen)|createServer/.test(src);
-      const hasImport = /^import\s/m.test(src);
-      expect(hasExport || hasIIFE || hasExpressApp || hasImport).toBe(true);
-    });
+  test('has exports or module pattern', () => {
+    const hasExport = /module\.exports|exports\.|export\s+(default|const|function|async|class|{)/m.test(src);
+    const hasIIFE = /\(function|\(\(\)|=>/.test(src);
+    const hasExpressApp = /app\.(get|post|use|listen)|createServer/.test(src);
+    const hasImport = /^import\s/m.test(src);
+    expect(hasExport || hasIIFE || hasExpressApp || hasImport).toBe(true);
+  });
 
-    test('file has reasonable length (22 lines)', () => {
-      expect(22).toBeGreaterThan(0);
-      expect(22).toBeLessThan(10000);
-    });
+  test('file has reasonable length (22 lines)', () => {
+    expect(22).toBeGreaterThan(0);
+    expect(22).toBeLessThan(10000);
+  });
 
-    test('no hardcoded secrets', () => {
-      const secrets = /(?:password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/i;
-      const hasSecrets = secrets.test(src);
-      // Allow if it's in example/config context
-      if (hasSecrets) {
-        const isExample = /example|sample|default|placeholder|process\.env/i.test(src);
-        expect(isExample).toBe(true);
-      }
-    });
+  test('no hardcoded secrets', () => {
+    const secrets = /(?:password|secret|api_key|apikey|token)\s*[:=]\s*['"][^'"]{8,}['"]/i;
+    const hasSecrets = secrets.test(src);
+    // Allow if it's in example/config context
+    if (hasSecrets) {
+      const isExample = /example|sample|default|placeholder|process\.env/i.test(src);
+      expect(isExample).toBe(true);
+    }
+  });
 });

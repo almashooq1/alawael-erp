@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
  * _gen_intelligent_agent_tests.js — Generator for intelligent-agent/ tests
- * 
+ *
  * Generates Vitest-compatible .test.ts files in tests/gen/ for all
  * untested TypeScript source files under intelligent-agent/src/.
- * 
+ *
  * Uses fs-based syntax validation (no imports from source).
- * 
+ *
  * Usage:
  *   node _gen_intelligent_agent_tests.js          # generate all
  *   node _gen_intelligent_agent_tests.js --dry     # preview only
@@ -37,7 +37,7 @@ function walk(dir, ext) {
   return results;
 }
 
-// Get existing test basenames (without .test.ts) 
+// Get existing test basenames (without .test.ts)
 function getExistingTestNames() {
   const names = new Set();
   if (!fs.existsSync(EXISTING_TESTS_DIR)) return names;
@@ -75,7 +75,7 @@ function generateTest(srcFile, relPath, type) {
   const srcRelPath = path.relative(IA_DIR, srcFile).replace(/\\/g, '/');
   // Relative path from tests/gen/ to the source file
   const testToSrc = path.relative(TEST_DIR, srcFile).replace(/\\/g, '/');
-  
+
   // Detect patterns
   const hasExport = /export\s+(default|const|function|async|class|interface|type|enum|declare|{)/m.test(src);
   const hasImport = /^import\s/m.test(src);
@@ -88,17 +88,17 @@ function generateTest(srcFile, relPath, type) {
   const hasInterface = /interface\s+\w+/.test(src);
   const hasEnum = /enum\s+\w+/.test(src);
   const hasFunction = /function\s+\w+|=>\s*{|=>\s*\w/.test(src);
-  
+
   // Count exports
   const exportMatches = src.match(/export\s+(default|const|function|async|class|interface|type|enum)/gm) || [];
   const exportCount = exportMatches.length;
-  
-  // Count functions  
+
+  // Count functions
   const funcMatches = src.match(/(function\s+\w+|=>\s*{|\w+\s*\([^)]*\)\s*{)/g) || [];
   const funcCount = funcMatches.length;
 
   let tests = '';
-  
+
   // Common tests for all types
   tests += `  test('file exists and is non-empty', () => {
     expect(src.length).toBeGreaterThan(0);
@@ -255,8 +255,9 @@ ${tests}});
 
 // Main
 const existingTests = getExistingTestNames();
-const sourceFiles = walk(SRC_DIR, ['.ts', '.tsx'])
-  .filter(f => !f.endsWith('.test.ts') && !f.endsWith('.spec.ts') && !f.endsWith('.test.tsx'));
+const sourceFiles = walk(SRC_DIR, ['.ts', '.tsx']).filter(
+  f => !f.endsWith('.test.ts') && !f.endsWith('.spec.ts') && !f.endsWith('.test.tsx'),
+);
 
 let created = 0;
 let skipped = 0;
@@ -266,33 +267,31 @@ const report = [];
 for (const srcFile of sourceFiles) {
   const relPath = path.relative(SRC_DIR, srcFile).replace(/\\/g, '/');
   const baseName = path.basename(srcFile, path.extname(srcFile));
-  
+
   // Check if already tested
   if (existingTests.has(baseName)) {
     report.push(`SKIP ${relPath}: already has test in tests/`);
     skipped++;
     continue;
   }
-  
+
   // Skip .d.ts declaration files (usually just type definitions)
   if (srcFile.endsWith('.d.ts')) {
     report.push(`SKIP ${relPath}: declaration file`);
     skipped++;
     continue;
   }
-  
+
   // Generate test file name from relative path
-  const testFileName = relPath
-    .replace(/\//g, '-')
-    .replace(/\.tsx?$/, '.test.ts');
+  const testFileName = relPath.replace(/\//g, '-').replace(/\.tsx?$/, '.test.ts');
   const testFilePath = path.join(TEST_DIR, testFileName);
-  
+
   if (fs.existsSync(testFilePath)) {
     report.push(`SKIP ${relPath}: generated test already exists`);
     skipped++;
     continue;
   }
-  
+
   let src = '';
   try {
     src = fs.readFileSync(srcFile, 'utf8');
@@ -301,15 +300,15 @@ for (const srcFile of sourceFiles) {
     errors++;
     continue;
   }
-  
+
   const type = classify(relPath, src);
-  
+
   if (DRY) {
     report.push(`WOULD CREATE ${testFileName} (type: ${type})`);
     created++;
     continue;
   }
-  
+
   try {
     const content = generateTest(srcFile, relPath, type);
     fs.mkdirSync(TEST_DIR, { recursive: true });

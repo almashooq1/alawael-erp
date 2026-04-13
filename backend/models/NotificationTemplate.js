@@ -63,7 +63,7 @@ const notificationTemplateSchema = new mongoose.Schema(
   }
 );
 
-notificationTemplateSchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true in schema
 notificationTemplateSchema.index({ category: 1, isActive: 1 });
 
 /**

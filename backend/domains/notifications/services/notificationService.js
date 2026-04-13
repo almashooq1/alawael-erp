@@ -59,7 +59,7 @@ const getModels = () => {
 const channelAdapters = {
   async email(notification) {
     try {
-      const emailService = require('../../../services/email.service');
+      const emailService = require('../../../services/emailService');
       await emailService.sendEmail({
         to: notification.recipientEmail,
         subject: notification.title,

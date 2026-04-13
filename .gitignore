@@ -266,3 +266,5 @@ backend/trace_indexes.js
 backend/fix_last4.js
 backend/fix_indexes_v2.js
 backend/fix_duplicate_models.js
+
+intelligent-agent/   

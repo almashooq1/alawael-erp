@@ -118,15 +118,8 @@ app.get('/api/v2/domains/health', async (_req, res) => {
   }
 });
 
-// Platform Health & Stats (DDD unified rehabilitation platform)
-try {
-  const platformRoutes = require('./routes/platform.routes');
-  app.use('/api/v1/platform', platformRoutes);
-  app.use('/api/v2/platform', platformRoutes);
-  logger.info('[Platform] ✓ Platform health/stats routes mounted (/api/v1/platform/*)');
-} catch (err) {
-  logger.warn('[Platform] Platform routes skipped:', err.message);
-}
+// Platform Health & Stats — REMOVED (platform.routes archived in Phase 9)
+// Health endpoint available at /api/v1/health via _registry.js
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 6. INTEGRATION BUS (cross-module event-driven architecture)

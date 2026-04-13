@@ -26,7 +26,7 @@ const kpiCategorySchema = new Schema(
   { timestamps: true }
 );
 
-kpiCategorySchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true + index:true in schema
 kpiCategorySchema.index({ isActive: 1 });
 
 module.exports = mongoose.models.KpiCategory || mongoose.model('KpiCategory', kpiCategorySchema);

@@ -25,18 +25,18 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ── Imports (all via safeRequire) ───────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   const hrSystemRouter = safeRequire('../routes/hrSystem.real.routes');
-  const hrAdvancedRoutes = safeRequire('../routes/hrAdvanced.routes');
-  const hrUnifiedRoutes = safeRequire('../routes/hrUnified.routes');
+  // PHANTOM: const hrAdvancedRoutes = safeRequire('../routes/hrAdvanced.routes');
+  // PHANTOM: const hrUnifiedRoutes = safeRequire('../routes/hrUnified.routes');
   const hrAttendanceRoutes = safeRequire('../routes/hr-attendance.routes');
   const hrInsuranceRoutes = safeRequire('../routes/hr-insurance.routes');
-  const hrSmartRoutes = safeRequire('../routes/hr-smart.routes');
+  // PHANTOM: const hrSmartRoutes = safeRequire('../routes/hr-smart.routes');
   const hrModuleRoutes = safeRequire('../routes/hr-module.routes');
   const employeeAffairsRoutes = safeRequire('../routes/employeeAffairs.routes');
-  const employeeAffairsExpandedRoutes = safeRequire('../routes/employee-affairs-expanded.routes');
-  const employeeAffairsPhase2Routes = safeRequire('../routes/employee-affairs-phase2.routes');
-  const employeeAffairsPhase3Routes = safeRequire('../routes/employee-affairs-phase3.routes');
+  // PHANTOM: const employeeAffairsExpandedRoutes = safeRequire('../routes/employee-affairs-expanded.routes');
+  // PHANTOM: const employeeAffairsPhase2Routes = safeRequire('../routes/employee-affairs-phase2.routes');
+  // PHANTOM: const employeeAffairsPhase3Routes = safeRequire('../routes/employee-affairs-phase3.routes');
   const compensationRouter = safeRequire('../routes/compensation.real.routes');
-  const compensationBenefitsRoutes = safeRequire('../routes/compensationBenefits.routes');
+  // PHANTOM: const compensationBenefitsRoutes = safeRequire('../routes/compensationBenefits.routes');
   const gratuityRoutes = safeRequire('../routes/gratuity.routes');
   const successionPlanningRoutes = safeRequire('../routes/successionPlanning.routes');
   const attendanceRoutes = safeRequire('../routes/attendance.routes');

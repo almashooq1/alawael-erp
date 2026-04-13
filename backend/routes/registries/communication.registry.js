@@ -26,16 +26,16 @@ module.exports = function registerCommunicationRoutes(
   // ── Imports ─────────────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   const communicationsRouter = safeRequire('../routes/communications.real.routes');
-  const aiCommRouter = safeRequire('../routes/aiCommunication.real.routes');
+  // PHANTOM: const aiCommRouter = safeRequire('../routes/aiCommunication.real.routes');
   const communicationRoutes = safeRequire('../routes/communication.routes');
-  const emailV2Routes = safeRequire('../routes/email-v2.routes');
-  const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
-  const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
-  const adminCommRoutes = safeRequire('../routes/admin-communications.routes');
-  const adminCommEnhancedRoutes = safeRequire('../routes/admin-comm-enhanced.routes');
-  const electronicDirectivesRoutes = safeRequire('../routes/electronic-directives.routes');
+  // PHANTOM: const emailV2Routes = safeRequire('../routes/email-v2.routes');
+  // PHANTOM: const whatsappRoutes = safeRequire('../routes/whatsapp.routes');
+  // PHANTOM: const whatsappEnhancedRoutes = safeRequire('../routes/whatsapp-enhanced.routes');
+  // PHANTOM: const adminCommRoutes = safeRequire('../routes/admin-communications.routes');
+  // PHANTOM: const adminCommEnhancedRoutes = safeRequire('../routes/admin-comm-enhanced.routes');
+  // PHANTOM: const electronicDirectivesRoutes = safeRequire('../routes/electronic-directives.routes');
   const communicationModuleRoutes = safeRequire('../routes/communication-module.routes');
-  const notificationsModuleRoutes = safeRequire('../routes/notifications-module.routes');
+  // PHANTOM: const notificationsModuleRoutes = safeRequire('../routes/notifications-module.routes');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Core Communications ────────────────────────────────────────────────

@@ -117,34 +117,7 @@ services:
           cpus: "0.5"
 
   # ─── API Gateway ─────────────────────────────────────────────────────────
-  api-gateway:
-    build:
-      context: ./gateway
-      dockerfile: Dockerfile
-    container_name: alawael-gateway
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      GATEWAY_PORT: 8080
-      AUTH_SERVICE_URL: http://backend:3001
-      HR_SERVICE_URL: http://backend:3001
-      FINANCE_SERVICE_URL: http://finance-backend:3030
-      REPORTS_SERVICE_URL: http://backend:3001
-      NOTIFICATIONS_SERVICE_URL: http://backend:3001
-      SCM_SERVICE_URL: http://scm-backend:3040
-      WHATSAPP_SERVICE_URL: http://whatsapp:3010
-      INTELLIGENT_AGENT_URL: http://intelligent-agent:3020
-    ports:
-      - "${GATEWAY_PORT:-8080}:8080"
-    depends_on:
-      backend:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
-      <<: *healthcheck-defaults
-
+  # api-gateway: # DISABLED — redundant pass-through proxy
   # ─── Backend (Main API) ──────────────────────────────────────────────────
   backend:
     build:
@@ -214,35 +187,8 @@ services:
           memory: 256M
           cpus: "0.25"
 
-  # ─── WhatsApp Service ────────────────────────────────────────────────────
-  whatsapp:
-    build:
-      context: ./whatsapp
-      dockerfile: Dockerfile
-    container_name: alawael-whatsapp
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3010
-      DATABASE_URL: mongodb://${MONGO_ROOT_USER:?Set MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD}@mongodb:27017/alawael_whatsapp?authSource=admin
-      REDIS_URL: redis://:${REDIS_PASSWORD:?Set REDIS_PASSWORD}@redis:6379
-      WHATSAPP_API_TOKEN: ${WHATSAPP_API_TOKEN:-}
-      WHATSAPP_PHONE_ID: ${WHATSAPP_PHONE_ID:-}
-      WHATSAPP_WEBHOOK_SECRET: ${WHATSAPP_WEBHOOK_SECRET:-}
-    ports:
-      - "${WHATSAPP_PORT:-3010}:3010"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
+  # ─── WhatsApp Service ── ARCHIVED ───────────────────────────────────────────
+  # whatsapp: # ARCHIVED → _archived/dead-subprojects/whatsapp/
 
   # ─── Intelligent Agent ───────────────────────────────────────────────────
   intelligent-agent:
@@ -271,30 +217,8 @@ services:
           memory: 2G
           cpus: "1.0"
 
-  # ─── Finance Module ──────────────────────────────────────────────────────
-  finance-backend:
-    build:
-      context: ./finance-module/backend
-      dockerfile: ../Dockerfile.finance
-    container_name: alawael-finance
-    <<: *restart-policy
-    environment:
-      <<: *common-env
-      PORT: 3030
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongodb:27017/alawael_finance?authSource=admin
-      BACKEND_URL: http://backend:3001
-    ports:
-      - "${FINANCE_PORT:-3030}:3030"
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-          cpus: "0.5"
+  # ─── Finance Module ── ARCHIVED ────────────────────────────────────────
+  # finance-backend: # ARCHIVED → _archived/dead-subprojects/finance-module/
 
   # ─── Supply Chain Backend ────────────────────────────────────────────────
   scm-backend:
@@ -321,28 +245,8 @@ services:
           memory: 512M
           cpus: "0.5"
 
-  # ─── Secretary AI (Python) ──────────────────────────────────────────────
-  secretary-ai:
-    build:
-      context: ./secretary_ai
-      dockerfile: Dockerfile
-    container_name: alawael-secretary-ai
-    <<: *restart-policy
-    environment:
-      PORT: 3050
-      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      BACKEND_URL: http://backend:3001
-    ports:
-      - "${SECRETARY_PORT:-3050}:3050"
-    depends_on:
-      - backend
-    networks:
-      - alawael-net
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "0.5"
+  # ─── Secretary AI (Python) ── ARCHIVED ──────────────────────────────────
+  # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/
 
   # ═════════════════════════════════════════════════════════════════════════
   # MONITORING STACK (optional, use --profile monitoring)

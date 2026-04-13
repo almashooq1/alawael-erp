@@ -36,7 +36,7 @@ const assetCategorySchema = new mongoose.Schema(
   { timestamps: true, collection: 'asset_categories' }
 );
 
-assetCategorySchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true in schema
 assetCategorySchema.index({ parentId: 1 });
 assetCategorySchema.index({ depreciationMethod: 1 });
 assetCategorySchema.index({ isActive: 1 });

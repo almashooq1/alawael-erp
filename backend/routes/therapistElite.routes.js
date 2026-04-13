@@ -16,7 +16,7 @@ try {
   authenticateToken = (req, _res, next) => next();
 }
 
-const svc = require('../services/therapistPortalElite.service');
+const svc = require('../services/therapistPortal.service');
 
 function wrap(fn) {
   return async (req, res) => {

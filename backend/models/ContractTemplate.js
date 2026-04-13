@@ -58,7 +58,7 @@ const contractTemplateSchema = new mongoose.Schema(
 );
 
 contractTemplateSchema.index({ type: 1 });
-contractTemplateSchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true in schema
 contractTemplateSchema.index({ isActive: 1 });
 
 module.exports =

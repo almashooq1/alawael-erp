@@ -9,6 +9,11 @@
 #   REDIS_PASSWORD, JWT_SECRET, MONGODB_URI
 ###############################################################################
 
+# ─── Shared logging config ──────────────────────────────────────────────────
+x-prod-logging: &prod-logging
+  driver: "json-file"
+  options: { max-size: "20m", max-file: "3" }
+
 services:
 
   # ─── MongoDB (Production Hardened) ────────────────────────────────────────
@@ -165,43 +170,7 @@ services:
   # ─── Production defaults for all microservices ───────────────────────────
   # Applied via x-service-defaults anchor
 
-  api-gateway:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-        reservations: { memory: 128M, cpus: "0.1" }
-    logging: &prod-logging
-      driver: "json-file"
-      options: { max-size: "20m", max-file: "3" }
-
-  graphql:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-  # ─── Communication & AI Services ─────────────────────────────────────────
-  whatsapp:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
+  # api-gateway: # DISABLED — redundant pass-through proxy, all traffic goes to backend:3001 via NGINX
   intelligent-agent:
     restart: always
     security_opt: [no-new-privileges:true]
@@ -213,13 +182,7 @@ services:
         limits: { memory: 1G, cpus: "1.0" }
     logging: *prod-logging
 
-  secretary-ai:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
+  # secretary-ai: # ARCHIVED → _archived/dead-subprojects/secretary_ai/
 
   python-ml:
     restart: always
@@ -230,16 +193,7 @@ services:
     logging: *prod-logging
 
   # ─── Business Modules ───────────────────────────────────────────────────
-  finance-backend:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
+  # finance-backend: # ARCHIVED → _archived/dead-subprojects/finance-module/
 
   scm-backend:
     restart: always
@@ -259,50 +213,12 @@ services:
         limits: { memory: 256M, cpus: "0.25" }
     logging: *prod-logging
 
-  dashboard-api:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment:
-      NODE_ENV: production
-      LOG_LEVEL: warn
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
+  # dashboard-api: # ARCHIVED → _archived/dead-subprojects/dashboard/
 
-  dashboard-ui:
-    restart: always
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
+  # dashboard-ui: # ARCHIVED → _archived/dead-subprojects/dashboard/
 
   # ─── Advanced Business Services ─────────────────────────────────────────
-  notification-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  payment-gateway:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-  communication-hub:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
+  # notification-service: # ARCHIVED → _archived/dead-microservices-bulk/
   report-worker:
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
@@ -311,15 +227,7 @@ services:
         limits: { memory: 512M, cpus: "0.5" }
     logging: *prod-logging
 
-  audit-service:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
+  # audit-service: # ARCHIVED → _archived/dead-microservices-bulk/
   webhook-worker:
     restart: always
     environment: { NODE_ENV: production, LOG_LEVEL: warn }
@@ -386,386 +294,7 @@ services:
     logging: *prod-logging
 
   # ─── Phase 5: Specialized Microservices ─────────────────────────────────
-  hr-payroll-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  crm-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  attendance-biometric-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  fleet-transport-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  document-management-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  workflow-engine-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  identity-service:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  analytics-bi-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-  e-learning-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  parent-portal-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  rehabilitation-care-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  fee-billing-service:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  multi-tenant-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  realtime-collaboration-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  kitchen-laundry-facility-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  # ─── Phase 6: Extended Microservices ────────────────────────────────────
-  inventory-warehouse-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  academic-curriculum-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  student-health-medical-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  visitor-campus-security-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  crisis-safety-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  compliance-accreditation-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  events-activities-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  asset-equipment-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  staff-training-development-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  cms-announcements-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  forms-survey-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  budget-financial-planning-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  student-lifecycle-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  external-integration-hub-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  facility-space-management-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  # ─── Phase 7: Platform Services ─────────────────────────────────────────
-  platform-api-gateway:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-  security-auth-service:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  smart-reports-service:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-  service-mesh-monitor:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  # ─── Phase 8: Operations ────────────────────────────────────────────────
-  notification-center:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  backup-recovery:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  ai-engine:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 1G, cpus: "1.0" }
-    logging: *prod-logging
-
-  advanced-audit:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  multilingual:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  payment-gateway-service:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  # ─── Phase 9: Productivity ──────────────────────────────────────────────
-  task-project:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  file-storage:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  chat-messaging:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  report-scheduler:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  system-config:
-    restart: always
-    security_opt: [no-new-privileges:true]
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 256M, cpus: "0.25" }
-    logging: *prod-logging
-
-  data-migration:
-    restart: always
-    environment: { NODE_ENV: production, LOG_LEVEL: warn }
-    deploy:
-      resources:
-        limits: { memory: 512M, cpus: "0.5" }
-    logging: *prod-logging
-
-# Persistent volumes for production data
+  # hr-payroll-service: # ARCHIVED → _archived/dead-microservices-bulk/
 volumes:
   uploads_data:
     driver: local

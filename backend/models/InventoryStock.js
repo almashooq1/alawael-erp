@@ -89,7 +89,7 @@ const supplierSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-supplierSchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true in supplier schema
 supplierSchema.index({ isActive: 1 });
 
 // --- أوامر الشراء ---

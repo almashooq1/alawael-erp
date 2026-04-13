@@ -25,13 +25,13 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  const documentsRoutes = safeRequire('../routes/documents');
-  const documentsSmartRouter = safeRequire('../routes/documents.smart.routes');
+  // PHANTOM: const documentsRoutes = safeRequire('../routes/documents');
+  // PHANTOM: const documentsSmartRouter = safeRequire('../routes/documents.smart.routes');
   const documentAdvancedRoutes = safeRequire('../routes/documentAdvanced.routes');
-  const archiveRoutes = safeRequire('../routes/archive.routes');
-  const formTemplateRoutes = safeRequire('../routes/formTemplate.routes');
+  // PHANTOM: const archiveRoutes = safeRequire('../routes/archive.routes');
+  // PHANTOM: const formTemplateRoutes = safeRequire('../routes/formTemplate.routes');
   const mediaRoutes = safeRequire('../routes/media.routes');
-  const documentEnhancedRoutes = safeRequire('../api/routes/document-enhanced.routes');
+  // PHANTOM: const documentEnhancedRoutes = safeRequire('../api/routes/document-enhanced.routes');
   const documentsProRoutes = safeRequire('../api/routes/documents-pro.routes');
   const documentsProExtRoutes = safeRequire('../api/routes/documents-pro-extended.routes');
   const documentsProV3Routes = safeRequire('../api/routes/documents-pro-phase3.routes');

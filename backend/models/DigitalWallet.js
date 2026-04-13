@@ -62,7 +62,7 @@ const digitalWalletSchema = new mongoose.Schema(
 // Indexes
 digitalWalletSchema.index({ branchId: 1, status: 1 });
 digitalWalletSchema.index({ ownerType: 1, ownerId: 1 });
-digitalWalletSchema.index({ walletNumber: 1 });
+// REMOVED DUPLICATE: walletNumber already has unique:true in schema
 digitalWalletSchema.index({ isBlocked: 1 });
 digitalWalletSchema.index({ deletedAt: 1 });
 

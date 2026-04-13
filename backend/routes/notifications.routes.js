@@ -5,7 +5,7 @@
 
 const express = require('express');
 const router = express.Router();
-const NotificationsService = require('../services/notifications.service');
+const NotificationsService = require('../domains/notifications/services/notificationService');
 const { authenticateToken } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -32,7 +32,7 @@ try {
 let notificationModel;
 try {
   const modelModule = require('../models/Notification.memory');
-const safeError = require('../utils/safeError');
+  const safeError = require('../utils/safeError');
   notificationModel = modelModule.Notification || modelModule;
 } catch (e) {
   notificationModel = null;

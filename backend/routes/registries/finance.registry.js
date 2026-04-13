@@ -20,14 +20,10 @@ module.exports = function registerFinanceRoutes(
   app,
   { safeRequire, dualMount, safeMount, logger }
 ) {
-  // ── Finance 7 Tiers (المالية — 7 مستويات) ──────────────────────────────
+  // ── Finance Routes (المالية) ──────────────────────────────────────────
   const financeRoutes = safeRequire('../routes/finance.routes.unified');
-  const financeAdvancedRoutes = safeRequire('../routes/finance.routes.advanced');
-  const financeExtendedRoutes = safeRequire('../routes/finance.routes.extended');
-  const financeProRoutes = safeRequire('../routes/finance.routes.pro');
-  const financeEnterpriseRoutes = safeRequire('../routes/finance.routes.enterprise');
-  const financeUltimateRoutes = safeRequire('../routes/finance.routes.ultimate');
-  const financeEliteRoutes = safeRequire('../routes/finance.routes.elite');
+  // NOTE: 6 phantom tier files removed (advanced/extended/pro/enterprise/ultimate/elite)
+  //       — all routes consolidated in finance.routes.unified.js
 
   // ── Other Finance Modules ───────────────────────────────────────────────
   const paymentsRouter = safeRequire('../routes/payments.real.routes');
@@ -35,17 +31,10 @@ module.exports = function registerFinanceRoutes(
   const financeOperationsRoutes = safeRequire('../routes/financeOperations.routes');
   const financeModuleRoutes = safeRequire('../routes/finance-module.routes');
 
-  // ── Mount: Finance 7 Tiers ──────────────────────────────────────────────
+  // ── Mount: Finance ──────────────────────────────────────────────────────
   dualMount(app, 'finance', financeRoutes);
-  dualMount(app, 'finance/advanced', financeAdvancedRoutes);
-  dualMount(app, 'finance/extended', financeExtendedRoutes);
-  dualMount(app, 'finance/pro', financeProRoutes);
-  dualMount(app, 'finance/enterprise', financeEnterpriseRoutes);
-  dualMount(app, 'finance/ultimate', financeUltimateRoutes);
-  dualMount(app, 'finance/elite', financeEliteRoutes);
-  logger.info(
-    'Finance 7-tier routes mounted (unified → advanced → extended → pro → enterprise → ultimate → elite)'
-  );
+  // NOTE: 6 phantom tier mounts removed (finance/advanced..elite)
+  logger.info('Finance routes mounted (unified)');
 
   // ── Mount: Payments ─────────────────────────────────────────────────────
   dualMount(app, 'payments', paymentsRouter);

@@ -16,7 +16,6 @@ const ApiKey = require('./ApiKey');
 
 // ── Beneficiary & Clinical ───────────────────────────────────────────────────
 const Beneficiary = require('./Beneficiary');
-const BeneficiaryFile = require('./BeneficiaryFile'); // → alias for Beneficiary (see BeneficiaryFile.js)
 const BeneficiaryPortal = require('./BeneficiaryPortal');
 const BeneficiaryProgress = require('./BeneficiaryProgress');
 const CarePlan = require('./CarePlan');
@@ -131,7 +130,6 @@ module.exports = {
 
   // Beneficiary & Clinical
   Beneficiary,
-  BeneficiaryFile,
   BeneficiaryPortal,
   BeneficiaryProgress,
   CarePlan,

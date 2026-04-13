@@ -48,7 +48,7 @@ const discountCouponSchema = new mongoose.Schema(
 );
 
 discountCouponSchema.index({ branchId: 1, isActive: 1 });
-discountCouponSchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true in schema
 discountCouponSchema.index({ expiresAt: 1, isActive: 1 });
 discountCouponSchema.index({ deletedAt: 1 });
 

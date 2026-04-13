@@ -16,7 +16,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const svc = require('../services/therapistPortalExtended.service');
+const svc = require('../services/therapistPortal.service');
 
 router.use(authenticateToken);
 

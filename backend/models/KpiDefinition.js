@@ -55,7 +55,7 @@ const kpiDefinitionSchema = new Schema(
 );
 
 kpiDefinitionSchema.index({ categoryId: 1, isActive: 1 });
-kpiDefinitionSchema.index({ code: 1 });
+// REMOVED DUPLICATE: code already has unique:true + index:true in schema
 kpiDefinitionSchema.index({ showOnDashboard: 1 });
 
 module.exports =

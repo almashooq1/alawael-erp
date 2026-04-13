@@ -147,3 +147,9 @@ vite.config.ts.timestamp-*
 
 # Export artifacts
 exports/
+
+# Generated data (not code)
+backups/*.gz
+instance/*.db
+keys/*.json
+storage/temp/

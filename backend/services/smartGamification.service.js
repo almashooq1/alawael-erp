@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
-const SmartNotificationService = require('./smartNotificationService');
+const SmartNotificationService = require('../domains/notifications/services/notificationService');
 const logger = require('../utils/logger');
 
 class SmartGamificationService {

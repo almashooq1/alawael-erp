@@ -27,15 +27,15 @@ module.exports = function registerStudentParentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   const studentsRouter = safeRequire('../routes/students.real.routes');
   const studentReportsRouter = safeRequire('../routes/studentReports.real.routes');
-  const studentMgmtRoutes = safeRequire('../routes/student-management.routes');
-  const studentComplaintsRoutes = safeRequire('../routes/student-complaints.routes');
-  const studentCertificatesRoutes = safeRequire('../routes/student-certificates.routes');
-  const studentHealthTrackerRoutes = safeRequire('../routes/student-health-tracker.routes');
-  const studentRewardsStoreRoutes = safeRequire('../routes/student-rewards-store.routes');
-  const studentEventsRoutes = safeRequire('../routes/student-events.routes');
-  const studentElearningRoutes = safeRequire('../routes/student-elearning.routes');
+  // PHANTOM: const studentMgmtRoutes = safeRequire('../routes/student-management.routes');
+  // PHANTOM: const studentComplaintsRoutes = safeRequire('../routes/student-complaints.routes');
+  // PHANTOM: const studentCertificatesRoutes = safeRequire('../routes/student-certificates.routes');
+  // PHANTOM: const studentHealthTrackerRoutes = safeRequire('../routes/student-health-tracker.routes');
+  // PHANTOM: const studentRewardsStoreRoutes = safeRequire('../routes/student-rewards-store.routes');
+  // PHANTOM: const studentEventsRoutes = safeRequire('../routes/student-events.routes');
+  // PHANTOM: const studentElearningRoutes = safeRequire('../routes/student-elearning.routes');
   const parentsRouter = safeRequire('../routes/parents.real.routes');
-  const guardianPortalRouter = safeRequire('../routes/guardianPortal.real.routes');
+  // PHANTOM: const guardianPortalRouter = safeRequire('../routes/guardianPortal.real.routes');
   const parentPortalEnhancedRoutes = safeRequire('../routes/parent-portal-enhanced.routes');
 
   // ══════════════════════════════════════════════════════════════════════════

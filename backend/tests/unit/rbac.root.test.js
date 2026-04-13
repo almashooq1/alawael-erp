@@ -57,5 +57,4 @@ describe('rbac', () => {
       expect(mod.RBAC_HELPERS).toBeDefined();
     }
   });
-
 });

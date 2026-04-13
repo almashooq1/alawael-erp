@@ -5,10 +5,26 @@
 'use strict';
 
 /* ── Mocks ── */
-const mockSchema = { index: jest.fn().mockReturnThis(), virtual: jest.fn(() => ({ get: jest.fn() })), pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), statics: {}, methods: {}, set: jest.fn() };
+const mockSchema = {
+  index: jest.fn().mockReturnThis(),
+  virtual: jest.fn(() => ({ get: jest.fn() })),
+  pre: jest.fn(),
+  post: jest.fn(),
+  plugin: jest.fn(),
+  statics: {},
+  methods: {},
+  set: jest.fn(),
+};
 jest.mock('mongoose', () => ({
   Schema: jest.fn(() => mockSchema),
-  model: jest.fn(() => ({ find: jest.fn(), findOne: jest.fn(), create: jest.fn(), findById: jest.fn(), findByIdAndUpdate: jest.fn(), deleteMany: jest.fn() })),
+  model: jest.fn(() => ({
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    findById: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    deleteMany: jest.fn(),
+  })),
   connect: jest.fn(() => Promise.resolve()),
   disconnect: jest.fn(() => Promise.resolve()),
   connection: { readyState: 1, on: jest.fn(), close: jest.fn() },
@@ -45,5 +61,4 @@ describe('models/prediction.model', () => {
     const instance = new mod();
     expect(typeof instance.save).toBe('function');
   });
-
 });

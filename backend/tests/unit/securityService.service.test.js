@@ -19,10 +19,24 @@ jest.mock('../../utils/logger', () => ({
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomBytes: jest.fn(() => Buffer.from('abcdef1234567890abcdef1234567890', 'hex')),
-  createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhash') })),
-  createHmac: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhmac') })),
-  createCipheriv: jest.fn(() => ({ update: jest.fn(() => 'enc'), final: jest.fn(() => ''), getAuthTag: jest.fn(() => Buffer.from('tag')) })),
-  createDecipheriv: jest.fn(() => ({ update: jest.fn(() => 'dec'), final: jest.fn(() => ''), setAuthTag: jest.fn() })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhash'),
+  })),
+  createHmac: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhmac'),
+  })),
+  createCipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'enc'),
+    final: jest.fn(() => ''),
+    getAuthTag: jest.fn(() => Buffer.from('tag')),
+  })),
+  createDecipheriv: jest.fn(() => ({
+    update: jest.fn(() => 'dec'),
+    final: jest.fn(() => ''),
+    setAuthTag: jest.fn(),
+  })),
   pbkdf2Sync: jest.fn(() => Buffer.from('derived-key-32-bytes-long!!!!!!!')),
 }));
 
@@ -34,41 +48,89 @@ jest.mock('bcryptjs', () => ({
   compareSync: jest.fn(() => true),
 }));
 
-jest.mock('speakeasy', () => ({
-  generateSecret: jest.fn(() => ({ base32: 'MOCK_SECRET', otpauth_url: 'otpauth://totp/test' })),
-  totp: { verify: jest.fn(() => true) },
-}), { virtual: true });
+jest.mock(
+  'speakeasy',
+  () => ({
+    generateSecret: jest.fn(() => ({ base32: 'MOCK_SECRET', otpauth_url: 'otpauth://totp/test' })),
+    totp: { verify: jest.fn(() => true) },
+  }),
+  { virtual: true }
+);
 
-jest.mock('../../models/User', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../models/User',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
-jest.mock('../../models/Session', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../models/Session',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
-jest.mock('../../models/securityLog.model', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../models/securityLog.model',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
-const mockSchema = { index: jest.fn().mockReturnThis(), virtual: jest.fn(() => ({ get: jest.fn() })), pre: jest.fn(), post: jest.fn(), plugin: jest.fn(), statics: {}, methods: {}, set: jest.fn() };
+const mockSchema = {
+  index: jest.fn().mockReturnThis(),
+  virtual: jest.fn(() => ({ get: jest.fn() })),
+  pre: jest.fn(),
+  post: jest.fn(),
+  plugin: jest.fn(),
+  statics: {},
+  methods: {},
+  set: jest.fn(),
+};
 const mockSchemaConstructor = jest.fn(() => mockSchema);
-mockSchemaConstructor.Types = { ObjectId: 'ObjectId', Mixed: 'Mixed', String: String, Number: Number, Boolean: Boolean, Date: Date };
+mockSchemaConstructor.Types = {
+  ObjectId: 'ObjectId',
+  Mixed: 'Mixed',
+  String: String,
+  Number: Number,
+  Boolean: Boolean,
+  Date: Date,
+};
 jest.mock('mongoose', () => ({
   Schema: mockSchemaConstructor,
-  model: jest.fn(() => ({ find: jest.fn(), findOne: jest.fn(), create: jest.fn(), findById: jest.fn(), findByIdAndUpdate: jest.fn(), deleteMany: jest.fn() })),
+  model: jest.fn(() => ({
+    find: jest.fn(),
+    findOne: jest.fn(),
+    create: jest.fn(),
+    findById: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
+    deleteMany: jest.fn(),
+  })),
   models: {},
   connect: jest.fn(() => Promise.resolve()),
   disconnect: jest.fn(() => Promise.resolve()),
@@ -78,13 +140,20 @@ jest.mock('mongoose', () => ({
   set: jest.fn(),
 }));
 
-jest.mock('../../utils/sanitize', () => new Proxy({}, {
-  get: (_, p) => {
-    if (p === '__esModule') return false;
-    if (p === 'default') return {};
-    return jest.fn(() => Promise.resolve({}));
-  },
-}));
+jest.mock(
+  '../../utils/sanitize',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (_, p) => {
+          if (p === '__esModule') return false;
+          if (p === 'default') return {};
+          return jest.fn(() => Promise.resolve({}));
+        },
+      }
+    )
+);
 
 /* ── Module under test ── */
 const mod = require('../../services/securityService');
@@ -111,5 +180,4 @@ describe('services/securityService', () => {
     expect(mod.SecurityService).toBeDefined();
     expect(typeof mod.SecurityService).toBe('function');
   });
-
 });

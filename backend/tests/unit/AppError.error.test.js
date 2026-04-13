@@ -89,7 +89,6 @@ describe('errors/AppError', () => {
       const err = new mod.AppError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('BadRequestError', () => {
@@ -103,7 +102,6 @@ describe('errors/AppError', () => {
       const err = new mod.BadRequestError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('ValidationError', () => {
@@ -117,7 +115,6 @@ describe('errors/AppError', () => {
       const err = new mod.ValidationError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('AuthenticationError', () => {
@@ -131,7 +128,6 @@ describe('errors/AppError', () => {
       const err = new mod.AuthenticationError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('UnauthorizedError', () => {
@@ -145,7 +141,6 @@ describe('errors/AppError', () => {
       const err = new mod.UnauthorizedError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('ForbiddenError', () => {
@@ -159,7 +154,6 @@ describe('errors/AppError', () => {
       const err = new mod.ForbiddenError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('NotFoundError', () => {
@@ -173,7 +167,6 @@ describe('errors/AppError', () => {
       const err = new mod.NotFoundError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('ConflictError', () => {
@@ -187,7 +180,6 @@ describe('errors/AppError', () => {
       const err = new mod.ConflictError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('RateLimitError', () => {
@@ -201,7 +193,6 @@ describe('errors/AppError', () => {
       const err = new mod.RateLimitError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('TooManyRequestsError', () => {
@@ -215,7 +206,6 @@ describe('errors/AppError', () => {
       const err = new mod.TooManyRequestsError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('ServiceUnavailableError', () => {
@@ -229,7 +219,6 @@ describe('errors/AppError', () => {
       const err = new mod.ServiceUnavailableError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
 
   describe('ApiError', () => {
@@ -243,7 +232,5 @@ describe('errors/AppError', () => {
       const err = new mod.ApiError('test');
       expect(err.statusCode).toBeDefined();
     });
-
   });
-
 });

@@ -17,8 +17,8 @@
     "quality": "npm run quality:ci"
   },
   "dependencies": {
-    "@prisma/client": "^5.10.2",
     "@aws-sdk/client-sqs": "^3.535.0",
+    "@prisma/client": "^5.10.2",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "ioredis": "^5.3.2",

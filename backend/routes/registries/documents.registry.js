@@ -46,9 +46,9 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Core Documents ─────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'documents', documentsRoutes);
-  dualMount(app, 'documents-smart', documentsSmartRouter);
-  logger.info('[Docs] Core documents + smart-documents mounted');
+  // PHANTOM-FIX: dualMount(app, 'documents', documentsRoutes);
+  // PHANTOM-FIX: dualMount(app, 'documents-smart', documentsSmartRouter);
+  logger.info('[Docs] Core documents SKIPPED (phantom imports)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Document Advanced Services (خدمات المستندات المتقدمة) ──────────────
@@ -59,14 +59,14 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Electronic Archive System (نظام الأرشفة الإلكتروني) ────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'archive', archiveRoutes);
-  logger.info('[Docs] Archive routes mounted');
+  // PHANTOM-FIX: dualMount(app, 'archive', archiveRoutes);
+  logger.info('[Docs] Archive routes SKIPPED (phantom import)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Form Templates System (نظام النماذج الجاهزة) ──────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'form-templates', formTemplateRoutes);
-  logger.info('[Docs] Form template routes mounted');
+  // PHANTOM-FIX: dualMount(app, 'form-templates', formTemplateRoutes);
+  logger.info('[Docs] Form template routes SKIPPED (phantom import)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Media Library System (نظام مكتبة الوسائط) ─────────────────────────
@@ -83,7 +83,7 @@ module.exports = function registerDocumentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   // ── Documents Pro Series (Enhanced → Pro → V3 → V9, 11 tiers) ────────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'documents-enhanced', documentEnhancedRoutes);
+  // PHANTOM-FIX: dualMount(app, 'documents-enhanced', documentEnhancedRoutes);
   dualMount(app, 'documents-pro', documentsProRoutes);
   dualMount(app, 'documents-pro-ext', documentsProExtRoutes);
   dualMount(app, 'documents-pro-v3', documentsProV3Routes);

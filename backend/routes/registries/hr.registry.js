@@ -47,14 +47,14 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ── Core HR System ─────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'hr-system', hrSystemRouter);
-  dualMount(app, 'hr-advanced', hrAdvancedRoutes);
-  dualMount(app, 'hr-unified', hrUnifiedRoutes);
+  // PHANTOM-FIX: dualMount(app, 'hr-advanced', hrAdvancedRoutes);
+  // PHANTOM-FIX: dualMount(app, 'hr-unified', hrUnifiedRoutes);
   dualMount(app, 'compensation', compensationRouter);
-  dualMount(app, 'compensation-benefits', compensationBenefitsRoutes);
+  // PHANTOM-FIX: dualMount(app, 'compensation-benefits', compensationBenefitsRoutes);
   dualMount(app, 'gratuity', gratuityRoutes);
   dualMount(app, 'succession-planning', successionPlanningRoutes);
   logger.info(
-    '[HR] Core HR mounted (hr-system, hr-advanced, hr-unified, compensation, benefits, gratuity, succession-planning)'
+    '[HR] Core HR mounted (hr-system, compensation, gratuity, succession-planning — hr-advanced, hr-unified, compensation-benefits skipped: phantom)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -77,20 +77,20 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ══════════════════════════════════════════════════════════════════════════
   // ── HR Smart System — AI, Analytics, Onboarding, Documents ─────────────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'hr-smart', hrSmartRoutes);
+  // PHANTOM-FIX: dualMount(app, 'hr-smart', hrSmartRoutes);
   logger.info(
-    '[HR] HR Smart routes mounted: AI predictions, analytics, onboarding, documents (35+ endpoints)'
+    '[HR] HR Smart routes SKIPPED (phantom import)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Employee Affairs (4 phases — شؤون الموظفين) ─────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'employee-affairs', employeeAffairsRoutes);
-  dualMount(app, 'employee-affairs-expanded', employeeAffairsExpandedRoutes);
-  dualMount(app, 'employee-affairs-phase2', employeeAffairsPhase2Routes);
-  dualMount(app, 'employee-affairs-phase3', employeeAffairsPhase3Routes);
+  // PHANTOM-FIX: dualMount(app, 'employee-affairs-expanded', employeeAffairsExpandedRoutes);
+  // PHANTOM-FIX: dualMount(app, 'employee-affairs-phase2', employeeAffairsPhase2Routes);
+  // PHANTOM-FIX: dualMount(app, 'employee-affairs-phase3', employeeAffairsPhase3Routes);
   logger.info(
-    '[HR] Employee Affairs mounted (4 phases: base 30+ → expanded 60+ → phase2 80+ → phase3 50+ endpoints)'
+    '[HR] Employee Affairs mounted (base only — expanded, phase2, phase3 skipped: phantom)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════

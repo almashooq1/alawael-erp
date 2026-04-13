@@ -43,28 +43,28 @@ module.exports = function registerStudentParentRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'students', studentsRouter);
   dualMount(app, 'student-reports', studentReportsRouter);
-  dualMount(app, 'student-management', studentMgmtRoutes);
-  logger.info('[Student] Core student routes mounted (students, reports, management)');
+  // PHANTOM-FIX: dualMount(app, 'student-management', studentMgmtRoutes);
+  logger.info('[Student] Core student routes mounted (students, reports — management skipped: phantom)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Student Portal Extended Services (خدمات بوابة الطالب الموسّعة) ────
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'student-complaints', studentComplaintsRoutes);
-  dualMount(app, 'student-certificates', studentCertificatesRoutes);
-  dualMount(app, 'student-health', studentHealthTrackerRoutes);
-  dualMount(app, 'student-rewards', studentRewardsStoreRoutes);
-  dualMount(app, 'student-events', studentEventsRoutes);
-  dualMount(app, 'student-elearning', studentElearningRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-complaints', studentComplaintsRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-certificates', studentCertificatesRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-health', studentHealthTrackerRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-rewards', studentRewardsStoreRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-events', studentEventsRoutes);
+  // PHANTOM-FIX: dualMount(app, 'student-elearning', studentElearningRoutes);
   logger.info(
-    '[Student] Student portal extended services mounted (6 modules: complaints, certificates, health, rewards, events, elearning)'
+    '[Student] Student portal extended services SKIPPED (6 phantom imports)'
   );
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Parents & Guardian ─────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
   dualMount(app, 'parents', parentsRouter);
-  dualMount(app, 'guardian', guardianPortalRouter);
-  logger.info('[Student] Parent & Guardian portal routes mounted');
+  // PHANTOM-FIX: dualMount(app, 'guardian', guardianPortalRouter);
+  logger.info('[Student] Parent portal mounted (guardian skipped: phantom)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Parent Portal Full API (بوابة ولي الأمر الشاملة) ──────────────────

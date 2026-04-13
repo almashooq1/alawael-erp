@@ -56,41 +56,42 @@ module.exports = function registerFleetRoutes(app, { safeRequire, dualMount, log
 
   // ── Mounts ───────────────────────────────────────────────────────────────
   dualMount(app, 'drivers', driversRoutes);
-  dualMount(app, 'vehicles', vehiclesRoutes);
-  dualMount(app, 'trips', tripsRoutes);
-  dualMount(app, 'gps', gpsRoutes);
-  dualMount(app, 'transport-routes', transportRoutesRouter);
 
-  // Fleet & Transport Extended Modules (وحدات الأسطول والنقل الموسّعة)
-  dualMount(app, 'geofences', geofenceRoutes);
-  dualMount(app, 'dispatch', dispatchRoutes);
-  dualMount(app, 'fleet-costs', fleetCostsRoutes);
-  dualMount(app, 'fleet-tires', fleetTiresRoutes);
-  dualMount(app, 'fleet-safety', fleetSafetyRoutes);
-  dualMount(app, 'fleet-fuel-cards', fleetFuelCardsRoutes);
-  dualMount(app, 'fleet-inspections', fleetInspectionsRoutes);
-  dualMount(app, 'driver-training', driverTrainingRoutes);
-  dualMount(app, 'vehicle-insurance', vehicleInsuranceRoutes);
-  dualMount(app, 'fleet-kpi', fleetKPIRoutes);
-  dualMount(app, 'driver-shifts', driverShiftsRoutes);
-  dualMount(app, 'fleet-compliance', fleetComplianceRoutes);
-  dualMount(app, 'traffic-fines', trafficFinesRoutes);
-  dualMount(app, 'fleet-documents', fleetDocumentRoutes);
-  dualMount(app, 'fleet-parts', fleetPartRoutes);
-  dualMount(app, 'cargo', cargoRoutes);
-  dualMount(app, 'fleet-reservations', fleetReservationRoutes);
-  dualMount(app, 'vehicle-assignments', vehicleAssignmentRoutes);
-  dualMount(app, 'fleet-parking', fleetParkingRoutes);
-  dualMount(app, 'fleet-alerts', fleetAlertRoutes);
-  dualMount(app, 'driver-leaves', driverLeaveRoutes);
-  dualMount(app, 'fleet-fuel', fleetFuelRoutes);
-  dualMount(app, 'fleet-tolls', fleetTollRoutes);
-  dualMount(app, 'fleet-accidents', fleetAccidentRoutes);
-  dualMount(app, 'fleet-warranties', fleetWarrantyRoutes);
-  dualMount(app, 'fleet-route-plans', fleetRoutePlanRoutes);
-  dualMount(app, 'fleet-communications', fleetCommunicationRoutes);
-  dualMount(app, 'fleet-penalties', fleetPenaltyRoutes);
-  dualMount(app, 'fleet-disposals', fleetDisposalRoutes);
+  // PHANTOM: Route files below do NOT exist yet — dualMount calls removed to
+  // prevent ReferenceError crash.  Re-enable as route files are implemented.
+  // dualMount(app, 'vehicles', vehiclesRoutes);
+  // dualMount(app, 'trips', tripsRoutes);
+  // dualMount(app, 'gps', gpsRoutes);
+  // dualMount(app, 'transport-routes', transportRoutesRouter);
+  // dualMount(app, 'geofences', geofenceRoutes);
+  // dualMount(app, 'dispatch', dispatchRoutes);
+  // dualMount(app, 'fleet-costs', fleetCostsRoutes);
+  // dualMount(app, 'fleet-tires', fleetTiresRoutes);
+  // dualMount(app, 'fleet-safety', fleetSafetyRoutes);
+  // dualMount(app, 'fleet-fuel-cards', fleetFuelCardsRoutes);
+  // dualMount(app, 'fleet-inspections', fleetInspectionsRoutes);
+  // dualMount(app, 'driver-training', driverTrainingRoutes);
+  // dualMount(app, 'vehicle-insurance', vehicleInsuranceRoutes);
+  // dualMount(app, 'fleet-kpi', fleetKPIRoutes);
+  // dualMount(app, 'driver-shifts', driverShiftsRoutes);
+  // dualMount(app, 'fleet-compliance', fleetComplianceRoutes);
+  // dualMount(app, 'traffic-fines', trafficFinesRoutes);
+  // dualMount(app, 'fleet-documents', fleetDocumentRoutes);
+  // dualMount(app, 'fleet-parts', fleetPartRoutes);
+  // dualMount(app, 'cargo', cargoRoutes);
+  // dualMount(app, 'fleet-reservations', fleetReservationRoutes);
+  // dualMount(app, 'vehicle-assignments', vehicleAssignmentRoutes);
+  // dualMount(app, 'fleet-parking', fleetParkingRoutes);
+  // dualMount(app, 'fleet-alerts', fleetAlertRoutes);
+  // dualMount(app, 'driver-leaves', driverLeaveRoutes);
+  // dualMount(app, 'fleet-fuel', fleetFuelRoutes);
+  // dualMount(app, 'fleet-tolls', fleetTollRoutes);
+  // dualMount(app, 'fleet-accidents', fleetAccidentRoutes);
+  // dualMount(app, 'fleet-warranties', fleetWarrantyRoutes);
+  // dualMount(app, 'fleet-route-plans', fleetRoutePlanRoutes);
+  // dualMount(app, 'fleet-communications', fleetCommunicationRoutes);
+  // dualMount(app, 'fleet-penalties', fleetPenaltyRoutes);
+  // dualMount(app, 'fleet-disposals', fleetDisposalRoutes);
 
-  logger.info('Fleet & Transport extended modules mounted (29 modules, 400+ endpoints)');
+  logger.info('Fleet & Transport: drivers mounted (33 phantom routes pending implementation)');
 };

@@ -103,24 +103,15 @@ module.exports = {
     path.resolve(__dirname, '..', '_archived').replace(/\\/g, '\\\\'),
     path.resolve(__dirname, '..', 'supply-chain-management').replace(/\\/g, '\\\\'),
     // Standalone Node scripts (not Jest tests) — use process.exit(), http.request, custom runners
-    'tests/tests/supply-chain\\.test',
-    'tests/tests/sso-e2e\\.test',
-    'tests/tests/sso-e2e-fixed\\.test',
-    'tests/tests/e2e-phase1\\.test',
-    'tests/tests/e2e-phase2\\.test',
-    'tests/tests/e2e-phase3\\.test',
-    'tests/tests/e2e-api\\.test',
-    'tests/tests/measurement-integration\\.test',
-    'tests/tests/advanced-measurements\\.test',
-    'tests/tests/driver-api-integration\\.test',
-    'tests/tests/comprehensive-advanced\\.test',
-    'tests/tests/civilDefense\\.test',
-    'tests/tests/driver-management\\.test',
+    // ARCHIVED: Moved 15 standalone/placeholder test scripts to _archived/dead-tests/
+    // (supply-chain, sso-e2e*, e2e-phase*, e2e-api, measurement-integration,
+    //  advanced-measurements, driver-*, comprehensive-advanced, civilDefense,
+    //  executiveDashboard (Mocha/Chai), comprehensive (placeholder))
+
     // Live-server test (needs running server, circular JSON errors)
     'tests/tests/measurement-system\\.test',
-    // Mocha/Chai tests (not Jest-compatible: uses chai.expect, done() callbacks, undeclared app global)
-    'tests/tests/integration/executiveDashboard\\.test',
-    // Integration tests with API/service mismatches (need rewrite to match actual service APIs)
+    // Mocha/Chai tests → archived to _archived/dead-tests/
+    // Integration tests with missing route files or service mismatches (need rewrite)
     'tests/tests/advanced-features\\.integration\\.test',
     'tests/tests/integration/vehicles\\.integration\\.test',
     'tests/tests/integration/trips\\.integration\\.test',
@@ -129,7 +120,6 @@ module.exports = {
     'tests/tests/database\\.integration\\.test',
     'tests/tests/communityAwareness\\.test',
     'tests/tests/sso\\.comprehensive\\.test',
-    'tests/tests/comprehensive\\.test',
   ],
   watchPathIgnorePatterns: ['/node_modules/', '/coverage/', '/dist/'],
 

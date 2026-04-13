@@ -1,5 +1,6 @@
 const js = require('@eslint/js');
 const globals = require('globals');
+const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const importPlugin = require('eslint-plugin-import');
 const unusedImportsPlugin = require('eslint-plugin-unused-imports');
@@ -19,6 +20,7 @@ module.exports = [
       reportUnusedDisableDirectives: 'warn',
     },
     plugins: {
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       import: importPlugin,
       'unused-imports': unusedImportsPlugin,
@@ -40,6 +42,9 @@ module.exports = [
     },
     rules: {
       ...js.configs.recommended.rules,
+      // React — mark JSX component references as "used" variables
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-uses-react': 'error',
       // React hooks
       'react-hooks/exhaustive-deps': 'warn',
       'react-hooks/rules-of-hooks': 'error',

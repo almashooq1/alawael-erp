@@ -12,7 +12,6 @@ import logger from '../../utils/logger';
 
 const cardSx = { borderRadius: 3, transition: 'box-shadow .2s', '&:hover': { boxShadow: 6 } };
 const statCard = (c) => ({ ...cardSx, borderTop: `4px solid ${c}`, textAlign: 'center' });
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '—';
 const fmtDateTime = (d) => d ? new Date(d).toLocaleString('ar-SA') : '—';
 const fmtSize = (b) => {
   if (!b) return '0';
@@ -416,7 +415,7 @@ function ApprovalTab() {
 function SecurityTab() {
   const [stats, setStats] = useState(null);
   const [logs, setLogs] = useState([]);
-  const [policies, setPolicies] = useState([]);
+  const [, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [docId, setDocId] = useState('');
   const [scanText, setScanText] = useState('');

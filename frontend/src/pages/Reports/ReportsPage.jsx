@@ -31,7 +31,6 @@ export default function ReportsPage() {
   const [templates, setTemplates] = useState([]);
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [previewReport, setPreviewReport] = useState(null);

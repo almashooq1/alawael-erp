@@ -151,10 +151,8 @@ export const ChartCard = ({
   height = 300,
   noPadding = false,
 }) => {
-  const theme = useTheme();
-
   return (
-    <Card sx={{ borderRadius: '16px', overflow: 'hidden' }}>
+    <Card sx={{ borderRadius: '16px', overflow: 'hidden' }}>  
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2.5, pb: 1 }}>
         <Box>

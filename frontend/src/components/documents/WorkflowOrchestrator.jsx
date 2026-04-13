@@ -30,7 +30,6 @@ function NodeEditor({ node, index, totalNodes, allNodes, edges, onChange, onDele
   const typeInfo = NODE_TYPES.find(t => t.type === node.type) || NODE_TYPES[2];
 
   const outgoingEdges = edges.filter(e => e.sourceNodeId === node.nodeId);
-  const incomingEdges = edges.filter(e => e.targetNodeId === node.nodeId);
 
   return (
     <Paper dir="rtl" sx={{ p: 2, mb: 1.5, borderRadius: 2, borderRight: `4px solid ${typeInfo.color}` }}>

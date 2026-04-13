@@ -141,7 +141,7 @@ export default function SmartAssessmentDashboard() {
 
   /* ─── Overview state (REAL API) ──────────────────────────── */
   const [overviewStats, setOverviewStats] = useState(null);
-  const [recentAssessments, setRecentAssessments] = useState([]);
+  const [, setRecentAssessments] = useState([]);
 
   /* ─── Administer state ───────────────────────────────────── */
   const [selectedScale, setSelectedScale] = useState(null);
@@ -393,7 +393,7 @@ export default function SmartAssessmentDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {SCALE_CATALOG.slice(0, 8).map((scale, i) => (
+                {SCALE_CATALOG.slice(0, 8).map((scale) => (
                   <TableRow key={scale.id} hover>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>

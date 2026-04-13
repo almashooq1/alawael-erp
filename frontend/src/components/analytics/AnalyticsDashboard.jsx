@@ -31,7 +31,7 @@ const AnalyticsDashboard = () => {
   const [period, setPeriod] = useState('month');
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState(null);
+  const [, setAnalyticsData] = useState(null);
 
   useEffect(() => {
     const fetchAnalytics = async () => {

@@ -47,7 +47,6 @@ const defaultForm = {
 
 export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
   const [form, setForm] = useState(defaultForm);
-  const [previewTab, setPreviewTab] = useState(0);
   const canvasRef = useRef(null);
 
   useEffect(() => {

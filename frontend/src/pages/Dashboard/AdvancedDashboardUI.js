@@ -47,6 +47,7 @@ function getFormattedTime() {
   return `${h}:${m} ${ampm}`;
 }
 
+// eslint-disable-next-line unused-imports/no-unused-vars
 function getNotificationIcon(type) {
   switch (type) {
     case 'warning':

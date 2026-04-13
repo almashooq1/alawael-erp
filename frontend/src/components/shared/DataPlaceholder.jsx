@@ -135,7 +135,6 @@ const DataPlaceholder = memo(function DataPlaceholder({
   sx = {},
 }) {
   const theme  = useTheme();
-  const isDark = theme.palette.mode === 'dark';
 
   const config    = CONFIGS[type] || CONFIGS.empty;
   const finalColor = color || config.color;

@@ -212,7 +212,7 @@ export default function DocumentsProExtended() {
           scrollButtons="auto"
           sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 2 }}
         >
-          {TAB_CONFIG.map((tab, i) => (
+          {TAB_CONFIG.map((tab) => (
             <Tab key={tab.key} icon={tab.icon} label={tab.label} iconPosition="start" />
           ))}
         </Tabs>

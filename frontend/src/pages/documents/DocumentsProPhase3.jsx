@@ -72,7 +72,7 @@ export default function DocumentsProPhase3() {
   const [productivityData, setProductivityData] = useState(null);
 
   // Dialogs
-  const [policyDialog, setPolicyDialog] = useState(false);
+  const [, setPolicyDialog] = useState(false);
   const [collectionDialog, setCollectionDialog] = useState(false);
 
   // ── Load dashboard data ────────────────────

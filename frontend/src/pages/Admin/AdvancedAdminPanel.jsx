@@ -28,7 +28,7 @@ const recentActions = [
 const AdvancedAdminPanel = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [stats, setStats] = useState(null);
+  const [, setStats] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {

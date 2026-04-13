@@ -59,7 +59,6 @@ export default function DocumentsProPhase4() {
 
   // Dialogs
   const [tagDialog, setTagDialog] = useState(false);
-  const [pdfDialog, setPdfDialog] = useState(false);
 
   // ── Loaders ───────────────────────────
   const loadDashboard = useCallback(async () => {

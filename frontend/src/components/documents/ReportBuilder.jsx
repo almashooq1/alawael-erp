@@ -60,7 +60,7 @@ export default function ReportBuilder({ onReportGenerated }) {
   });
 
   // Dialog state
-  const [scheduleDialog, setScheduleDialog] = useState(false);
+  const [, setScheduleDialog] = useState(false);
 
   const loadTemplates = useCallback(async () => {
     try {
@@ -114,7 +114,7 @@ export default function ReportBuilder({ onReportGenerated }) {
     } catch { }
   };
 
-  const handleCreateSchedule = async () => {
+  const _handleCreateSchedule = async () => {
     try {
       await reportApi.createSchedule({
         name: report.nameAr || 'جدول تقرير',

@@ -238,7 +238,6 @@ export default function ParentPortalManagement() {
       ]);
 
       // إحصاءات حسب الحالة
-      const statusCounts = { submitted: 0, in_progress: 0, resolved: 0 };
       const [sub, inprog, res] = await Promise.all([
         axios.get(`${API_BASE}/parent-portal/admin/complaints?status=submitted&limit=1`, {
           headers: authHeader,

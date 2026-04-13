@@ -357,7 +357,7 @@ const TopPerformers = ({ performers, isDark }) => {
 /* ─────────────────────────────────────────────────────── */
 /*  Alert Item                                             */
 /* ─────────────────────────────────────────────────────── */
-const AlertRow = ({ alert, index, isDark }) => {
+const AlertRow = ({ alert, index }) => {
   const ALERT_COLORS = {
     critical: { color: '#f44336', bg: 'rgba(244,67,54,0.08)', border: 'rgba(244,67,54,0.2)', icon: <ErrorRoundedIcon sx={{ fontSize: 16 }} /> },
     warning:  { color: '#ff9800', bg: 'rgba(255,152,0,0.08)', border: 'rgba(255,152,0,0.2)', icon: <WarningAmberRoundedIcon sx={{ fontSize: 16 }} /> },
@@ -454,7 +454,6 @@ const HQDashboard = () => {
   /* Derived */
   const branches   = dashboard?.branches   || [];
   const summary    = dashboard?.summary    || {};
-  const kpis       = dashboard?.kpis       || {};
   const performers = dashboard?.top_performers || [];
 
   const filteredBranches = filterRegion === 'all'
@@ -859,7 +858,7 @@ const HQDashboard = () => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {(financials.by_branch || []).map((b, i) => (
+                              {(financials.by_branch || []).map((b) => (
                                 <TableRow key={b.branch_code}
                                   sx={{ '&:hover': { background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)' } }}
                                 >

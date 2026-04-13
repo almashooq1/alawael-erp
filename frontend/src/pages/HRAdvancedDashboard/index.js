@@ -24,7 +24,6 @@ const HRAdvancedDashboard = () => {
     attendance,
     leaves,
     reviews,
-    isDemo,
     loading,
     actionLoading,
     loadDashboard,

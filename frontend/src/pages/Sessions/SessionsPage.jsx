@@ -93,11 +93,6 @@ export default function SessionsPage() {
     count: sessions.filter(s => s.status === key).length,
   }));
 
-  const todaySessions = sessions.filter(s => {
-    if (!s.scheduledDate) return false;
-    return new Date(s.scheduledDate).toDateString() === new Date().toDateString();
-  });
-
   const pageCount = Math.ceil(total / perPage);
 
   return (

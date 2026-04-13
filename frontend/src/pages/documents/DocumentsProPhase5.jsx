@@ -12,8 +12,8 @@ function TabPanel({ children, value, index }) {
 export default function DocumentsProPhase5() {
   const [tab, setTab] = useState(0);
   const [overview, setOverview] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [, setLoading] = useState(false);
+  const [error] = useState(null);
 
   const loadOverview = useCallback(async () => {
     setLoading(true);

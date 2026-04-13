@@ -22,7 +22,6 @@ const statCard = (color) => ({
 });
 
 /* ─── Helper ─────────────────────────────────────────────── */
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '—';
 const fmtDateTime = (d) => d ? new Date(d).toLocaleString('ar-SA') : '—';
 
 const severityColor = {

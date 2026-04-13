@@ -17,9 +17,6 @@ const WorkflowPage = lazy(() => import('../pages/workflow/WorkflowPage'));
 const QualityPage = lazy(() => import('../pages/quality/QualityPage'));
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage'));
 
-/* Domain pages from factory */
-const DomainPages = lazy(() => import('../pages/domains/DomainPages'));
-
 /* ── Loading fallback ── */
 const PageLoader = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight={300}>

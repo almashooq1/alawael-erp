@@ -34,7 +34,6 @@ const WORKFLOW_ORDER = [
 ];
 
 export default function WorkflowTimeline({
-  workflowData,
   history = [],
   currentState,
   onTransition,

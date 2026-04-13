@@ -7,7 +7,6 @@
 
 import { useState, useEffect } from 'react';
 import {
-  useTheme,
   alpha,
 } from '@mui/material';
 import {
@@ -24,8 +23,6 @@ const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#F44336', '#9C27B0', '#00BCD4'
 
 // ── HR Metric Card ────────────────────────────────────────────────
 function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
-  const theme = useTheme();
-
   return (
     <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <Card
@@ -93,7 +90,6 @@ function HRMetricCard({ title, value, subtitle, icon: Icon, color, progress }) {
 // ═══════════════════════════════════════════════════════════════════
 
 export default function BIHRAnalytics() {
-  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [hrData, setHRData] = useState(null);
   const [deptComparison, setDeptComparison] = useState([]);

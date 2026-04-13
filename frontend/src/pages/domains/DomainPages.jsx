@@ -13,7 +13,7 @@ import { Paper,
 
 
 /* ── Generic Domain Page Factory ── */
-function createDomainPage({ title, titleEn, icon, apiModule, columns, detailFields, statsConfig }) {
+function createDomainPage({ title, icon, apiModule, columns, detailFields, statsConfig }) {
   return function DomainPage() {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);

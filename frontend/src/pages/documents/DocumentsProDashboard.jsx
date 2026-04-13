@@ -6,9 +6,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  useTheme,
-} from '@mui/material';
+
+
 
 
 
@@ -498,7 +497,6 @@ function RecentDocsList({ documents, loading }) {
 // ══════════════════════════════════════════════════════════════
 
 export default function DocumentsProDashboard() {
-  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);

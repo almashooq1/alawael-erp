@@ -34,7 +34,7 @@ export default function TelehealthDashboard() {
   const [filters, setFilters] = useState({ status: '', date: '', search: '', page: 1 });
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [, setShowCreateModal] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);

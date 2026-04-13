@@ -75,8 +75,6 @@ const Glass = ({ children, sx = {}, ...props }) => {
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 const KPICard = memo(({ label, value, unit = '', icon, gradient, note, delay = 0 }) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -202,7 +200,6 @@ const SessionRow = memo(({ session, idx }) => {
 // ─── Patient Row ──────────────────────────────────────────────────────────────
 const PatientRow = memo(({ patient, idx }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const initials = (patient.full_name || patient.name_ar || '?').slice(0, 2);
   const colors = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4'];
   const color = colors[idx % colors.length];
@@ -264,7 +261,6 @@ const PatientRow = memo(({ patient, idx }) => {
 
 // ─── Vehicle Card ─────────────────────────────────────────────────────────────
 const VehicleCard = memo(({ vehicle, idx }) => {
-  const theme = useTheme();
   const statusMap = {
     on_route: { label: 'في الطريق', color: '#10b981', bg: '#d1fae5', icon: '🚌' },
     idle:     { label: 'في الانتظار', color: '#f59e0b', bg: '#fffbeb', icon: '⏸️' },
@@ -355,7 +351,6 @@ const AlertItem = memo(({ alert, idx }) => {
 
 // ─── KPI Comparison Card ──────────────────────────────────────────────────────
 const KPICompareCard = memo(({ kpi, idx }) => {
-  const theme = useTheme();
   const isAbove = kpi.status === 'above';
   const isBelow = kpi.status === 'below';
   const color = isAbove ? '#10b981' : isBelow ? '#ef4444' : '#f59e0b';

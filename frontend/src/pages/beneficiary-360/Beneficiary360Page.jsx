@@ -66,7 +66,7 @@ export default function Beneficiary360Page() {
 
   // Data state
   const [beneficiary, setBeneficiary] = useState(null);
-  const [profile360, setProfile360] = useState(null);
+  const [, setProfile360] = useState(null);
   const [episodes, setEpisodes] = useState([]);
   const [timeline, setTimeline] = useState([]);
   const [assessments, setAssessments] = useState([]);

@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 
 import { ocrApi } from '../../services/documentProPhase6Service';
 
-export default function OCRViewer({ documentId, onClose }) {
+export default function OCRViewer({ documentId }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);

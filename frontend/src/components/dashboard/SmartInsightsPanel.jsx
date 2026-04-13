@@ -254,7 +254,7 @@ const InsightCard = ({ insight, index, isDark }) => {
 /* ─────────────────────────────────────── */
 /*  Brain animation header                 */
 /* ─────────────────────────────────────── */
-const BrainOrb = ({ isDark }) => (
+const BrainOrb = () => (
   <Box sx={{
     position: 'relative',
     width: 44, height: 44, flexShrink: 0,

@@ -16,7 +16,7 @@ const STATUS_COLORS = {
 export default function IntegrationManager() {
   const [integrations, setIntegrations] = useState([]);
   const [providers, setProviders] = useState([]);
-  const [eventTypes, setEventTypes] = useState([]);
+  const [, setEventTypes] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

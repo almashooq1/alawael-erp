@@ -7,7 +7,6 @@
 
 import { useState, useEffect } from 'react';
 import {
-  useTheme,
   alpha,
 } from '@mui/material';
 import {
@@ -50,8 +49,6 @@ const STATUS_LABELS = {
 
 // ── Ops Status Card ───────────────────────────────────────────────
 function OpsCard({ title, total, breakdown, icon: Icon, color }) {
-  const theme = useTheme();
-
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <Card
@@ -133,7 +130,6 @@ function OpsCard({ title, total, breakdown, icon: Icon, color }) {
 // ═══════════════════════════════════════════════════════════════════
 
 export default function BIOperationsAnalytics() {
-  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [ops, setOps] = useState({});
   const [sessionTrend, setSessionTrend] = useState([]);

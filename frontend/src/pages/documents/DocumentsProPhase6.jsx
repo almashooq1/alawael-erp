@@ -20,7 +20,6 @@ function TabPanel({ children, value, index }) {
    ═══════════════════════════════════════════════════════════════ */
 export default function DocumentsProPhase6() {
   const [tab, setTab] = useState(0);
-  const [loading, setLoading] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
   const [dashboard, setDashboard] = useState(null);
 
@@ -232,7 +231,7 @@ function OCRTab({ showSnack }) {
 /* ═══════════════════════════════════════════════════════════════
    Archive Tab — الأرشفة والامتثال
    ═══════════════════════════════════════════════════════════════ */
-function ArchiveTab({ showSnack }) {
+function ArchiveTab() {
   const [policies, setPolicies] = useState([]);
   const [legalHolds, setLegalHolds] = useState([]);
   const [stats, setStats] = useState(null);
@@ -471,7 +470,7 @@ function ReportTab({ showSnack }) {
 function EmailTab({ showSnack }) {
   const [messages, setMessages] = useState([]);
   const [rules, setRules] = useState([]);
-  const [templates, setTemplates] = useState([]);
+  const [, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sendDialog, setSendDialog] = useState(false);
   const [sendForm, setSendForm] = useState({ to: '', subject: '', body: '' });

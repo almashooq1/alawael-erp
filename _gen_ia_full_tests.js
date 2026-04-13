@@ -22,11 +22,11 @@ const IA = path.join(ROOT, 'intelligent-agent');
 const TEST_DIR = path.join(IA, 'tests', 'gen');
 
 const SCAN_DIRS = [
-  { base: 'backend',  exts: ['.ts'] },
+  { base: 'backend', exts: ['.ts'] },
   { base: 'dashboard', exts: ['.ts', '.tsx', '.js'] },
   { base: 'frontend', exts: ['.ts', '.tsx'] },
   { base: 'services', exts: ['.ts'] },
-  { base: 'scripts',  exts: ['.ts'] },
+  { base: 'scripts', exts: ['.ts'] },
 ];
 const ROOT_EXTS = ['.ts'];
 
@@ -37,7 +37,7 @@ function walk(dir, exts) {
   for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, d.name);
     if (d.isDirectory()) {
-      if (['node_modules','dist','_archived','__tests__','.test-files','coverage','build'].includes(d.name)) continue;
+      if (['node_modules', 'dist', '_archived', '__tests__', '.test-files', 'coverage', 'build'].includes(d.name)) continue;
       out.push(...walk(full, exts));
     } else if (d.isFile()) {
       if (d.name.endsWith('.test.ts') || d.name.endsWith('.spec.ts') || d.name.endsWith('.test.tsx') || d.name.endsWith('.d.ts')) continue;
@@ -310,7 +310,9 @@ ${t}});
 
 /* ── main ── */
 const existing = existingGenTests();
-let created = 0, skipped = 0, errors = 0;
+let created = 0,
+  skipped = 0,
+  errors = 0;
 const report = [];
 
 // Scan sub-dirs
@@ -322,21 +324,43 @@ for (const { base, exts } of SCAN_DIRS) {
     const relInBase = path.relative(dir, f);
     const testName = testNameFor(base, relInBase);
 
-    if (existing.has(testName)) { report.push(`SKIP ${relFromIA}: already exists`); skipped++; continue; }
+    if (existing.has(testName)) {
+      report.push(`SKIP ${relFromIA}: already exists`);
+      skipped++;
+      continue;
+    }
 
     // Also check for existing test with similar name (from P#110 run)
     const baseName = path.basename(f, path.extname(f)).replace(/\./g, '-').toLowerCase();
     const maybeOld = [...existing].find(x => x.includes(baseName));
-    if (maybeOld) { report.push(`SKIP ${relFromIA}: covered by ${maybeOld}`); skipped++; continue; }
+    if (maybeOld) {
+      report.push(`SKIP ${relFromIA}: covered by ${maybeOld}`);
+      skipped++;
+      continue;
+    }
 
     let src;
-    try { src = fs.readFileSync(f, 'utf8'); } catch (e) { report.push(`ERROR ${relFromIA}: read fail`); errors++; continue; }
+    try {
+      src = fs.readFileSync(f, 'utf8');
+    } catch (e) {
+      report.push(`ERROR ${relFromIA}: read fail`);
+      errors++;
+      continue;
+    }
 
-    if (src.trim().length < 10) { report.push(`SKIP ${relFromIA}: too small`); skipped++; continue; }
+    if (src.trim().length < 10) {
+      report.push(`SKIP ${relFromIA}: too small`);
+      skipped++;
+      continue;
+    }
 
     const type = classify(relFromIA, src);
 
-    if (DRY) { report.push(`WOULD CREATE ${testName} (type: ${type})`); created++; continue; }
+    if (DRY) {
+      report.push(`WOULD CREATE ${testName} (type: ${type})`);
+      created++;
+      continue;
+    }
 
     try {
       fs.mkdirSync(TEST_DIR, { recursive: true });
@@ -344,12 +368,16 @@ for (const { base, exts } of SCAN_DIRS) {
       fs.writeFileSync(path.join(TEST_DIR, testName), content, 'utf8');
       report.push(`CREATED ${testName} (type: ${type})`);
       created++;
-    } catch (e) { report.push(`ERROR ${relFromIA}: ${e.message}`); errors++; }
+    } catch (e) {
+      report.push(`ERROR ${relFromIA}: ${e.message}`);
+      errors++;
+    }
   }
 }
 
 // Scan root .ts files
-const rootFiles = fs.readdirSync(IA)
+const rootFiles = fs
+  .readdirSync(IA)
   .filter(f => ROOT_EXTS.some(e => f.endsWith(e)) && !f.endsWith('.test.ts') && !f.endsWith('.d.ts') && f !== 'vitest.config.ts')
   .map(f => path.join(IA, f));
 
@@ -357,25 +385,50 @@ for (const f of rootFiles) {
   const relFromIA = path.relative(IA, f);
   const testName = testNameFor('', path.basename(f));
 
-  if (existing.has(testName)) { report.push(`SKIP ${relFromIA}: already exists`); skipped++; continue; }
+  if (existing.has(testName)) {
+    report.push(`SKIP ${relFromIA}: already exists`);
+    skipped++;
+    continue;
+  }
   const baseName = path.basename(f, path.extname(f)).replace(/\./g, '-').toLowerCase();
   const maybeOld = [...existing].find(x => x.includes(baseName));
-  if (maybeOld) { report.push(`SKIP ${relFromIA}: covered by ${maybeOld}`); skipped++; continue; }
+  if (maybeOld) {
+    report.push(`SKIP ${relFromIA}: covered by ${maybeOld}`);
+    skipped++;
+    continue;
+  }
 
   let src;
-  try { src = fs.readFileSync(f, 'utf8'); } catch (e) { report.push(`ERROR ${relFromIA}: read fail`); errors++; continue; }
-  if (src.trim().length < 10) { report.push(`SKIP ${relFromIA}: too small`); skipped++; continue; }
+  try {
+    src = fs.readFileSync(f, 'utf8');
+  } catch (e) {
+    report.push(`ERROR ${relFromIA}: read fail`);
+    errors++;
+    continue;
+  }
+  if (src.trim().length < 10) {
+    report.push(`SKIP ${relFromIA}: too small`);
+    skipped++;
+    continue;
+  }
 
   const type = classify(relFromIA, src);
 
-  if (DRY) { report.push(`WOULD CREATE ${testName} (type: ${type})`); created++; continue; }
+  if (DRY) {
+    report.push(`WOULD CREATE ${testName} (type: ${type})`);
+    created++;
+    continue;
+  }
 
   try {
     const content = genTest(f, '', relFromIA, type);
     fs.writeFileSync(path.join(TEST_DIR, testName), content, 'utf8');
     report.push(`CREATED ${testName} (type: ${type})`);
     created++;
-  } catch (e) { report.push(`ERROR ${relFromIA}: ${e.message}`); errors++; }
+  } catch (e) {
+    report.push(`ERROR ${relFromIA}: ${e.message}`);
+    errors++;
+  }
 }
 
 console.log('='.repeat(60));

@@ -32,7 +32,10 @@ describe('services/user-service.ts', () => {
   });
 
   test('defines service/API functions', () => {
-    const hasMethods = /async\s+\w+|export\s+(default|const|function|async|class|{)|class\s+\w+(Service)?|module\.exports|import\s+\w+\s+from|app\.(get|post|put|delete|use)|\.listen\(/i.test(src);
+    const hasMethods =
+      /async\s+\w+|export\s+(default|const|function|async|class|{)|class\s+\w+(Service)?|module\.exports|import\s+\w+\s+from|app\.(get|post|put|delete|use)|\.listen\(/i.test(
+        src,
+      );
     expect(hasMethods).toBe(true);
   });
 

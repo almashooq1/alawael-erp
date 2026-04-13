@@ -16,30 +16,34 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-jest.mock('ioredis', () => {
-  const RedisMock = jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve(null)),
-    set: jest.fn(() => Promise.resolve('OK')),
-    del: jest.fn(() => Promise.resolve(1)),
-    setex: jest.fn(() => Promise.resolve('OK')),
-    expire: jest.fn(() => Promise.resolve(1)),
-    keys: jest.fn(() => Promise.resolve([])),
-    info: jest.fn(() => Promise.resolve('# Server\nredis_version:7.0.0')),
-    ping: jest.fn(() => Promise.resolve('PONG')),
-    on: jest.fn().mockReturnThis(),
-    connect: jest.fn(() => Promise.resolve()),
-    disconnect: jest.fn(),
-    quit: jest.fn(() => Promise.resolve()),
-    status: 'ready',
-    pipeline: jest.fn(() => ({ exec: jest.fn(() => Promise.resolve([])) })),
-    exists: jest.fn(() => Promise.resolve(0)),
-    scan: jest.fn(() => Promise.resolve(['0', []])),
-    flushall: jest.fn(() => Promise.resolve('OK')),
-    dbsize: jest.fn(() => Promise.resolve(0)),
-  }));
-  RedisMock.Cluster = jest.fn(() => ({}));
-  return RedisMock;
-}, { virtual: true });
+jest.mock(
+  'ioredis',
+  () => {
+    const RedisMock = jest.fn(() => ({
+      get: jest.fn(() => Promise.resolve(null)),
+      set: jest.fn(() => Promise.resolve('OK')),
+      del: jest.fn(() => Promise.resolve(1)),
+      setex: jest.fn(() => Promise.resolve('OK')),
+      expire: jest.fn(() => Promise.resolve(1)),
+      keys: jest.fn(() => Promise.resolve([])),
+      info: jest.fn(() => Promise.resolve('# Server\nredis_version:7.0.0')),
+      ping: jest.fn(() => Promise.resolve('PONG')),
+      on: jest.fn().mockReturnThis(),
+      connect: jest.fn(() => Promise.resolve()),
+      disconnect: jest.fn(),
+      quit: jest.fn(() => Promise.resolve()),
+      status: 'ready',
+      pipeline: jest.fn(() => ({ exec: jest.fn(() => Promise.resolve([])) })),
+      exists: jest.fn(() => Promise.resolve(0)),
+      scan: jest.fn(() => Promise.resolve(['0', []])),
+      flushall: jest.fn(() => Promise.resolve('OK')),
+      dbsize: jest.fn(() => Promise.resolve(0)),
+    }));
+    RedisMock.Cluster = jest.fn(() => ({}));
+    return RedisMock;
+  },
+  { virtual: true }
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/redis');

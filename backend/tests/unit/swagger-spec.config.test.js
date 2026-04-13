@@ -5,11 +5,16 @@
 'use strict';
 
 /* ── Mocks ── */
-jest.mock('swagger-jsdoc', () => jest.fn(() => ({
-  openapi: '3.0.0',
-  info: { title: 'Test', version: '1.0.0' },
-  paths: {},
-})), { virtual: true });
+jest.mock(
+  'swagger-jsdoc',
+  () =>
+    jest.fn(() => ({
+      openapi: '3.0.0',
+      info: { title: 'Test', version: '1.0.0' },
+      paths: {},
+    })),
+  { virtual: true }
+);
 
 /* ── Module under test ── */
 const mod = require('../../config/swagger');

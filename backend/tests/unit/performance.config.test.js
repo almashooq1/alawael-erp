@@ -16,34 +16,46 @@ jest.mock('../../utils/logger', () => ({
   stream: { write: jest.fn() },
 }));
 
-jest.mock('ioredis', () => {
-  const RedisMock = jest.fn(() => ({
-    get: jest.fn(() => Promise.resolve(null)),
-    set: jest.fn(() => Promise.resolve('OK')),
-    del: jest.fn(() => Promise.resolve(1)),
-    setex: jest.fn(() => Promise.resolve('OK')),
-    expire: jest.fn(() => Promise.resolve(1)),
-    keys: jest.fn(() => Promise.resolve([])),
-    info: jest.fn(() => Promise.resolve('# Server\nredis_version:7.0.0')),
-    ping: jest.fn(() => Promise.resolve('PONG')),
-    on: jest.fn().mockReturnThis(),
-    connect: jest.fn(() => Promise.resolve()),
-    disconnect: jest.fn(),
-    quit: jest.fn(() => Promise.resolve()),
-    status: 'ready',
-    pipeline: jest.fn(() => ({ exec: jest.fn(() => Promise.resolve([])) })),
-  }));
-  RedisMock.Cluster = jest.fn(() => ({}));
-  return RedisMock;
-}, { virtual: true });
+jest.mock(
+  'ioredis',
+  () => {
+    const RedisMock = jest.fn(() => ({
+      get: jest.fn(() => Promise.resolve(null)),
+      set: jest.fn(() => Promise.resolve('OK')),
+      del: jest.fn(() => Promise.resolve(1)),
+      setex: jest.fn(() => Promise.resolve('OK')),
+      expire: jest.fn(() => Promise.resolve(1)),
+      keys: jest.fn(() => Promise.resolve([])),
+      info: jest.fn(() => Promise.resolve('# Server\nredis_version:7.0.0')),
+      ping: jest.fn(() => Promise.resolve('PONG')),
+      on: jest.fn().mockReturnThis(),
+      connect: jest.fn(() => Promise.resolve()),
+      disconnect: jest.fn(),
+      quit: jest.fn(() => Promise.resolve()),
+      status: 'ready',
+      pipeline: jest.fn(() => ({ exec: jest.fn(() => Promise.resolve([])) })),
+    }));
+    RedisMock.Cluster = jest.fn(() => ({}));
+    return RedisMock;
+  },
+  { virtual: true }
+);
 
-jest.mock('compression', () => jest.fn(() => jest.fn((req, res, next) => next && next())), { virtual: true });
+jest.mock('compression', () => jest.fn(() => jest.fn((req, res, next) => next && next())), {
+  virtual: true,
+});
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
   randomBytes: jest.fn(() => Buffer.from('abcdef1234567890', 'hex')),
-  createHash: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhash') })),
-  createHmac: jest.fn(() => ({ update: jest.fn().mockReturnThis(), digest: jest.fn(() => 'mockhmac') })),
+  createHash: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhash'),
+  })),
+  createHmac: jest.fn(() => ({
+    update: jest.fn().mockReturnThis(),
+    digest: jest.fn(() => 'mockhmac'),
+  })),
 }));
 
 /* ── Module under test ── */
@@ -106,5 +118,4 @@ describe('config/performance', () => {
     expect(mod.getMemoryPressure).toBeDefined();
     expect(typeof mod.getMemoryPressure).toBe('function');
   });
-
 });

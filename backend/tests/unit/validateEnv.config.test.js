@@ -17,9 +17,20 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 jest.mock('joi', () => {
-  const chain = () => new Proxy({}, { get: (_, p) => typeof p === 'string' ? jest.fn(() => chain()) : undefined });
+  const chain = () =>
+    new Proxy({}, { get: (_, p) => (typeof p === 'string' ? jest.fn(() => chain()) : undefined) });
   return {
-    object: jest.fn(() => ({ keys: jest.fn(() => ({ validate: jest.fn(() => ({ value: {}, error: null })), unknown: jest.fn().mockReturnThis(), options: jest.fn().mockReturnThis() })), validate: jest.fn(() => ({ value: {}, error: null })), unknown: jest.fn().mockReturnThis(), options: jest.fn().mockReturnThis(), append: jest.fn().mockReturnThis() })),
+    object: jest.fn(() => ({
+      keys: jest.fn(() => ({
+        validate: jest.fn(() => ({ value: {}, error: null })),
+        unknown: jest.fn().mockReturnThis(),
+        options: jest.fn().mockReturnThis(),
+      })),
+      validate: jest.fn(() => ({ value: {}, error: null })),
+      unknown: jest.fn().mockReturnThis(),
+      options: jest.fn().mockReturnThis(),
+      append: jest.fn().mockReturnThis(),
+    })),
     string: jest.fn(() => chain()),
     number: jest.fn(() => chain()),
     boolean: jest.fn(() => chain()),
@@ -67,5 +78,4 @@ describe('config/validateEnv', () => {
       expect(mod).toBeTruthy();
     }
   });
-
 });

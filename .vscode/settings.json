@@ -184,6 +184,7 @@
   // Python
   "python.linting.enabled": false,
   "python.formatting.provider": "none",
+  "python.terminal.useEnvFile": true,
 
   // ────────────────────────────────────────────────────────────
   // 🔌 Extension-Specific Settings

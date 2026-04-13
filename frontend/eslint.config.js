@@ -20,7 +20,7 @@ module.exports = [
     },
     plugins: {
       'react-hooks': reactHooksPlugin,
-      'import': importPlugin,
+      import: importPlugin,
       'unused-imports': unusedImportsPlugin,
     },
     languageOptions: {
@@ -69,7 +69,7 @@ module.exports = [
       'no-console': 'warn',
       'no-undef': 'warn',
       // Security rules (warn to avoid blocking lint)
-      'eqeqeq': ['warn', 'always'],
+      eqeqeq: ['warn', 'always'],
       'no-eval': 'warn',
       'no-implied-eval': 'warn',
       'no-new-func': 'warn',

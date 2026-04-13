@@ -74,8 +74,12 @@ mongoose.plugin(schema => {
 });
 
 // ==================== GLOBAL TIMESTAMPS (Round 34) ====================
-// Ensure every schema gets createdAt/updatedAt auto-managed
+// Ensure every schema gets createdAt/updatedAt auto-managed.
+// Opt out per-schema: new Schema({...}, { timestamps: false }) or { _noTimestamps: true }
 mongoose.plugin(schema => {
+  if (schema.options._noTimestamps || schema.options.timestamps === false) {
+    return; // respect explicit opt-out
+  }
   if (!schema.options.timestamps) {
     schema.set('timestamps', true);
   }

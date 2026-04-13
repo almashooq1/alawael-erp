@@ -27,6 +27,7 @@
     "@fontsource/cairo": "^5.0.0",
     "@mui/icons-material": "^5.15.0",
     "@mui/material": "^5.15.0",
+    "@sentry/react": "^10.48.0",
     "axios": "^1.15.0",
     "chart.js": "^4.4.0",
     "date-fns": "^4.1.0",

@@ -335,6 +335,12 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
     summary.failedRoutes.forEach(f => {
       logger.warn(`   ✗ ${f.path} → ${f.error}`);
     });
+    // Emit structured event for monitoring/alerting systems (Sentry, Prometheus, etc.)
+    process.emit('route:load:failures', {
+      count: summary.failed,
+      routes: summary.failedRoutes,
+      timestamp: new Date().toISOString(),
+    });
   }
 };
 

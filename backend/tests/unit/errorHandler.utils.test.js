@@ -4,11 +4,30 @@
  */
 'use strict';
 
-jest.mock('../../errors/AppError', () => ({ AppError: class AppError extends Error { constructor(m,s){super(m);this.statusCode=s;} } }), { virtual: true });
-jest.mock('../../errors/errorHandler', () => ({ errorHandler: jest.fn(), asyncHandler: jest.fn((fn) => fn) }), { virtual: true });
+jest.mock(
+  '../../errors/AppError',
+  () => ({
+    AppError: class AppError extends Error {
+      constructor(m, s) {
+        super(m);
+        this.statusCode = s;
+      }
+    },
+  }),
+  { virtual: true }
+);
+jest.mock(
+  '../../errors/errorHandler',
+  () => ({ errorHandler: jest.fn(), asyncHandler: jest.fn(fn => fn) }),
+  { virtual: true }
+);
 
 let mod;
-try { mod = require('../../utils/errorHandler'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/errorHandler');
+} catch (e) {
+  /* load fail */
+}
 
 describe('utils/errorHandler', () => {
   test('module loads without crash', () => {
@@ -24,7 +43,11 @@ describe('utils/errorHandler', () => {
     if (!mod) return;
     const fn = mod.AppError;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -37,7 +60,11 @@ describe('utils/errorHandler', () => {
     if (!mod) return;
     const fn = mod.errorHandler;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -50,7 +77,11 @@ describe('utils/errorHandler', () => {
     if (!mod) return;
     const fn = mod.asyncHandler;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
@@ -63,8 +94,11 @@ describe('utils/errorHandler', () => {
     if (!mod) return;
     const fn = mod.catchAsync;
     if (typeof fn !== 'function') return;
-    try { await fn(); } catch(e) { /* allowed */ }
+    try {
+      await fn();
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -2,9 +2,16 @@
  * Student Registration — Styled Components & Step Icons
  */
 
-import { Box, StepConnector } from '@mui/material';
-
-
+import React from 'react';
+import { Box, Typography, StepConnector, Avatar } from '@mui/material';
+import {
+  Person,
+  Accessible,
+  FamilyRestroom,
+  LocalHospital,
+  CheckCircle,
+  School,
+} from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 

@@ -3,8 +3,23 @@
  * جدول المستخدمين مع الترقيم والإجراءات
  */
 
-
-
+import {
+  Box,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  Card,
+  CardHeader,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { brandColors, surfaceColors } from '../../theme/palette';
 
 const UsersTable = ({

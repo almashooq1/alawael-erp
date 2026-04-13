@@ -1,11 +1,58 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import administrationService from '../../services/administration.service';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  Avatar,
+  Divider,
+  Tooltip,
+  CircularProgress,
+  Tab,
+  Tabs,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Alert,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  LinearProgress,
+} from '@mui/material';
+import {
+  ArrowBack,
+  CheckCircle,
+  Cancel,
+  Block,
+  Refresh,
+  History,
+  People,
+  Send,
+  Archive,
+  Campaign,
+  Comment,
+  Visibility,
+  AccessTime,
+  Flag,
+  Lock,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 /* ═══ Helpers ════════════════════════════════════════════════════════════════ */

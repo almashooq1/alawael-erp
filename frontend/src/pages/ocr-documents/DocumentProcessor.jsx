@@ -2,12 +2,34 @@
  * Document Processor — معالج المستندات
  * Phase 18 — رفع ومعالجة ومراجعة المستندات الطبية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Grid, Card, Tabs, Tab,
+  Chip, LinearProgress, Alert, Snackbar, TextField, InputAdornment,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, IconButton, Tooltip, Divider, Button, Dialog, DialogTitle,
+  DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem,
+  Accordion, AccordionSummary, AccordionDetails, List, ListItem,
+  ListItemText, ListItemIcon,
 } from '@mui/material';
-
-
+import {
+  DocumentScanner as ScanIcon,
+  Description as DocIcon,
+  CloudUpload as UploadIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  Edit as EditIcon,
+  ExpandMore as ExpandIcon,
+  Search as SearchIcon,
+  TextSnippet as TextIcon,
+  History as HistoryIcon,
+  Replay as ReplayIcon,
+  BatchPrediction as BatchIcon,
+  ArrowBack as BackIcon,
+  DataObject as JsonIcon,
+  TableChart as CsvIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ocrDocumentService from '../../services/ocrDocumentService';
 

@@ -1,6 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Grid, Paper, Button, IconButton,
+  Chip, Alert, CircularProgress, Rating, Divider, Avatar,
+  Stack, Table, TableBody, TableCell, TableContainer, TableHead,
+  TableRow, TextField, Dialog, DialogTitle, DialogContent,
+  DialogActions, Snackbar, Tabs, Tab, LinearProgress,
+} from '@mui/material';
+import {
+  ArrowBack, MenuBook, Healing, School, VideoLibrary, Accessibility,
+  SportsEsports, Article, Description, QrCode, Star, Person,
+} from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import libraryService from '../../services/libraryService';
 

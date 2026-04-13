@@ -6,10 +6,46 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { hrService } from '../services/hrService';
 import { useSnackbar } from '../contexts/SnackbarContext';
 import {
+  Box,
+  Typography,
   Paper,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  Avatar,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-
-
+import {
+  AttachMoney as MoneyIcon,
+  TrendingUp as TrendIcon,
+  Groups as GroupsIcon,
+  AccountBalanceWallet as WalletIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+  Visibility as ViewIcon,
+  CheckCircle as ApprovedIcon,
+  HourglassEmpty as PendingIcon,
+  Receipt as ReceiptIcon,
+  Download as DownloadIcon,
+  Assessment as ChartIcon,
+} from '@mui/icons-material';
 import { DEPT_COLORS } from '../constants/departmentColors';
 import { statusColors, neutralColors, surfaceColors } from '../theme/palette';
 

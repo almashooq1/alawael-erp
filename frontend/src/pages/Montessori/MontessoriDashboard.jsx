@@ -12,15 +12,40 @@
  * @version 2.0.0
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Card, Avatar,
+  Chip, LinearProgress, Button, Skeleton, IconButton, Tooltip, useTheme, alpha,
+  Stack, List, ListItem, ListItemText, ListItemAvatar, CardActionArea,
+  Badge, CircularProgress,
 } from '@mui/material';
-
-
-
+import {
+  ChildCare as ChildIcon,
+  School as ProgramIcon,
+  EventNote as SessionIcon,
+  Assessment as EvalIcon,
+  PlaylistAddCheck as PlanIcon,
+  Groups as TeamIcon,
+  Refresh as RefreshIcon,
+  Star as StarIcon,
+  ArrowForward as ArrowIcon,
+  Print as PrintIcon,
+  Download as DownloadIcon,
+  Insights as InsightsIcon,
+  AutoAwesome as AutoAwesomeIcon,
+} from '@mui/icons-material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
+import { ChartTooltip } from '../../components/dashboard/shared/ChartTooltip';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 import logger from '../../utils/logger';
 import montessoriService from '../../services/montessoriService';
 

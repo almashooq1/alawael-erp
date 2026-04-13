@@ -2,6 +2,7 @@
  * CommunicationStatsCards — 4 summary stat cards
  */
 
+import { Grid, Card, CardContent, Typography } from '@mui/material';
 
 const CommunicationStatsCards = ({ stats }) => (
   <Grid container spacing={2} sx={{ mb: 3 }}>

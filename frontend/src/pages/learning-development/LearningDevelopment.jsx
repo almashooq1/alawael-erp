@@ -11,12 +11,52 @@
  *   6. التكامل (Integrations)
  */
 
-import { useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  IconButton,
+  LinearProgress,
+  Alert,
+  MenuItem,
+  Tooltip,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  School as SchoolIcon,
+  MenuBook as CourseIcon,
+  Assignment as EnrollIcon,
+  EmojiEvents as CertIcon,
+  Analytics as AnalyticsIcon,
+  IntegrationInstructions as IntegrationIcon,
+  Add as AddIcon,
+  Archive as ArchiveIcon,
+  Refresh as RefreshIcon,
+  Person as PersonIcon,
+  CheckCircle as CheckIcon,
+  HourglassEmpty as PendingIcon,
+  TrendingUp as TrendIcon,
+  Star as StarIcon,
+} from '@mui/icons-material';
 import learningDevelopmentService from '../../services/learningDevelopmentService';
 
 /* ────────────────────── helpers ────────────────────── */

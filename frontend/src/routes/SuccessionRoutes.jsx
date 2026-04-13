@@ -1,6 +1,7 @@
 /**
  * Succession Planning Routes — مسارات تخطيط التعاقب
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const SuccessionDashboard = lazyWithRetry(() => import('../pages/succession/SuccessionDashboard'));

@@ -109,7 +109,7 @@ export function useHQDashboard({
  */
 export function useBranchDashboard(
   branchCode,
-  _userRole = 'branch_manager',
+  userRole = 'branch_manager',
   { refreshInterval = 3 * 60_000 } = {}
 ) {
   const [state, setState] = useState({

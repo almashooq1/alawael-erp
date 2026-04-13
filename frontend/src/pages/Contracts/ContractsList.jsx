@@ -1,9 +1,13 @@
 /**
  * قائمة العقود — Contracts List
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+  TablePagination, Button, Chip, IconButton, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, MenuItem, CircularProgress,
+} from '@mui/material';
+import { Add, Edit, Delete, Refresh, Autorenew } from '@mui/icons-material';
 import { getContracts, createContract, updateContract, deleteContract, renewContract } from '../../services/contractManagement.service';
 
 const typeOptions = [

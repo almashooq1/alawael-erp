@@ -1,7 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
+  CircularProgress, Alert, TextField, Dialog, DialogTitle, DialogContent,
+  DialogActions, Paper, Grid, Tooltip, InputAdornment, Autocomplete,
+  List, ListItem, ListItemAvatar, ListItemText, Divider, Menu, MenuItem,
+} from '@mui/material';
+import {
+  Label as TagIcon, Add as AddIcon, Refresh as RefreshIcon,
+  Edit as EditIcon, Delete as DeleteIcon, Search as SearchIcon,
+  Merge as MergeIcon, CloudQueue as CloudIcon,
+  Circle as CircleIcon, Category as CategoryIcon,
+} from '@mui/icons-material';
 import { tagsApi } from '../../services/documentProPhase4Service';
 import logger from '../../utils/logger';
 

@@ -14,6 +14,8 @@
     }
   },
   "rules": {
+    "react/jsx-uses-vars": "error",
+    "react/jsx-uses-react": "error",
     "react/react-in-jsx-scope": "off",
     "react-hooks/exhaustive-deps": "warn",
     "no-unused-vars": [

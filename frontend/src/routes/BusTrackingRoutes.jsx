@@ -1,3 +1,5 @@
+import React from 'react';
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const BusTrackingDashboard = lazyWithRetry(

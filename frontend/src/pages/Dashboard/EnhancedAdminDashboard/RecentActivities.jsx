@@ -1,5 +1,17 @@
-
-
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
+  Avatar,
+} from '@mui/material';
+import { ArrowForward } from '@mui/icons-material';
 
 /** Recent activities feed card */
 const RecentActivities = ({ recentActivities }) => (

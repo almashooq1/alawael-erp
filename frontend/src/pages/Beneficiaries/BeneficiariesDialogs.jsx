@@ -3,8 +3,26 @@
  * BeneficiariesDialogs – filter dialog, export dialog, row-action menu, snackbar
  */
 
-
-
+import {
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  Stack,
+  Button,
+  Divider,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import { Delete, Download, Edit, Star, Visibility } from '@mui/icons-material';
+import ConfirmDialog from 'components/common/ConfirmDialog';
 
 // ─── Filter Dialog ────────────────────────────────────────
 export const FilterDialog = ({ open, onClose, filters, setFilters, applyFilters }) => (

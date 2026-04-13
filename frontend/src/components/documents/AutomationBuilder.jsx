@@ -2,10 +2,40 @@
  * AutomationBuilder — منشئ قواعد الأتمتة
  * واجهة بصرية لبناء قواعد أتمتة المستندات (RPA)
  */
-import { useState, useEffect } from 'react';
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+  Grid, Typography, Box, Select, MenuItem, FormControl, InputLabel,
+  Switch, FormControlLabel, Stack, Chip, Paper, Divider, IconButton,
+  Tooltip, Card, CardContent, Alert, Stepper, Step, StepLabel, StepContent,
+  Accordion, AccordionSummary, AccordionDetails, List, ListItem,
+  ListItemIcon, ListItemText, ListItemSecondaryAction
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  PlayArrow as PlayIcon,
+  Upload as UploadIcon,
+  Refresh as RefreshIcon,
+  Schedule as ScheduleIcon,
+  Webhook as WebhookIcon,
+  CheckCircle as ApprovalIcon,
+  TextSnippet as KeywordIcon,
+  EventNote as DateIcon,
+  ExpandMore as ExpandMoreIcon,
+  Save as SaveIcon,
+  DragIndicator as DragIcon,
+  Email as EmailIcon,
+  Notifications as NotifyIcon,
+  Label as TagIcon,
+  DriveFileMove as MoveIcon,
+  ContentCopy as CopyIcon,
+  Archive as ArchiveIcon,
+  BrandingWatermark as WatermarkIcon,
+  ArrowForward as ArrowIcon,
+  Settings as SettingsIcon,
+  Rule as RuleIcon,
+} from '@mui/icons-material';
 
 /* ─── تعريفات المشغلات ─── */
 const TRIGGERS = [

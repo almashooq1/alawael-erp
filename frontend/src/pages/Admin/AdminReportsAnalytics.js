@@ -1,11 +1,47 @@
 import { useState, useEffect } from 'react';
 // Statistics Cards Section
-
-
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Button,
+  ToggleButton,
+  ToggleButtonGroup,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+} from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ScatterChart,
+  Scatter,
+} from 'recharts';
+import {
+  QueryStats as QueryStatsIcon,
+  TrendingUp as TrendingUpIcon,
+  FileDownload as FileDownloadIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
 import { adminService } from 'services/adminService';
 import exportService from 'services/exportService';
 import logger from 'utils/logger';

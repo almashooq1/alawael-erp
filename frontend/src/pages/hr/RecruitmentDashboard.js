@@ -4,12 +4,62 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,  useTheme,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Rating,
+  Tabs,
+  Tab,  useTheme,
 } from '@mui/material';
-
-
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Work as WorkIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  ThumbDown as RejectIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  ArrowForward as NextStageIcon,
+  Business as DeptIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,  PieChart,
+  Pie,
+  Cell,  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
   jobPostingsService,
   applicantsService,

@@ -5,10 +5,30 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
   Paper,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Card,
+  CardContent,
+  Grid,
+  Stack,
+  Divider,
+  Avatar,
+  LinearProgress,
 } from '@mui/material';
-
-
+import {
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  Room as RoomIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';
 import { gradients, surfaceColors, neutralColors } from 'theme/palette';

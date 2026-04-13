@@ -1,8 +1,43 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Tabs,
+  Tab,
+  Badge,} from '@mui/material';
+import {
+  Search as SearchIcon,
+  People as PeopleIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Send as SendIcon,
+  Message as MessageIcon,
+  MarkEmailRead as ReadIcon,
+  MarkEmailUnread as UnreadIcon,
+  Inbox as InboxIcon,
+  FamilyRestroom as FamilyIcon,
+  Notifications as NotifIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -39,7 +74,7 @@ const TherapistParentComm = () => {
 
   useEffect(() => {
     loadMessages();
-  }, []);  
+  }, []); // eslint-disable-line
 
   const loadMessages = async () => {
     try {

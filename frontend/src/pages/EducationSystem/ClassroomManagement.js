@@ -2,11 +2,53 @@
  * إدارة الفصول الدراسية
  * Classroom Management
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container,
+  Grid,
+  Paper,
+  Box,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Avatar,
+  TablePagination,
+  InputAdornment,
+  Switch,
+  FormControlLabel,
+  FormGroup,
+  Checkbox,
+  Divider,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  MeetingRoom as ClassroomIcon,
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  Accessible as AccessIcon,
+  People as PeopleIcon,
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

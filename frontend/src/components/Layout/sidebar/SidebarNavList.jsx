@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useMemo, memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 
 /* ─── Tooltip for collapsed mode ─────────────────────────────────────────── */
 function CollapsedTooltip({ label, children }) {

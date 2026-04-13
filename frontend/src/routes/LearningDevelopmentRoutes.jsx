@@ -3,6 +3,8 @@
  * Phase 22 — Learning & Development (LMS)
  */
 
+import React from 'react';
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const LearningDevelopment = lazyWithRetry(() =>

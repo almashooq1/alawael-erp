@@ -4,10 +4,42 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  Assignment as PlanIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as ActiveIcon,
+  Archive as ArchiveIcon,
+  Edit as EditIcon,
+  Visibility as ViewIcon,
+  Dashboard as StatsIcon,
+} from '@mui/icons-material';
 import carePlanService from '../../services/carePlanService';
 
 // ── Status Helpers ────────────────────────────────────────────────────────────

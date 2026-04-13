@@ -2,12 +2,31 @@
  * OCR Document Dashboard — لوحة تحكم معالجة المستندات
  * Phase 18 — مسح التقارير الطبية الورقية وتحويلها لبيانات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Grid, Card, CardContent, CardActionArea,
+  Chip, LinearProgress, Alert, Snackbar, TextField, InputAdornment,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, IconButton, Tooltip, Divider, Badge, MenuItem, Select,
+  FormControl, InputLabel, Button,
 } from '@mui/material';
-
-
+import {
+  DocumentScanner as ScanIcon,
+  Description as DocIcon,
+  Verified as VerifiedIcon,
+  PendingActions as PendingIcon,
+  Speed as SpeedIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  Refresh as RefreshIcon,
+  CloudUpload as UploadIcon,
+  BatchPrediction as BatchIcon,
+  TextSnippet as TextIcon,
+  HourglassTop as QueueIcon,
+  Analytics as AnalyticsIcon,
+  FilterList as FilterIcon,
+  Download as DownloadIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import ocrDocumentService from '../../services/ocrDocumentService';
 

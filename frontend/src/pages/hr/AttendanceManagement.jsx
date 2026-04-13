@@ -1,8 +1,27 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
-
-
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
+  Chip, Avatar, IconButton, Alert, Snackbar, Tooltip, CircularProgress, Divider,
+  InputAdornment, MenuItem, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions,
+  Tabs, Tab, Badge,
+} from '@mui/material';
+import {
+  Login as CheckInIcon, Logout as CheckOutIcon, Search as SearchIcon,
+  CalendarMonth as CalendarIcon, AccessTime as TimeIcon,
+  PeopleAlt as PeopleIcon, CheckCircle as PresentIcon,
+  Cancel as AbsentIcon, EventBusy as LateIcon, Refresh as RefreshIcon,
+  Download as DownloadIcon, Print as PrintIcon, Visibility as ViewIcon, Close as CloseIcon, Timer as OvertimeIcon,
+  FilterList as FilterListIcon, Schedule as ScheduleIcon,
+  TrendingUp as TrendUpIcon, Timelapse as TimelapseIcon,
+  Fingerprint as FingerprintIcon, Sync as SyncIcon,
+  Edit as EditIcon, History as HistoryIcon,
+  Assessment as ReportIcon, BeachAccess as LeaveIcon,
+  Today as TodayIcon, DateRange as DateRangeIcon,
+  CheckCircleOutline as ApproveIcon, HighlightOff as RejectIcon,
+  BarChart as ChartIcon, Save as SaveIcon,
+  EventAvailable as EventAvailableIcon, EventBusy as EventBusyIcon,
+  } from '@mui/icons-material';
 import hrService from 'services/hrService';
 import zktecoService from 'services/zktecoService';
 import attendanceEngineService from '../../services/hr/attendanceEngineService';

@@ -1,9 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { Suspense, useMemo } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { prefixer } from 'stylis';
 import rtlPlugin from 'stylis-plugin-rtl';
-import { useAuth } from './contexts/AuthContext';
-import { useThemeMode } from './contexts/ThemeContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SnackbarProvider } from './contexts/SnackbarContext';
+import { ThemeModeProvider, useThemeMode } from './contexts/ThemeContext';
+import { DashboardSkeleton } from './components/ui/LoadingSkeleton';
+import ErrorBoundary from './components/ErrorBoundary';
 import logger from './utils/logger';
 
 // Public pages — lazy loaded with Tailwind design

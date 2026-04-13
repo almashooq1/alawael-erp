@@ -5,14 +5,43 @@
  * metrics table, and rankings.
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-
-
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Paper,
+  TextField,
+  Alert,
+  CircularProgress,
+  Autocomplete,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  Avatar,
+} from '@mui/material';
+import {
+  Print as PrintIcon,
+  ArrowBack as ArrowBackIcon,
+  CompareArrows as CompareIcon,
+  EmojiEvents as TrophyIcon,
+  PersonAdd as PersonAddIcon,
+  Delete as DeleteIcon,
+  } from '@mui/icons-material';
+import {
+  RadarChart, Radar, PolarGrid, PolarAngleAxis,
+  PolarRadiusAxis, ResponsiveContainer, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+} from 'recharts';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';

@@ -2,10 +2,29 @@
  * WatermarkDesigner — مصمم العلامات المائية
  * مكون لإنشاء وتعديل ملفات العلامات المائية مع معاينة حية
  */
-import { useState, useEffect, useRef } from 'react';
-
-
-
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+  Grid, Typography, Box, Select, MenuItem, FormControl, InputLabel,
+  Switch, FormControlLabel, Slider, Stack, Chip, Paper, Divider,
+  ToggleButton, ToggleButtonGroup, IconButton, Tooltip, Tab, Tabs,
+  Card, CardContent, Alert
+} from '@mui/material';
+import {
+  TextFields as TextIcon,
+  Image as ImageIcon,
+  QrCode as QrCodeIcon,
+  VisibilityOff as InvisibleIcon,
+  Palette as PaletteIcon,
+  FormatSize as SizeIcon,
+  RotateRight as RotateIcon,
+  Opacity as OpacityIcon,
+  GridOn as TileIcon,
+  CenterFocusStrong as CenterIcon,
+  Save as SaveIcon,
+  Preview as PreviewIcon,
+  Refresh as ResetIcon,
+} from '@mui/icons-material';
 
 /* ─── الإعدادات الافتراضية المسبقة ─── */
 const PRESETS = [
@@ -47,6 +66,7 @@ const defaultForm = {
 
 export default function WatermarkDesigner({ open, onClose, onSave, profile }) {
   const [form, setForm] = useState(defaultForm);
+  const [previewTab, setPreviewTab] = useState(0);
   const canvasRef = useRef(null);
 
   useEffect(() => {

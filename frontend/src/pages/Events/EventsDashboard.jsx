@@ -1,9 +1,13 @@
 /**
  * Events Dashboard — لوحة إدارة الفعاليات
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
+  Table, TableHead, TableBody, TableRow, TableCell,
 } from '@mui/material';
+import { Refresh, Event, People, CalendarMonth, Celebration } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
 import { getEventsDashboard } from '../../services/events.service';
 
 const TYPE_LABELS = { conference: 'مؤتمر', seminar: 'ندوة', workshop: 'ورشة عمل', ceremony: 'حفل', exhibition: 'معرض', meeting: 'اجتماع', training: 'تدريب', social: 'اجتماعي', sports: 'رياضي', other: 'أخرى' };

@@ -50,7 +50,7 @@ describe('API Endpoints', () => {
     const allStatic = [];
 
     Object.keys(API).forEach(group => {
-      Object.entries(API[group]).forEach(([, val]) => {
+      Object.entries(API[group]).forEach(([key, val]) => {
         if (typeof val === 'string') {
           allStatic.push({ group, val });
         }
@@ -58,7 +58,7 @@ describe('API Endpoints', () => {
     });
 
     it('all static values are strings starting with /', () => {
-      allStatic.forEach(({ val }) => {
+      allStatic.forEach(({ group, val }) => {
         expect(val).toBeTruthy();
         expect(val.startsWith('/')).toBe(true);
       });

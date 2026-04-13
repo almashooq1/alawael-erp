@@ -3,6 +3,8 @@
  * Phase 23 — مسارات النسخ الاحتياطي التلقائي
  */
 
+import React from 'react';
+import { Route } from 'react-router-dom';
 
 import { lazyWithRetry } from '../utils/lazyLoader';
 

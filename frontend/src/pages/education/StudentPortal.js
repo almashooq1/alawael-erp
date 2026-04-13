@@ -4,10 +4,32 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Button,
+  Chip,
+  LinearProgress,
+  Paper,
+  Divider,
+  Stack,
+  IconButton,
+  Alert,
+} from '@mui/material';
+import {
+  School as SchoolIcon,
+  Assessment as AssessmentIcon,
+  Assignment as AssignmentIcon,
+  EventAvailable as AttendanceIcon,
+  Announcement as AnnouncementIcon,
+  EmojiEvents as TrophyIcon,
+  ArrowForward as ArrowForwardIcon,
+  Notifications as NotificationsIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';

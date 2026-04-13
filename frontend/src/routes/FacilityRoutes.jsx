@@ -1,6 +1,7 @@
 /**
  * Facility Routes — مسارات إدارة المرافق
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const FacilityDashboard = lazyWithRetry(() => import('../pages/facility/FacilityDashboard'));

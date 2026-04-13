@@ -4,11 +4,53 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Rating,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
   useTheme,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  School as SchoolIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CheckIcon,
+  Star as StarIcon,
+  Group as GroupIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
 import { programsService, MOCK_PROGRAMS } from 'services/trainingService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 

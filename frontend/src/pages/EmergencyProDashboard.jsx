@@ -4,13 +4,23 @@
  * Gradient: #ef4444 → #f59e0b → #06b6d4
  */
 
-import { useTheme,
+import {
+  Box, Typography, Grid, Card, useTheme, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  LinearProgress,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 import AirportShuttleIcon from '@mui/icons-material/AirportShuttle';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PeopleIcon from '@mui/icons-material/People';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
 // ─── Data ──────────────────────────────────────────────────────────────────────
 const kpiData = [

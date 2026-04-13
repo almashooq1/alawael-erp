@@ -10,15 +10,68 @@
  * - Vehicle statistics & KPIs
  * - Export-ready data tables
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Container,
+  Typography,
+  Grid,
+  Box,
+  Button,
+  Tab,
+  Tabs,
+  Card,
+  CardContent,
+  Chip,
   Paper,
+  TextField,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  InputAdornment,
+  Alert,
+  Divider,
+  Avatar,
+  TablePagination,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  DirectionsCar as CarIcon,
+  Build as MaintenanceIcon,
+  LocalGasStation as FuelIcon,
+  Speed as SpeedIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Visibility as ViewIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  LocalShipping as TruckIcon,
+  TwoWheeler as BikeIcon,
+  AirportShuttle as BusIcon,
+  Assessment as StatsIcon,
+  GpsFixed as GpsIcon,
+} from '@mui/icons-material';
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RTooltip } from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 import vehicleService from '../../services/vehicleManagement.service';
 import logger from '../../utils/logger';
 

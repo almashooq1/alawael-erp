@@ -7,10 +7,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  IconButton,
+  Grid,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  LinearProgress,
   alpha,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  ArrowBack as BackIcon,
+  Cancel as CancelIcon,
+  PauseCircle as SuspendIcon,
+  PlayCircle as ResumeIcon,
+  CheckCircle as CompleteIcon,
+  Error as ErrorIcon,
+  HourglassBottom as PendingIcon,
+  Assignment as TaskIcon,
+  Refresh as RefreshIcon,
+  AccessTime as TimeIcon,
+  Person as PersonIcon,
+  Description as DescIcon,
+  AccountTree as WorkflowIcon,
+  Circle as DotIcon,
+  Timeline as AuditIcon,
+  DataObject as VarIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

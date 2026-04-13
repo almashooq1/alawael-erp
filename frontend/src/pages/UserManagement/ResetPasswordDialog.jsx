@@ -1,11 +1,26 @@
 /**
  * ResetPasswordDialog — حوار إعادة تعيين كلمة المرور
  */
-
-
+import {
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  Alert,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
 import { useState } from 'react';
-
-
+import {
+  LockReset as ResetIcon,
+  Visibility as ShowIcon,
+  VisibilityOff as HideIcon,
+  ContentCopy as CopyIcon,
+} from '@mui/icons-material';
 
 const generatePassword = () => {
   const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';

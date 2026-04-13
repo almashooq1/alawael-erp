@@ -2,10 +2,15 @@
  * DetailDialog – detailed view of a single test result
  */
 import {
-  Paper,
+  Box, Grid, Dialog, DialogTitle, DialogContent,
+  Typography, IconButton, Chip, Tooltip, Alert,
+  Paper, LinearProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
-
+import {
+  Print as PrintIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { surfaceColors } from '../../theme/palette';
 import { getLevelColor } from './constants';
 

@@ -1,6 +1,7 @@
 /**
  * Legal Affairs Routes — مسارات الشؤون القانونية
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const LegalDashboard = lazyWithRetry(() => import('../pages/LegalAffairs/LegalDashboard'));

@@ -3,8 +3,16 @@
  * Mudad Wage Protection Dashboard
  */
 import { useState, useEffect, useCallback } from 'react';
-
-
+import {
+  Box, Card, CardContent, Typography, Grid, Button, Chip, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow,
+  CircularProgress, Alert, LinearProgress, IconButton, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+} from '@mui/material';
+import {
+  AccountBalance, AttachMoney, CheckCircle, Refresh,
+  CloudUpload, TrendingUp, PriorityHigh,
+} from '@mui/icons-material';
 import mudadService from '../../services/mudad.service';
 
 const statusColors = {

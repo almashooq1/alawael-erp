@@ -10,10 +10,26 @@
  * حوارات رفع المستندات وعرض التفاصيل
  */
 
-
-
-
-
+import {
+  Box,
+  Grid,
+  Typography,
+  Button,
+  TextField,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import {
+  CloudUpload as UploadIcon,
+  Download as DownloadIcon,
+} from '@mui/icons-material';
 import { getStatusColor } from 'utils/statusColors';
 import { formatFileSize } from './useDocumentsPage';
 

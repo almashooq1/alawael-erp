@@ -2,12 +2,34 @@
  * WorkflowNotificationPrefs – تفضيلات الإشعارات
  * Per-user notification preferences for workflow events.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {  alpha,
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,  alpha,
+  Avatar,
+  Switch,
+  Skeleton,
+  Divider,  Stack,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  ArrowBack,
+  Refresh,
+  Notifications,
+  Save,
+  Email,
+  Sms,
+  DesktopWindows,
+  Assignment,
+  Description,
+  Flag,
+  AccessAlarm,
+  Comment,} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

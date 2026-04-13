@@ -1,6 +1,7 @@
 /**
  * Payroll Routes — مسارات الرواتب
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const PayrollDashboard = lazyWithRetry(() => import('../pages/Payroll/PayrollDashboard'));

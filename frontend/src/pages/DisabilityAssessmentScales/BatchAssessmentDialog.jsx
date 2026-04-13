@@ -3,10 +3,36 @@
  * Allows applying multiple scales in one session for a single beneficiary.
  */
 import { useState, useMemo } from 'react';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  Slider,
+  Alert,
+  Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Checkbox,
+  FormControlLabel,  LinearProgress,  Avatar,
+  Divider,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  Close as CloseIcon,
+  PlaylistAddCheck as BatchIcon,
+  NavigateNext as NextIcon,
+  NavigateBefore as BackIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
 import { SCALE_ICONS } from './constants';

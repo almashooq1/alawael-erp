@@ -1,7 +1,10 @@
 import React from 'react';
 import {
-  Paper,
+  Paper, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, Chip, Box, Typography,
+  LinearProgress, IconButton, Tooltip,
 } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { statusColors } from './constants';
 
 const DataTable = ({ items, cols, headers, onEdit, onDelete }) => (

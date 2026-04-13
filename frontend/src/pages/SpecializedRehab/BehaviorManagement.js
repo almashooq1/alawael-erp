@@ -2,14 +2,50 @@
  * 🧠 إدارة السلوك — Behavior Management
  * AlAwael ERP — Behavior tracking, FBA management, intervention plans
  */
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  TextField,
+  Button,
+  Avatar,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Stack,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Alert,
   useTheme,
   alpha,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
-
-
+import {
+  EmojiPeople as BehaviorIcon,
+  Add as AddIcon,
+  Warning as WarningIcon,
+  Save as SaveIcon,
+  Psychology as FBAIcon,
+  Assignment as PlanIcon,
+  Close as CloseIcon,
+  Speed as SpeedIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 
 /* ── Behavior type catalogs ── */

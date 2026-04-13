@@ -1,5 +1,11 @@
-
-
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+} from '@mui/material';
 
 /** Delete confirmation dialog */
 const DeleteStudentDialog = ({ open, student, onClose, onConfirm }) => (

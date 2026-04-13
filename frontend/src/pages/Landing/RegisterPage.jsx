@@ -3,8 +3,8 @@
  * Multi-step: بيانات أساسية → كلمة المرور → نوع الحساب
  * Premium glass design with rich animations & micro-interactions
  */
-import { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 

@@ -5,10 +5,43 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  Slider,
+  Alert,
+  CircularProgress,
+  IconButton,
+  Chip,
+  Tooltip,
+  Stack,
+  Divider,
+  Paper,
+} from '@mui/material';
+import {
+  CameraAlt as CameraIcon,
+  Close as CloseIcon,
+  Replay as RetakeIcon,
+  CloudUpload as UploadIcon,
+  Tune as FiltersIcon,
+  AutoFixHigh as EnhanceIcon,
+  FlipCameraAndroid as FlipIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  PhotoCamera as SnapIcon,
+  Image as ImageIcon,
+  Scanner as ScannerIcon,
+} from '@mui/icons-material';
 import { statusColors, surfaceColors } from '../../theme/palette';
 import documentService from 'services/documentService';
 import logger from 'utils/logger';

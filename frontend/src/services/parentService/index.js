@@ -120,8 +120,12 @@ export const parentService = {
   },
 
   async updateProfile(profileData) {
-    const data = await apiClient.put('/guardian/profile', profileData);
-    return data?.data || data;
+    try {
+      const data = await apiClient.put('/guardian/profile', profileData);
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 
   // Beneficiaries
@@ -210,8 +214,12 @@ export const parentService = {
   },
 
   async makePayment(paymentData) {
-    const data = await apiClient.post('/guardian/payments', paymentData);
-    return data?.data || data;
+    try {
+      const data = await apiClient.post('/guardian/payments', paymentData);
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 
   // Messages (Guardian Portal)
@@ -225,8 +233,12 @@ export const parentService = {
   },
 
   async sendGuardianMessage(messageData) {
-    const data = await apiClient.post('/guardian/messages', messageData);
-    return data?.data || data;
+    try {
+      const data = await apiClient.post('/guardian/messages', messageData);
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 
   // Notifications
@@ -240,13 +252,21 @@ export const parentService = {
   },
 
   async markNotificationRead(id) {
-    const data = await apiClient.put(`/guardian/notifications/${id}/read`);
-    return data?.data || data;
+    try {
+      const data = await apiClient.put(`/guardian/notifications/${id}/read`);
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 
   async markAllNotificationsRead() {
-    const data = await apiClient.put('/guardian/notifications/read-all');
-    return data?.data || data;
+    try {
+      const data = await apiClient.put('/guardian/notifications/read-all');
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 
   // Reports
@@ -260,8 +280,12 @@ export const parentService = {
   },
 
   async generateReport(reportConfig) {
-    const data = await apiClient.post('/guardian/reports/generate', reportConfig);
-    return data?.data || data;
+    try {
+      const data = await apiClient.post('/guardian/reports/generate', reportConfig);
+      return data?.data || data;
+    } catch (err) {
+      throw err;
+    }
   },
 };
 

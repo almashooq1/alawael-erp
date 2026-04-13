@@ -1,6 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip, Button,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  LinearProgress, Alert, IconButton, Dialog, DialogTitle,
+  DialogContent, DialogActions, TextField, MenuItem, Divider,
+  FormControl, InputLabel, Select, Pagination,
+  List, ListItem, ListItemText, ListItemIcon,
+} from '@mui/material';
+import {
+  Assessment as ReportIcon, ArrowBack as BackIcon,
+  Download as ExportIcon, PlayArrow as RunIcon,
+  Share as ShareIcon, Schedule as ScheduleIcon,
+  PieChart as ChartIcon, TableChart as TableViewIcon,
+  FilterList as FilterIcon, Refresh as RefreshIcon,
+  History as HistoryIcon, Star as StarIcon, StarBorder as StarBorderIcon,
+  PersonAdd as ShareUserIcon, } from '@mui/icons-material';
 import reportBuilderService from '../../services/reportBuilderService';
 
 /* ═══════════════════════════════════════════════════════════

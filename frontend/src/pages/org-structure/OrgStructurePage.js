@@ -3,10 +3,47 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  AccountTree as OrgIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Business as DeptIcon,
+  Edit as EditIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  Group as GroupIcon,
+  Badge as PositionIcon,
+  WorkOutline as WorkIcon,
+} from '@mui/icons-material';
 import orgStructureService from '../../services/orgStructure.service';
 
 const DEMO_DEPARTMENTS = [

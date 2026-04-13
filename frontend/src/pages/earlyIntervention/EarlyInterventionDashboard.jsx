@@ -4,11 +4,17 @@
  * Children 0–3 years: screenings, developmental milestones,
  * IFSP (Individual Family Service Plan), referrals.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, IconButton, Tooltip, MenuItem, LinearProgress,
 } from '@mui/material';
-
-
+import {
+  ChildCare as ChildIcon, Assessment as ScreenIcon, Assignment as IFSPIcon, SwapHoriz as ReferralIcon, Refresh as RefreshIcon, Add as AddIcon, Visibility as ViewIcon,
+  Error as DelayIcon,
+} from '@mui/icons-material';
 import eisApi from '../../services/earlyIntervention.service';
 
 function TabPanel({ children, value, index }) {

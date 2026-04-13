@@ -1,3 +1,4 @@
+import { Box } from '@mui/material';
 
 /**
  * TabPanel — Accessible tab content panel.

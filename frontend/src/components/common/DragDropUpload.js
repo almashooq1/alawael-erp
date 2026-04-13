@@ -16,10 +16,34 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-
-
-
-
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Button,
+  LinearProgress,
+  Chip,
+  Stack,
+  Alert,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Tooltip,
+} from '@mui/material';
+import {
+  CloudUpload as CloudUploadIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  InsertDriveFile as FileIcon,
+  Image as ImageIcon,
+  PictureAsPdf as PdfIcon,
+  Description as DocIcon,
+  VideoLibrary as VideoIcon,
+  AudioFile as AudioIcon,
+} from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 
 const DragDropUpload = ({

@@ -1,11 +1,16 @@
 /**
  * لوحة تحكم التأهيل بالواقع المعزز — AR Rehabilitation Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+} from '@mui/material';
+import {
+  ViewInAr as ARIcon,
+  Sensors as BCIIcon,
+  Groups as CollabIcon,
+  } from '@mui/icons-material';
 import {   getDashboard } from '../../services/arRehabService';
 
 const sessionStatusLabels = { active: 'نشطة', completed: 'مكتملة', paused: 'متوقفة', cancelled: 'ملغاة' };

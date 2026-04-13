@@ -1,8 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Chip,
+  Button,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+} from '@mui/material';
+import {
+  Receipt as InvoiceIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Send as SendIcon,
+  Print as PrintIcon,
+  Delete as DeleteIcon,
+  AttachMoney as MoneyIcon,
+} from '@mui/icons-material';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

@@ -2,9 +2,21 @@
  * Reports & Analytics Page — صفحة التقارير والتحليلات
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Card, CardContent, CardActions, Typography, Chip, Grid, Avatar,
+  Button, IconButton, Stack, LinearProgress, Alert, TextField,
+  InputAdornment, Select, FormControl, InputLabel, MenuItem,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from '@mui/material';
+import {
+  BarChart as ChartIcon, Description as ReportIcon,
+  Download as DownloadIcon, Add as AddIcon,
+  Refresh as RefreshIcon, Search as SearchIcon,
+  Schedule as ScheduleIcon, PictureAsPdf as PdfIcon,
+  TableChart as ExcelIcon, Print as PrintIcon,
+  Visibility as PreviewIcon, Star as StarIcon,
+} from '@mui/icons-material';
 
 import { reportsAPI } from '../../services/ddd';
 
@@ -31,6 +43,7 @@ export default function ReportsPage() {
   const [templates, setTemplates] = useState([]);
   const [generated, setGenerated] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState(0);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
   const [previewReport, setPreviewReport] = useState(null);

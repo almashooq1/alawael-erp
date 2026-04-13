@@ -1,10 +1,36 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import budgetManagementService from '../../services/budgetManagement.service';
 import {
+  Box,
+  Typography,
   Paper,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tabs,
+  Tab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  LinearProgress,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  AccountBalance as BudgetIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  Assessment as ReportIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, surfaceColors } from '../../theme/palette';
 

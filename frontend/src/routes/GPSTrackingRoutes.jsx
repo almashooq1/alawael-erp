@@ -1,6 +1,7 @@
 /**
  * GPS Tracking Routes — مسارات تتبع GPS
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const GPSTrackingDashboard = lazyWithRetry(() => import('../pages/gps-tracking/GPSTrackingDashboard'));

@@ -4,10 +4,17 @@
  * Employee verification, contract management, WPS wage protection,
  * Nitaqat saudization tracking, batch operations.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, MenuItem, Divider, LinearProgress,
 } from '@mui/material';
-
+import {
+  Business as QiwaIcon, PersonSearch as VerifyIcon, Description as ContractIcon, TrendingUp as NitaqatIcon, Refresh as RefreshIcon,
+  Add as AddIcon, Search as SearchIcon,
+} from '@mui/icons-material';
 import qiwaApi from '../../services/qiwa.service';
 
 /* ── Tab panels ─────────────────────────── */

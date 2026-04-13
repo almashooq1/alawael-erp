@@ -1,9 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Card,
+  CardContent,
+  Tooltip,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  ExitToApp as ClearanceIcon,
+  CheckCircle as ClearIcon,
+  Assessment as SettlementIcon,
+  RateReview as InterviewIcon,
+} from '@mui/icons-material';
 import {
   fetchClearances,
   initiateClearance,

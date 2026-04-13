@@ -4,8 +4,18 @@
  */
 
 import React from 'react';
-import { useTheme } from '@mui/material';
+import { Box, Paper, Typography, Grid, LinearProgress, Chip, useTheme, Tooltip as MuiTooltip } from '@mui/material';
+import { motion } from 'framer-motion';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from 'recharts';
+import { ChartTooltip } from './shared/ChartTooltip';
 import { chartColors, brandColors } from 'theme/palette';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import FlagIcon from '@mui/icons-material/Flag';
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import StarIcon from '@mui/icons-material/Star';
+import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const COLORS = chartColors.main;
 

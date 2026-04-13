@@ -1,9 +1,25 @@
 /**
  * LeavesTab — بوابة الموظف: تبويب الإجازات
  */
+import React from 'react';
 import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Button,
   Paper,
+  LinearProgress,
 } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { LEAVE_TYPES, STATUS_MAP } from './employeePortalData';
 
 export default function LeavesTab({ leaveBalances, leaveHistory, onOpenLeaveDialog }) {

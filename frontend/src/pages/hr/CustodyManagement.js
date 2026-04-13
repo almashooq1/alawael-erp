@@ -1,12 +1,41 @@
 /**
  * Custody & Asset Management — إدارة العهد والممتلكات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  AssignmentReturn as ReturnIcon,
+  ReportProblem as IssueIcon,
+} from '@mui/icons-material';
 import {
   getCustodies,
   createCustody,

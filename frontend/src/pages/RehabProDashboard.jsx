@@ -5,9 +5,16 @@
  */
 
 import { useState } from 'react';
-import { useTheme,
+import {
+  Box, Typography, Grid, Card, useTheme, LinearProgress,
+  Chip, Avatar, Divider,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, RadarChart, Radar,
+  PolarGrid, PolarAngleAxis, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import GroupsIcon from '@mui/icons-material/Groups';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';

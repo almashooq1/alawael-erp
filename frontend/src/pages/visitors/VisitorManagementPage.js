@@ -3,10 +3,46 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  Badge,
 } from '@mui/material';
-
-
+import {
+  People as VisitorIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Login as CheckInIcon,
+  Logout as CheckOutIcon,
+  Edit as EditIcon,
+  Today as TodayIcon,
+  Badge as BadgeIcon,
+  DirectionsCar as CarIcon,
+} from '@mui/icons-material';
 import visitorsService from '../../services/visitors.service';
 
 const DEMO_VISITORS = [

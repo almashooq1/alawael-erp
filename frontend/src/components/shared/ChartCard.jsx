@@ -12,11 +12,29 @@
 
 import { memo, useState } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Skeleton,
+  IconButton,
+  Menu,
+  MenuItem,
+  Chip,
+  Tooltip,
   useTheme,
   alpha,
 } from '@mui/material';
-
-
+import {
+  MoreVert as MoreIcon,
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+  BarChart as ChartIcon,
+  FullscreenOutlined,
+  DownloadOutlined,
+  RefreshOutlined,
+} from '@mui/icons-material';
 
 // ─── Trend badge ──────────────────────────────────────────────────────────────
 function TrendBadge({ value, suffix = '%' }) {

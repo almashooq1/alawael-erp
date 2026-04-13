@@ -1,8 +1,53 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Tabs,
+  Tab,
+  LinearProgress,
+  Avatar,
+  IconButton,
+  Tooltip,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+import {
+  EventNote as EventNoteIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  AccessTime as LateIcon,
+  TrendingUp as TrendingUpIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  Print as PrintIcon,
+  CalendarMonth as CalendarIcon,
+  Psychology as BehaviorIcon,
+  Star as StarIcon,
+  ThumbUp as ThumbUpIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
 import { parentService } from 'services/parentService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

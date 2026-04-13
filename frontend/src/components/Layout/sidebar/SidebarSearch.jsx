@@ -2,6 +2,7 @@
  * SidebarSearch — بحث في قائمة التنقل (Enhanced)
  * Glass input with animated focus ring
  */
+import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
 
 export default function SidebarSearch({ collapsed, isMobile, searchQuery, onSearchChange, onClear }) {
   if (collapsed && !isMobile) {

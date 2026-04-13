@@ -1,11 +1,45 @@
 import { useState, useEffect, useCallback } from 'react';
 import { triggerBlobDownload } from 'utils/downloadHelper';
-
-
-
-
-
-
+import {
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  CircularProgress,
+  Alert,
+  Tabs,
+  Tab,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+} from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import {
+  TrendingUp,
+  Assessment,
+  PeopleAlt,
+  AttachMoney,
+  CheckCircle,
+  Schedule,
+} from '@mui/icons-material';
 import { getToken } from 'utils/tokenStorage';
 import logger from 'utils/logger';
 import { useSnackbar } from 'contexts/SnackbarContext';

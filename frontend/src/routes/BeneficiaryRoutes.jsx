@@ -1,6 +1,7 @@
 /**
  * Beneficiary Portal Routes — مسارات بوابة المستفيدين
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const BeneficiariesDashboard = lazyWithRetry(() => import('../pages/Beneficiaries/BeneficiariesDashboard'));

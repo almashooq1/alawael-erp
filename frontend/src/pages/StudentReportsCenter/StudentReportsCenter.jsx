@@ -10,12 +10,53 @@
  * - Attendance & Progress reports
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Paper,
+  TextField,
+  Alert,
+  CircularProgress,
+  Avatar,
+  Divider,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemButton,
+  Autocomplete,
+} from '@mui/material';
+import {
+  Description as DescriptionIcon,
+  DateRange as DateRangeIcon,
+  Compare as CompareIcon,
+  FamilyRestroom as FamilyIcon,
+  Timeline as TimelineIcon,
+  EventAvailable as EventAvailableIcon,
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon,
+  Search as SearchIcon,
+  Group as GroupIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  ArrowForward as ArrowForwardIcon,
+  Analytics as AnalyticsIcon,
+  Print as PrintIcon,
+} from '@mui/icons-material';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';

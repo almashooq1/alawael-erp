@@ -5,13 +5,49 @@
  * disability distribution, progress, IEP, behavior, and risk analysis.
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+  Paper,
+  TextField,
+  MenuItem,
+  Alert,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  Avatar,
+} from '@mui/material';
+import {
+  Print as PrintIcon,
+  ArrowBack as ArrowBackIcon,
+  Group as GroupIcon,
+  EventAvailable as EventAvailableIcon,
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
+  EmojiEvents as EmojiEventsIcon,
+  Assessment as AssessmentIcon,
+  Accessible as AccessibleIcon,
+  School as SchoolIcon,
+} from '@mui/icons-material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { gradients, brandColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 import { useAuth } from 'contexts/AuthContext';

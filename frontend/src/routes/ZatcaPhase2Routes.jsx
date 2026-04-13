@@ -2,6 +2,7 @@
  * ZATCA Phase 2 Routes — مسارات الفوترة الإلكترونية
  * هيئة الزكاة والضريبة والجمارك — منصة فاتورة FATOORA
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ZatcaPhase2Page = lazyWithRetry(

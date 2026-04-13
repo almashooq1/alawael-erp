@@ -1,8 +1,45 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,  Rating,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Videocam as VideoIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Phone as AudioIcon,
+  Chat as ChatIcon,
+  PlayArrow as StartIcon,
+  CheckCircle as CompleteIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+  Link as LinkIcon,
+  Person as PatientIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

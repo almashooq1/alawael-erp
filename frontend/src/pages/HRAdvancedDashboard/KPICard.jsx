@@ -1,6 +1,8 @@
 /**
  * KPICard & QuickAction – presentational HR dashboard sub-components.
  */
+import React from 'react';
+import { Card, CardContent, Box, Typography, Avatar, Button } from '@mui/material';
 
 export const KPICard = ({ title, value, subtitle, icon, color, onClick }) => (
   <Card

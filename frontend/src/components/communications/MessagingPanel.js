@@ -1,8 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Badge,
+  Typography,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Paper,
+  Chip,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Send as SendIcon,
+  AttachFile as AttachIcon,
+  MoreVert as MoreVertIcon,
+  Star as StarIcon,
+  Archive as ArchiveIcon,
+  Delete as DeleteIcon,
+  Group as GroupIcon,
+} from '@mui/icons-material';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';

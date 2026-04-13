@@ -14,11 +14,38 @@
  * - المخاطر
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-
-
+import {
+  Box, Grid, Card, CardContent, CardHeader, Typography, Avatar, Chip,
+  Tabs, Tab, Divider, IconButton, Button, LinearProgress, Alert,
+  List, ListItem, ListItemText, ListItemIcon, ListItemAvatar,
+  Timeline as MuiTimeline, TimelineItem, TimelineSeparator,
+  TimelineConnector, TimelineDot, TimelineContent, TimelineOppositeContent,
+  Paper, Stack, Badge, Tooltip, Skeleton, Accordion, AccordionSummary,
+  AccordionDetails, Rating, Dialog, DialogTitle, DialogContent,
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  Event as EventIcon,
+  Assessment as AssessmentIcon,
+  LocalHospital as HospitalIcon,
+  Psychology as PsychologyIcon,
+  FamilyRestroom as FamilyIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Schedule as ScheduleIcon,
+  TrackChanges as GoalIcon,
+  TrendingUp as TrendIcon,
+  ArrowBack as BackIcon,
+  ExpandMore as ExpandIcon,
+  Edit as EditIcon,
+  Print as PrintIcon,
+  Share as ShareIcon,
+  AutoAwesome as AIIcon,
+  StickyNote2 as NoteIcon,
+  CalendarMonth as CalendarIcon,
+} from '@mui/icons-material';
 
 import { coreAPI, episodesAPI, timelineAPI, assessmentsAPI, carePlansAPI, sessionsAPI, goalsAPI, aiRecommendationsAPI, familyAPI } from '../../services/ddd';
 
@@ -66,7 +93,7 @@ export default function Beneficiary360Page() {
 
   // Data state
   const [beneficiary, setBeneficiary] = useState(null);
-  const [, setProfile360] = useState(null);
+  const [profile360, setProfile360] = useState(null);
   const [episodes, setEpisodes] = useState([]);
   const [timeline, setTimeline] = useState([]);
   const [assessments, setAssessments] = useState([]);

@@ -2,12 +2,53 @@
  * DocumentsProPhase9 — لوحة المرحلة التاسعة
  * دورة حياة المستند • التوقيع الرقمي PKI • التصنيف الذكي • تنسيق سير العمل • التحليل الجنائي
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Tabs, Tab, Paper, Typography, Button, Chip, Grid, Card, CardContent,
+  CardActions, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Select, MenuItem, FormControl, InputLabel,
+  Switch, FormControlLabel, Alert, CircularProgress, LinearProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Stack, Snackbar, Stepper, Step, StepLabel, Divider, Accordion,
+  AccordionSummary, AccordionDetails, Badge, Avatar
 } from '@mui/material';
-
-
+import {
+  Timeline as LifecycleIcon,
+  VerifiedUser as CertIcon,
+  Category as ClassifyIcon,
+  AccountTree as WorkflowIcon,
+  FindInPage as ForensicsIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Warning as WarningIcon,
+  ExpandMore as ExpandMoreIcon,
+  PlayArrow as PlayIcon,
+  Pause as PauseIcon,
+  Stop as StopIcon,
+  Lock as LockIcon,
+  LockOpen as UnlockIcon,
+  Gavel as LegalIcon,
+  Archive as ArchiveIcon,
+  ContentCopy as CloneIcon,
+  VpnKey as KeyIcon,
+  Shield as ShieldIcon,
+  Speed as SpeedIcon,
+  BubbleChart as ClusterIcon,
+  Psychology as AIIcon,
+  Fingerprint as FingerprintIcon,
+  Security as SecurityIcon,
+  ReportProblem as AlertIcon,
+  Assessment as AnalysisIcon,
+  Link as ChainIcon,
+} from '@mui/icons-material';
 import { lifecycleApi, digitalCertApi, classificationApi, workflowOrchApi, forensicsApi, getDashboard } from '../../services/documentProPhase9Service';
+import LifecycleTimeline from '../../components/documents/LifecycleTimeline';
+import WorkflowOrchestrator from '../../components/documents/WorkflowOrchestrator';
 import logger from '../../utils/logger';
 
 const cardSx = { borderRadius: 3, transition: 'box-shadow .2s', '&:hover': { boxShadow: 6 } };

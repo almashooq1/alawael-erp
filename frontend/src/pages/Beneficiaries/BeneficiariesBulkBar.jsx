@@ -3,6 +3,8 @@
  * BeneficiariesBulkBar – conditional bulk-action bar
  */
 
+import { Button, Paper, Stack, Typography } from '@mui/material';
+import { Delete, Download, Send } from '@mui/icons-material';
 
 const BeneficiariesBulkBar = ({ selected, handleBulkAction }) => {
   if (selected.length === 0) return null;

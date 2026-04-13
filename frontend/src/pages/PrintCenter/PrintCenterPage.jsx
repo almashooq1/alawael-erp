@@ -3,9 +3,85 @@
  * صفحة مركزية تجمع كل قوالب الطباعة من جميع الأنظمة
  */
 import React, { useState, useRef, useCallback } from 'react';
-
-
-
+import {
+  Box, Typography, Paper, Grid, Card, CardContent, CardActions,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, InputAdornment, Tabs, Tab, IconButton, Chip,
+  Breadcrumbs, Link, Fade, Tooltip, Alert,
+} from '@mui/material';
+import {
+  Print as PrintIcon,
+  PictureAsPdf as PdfIcon,
+  Search as SearchIcon,
+  Close as CloseIcon,
+  Visibility as PreviewIcon,
+  LocalPrintshop as PrintCenterIcon,
+  People as HRIcon,
+  AccountBalance as FinanceIcon,
+  LocalHospital as TherapyIcon,
+  Business as AdminIcon,
+  Build as OpsIcon,
+  Home as HomeIcon,
+  School as EducationIcon,
+  ShoppingCart as ProcurementIcon,
+  Gavel as LegalIcon,
+  VerifiedUser as QualityIcon,
+  MedicalServices as MedicalIcon,
+  DirectionsCar as FleetIcon,
+  BadgeOutlined as RecruitmentIcon,
+  Campaign as CommsIcon,
+  HomeWork as FacilityIcon,
+  TrendingUp as BusinessIcon,
+  Groups as StakeholderIcon,
+  Accessible as RehabIcon,
+  ChildCare as EarlyIcon,
+  Videocam as TelehealthIcon,
+  VolunteerActivism as DonationsIcon,
+  RocketLaunch as ProjectsIcon,
+  FactCheck as AuditIcon,
+  Restaurant as KitchenIcon,
+  Public as GovIcon,
+  Store as EcomIcon,
+  Dashboard as PortalsIcon,
+  /* Batch 4 Icons */
+  FolderShared as CaseMgmtIcon,
+  ReportProblem as ComplaintsIcon,
+  FamilyRestroom as FamilyIcon,
+  Accessibility as DisabilityIcon,
+  Description as DocMgmtIcon,
+  Shield as CrisisIcon,
+  Diversity3 as CommunityIcon,
+  Insights as BIIcon,
+  AutoStories as SpecialEdIcon,
+  CorporateFare as EnterpriseIcon,
+  /* Batch 5 Icons */
+  Flag as SaudiGovIcon,
+  CalendarMonth as AcademicIcon,
+  ChildFriendly as StudentExtIcon,
+  AccountBalanceWallet as FinPlanIcon,
+  Psychology as AdvTherapyIcon,
+  GpsFixed as GpsBusIcon,
+  Paid as CompWorkIcon,
+  SmartToy as AIMLIcon,
+  AdminPanelSettings as SysAdminIcon,
+  Approval as SmartApprovalIcon,
+  MarkEmailRead as MessagingIcon,
+  LocalShipping as SCMExtIcon,
+  MenuBook as ElearningIcon,
+  WhatsApp as WhatsAppIcon,
+  Hub as MicroservicesIcon,
+  /* Batch 6 Icons */
+  Handshake as PartnershipsIcon,
+  HealthAndSafety as InsuranceIcon,
+  GppGood as RiskComplianceIcon,
+  Assessment as ReportBuilderIcon,
+  MedicalInformation as TreatmentWaitIcon,
+  Mosque as ZakatIcon,
+  TrendingUp as SuccessionIcon,
+  ThumbsUpDown as FeedbackIcon,
+  Biotech as IntegratedCareIcon,
+  SupportAgent as AgentChatIcon,
+} from '@mui/icons-material';
 
 /* ─── Batch 1 Templates ─── */
 import { HR_TEMPLATES, HRTemplateRenderer } from './templates/HRPrintTemplates';

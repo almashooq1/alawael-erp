@@ -2,9 +2,18 @@
  * Medical Files Dashboard — لوحة معلومات السجلات الطبية
  */
 import { useState, useEffect } from 'react';
-
-
-
+import {
+  Box, Grid, Card, CardContent, Typography, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, LinearProgress
+} from '@mui/material';
+import {
+  FolderSpecial as FilesIcon,
+  CloudUpload as UploadIcon,
+  Storage as StorageIcon,
+  Security as SecurityIcon
+} from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#1976d2', '#388e3c', '#f57c00', '#d32f2f', '#7b1fa2', '#00796b'];

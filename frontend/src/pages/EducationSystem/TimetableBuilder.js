@@ -2,11 +2,39 @@
  * الجدول الدراسي
  * Timetable Builder
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container,
+  Grid,
+  Paper,
+  Box,
+  Typography,
+  Button,  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  IconButton,  LinearProgress,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Schedule as TimetableIcon,
+  ArrowBack as BackIcon,
+  Publish as PublishIcon,
+  ViewWeek as WeekIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

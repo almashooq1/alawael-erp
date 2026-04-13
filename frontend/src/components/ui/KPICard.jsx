@@ -12,10 +12,17 @@
  */
 
 import { memo, useEffect, useRef, useState } from 'react';
-import { useTheme, alpha,
+import {
+  Box, Card, Typography, Skeleton, Tooltip,
+  LinearProgress, useTheme, alpha,
 } from '@mui/material';
-
-
+import {
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+  ArrowForwardIos,
+  FlagOutlined,
+} from '@mui/icons-material';
 
 // ─── Animated number counter ──────────────────────────────────────────────────
 function useAnimatedValue(target, duration = 1200) {

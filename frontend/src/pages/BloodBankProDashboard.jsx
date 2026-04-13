@@ -5,9 +5,16 @@
  * Gradient: #ef4444 → #dc2626 → #8b5cf6
  */
 
-import { useTheme, alpha,
+import {
+  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import BloodtypeIcon from '@mui/icons-material/Bloodtype';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ScienceIcon from '@mui/icons-material/Science';

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * Centralized logger utility.
  * - In development: logs to console normally

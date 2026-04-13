@@ -3,8 +3,19 @@
  * حوار إضافة أو تعديل مستخدم
  */
 
-
-
+import {
+  Box,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
 
 const UserFormDialog = ({ open, onClose, editingUser, formData, setFormData, onSave }) => (
   <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>

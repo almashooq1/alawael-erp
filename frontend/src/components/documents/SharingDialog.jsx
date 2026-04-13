@@ -1,8 +1,53 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  Button,
+  TextField,
+  Stack,
+  Tabs,
+  Tab,
+  IconButton,
+  Chip,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction,
+  Divider,
+  Switch,
+  FormControlLabel,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Alert,
+  CircularProgress,
+  Tooltip,
+  Paper,
+  InputAdornment,
+} from '@mui/material';
+import {
+  Share as ShareIcon,
+  Person as PersonIcon,
+  Group as GroupIcon,
+  Public as PublicIcon,
+  Link as LinkIcon,
+  ContentCopy,
+  Delete as DeleteIcon,
+  Lock as LockIcon,
+  Visibility,
+  Edit as EditIcon,
+  Comment as CommentIcon,
+  AdminPanelSettings,
+  Schedule as ScheduleIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { sharingApi } from '../../services/documentProPhase3Service';
 import logger from '../../utils/logger';
 

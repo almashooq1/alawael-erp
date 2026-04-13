@@ -1,8 +1,43 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  LinearProgress,
+  Tabs,
+  Tab,
+  Avatar,
+  Divider,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  TrendingUp as TrendIcon,
+  Delete as DeleteIcon,
+  Timeline as TimelineIcon,
+  Close as CloseIcon,
+  Person as PersonIcon,
+  Assessment as AssessmentIcon,
+  CalendarToday as CalendarIcon,
+  BarChart as ChartIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -44,7 +79,7 @@ const TherapistProgressTracking = () => {
 
   useEffect(() => {
     loadRecords();
-  }, []);  
+  }, []); // eslint-disable-line
 
   const loadRecords = async () => {
     try {

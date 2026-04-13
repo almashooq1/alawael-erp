@@ -2,6 +2,7 @@
  * AR Rehabilitation Routes
  * مسارات التأهيل بالواقع المعزز
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ARRehabDashboard = lazyWithRetry(

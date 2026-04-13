@@ -1,8 +1,52 @@
-import { useState, useCallback } from 'react';
-
-
-
-
+import React, { useState, useCallback } from 'react';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Grid,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  LinearProgress,
+  Divider,
+  Alert,
+  Tabs,
+  Tab,
+  Tooltip,
+  Paper,
+  IconButton,
+  Collapse,
+} from '@mui/material';
+import {
+  Assessment as ReportIcon,
+  Download as DownloadIcon,
+  AccountBalance as BankIcon,
+  Security as GOSIIcon,
+  Description as WPSIcon,
+  Print as PrintIcon,
+  BarChart as ChartIcon,
+  CompareArrows as VarianceIcon,
+  Business as DeptIcon,
+  CalendarMonth as AnnualIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  KeyboardArrowDown as ExpandIcon,
+  KeyboardArrowUp as CollapseIcon,
+  TableChart as ExcelIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

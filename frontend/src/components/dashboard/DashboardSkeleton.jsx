@@ -3,7 +3,7 @@
  * هيكل التحميل للوحة التحكم
  */
 
-import { useTheme } from '@mui/material';
+import { Box, Grid, Skeleton, useTheme } from '@mui/material';
 import { gradients } from 'theme/palette';
 
 export default function DashboardSkeleton() {

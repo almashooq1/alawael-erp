@@ -1,6 +1,7 @@
 /**
  * Print Center Routes — مسارات مركز الطباعة
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const PrintCenterPage = lazyWithRetry(() =>

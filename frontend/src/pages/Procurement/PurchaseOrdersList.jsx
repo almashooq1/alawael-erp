@@ -1,8 +1,13 @@
 /**
  * قائمة أوامر الشراء — Purchase Orders List
  */
-import { useState, useEffect, useCallback } from 'react';
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+  TablePagination, Button, Chip, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, MenuItem, CircularProgress,
+} from '@mui/material';
+import { Add, Refresh } from '@mui/icons-material';
 import { getPurchaseOrders, createPurchaseOrder } from '../../services/procurement.service';
 
 const statusOptions = [

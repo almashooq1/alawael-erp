@@ -3,10 +3,25 @@
  * Premium floating command palette with AI-powered search & quick actions
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTheme,
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Box, Typography, InputBase, Paper, useTheme,
+  Chip, Fade, Backdrop,
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import PeopleIcon from '@mui/icons-material/People';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AddCircleRoundedIcon from '@mui/icons-material/AddCircleRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
+import FlashOnRoundedIcon from '@mui/icons-material/FlashOnRounded';
+import KeyboardReturnRoundedIcon from '@mui/icons-material/KeyboardReturnRounded';
+import BackspaceRoundedIcon from '@mui/icons-material/BackspaceRounded';
 
 /* ─────────────────────────────────────── */
 const COMMANDS = [

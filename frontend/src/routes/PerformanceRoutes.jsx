@@ -1,6 +1,7 @@
 /**
  * Performance Routes — مسارات تقييم الأداء
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const PerformanceDashboard = lazyWithRetry(() => import('../pages/Performance/PerformanceDashboard'));

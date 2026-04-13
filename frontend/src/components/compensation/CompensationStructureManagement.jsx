@@ -3,11 +3,23 @@
  * Delegates to sub-components: stats, cards, form dialog
  */
 
-
-
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, Card, CardContent,
+  Avatar, IconButton, Tooltip, LinearProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as ActiveIcon,
+  LocalAtm as AllowanceIcon,
+  BeachAccess as LeaveIcon,
+  Business as StructureIcon,
+} from '@mui/icons-material';
 import { gradients, statusColors, neutralColors } from 'theme/palette';
 import { useCompensation } from './useCompensation';
+import CompensationStructureCard from './CompensationStructureCard';
+import CompensationFormDialog from './CompensationFormDialog';
 
 const CompensationStructureManagement = () => {
   const {

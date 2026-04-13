@@ -3,8 +3,11 @@
  * 8 نماذج: قرار إداري، خطاب صادر، مذكرة داخلية، محضر اجتماع،
  *          تفويض صلاحيات، تعميم، إيصال شكوى، تأكيد موعد
  */
+import { Box, Typography, Grid } from '@mui/material';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
   fieldRow, bodyPad, pageWrapper, formatDate,
+  RefDateLine, NotesBox, EmptyTable,
 } from '../shared/PrintTemplateShared';
 
 export const ADMIN_TEMPLATES = [

@@ -4,10 +4,46 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  InputAdornment,
+  Chip,
+  Button,
+  Stack,
+  Avatar,
+  Paper,
+  IconButton,
+  Alert,
+  LinearProgress,
+  CardMedia,
+  CardActions,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+} from '@mui/material';
+import {
+  MenuBook as BookIcon,
+  Search as SearchIcon,
+  Download as DownloadIcon,
+  Favorite as FavoriteIcon,
+  FavoriteBorder as FavoriteBorderIcon,
+  Visibility as ViewIcon,
+  Category as CategoryIcon,
+  AutoStories as ReadIcon,
+  PictureAsPdf as PdfIcon,
+  VideoLibrary as VideoIcon,
+  Audiotrack as AudioIcon,
+} from '@mui/icons-material';
 import { placeholderImage } from 'utils/placeholderImage';
 import { gradients, statusColors } from 'theme/palette';
 import lmsService from 'services/lmsService';

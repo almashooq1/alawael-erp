@@ -2,9 +2,23 @@
  * FleetTable.jsx
  * جدول بيانات الأسطول حسب التبويب النشط
  */
+import React from 'react';
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  IconButton,
+  Chip,
+  Tooltip,
+  Typography,
+  Box,
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { TABS } from './fleetManagement.constants';
 
 // ─── Column definitions per tab ─────────────────────────────

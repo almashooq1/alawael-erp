@@ -1,8 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Chip,
+  Avatar,
+  IconButton,
+  Button,
+  CircularProgress,
+  Alert,
+  Tooltip,
+  Paper,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+} from '@mui/material';
+import {
+  AccountTree as GraphIcon,
+  Link as LinkIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  ZoomIn,
+  ZoomOut,
+  CenterFocusStrong,
+} from '@mui/icons-material';
 import { linkingApi } from '../../services/documentProPhase4Service';
 import logger from '../../utils/logger';
 

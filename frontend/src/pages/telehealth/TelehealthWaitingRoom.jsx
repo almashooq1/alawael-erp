@@ -4,10 +4,21 @@
  * Shows today's queue of scheduled and in-progress sessions with countdown timers,
  * priority badges, and quick actions.
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Button, Chip, IconButton, Alert,
+  LinearProgress, Card, CardContent, CardActions, Divider,
+  Tooltip, Badge,
+} from '@mui/material';
+import {
+  People as PeopleIcon,
+  VideoCall as VideoCallIcon,
+  Schedule as ScheduleIcon,
+  PlayArrow as PlayIcon,
+  Refresh as RefreshIcon,
+  AccessTime as TimeIcon,
+  ArrowBack as BackIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import telehealthService from '../../services/telehealthService';
 

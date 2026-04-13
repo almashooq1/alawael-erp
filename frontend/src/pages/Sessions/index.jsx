@@ -5,9 +5,16 @@
  * Uses /api/therapy-sessions endpoints via therapySessions.service.js.
  */
 import React from 'react';
-
+import {
+  Container, Typography, Box, Grid, Button, IconButton, Stack, Alert, Paper,
+} from '@mui/material';
+import { Add as AddIcon, Event as EventIcon, Refresh, ErrorOutline } from '@mui/icons-material';
 
 import useSessionsManagement from './useSessionsManagement';
+import StatCards from './StatCards';
+import SessionsTable from './SessionsTable';
+import SessionFormDialog from './SessionFormDialog';
+import DeleteConfirmDialog from './DeleteConfirmDialog';
 
 // ── Error Boundary ────────────────────────────────────────────────────────
 class SessionsErrorBoundary extends React.Component {

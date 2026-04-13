@@ -1,9 +1,78 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Button,
+  Chip,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  ListItemSecondaryAction,
+  Divider,
+  LinearProgress,
+  Alert,
+  Tooltip,
+  Stack,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Badge,
+} from '@mui/material';
+import {
+  Link as LinkIcon,
+  Label as TagIcon,
+  Security as SecurityIcon,
+  PictureAsPdf as PdfIcon,
+  Group as CollabIcon,
+  Dashboard as DashboardIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  AccountTree as GraphIcon,
+  Cloud as CloudIcon,
+  Lock as LockIcon,
+  Shield as ShieldIcon,
+  Merge as MergeIcon,
+  CallSplit as SplitIcon,
+  Description as DocIcon,
+  People as PeopleIcon,
+  Gavel as GavelIcon,
+  Verified as VerifiedIcon,
+  Stamp as StampIcon,
+  MenuBook as CoverIcon,
+  FormatListNumbered as NumberIcon,
+  Compress as CompressIcon,
+  Download as DownloadIcon,
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Campaign as BroadcastIcon,
+  Circle as CircleIcon,
+  ArrowUpward,
+  ArrowDownward,
+} from '@mui/icons-material';
+import {
+  linkingApi,
   tagsApi,
   tagCategoriesApi,
   aclApi,
@@ -59,6 +128,7 @@ export default function DocumentsProPhase4() {
 
   // Dialogs
   const [tagDialog, setTagDialog] = useState(false);
+  const [pdfDialog, setPdfDialog] = useState(false);
 
   // ── Loaders ───────────────────────────
   const loadDashboard = useCallback(async () => {

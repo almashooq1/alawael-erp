@@ -2,7 +2,10 @@
  * قوالب ذكاء الأعمال والتقارير التنفيذية والتطوير
  * Business Intelligence, Executive Reports & Development Templates
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

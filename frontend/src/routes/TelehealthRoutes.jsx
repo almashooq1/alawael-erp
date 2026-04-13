@@ -1,6 +1,8 @@
 /**
  * TelehealthRoutes — مسارات الطب عن بُعد في الواجهة
  */
+import React from 'react';
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const TelehealthDashboard = lazyWithRetry(() => import('../pages/telehealth/TelehealthDashboard'));

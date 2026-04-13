@@ -4,9 +4,23 @@
  */
 
 import React, { useState } from 'react';
-import { useTheme,
+import {
+  Box, Paper, Typography, Chip, useTheme,
+  IconButton, Tooltip, Collapse,
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
+import LightbulbRoundedIcon from '@mui/icons-material/LightbulbRounded';
+import PsychologyRoundedIcon from '@mui/icons-material/PsychologyRounded';
+import ShowChartRoundedIcon from '@mui/icons-material/ShowChartRounded';
+import NotificationsActiveRoundedIcon from '@mui/icons-material/NotificationsActiveRounded';
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded';
+import ExpandMoreRoundedIcon from '@mui/icons-material/ExpandMoreRounded';
+import ExpandLessRoundedIcon from '@mui/icons-material/ExpandLessRounded';
+import CheckCircleRoundedIcon from '@mui/icons-material/CheckCircleRounded';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
 
 /* ─────────────────────────────────────── */
 const INSIGHT_TYPES = {
@@ -254,7 +268,7 @@ const InsightCard = ({ insight, index, isDark }) => {
 /* ─────────────────────────────────────── */
 /*  Brain animation header                 */
 /* ─────────────────────────────────────── */
-const BrainOrb = () => (
+const BrainOrb = ({ isDark }) => (
   <Box sx={{
     position: 'relative',
     width: 44, height: 44, flexShrink: 0,

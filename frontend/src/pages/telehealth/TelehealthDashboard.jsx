@@ -1,12 +1,13 @@
 /**
  * TelehealthDashboard — لوحة تحكم الطب عن بعد
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   getConsultations,
   getTelehealthStats,
   cancelConsultation,
   STATUS_LABELS,
+  STATUS_COLORS,
   TYPE_LABELS,
   PRIORITY_LABELS,
 } from '../../services/telehealthService';
@@ -34,7 +35,7 @@ export default function TelehealthDashboard() {
   const [filters, setFilters] = useState({ status: '', date: '', search: '', page: 1 });
   const [loading, setLoading] = useState(false);
   const [total, setTotal] = useState(0);
-  const [, setShowCreateModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);

@@ -2,7 +2,13 @@
  * Student Registration — Step 3: Programs & Schedule
  */
 
-
+import React from 'react';
+import {
+  Box, Grid, TextField, Typography, FormControl, InputLabel,
+  Select, MenuItem, Card, Chip, Alert, Divider, Fade,
+} from '@mui/material';
+import { School, CheckCircle } from '@mui/icons-material';
+import { SectionTitle } from '../StyledComponents';
 import { PROGRAMS, SHIFTS, WEEK_DAYS } from '../studentRegistrationConfig';
 import { brandColors } from 'theme/palette';
 

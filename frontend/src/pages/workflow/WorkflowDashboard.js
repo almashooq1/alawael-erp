@@ -4,13 +4,45 @@
  * Main overview page with KPIs, recent tasks, recent instances,
  * quick-start actions, and category distribution.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Avatar,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Card,
+  CardContent,
+  Tooltip,
+  Skeleton,
   alpha,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  AccountTree as WorkflowIcon,
+  Assignment as TaskIcon,
+  PlayArrow as StartIcon,
+  Warning as OverdueIcon,
+  CheckCircle as CompletedIcon,
+  TrendingUp as TrendIcon,
+  Speed as SLAIcon,
+  Refresh as RefreshIcon,
+  ArrowForward as ArrowIcon,
+  Add as AddIcon,
+  Dashboard as DashboardIcon,
+  Category as CategoryIcon,
+  Timer as TimerIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

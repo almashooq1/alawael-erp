@@ -1,12 +1,21 @@
 /**
  * لوحة تحكم التدقيق الداخلي — Internal Audit Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Assignment as AuditIcon,
+  PlaylistAddCheck as PlanIcon,
+  Warning as FindingIcon,
+  CheckCircle as ClosedIcon,
+} from '@mui/icons-material';
 import { getDashboard } from '../../services/internalAudit.service';
 
 const statusMap = {

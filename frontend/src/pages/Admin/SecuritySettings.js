@@ -1,10 +1,71 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-
-
-
+import {
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+  Alert,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  CircularProgress,
+  IconButton,
+  Tabs,
+  Tab,
+  Switch,
+  FormControlLabel,
+  LinearProgress,
+  Tooltip,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  InputAdornment,
+  Slider,
+} from '@mui/material';
+import {
+  Shield,
+  History,
+  Lock,
+  ContentCopy as CopyIcon,
+  Visibility,
+  VisibilityOff,
+  Security as SecurityIcon,
+  Devices,
+  VpnKey,
+  Delete,
+  Refresh,
+  Warning,
+  CheckCircle,
+  Error as ErrorIcon,
+  TrendingUp,
+  Block,
+  Settings,
+  Assessment,
+  Policy,
+  GppGood,
+  GppBad,
+  Laptop,
+  PhoneAndroid,
+  DesktopWindows,
+  Logout,
+  Add,
+  Save,
+} from '@mui/icons-material';
+import { QRCodeSVG } from 'qrcode.react';
 import { useSnackbar } from '../../contexts/SnackbarContext';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 import { gradients } from '../../theme/palette';
 import securityService from '../../services/security.service';
 

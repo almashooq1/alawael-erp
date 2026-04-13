@@ -2,6 +2,7 @@
  * Government Integration & Compliance Routes
  * مسارات التكامل الحكومي والامتثال
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // مُدد — حماية الأجور

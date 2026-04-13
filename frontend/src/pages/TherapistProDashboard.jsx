@@ -6,17 +6,26 @@
 
 import { useState } from 'react';
 import {
-  useTheme,
+  Box, Typography, Grid, Paper, Avatar, Chip, LinearProgress,
+  List, ListItem, ListItemAvatar, ListItemText, Divider,
+  useTheme, AvatarGroup,
 } from '@mui/material';
+import { motion } from 'framer-motion';
 import {
+  PsychologyOutlined,
   CalendarTodayOutlined,
   PeopleAltOutlined,
   TrendingUpOutlined,
   CheckCircleOutlined,
+  AccessTimeOutlined,
   AssignmentOutlined,
   EmojiEventsOutlined,
+  NotificationsActiveOutlined,
 } from '@mui/icons-material';
-
+import {
+  AreaChart, Area, RadialBarChart, RadialBar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 
 const GRAD = 'linear-gradient(135deg, #06b6d4 0%, #6366f1 100%)';
 const G1 = '#06b6d4';

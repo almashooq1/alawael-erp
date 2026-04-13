@@ -1,6 +1,7 @@
 /**
  * Sessions Routes — مسارات الجلسات العلاجية
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const SessionsDashboard = lazyWithRetry(() => import('../pages/Sessions/SessionsDashboard'));

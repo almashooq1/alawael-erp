@@ -1,9 +1,13 @@
 /**
  * Training Plans — خطط التدريب السنوية
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
+import { Refresh, Add, Edit, EventNote } from '@mui/icons-material';
 import { getPlans, createPlan, updatePlan } from '../../services/training.service';
 
 const STATUS_LABELS = { draft: 'مسودة', pending_approval: 'بانتظار الاعتماد', approved: 'معتمدة', in_progress: 'قيد التنفيذ', completed: 'مكتملة' };

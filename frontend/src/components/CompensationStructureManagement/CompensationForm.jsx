@@ -1,9 +1,16 @@
 /**
  * CompensationStructureManagement — Form Dialog (4 sections)
  */
-
-
-import { SCOPE_LABELS, FORM_SECTIONS } from './constants';
+import {
+  Typography, Grid, Paper, Box, Button, TextField,
+  IconButton, Dialog, DialogTitle, DialogContent, DialogActions,
+  Switch, FormControlLabel, Chip, CircularProgress, Divider, MenuItem,
+} from '@mui/material';
+import {
+  Add as AddIcon, Delete as DeleteIcon,
+  Close as CloseIcon, Save as SaveIcon,
+} from '@mui/icons-material';
+import { SCOPE_LABELS, FORM_SECTIONS, ICONS } from './constants';
 
 const CompensationForm = ({
   open, onClose, editingId, formData, setFormData, loading,

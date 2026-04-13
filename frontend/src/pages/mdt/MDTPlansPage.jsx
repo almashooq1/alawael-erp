@@ -2,10 +2,19 @@
  * إدارة خطط التأهيل الموحدة — Unified Rehabilitation Plans Management
  * CRUD كامل: قائمة، إنشاء، تعديل، أعضاء الفريق، الأهداف، المراجعات، الموافقات
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Button, Chip, IconButton, Tooltip,
+  Table, TableHead, TableRow, TableCell, TableBody, TablePagination,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
+  CircularProgress, Alert, Tabs, Tab, Divider, Card, CardContent,
+  LinearProgress, Slider,
+} from '@mui/material';
+import {
+  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon,
+  ArrowBack as BackIcon, PersonAdd as PersonAddIcon, Flag as GoalIcon,
+  CheckCircle as ApproveIcon, RateReview as ReviewIcon, TrackChanges as ProgressIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { plansService } from '../../services/mdtCoordinationService';
 

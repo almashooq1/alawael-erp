@@ -1,12 +1,14 @@
 /**
  * StatsCards — بطاقات الإحصائيات
  */
+import { Grid, Card, CardContent, Typography, Box, Skeleton } from '@mui/material';
 import {
   People as PeopleIcon,
   CheckCircle as ActiveIcon,
   Block as InactiveIcon,
   Lock as LockedIcon,
   PersonAdd as NewIcon,
+  TrendingUp as TrendIcon,
 } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 

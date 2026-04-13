@@ -2,9 +2,18 @@
  * MHPSS Dashboard — لوحة الصحة النفسية والدعم النفسي الاجتماعي
  */
 import { useState, useEffect } from 'react';
-
-
-
+import {
+  Box, Grid, Card, CardContent, Typography, Paper,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Chip, LinearProgress
+} from '@mui/material';
+import {
+  Psychology as PsychIcon,
+  MedicalServices as SessionIcon,
+  Warning as CrisisIcon,
+  Group as GroupIcon
+} from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#5c6bc0', '#26a69a', '#ef5350', '#ffa726', '#ab47bc'];

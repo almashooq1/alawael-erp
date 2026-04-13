@@ -1,9 +1,13 @@
 /**
  * قائمة التذاكر — Tickets List
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+  TablePagination, Button, Chip, IconButton, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, MenuItem, CircularProgress,
+} from '@mui/material';
+import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
 import { getTickets, createTicket, updateTicket, deleteTicket } from '../../services/helpdesk.service';
 
 const categoryOptions = [

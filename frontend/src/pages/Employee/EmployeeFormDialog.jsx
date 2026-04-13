@@ -2,9 +2,23 @@
  * EmployeeFormDialog.jsx — Add / Edit / View dialog with multi-step form
  * نموذج إضافة / تعديل الموظفين مع خطوات متعددة
  */
-
-
-
+import {
+  Typography, Grid, Box, Button, TextField, Avatar, IconButton,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  InputAdornment, MenuItem, Tooltip, CircularProgress, Divider,
+  Stepper, Step, StepLabel, Collapse, Chip, Paper, Stack,
+} from '@mui/material';
+import {
+  Close as CloseIcon, Person as PersonIcon,
+  Work as WorkIcon, Phone as PhoneIcon, Email as EmailIcon,
+  Badge as BadgeIcon, ContactPhone as ContactIcon,
+  AccountBalance as BankIcon,
+  NavigateNext as NextIcon, NavigateBefore as BackIcon,
+  Save as SaveIcon, CheckCircle as ActiveIcon,
+  CreditCard as IdIcon, Home as HomeIcon, LocationCity as CityIcon,
+  LocalHospital as EmergIcon, Refresh as RefreshIcon,
+} from '@mui/icons-material';
+import EmployeeProfileView, { SectionHeader } from './EmployeeProfileView';
 import {
   DEPARTMENTS, STATUS_MAP, CONTRACT_TYPES, GENDERS,
   MARITAL_STATUS, NATIONALITIES, BANKS, STEPS,

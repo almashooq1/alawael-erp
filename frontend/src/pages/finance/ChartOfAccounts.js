@@ -1,8 +1,43 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Chip,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Collapse,
+} from '@mui/material';
+import {
+  AccountTree as TreeIcon,
+  Search as SearchIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  ExpandMore,
+  ExpandLess,
+  AccountBalance as AccountIcon,
+} from '@mui/icons-material';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

@@ -1,15 +1,48 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Switch,
+  FormControlLabel,
+} from '@mui/material';
+import {
+  Notifications as NotificationsIcon,
+  Delete as DeleteIcon,
+  Send as SendIcon,
+  Edit as EditNotificationIcon,
+} from '@mui/icons-material';
 import { adminService } from 'services/adminService';
 import api from 'services/api.client';
 import { getStatusColor } from 'utils/statusColors';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
-import { useConfirmDialog } from 'components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const AdminNotifications = () => {

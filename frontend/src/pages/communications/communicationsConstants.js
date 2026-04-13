@@ -2,8 +2,19 @@
  * Communications Constants — تصنيفات وحالات المراسلات
  */
 
-
-
+import {
+  Send as SendIcon,
+  Drafts as DraftsIcon,
+  Archive as ArchiveIcon,
+  Reply as ReplyIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Pending as PendingIcon,
+  Visibility as VisibilityIcon,
+  Business as BusinessIcon,
+  Email as EmailIcon,
+  Message as MessageIcon,
+} from '@mui/icons-material';
 
 // تصنيفات المراسلات
 export const COMMUNICATION_TYPES = {

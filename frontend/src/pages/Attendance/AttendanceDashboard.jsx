@@ -1,11 +1,23 @@
 /**
  * لوحة تحكم الحضور والانصراف — Attendance Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Typography, Card, CardContent, CircularProgress, Chip, Fade, Grow,
+  Table, TableHead, TableRow, TableCell, TableBody, TableContainer,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Fingerprint as BiometricIcon,
+  CheckCircle as PresentIcon,
+  Cancel as AbsentIcon,
+  AccessTime as LateIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+} from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import apiClient from '../../services/api';
 

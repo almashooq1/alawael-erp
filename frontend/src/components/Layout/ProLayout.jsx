@@ -2,10 +2,14 @@
  * ProLayout — التخطيط الاحترافي (Enhanced)
  * Premium layout with mesh gradients, noise texture, smooth transitions
  */
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useTheme, useMediaQuery } from '@mui/material';
-import { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
+import ProSidebar, { SIDEBAR_WIDTH, SIDEBAR_COLLAPSED } from './sidebar';
+import ProHeader from './ProHeader';
+import { DashboardSkeleton } from '../ui/LoadingSkeleton';
+import RouteErrorBoundary from '../shared/RouteErrorBoundary';
+import WatermarkBackground from '../shared/WatermarkBackground';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import logger from '../../utils/logger';
 

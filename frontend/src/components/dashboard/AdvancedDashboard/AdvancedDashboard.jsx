@@ -2,10 +2,22 @@
  * 📊 Advanced Dashboard v3 — Orchestrator
  * لوحة التحكم التنفيذية المحسّنة مع شريط تنقل سريع بين الأقسام
  */
-import { useTheme } from '@mui/material';
+import React from 'react';
+import { Box, useTheme } from '@mui/material';
+import WelcomeHeader from '../WelcomeHeader';
+import DashboardErrorBoundary from '../shared/DashboardErrorBoundary';
+import { SectionNav } from '../DashboardNavigation';
+import DashboardSkeleton from '../DashboardSkeleton';
+import DashboardFooter from '../DashboardFooter';
 import { SECTIONS } from '../dashboardConstants';
 import { useAdvancedDashboard } from './useAdvancedDashboard';
+import DashboardGlobalStyles from './DashboardGlobalStyles';
+import DashboardSearchBar from './DashboardSearchBar';
 import { gradients } from 'theme/palette';
+import DashboardStatusBanners from './DashboardStatusBanners';
+import KpiCardsGrid from './KpiCardsGrid';
+import DashboardSections from './DashboardSections';
+import DashboardOverlays from './DashboardOverlays';
 
 const AdvancedDashboard = () => {
   const theme = useTheme();

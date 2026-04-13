@@ -5,12 +5,61 @@
  * 6 Tabs: نظرة عامة | النسخ الاحتياطية | الجداول | التخزين | الاستعادة | الإعدادات
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
   Paper,
+  Typography,
+  Tabs,
+  Tab,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Switch,
+  FormControlLabel,
+  Grid,
+  Card,
+  CardContent,
+  Alert,
+  CircularProgress,  Tooltip,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Snackbar,
 } from '@mui/material';
-
-
+import {
+  Backup as BackupIcon,
+  CloudUpload,
+  Schedule,
+  Storage,
+  SettingsBackupRestore,
+  Settings,
+  Add,
+  Delete,
+  Refresh,
+  CheckCircle,
+  Error as ErrorIcon,
+  Warning,
+  CloudDone,
+  Speed,
+  VerifiedUser,
+  CleaningServices,
+  PlayArrow,
+  Pause,
+  NetworkCheck,
+} from '@mui/icons-material';
 import automatedBackupService from '../../services/automatedBackupService';
 
 /* ━━━ helpers ━━━ */

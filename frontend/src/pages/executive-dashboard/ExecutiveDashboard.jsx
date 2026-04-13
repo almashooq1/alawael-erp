@@ -5,19 +5,45 @@
  * والملخصات عبر جميع المجالات
  */
 
-import { useEffect, useState, useCallback } from 'react';
-
-
+import React, { useEffect, useState, useCallback } from 'react';
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  Alert,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Badge,
+  Paper,
+  Button,
+  LinearProgress,
+} from '@mui/material';
 import {
   People as PeopleIcon,
   EventNote as EpisodeIcon,
   Assessment as SessionIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
   TrendingUp as TrendUpIcon,
   TrendingDown as TrendDownIcon,
   TrendingFlat as TrendFlatIcon,
+  Refresh as RefreshIcon,
+  Speed as SpeedIcon,
   NotificationsActive as AlertIcon,
+  Dashboard as DashboardIcon,
+  Psychology as AIIcon,
 } from '@mui/icons-material';
-import { dashboardsAPI } from '../../services/ddd';
+import { dashboardsAPI, aiRecommendationsAPI, qualityAPI } from '../../services/ddd';
 
 /* ── Severity colors ── */
 const SEVERITY_COLORS = {

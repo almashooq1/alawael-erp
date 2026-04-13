@@ -5,10 +5,27 @@
 
 import { useState, useRef, useEffect } from 'react';
 import {
+  Box,
+  Paper,
+  TextField,
+  IconButton,
+  Typography,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Divider,
+  Chip,
+  InputAdornment,
   useTheme,
 } from '@mui/material';
-
-
+import {
+  Send as SendIcon,
+  AttachFile as AttachIcon,
+  EmojiEmotions as EmojiIcon,
+  Search as SearchIcon,
+} from '@mui/icons-material';
 
 const DEMO_MESSAGES = [
   {

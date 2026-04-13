@@ -2,14 +2,25 @@
  * OCR Viewer Component — عارض نتائج استخراج النصوص
  * عرض النص المستخرج مع مناطق التعرف ومستوى الثقة
  */
-import { useState, useEffect } from 'react';
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Paper, Typography, Grid, Chip, CircularProgress,
+  LinearProgress, Divider, Table, TableHead, TableRow,
+  TableCell, TableBody, IconButton, Tooltip, Alert, Tabs, Tab,
+} from '@mui/material';
+import {
+  DocumentScanner as OCRIcon,
+  Translate as LangIcon,
+  GridOn as TableIcon,
+  TextFields as TextIcon,
+  Speed as ConfidenceIcon,
+  Refresh as RefreshIcon,
+  ContentCopy as CopyIcon,
+} from '@mui/icons-material';
 
 import { ocrApi } from '../../services/documentProPhase6Service';
 
-export default function OCRViewer({ documentId }) {
+export default function OCRViewer({ documentId, onClose }) {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState(0);
@@ -17,7 +28,6 @@ export default function OCRViewer({ documentId }) {
   useEffect(() => {
     if (!documentId) return;
     loadResult();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId]);
 
   const loadResult = async () => {

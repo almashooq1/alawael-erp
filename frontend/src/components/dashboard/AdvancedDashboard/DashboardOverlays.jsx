@@ -1,8 +1,14 @@
 /**
  * DashboardOverlays — Scroll-to-top FAB, error/socket snackbars, shortcuts dialog
  */
-
-
+import React from 'react';
+import {
+  Box, Typography, Fab, Zoom, Snackbar, Alert, Button,
+  Dialog, DialogTitle, DialogContent, IconButton, Chip,
+} from '@mui/material';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import CloseIcon from '@mui/icons-material/Close';
+import KeyboardIcon from '@mui/icons-material/Keyboard';
 import { brandColors, gradients } from 'theme/palette';
 import { SECTIONS } from '../dashboardConstants';
 

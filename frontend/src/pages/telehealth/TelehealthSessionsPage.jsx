@@ -3,10 +3,20 @@
  *
  * Full CRUD: list, filter, search, create, edit, delete, change status, start session.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Button, TextField, MenuItem, Select,
+  FormControl, InputLabel, Chip, IconButton, Tooltip, Alert, LinearProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, TablePagination,
+  InputAdornment, Card, CardContent,
 } from '@mui/material';
-
+import {
+  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
+  Search as SearchIcon, VideoCall as VideoCallIcon,
+  PlayArrow as PlayIcon, Stop as StopIcon, Cancel as CancelIcon,
+  Refresh as RefreshIcon, FilterList as FilterIcon,
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import telehealthService from '../../services/telehealthService';
 

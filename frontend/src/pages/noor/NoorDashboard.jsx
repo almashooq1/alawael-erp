@@ -7,12 +7,46 @@
  *  - Academic progress reports
  *  - Disability type & placement analytics
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Tabs,
+  Tab,
+  IconButton,
+  Tooltip,
+  Alert,
+  LinearProgress,
+  CircularProgress,
 } from '@mui/material';
-
-
+import {
+  School as SchoolIcon,
+  Sync as SyncIcon,
+  Description as IEPIcon,
+  Assessment as ReportIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  CloudUpload as SubmitIcon,
+  Person as StudentIcon,
+} from '@mui/icons-material';
 import noorService from '../../services/noor.service';
 
 /* ─── Status label maps ─── */

@@ -5,8 +5,20 @@
  * operational efficiency, and department comparison.
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Alert,
+  Divider,
+  useTheme,
   alpha,
 } from '@mui/material';
 import {
@@ -14,9 +26,22 @@ import {
   ReportProblem,
   Build,
   DirectionsCar,
+  Refresh,
 } from '@mui/icons-material';
-
-
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
 import { getOperationsAnalytics, getTrends } from '../../services/biDashboard.service';
 
 const STATUS_COLORS = {
@@ -49,6 +74,8 @@ const STATUS_LABELS = {
 
 // ── Ops Status Card ───────────────────────────────────────────────
 function OpsCard({ title, total, breakdown, icon: Icon, color }) {
+  const theme = useTheme();
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
       <Card
@@ -130,6 +157,7 @@ function OpsCard({ title, total, breakdown, icon: Icon, color }) {
 // ═══════════════════════════════════════════════════════════════════
 
 export default function BIOperationsAnalytics() {
+  const theme = useTheme();
   const [loading, setLoading] = useState(true);
   const [ops, setOps] = useState({});
   const [sessionTrend, setSessionTrend] = useState([]);

@@ -2,10 +2,27 @@
  * LifecycleTimeline — عارض الجدول الزمني لدورة حياة المستند
  * عرض المراحل والأحداث والاحتفاظ والحجز القانوني
  */
-import { useState, useEffect } from 'react';
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  TextField, Typography, Chip, Stack, Paper, Stepper, Step, StepLabel,
+  StepContent, CircularProgress, Alert, Divider, Card, CardContent,
+  Avatar, List, ListItem, ListItemIcon, ListItemText, Tooltip
+} from '@mui/material';
+import {
+  Timeline as TimelineIcon,
+  CheckCircle as DoneIcon,
+  PlayArrow as ActiveIcon,
+  Schedule as PendingIcon,
+  Lock as HoldIcon,
+  Delete as DisposedIcon,
+  Event as EventIcon,
+  Gavel as LegalIcon,
+  CalendarToday as CalIcon,
+  ArrowForward as ArrowIcon,
+  Warning as WarningIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
 import { lifecycleApi } from '../../services/documentProPhase9Service';
 import logger from '../../utils/logger';
 
@@ -79,7 +96,6 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
 
   useEffect(() => {
     if (open && docId) loadTimeline();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, docId]);
 
   const loadTimeline = async () => {

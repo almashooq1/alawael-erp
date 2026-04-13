@@ -1,8 +1,22 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Container,
+  Typography,
+  Paper,
+  Box,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Chip,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Notifications as NotifIcon,
+  CheckCircle as DoneIcon,
+  Info as InfoIcon,
+  Warning as WarnIcon,
+} from '@mui/icons-material';
 import apiClient from 'services/api.client';
 import { gradients } from 'theme/palette';
 

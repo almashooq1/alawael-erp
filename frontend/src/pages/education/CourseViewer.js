@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-
+import {
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Divider,
+} from '@mui/material';
+import { PlayCircleFilled, Add as AddIcon, School as SchoolIcon } from '@mui/icons-material';
 import apiClient from 'services/api.client';
 import logger from 'utils/logger';
 import { gradients } from 'theme/palette';

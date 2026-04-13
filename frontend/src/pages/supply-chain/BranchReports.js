@@ -2,11 +2,37 @@
  * 📊 تقارير الفروع — Branch Reports & Cross-Branch Analytics
  * AlAwael ERP — Multi-Branch Dashboard & Performance Comparison
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,} from '@mui/material';
-
-
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Tabs,
+  Tab,  LinearProgress,
+  Avatar,
+  Divider,  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,} from '@mui/material';
+import {
+  Assessment as ReportIcon,
+  Store as BranchIcon,
+  Inventory as InventoryIcon,
+  ShoppingCart as PurchaseIcon,
+  SwapHoriz as TransferIcon,
+  Warehouse as WarehouseIcon,
+  Refresh as RefreshIcon,
+  EmojiEvents as TopIcon,
+  Warning as WarningIcon,
+  CompareArrows as CompareIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import {

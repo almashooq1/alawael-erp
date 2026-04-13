@@ -2,6 +2,7 @@
  * Finance & Accounting Routes
  * مسارات المالية والمحاسبة
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Lazy-loaded Finance pages

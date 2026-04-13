@@ -3,14 +3,58 @@
  *
  * Manage SLA policies, track compliance, and view SLA dashboard.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  Tooltip,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
   alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CloneIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  Speed as SpeedIcon,
+  Timer as TimerIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
+  Dashboard as DashboardIcon,
+  TrendingUp as TrendIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

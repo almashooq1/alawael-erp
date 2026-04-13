@@ -25,11 +25,22 @@
  * @date 2026-03-23
  */
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment } from 'react';
 import {
-  Box, Card,
+  Box, Container, Grid, Card, CardContent, Typography, Button, TextField,
+  InputAdornment, IconButton, Chip, Avatar, MenuItem, Select, FormControl,
+  InputLabel, Stack, Alert, Snackbar, Skeleton, Fade, Tooltip, Pagination,
+  ToggleButton, ToggleButtonGroup, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, TableSortLabel, Checkbox, LinearProgress, Collapse,
+  Paper, Menu, ListItemIcon, ListItemText, Divider, Badge, Dialog,
+  DialogTitle, DialogContent, DialogActions,
 } from '@mui/material';
-
+import {
+  Search, Download, PersonAdd, CheckCircle, Pending, TrendingUp as TrendingUpIcon,
+  GridView, ViewList, Refresh, Groups, MoreVert, KeyboardArrowDown, KeyboardArrowUp, Edit, Visibility, Archive, Phone,
+  WhatsApp, Email as EmailIcon, FilterList, Print, Warning, Close, Clear,
+  Description, Send, CalendarMonth, LocalHospital, FamilyRestroom,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, surfaceColors, statusColors, neutralColors } from 'theme/palette';

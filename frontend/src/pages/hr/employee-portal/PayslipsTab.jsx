@@ -1,8 +1,28 @@
+import React from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Grid,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
   Paper,
 } from '@mui/material';
-
-
+import {
+  Visibility as ViewIcon,
+  Print as PrintIcon,
+  AccountBalanceWallet as WalletIcon,
+  TrendingUp as TrendIcon,
+  Receipt as ReceiptIcon,
+} from '@mui/icons-material';
 
 const MONTH_NAMES = [
   '', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',

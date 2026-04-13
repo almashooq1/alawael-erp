@@ -4,13 +4,65 @@
  * المرحلة 2: التوقيع الرقمي، القوالب، الإصدارات، التدقيق، العمليات المجمعة
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  CircularProgress,
+  Alert,
+  Tabs,
+  Tab,
+  Divider,
+  Avatar,
+  Stack,
+  IconButton,
+  Tooltip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  ListItemSecondaryAction,
+  Badge,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from '@mui/material';
+import {
+  Draw as SignIcon,
+  History as VersionIcon,
+  Description as TemplateIcon,
+  Security as AuditIcon,
+  ContentCopy as BulkIcon,
+  Dashboard as DashboardIcon,
+  VerifiedUser as VerifiedIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Schedule as ScheduleIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Download as DownloadIcon,
+  PlayArrow as PlayIcon,
+  Article as ArticleIcon,
+  Shield as ShieldIcon,
+  TrendingUp as TrendIcon,
+} from '@mui/icons-material';
+import documentProExtService, {
   signatureApi,
+  versionApi,
   templateApi,
   auditApi,
   bulkApi,
@@ -71,21 +123,18 @@ export default function DocumentsProExtended() {
   const loadTabData = useCallback(async (tabKey) => {
     try {
       switch (tabKey) {
-        case 'signatures': {
+        case 'signatures':
           const sigResult = await signatureApi.getPending().catch(() => ({ signatures: [] }));
           setPendingSignatures(sigResult.signatures || []);
           break;
-        }
-        case 'audit': {
+        case 'audit':
           const auditResult = await auditApi.getStats().catch(() => ({ stats: {} }));
           setAuditStats(auditResult.stats || {});
           break;
-        }
-        case 'bulk': {
+        case 'bulk':
           const bulkResult = await bulkApi.getJobs().catch(() => ({ jobs: [] }));
           setBulkJobs(bulkResult.jobs || []);
           break;
-        }
         default:
           break;
       }
@@ -212,7 +261,7 @@ export default function DocumentsProExtended() {
           scrollButtons="auto"
           sx={{ borderBottom: '1px solid', borderColor: 'divider', px: 2 }}
         >
-          {TAB_CONFIG.map((tab) => (
+          {TAB_CONFIG.map((tab, i) => (
             <Tab key={tab.key} icon={tab.icon} label={tab.label} iconPosition="start" />
           ))}
         </Tabs>

@@ -2,9 +2,20 @@
  * Quality & Compliance Page — صفحة الجودة والامتثال
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
+  Button, IconButton, Stack, LinearProgress, Alert, Tooltip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Tab, Tabs, Badge, Divider, List, ListItem, ListItemText,
+  ListItemIcon,
+} from '@mui/material';
+import {
+  VerifiedUser as QualityIcon, Warning as WarningIcon,
+  CheckCircle as PassIcon, Cancel as FailIcon,
+  Refresh as RefreshIcon, Assessment as AuditIcon,
+  Build as ActionIcon, TrendingUp as TrendIcon,
+} from '@mui/icons-material';
 
 import { qualityAPI } from '../../services/ddd';
 

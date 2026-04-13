@@ -1,9 +1,13 @@
 /**
  * Training Dashboard — لوحة التدريب والتطوير
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
+  Table, TableHead, TableBody, TableRow, TableCell,
 } from '@mui/material';
+import { Refresh, School, Groups, EventNote, CheckCircle } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
 import { getTrainingDashboard } from '../../services/training.service';
 
 const CAT_LABELS = { technical: 'تقنية', leadership: 'قيادة', soft_skills: 'مهارات ناعمة', compliance: 'امتثال', safety: 'سلامة', professional: 'مهنية', language: 'لغات', other: 'أخرى' };

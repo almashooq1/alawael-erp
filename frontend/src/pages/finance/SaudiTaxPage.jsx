@@ -4,9 +4,39 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,} from '@mui/material';
-
-
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Tabs,
+  Tab,
+  LinearProgress,
+  Stack,
+  Alert,} from '@mui/material';
+import {
+  AccountBalance as TaxIcon,
+  Refresh as RefreshIcon,
+  Receipt as VatIcon,
+  Description as FilingIcon,
+  Calculate as CalcIcon,
+  Event as DeadlineIcon,
+} from '@mui/icons-material';
 import saudiTaxService from '../../services/saudiTaxService';
 
 const STATUS_MAP = {

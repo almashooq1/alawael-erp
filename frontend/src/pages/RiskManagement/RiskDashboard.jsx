@@ -1,9 +1,13 @@
 /**
  * Risk Management Dashboard — لوحة إدارة المخاطر
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Grid, useTheme, alpha,
+  Table, TableHead, TableBody, TableRow, TableCell,
 } from '@mui/material';
+import { Refresh, Warning, Shield, Assessment, GppBad } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer } from 'recharts';
 import { getRiskDashboard } from '../../services/riskManagement.service';
 
 const CAT_LABELS = { strategic: 'استراتيجي', operational: 'تشغيلي', financial: 'مالي', compliance: 'امتثال', reputational: 'سمعة', technology: 'تقنية', environmental: 'بيئي', safety: 'سلامة', legal: 'قانوني', other: 'أخرى' };

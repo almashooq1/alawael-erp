@@ -2,10 +2,38 @@
  * WorkflowOrchestrator — مصمم وعارض تدفقات سير العمل
  * إنشاء/تعديل تعريفات العمليات مع عقد وحواف
  */
-import { useState, useEffect } from 'react';
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  TextField, Select, MenuItem, FormControl, InputLabel, IconButton,
+  Tooltip, Stack, Paper, Typography, Chip, Divider, Grid,
+  Switch, FormControlLabel, Avatar, Alert, Card, CardContent
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Save as SaveIcon,
+  PlayArrow as StartIcon,
+  Stop as EndIcon,
+  Assignment as TaskIcon,
+  CallSplit as DecisionIcon,
+  DeviceHub as ParallelIcon,
+  MergeType as MergeIcon,
+  Timer as TimerIcon,
+  Notifications as SignalIcon,
+  SubdirectoryArrowRight as SubIcon,
+  Code as ScriptIcon,
+  Person as UserIcon,
+  CloudQueue as ServiceIcon,
+  ArrowUpward as UpIcon,
+  ArrowDownward as DownIcon,
+  ContentCopy as CloneIcon,
+  DragIndicator as DragIcon,
+  Link as LinkIcon,
+  AccountTree as TreeIcon,
+  CheckCircle as ValidIcon,
+  Error as ErrorIcon,
+} from '@mui/icons-material';
 
 const NODE_TYPES = [
   { type: 'start',            label: 'بداية',           icon: <StartIcon />,   color: '#4caf50' },
@@ -30,6 +58,7 @@ function NodeEditor({ node, index, totalNodes, allNodes, edges, onChange, onDele
   const typeInfo = NODE_TYPES.find(t => t.type === node.type) || NODE_TYPES[2];
 
   const outgoingEdges = edges.filter(e => e.sourceNodeId === node.nodeId);
+  const incomingEdges = edges.filter(e => e.targetNodeId === node.nodeId);
 
   return (
     <Paper dir="rtl" sx={{ p: 2, mb: 1.5, borderRadius: 2, borderRight: `4px solid ${typeInfo.color}` }}>

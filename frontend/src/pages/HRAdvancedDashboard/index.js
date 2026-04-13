@@ -11,9 +11,6 @@
  */
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 import { gradients } from '../../theme/palette';
 import useHRDashboard from './useHRDashboard';
 

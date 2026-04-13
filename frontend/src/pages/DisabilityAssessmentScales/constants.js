@@ -1,5 +1,27 @@
-
-
+import {
+  DirectionsRun as DirectionsRunIcon,
+  Home as HomeIcon,
+  RecordVoiceOver as RecordVoiceOverIcon,
+  Psychology as PsychologyIcon,
+  Favorite as FavoriteIcon,
+  Visibility as VisibilityIcon,
+  Lightbulb as LightbulbIcon,
+  AccountTree as AccountTreeIcon,
+  LocalHospital as LocalHospitalIcon,
+  ChildCare as ChildCareIcon,
+  School as SchoolIcon,
+  Devices as DevicesIcon,
+  VolunteerActivism as VolunteerActivismIcon,
+  Groups as GroupsIcon,
+  EmojiEmotions as EmojiEmotionsIcon,
+  People as PeopleIcon,
+  Work as WorkIcon,
+  FamilyRestroom as FamilyRestroomIcon,
+  Build as BuildIcon,
+  Accessibility as AccessibilityIcon,
+  SentimentVerySatisfied as SentimentIcon,
+} from '@mui/icons-material';
+import { Box } from '@mui/material';
 
 /* ─────────────── Icon Map ─────────────── */
 

@@ -1,5 +1,20 @@
-
-
+import React from 'react';
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
+  Typography,
+  Chip,
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 /* ------------------------------------------------------------------ */
 /*  Column definitions per tab key                                     */

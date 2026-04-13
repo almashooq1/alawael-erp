@@ -2,9 +2,24 @@
  * RehabProgramsLibrary — مكتبة البرامج التأهيلية
  * Rehabilitation Programs Library
  */
-import { useState } from 'react';
-
-
+import React, { useState } from 'react';
+import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Chip,
+  TextField,
+  InputAdornment,
+  ToggleButtonGroup,
+  ToggleButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
 const PROGRAMS = [
   {

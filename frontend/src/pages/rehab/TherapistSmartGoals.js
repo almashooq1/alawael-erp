@@ -1,8 +1,43 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  LinearProgress,  Divider,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  TrackChanges as GoalIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckIcon,
+  RadioButtonUnchecked as UncheckedIcon,
+  Flag as FlagIcon,
+  EmojiEvents as TrophyIcon,
+  Timeline as TimelineIcon,
+  TrendingUp as TrendIcon,
+  Category as DomainIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -55,7 +90,7 @@ const TherapistSmartGoals = () => {
 
   useEffect(() => {
     loadGoals();
-  }, []);  
+  }, []); // eslint-disable-line
 
   const loadGoals = async () => {
     try {

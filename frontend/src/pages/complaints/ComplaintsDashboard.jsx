@@ -2,8 +2,12 @@
  * Complaints Dashboard — لوحة تحكم الشكاوى والمقترحات
  */
 import { useState, useEffect } from 'react';
-
+import {
+  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
+} from '@mui/material';
 import { Report, CheckCircle, HourglassTop, Escalator } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#f44336', '#ff9800', '#4caf50', '#2196f3', '#9c27b0'];

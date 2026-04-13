@@ -9,9 +9,21 @@
  */
 
 import { memo } from 'react';
-import { useTheme, alpha } from '@mui/material';
-
-
+import { Box, Typography, Button, useTheme, alpha } from '@mui/material';
+import {
+  SearchOff,
+  CloudOff,
+  FolderOff,
+  PeopleOutlined,
+  BarChartOutlined,
+  AssignmentOutlined,
+  AddCircleOutline,
+  RefreshOutlined,
+  InboxOutlined,
+  WarningAmberOutlined,
+  LockOutlined,
+  WifiOff,
+} from '@mui/icons-material';
 
 // ─── Illustration SVGs ────────────────────────────────────────────────────────
 const illustrations = {
@@ -135,6 +147,7 @@ const DataPlaceholder = memo(function DataPlaceholder({
   sx = {},
 }) {
   const theme  = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   const config    = CONFIGS[type] || CONFIGS.empty;
   const finalColor = color || config.color;

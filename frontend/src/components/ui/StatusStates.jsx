@@ -17,11 +17,34 @@
 
 import { useState, useEffect } from 'react';
 import {
+  Box,
+  Typography,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
   useTheme,
   alpha,
+  Backdrop,
+  LinearProgress,
 } from '@mui/material';
-
-
+import {
+  InboxRounded as EmptyIcon,
+  ErrorOutline as ErrorIcon,
+  CheckCircleOutline as SuccessIcon,
+  Refresh as RefreshIcon,
+  Close as CloseIcon,
+  WarningAmber as WarningIcon,
+  DeleteForever as DeleteIcon,
+  SearchOff as SearchOffIcon,
+  CloudOff as CloudOffIcon,
+  LockOutlined as LockIcon,
+  FolderOffOutlined as FolderOffIcon,
+  AddCircleOutline as AddIcon,
+} from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 // ─── Illustration variants for EmptyState ─────────────────────────────────────

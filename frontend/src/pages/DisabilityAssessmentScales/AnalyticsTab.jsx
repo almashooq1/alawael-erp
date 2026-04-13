@@ -3,13 +3,37 @@
  * Shows global analytics, comparison radar, and per-beneficiary profiles.
  */
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  Alert,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Paper,
+  LinearProgress,
+  Divider,
+  Tooltip,
+} from '@mui/material';
+import {
+  Analytics as AnalyticsIcon,
+  CompareArrows as CompareIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  Assessment as AssessmentIcon,
+  Person as PersonIcon,
+  Star as StarIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
 import assessmentService from 'services/assessmentService';
 import logger from 'utils/logger';
-import { SCALE_ICONS } from './constants';
+import { TabPanel, SCALE_ICONS } from './constants';
 
 /* ── Score bar with label ── */
 const ScoreBar = ({ label, score, maxScore, color }) => {

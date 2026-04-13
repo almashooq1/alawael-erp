@@ -1,6 +1,7 @@
 /**
  * Leave Management Routes — مسارات إدارة الإجازات
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const LeaveDashboard = lazyWithRetry(() => import('../pages/LeaveManagement/LeaveDashboard'));

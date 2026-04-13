@@ -8,11 +8,27 @@
  *   ItemFormDialog.jsx  – create / edit dialog
  *   index.js            – this file (layout + wiring)
  */
-
-
+import React from 'react';
+import {
+  Container,
+  Typography,
+  Grid,
+  Paper,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Tab,
+  Tabs,
+  LinearProgress,
+} from '@mui/material';
+import { Add as AddIcon, Refresh as RefreshIcon, School as SchoolIcon } from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
+import ConfirmDialog from '../../components/common/ConfirmDialog';
 import useEducationRehab from './useEducationRehab';
 import { tabs, buildStats } from './constants';
+import DataTable from './DataTable';
+import ItemFormDialog from './ItemFormDialog';
 
 const EducationRehab = () => {
   const {

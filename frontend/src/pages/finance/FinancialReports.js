@@ -1,8 +1,35 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Button,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  LinearProgress,
+  Tabs,
+  Tab,
+  Divider,
+  FormControl,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import {
+  Assessment as ReportIcon,
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  AccountBalance as BalanceIcon,
+  BarChart as ChartIcon,
+  PictureAsPdf as PdfIcon,
+  TableChart as ExcelIcon,
+} from '@mui/icons-material';
 import accountingService from 'services/accountingService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

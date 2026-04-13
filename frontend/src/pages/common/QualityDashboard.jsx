@@ -1,14 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box,
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, LinearProgress, Button,
+} from '@mui/material';
+import {
+  Security as SecurityIcon,
+  Error as ErrorIcon,
+  Assignment as AuditIcon,
+  TrendingUp as TrendingUpIcon,
+  Gavel as ComplianceIcon,
+  BugReport as TicketIcon,
+  Assessment as AssessmentIcon,
+  ArrowForward as ArrowForwardIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend, AreaChart, Area,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import qualityService from '../../services/quality.service';
 import { useNavigate } from 'react-router-dom';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

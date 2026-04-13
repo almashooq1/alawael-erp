@@ -13,12 +13,49 @@
  * ════════════════════════════════════════════════════════════════
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { Paper,
+import React, { useState, useCallback, useEffect } from 'react';
+import {
+  Container, Box, Typography, Grid, Card, CardContent, Paper, Tabs, Tab,
+  Button, TextField, Select, MenuItem, InputLabel, FormControl, Chip, Alert,
+  Table, TableHead, TableRow, TableCell, TableBody, TableContainer,
+  Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Tooltip,
+  LinearProgress, Divider, CircularProgress, Rating,
+  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
+  Accordion, AccordionSummary, AccordionDetails, Switch, FormControlLabel,
 } from '@mui/material';
 
-
-
+import {
+  Psychology as PsychologyIcon,
+  Assessment as AssessmentIcon,
+  TrendingUp as TrendingUpIcon,
+  LocalHospital as ProtocolIcon,
+  ExitToApp as DischargeIcon,
+  BatteryChargingFull as BatteryIcon,
+  PlayArrow as StartIcon,
+  CheckCircle as DoneIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  Info as InfoIcon,
+  ExpandMore as ExpandMoreIcon,
+  Science as ScienceIcon,
+  Analytics as AnalyticsIcon,
+  ChildCare as ChildIcon,
+  Accessibility as AccessibilityIcon,
+  Hearing as HearingIcon,
+  Visibility as VisionIcon,
+  EmojiPeople as MotorIcon,
+  RecordVoiceOver as SpeechIcon,
+  FamilyRestroom as FamilyIcon,
+  BarChart as BarChartIcon,
+  Timeline as TimelineIcon,
+  Speed as SpeedIcon,
+  Star as StarIcon,
+  School as SchoolIcon,
+  Download as DownloadIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+  AutoAwesome as SmartIcon,
+} from '@mui/icons-material';
 
 /* ─── API Helper ───────────────────────────────────────────── */
 const API = '/api/smart-assessment';
@@ -141,7 +178,7 @@ export default function SmartAssessmentDashboard() {
 
   /* ─── Overview state (REAL API) ──────────────────────────── */
   const [overviewStats, setOverviewStats] = useState(null);
-  const [, setRecentAssessments] = useState([]);
+  const [recentAssessments, setRecentAssessments] = useState([]);
 
   /* ─── Administer state ───────────────────────────────────── */
   const [selectedScale, setSelectedScale] = useState(null);
@@ -393,7 +430,7 @@ export default function SmartAssessmentDashboard() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {SCALE_CATALOG.slice(0, 8).map((scale) => (
+                {SCALE_CATALOG.slice(0, 8).map((scale, i) => (
                   <TableRow key={scale.id} hover>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-end' }}>

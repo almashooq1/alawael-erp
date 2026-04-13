@@ -1,8 +1,20 @@
-
-
-
-
-import { SCALE_ICONS } from './constants';
+import {
+  Box,
+  Card,
+  CardContent,
+  CardActions,
+  Typography,
+  Button,
+  Grid,
+  Chip,
+  Avatar,
+  Divider,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  Add as AddIcon,
+} from '@mui/icons-material';
+import { SCALE_ICONS, TabPanel } from './constants';
 
 /**
  * Tab 0 — displays all assessment scale cards in a responsive grid.

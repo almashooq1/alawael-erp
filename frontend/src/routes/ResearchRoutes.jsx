@@ -1,6 +1,7 @@
 /**
  * Research Center Routes — مسارات مركز الأبحاث
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ResearchDashboard = lazyWithRetry(() => import('../pages/research/ResearchDashboard'));

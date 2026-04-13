@@ -1,8 +1,31 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+} from '@mui/material';
+import {
+  NavigateBefore as NavigateBeforeIcon,
+  NavigateNext as NavigateNextIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  CalendarMonth as CalendarIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

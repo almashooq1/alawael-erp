@@ -2,10 +2,30 @@
  * RehabProgressTracking — تتبع تقدم التأهيل
  * Rehabilitation Progress Tracking Dashboard
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  LinearProgress,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Avatar,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingIcon from '@mui/icons-material/Pending';
 
 const METRICS = [
   { label: 'التقدم العام', value: 72, color: 'primary' },

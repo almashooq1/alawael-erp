@@ -3,10 +3,33 @@
  * AlAwael ERP — Admin Panel
  */
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Switch,
+  FormControlLabel,
+  TextField,
+  Divider,
+  Alert,
+  Stack,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import {
+  Settings as SettingsIcon,
+  Save as SaveIcon,
+  Refresh as RefreshIcon,
+  Warning as WarningIcon,
+  Build as MaintenanceIcon,
+} from '@mui/icons-material';
 import systemSettingsService from '../../services/systemSettingsService';
 
 export default function SystemSettingsPage() {

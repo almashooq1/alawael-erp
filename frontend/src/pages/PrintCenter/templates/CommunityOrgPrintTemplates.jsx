@@ -2,7 +2,10 @@
  * قوالب المجتمع والمتطوعين والهيكل التنظيمي
  * Community Integration, Volunteers & Organizational Structure Templates
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

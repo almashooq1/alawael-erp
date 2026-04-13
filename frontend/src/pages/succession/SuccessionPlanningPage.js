@@ -3,10 +3,47 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  LinearProgress as ProgressBar,
 } from '@mui/material';
-
-
+import {
+  SwapHoriz as SuccessionIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  TrendingUp as ReadyIcon,
+  Person as PersonIcon,
+  Edit as EditIcon,
+  Schedule as TimelineIcon,
+  Assessment as AssessIcon,
+  Groups as GroupsIcon,
+} from '@mui/icons-material';
 import successionPlanningService from '../../services/successionPlanning.service';
 
 const DEMO_PLANS = [

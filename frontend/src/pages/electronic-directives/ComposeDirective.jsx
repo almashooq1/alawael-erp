@@ -1,12 +1,36 @@
 /**
  * Compose Directive — إنشاء توجيه إلكتروني جديد
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Button,
+  Chip,
+  IconButton,  Switch,
+  FormControlLabel,
+  Alert,
+  Snackbar,
+  Card,
+  CardContent,
+  Autocomplete,
+} from '@mui/material';
+import {
+  Send as SendIcon,
+  Save as SaveIcon,
+  ArrowBack as BackIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  AttachFile as AttachIcon,
+  } from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   typeOptions,

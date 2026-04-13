@@ -3,9 +3,18 @@
  * شريط البحث والمرشحات والإحصائيات
  */
 
-
-
-
+import {
+  Box, Paper, Stack, TextField, InputAdornment, FormControl, InputLabel,
+  Select, MenuItem, Tooltip, IconButton, Collapse, Typography, Chip,
+  Button, Badge,
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  FilterList as FilterListIcon,
+  KeyboardArrowUp as KeyboardArrowUpIcon,
+  ViewColumn as ViewColumnIcon,
+  DataObject as DataObjectIcon,
+} from '@mui/icons-material';
 import { CATEGORIES } from './documentListConstants';
 
 const DocumentListToolbar = ({

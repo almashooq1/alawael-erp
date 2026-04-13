@@ -2,9 +2,22 @@
  * 📅 CalendarEventsWidget — ويدجت التقويم والأحداث
  * Professional calendar widget with upcoming events, hijri date, and quick scheduling
  */
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  useTheme, } from '@mui/material';
+  Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
+  useTheme, Divider, Avatar, List, ListItem,
+  ListItemAvatar, ListItemText, } from '@mui/material';
+import { motion } from 'framer-motion';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import EventIcon from '@mui/icons-material/Event';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import GroupIcon from '@mui/icons-material/Group';
+import VideoCallIcon from '@mui/icons-material/VideoCall';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import AddIcon from '@mui/icons-material/Add';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import { gradients, statusColors, brandColors } from 'theme/palette';
 
 const DAYS_AR = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
@@ -51,7 +64,7 @@ const MiniCalendar = () => {
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
 
-  const calendarDays =  
+  const calendarDays = // eslint-disable-next-line react-hooks/exhaustive-deps
  useMemo(() => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();

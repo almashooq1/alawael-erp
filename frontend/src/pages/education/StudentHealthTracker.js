@@ -4,10 +4,46 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  Paper,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  LinearProgress,
+  Divider,
+  Alert,
+  Tabs,
+  Tab,
+  Slider,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+} from '@mui/material';
+import {
+  MonitorHeart as HeartIcon,
+  Thermostat as TempIcon,
+  Medication as MedIcon,
+  Restaurant as FoodIcon,
+  Notifications as AlertIcon,
+  CheckCircle as CheckIcon,
+  Add as AddIcon,
+  Close as CloseIcon,
+  Bedtime as SleepIcon,
+  WaterDrop as WaterIcon,
+  SentimentVerySatisfied as HappyIcon,
+} from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';

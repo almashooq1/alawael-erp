@@ -5,7 +5,10 @@
  * ويوفر lazy-loaded pages مع React Router
  */
 
-import { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { CircularProgress, Box } from '@mui/material';
+import DDDPlatformLayout from '../components/ddd/DDDPlatformLayout';
 
 /* ── Lazy-loaded pages ── */
 const ExecutiveDashboard = lazy(() => import('../pages/executive-dashboard/ExecutiveDashboard'));
@@ -16,6 +19,9 @@ const SessionsPage = lazy(() => import('../pages/sessions/SessionsPage'));
 const WorkflowPage = lazy(() => import('../pages/workflow/WorkflowPage'));
 const QualityPage = lazy(() => import('../pages/quality/QualityPage'));
 const ReportsPage = lazy(() => import('../pages/reports/ReportsPage'));
+
+/* Domain pages from factory */
+const DomainPages = lazy(() => import('../pages/domains/DomainPages'));
 
 /* ── Loading fallback ── */
 const PageLoader = () => (

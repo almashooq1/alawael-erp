@@ -5,9 +5,19 @@
 
 import React, { useState, useMemo } from 'react';
 import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  ButtonBase,
   useTheme,
+  TextField,
+  InputAdornment,
+  Chip,
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import SearchIcon from '@mui/icons-material/Search';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -19,6 +29,8 @@ import ContactsIcon from '@mui/icons-material/Contacts';
 import BuildIcon from '@mui/icons-material/Build';
 import DescriptionIcon from '@mui/icons-material/Description';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import ArrowForwardIosRoundedIcon from '@mui/icons-material/ArrowForwardIosRounded';
+import ViewModuleRoundedIcon from '@mui/icons-material/ViewModuleRounded';
 
 import { formatNumber } from 'services/dashboardService';
 
@@ -233,7 +245,7 @@ const ModulesSummary = ({ kpis = {}, supplyChain = {}, fleet = {}, operations = 
     { name: 'maintenance',   label: 'الصيانة',            icon: 'Build',          stats: { open: operations.maintenance?.open || 0 },                                             path: '/operations' },
     { name: 'documents',     label: 'المستندات',          icon: 'Description',    stats: { total: kpis.documents?.total || 0 },                                                   path: '/documents' },
   ].map((m, i) => ({ ...m, ...MODULE_GRADIENTS[i % MODULE_GRADIENTS.length] })),
-   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   [kpis, supplyChain, fleet, operations]);
 
   const modules = useMemo(() => {

@@ -4,9 +4,16 @@
  * Gradient: #8b5cf6 → #ec4899 → #06b6d4
  */
 
-import { useTheme, alpha,
+import {
+  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import ScienceIcon from '@mui/icons-material/Science';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DescriptionIcon from '@mui/icons-material/Description';

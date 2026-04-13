@@ -5,9 +5,17 @@
  * Gradient: #ef4444 → #f59e0b → #22c55e
  */
 
-import { useTheme, alpha, TableRow,
+import {
+  Box, Typography, Grid, Card, useTheme, alpha, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  LinearProgress, IconButton, Tooltip,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 
 import SettingsIcon from '@mui/icons-material/Settings';
 import BuildIcon from '@mui/icons-material/Build';
@@ -15,7 +23,12 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingIcon from '@mui/icons-material/Pending';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ErrorIcon from '@mui/icons-material/Error';
 
 /* ═══════════════════════════════════════════════════════════════════ */
 const GRAD = ['#ef4444', '#f59e0b', '#22c55e'];

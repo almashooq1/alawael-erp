@@ -4,7 +4,10 @@
  */
 
 import React from 'react';
-import { useTheme } from '@mui/material';
+import { Box, Paper, Typography, Chip, useTheme, Tooltip } from '@mui/material';
+import { motion } from 'framer-motion';
+import EmojiEventsRoundedIcon from '@mui/icons-material/EmojiEventsRounded';
+import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded';
 
 /* ─────────────────────────────────────── */
 const RINGS_DEMO = [

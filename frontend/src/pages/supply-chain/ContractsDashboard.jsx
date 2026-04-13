@@ -1,14 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import computeStatusCounts from '../../utils/computeStatusCounts';
-
-
-
-
+import {
+  Container, Typography, Grid, Paper, Box,
+  Chip, Table, TableBody, TableCell, TableContainer,
+  TableHead, TableRow, LinearProgress, Button,
+} from '@mui/material';
+import {
+  Gavel as ContractsIcon,
+  Description as DocIcon,
+  EventAvailable as ActiveIcon,
+  EventBusy as ExpiredIcon,
+  AttachMoney as MoneyIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendingUpIcon,
+  ArrowForward as ArrowForwardIcon,
+} from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors, neutralColors, brandColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import contractsService from '../../services/contracts.service';
 import { useNavigate } from 'react-router-dom';
+import ModuleKPICard from '../../components/dashboard/shared/ModuleKPICard';
+import EmptyState from '../../components/dashboard/shared/EmptyState';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── بيانات تجريبية ──────── */
 const DEMO_STATS = {

@@ -5,22 +5,54 @@
  * real-time metrics, and summary charts.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  ToggleButtonGroup,
+  ToggleButton,
+  Tooltip,
+  IconButton,
+  Alert,
   useTheme,
   alpha,
 } from '@mui/material';
 import {
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
   People,
   AccountBalance,
   EventNote,
   Accessibility,
   ReportProblem,
   HowToReg,
+  Refresh,
   Speed,
+  AccessTime,
+  Wifi,
+  Assignment,
 } from '@mui/icons-material';
-
-
+import {
+    AreaChart,
+    Area,
+    PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+} from 'recharts';
+import { motion } from 'framer-motion';
 import { getOverview, getKPIs, getRealtime, getTrends } from '../../services/biDashboard.service';
 
 const PERIOD_OPTIONS = [

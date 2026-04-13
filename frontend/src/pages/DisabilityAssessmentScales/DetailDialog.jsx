@@ -1,6 +1,22 @@
-
-
-
+import {
+  Box,
+  Typography,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Chip,
+  LinearProgress,
+  Alert,
+  Paper,
+  IconButton,
+  Tooltip,
+} from '@mui/material';
+import { Print as PrintIcon, Close as CloseIcon } from '@mui/icons-material';
+import {
+  RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  ResponsiveContainer, Tooltip as RechartsTooltip,
+} from 'recharts';
 import { surfaceColors } from '../../theme/palette';
 
 /**

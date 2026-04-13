@@ -1,6 +1,7 @@
 /**
  * Quality & Compliance Routes — مسارات الجودة والامتثال
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const QualityDashboard = lazyWithRetry(() => import('../pages/Quality/QualityDashboard'));

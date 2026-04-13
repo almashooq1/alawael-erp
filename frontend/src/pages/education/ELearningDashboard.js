@@ -1,7 +1,27 @@
 // Phase 5: E-Learning Dashboard
 import { useState, useEffect, useCallback } from 'react';
-
-
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+  Button,
+  Chip,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  TextField,
+  DialogActions,
+  MenuItem,
+  Tabs,
+  Tab,
+  LinearProgress,
+} from '@mui/material';
+import { Add as AddIcon, School as SchoolIcon, PlayArrow } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import eLearningService from 'services/eLearning.service';
 import { placeholderImage } from 'utils/placeholderImage';

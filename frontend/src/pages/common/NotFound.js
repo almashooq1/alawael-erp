@@ -1,3 +1,4 @@
+import { Container, Typography, Paper, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 function NotFound() {

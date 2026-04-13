@@ -13,9 +13,18 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-
-
+import {
+  Container, Box, Typography, Grid, Paper, Button, Chip,
+  TextField, MenuItem, Divider, Avatar, IconButton, Tab, Tabs,
+  LinearProgress, Stack, Alert, Skeleton,
+} from '@mui/material';
+import {
+  ArrowBack, Edit, Save, Cancel, Person, Phone, Email, Star,
+  School, LocalHospital, Accessibility, FamilyRestroom as Family, TrendingUp, Description, History,
+} from '@mui/icons-material';
+import {
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors } from '../../theme/palette';
 import beneficiaryService from '../../services/beneficiaryService';

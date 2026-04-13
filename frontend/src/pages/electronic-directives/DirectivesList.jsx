@@ -1,13 +1,47 @@
 /**
  * Directives List — قائمة التوجيهات الإلكترونية
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
+  Box,
+  Typography,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Chip,
+  IconButton,
+  Button,
+  TextField,
+  InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Tooltip,
+  Skeleton,
+  Alert,
+  Grid,
+  Avatar,
 } from '@mui/material';
-
-
+import {
+  Search as SearchIcon,
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Campaign as CampaignIcon,
+  Gavel as DecisionIcon,
+  Description as MemoIcon,
+  NotificationsActive as UrgentIcon,
+  PolicyOutlined as PolicyIcon,
+  Rule as ProcedureIcon,
+  Assignment as InstructionIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,

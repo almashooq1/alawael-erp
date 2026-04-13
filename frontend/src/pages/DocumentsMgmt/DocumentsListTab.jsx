@@ -10,10 +10,33 @@
  * تبويب قائمة المستندات: شريط البحث والفلترة وعرض المستندات
  */
 
-
-
-
-
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  InputAdornment,
+  MenuItem,
+  LinearProgress,
+  Select,
+  FormControl,
+  InputLabel,
+  Tooltip,
+} from '@mui/material';
+import {
+  Search as SearchIcon,
+  Description as DocumentIcon,
+  Download as DownloadIcon,
+  Share as ShareIcon,
+  Visibility as ViewIcon,
+  Lock as LockIcon,
+} from '@mui/icons-material';
 import { getStatusColor } from 'utils/statusColors';
 import { formatFileSize } from './useDocumentsPage';
 

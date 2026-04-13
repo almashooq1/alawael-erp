@@ -1,12 +1,21 @@
 /**
  * لوحة تحكم الأزمات — Crisis Management Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Warning as CrisisIcon,
+  Shield as PlanIcon,
+  Event as DrillIcon,
+  ContactPhone as ContactIcon,
+} from '@mui/icons-material';
 import { getDashboard } from '../../services/crisisManagement.service';
 
 const severityLabels = { minor: 'بسيط', moderate: 'متوسط', major: 'كبير', critical: 'حرج' };

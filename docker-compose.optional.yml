@@ -30,7 +30,7 @@ services:
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
-      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:-changeme}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:?Set ELASTIC_PASSWORD in .env}
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
@@ -39,7 +39,7 @@ services:
     networks:
       - alawael-net
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD:-changeme} http://localhost:9200/_cluster/health | grep -q '\"status\":\"[gy]'"]
+      test: ["CMD-SHELL", "curl -sf -u elastic:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health | grep -q '\"status\":\"[gy]'"]
       interval: 30s
       timeout: 10s
       retries: 5

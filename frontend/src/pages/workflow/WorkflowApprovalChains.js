@@ -4,14 +4,66 @@
  * Manage multi-level approval chains, start approval processes,
  * review and decide on pending approvals, and view approval timeline.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
+  Badge,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
   alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CloneIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  CheckCircle as ApproveIcon,
+  Cancel as RejectIcon,
+  AccountTree as ChainIcon,
+  Timeline as TimelineIcon,
+  Pending as PendingIcon,
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

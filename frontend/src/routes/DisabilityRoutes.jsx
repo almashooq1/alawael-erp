@@ -1,6 +1,7 @@
 /**
  * Disability Routes — مسارات الإعاقة والتأهيل
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const DisabilityAuthorityDashboard = lazyWithRetry(() => import('../pages/disabilityAuthority/DisabilityAuthorityDashboard'));

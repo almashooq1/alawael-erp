@@ -4,11 +4,47 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
   useTheme,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Business as BusinessIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { contactsService, MOCK_CONTACTS } from 'services/crmService';
 import { useSnackbar } from 'contexts/SnackbarContext';
 

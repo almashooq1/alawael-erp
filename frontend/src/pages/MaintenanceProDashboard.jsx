@@ -7,13 +7,27 @@
 
 import { useState } from 'react';
 import {
-  useTheme, alpha,
+  Box, Typography, Grid, Card, LinearProgress, Chip, Avatar,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  useTheme, alpha, IconButton, Tooltip,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadarChart,
+  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import BuildIcon from '@mui/icons-material/Build';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import ApartmentIcon from '@mui/icons-material/Apartment';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import PendingActionsIcon from '@mui/icons-material/PendingActions';
 import EngineeringIcon from '@mui/icons-material/Engineering';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // ─── Gradient Palette ───────────────────────────────────────────────────────
 const GRADIENT = 'linear-gradient(135deg, #f59e0b 0%, #22c55e 50%, #06b6d4 100%)';

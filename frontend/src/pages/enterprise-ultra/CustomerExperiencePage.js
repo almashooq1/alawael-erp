@@ -4,10 +4,24 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Paper,
+  Box, Typography, Tabs, Tab, Card, CardContent, Grid, Button, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions, TextField,
+  MenuItem, Alert, LinearProgress, Stack, IconButton, Rating, Divider,
 } from '@mui/material';
-
-
+import {
+  SentimentSatisfiedAlt as CXIcon,
+  Add as AddIcon,
+  Poll as SurveyIcon,
+  Feedback as FeedbackIcon,
+  Report as ComplaintIcon,
+  Timeline as JourneyIcon,
+  Speed as BenchmarkIcon,
+  Refresh as RefreshIcon,
+  ThumbUp as ThumbUpIcon,
+  ThumbDown as ThumbDownIcon,
+  TrendingUp as TrendUpIcon,
+} from '@mui/icons-material';
 import * as cxService from '../../services/enterpriseUltra.service';
 
 const statusColors = {

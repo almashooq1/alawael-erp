@@ -3,11 +3,44 @@
  * Phase 20 — تدقيق، مؤشرات جودة، تقارير اعتماد تلقائية
  */
 
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Card,
+  CardContent,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Button,
+  CircularProgress,
+  Alert,
+  LinearProgress,
+  Divider,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  VerifiedUser as VerifiedUserIcon,
+  FindInPage as FindInPageIcon,
+  Warning as WarningIcon,
+  Description as DescriptionIcon,
+  Security as SecurityIcon,
+  TrendingUp as TrendingUpIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Schedule as ScheduleIcon,
+  Refresh as RefreshIcon,
+  Assignment as AssignmentIcon,
+  LocalHospital as LocalHospitalIcon,
+} from '@mui/icons-material';
 import qualityManagementService from '../../services/qualityManagementService';
 
 /* ═══ Helper — severity chip ═══ */

@@ -1,14 +1,48 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import {
+  Business as BusinessIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  LocationOn as LocationOnIcon,
+} from '@mui/icons-material';
 import { adminService } from 'services/adminService';
 import api from 'services/api.client';
 import logger from 'utils/logger';
 import { gradients, brandColors, neutralColors, surfaceColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
-import { useConfirmDialog } from 'components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from 'components/common/ConfirmDialog';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 
 const AdminClinicManagement = () => {

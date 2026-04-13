@@ -10,8 +10,21 @@
  * تبويب التحليلات: بطاقات عامة، رسم بياني دائري وأكثر المستندات تحميلاً
  */
 
-
-
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  Alert,
+} from '@mui/material';
+import { Pie } from 'react-chartjs-2';
 import { chartColors } from '../../theme/palette';
 
 export const TemplatesTab = () => (

@@ -2,10 +2,29 @@
  * FinanceDashboard.jsx — لوحة المالية المتقدمة
  * تصميم Glassmorphism بريميوم | Framer Motion | RTL | Dark/Light
  */
-import { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
+  Box, Typography, Grid, Avatar, Chip, LinearProgress,
+  Skeleton, Tooltip, IconButton, Badge, Divider,
+  Table, TableBody, TableCell, TableHead, TableRow,
   useTheme, alpha,
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import SavingsIcon from '@mui/icons-material/Savings';
+import CreditScoreIcon from '@mui/icons-material/CreditScore';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import PaymentsIcon from '@mui/icons-material/Payments';
+import InsightsIcon from '@mui/icons-material/Insights';
 
 /* ─── Glass ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {

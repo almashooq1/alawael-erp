@@ -4,7 +4,10 @@
  */
 
 import { Component } from 'react';
+import { Box, Paper, Typography, Button } from '@mui/material';
 import logger from '../../../utils/logger';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { statusColors, gradients } from '../../../theme/palette';
 
 class DashboardErrorBoundary extends Component {

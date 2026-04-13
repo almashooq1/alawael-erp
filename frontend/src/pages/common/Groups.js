@@ -1,14 +1,43 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  IconButton,
+  TextField,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Chip,
+  Grid,
+  CircularProgress,
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Group as GroupIcon,
+  PersonAdd as PersonAddIcon,
+  MoreVert as MoreVertIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import groupsService from 'services/groupsService';
 import { gradients } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const Groups = () => {
   const showSnackbar = useSnackbar();

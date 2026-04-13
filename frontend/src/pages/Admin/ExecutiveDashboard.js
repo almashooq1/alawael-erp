@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  LinearProgress,
+  Divider,
+} from '@mui/material';
+import { TrendingUp, People, Dns, Warning, CheckCircle, Speed } from '@mui/icons-material';
 import analyticsService from 'services/analyticsService';
 import logger from 'utils/logger';
 import { gradients, surfaceColors } from '../../theme/palette';

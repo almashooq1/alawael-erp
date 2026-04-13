@@ -5,12 +5,22 @@
  * يُستخدم كـ wrapper حول DDDRoutes
  */
 
-import { useState } from 'react';
-import { useMediaQuery, useTheme,
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import {
+  Box, AppBar, Toolbar, Typography, IconButton, Avatar,
+  Badge, Tooltip, useMediaQuery, useTheme, Chip,
 } from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Notifications as NotifIcon,
+  Settings as SettingsIcon,
+  Fullscreen as FullscreenIcon,
+  Search as SearchIcon,
+  Dashboard as DashIcon,
+} from '@mui/icons-material';
 
-
-
+import DDDSidebar from './DDDSidebar';
 
 const DRAWER_WIDTH = 260;
 

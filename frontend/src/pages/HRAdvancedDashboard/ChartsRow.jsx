@@ -2,8 +2,20 @@
  * ChartsRow – Attendance pie + Department bar chart.
  */
 import React from 'react';
-
-
+import { Grid, Paper, Typography, Box } from '@mui/material';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import { statusColors } from '../../theme/palette';
 
 const ChartsRow = ({ attendanceChartData, departmentChartData }) => (

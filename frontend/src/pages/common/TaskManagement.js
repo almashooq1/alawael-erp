@@ -4,11 +4,61 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Paper,} from '@mui/material';
-
-
-
-
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Avatar,
+  Button,
+  IconButton,
+  Tooltip,
+  TextField,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress,
+  InputAdornment,
+  Tabs,
+  Tab,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Close as CloseIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CompleteIcon,
+  PlayArrow as StartIcon,
+  Assignment as TaskIcon,
+  } from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
 import {
   tasksService,
   taskReportsService,

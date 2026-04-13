@@ -1,6 +1,9 @@
 /**
  * KpiCardsGrid — Responsive grid of 8 StatCard components
  */
+import React from 'react';
+import { Grid } from '@mui/material';
+import StatCard from '../StatCard';
 
 const KpiCardsGrid = ({ kpiCards, refreshing }) => (
   <Grid

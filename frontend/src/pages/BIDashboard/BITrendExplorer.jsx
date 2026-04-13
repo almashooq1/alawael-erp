@@ -5,15 +5,46 @@
  * time range controls, trend lines, and predictions.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  IconButton,
+  Tooltip,
+  Alert,
+  Chip,
   useTheme,
   alpha,
 } from '@mui/material';
-
-
-
-
+import {
+  TrendingUp,
+  TrendingDown,
+  TrendingFlat,
+  Refresh,
+  ShowChart,
+  Timeline,
+} from '@mui/icons-material';
+import {
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  ReferenceLine,
+} from 'recharts';
 import { getTrends } from '../../services/biDashboard.service';
 
 const METRICS = [

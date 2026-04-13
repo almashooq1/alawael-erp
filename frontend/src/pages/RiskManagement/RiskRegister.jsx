@@ -1,9 +1,13 @@
 /**
  * Risk Register — سجل المخاطر
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
+import { Refresh, Add, Edit, Delete, Warning } from '@mui/icons-material';
 import { getRisks, createRisk, updateRisk, deleteRisk } from '../../services/riskManagement.service';
 
 const CAT_LABELS = { strategic: 'استراتيجي', operational: 'تشغيلي', financial: 'مالي', compliance: 'امتثال', reputational: 'سمعة', technology: 'تقنية', environmental: 'بيئي', safety: 'سلامة', legal: 'قانوني', other: 'أخرى' };

@@ -2,8 +2,14 @@
  * PerformanceHeader.jsx — Gradient header + toolbar
  * Extracted from PerformanceEvaluation.js
  */
-
-
+import React from 'react';
+import { Box, Typography, Paper, Button, Avatar } from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  Download as DownloadIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+} from '@mui/icons-material';
 import { gradients } from '../../../theme/palette';
 
 const PerformanceHeader = ({ handleExportCSV, loadData }) => (

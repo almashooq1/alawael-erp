@@ -2,7 +2,10 @@
  * قوالب التأهيل المتخصص و ICF/MDT — Rehabilitation & ICF/MDT Print Templates
  * يشمل: البرامج التأهيلية المتخصصة، مقاييس التقييم، التصنيف الدولي، الفريق متعدد التخصصات
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

@@ -4,13 +4,21 @@
  * Gradient: #22c55e → #06b6d4 → #6366f1
  */
 
-import { useTheme, alpha,
+import {
+  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import ShieldIcon from '@mui/icons-material/Shield';
 
 /* ─── Mock Data ────────────────────────────────────────────────────────────── */
 const KPI_DATA = [

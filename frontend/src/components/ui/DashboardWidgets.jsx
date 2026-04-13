@@ -11,10 +11,16 @@
  * - WelcomeCard: Personalized greeting banner
  */
 
+import { Box, Card, CardContent, Typography, Chip, Avatar,
+  List, ListItem, ListItemAvatar, ListItemText, LinearProgress,
+  useTheme, alpha, Grid, Button, Stack } from '@mui/material';
 import {
-  useTheme, alpha } from '@mui/material';
-
-
+  TrendingUp as TrendUpIcon,
+  TrendingDown as TrendDownIcon,
+  TrendingFlat as TrendFlatIcon,
+  ArrowForward as ArrowIcon,
+  Circle as DotIcon,
+} from '@mui/icons-material';
 import { motion } from 'framer-motion';
 
 // ─── STAT CARD ───────────────────────────────────────────────────────────────
@@ -151,8 +157,10 @@ export const ChartCard = ({
   height = 300,
   noPadding = false,
 }) => {
+  const theme = useTheme();
+
   return (
-    <Card sx={{ borderRadius: '16px', overflow: 'hidden' }}>  
+    <Card sx={{ borderRadius: '16px', overflow: 'hidden' }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2.5, pt: 2.5, pb: 1 }}>
         <Box>

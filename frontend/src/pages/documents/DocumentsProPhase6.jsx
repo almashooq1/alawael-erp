@@ -2,10 +2,48 @@
  * Documents Pro Phase 6 — لوحة تحكم المرحلة السادسة
  * OCR • الأرشفة والامتثال • محرك التقارير • بوابة البريد • المساعد الذكي
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Tabs, Tab, Paper, Typography, Grid, Card, CardContent,
+  Button, TextField, IconButton, Chip, Alert, CircularProgress,
+  Dialog, DialogTitle, DialogContent, DialogActions, Divider,
+  List, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction,
+  Switch, Tooltip, Badge, Avatar, LinearProgress, Snackbar,
+  Table, TableHead, TableRow, TableCell, TableBody,
+  FormControl, InputLabel, Select, MenuItem
+} from '@mui/material';
+import {
+  DocumentScanner as OCRIcon,
+  Archive as ArchiveIcon,
+  Assessment as ReportIcon,
+  Email as EmailIcon,
+  SmartToy as AIIcon,
+  Upload as UploadIcon,
+  Search as SearchIcon,
+  PlayArrow as RunIcon,
+  Send as SendIcon,
+  Chat as ChatIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as CheckIcon,
+  Error as ErrorIcon,
+  Warning as WarningIcon,
+  Visibility as ViewIcon,
+  Download as DownloadIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Gavel as LegalIcon,
+  VerifiedUser as ComplianceIcon,
+  Schedule as ScheduleIcon,
+  ForwardToInbox as ForwardIcon,
+  Psychology as BrainIcon,
+  AutoFixHigh as AutoIcon,
+  ContentCopy as DuplicateIcon,
+  Summarize as SummarizeIcon,
+  Category as ClassifyIcon,
+  DataObject as ExtractIcon,
+  Dashboard as DashIcon,
+} from '@mui/icons-material';
 
 import { ocrApi, archiveApi, reportApi, emailApi, aiApi, getDashboard }
   from '../../services/documentProPhase6Service';
@@ -20,6 +58,7 @@ function TabPanel({ children, value, index }) {
    ═══════════════════════════════════════════════════════════════ */
 export default function DocumentsProPhase6() {
   const [tab, setTab] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' });
   const [dashboard, setDashboard] = useState(null);
 
@@ -231,7 +270,7 @@ function OCRTab({ showSnack }) {
 /* ═══════════════════════════════════════════════════════════════
    Archive Tab — الأرشفة والامتثال
    ═══════════════════════════════════════════════════════════════ */
-function ArchiveTab() {
+function ArchiveTab({ showSnack }) {
   const [policies, setPolicies] = useState([]);
   const [legalHolds, setLegalHolds] = useState([]);
   const [stats, setStats] = useState(null);
@@ -470,7 +509,7 @@ function ReportTab({ showSnack }) {
 function EmailTab({ showSnack }) {
   const [messages, setMessages] = useState([]);
   const [rules, setRules] = useState([]);
-  const [, setTemplates] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [sendDialog, setSendDialog] = useState(false);
   const [sendForm, setSendForm] = useState({ to: '', subject: '', body: '' });

@@ -2,10 +2,36 @@
  * HRAdvancedDashboard.jsx — لوحة الموارد البشرية المتقدمة
  * تصميم Glassmorphism بريميوم | Framer Motion | RTL | Dark/Light
  */
-import { useState, useEffect, useCallback, memo } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import {
+  Box, Typography, Grid, Avatar, Chip, LinearProgress,
+  Skeleton, Tooltip, IconButton, Badge, Divider,
+  Table, TableBody, TableCell, TableHead, TableRow,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, TextField, MenuItem, useTheme, alpha,
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import GroupsIcon from '@mui/icons-material/Groups';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonOffIcon from '@mui/icons-material/PersonOff';
+import EventBusyIcon from '@mui/icons-material/EventBusy';
+import StarIcon from '@mui/icons-material/Star';
+import SchoolIcon from '@mui/icons-material/School';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import WorkIcon from '@mui/icons-material/Work';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import AddIcon from '@mui/icons-material/Add';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 /* ─── Glass component ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {

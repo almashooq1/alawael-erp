@@ -2,6 +2,9 @@
  * Student Registration — Success View
  */
 
+import React from 'react';
+import { Container, Box, Typography, Button, Avatar, Fade } from '@mui/material';
+import { CheckCircle, Print } from '@mui/icons-material';
 import { gradients } from 'theme/palette';
 
 const RegistrationSuccess = ({ formData, onReset, onNavigate }) => (

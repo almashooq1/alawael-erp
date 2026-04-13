@@ -2,10 +2,28 @@
  * CEODashboard.jsx — لوحة تحكم الرئيس التنفيذي (CEO)
  * تصميم Glassmorphism بريميوم | Framer Motion | RTL | Dark/Light
  */
-import { useState, useEffect, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback, memo } from 'react';
 import {
+  Box, Typography, Grid, Avatar, Chip, LinearProgress,
+  Skeleton, Tooltip, IconButton, Badge, Divider,
+  Table, TableBody, TableCell, TableHead, TableRow,
   useTheme, alpha,
 } from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import GroupsIcon from '@mui/icons-material/Groups';
+import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
+import AutoGraphIcon from '@mui/icons-material/AutoGraph';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import BusinessIcon from '@mui/icons-material/Business';
+import SpeedIcon from '@mui/icons-material/Speed';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 
 /* ─── Glass component ─── */
 const Glass = memo(({ children, sx = {}, ...rest }) => {

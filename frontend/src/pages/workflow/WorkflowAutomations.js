@@ -4,14 +4,61 @@
  * Create and manage automation rules that trigger actions
  * based on workflow events. View execution logs and test rules.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Switch,
+  FormControlLabel,
+  Tooltip,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Badge,
   alpha,
+  Skeleton,
+  Alert,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Refresh as RefreshIcon,
+  ArrowBack as BackIcon,
+  Save as SaveIcon,
+  AutoFixHigh as AutoIcon,
+  PlayArrow as TestIcon,
+  FlashOn as TriggerIcon,
+  Settings as ActionIcon,
+  Rule as RuleIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  FilterList as FilterIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

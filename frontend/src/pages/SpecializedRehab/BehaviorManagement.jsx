@@ -2,10 +2,36 @@
  * BehaviorManagement — إدارة السلوك
  * Behavior Management & Intervention Tracking
  */
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
 } from '@mui/material';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import AddIcon from '@mui/icons-material/Add';
 
 const BEHAVIOR_RECORDS = [
   {

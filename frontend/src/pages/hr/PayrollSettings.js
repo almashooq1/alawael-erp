@@ -1,8 +1,33 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Grid,
+  Button,
+  TextField,
+  InputAdornment,
+  Divider,
+  LinearProgress,  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+  Chip,
+  Alert,
+} from '@mui/material';
+import {
+  Settings as SettingsIcon,
+  Save as SaveIcon,
+  AccountBalance as GOSIIcon,
+  LocalHospital as InsuranceIcon,
+  Receipt as TaxIcon,
+  AccessTime as OTIcon,
+  CalendarMonth as CalIcon,
+  MonetizationOn as CurrIcon,
+} from '@mui/icons-material';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';

@@ -1,9 +1,13 @@
 /**
  * Training Courses List — قائمة الدورات التدريبية
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
+import { Refresh, Add, Edit, Delete, School } from '@mui/icons-material';
 import { getCourses, createCourse, updateCourse, deleteCourse } from '../../services/training.service';
 
 const CAT_LABELS = { technical: 'تقنية', leadership: 'قيادة', soft_skills: 'مهارات ناعمة', compliance: 'امتثال', safety: 'سلامة', professional: 'مهنية', language: 'لغات', other: 'أخرى' };

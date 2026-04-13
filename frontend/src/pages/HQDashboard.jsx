@@ -14,16 +14,41 @@
  * API:    GET /api/branch-management/hq/dashboard
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  useTheme,
+  Box, Paper, Typography, Grid, Chip, IconButton, Tooltip,
+  useTheme, ButtonBase, LinearProgress, Avatar, Badge,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Select, MenuItem, Tabs, Tab, Skeleton,
 } from '@mui/material';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getToken } from '../utils/tokenStorage';
 
 /* ── New Premium Components ───────────────────────────── */
+import LiveMetricsTicker  from 'components/dashboard/LiveMetricsTicker';
+import SmartInsightsPanel from 'components/dashboard/SmartInsightsPanel';
+import PerformanceRings   from 'components/dashboard/PerformanceRings';
+import AICommandBar       from 'components/dashboard/AICommandBar';
 
 /* ── Icons ────────────────────────────────────────────── */
+import RefreshRoundedIcon        from '@mui/icons-material/RefreshRounded';
+import BusinessRoundedIcon       from '@mui/icons-material/BusinessRounded';
+import TrendingUpIcon            from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon          from '@mui/icons-material/TrendingDown';
+import GroupsRoundedIcon         from '@mui/icons-material/GroupsRounded';
+import EventNoteRoundedIcon      from '@mui/icons-material/EventNoteRounded';
+import AttachMoneyRoundedIcon    from '@mui/icons-material/AttachMoneyRounded';
+import SpeedRoundedIcon          from '@mui/icons-material/SpeedRounded';
+import WarningAmberRoundedIcon   from '@mui/icons-material/WarningAmberRounded';
+import CheckCircleRoundedIcon    from '@mui/icons-material/CheckCircleRounded';
+import ErrorRoundedIcon          from '@mui/icons-material/ErrorRounded';
+import EmojiEventsRoundedIcon    from '@mui/icons-material/EmojiEventsRounded';
+import FlashOnRoundedIcon        from '@mui/icons-material/FlashOnRounded';
+import OpenInNewRoundedIcon      from '@mui/icons-material/OpenInNewRounded';
+import MapRoundedIcon            from '@mui/icons-material/MapRounded';
+import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
+import CompareArrowsRoundedIcon  from '@mui/icons-material/CompareArrowsRounded';
+import KeyboardCommandKeyIcon    from '@mui/icons-material/KeyboardCommandKey';
 
 /* ─────────────────────────────────────────────────────── */
 const API_BASE = '/api/branch-management';
@@ -357,7 +382,7 @@ const TopPerformers = ({ performers, isDark }) => {
 /* ─────────────────────────────────────────────────────── */
 /*  Alert Item                                             */
 /* ─────────────────────────────────────────────────────── */
-const AlertRow = ({ alert, index }) => {
+const AlertRow = ({ alert, index, isDark }) => {
   const ALERT_COLORS = {
     critical: { color: '#f44336', bg: 'rgba(244,67,54,0.08)', border: 'rgba(244,67,54,0.2)', icon: <ErrorRoundedIcon sx={{ fontSize: 16 }} /> },
     warning:  { color: '#ff9800', bg: 'rgba(255,152,0,0.08)', border: 'rgba(255,152,0,0.2)', icon: <WarningAmberRoundedIcon sx={{ fontSize: 16 }} /> },
@@ -454,6 +479,7 @@ const HQDashboard = () => {
   /* Derived */
   const branches   = dashboard?.branches   || [];
   const summary    = dashboard?.summary    || {};
+  const kpis       = dashboard?.kpis       || {};
   const performers = dashboard?.top_performers || [];
 
   const filteredBranches = filterRegion === 'all'
@@ -858,7 +884,7 @@ const HQDashboard = () => {
                               </TableRow>
                             </TableHead>
                             <TableBody>
-                              {(financials.by_branch || []).map((b) => (
+                              {(financials.by_branch || []).map((b, i) => (
                                 <TableRow key={b.branch_code}
                                   sx={{ '&:hover': { background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)' } }}
                                 >

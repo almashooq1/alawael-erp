@@ -1,8 +1,39 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Tooltip,
+  Paper,
+  Avatar,
+  Divider,
+  LinearProgress,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Assessment as QualityIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Edit as EditIcon,
+  Flag as FindingIcon,
+  PlaylistAddCheck as AuditIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';

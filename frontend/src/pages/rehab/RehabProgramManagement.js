@@ -2,12 +2,46 @@
  * ♿ إدارة البرامج التأهيلية — Rehabilitation Program Management
  * AlAwael ERP — Full CRUD: programs, goals, sessions, assessments, progress tracking
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Paper,
+  Grid,  Chip,  LinearProgress,
+  Divider,
+  IconButton,
+  Tooltip,
+  Button,  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Stack,
+  CircularProgress,
   useTheme,
-  alpha,} from '@mui/material';
-
-
+  alpha,
+  InputAdornment,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CompleteIcon,
+  Assessment as AssessIcon,
+  Person as PersonIcon,
+  CalendarToday as CalendarIcon,
+  TrendingUp as TrendIcon,
+  Close as CloseIcon,
+  Save as SaveIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { rehabProgramService } from 'services/disabilityRehabService';
 

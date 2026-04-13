@@ -4,10 +4,39 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Chip,
+  Stack,
+  Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  LinearProgress,
+  Avatar,
+  Tabs,
+  Tab,
+  Divider,
+} from '@mui/material';
+import {
+  Stars as StarsIcon,
+  ShoppingCart as CartIcon,
+  EmojiEvents as TrophyIcon,
+  Leaderboard as LeaderboardIcon,
+  History as HistoryIcon,
+  Redeem as RedeemIcon,
+  Close as CloseIcon,
+  Lock as LockIcon,
+  CheckCircle as CheckIcon,
+  WorkspacePremium as BadgeIcon,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import api from 'services/api';

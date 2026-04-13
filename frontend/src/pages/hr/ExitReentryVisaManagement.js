@@ -1,9 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
   Paper,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Card,
+  CardContent,
+  Tooltip,
+  Tabs,
+  Tab,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  FlightTakeoff as VisaIcon,
+  CheckCircle as ApproveIcon,
+  Flight as TravelIcon,
+  FlightLand as ReturnIcon,
+  Print as IssueIcon,
+} from '@mui/icons-material';
 import {
   fetchVisaRequests,
   createVisaRequest,

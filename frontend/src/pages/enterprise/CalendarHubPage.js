@@ -5,10 +5,53 @@
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  IconButton,
+  Chip,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  LinearProgress,
+  Tab,
+  Tabs,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Avatar,
+  AvatarGroup,
+  Tooltip,
+  Badge,
   alpha,
 } from '@mui/material';
-
-
+import {
+  Refresh as RefreshIcon,
+  CalendarMonth as CalendarIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ChevronLeft as PrevIcon,
+  ChevronRight as NextIcon,
+  Today as TodayIcon,
+  Event as EventIcon,
+  MeetingRoom as RoomIcon,
+  AccessTime as TimeIcon,
+  Circle as CircleIcon,
+  Save as SaveIcon,
+  LocationOn as LocationIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
 

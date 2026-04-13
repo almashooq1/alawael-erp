@@ -2,16 +2,63 @@
  * DocumentsProPhase8 — لوحة المرحلة الثامنة
  * ترجمة المستندات • النماذج الديناميكية • سلاسل الموافقات • التشفير/DLP • النسخ الاحتياطي
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Tabs, Tab, Paper, Typography, Button, Chip, Grid, Card, CardContent,
+  CardActions, IconButton, Tooltip, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Select, MenuItem, FormControl, InputLabel,
+  Switch, FormControlLabel, Alert, CircularProgress, LinearProgress,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Stack, Snackbar, Stepper, Step, StepLabel, Divider, Accordion,
+  AccordionSummary, AccordionDetails, List, ListItem, ListItemIcon,
+  ListItemText, Badge
 } from '@mui/material';
-
-
+import {
+  Translate as TranslateIcon,
+  DynamicForm as FormsIcon,
+  AccountTree as ApprovalIcon,
+  Security as SecurityIcon,
+  Backup as BackupIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  PlayArrow as PlayIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Visibility as ViewIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  ExpandMore as ExpandMoreIcon,
+  Language as LanguageIcon,
+  GTranslate as GTranslateIcon,
+  ContentCopy as CloneIcon,
+  Publish as PublishIcon,
+  ThumbUp as ApproveIcon,
+  ThumbDown as RejectIcon,
+  Undo as ReturnIcon,
+  Lock as EncryptIcon,
+  LockOpen as DecryptIcon,
+  Shield as ClassifyIcon,
+  Policy as DLPIcon,
+  History as LogIcon,
+  CloudUpload as UploadBackupIcon,
+  Restore as RestoreIcon,
+  VerifiedUser as VerifyIcon,
+  CameraAlt as SnapshotIcon,
+  Compare as CompareIcon,
+  Schedule as ScheduleIcon,
+  Assignment as SubmitIcon,
+  Star as StarIcon,
+} from '@mui/icons-material';
 import { translationApi, formsApi, approvalApi, securityApi, backupApi, getDashboard } from '../../services/documentProPhase8Service';
+import FormDesigner from '../../components/documents/FormDesigner';
+import ApprovalChainVisualizer from '../../components/documents/ApprovalChainVisualizer';
 import logger from '../../utils/logger';
 
 const cardSx = { borderRadius: 3, transition: 'box-shadow .2s', '&:hover': { boxShadow: 6 } };
 const statCard = (c) => ({ ...cardSx, borderTop: `4px solid ${c}`, textAlign: 'center' });
+const fmtDate = (d) => d ? new Date(d).toLocaleDateString('ar-SA') : '—';
 const fmtDateTime = (d) => d ? new Date(d).toLocaleString('ar-SA') : '—';
 const fmtSize = (b) => {
   if (!b) return '0';
@@ -415,7 +462,7 @@ function ApprovalTab() {
 function SecurityTab() {
   const [stats, setStats] = useState(null);
   const [logs, setLogs] = useState([]);
-  const [, setPolicies] = useState([]);
+  const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [docId, setDocId] = useState('');
   const [scanText, setScanText] = useState('');

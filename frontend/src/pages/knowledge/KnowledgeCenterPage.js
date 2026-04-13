@@ -2,10 +2,46 @@
  * Knowledge Center Page — مركز المعرفة
  */
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  InputAdornment,
+  CardActions,
+  Rating,
+  Divider,
+} from '@mui/material';
+import {
+  MenuBook as BookIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  Bookmark as BookmarkIcon,
+  BookmarkBorder as BookmarkBorderIcon,
+  Visibility as ViewIcon,
+  Category as CategoryIcon,
+  Star as StarIcon,
+  Article as ArticleIcon,
+  School as SchoolIcon,
+} from '@mui/icons-material';
 import knowledgeCenterService from '../../services/knowledgeCenter.service';
 
 const DEMO_ARTICLES = [

@@ -5,10 +5,50 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Divider,
+  LinearProgress,
+  Tab,
+  Tabs,
+  CircularProgress,
   alpha,
 } from '@mui/material';
-
-
+import {
+  Refresh as RefreshIcon,
+  Security as SecurityIcon,
+  History as HistoryIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarningIcon,
+  Error as ErrorIcon,
+  Search as SearchIcon,
+  Visibility as ViewIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  DoneAll as ResolveIcon,
+  Assessment as StatsIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import enterpriseProService from '../../services/enterprisePro.service';
 

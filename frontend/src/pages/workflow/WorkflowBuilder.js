@@ -8,13 +8,53 @@
  * - Definition metadata (name, category, permissions)
  * - Save as draft / publish
  */
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Avatar,
+  Card,
+  CardContent,
+  Switch,
+  FormControlLabel,
+  Divider,
+  Tooltip,
+  Alert,
   alpha,
+  InputAdornment,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Publish as PublishIcon,
+  PlayArrow as StartIcon,
+  Stop as EndIcon,
+  Assignment as TaskIcon,
+  ThumbUp as ApprovalIcon,
+  Notifications as NotifIcon,
+  AccountTree as ConditionIcon,
+  CallSplit as ParallelIcon,
+  ArrowDownward as ArrowIcon,
+  ArrowUpward as ArrowUpIcon,
+  ArrowBack as BackIcon,
+  ContentCopy as CloneIcon,
+  Timer as SLAIcon,
+  Person as AssignIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

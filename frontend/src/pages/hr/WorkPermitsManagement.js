@@ -1,12 +1,43 @@
 /**
  * Work Permits & Iqama Management — إدارة تصاريح العمل والإقامات
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Button,
+  Chip,
+  TextField,
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  IconButton,
+  Tooltip,
+  Card,
+  CardContent,
+  Alert,
+  Snackbar,
+  CircularProgress,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Visibility as ViewIcon,
+  Autorenew as RenewIcon,
+  Warning as WarningIcon,
+  GppGood as ValidIcon,
+} from '@mui/icons-material';
 import {
   getWorkPermits,
   createWorkPermit,

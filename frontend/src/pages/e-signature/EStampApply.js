@@ -1,10 +1,37 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eStampService from '../../services/eStamp.service';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Grid,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Alert,
+  Stepper,
+  Step,
+  StepLabel,
+  Chip,
+  Avatar,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Slider,
+} from '@mui/material';
+import {
+  ArrowBack,
+  ArrowForward,
+  Verified,
+  ContentCopy,
+  CheckCircle,
+  Description,
+  Place,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients } from '../../theme/palette';
 

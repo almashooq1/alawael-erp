@@ -16,10 +16,33 @@
  *   disabled         → boolean
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Paper,
+  Tabs,
+  Tab,
+  Button,
+  TextField,
+  Typography,
+  Slider,
+  IconButton,
+  Tooltip,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import {
+  Draw,
+  TextFields,
+  CloudUpload,
+  Undo,
+  Delete,
+  Save,
+  Palette,
+  LineWeight,
+} from '@mui/icons-material';
 
 /* ─── Signature Fonts ────────────────────────────────────────────────────── */
 const SIGNATURE_FONTS = [

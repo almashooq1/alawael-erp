@@ -2,7 +2,10 @@
  * قوالب طباعة الأسطول والنقل — Fleet & Transport Print Templates
  * يشمل: إدارة الأسطول، النقل، تتبع الحافلات
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

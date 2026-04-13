@@ -5,10 +5,23 @@
  * مع Kanban board و task list
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-
+import {
+  Box, Card, CardContent, Typography, Chip, Grid, Avatar,
+  Button, IconButton, TextField, InputAdornment, Select,
+  FormControl, InputLabel, MenuItem, Stack, LinearProgress,
+  Alert, Tooltip, Tab, Tabs, Badge, Paper, Divider,
+  List, ListItem, ListItemText, ListItemAvatar, ListItemSecondaryAction,
+} from '@mui/material';
+import {
+  Search as SearchIcon, Refresh as RefreshIcon,
+  AccountTree as WorkflowIcon, PlayArrow as PlayIcon,
+  CheckCircle as DoneIcon, Warning as WarningIcon,
+  Schedule as PendingIcon, Person as PersonIcon,
+  ArrowForward as ArrowIcon, Flag as FlagIcon,
+  Assessment as AssessmentIcon, Notifications as NotifIcon,
+} from '@mui/icons-material';
 
 import { workflowAPI } from '../../services/ddd';
 

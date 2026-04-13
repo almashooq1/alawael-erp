@@ -10,11 +10,21 @@
  *         GET /api/branch-management/:branch_code/transport
  */
 
-import { useState, useEffect, useCallback, memo } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback, memo } from 'react';
+import {
+  Box, Typography, Chip, IconButton, Tooltip, Skeleton,
+  InputBase, Select, MenuItem, LinearProgress, Tabs, Tab,
+  Avatar, Badge, Collapse, useTheme, alpha, Divider, Paper,
 } from '@mui/material';
-
+import {
+  Refresh, Search, CheckCircle, Cancel, Groups, MeetingRoom,
+  DirectionsBus, TrendingUp, TrendingDown, TrendingFlat,
+  NotificationsActive, Schedule, Person, ArrowBack,
+  FiberManualRecord, Bolt, LocalHospital, BarChart,
+  KeyboardArrowDown, KeyboardArrowUp, Star,
+} from '@mui/icons-material';
 import { getToken } from '../utils/tokenStorage';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const API_BASE = '/api/branch-management';
@@ -75,6 +85,8 @@ const Glass = ({ children, sx = {}, ...props }) => {
 
 // ─── KPI Card ─────────────────────────────────────────────────────────────────
 const KPICard = memo(({ label, value, unit = '', icon, gradient, note, delay = 0 }) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -200,6 +212,7 @@ const SessionRow = memo(({ session, idx }) => {
 // ─── Patient Row ──────────────────────────────────────────────────────────────
 const PatientRow = memo(({ patient, idx }) => {
   const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const initials = (patient.full_name || patient.name_ar || '?').slice(0, 2);
   const colors = ['#3b82f6','#10b981','#8b5cf6','#f59e0b','#ef4444','#06b6d4'];
   const color = colors[idx % colors.length];
@@ -261,6 +274,7 @@ const PatientRow = memo(({ patient, idx }) => {
 
 // ─── Vehicle Card ─────────────────────────────────────────────────────────────
 const VehicleCard = memo(({ vehicle, idx }) => {
+  const theme = useTheme();
   const statusMap = {
     on_route: { label: 'في الطريق', color: '#10b981', bg: '#d1fae5', icon: '🚌' },
     idle:     { label: 'في الانتظار', color: '#f59e0b', bg: '#fffbeb', icon: '⏸️' },
@@ -351,6 +365,7 @@ const AlertItem = memo(({ alert, idx }) => {
 
 // ─── KPI Comparison Card ──────────────────────────────────────────────────────
 const KPICompareCard = memo(({ kpi, idx }) => {
+  const theme = useTheme();
   const isAbove = kpi.status === 'above';
   const isBelow = kpi.status === 'below';
   const color = isAbove ? '#10b981' : isBelow ? '#ef4444' : '#f59e0b';

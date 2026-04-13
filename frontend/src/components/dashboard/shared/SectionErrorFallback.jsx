@@ -4,7 +4,11 @@
  */
 
 import { Component } from 'react';
+import { Box, Typography, Button, Collapse } from '@mui/material';
 import logger from '../../../utils/logger';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 class SectionErrorFallback extends Component {
   constructor(props) {

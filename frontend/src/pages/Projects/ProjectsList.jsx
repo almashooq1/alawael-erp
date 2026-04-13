@@ -1,9 +1,13 @@
 /**
  * قائمة المشاريع — Projects List
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Paper, Table, TableHead, TableRow, TableCell, TableBody,
+  TablePagination, Button, Chip, IconButton, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, MenuItem, CircularProgress,
+} from '@mui/material';
+import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
 import { getProjects, createProject, updateProject, deleteProject } from '../../services/projectManagement.service';
 
 const statusOptions = [

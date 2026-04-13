@@ -1,8 +1,40 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Skeleton,
+  Alert,
+  Paper,
+  Chip,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+} from '@mui/material';
+import {
+  Memory as CpuIcon,
+  Storage as MemoryIcon,
+  HealthAndSafety as HealthIcon,
+  Timer as UptimeIcon,
+  Speed as RpsIcon,
+  BoltOutlined as LatencyIcon,
+  ErrorOutline as ErrorIcon,
+  PeopleAlt as UsersIcon,
+  Cached as CacheIcon,
+  Dns as DbIcon,
+  QueryStats as QueryIcon,
+  SensorsOutlined as RealtimeIcon,
+  CheckCircleOutline as HitIcon,
+  WarningAmber as MissIcon,
+  SlowMotionVideo as SlowIcon,
+  TrendingUp as AvgIcon,
+} from '@mui/icons-material';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import apiClient from '../../services/api.client';
 import { gradients, statusColors, surfaceColors, chartColors } from '../../theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

@@ -2,6 +2,7 @@
  * BI Dashboard Routes
  * مسارات لوحة التقارير والتحليلات
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const BIExecutiveOverview = lazyWithRetry(() => import('../pages/BIDashboard/BIExecutiveOverview'));

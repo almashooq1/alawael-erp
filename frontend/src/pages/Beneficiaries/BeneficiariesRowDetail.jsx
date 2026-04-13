@@ -3,6 +3,7 @@
  * BeneficiariesRowDetail – expandable row detail panel
  */
 
+import { Box, Collapse, Grid, Stack, Typography } from '@mui/material';
 
 const BeneficiariesRowDetail = ({ row, isOpen }) => (
   <Collapse in={isOpen} timeout="auto" unmountOnExit>

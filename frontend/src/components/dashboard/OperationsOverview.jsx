@@ -4,7 +4,16 @@
  */
 
 import React from 'react';
-import { useTheme } from '@mui/material';
+import { Box, Paper, Typography, Grid, useTheme, LinearProgress, Tooltip, Chip } from '@mui/material';
+import { motion } from 'framer-motion';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
+import BuildIcon from '@mui/icons-material/Build';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import PersonIcon from '@mui/icons-material/Person';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { formatNumber } from 'services/dashboardService';
 import { statusColors, brandColors, gradients } from '../../theme/palette';
 

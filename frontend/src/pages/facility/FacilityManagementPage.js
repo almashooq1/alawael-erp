@@ -3,10 +3,46 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Stack,
+  Alert,
+  Badge,
 } from '@mui/material';
-
-
+import {
+  Business as FacilityIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  MeetingRoom as RoomIcon,
+  Build as MaintenanceIcon,
+  Edit as EditIcon,
+  Event as BookingIcon,
+  CheckCircle as AvailableIcon,
+} from '@mui/icons-material';
 import facilityService from '../../services/facility.service';
 
 const DEMO_ROOMS = [

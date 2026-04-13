@@ -7,11 +7,23 @@
  * - الموافقة المسبقة (Prior Authorization)
  * - متابعة حالة المطالبات (Claim Status)
  */
-import { useState, useCallback } from 'react';
-import { Paper,
+import React, { useState, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, Chip, Divider, Paper, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, MenuItem,
 } from '@mui/material';
-
-
+import {
+  HealthAndSafety as NphiesIcon,
+  Verified as EligibilityIcon,
+  RequestPage as ClaimIcon,
+  Assignment as AuthIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+  Refresh as RefreshIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 
 const API = axios.create({ baseURL: '/api/nphies', withCredentials: true });

@@ -11,9 +11,13 @@
  * @module components/guards
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { Suspense, useEffect, useState, useCallback } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from 'contexts/AuthContext';
+import { DashboardSkeleton } from 'components/ui/LoadingSkeleton';
+import { Box, Typography, Button, Alert } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import WifiOffIcon from '@mui/icons-material/WifiOff';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // AUTH GUARD — حراسة المصادقة

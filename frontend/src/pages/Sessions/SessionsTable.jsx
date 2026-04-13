@@ -2,9 +2,19 @@
  * SessionsTable — Search, filters, table, pagination, and quick actions
  * Now supports cancel / attendance / no-show + backend-aligned status & type fields
  */
-import { Paper,
+import React from 'react';
+import {
+  Card, CardContent, Stack, TextField, InputAdornment, Button, Collapse,
+  MenuItem, TableContainer, Paper, Table, TableHead, TableRow, TableCell,
+  TableBody, Skeleton, Typography, Box, Avatar, Chip, IconButton, Tooltip,
+  TablePagination,
 } from '@mui/material';
-
+import {
+  Search as SearchIcon, FilterList, Add as AddIcon,
+  Edit as EditIcon, Delete as DeleteIcon,
+  Event as EventIcon, CalendarToday, AccessTime, Person, LocalHospital,
+  CheckCircle as CheckCircleIcon, Cancel as CancelIcon, PersonOff as NoShowIcon,
+} from '@mui/icons-material';
 import {
   SESSION_TYPES, STATUS_MAP, STATUS_FILTER_OPTIONS,
   getTypeColor, getSessionType, formatDate, formatTime,

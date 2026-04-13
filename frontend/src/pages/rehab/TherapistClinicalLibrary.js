@@ -1,8 +1,37 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Button,
+  TextField,
+  Chip,
+  IconButton,
+  InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,  Paper,  CardActions,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  LibraryBooks as LibraryIcon,
+  Delete as DeleteIcon,
+  Close as CloseIcon,
+  Category as CategoryIcon,
+  Star as StarIcon,
+  Visibility as ViewIcon,
+  Article as ArticleIcon,
+  Science as ScienceIcon,
+  MenuBook as GuideIcon,
+  } from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -53,7 +82,7 @@ const TherapistClinicalLibrary = () => {
 
   useEffect(() => {
     loadItems();
-  }, []);  
+  }, []); // eslint-disable-line
 
   const loadItems = async () => {
     try {

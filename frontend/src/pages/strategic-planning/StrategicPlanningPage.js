@@ -4,12 +4,66 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Alert,
+  Stack,
 } from '@mui/material';
-
-
-
-
+import {
+  Flag as FlagIcon,
+  Add as AddIcon,
+  TrendingUp as TrendingIcon,
+  Assessment as KPIIcon,
+  Lightbulb as InitiativeIcon,
+  Refresh as RefreshIcon,
+  Edit as EditIcon,
+  CheckCircle as CheckIcon,
+  Timeline as TimelineIcon,
+  Speed as SpeedIcon,
+  BarChart as ChartIcon,
+} from '@mui/icons-material';
+import {
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RTooltip,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from 'recharts';
 import strategicPlanningService from '../../services/strategicPlanning.service';
 
 /* ══════════════ بيانات تجريبية ══════════════ */

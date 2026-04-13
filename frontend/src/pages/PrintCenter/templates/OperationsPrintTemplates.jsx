@@ -3,8 +3,11 @@
  * 10 نماذج: أمر شراء، سند استلام، تقرير جرد، سجل أصول، أمر صيانة،
  *           بطاقة زائر، تسليم مركبة، تقرير رحلة، حالة مشروع، تقرير تدقيق
  */
+import { Box, Typography, Divider, Grid, Avatar } from '@mui/material';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, StampCircle, Section, Field,
   fieldRow, bodyPad, pageWrapper, formatDate, formatMoney,
+  RefDateLine, NotesBox, PrintTable, EmptyTable, ConfidentialBanner,
 } from '../shared/PrintTemplateShared';
 
 export const OPERATIONS_TEMPLATES = [

@@ -1,9 +1,14 @@
 /**
  * Warehouse List — قائمة المستودعات
  */
-import { useState, useEffect, useCallback } from 'react';
-import { TableRow, useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
+import { Refresh, Add, Edit, Delete, Warehouse as WHIcon } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse } from '../../services/warehouse.service';
 
 const TYPE_LABELS = { main: 'رئيسي', sub: 'فرعي', transit: 'عبور', quarantine: 'حجر', returns: 'مرتجعات' };

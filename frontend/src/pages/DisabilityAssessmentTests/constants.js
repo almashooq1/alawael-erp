@@ -1,8 +1,14 @@
 /**
  * DisabilityAssessmentTests – shared constants & helpers
  */
-
-
+import {
+  Groups as GroupsIcon,
+  AccessibilityNew as AccessibilityIcon,
+  Psychology as PsychologyIcon,
+  Translate as TranslateIcon,
+  TouchApp as TouchAppIcon,
+} from '@mui/icons-material';
+import { Box } from '@mui/material';
 import { assessmentColors } from '../../theme/palette';
 
 /* ─── Icon map ─── */

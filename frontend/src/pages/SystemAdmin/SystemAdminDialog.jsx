@@ -2,8 +2,20 @@
  * SystemAdminDialog.jsx — Create/Edit dialog
  * Extracted from SystemAdmin.js
  */
-
-
+import React from 'react';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { FIELD_SETS } from './systemAdmin.constants';
 
 const SystemAdminDialog = ({

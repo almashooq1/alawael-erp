@@ -1,6 +1,7 @@
 /**
  * Operations Routes — مسارات العمليات والتشغيل
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const OperationsDashboard = lazyWithRetry(() => import('../pages/Operations/OperationsDashboard'));

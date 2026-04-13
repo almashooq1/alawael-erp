@@ -4,11 +4,18 @@
  * Sections: Performance Score · Trends · 7-Day Forecast · Anomalies · AI Recommendations · Targets
  */
 
-import { useState, useMemo, memo } from 'react';
+import React, { useState, useMemo, memo } from 'react';
 import {
-  useTheme, alpha,
+  Box, Typography, IconButton, Tooltip, Avatar, LinearProgress,
+  useTheme, alpha, Skeleton, Divider,
 } from '@mui/material';
-
+import {
+  TrendingUp, TrendingDown, TrendingFlat, SmartToy,
+  NotificationsActive, GpsFixed, BarChart, BubbleChart,
+  AutoGraph, Psychology, Warning, CheckCircle, Star,
+  Analytics, Bolt, ArrowUpward, ArrowDownward,
+} from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   useBranchAnalytics,
   useBranchKPIs,
@@ -326,7 +333,7 @@ export default function BranchAnalytics({ branchCode }) {
 
   const { trends, anomalies, forecast, recommendations, loading: analyticsLoading, error: analyticsError } = useBranchAnalytics(branchCode, { days, forecastMetric: selectedMetric, forecastDays: 7 });
   const { kpis, loading: kpisLoading } = useBranchKPIs(branchCode);
-  const { targets } = useBranchTargets(branchCode, new Date().getFullYear(), new Date().getMonth() + 1);
+  const { targets, loading: targetsLoading } = useBranchTargets(branchCode, new Date().getFullYear(), new Date().getMonth() + 1);
 
   const metricHistory = useMemo(() => trends?.[selectedMetric]?.history || [], [trends, selectedMetric]);
   const metricTrend = useMemo(() => trends?.[selectedMetric] || null, [trends, selectedMetric]);
@@ -475,7 +482,7 @@ export default function BranchAnalytics({ branchCode }) {
       {/* ── Tabs ── */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
         <Glass sx={{ mb: 2.5, p: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap', borderRadius: 3 }}>
-          {TABS.map((t) => (
+          {TABS.map((t, i) => (
             <Box key={t.id} sx={{ position: 'relative', flex: '1 1 auto' }}>
               <TabBtn active={activeTab === t.id} label={t.label} icon={t.icon} onClick={() => setActiveTab(t.id)} />
               {t.badge > 0 && (

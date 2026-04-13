@@ -2,10 +2,23 @@
  * 📊 AdvancedAnalyticsPanel — لوحة التحليلات المتقدمة
  * Professional analytics panel with multiple chart types, real-time data, and export
  */
-import { useState, useMemo } from 'react';
-import { useTheme,
+import React, { useState, useMemo } from 'react';
+import {
+  Box, Paper, Typography, Grid, Chip, ToggleButton, ToggleButtonGroup,
+  IconButton, Tooltip, useTheme, Divider, Select, MenuItem,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip as ChartTooltip, Legend,
+  ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+} from 'recharts';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { gradients, statusColors, brandColors, chartColors } from 'theme/palette';
 
 const PERIOD_OPTIONS = [

@@ -1,6 +1,7 @@
 /**
  * Procurement Routes — مسارات المشتريات
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const ProcurementDashboard = lazyWithRetry(() => import('../pages/Procurement/ProcurementDashboard'));

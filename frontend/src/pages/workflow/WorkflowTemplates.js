@@ -4,13 +4,44 @@
  * Gallery of pre-built templates with category filter,
  * preview dialog, and deploy-to-builder functionality.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  Grid,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  InputAdornment,
+  Tooltip,
+  Stepper,
+  Step,
+  StepLabel,
+  LinearProgress,
   alpha,
+  Card,
+  CardContent,
+  CardActions,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  ArrowBack as BackIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  Rocket as DeployIcon,
+  Visibility as PreviewIcon,
+  Description as TemplateIcon,
+  AccessTime as TimeIcon,
+  ForkRight as StepsIcon,
+  AccountTree as WorkflowIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

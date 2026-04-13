@@ -5,17 +5,29 @@
  * Steps are rendered by dedicated sub-components.
  */
 
-import { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import {
+  Container, Box, Typography, Button, Paper,
+  Alert, CircularProgress, Stepper, Step, StepLabel,
+  LinearProgress, Slide, Avatar, Snackbar,
+} from '@mui/material';
+import { ArrowForward, ArrowBack, Save } from '@mui/icons-material';
 import { gradients, surfaceColors } from 'theme/palette';
 import studentManagementService from 'services/studentManagementService';
 
 import { STEPS, INITIAL_FORM } from './studentRegistrationConfig';
 import { validateStepFields, buildPayload } from './studentRegistrationUtils';
-import { CustomStepIcon } from './StyledComponents';
+import { GradientHeader, StyledStepConnector, CustomStepIcon } from './StyledComponents';
+import RegistrationSuccess from './RegistrationSuccess';
 
 // Step sub-components
+import PersonalInfoStep from './steps/PersonalInfoStep';
+import DisabilityStep from './steps/DisabilityStep';
+import GuardianStep from './steps/GuardianStep';
+import ProgramsStep from './steps/ProgramsStep';
+import MedicalStep from './steps/MedicalStep';
+import ReviewStep from './steps/ReviewStep';
 
 // ═══════════════════════════════════════════════════════
 //  StudentRegistrationForm Component

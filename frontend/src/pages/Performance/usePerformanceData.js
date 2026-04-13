@@ -3,8 +3,12 @@
  * Custom hook extracted from PerformanceEvaluation.js
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
-
+import {
+  EmojiEvents as TrophyIcon,
+  Assessment as AssessmentIcon,
+  Groups as GroupsIcon,
+  Warning as WarningIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import systemService from 'services/system.service';
 import logger from 'utils/logger';

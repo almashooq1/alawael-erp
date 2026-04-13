@@ -1,8 +1,46 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Grid,
+  Button,
+  TextField,
+  InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  LinearProgress,
+  Tabs,
+  Tab,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,  Tooltip,
+} from '@mui/material';
+import {
+  Inventory as InvIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Warning as WarnIcon,
+  Warehouse as WhIcon,
+  Category as CatIcon,
+  TrendingUp as TrendIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  } from '@mui/icons-material';
 import { inventoryService } from 'services/operationsService';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from 'theme/palette';
 import { useSnackbar } from '../../contexts/SnackbarContext';

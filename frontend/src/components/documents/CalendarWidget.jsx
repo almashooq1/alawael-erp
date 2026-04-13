@@ -1,7 +1,19 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
+  CircularProgress, Alert, Paper, Grid, List, ListItem, ListItemAvatar,
+  ListItemText, Divider, Tooltip, Badge,
+} from '@mui/material';
+import {
+  CalendarMonth as CalendarIcon,
+  Event as EventIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckIcon,
+  Schedule as ScheduleIcon,
+  Snooze as SnoozeIcon,
+  Refresh as RefreshIcon,
+  AccessTime as TimeIcon,
+} from '@mui/icons-material';
 import { calendarApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
 

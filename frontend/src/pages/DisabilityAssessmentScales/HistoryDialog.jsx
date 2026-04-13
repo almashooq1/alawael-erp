@@ -1,8 +1,29 @@
 import {
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Grid,
+  Chip,
   Paper,
+  IconButton,
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
-
-
+import {
+  History as HistoryIcon,
+  Close as CloseIcon,
+  BarChart as BarChartIcon,
+} from '@mui/icons-material';
 import { surfaceColors } from '../../theme/palette';
 
 /**

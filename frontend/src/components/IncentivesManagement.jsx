@@ -4,9 +4,23 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
-
-
+import {
+  Container, Typography, Grid, Paper, Box, Button, TextField, Card, CardContent,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination,
+  Chip, Avatar, IconButton, Tooltip, CircularProgress, Divider,
+  MenuItem, Dialog, DialogTitle, DialogContent, DialogActions,
+  InputAdornment, LinearProgress, Tab, Tabs,
+} from '@mui/material';
+import {
+  Add as AddIcon, Search as SearchIcon,
+  Delete as DeleteIcon, CheckCircle as ApproveIcon,
+  Cancel as RejectIcon, Close as CloseIcon, Refresh as RefreshIcon,
+  Download as DownloadIcon, Print as PrintIcon,
+  EmojiEvents as TrophyIcon, Star as StarIcon,
+  AttachMoney as MoneyIcon, TrendingUp as TrendIcon,
+  Paid as PaidIcon, Assessment as AssessmentIcon,
+  Groups as GroupsIcon, CardGiftcard as GiftIcon,
+} from '@mui/icons-material';
 import apiClient from 'services/api.client';
 import { formatCurrency } from 'utils/formatters';
 import { useSnackbar } from 'contexts/SnackbarContext';

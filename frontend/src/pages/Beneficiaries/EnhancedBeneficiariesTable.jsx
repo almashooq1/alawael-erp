@@ -13,9 +13,18 @@
  * - Real-time updates
  */
 
+import { Box } from '@mui/material';
 import useBeneficiariesTable from './useBeneficiariesTable';
-
-
+import BeneficiariesToolbar from './BeneficiariesToolbar';
+import BeneficiariesBulkBar from './BeneficiariesBulkBar';
+import BeneficiariesTableBody from './BeneficiariesTableBody';
+import {
+  FilterDialog,
+  ExportDialog,
+  RowActionMenu,
+  BeneficiariesSnackbar,
+  BeneficiariesConfirmDialog,
+} from './BeneficiariesDialogs';
 
 const EnhancedBeneficiariesTable = () => {
   const state = useBeneficiariesTable();

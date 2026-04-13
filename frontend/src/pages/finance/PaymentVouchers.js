@@ -1,10 +1,43 @@
- 
+/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  CircularProgress,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  IconButton,
+  Tooltip,
+  Tabs,
+  Tab,  Divider,
+} from '@mui/material';
+import {
+  Add,
+  Receipt,
+  Payment,
+  CheckCircle,
+  PostAdd,
+  Delete,
+  AccountBalanceWallet,
+  TrendingUp,
+  TrendingDown,
+} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -69,7 +102,7 @@ const PaymentVouchers = () => {
 
   useEffect(() => {
     fetchData();
-   
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleCreate = async () => {

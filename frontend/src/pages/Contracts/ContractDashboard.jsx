@@ -1,11 +1,20 @@
 /**
  * لوحة تحكم العقود — Contract Management Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  Description as ContractIcon,
+  CheckCircle as ActiveIcon,
+  Warning as ExpiringIcon,
+  AttachMoney as ValueIcon,
+} from '@mui/icons-material';
 import { getDashboard } from '../../services/contractManagement.service';
 
 const typeLabels = {

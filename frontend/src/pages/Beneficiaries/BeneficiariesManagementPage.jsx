@@ -17,11 +17,50 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Chip,
+  Avatar,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Stack,
+  Alert,
+  Snackbar,
+  Skeleton,
+  Fade,
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  Pagination,
+} from '@mui/material';
+import {
+  Search,
+  Download,
+  Upload,
+  PersonAdd,
+  CheckCircle,
+  Pending,
+  TrendingUp as TrendingUpIcon,
+  GridView,
+  ViewList,
+  Refresh,
+  Assignment,
+  School,
+  Groups,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { Line, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -38,8 +77,9 @@ import {
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { gradients, brandColors, surfaceColors } from 'theme/palette';
 import beneficiaryService from 'services/beneficiaryService';
-import { PAGE_SIZE } from './beneficiariesConstants';
+import { PAGE_SIZE, GradientHeader, KpiCard } from './beneficiariesConstants';
 import { useBeneficiariesChartData } from './useBeneficiariesChartData';
+import BeneficiaryCard from './BeneficiaryCard';
 
 // ── Register ChartJS ────────────────────────────
 ChartJS.register(

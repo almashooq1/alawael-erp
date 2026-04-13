@@ -3,6 +3,7 @@
  * مسارات التنسيق متعدد التخصصات
  * لوحة التحكم + الاجتماعات + خطط التأهيل + الإحالات
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const MDTCoordinationDashboard = lazyWithRetry(

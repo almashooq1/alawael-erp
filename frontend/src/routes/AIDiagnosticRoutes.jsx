@@ -2,6 +2,8 @@
  * AI Diagnostic Routes — مسارات الذكاء الاصطناعي للتشخيص
  * Phase 17 — Frontend
  */
+import React from 'react';
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const AIDiagnosticDashboard = lazyWithRetry(() => import('../pages/ai-diagnostic/AIDiagnosticDashboard'));

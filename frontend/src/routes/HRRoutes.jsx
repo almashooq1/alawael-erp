@@ -2,6 +2,7 @@
  * HR & Payroll Routes
  * مسارات الموارد البشرية والرواتب
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 // Lazy-loaded HR pages

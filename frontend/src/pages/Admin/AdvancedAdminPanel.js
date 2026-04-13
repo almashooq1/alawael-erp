@@ -1,13 +1,52 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Switch,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Divider,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  LinearProgress,
   Paper,
+  Tab,
+  Tabs,
 } from '@mui/material';
-
-
+import {
+  Save as SaveIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  Add as AddIcon,
+  Block as BlockIcon,
+  CheckCircle as ActiveIcon,
+  Warning as WarningIcon,
+  AdminPanelSettings as AdminPanelIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'contexts/SnackbarContext';
 import { adminService } from 'services/adminService';
 import { gradients, surfaceColors } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const AdminPanel = () => {
   const showSnackbar = useSnackbar();

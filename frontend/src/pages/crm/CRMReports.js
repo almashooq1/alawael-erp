@@ -4,12 +4,50 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Chip,
+  Paper,
+  Tab,
+  Tabs,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  LinearProgress,
+  IconButton,
+  Tooltip,
   useTheme,
 } from '@mui/material';
-
-
-
-
+import {
+  Refresh as RefreshIcon,
+  TrendingUp as TrendIcon,
+  Assessment as AssessIcon,
+  PieChart as PieIcon,
+  Timeline as TimelineIcon,
+} from '@mui/icons-material';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as ReTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line,
+  Legend,
+  AreaChart,
+  Area,
+} from 'recharts';
 import { crmReportsService, MOCK_CONVERSION_REPORT, MOCK_CRM_DASHBOARD } from 'services/crmService';
 
 const COLORS = ['#4FC3F7', '#81C784', '#FFB74D', '#E57373', '#BA68C8', '#4DB6AC'];

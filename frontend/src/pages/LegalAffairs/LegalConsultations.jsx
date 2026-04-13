@@ -1,9 +1,13 @@
 /**
  * Legal Consultations — الاستشارات القانونية
  */
-import { useState, useEffect, useCallback } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Paper, Typography, CircularProgress, IconButton, Tooltip, Alert, Chip, Button,
+  Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, FormControl, InputLabel, Select, MenuItem, useTheme, alpha,
 } from '@mui/material';
+import { Refresh, Add, Edit, Balance } from '@mui/icons-material';
 import { getConsultations, createConsultation, updateConsultation } from '../../services/legalAffairs.service';
 
 const TYPE_LABELS = { contract_review: 'مراجعة عقد', legal_opinion: 'رأي قانوني', compliance: 'امتثال', risk_assessment: 'تقييم مخاطر', general: 'عامة', employment: 'توظيف' };

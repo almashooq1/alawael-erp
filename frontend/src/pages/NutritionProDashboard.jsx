@@ -7,11 +7,26 @@
 
 import { useState } from 'react';
 import {
-  useTheme, alpha,
+  Box, Typography, Grid, Card, LinearProgress, Chip, Avatar,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  useTheme, alpha, IconButton, Tooltip,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadarChart,
+  Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import RestaurantIcon from '@mui/icons-material/Restaurant';
+import LocalDiningIcon from '@mui/icons-material/LocalDining';
 import KitchenIcon from '@mui/icons-material/Kitchen';
+import FlatwareIcon from '@mui/icons-material/Flatware';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import SetMealIcon from '@mui/icons-material/SetMeal';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 

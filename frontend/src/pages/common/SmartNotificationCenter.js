@@ -1,10 +1,42 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import smartNotificationsService from '../../services/smartNotifications.service';
 import { useRealTimeNotifications, useSocketEmit } from '../../contexts/SocketContext';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  IconButton,
+  Badge,
+  Chip,
+  Tabs,
+  Tab,
+  Button,
+  Switch,
+  FormControlLabel,
+  Divider,
+  Card,
+  CardContent,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import {
+  Notifications as NotifIcon,
+  NotificationsActive,
+  MarkEmailRead,
+  Delete as DeleteIcon,
+  Settings as SettingsIcon,
+  Alarm as ReminderIcon,
+  CheckCircle as ApprovalIcon,
+  Info as SystemIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors } from '../../theme/palette';
 

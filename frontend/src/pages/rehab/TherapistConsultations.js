@@ -1,8 +1,47 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Grid,
+  Paper,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Avatar,
+  IconButton,
+  Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Divider,
+  List,  InputAdornment,
+} from '@mui/material';
+import {
+  Forum as ConsultIcon,
+  Add as AddIcon,
+  Search as SearchIcon,
+  Send as SendIcon,
+  Reply as ReplyIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckIcon,
+  HourglassEmpty as PendingIcon,
+  Cancel as CancelIcon,
+  Person as PersonIcon,
+  LocalHospital as MedicalIcon,
+  SwapHoriz as ReferralIcon,
+  Assessment as AssessmentIcon,
+  QuestionAnswer as QAIcon,
+  Visibility as ViewIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -69,7 +108,7 @@ const TherapistConsultations = () => {
 
   useEffect(() => {
     loadConsultations();
-     
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadConsultations = async () => {

@@ -2,8 +2,12 @@
  * Leave Management Dashboard — لوحة تحكم إدارة الإجازات
  */
 import { useState, useEffect } from 'react';
-
+import {
+  Box, Grid, Card, CardContent, Typography, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Paper, Chip, LinearProgress
+} from '@mui/material';
 import { BeachAccess, PendingActions, CheckCircle, EventBusy } from '@mui/icons-material';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import apiClient from '../../services/api';
 
 const COLORS = ['#4caf50', '#2196f3', '#ff9800', '#f44336', '#9c27b0'];

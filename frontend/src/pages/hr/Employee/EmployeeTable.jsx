@@ -1,9 +1,18 @@
 /**
  * EmployeeTable – paginated table for employee list.
  */
-
-
-
+import React from 'react';
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  TablePagination, Paper, Avatar, Chip, IconButton, Tooltip,
+  Skeleton, Typography, Box, Stack,
+} from '@mui/material';
+import {
+  Visibility as ViewIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  ContentCopy as CopyIcon,
+} from '@mui/icons-material';
 import { STATUS_MAP } from './employeeManagement.constants';
 
 /* ── helpers ── */

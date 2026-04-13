@@ -3,12 +3,47 @@
  * Phase 21 — تخطيط القوى العاملة، التنبؤ، التعاقب، المهارات، التعويضات
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
   Paper,
+  Grid,
+  Card,
+  CardContent,
+  Tabs,
+  Tab,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Button,
+  IconButton,
+  CircularProgress,
+  Alert,
+  LinearProgress,
+  Tooltip,
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
 } from '@mui/material';
-
-
+import {
+  People as PeopleIcon,
+  TrendingUp as TrendingUpIcon,
+  SwapHoriz as SwapHorizIcon,
+  School as SchoolIcon,
+  AttachMoney as AttachMoneyIcon,
+  Favorite as FavoriteIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon,
+  } from '@mui/icons-material';
 import workforceAnalyticsService from '../../services/workforceAnalyticsService';
 
 /* ═══ Helper — risk chip color ═══ */

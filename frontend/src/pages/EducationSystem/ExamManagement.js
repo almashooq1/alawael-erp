@@ -2,11 +2,48 @@
  * إدارة الاختبارات
  * Exam Management
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container,
+  Grid,
+  Paper,
+  Box,
+  Typography,
+  Button,  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Chip,
+  IconButton,
+  Tooltip,
+  LinearProgress,
+  Alert,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Avatar,
+  TablePagination,  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Quiz as ExamIcon,
+  ArrowBack as BackIcon,
+  Timer as TimerIcon,
+  QuestionAnswer as QuestionIcon,
+  } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { gradients } from '../../theme/palette';
 import educationSystemService from '../../services/educationSystem.service';

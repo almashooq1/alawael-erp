@@ -1,7 +1,10 @@
 /**
  * قوالب التكامل الحكومي وإنترنت الأشياء — Government Integrations & IoT Templates
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

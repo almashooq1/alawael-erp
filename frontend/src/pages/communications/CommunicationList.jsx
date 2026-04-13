@@ -2,10 +2,31 @@
  * CommunicationList — Scrollable message list with actions
  */
 
-
-
-
-
+import { Fragment } from 'react';
+import {
+  Card,
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemAvatar,
+  Avatar,
+  Badge,
+  Chip,
+  Tooltip,
+  Divider,
+  IconButton,
+  LinearProgress,
+} from '@mui/material';
+import {
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Archive as ArchiveIcon,
+  Delete as DeleteIcon,
+  Reply as ReplyIcon,
+  Email as EmailIcon,
+} from '@mui/icons-material';
 import {
   COMMUNICATION_TYPES,
   COMMUNICATION_STATUS,

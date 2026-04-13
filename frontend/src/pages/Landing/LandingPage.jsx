@@ -3,7 +3,8 @@
  * Advanced landing with particles, glassmorphism, parallax, typewriter,
  * how-it-works timeline, trusted-by ticker, FAQ accordion, auto-slide testimonials
  */
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 /* ══════════════════════ helpers ══════════════════════ */
 function useOnScreen(ref, threshold = 0.15) {

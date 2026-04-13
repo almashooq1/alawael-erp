@@ -4,10 +4,18 @@
  * Case tracking, follow-up visits, impact measurement,
  * satisfaction surveys, re-enrollment requests.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, MenuItem,
 } from '@mui/material';
-
+import {
+  FollowTheSigns as FollowIcon, EventNote as VisitIcon, TrendingUp as ImpactIcon, ReplayCircleFilled as ReEnrollIcon,
+  Refresh as RefreshIcon, Add as AddIcon,
+  Warning as OverdueIcon,
+} from '@mui/icons-material';
 import postRehabApi from '../../services/postRehab.service';
 
 function TabPanel({ children, value, index }) {

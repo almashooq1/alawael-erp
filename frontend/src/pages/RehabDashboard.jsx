@@ -2,10 +2,21 @@
  * RehabDashboard.jsx — لوحة تحكم خطط التأهيل الذكية | Premium v2
  */
 
-import { useState, useEffect, useCallback, Component, memo } from 'react';
-import { useTheme, alpha,
+import React, { useState, useEffect, useCallback, Component, memo } from 'react';
+import {
+  Box, Typography, IconButton, Tooltip, Avatar,
+  CircularProgress, Alert, Snackbar,
+  TextField, Select, MenuItem, FormControl, InputLabel,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, Divider, useTheme, alpha,
 } from '@mui/material';
-
+import {
+  Refresh, Add, Visibility, Edit, VideoCall,
+  Psychology, TrendingUp, Assessment, SmartToy, Warning,
+  CheckCircle, Schedule, FitnessCenter, NotificationsActive,
+  MedicalServices, PlayArrow,
+} from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getToken } from '../utils/tokenStorage';
 
 // ─── API ──────────────────────────────────────────────────────────────────────

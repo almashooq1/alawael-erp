@@ -8,10 +8,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Paper,
+  Typography,
+  Chip,
+  Grid,
+  IconButton,
+  Tooltip,
+  LinearProgress,
   alpha,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
 } from '@mui/material';
-
-
+import {
+  ArrowBack as BackIcon,
+  Refresh as RefreshIcon,
+  Analytics as AnalyticsIcon,
+  Speed as SLAIcon,
+  TrendingUp as TrendIcon,
+  Category as CategoryIcon,
+  EmojiEvents as TopIcon,
+  Warning as BottleneckIcon,
+  Timer as TimerIcon,
+  CheckCircle as CompleteIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

@@ -1,12 +1,63 @@
 /**
  * Directive Detail — تفاصيل التوجيه الإلكتروني
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-
-
-
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Chip,
+  Button,
+  Divider,
+  Avatar,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemSecondaryAction,
+  LinearProgress,
+  Alert,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Tooltip,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
+import {
+  ArrowBack as BackIcon,
+  Campaign as CampaignIcon,
+  Gavel as DecisionIcon,
+  Description as MemoIcon,
+  NotificationsActive as UrgentIcon,
+  PolicyOutlined as PolicyIcon,
+  Rule as ProcedureIcon,
+  Assignment as InstructionIcon,
+  CheckCircle as CheckIcon,
+  Cancel as CancelIcon,
+  Send as IssueIcon,
+  Visibility as ReadIcon,
+  ThumbUp as AckIcon,
+  AttachFile as AttachIcon,
+  Delete as DeleteIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  Warning as WarningIcon,
+  Done as DoneIcon,
+  PlayArrow as PlayIcon,
+  Edit as EditIcon,
+} from '@mui/icons-material';
 import electronicDirectivesService from '../../services/electronicDirectives.service';
 import {
   DIRECTIVE_TYPES,

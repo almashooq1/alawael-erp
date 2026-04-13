@@ -5,9 +5,17 @@
  * Gradient: #ec4899 → #f59e0b → #10b981
  */
 
-import { useTheme,
+import {
+  Box, Typography, Grid, Card, useTheme,
+  LinearProgress, Chip, IconButton, Tooltip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import MedicationIcon from '@mui/icons-material/Medication';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -15,6 +23,12 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 
 // ─── Gradient + Glass helpers ──────────────────────────────────────────────────
 const GRAD = 'linear-gradient(135deg, #ec4899 0%, #f59e0b 50%, #10b981 100%)';

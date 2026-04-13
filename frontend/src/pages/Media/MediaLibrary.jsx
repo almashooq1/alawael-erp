@@ -11,9 +11,42 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-
-
-
+import {
+  Container, Typography, Grid, Paper, Box, Card, CardContent,
+  Avatar, Chip, IconButton, Button, LinearProgress, Tabs, Tab,
+  TextField, InputAdornment, Menu, MenuItem, Tooltip, Divider,
+  Pagination, Dialog, DialogTitle, DialogContent, DialogActions,
+  Select, FormControl, InputLabel,
+  ToggleButtonGroup, ToggleButton,
+} from '@mui/material';
+import {
+  PhotoLibrary as MediaIcon,
+  CloudUpload as UploadIcon,
+  Image as ImageIcon,
+  Videocam as VideoIcon,
+  AudioFile as AudioIcon,
+  Description as DocIcon,
+  Archive as ArchiveIcon,
+  InsertDriveFile as FileIcon,
+  Search as SearchIcon,
+  ViewModule as GridViewIcon,
+  ViewList as ListViewIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
+  Delete as DeleteIcon,
+  Download as DownloadIcon,
+  Edit as EditIcon,
+  Folder as FolderIcon,
+  CreateNewFolder as NewFolderIcon,
+  MoreVert as MoreIcon,
+  Close as CloseIcon,
+  Storage as StorageIcon,
+  TrendingUp as TrendUpIcon,
+  Refresh as RefreshIcon,
+  Check as CheckIcon,
+  Fullscreen as PreviewIcon,
+  CloudDone as CloudIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, brandColors, statusColors, surfaceColors, neutralColors } from '../../theme/palette';
 import logger from '../../utils/logger';

@@ -1,7 +1,27 @@
-
-
-
-
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardContent,
+  Paper,
+  Tab,
+  Tabs,
+  Stack,
+} from '@mui/material';
+import {
+  Assessment as AssessmentIcon,
+  History as HistoryIcon,
+  Person as PersonIcon,
+  TrendingUp as TrendingUpIcon,
+  BarChart as BarChartIcon,
+  AccessibilityNew as AccessibilityIcon,
+  PlaylistAddCheck as BatchIcon,
+  Timeline as TimelineIcon,
+  Recommend as RecommendIcon,
+  Analytics as AnalyticsIcon,
+} from '@mui/icons-material';
 import { gradients } from '../../theme/palette';
 
 /**

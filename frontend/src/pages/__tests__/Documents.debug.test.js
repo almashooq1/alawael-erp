@@ -1,7 +1,10 @@
 /**
  * Debug test to find undefined JSX element in Documents.js
  */
+import React from 'react';
 import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { SnackbarProvider } from '../../contexts/SnackbarContext';
 
 // Check MUI imports
 import * as MUI from '@mui/material';

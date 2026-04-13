@@ -2,9 +2,19 @@
  * إدارة اجتماعات الفريق متعدد التخصصات — MDT Meetings Management
  * CRUD كامل: قائمة، إنشاء، تعديل، إضافة حاضرين، تسجيل الحضور، إضافة جدول أعمال
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Button, Chip, IconButton, Tooltip,
+  Table, TableHead, TableRow, TableCell, TableBody, TablePagination,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
+  CircularProgress, Alert, Tabs, Tab, Divider, Card, CardContent,
+  List, ListItem, ListItemText, FormControlLabel, Switch,
+} from '@mui/material';
+import {
+  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon,
+  Groups as MeetingIcon, ArrowBack as BackIcon, PersonAdd as PersonAddIcon,
+  EventNote as AgendaIcon,
+  Description as MinutesIcon, Gavel as DecisionIcon, } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { meetingsService, minutesService } from '../../services/mdtCoordinationService';
 

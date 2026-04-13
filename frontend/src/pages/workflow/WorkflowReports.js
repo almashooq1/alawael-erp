@@ -2,13 +2,57 @@
  * WorkflowReports – التقارير المحفوظة
  * Create, manage, and generate workflow reports.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Button,
+  IconButton,
+  Tooltip,
+  Chip,
+  Card,
+  CardContent,
+  Skeleton,
   alpha,
+  Avatar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Stack,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  ArrowBack,
+  Refresh,
+  Add,
+  Assessment,
+  TrendingUp,
+  BarChart,
+  PieChart,
+  Speed,
+  People,
+  Delete,
+  Edit,
+  PlayArrow,
+  Schedule,
+  Category,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

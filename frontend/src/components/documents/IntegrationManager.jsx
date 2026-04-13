@@ -1,7 +1,22 @@
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Stack, Chip, Avatar, IconButton, Button,
+  CircularProgress, Alert, Paper, Grid, List, ListItem, ListItemAvatar,
+  ListItemText, Divider, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, Select, MenuItem, FormControl, InputLabel, Switch, FormControlLabel,
+  Badge, Tooltip,
+} from '@mui/material';
+import {
+  Webhook as WebhookIcon,
+  Add as AddIcon,
+  Refresh as RefreshIcon,
+  PlayArrow as TestIcon,
+  PowerSettingsNew as ToggleIcon,
+  Delete as DeleteIcon,
+  History as LogsIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+} from '@mui/icons-material';
 import { integrationsApi } from '../../services/documentProPhase5Service';
 import logger from '../../utils/logger';
 
@@ -16,7 +31,7 @@ const STATUS_COLORS = {
 export default function IntegrationManager() {
   const [integrations, setIntegrations] = useState([]);
   const [providers, setProviders] = useState([]);
-  const [, setEventTypes] = useState([]);
+  const [eventTypes, setEventTypes] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

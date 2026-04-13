@@ -5,10 +5,18 @@
  */
 
 import { useState } from 'react';
-import { useTheme,
+import {
+  Box, Typography, Grid, Card, useTheme, LinearProgress,
+  Chip, Avatar, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
-
+import { motion } from 'framer-motion';
+import {
+  ComposedChart, Bar, Line, Area,
+  PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import BusinessIcon from '@mui/icons-material/Business';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import GavelIcon from '@mui/icons-material/Gavel';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';

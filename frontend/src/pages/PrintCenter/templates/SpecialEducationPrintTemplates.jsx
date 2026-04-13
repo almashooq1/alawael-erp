@@ -2,7 +2,10 @@
  * قوالب التربية الخاصة والتوظيف المدعوم
  * Special Education & Supported Employment Templates
  */
+import React from 'react';
 import {
+  OrgHeader, OrgFooter, SignatureBlock, Field, Section,
+  NotesBox, EmptyTable, RefDateLine, ConfidentialBanner,
   fieldRow, bodyPad, pageWrapper, formatDate, today,
 } from '../shared/PrintTemplateShared';
 

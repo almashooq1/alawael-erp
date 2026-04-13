@@ -2,9 +2,21 @@
  * SystemAdminTable.jsx — Data table component
  * Extracted from SystemAdmin.js
  */
+import React from 'react';
 import {
+  Typography,
   Paper,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { STATUS_COLORS, COL_MAP } from './systemAdmin.constants';
 
 const SystemAdminTable = ({ activeTab, tabs, data, openEdit, handleDelete }) => {

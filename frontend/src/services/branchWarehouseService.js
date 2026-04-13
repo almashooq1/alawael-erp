@@ -1,4 +1,4 @@
- 
+/* eslint-disable import/no-anonymous-default-export */
 /**
  * 🏢 خدمة المخازن والمشتريات للفروع — Branch Warehouse & Purchasing Service
  * AlAwael ERP — Multi-Branch Operations

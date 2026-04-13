@@ -5,8 +5,26 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme, useMediaQuery } from '@mui/material';
-
-
+import {
+  Menu as MenuIcon,
+  Search as SearchIcon,
+  NotificationsOutlined,
+  DarkModeOutlined,
+  LightModeOutlined,
+  LanguageOutlined,
+  FullscreenOutlined,
+  FullscreenExitOutlined,
+  KeyboardArrowDown,
+  AccountCircleOutlined,
+  SettingsOutlined,
+  LogoutOutlined,
+  CheckCircleOutlined,
+  WarningAmberOutlined,
+  InfoOutlined,
+  NavigateNext,
+  Home as HomeIcon,
+  CloseOutlined,
+} from '@mui/icons-material';
 import { useAuth } from 'contexts/AuthContext';
 
 /* ─── Breadcrumb map ─────────────────────────────────────────────────────── */

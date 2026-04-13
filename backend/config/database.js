@@ -3,25 +3,33 @@ const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
 // ==================== GLOBAL QUERY SAFETY (Round 31) ====================
-// Prevent unbounded find() queries from returning millions of docs
+// Prevent unbounded find() queries from returning millions of docs.
+// Queries can opt out by calling .limit(0) or setting option { _noDefaultLimit: true }.
 const MAX_QUERY_LIMIT = parseInt(process.env.MONGO_MAX_QUERY_LIMIT, 10) || 1000;
 mongoose.plugin(schema => {
   schema.pre(/^find/, function () {
-    // Only apply default limit if none was explicitly set
-    if (!this.getOptions().limit) {
-      this.limit(MAX_QUERY_LIMIT);
+    const opts = this.getOptions();
+    // Skip if an explicit limit was set, or if the caller opted out
+    if (opts.limit || opts._noDefaultLimit) {
+      return;
     }
+    this.limit(MAX_QUERY_LIMIT);
   });
 });
 
 // ==================== GLOBAL MASS-ASSIGNMENT GUARD (Round 33) ====================
-// Strip privileged / internal fields from every update operation
+// Strip privileged / internal fields from every update operation.
+// Admin / system operations can bypass by setting option { _adminBypass: true }.
 const MASS_ASSIGN_BLACKLIST = new Set([
   '__proto__',
   'constructor',
   'prototype',
   '_id',
   '__v',
+]);
+
+// Sensitive fields that admin operations may legitimately need to update
+const MASS_ASSIGN_SENSITIVE = new Set([
   'role',
   'roles',
   'isAdmin',
@@ -31,17 +39,24 @@ const MASS_ASSIGN_BLACKLIST = new Set([
   'passwordHash',
 ]);
 
-function stripBlacklisted(obj) {
+function stripBlacklisted(obj, includeSensitive) {
   if (!obj || typeof obj !== 'object') return obj;
   for (const key of MASS_ASSIGN_BLACKLIST) {
     delete obj[key];
   }
-  // Also strip from $set / $unset operators
-  if (obj.$set) {
-    for (const key of MASS_ASSIGN_BLACKLIST) delete obj.$set[key];
+  if (includeSensitive) {
+    for (const key of MASS_ASSIGN_SENSITIVE) {
+      delete obj[key];
+    }
   }
-  if (obj.$unset) {
-    for (const key of MASS_ASSIGN_BLACKLIST) delete obj.$unset[key];
+  // Also strip from $set / $unset operators
+  for (const target of ['$set', '$unset']) {
+    if (obj[target]) {
+      for (const key of MASS_ASSIGN_BLACKLIST) delete obj[target][key];
+      if (includeSensitive) {
+        for (const key of MASS_ASSIGN_SENSITIVE) delete obj[target][key];
+      }
+    }
   }
   return obj;
 }
@@ -49,8 +64,12 @@ function stripBlacklisted(obj) {
 mongoose.plugin(schema => {
   // Intercept findOneAndUpdate, updateOne, updateMany
   schema.pre(/^(findOneAnd|update)/, function () {
+    const opts = this.getOptions();
+    // Admin operations can bypass sensitive-field stripping
+    if (opts._adminBypass) return;
     const update = this.getUpdate();
-    if (update) stripBlacklisted(update);
+    // Always strip prototype pollution keys; only strip sensitive if not admin
+    if (update) stripBlacklisted(update, /* includeSensitive */ true);
   });
 });
 

@@ -2,10 +2,18 @@
  * إدارة تذاكر الإحالة الداخلية — Internal Referral Tickets Management
  * CRUD كامل: قائمة، إنشاء، قبول، رفض، إكمال، سجل التدقيق
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Button, Chip, IconButton, Tooltip,
+  Table, TableHead, TableRow, TableCell, TableBody, TablePagination,
+  Dialog, DialogTitle, DialogContent, DialogActions, TextField, MenuItem,
+  CircularProgress, Alert, Tabs, Tab, Divider, Card, CardContent,
+} from '@mui/material';
+import {
+  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon, Refresh as RefreshIcon,
+  ArrowBack as BackIcon, CheckCircle as AcceptIcon, Cancel as RejectIcon,
+  DoneAll as CompleteIcon, Visibility as ViewIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { referralsService } from '../../services/mdtCoordinationService';
 

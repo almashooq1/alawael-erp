@@ -2,12 +2,48 @@
  * Vendor & Supplier Relationship Management — إدارة علاقات الموردين
  * Vendors, RFQs, Evaluations, Purchase Orders
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Avatar,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  MenuItem,
+  Tab,
+  Tabs,
+  Card,
+  CardContent,
+  LinearProgress,
+  Stack,
+  Rating,
+  Tooltip,
+} from '@mui/material';
 import { alpha } from '@mui/material/styles';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Store as VendorIcon,
+  RequestQuote as RFQIcon,
+  Assessment as EvalIcon,
+  ShoppingCart as POIcon,
+  Close as CloseIcon,
+  Star as StarIcon,
+  Gavel as AwardIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

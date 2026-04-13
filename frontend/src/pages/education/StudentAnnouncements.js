@@ -4,10 +4,43 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  InputAdornment,
+  Chip,
+  Button,
+  Stack,
+  Avatar,
+  Paper,
+  Alert,
+  LinearProgress,
+  Divider,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Badge,
+  ToggleButton,
+  ToggleButtonGroup,
+} from '@mui/material';
+import {
+  Notifications as NotificationsIcon,
+  Search as SearchIcon,
+  ExpandMore as ExpandMoreIcon,
+  PriorityHigh as PriorityIcon,
+  Info as InfoIcon,
+  Event as EventIcon,
+  School as SchoolIcon,
+  Campaign as CampaignIcon,
+  FilterList as FilterIcon,
+  Visibility as ViewIcon,
+  CalendarToday as CalendarIcon,
+  Person as PersonIcon,
+} from '@mui/icons-material';
 import studentPortalService from 'services/studentPortalService';
 import logger from 'utils/logger';
 import { gradients, statusColors, neutralColors } from 'theme/palette';

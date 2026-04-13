@@ -1,14 +1,42 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import meetingsService from '../../services/meetings.service';
 import { useSocketEvent } from '../../contexts/SocketContext';
 import {
+  Box,
+  Typography,
   Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Button,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+  Tabs,
+  Tab,
+  Tooltip,
 } from '@mui/material';
-
-
+import {
+  Add as AddIcon,
+  Event as MeetingIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  NoteAdd as MinutesIcon,
+  People as AttendeesIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, statusColors, neutralColors } from '../../theme/palette';
-import { useConfirmDialog } from '../../components/common/ConfirmDialog';
+import ConfirmDialog, { useConfirmDialog } from '../../components/common/ConfirmDialog';
 
 const demoMeetings = [
   {

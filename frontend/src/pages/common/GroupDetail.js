@@ -1,7 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-
-
+import {
+  Container,
+  Typography,
+  Paper,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Chip,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  CircularProgress,
+  Divider,
+} from '@mui/material';
+import { Group as GroupIcon, Person as PersonIcon } from '@mui/icons-material';
 import groupsService from 'services/groupsService';
 
 function GroupDetail() {

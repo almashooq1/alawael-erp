@@ -4,13 +4,58 @@
  * AlAwael ERP — للموظفين والمدراء فقط
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Chip,
+  IconButton,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tabs,
+  Tab,
+  Badge,
+  Avatar,
+  Tooltip,
+  Alert,
+  LinearProgress,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  People as PeopleIcon,
+  Message as MessageIcon,
+  Report as ReportIcon,
+  CheckCircle as CheckCircleIcon,
+  Schedule as ScheduleIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  Reply as ReplyIcon,
+  Assignment as AssignmentIcon,
+  Star as StarIcon,
+  Warning as WarningIcon,
+  Close as CloseIcon,
+  Send as SendIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 
 // ─── الثوابت ─────────────────────────────────────────────────────────────────
@@ -238,6 +283,7 @@ export default function ParentPortalManagement() {
       ]);
 
       // إحصاءات حسب الحالة
+      const statusCounts = { submitted: 0, in_progress: 0, resolved: 0 };
       const [sub, inprog, res] = await Promise.all([
         axios.get(`${API_BASE}/parent-portal/admin/complaints?status=submitted&limit=1`, {
           headers: authHeader,
@@ -260,7 +306,6 @@ export default function ParentPortalManagement() {
     } catch (err) {
       console.error('Stats fetch error:', err);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── جلب الشكاوى ──────────────────────────────────────────────────────────
@@ -284,7 +329,6 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filters]);
 
   // ─── جلب الرسائل ──────────────────────────────────────────────────────────
@@ -302,7 +346,6 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {

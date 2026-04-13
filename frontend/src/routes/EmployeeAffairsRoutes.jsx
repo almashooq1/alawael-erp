@@ -1,6 +1,7 @@
 /**
  * Employee Affairs Routes — مسارات شؤون الموظفين
  */
+import { Route } from 'react-router-dom';
 import { lazyWithRetry } from '../utils/lazyLoader';
 
 const EmployeeAffairsDashboard = lazyWithRetry(() => import('../pages/EmployeeAffairs/EmployeeAffairsDashboard'));

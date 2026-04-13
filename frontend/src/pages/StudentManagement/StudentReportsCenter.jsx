@@ -2,16 +2,65 @@
  * Student Reports Center — مركز تقارير الطلاب الشاملة
  * لوحة مركزية لعرض وإدارة جميع أنواع التقارير المتاحة
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Container, Typography, Grid, Paper, Box, Chip, Button,
+  LinearProgress, Tabs, Tab, Card, CardContent, CardActions,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Divider, IconButton, Tooltip, CircularProgress,
+  TextField, MenuItem, Select, InputLabel, FormControl, Switch,
+  Collapse,
+} from '@mui/material';
+import {
+  Description as ReportIcon,
+  School as AcademicIcon,
+  Psychology as BehaviorIcon,
+  HealthAndSafety as HealthIcon,
+  FamilyRestroom as FamilyIcon,
+  SwapHoriz as TransitionIcon,
+  Analytics as AnalyticsIcon,
+  Build as CustomIcon,
+  FileDownload as ExportIcon,
+  Schedule as ScheduleIcon,
+  TrendingUp as TrendUpIcon,
+  Compare as CompareIcon,
+  EventAvailable as AttendanceIcon,
+  People as PeopleIcon,
+  Timeline as TimelineIcon,
+  DateRange as PeriodicIcon,
+  Assessment as AssessmentIcon,
+  Print as PrintIcon,
+  Refresh as RefreshIcon,
+  NewReleases as NewIcon,
+  Star as StarIcon,
+  ArrowBack as BackIcon,
+  Visibility as ViewIcon,
+  Email as EmailIcon,
+  WhatsApp as WhatsAppIcon,
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Pause as PauseIcon,
+  PlayArrow as PlayIcon,
+  Send as SendIcon,
+  History as HistoryIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  ExpandMore as ExpandIcon,
+  ExpandLess as CollapseIcon,
+  NotificationsActive as NotifIcon,
+  } from '@mui/icons-material';
+import {
+  BarChart, Bar, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip as RTooltip,
+  ResponsiveContainer, Legend,
+} from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import { gradients, chartColors, statusColors } from '../../theme/palette';
 import logger from '../../utils/logger';
 import studentManagementService from '../../services/studentManagementService';
+import DashboardErrorBoundary from '../../components/dashboard/shared/DashboardErrorBoundary';
 
 /* ──────── Helper Components ──────── */
 const SectionHeader = ({ icon, title, subtitle, action }) => (

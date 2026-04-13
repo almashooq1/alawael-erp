@@ -2,10 +2,27 @@
  * لوحة تحكم التنسيق متعدد التخصصات — MDT Coordination Dashboard (Enhanced)
  * يعرض: KPI شامل، اجتماعات قادمة، ملخص الخطط، الإحالات المعلقة، المتأخرات
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip, Button,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+  LinearProgress, Alert, Tabs, Tab, IconButton, Tooltip, Badge,
+  List, ListItem, ListItemAvatar, ListItemText, Avatar,
+} from '@mui/material';
+import {
+  Groups as MeetingIcon,
+  ListAlt as PlanIcon,
+  SwapHoriz as RefIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendIcon,
+  CalendarMonth as CalIcon,
+  Refresh as RefreshIcon,
+  ArrowForward as ArrowIcon,
+  AccessTime as TimeIcon,
+  Assignment as TaskIcon,
+  CheckCircle as CheckIcon,
+  EventNote as EventIcon,
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import {
   meetingsService, dashboardService, plansService, referralsService,

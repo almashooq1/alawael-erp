@@ -4,13 +4,44 @@
  * List all workflow instances with status tabs, search,
  * pagination, and navigation to instance detail.
  */
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  Chip,
+  IconButton,
+  TextField,
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  Tabs,
+  Tab,
+  LinearProgress,
+  InputAdornment,
   alpha,
+  Avatar,
 } from '@mui/material';
-
-
+import {
+  ArrowBack as BackIcon,
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
+  PlayArrow as RunningIcon,
+  CheckCircle as CompleteIcon,
+  Cancel as CancelIcon,
+  Pause as SuspendIcon,
+  Error as ErrorIcon,
+  Visibility as ViewIcon,
+  AddCircle as StartIcon,
+  AccountTree as WorkflowIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import workflowService from '../../services/workflow.service';
 

@@ -5,10 +5,38 @@
  */
 
 import React, { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Paper,
+  Typography,
+  Stepper,
+  Step,
+  StepLabel,
+  StepContent,
+  Chip,
+  Avatar,
+  IconButton,
+  Tooltip,
+  CircularProgress,
+  Alert,
+  Divider,
+  Card,
+  CardContent,
+  Stack,
+  Button,
+  LinearProgress,
+} from '@mui/material';
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  Schedule as ScheduleIcon,
+  Person as PersonIcon,
+  ArrowForward as ArrowForwardIcon,
+  Replay as ReplayIcon,
+  Description as DescriptionIcon,
+  Warning as WarningIcon,
+  PauseCircle as PauseIcon,
+} from '@mui/icons-material';
 
 // ── ألوان الحالات ──────────────────────────────────
 const STATUS_CONFIG = {
@@ -34,6 +62,7 @@ const WORKFLOW_ORDER = [
 ];
 
 export default function WorkflowTimeline({
+  workflowData,
   history = [],
   currentState,
   onTransition,

@@ -1,8 +1,38 @@
 import { useState, useEffect } from 'react';
-
-
-
-
+import {
+  Box,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Chip,
+  Avatar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+} from '@mui/material';
+import {
+  DateRange as DateRangeIcon,
+  Add as AddIcon,
+  Edit as EditIcon,
+  Check as CheckIcon,
+} from '@mui/icons-material';
 import { parentService } from 'services/parentService';
 import api from 'services/api.client';
 import { getStatusColor } from 'utils/statusColors';

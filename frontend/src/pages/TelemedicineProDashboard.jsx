@@ -4,9 +4,16 @@
  * Gradient: #6366f1 → #06b6d4 → #22c55e
  */
 
-import { useTheme, alpha,
+import {
+  Box, Typography, Grid, Card, useTheme, alpha, LinearProgress, Chip,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
 } from '@mui/material';
-
+import { motion } from 'framer-motion';
+import {
+  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import PeopleIcon from '@mui/icons-material/People';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';

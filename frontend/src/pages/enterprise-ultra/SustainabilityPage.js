@@ -4,10 +4,46 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Typography,
+  Tabs,
+  Tab,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  MenuItem,
+  Alert,
+  LinearProgress,
+  Stack,
+  IconButton,
+  Divider,
 } from '@mui/material';
-
-
+import {
+  EnergySavingsLeaf as EcoIcon,
+  Add as AddIcon,
+  ElectricBolt as EnergyIcon,
+  Cloud as CarbonIcon,
+  Delete as WasteIcon,
+  Assessment as ESGIcon,
+  Flag as GoalIcon,
+  Refresh as RefreshIcon,
+  TrendingDown as TrendDownIcon,
+  Nature as NatureIcon,
+} from '@mui/icons-material';
 import * as susService from '../../services/enterpriseUltra.service';
 
 const statusColors = {

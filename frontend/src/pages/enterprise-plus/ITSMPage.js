@@ -2,12 +2,50 @@
  * IT Service Management (ITSM) — إدارة خدمات تقنية المعلومات
  * IT Assets, Incidents, Change Requests, Service Catalog, SLA Policies
  */
-import { useState, useEffect, useCallback } from 'react';
-
-
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  Grid,
+  Button,
+  TextField,
+  IconButton,
+  Chip,
+  Avatar,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  MenuItem,
+  Tab,
+  Tabs,
+  Card,
+  CardContent,
+  LinearProgress,
+  Stack,
+  Tooltip,
+  Badge,
+} from '@mui/material';
 import { alpha } from '@mui/material/styles';
-
-
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Computer as AssetIcon,
+  BugReport as IncidentIcon,
+  ChangeCircle as ChangeIcon,
+  MenuBook as CatalogIcon,
+  Speed as SLAIcon,
+  Close as CloseIcon,
+  CheckCircle as ResolvedIcon,
+  Error as CriticalIcon,
+  Warning as WarningIcon,
+  Build as BuildIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from '../../contexts/SnackbarContext';
 import * as svc from '../../services/enterpriseProPlus.service';
 

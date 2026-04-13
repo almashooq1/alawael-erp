@@ -1,8 +1,30 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-
-
-
-
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  Box,
+  Container,
+  Card,
+  CardContent,
+  Typography,
+  Avatar,
+  Grid,
+  Button,
+  Divider,
+  Chip,
+  LinearProgress,
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from '@mui/material';
+import {
+  Receipt as SlipIcon,
+  Print as PrintIcon,
+  Download as DownloadIcon,
+  ArrowBack as BackIcon,
+  Person as PersonIcon,
+  CalendarMonth as CalIcon,
+  AccountBalance as BankIcon,
+} from '@mui/icons-material';
 import { useParams, useNavigate } from 'react-router-dom';
 import payrollService from 'services/payrollService';
 import logger from 'utils/logger';

@@ -3,6 +3,7 @@
  * مكونات واجهة المستخدم الموافقة لمعايير الوصول
  */
 
+import { Button, IconButton, TextField, Chip } from '@mui/material';
 
 // Accessible Button with proper ARIA labels
 export const AccessibleButton = ({

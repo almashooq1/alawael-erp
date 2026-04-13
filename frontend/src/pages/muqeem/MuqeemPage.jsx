@@ -4,11 +4,23 @@
  * Ministry of Interior - Muqeem integration: residence queries,
  * renewals, exit/re-entry visas, final exit visas, expiry alerts.
  */
-import { useState, useEffect, useCallback } from 'react';
-import { Paper,
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Box, Typography, Card, CardContent, Grid, Button, Table, TableBody,
+  TableCell, TableContainer, TableHead, TableRow, Paper, Chip, TextField,
+  Dialog, DialogTitle, DialogContent, DialogActions, Alert, CircularProgress,
+  Tabs, Tab, Badge, Tooltip, IconButton,
 } from '@mui/material';
-
-
+import {
+  CreditCard as IqamaIcon,
+  FlightTakeoff as ExitIcon,
+  FlightLand as ReturnIcon,
+  Warning as WarnIcon,
+  Search as SearchIcon,
+  Refresh as RefreshIcon,
+  CheckCircle as CheckIcon,
+  Work as OccupationIcon,
+} from '@mui/icons-material';
 import axios from 'axios';
 
 const API = axios.create({ baseURL: '/api/muqeem', withCredentials: true });

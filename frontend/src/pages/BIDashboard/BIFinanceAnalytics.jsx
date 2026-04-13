@@ -5,19 +5,52 @@
  * monthly comparisons, and financial KPIs.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  CircularProgress,
+  ToggleButtonGroup,
+  ToggleButton,
+  IconButton,
+  Tooltip,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   useTheme,
   alpha,
 } from '@mui/material';
 import {
+  TrendingUp,
+  TrendingDown,
   AccountBalance,
   Receipt,
   MoneyOff,
+  Refresh,
   AttachMoney,
 } from '@mui/icons-material';
-
-
+import {
+  AreaChart,
+  Area,
+  Bar,
+  Line,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartTooltip,
+  Legend,
+  ComposedChart,
+} from 'recharts';
+import { motion } from 'framer-motion';
 import { getFinanceAnalytics, getCashflow } from '../../services/biDashboard.service';
 
 function formatCurrency(amount) {

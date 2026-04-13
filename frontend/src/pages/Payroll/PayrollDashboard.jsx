@@ -1,12 +1,21 @@
 /**
  * لوحة تحكم الرواتب — Payroll Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, CircularProgress,
+  Table, TableHead, TableRow, TableCell, TableBody, Chip,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  AccountBalance as PayrollIcon,
+  TrendingUp as GrossIcon,
+  TrendingDown as DeductIcon,
+  People as EmployeesIcon,
+} from '@mui/icons-material';
 import apiClient from '../../services/api';
 
 const PIE_COLORS = ['#1976d2', '#4caf50', '#ff9800', '#f44336', '#9c27b0', '#00bcd4'];

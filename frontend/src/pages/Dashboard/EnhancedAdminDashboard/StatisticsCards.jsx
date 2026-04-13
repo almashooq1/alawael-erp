@@ -1,7 +1,21 @@
-
-
-
-
+import {
+  Grid,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Avatar,
+  Skeleton,
+} from '@mui/material';
+import {
+  People,
+  EventNote,
+  AttachMoney,
+  CheckCircle,
+  TrendingUp,
+  TrendingDown,
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { gradients } from 'theme/palette';
 
 const cardVariants = {

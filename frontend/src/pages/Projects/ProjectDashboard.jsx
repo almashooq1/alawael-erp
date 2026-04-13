@@ -1,13 +1,21 @@
 /**
  * لوحة تحكم المشاريع — Project Management Dashboard
  */
-import { useState, useEffect } from 'react';
-
-
-
-
-
-
+import React, { useState, useEffect } from 'react';
+import {
+  Box, Grid, Paper, Typography, Card, CardContent, Chip,
+  Table, TableHead, TableRow, TableCell, TableBody, CircularProgress,
+} from '@mui/material';
+import {
+  PieChart, Pie, Cell,
+  Tooltip, ResponsiveContainer, Legend,
+} from 'recharts';
+import {
+  AccountTree as ProjectIcon,
+  PlayArrow as ActiveIcon,
+  CheckCircle as CompletedIcon,
+  Pause as HoldIcon,
+} from '@mui/icons-material';
 import { getDashboard } from '../../services/projectManagement.service';
 
 const statusLabels = { active: 'نشط', completed: 'مكتمل', on_hold: 'معلق', access_request: 'طلب وصول' };

@@ -15,8 +15,9 @@
 
 require('express-async-errors');
 const path = require('path');
+// Load backend/.env first; parent .env fills in gaps (override: false)
 require('dotenv').config({ path: path.resolve(__dirname, '.env') });
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '..', '.env'), override: false });
 const { validateEnv } = require('./config/validateEnv');
 validateEnv();
 
@@ -34,6 +35,10 @@ const safeError = require('./utils/safeError');
 
 // ─── Environment Setup ───────────────────────────────────────────────────────
 if (!process.env.MONGODB_URI && !process.env.USE_MOCK_DB) {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('FATAL: MONGODB_URI is required in production. Set it in .env or environment.');
+  }
+  // Only auto-enable mock DB in development/test
   process.env.USE_MOCK_DB = 'true';
 }
 
@@ -118,8 +123,15 @@ app.get('/api/v2/domains/health', async (_req, res) => {
   }
 });
 
-// Platform Health & Stats — REMOVED (platform.routes archived in Phase 9)
-// Health endpoint available at /api/v1/health via _registry.js
+// Platform Health & Stats (DDD unified rehabilitation platform)
+try {
+  const platformRoutes = require('./routes/platform.routes');
+  app.use('/api/v1/platform', platformRoutes);
+  app.use('/api/v2/platform', platformRoutes);
+  logger.info('[Platform] ✓ Platform health/stats routes mounted (/api/v1/platform/*)');
+} catch (err) {
+  logger.warn('[Platform] Platform routes skipped:', err.message);
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 6. INTEGRATION BUS (cross-module event-driven architecture)

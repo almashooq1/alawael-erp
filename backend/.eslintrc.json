@@ -22,5 +22,5 @@
     "no-duplicate-imports": "error",
     "no-template-curly-in-string": "warn"
   },
-  "ignorePatterns": ["node_modules/", "uploads/", "coverage/", "dist/", "build/", "__tests__/"]
+  "ignorePatterns": ["node_modules/", "uploads/", "coverage/", "dist/", "build/"]
 }

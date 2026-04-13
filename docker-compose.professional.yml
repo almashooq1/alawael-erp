@@ -175,7 +175,7 @@ services:
     ports:
       - "${FRONTEND_PORT:-3004}:80"
     depends_on:
-      - api-gateway
+      - backend
     networks:
       - alawael-net
     healthcheck:

@@ -12,7 +12,7 @@
 const express = require('express');
 const logger = require('../utils/logger');
 
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // ─── Safe Require — returns empty router on failure ───────────────────────────
 function safeRequire(modulePath) {
@@ -52,19 +52,19 @@ const messagingRoutes = safeRequire('../routes/messaging.routes');
 // Finance — delegated to registries/finance.registry.js (16 modules)
 const registerFinanceRoutes = require('./registries/finance.registry');
 // Clinical, HR, Documents, Communication, Student-Parent — delegated via phases.registry.js
-// PHANTOM: const integrationRoutes = safeRequire('../routes/integration.routes.minimal');
+const integrationRoutes = safeRequire('../routes/integration.routes.minimal');
 // NOTE: disability-rehabilitation (old .js) — الإصدار القديم. تمّ استبداله بـ disability-rehabilitation.routes.js
 //       (مثبّت لاحقاً عبر safeMount على /api/ و /api/v1/ معاً).
-// PHANTOM: const maintenanceRoutes = safeRequire('../routes/maintenance');
+const maintenanceRoutes = safeRequire('../routes/maintenance');
 const assetRoutes = safeRequire('../routes/assets');
 const scheduleRoutes = safeRequire('../routes/schedules');
 
 // Existing route files
 const dashboardRoutes = safeRequire('../routes/dashboard');
-// PHANTOM: const searchRoutes = safeRequire('../routes/search');
+const searchRoutes = safeRequire('../routes/search');
 const validateRoutes = safeRequire('../routes/validate');
-// PHANTOM: const elearningRoutes = safeRequire('../routes/elearning');
-// PHANTOM: const orgBrandingRoutes = safeRequire('../routes/orgBranding');
+const elearningRoutes = safeRequire('../routes/elearning');
+const orgBrandingRoutes = safeRequire('../routes/orgBranding');
 
 // Real Mongoose CRUD routes (converted from frontend-api-stubs)
 const adminRouter = safeRequire('../routes/admin.real.routes');
@@ -90,19 +90,19 @@ const ecommerceRoutes = safeRequire('../routes/ecommerce.routes');
 const { router: purchasingRoutes } = safeRequire('../routes/purchasing.routes.unified');
 // Fleet & Transport — delegated to registries/fleet.registry.js (34 modules)
 const registerFleetRoutes = require('./registries/fleet.registry');
-// PHANTOM: const cmsRoutes = safeRequire('../routes/cms');
+const cmsRoutes = safeRequire('../routes/cms');
 const communityRoutes = safeRequire('../routes/community');
 const knowledgeRoutes = safeRequire('../routes/knowledge');
 const rbacAdvancedRoutes = safeRequire('../routes/rbac-advanced.routes');
-// PHANTOM: const licensesRoutes = safeRequire('../routes/licenses');
+const licensesRoutes = safeRequire('../routes/licenses');
 const caseManagementRoutes = safeRequire('../routes/caseManagement');
 const internalAuditRoutes = safeRequire('../routes/internalAudit');
 const qualityRoutes = safeRequire('../routes/quality');
-// PHANTOM: const equipmentRoutes = safeRequire('../routes/equipment');
+const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
 const projectsRoutes = safeRequire('../routes/projects.routes');
 const branchesRoutes = safeRequire('../routes/branches.routes');
-// PHANTOM: const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
+const beneficiaryPortalRoutes = safeRequire('../routes/beneficiaryPortal');
 const beneficiariesAdminRoutes = safeRequire('../routes/beneficiaries');
 const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.routes');
 
@@ -110,13 +110,13 @@ const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.r
 const civilDefenseRoutes = safeRequire('../routes/civilDefense.routes');
 const { router: inventoryUnifiedRoutes } = safeRequire('../routes/inventory.routes.unified');
 const supplyChainRoutes = safeRequire('../routes/supplyChain.routes');
-// PHANTOM: const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
-// PHANTOM: const mfaRoutes = safeRequire('../routes/mfa');
+const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
+const mfaRoutes = safeRequire('../routes/mfa');
 const ssoRoutes = safeRequire('../routes/sso.routes');
 const rbacRoutes = safeRequire('../routes/rbac.routes');
 const rbacAdminRoutes = safeRequire('../routes/rbac.admin.routes');
 const montessoriRoutes = safeRequire('../routes/montessori');
-// PHANTOM: const montessoriAuthRoutes = safeRequire('../routes/montessoriAuth');
+const montessoriAuthRoutes = safeRequire('../routes/montessoriAuth');
 const measurementsRoutes = safeRequire('../routes/measurements.routes');
 const mobileAppRoutes = safeRequire('../routes/mobileApp.routes');
 

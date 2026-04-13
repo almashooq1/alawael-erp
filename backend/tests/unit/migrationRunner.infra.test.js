@@ -44,12 +44,12 @@ describe('infrastructure/migrationRunner.js', () => {
   });
 
   test('has npm dependencies (6)', () => {
-    const npms = (source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || []);
+    const npms = source.match(/require\s*\(\s*['"](?![./])[^'"]+['"]\s*\)/g) || [];
     expect(npms.length).toBe(6);
   });
 
   test('has local dependencies (3)', () => {
-    const locals = (source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || []);
+    const locals = source.match(/require\s*\(\s*['"]\.[^'"]+['"]\s*\)/g) || [];
     expect(locals.length).toBe(3);
   });
 

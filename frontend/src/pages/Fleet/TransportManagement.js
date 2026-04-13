@@ -557,7 +557,7 @@ const TransportManagement = () => {
             color: '#DD6B20',
           },
         ].map((s, i) => (
-          <Grid item xs={6} sm={4} md={12 / 7 > 1.5 ? 2 : 2} lg key={i}>
+          <Grid item xs={6} sm={4} md={2} lg key={i}>
             <StatCard {...s} />
           </Grid>
         ))}

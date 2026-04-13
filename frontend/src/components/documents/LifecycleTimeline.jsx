@@ -79,6 +79,7 @@ export default function LifecycleTimeline({ open, onClose, documentId: propDocId
 
   useEffect(() => {
     if (open && docId) loadTimeline();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, docId]);
 
   const loadTimeline = async () => {

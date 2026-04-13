@@ -71,18 +71,21 @@ export default function DocumentsProExtended() {
   const loadTabData = useCallback(async (tabKey) => {
     try {
       switch (tabKey) {
-        case 'signatures':
+        case 'signatures': {
           const sigResult = await signatureApi.getPending().catch(() => ({ signatures: [] }));
           setPendingSignatures(sigResult.signatures || []);
           break;
-        case 'audit':
+        }
+        case 'audit': {
           const auditResult = await auditApi.getStats().catch(() => ({ stats: {} }));
           setAuditStats(auditResult.stats || {});
           break;
-        case 'bulk':
+        }
+        case 'bulk': {
           const bulkResult = await bulkApi.getJobs().catch(() => ({ jobs: [] }));
           setBulkJobs(bulkResult.jobs || []);
           break;
+        }
         default:
           break;
       }

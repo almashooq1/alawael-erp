@@ -17,6 +17,7 @@ export default function OCRViewer({ documentId, onClose }) {
   useEffect(() => {
     if (!documentId) return;
     loadResult();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentId]);
 
   const loadResult = async () => {

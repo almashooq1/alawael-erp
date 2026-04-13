@@ -148,7 +148,7 @@ apiClient.interceptors.response.use(
 
     // Log slow requests in development only
     if (process.env.NODE_ENV === 'development' && duration > 3000) {
-      // eslint-disable-next-line no-console
+       
       console.warn(`⏱️ Slow API call: ${response.config.url} (${duration}ms)`);
     }
 
@@ -179,7 +179,7 @@ apiClient.interceptors.response.use(
 
       // Retry logging — development only
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.info(
           `🔄 Retrying ${config.url} (attempt ${config._retryCount}/${MAX_RETRIES}) in ${retryDelay}ms`
         );
@@ -271,18 +271,18 @@ apiClient.interceptors.response.use(
     // Log errors only in development to avoid leaking info in production
     if (process.env.NODE_ENV === 'development') {
       if (error.response?.status === 403) {
-        // eslint-disable-next-line no-console
+         
         console.error('Access Forbidden:', errorData);
       }
 
       if (error.response?.status === 429) {
         const retryAfter = error.response.headers?.['retry-after'];
-        // eslint-disable-next-line no-console
+         
         console.warn(`Rate limited. Retry after: ${retryAfter || 'unknown'} seconds`);
       }
 
       if (error.response?.status >= 500) {
-        // eslint-disable-next-line no-console
+         
         console.error('Server Error:', errorData);
       }
     }

@@ -261,6 +261,7 @@ export default function ParentPortalManagement() {
     } catch (err) {
       console.error('Stats fetch error:', err);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── جلب الشكاوى ──────────────────────────────────────────────────────────
@@ -284,6 +285,7 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filters]);
 
   // ─── جلب الرسائل ──────────────────────────────────────────────────────────
@@ -301,6 +303,7 @@ export default function ParentPortalManagement() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {

@@ -76,8 +76,9 @@ export default function useStudentReport() {
           : 'تعذر تحميل التقرير. الرجاء المحاولة لاحقًا.';
       setLoadError(errorMessage);
     } finally {
-      if (requestId !== requestIdRef.current) return;
-      setLoading(false);
+      if (requestId === requestIdRef.current) {
+        setLoading(false);
+      }
     }
   }, [filters, isDateRangeInvalid, userId, showSnackbar]);
 

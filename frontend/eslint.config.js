@@ -54,22 +54,15 @@ module.exports = [
           varsIgnorePattern: '^_',
           args: 'after-used',
           argsIgnorePattern: '^_',
-        },
-      ],
-      'no-unused-vars': [
-        'warn',
-        {
-          vars: 'all',
-          varsIgnorePattern: '^_',
-          args: 'after-used',
-          argsIgnorePattern: '^_',
           caughtErrors: 'none',
         },
       ],
-      'no-console': 'warn',
+      // Disable base rule — unused-imports/no-unused-vars covers it (avoids duplicate warnings)
+      'no-unused-vars': 'off',
+      'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
       'no-undef': 'warn',
       // Security rules (warn to avoid blocking lint)
-      eqeqeq: ['warn', 'always'],
+      eqeqeq: ['warn', 'always', { null: 'ignore' }],
       'no-eval': 'warn',
       'no-implied-eval': 'warn',
       'no-new-func': 'warn',
@@ -88,7 +81,7 @@ module.exports = [
     },
   },
   {
-    files: ['**/*.test.js', '**/*.test.jsx', '**/*.spec.js', '**/*.spec.jsx'],
+    files: ['**/*.test.js', '**/*.test.jsx', '**/*.spec.js', '**/*.spec.jsx', '**/setupTests.js'],
     languageOptions: {
       globals: {
         describe: 'readonly',
@@ -103,14 +96,8 @@ module.exports = [
       },
     },
     rules: {
-      'no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrors: 'none',
-        },
-      ],
+      'no-unused-vars': 'off',
+      'no-console': 'off',
     },
   },
 ];

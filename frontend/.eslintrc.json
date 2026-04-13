@@ -49,6 +49,7 @@
     "no-constant-condition": "warn",
     "no-useless-catch": "warn",
     "no-useless-escape": "warn",
-    "no-unsafe-finally": "warn"
+    "no-unsafe-finally": "warn",
+    "no-case-declarations": "warn"
   }
 }

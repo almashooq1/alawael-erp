@@ -132,15 +132,8 @@ module.exports = {
     '<rootDir>/../supply-chain-management',
   ],
 
-  // Block duplicate __mocks__ files in non-backend folders from haste-map scanning
-  haste: {
-    blockList: [
-      /[/\\]frontend[/\\]/,
-      /[/\\]_archived[/\\]/,
-      /[/\\]backups[/\\]/,
-      /[/\\]supply-chain-management[/\\]/,
-    ],
-  },
+  // NOTE: haste.blockList removed — duplicate of modulePathIgnorePatterns above
+  // and causes "Unknown option" warning in Jest 29+
 
   // Module file extensions
   moduleFileExtensions: ['js', 'json', 'node'],

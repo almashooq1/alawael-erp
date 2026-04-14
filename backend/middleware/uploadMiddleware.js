@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 /**
  * File Upload Middleware
  * معالج تحميل الملفات مع التحقق من الأمان والنوع والحجم
@@ -9,7 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 // ── Magic-byte signatures for common file types ──────────────────────────────
 const MAGIC_BYTES = {
   'application/pdf': [Buffer.from([0x25, 0x50, 0x44, 0x46])], // %PDF
@@ -217,12 +217,16 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// File size limit: driven by FILE_SIZE_LIMIT_MB env variable (default: 50 MB)
+const FILE_SIZE_LIMIT_MB = parseInt(process.env.FILE_SIZE_LIMIT_MB, 10) || 50;
+const FILE_SIZE_LIMIT_BYTES = FILE_SIZE_LIMIT_MB * 1024 * 1024;
+
 // إعدادات multer
 const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB
+    fileSize: FILE_SIZE_LIMIT_BYTES,
   },
 });
 
@@ -230,7 +234,7 @@ const upload = multer({
 const handleUploadError = (err, _req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: 'حجم الملف كبير جداً. الحد الأقصى 50 MB' });
+      return res.status(400).json({ message: `حجم الملف كبير جداً. الحد الأقصى ${FILE_SIZE_LIMIT_MB} MB` });
     }
     return res.status(400).json({ message: `خطأ في تحميل الملف: ${err.message}` });
   } else if (err) {

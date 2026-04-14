@@ -4,17 +4,16 @@
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const EcommerceService = require('../services/EcommerceService');
-const authenticate = require('../middleware/authenticate');
-const { _authenticateToken } = require('../middleware/auth');
+const { authenticateToken: authenticate } = require('../middleware/auth');
 const logger = require('../utils/logger');
 
 // RBAC Integration (Role-Based Access Control)
 let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
-const safeError = require('../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[E-Commerce Routes] RBAC module not available, using fallback');

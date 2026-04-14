@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const logger = require('../utils/logger');
 const { jwtSecret } = require('../config/secrets');
 const tokenBlacklist = require('../utils/tokenBlacklist');
+const safeError = require('../utils/safeError');
 const {
   ROLES,
   hasPermission: configHasPermission,
@@ -19,7 +20,6 @@ function getUser() {
 }
 function getSession() {
   if (!_Session) _Session = require('../models/Session');
-  const safeError = require('../utils/safeError');
   return _Session;
 }
 
@@ -57,7 +57,7 @@ const requireAuth = async (req, res, next) => {
 /**
  * Authenticate JWT token middleware (lenient in tests)
  */
-const authenticateToken = (req, res, next) => {
+const authenticateToken = async (req, res, next) => {
   try {
     // Only allow pre-set req.user inside Jest runner (for test mocks)
     if (req.user && process.env.JEST_WORKER_ID) {
@@ -65,34 +65,37 @@ const authenticateToken = (req, res, next) => {
     }
 
     const authHeader = req.headers['authorization'];
-    // Support Bearer token from header, fallback to query param (SSE streams)
-    const token = (authHeader && authHeader.split(' ')[1]) || req.query?.token;
+    // Only accept Bearer token from Authorization header
+    // NOTE: query param tokens leak in server logs, referer headers, and browser history
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (!token) {
       return res.status(401).json({ success: false, message: 'Access token is required' });
     }
 
-    jwt.verify(token, JWT_SECRET, async (err, decoded) => {
-      if (err) {
-        if (err.name === 'TokenExpiredError') {
-          return res
-            .status(401)
-            .json({ success: false, message: 'Access token has expired', expired: true });
-        }
-        return res.status(403).json({ success: false, message: 'Invalid access token' });
+    // Synchronous verify — throws on invalid/expired token (fully caught by outer try/catch)
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Access token has expired', expired: true });
       }
+      return res.status(403).json({ success: false, message: 'Invalid access token' });
+    }
 
-      // Check token blacklist (logout invalidation)
-      if (await tokenBlacklist.isBlacklisted(token)) {
-        return res.status(401).json({ success: false, message: 'Token has been revoked' });
-      }
+    // Check token blacklist (logout invalidation) — await is now safe inside async function
+    if (await tokenBlacklist.isBlacklisted(token)) {
+      return res.status(401).json({ success: false, message: 'Token has been revoked' });
+    }
 
-      req.user = decoded;
-      req.userId = decoded.id || decoded.sub;
-      req.userRole = decoded.role || 'user';
-      req.permissions = decoded.permissions || [];
-      next();
-    });
+    req.user = decoded;
+    req.userId = decoded.id || decoded.sub;
+    req.userRole = decoded.role || 'user';
+    req.permissions = decoded.permissions || [];
+    next();
   } catch (error) {
     safeError(res, error, 'Auth middleware error');
   }
@@ -351,29 +354,56 @@ const generateTokenWithSession = async (userData, ipAddress, userAgent, expiresI
 };
 
 /**
- * Refresh an expired token (within 7-day window)
+ * Refresh an expired token using a valid refresh token
+ * Requires: { refreshToken } in request body
  */
 const refreshToken = (req, res) => {
   try {
-    const token = extractToken(req);
-    if (!token) {
-      return res.status(401).json({ success: false, error: 'No token provided' });
+    const { refreshToken: refreshTk } = req.body || {};
+    if (!refreshTk) {
+      return res.status(400).json({
+        success: false,
+        error: 'Refresh token is required in request body',
+      });
+    }
+
+    // Verify the refresh token with the dedicated refresh secret
+    const { jwtRefreshSecret } = require('../config/secrets');
+    let refreshDecoded;
+    try {
+      refreshDecoded = jwt.verify(refreshTk, jwtRefreshSecret);
+    } catch (verifyErr) {
+      return res.status(403).json({
+        success: false,
+        error: 'Invalid or expired refresh token — please re-login',
+      });
+    }
+
+    if (refreshDecoded.type !== 'refresh') {
+      return res.status(403).json({
+        success: false,
+        error: 'Invalid token type — expected refresh token',
+      });
+    }
+
+    // Also verify the expired access token to get user claims
+    const accessToken = extractToken(req);
+    if (!accessToken) {
+      return res.status(401).json({ success: false, error: 'No access token provided' });
     }
 
     let decoded;
     try {
-      decoded = jwt.verify(token, JWT_SECRET, { ignoreExpiration: true });
+      decoded = jwt.verify(accessToken, JWT_SECRET, { ignoreExpiration: true });
     } catch (verifyErr) {
-      return res.status(403).json({ success: false, error: 'Invalid token — cannot refresh' });
+      return res.status(403).json({ success: false, error: 'Invalid access token' });
     }
 
-    // Reject tokens older than refresh window (7 days)
-    const tokenAge = Math.floor(Date.now() / 1000) - (decoded.iat || 0);
-    const MAX_REFRESH_WINDOW = 7 * 24 * 60 * 60;
-    if (tokenAge > MAX_REFRESH_WINDOW) {
+    // Ensure both tokens belong to the same user
+    if (decoded.id !== refreshDecoded.id) {
       return res.status(403).json({
         success: false,
-        error: 'Token too old to refresh — please re-login',
+        error: 'Token mismatch — access and refresh tokens belong to different users',
       });
     }
 

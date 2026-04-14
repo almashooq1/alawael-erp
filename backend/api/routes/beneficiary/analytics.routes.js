@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const AnalyticsService = require('../../../services/BeneficiaryManagement/AnalyticsService');
-const authenticate = require('../../../middleware/authMiddleware');
+const { authenticateToken: authenticate } = require('../../../middleware/auth');
 const safeError = require('../../../utils/safeError');
 
 // Initialize service
@@ -40,8 +40,6 @@ router.get('/:beneficiaryId/individual', authenticate, async (req, res) => {
     return res.status(statusCode).json(result);
   } catch (error) {
     safeError(res, error, 'analytics');
-      timestamp: new Date(),
-    });
   }
 });
 
@@ -66,8 +64,6 @@ router.get('/group/comparison', authenticate, async (req, res) => {
     return res.status(statusCode).json(result);
   } catch (error) {
     safeError(res, error, 'analytics');
-      timestamp: new Date(),
-    });
   }
 });
 
@@ -90,8 +86,6 @@ router.get('/:beneficiaryId/report', authenticate, async (req, res) => {
     return res.status(statusCode).json(result);
   } catch (error) {
     safeError(res, error, 'analytics');
-      timestamp: new Date(),
-    });
   }
 });
 
@@ -110,8 +104,6 @@ router.get('/:beneficiaryId/predict-outcomes', authenticate, async (req, res) =>
     return res.status(statusCode).json(result);
   } catch (error) {
     safeError(res, error, 'analytics');
-      timestamp: new Date(),
-    });
   }
 });
 
@@ -155,8 +147,6 @@ router.post('/:beneficiaryId/export-report', authenticate, async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'analytics');
-      timestamp: new Date(),
-    });
   }
 });
 

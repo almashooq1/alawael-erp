@@ -6,8 +6,7 @@ const express = require('express');
 const router = express.Router();
 const trafficAccidentAnalytics = require('../services/trafficAccidentAnalytics');
 const logger = require('../utils/logger');
-const authenticate = require('../middleware/authenticate');
-const authorize = require('../middleware/authorize');
+const { authenticateToken: authenticate, requirePermission: authorize } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);

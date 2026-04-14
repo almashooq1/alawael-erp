@@ -14,6 +14,7 @@
  */
 
 const express = require('express');
+const safeError = require('../../utils/safeError');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
@@ -40,7 +41,6 @@ if (!fs.existsSync(uploadsDir)) {
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
-const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   createRBACMiddleware = _permissions => (_req, _res, next) => next();
@@ -126,6 +126,14 @@ const BLOCKED_EXTENSIONS = [
 ];
 
 /**
+ * Extract user ID consistently from request regardless of JWT payload shape.
+ * Handles both `id` and `sub` claim names for backward compatibility.
+ */
+function getUserId(req) {
+  return req.user?.id || req.user?.sub || req.userId || null;
+}
+
+/**
  * Check if a user can access a document.
  * Returns true if: user is admin, document owner, or explicitly shared with user.
  */
@@ -138,6 +146,26 @@ function canAccessDocument(document, userId, userRole) {
     return true;
   }
   return false;
+}
+
+// ── Dashboard in-memory cache (60s TTL) ──────────────────────────────────
+// Avoids running 7 DB queries per request when traffic spikes.
+// Key: 'admin' for admins, 'user:<id>' for regular users.
+const _dashboardCache = new Map();
+const DASHBOARD_CACHE_TTL = 60 * 1000;
+
+function getDashboardCache(key) {
+  const entry = _dashboardCache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > DASHBOARD_CACHE_TTL) {
+    _dashboardCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+
+function setDashboardCache(key, data) {
+  _dashboardCache.set(key, { data, ts: Date.now() });
 }
 
 // Apply authentication to all routes
@@ -154,6 +182,26 @@ router.use(authenticateToken);
 router.get('/dashboard', async (req, res) => {
   try {
     const Doc = getDocument();
+    const userId = getUserId(req);
+    const isAdmin = req.user?.role === 'admin' || req.user?.role === 'superadmin';
+
+    // Return cached result if available (60s TTL)
+    const cacheKey = isAdmin ? 'admin' : `user:${userId}`;
+    const cached = getDashboardCache(cacheKey);
+    if (cached) return res.json(cached);
+
+    // Scope filter: admins see all documents; regular users see only their own + shared + public
+    const scopeFilter = isAdmin
+      ? {}
+      : {
+          $or: [
+            { uploadedBy: userId },
+            { 'sharedWith.userId': userId },
+            { isPublic: true },
+          ],
+        };
+
+    const baseFilter = { status: { $ne: 'محذوف' }, ...scopeFilter };
 
     // Run all independent queries in parallel for performance
     const [
@@ -165,22 +213,27 @@ router.get('/dashboard', async (req, res) => {
       pendingApproval,
       sharedDocuments,
     ] = await Promise.all([
-      Doc.countDocuments({ status: { $ne: 'محذوف' } }),
+      Doc.countDocuments(baseFilter),
       Doc.aggregate([
-        { $match: { status: { $ne: 'محذوف' } } },
+        { $match: baseFilter },
         { $group: { _id: null, total: { $sum: '$fileSize' } } },
       ]),
       Doc.aggregate([
-        { $match: { status: { $ne: 'محذوف' } } },
+        { $match: baseFilter },
         { $group: { _id: '$category', count: { $sum: 1 } } },
       ]),
-      Doc.find({ status: { $ne: 'محذوف' } })
+      Doc.find(baseFilter)
         .sort({ createdAt: -1 })
         .limit(10)
         .select('title category fileType fileSize createdAt uploadedByName status')
         .lean(),
       Doc.aggregate([
+        { $match: baseFilter },
         { $unwind: { path: '$activityLog', preserveNullAndEmptyArrays: false } },
+        // For non-admins: only show activities they performed
+        ...(isAdmin
+          ? []
+          : [{ $match: { 'activityLog.performedBy': userId } }]),
         { $sort: { 'activityLog.performedAt': -1 } },
         { $limit: 10 },
         {
@@ -195,10 +248,10 @@ router.get('/dashboard', async (req, res) => {
           },
         },
       ]),
-      Doc.countDocuments({ approvalStatus: 'معلق', status: 'نشط' }),
+      Doc.countDocuments({ ...baseFilter, approvalStatus: 'معلق', status: 'نشط' }),
       Doc.countDocuments({
+        ...baseFilter,
         'sharedWith.0': { $exists: true },
-        status: { $ne: 'محذوف' },
       }),
     ]);
 
@@ -213,7 +266,7 @@ router.get('/dashboard', async (req, res) => {
       count: catMap[cat.id] || 0,
     }));
 
-    res.json({
+    const responseData = {
       success: true,
       data: {
         stats: {
@@ -228,7 +281,10 @@ router.get('/dashboard', async (req, res) => {
         recentActivities: activityAgg,
         categories: CATEGORIES,
       },
-    });
+    };
+
+    setDashboardCache(cacheKey, responseData);
+    res.json(responseData);
   } catch (error) {
     safeError(res, error, '[Documents] Dashboard error');
   }
@@ -1167,9 +1223,9 @@ router.get('/:id/preview', async (req, res) => {
     const range = req.headers.range;
 
     // Only increment view count for non-Range requests (avoid inflation by media players)
+    // Using atomic $inc to prevent race conditions from concurrent requests
     if (!range) {
-      document.viewCount = (document.viewCount || 0) + 1;
-      await document.save();
+      await Doc.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } });
     }
 
     if (range) {
@@ -1212,11 +1268,16 @@ router.get('/:id/versions', async (req, res) => {
   try {
     const Doc = getDocument();
     const document = await Doc.findById(req.params.id)
-      .select('version previousVersions title updatedAt')
+      .select('version previousVersions title updatedAt uploadedBy sharedWith isPublic')
       .lean();
 
     if (!document) {
       return res.status(404).json({ message: 'المستند غير موجود' });
+    }
+
+    // Access control: only owner, admin, or shared users can view versions
+    if (!canAccessDocument(document, req.user?.id, req.user?.role)) {
+      return res.status(403).json({ message: 'ليس لديك صلاحية للوصول إلى إصدارات هذا المستند' });
     }
 
     const versions = [
@@ -1404,6 +1465,11 @@ router.get('/:id/versions/:versionId/compare', async (req, res) => {
 
     if (!document) {
       return res.status(404).json({ message: 'المستند غير موجود' });
+    }
+
+    // Access control: only owner, admin, or shared users can compare versions
+    if (!canAccessDocument(document, req.user?.id, req.user?.role)) {
+      return res.status(403).json({ message: 'ليس لديك صلاحية لمقارنة إصدارات هذا المستند' });
     }
 
     const v1Num = parseInt(req.params.versionId.replace('v', ''));

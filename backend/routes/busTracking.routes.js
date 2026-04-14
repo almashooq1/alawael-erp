@@ -19,7 +19,7 @@
 const express = require('express');
 const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
 const _logger = require('../utils/logger');
 
 const MAX_PAGE_LIMIT = 100;

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Government Integration Service — خدمة التكامل الحكومي الموحّد
  *
@@ -22,11 +21,7 @@ const getEmployee = () => {
   return Employee;
 };
 
-let gosiService, gosiAdvanced, qiwaService;
-const getGosi = () => {
-  if (!gosiService) gosiService = require('./gosi.service');
-  return gosiService;
-};
+let gosiAdvanced, qiwaService;
 const getGosiAdvanced = () => {
   if (!gosiAdvanced) gosiAdvanced = require('./gosi-advanced.service');
   return gosiAdvanced;

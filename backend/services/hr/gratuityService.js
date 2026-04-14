@@ -20,7 +20,6 @@ const Gratuity = require('../../models/gratuity.model');
 const GratuityAudit = require('../../models/gratuityAudit.model');
 const Payment = require('../../models/payment.model');
 const QiwaService = require('../qiwa.service');
-const GOSIService = require('../gosi.service');
 const logger = require('../../utils/logger');
 
 class GratuityService {

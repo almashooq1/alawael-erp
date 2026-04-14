@@ -5,7 +5,7 @@
 
 const express = require('express');
 const { body, param } = require('express-validator');
-const { authenticate, authorize } = require('../middleware/authMiddleware');
+const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
 const svc = require('../services/qualityManagement.service');
 
 const router = express.Router();

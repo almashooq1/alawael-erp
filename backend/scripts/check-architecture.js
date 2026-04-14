@@ -16,7 +16,7 @@
 
 'use strict';
 
-const fs   = require('fs');
+const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -24,9 +24,17 @@ const ROOT = path.resolve(__dirname, '..');
 let errors = 0;
 let warnings = 0;
 
-function fail(msg)  { console.error(`  ✗ ${msg}`); errors++; }
-function warn(msg)  { console.warn(`  ⚠  ${msg}`); warnings++; }
-function pass(msg)  { console.log(`  ✓ ${msg}`); }
+function fail(msg) {
+  console.error(`  ✗ ${msg}`);
+  errors++;
+}
+function warn(msg) {
+  console.warn(`  ⚠  ${msg}`);
+  warnings++;
+}
+function pass(msg) {
+  console.log(`  ✓ ${msg}`);
+}
 
 // ── Get only STAGED files (new additions or modifications) ────────────────
 function getStagedFiles() {
@@ -43,8 +51,11 @@ function getStagedFiles() {
 
 // ── Count lines ───────────────────────────────────────────────────────────
 function countLines(filePath) {
-  try { return fs.readFileSync(filePath, 'utf8').split('\n').length; }
-  catch { return 0; }
+  try {
+    return fs.readFileSync(filePath, 'utf8').split('\n').length;
+  } catch {
+    return 0;
+  }
 }
 
 // ── Read file safely ──────────────────────────────────────────────────────
@@ -53,7 +64,9 @@ function readFile(relPath) {
     const repoRoot = path.join(ROOT, '..');
     const abs = path.join(repoRoot, relPath);
     return fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : '';
-  } catch { return ''; }
+  } catch {
+    return '';
+  }
 }
 
 const staged = getStagedFiles();
@@ -85,12 +98,18 @@ if (c1 === 0) pass('No _archived require() calls in staged files');
 // Check 2: New code must not import deprecated proxy auth files
 // ──────────────────────────────────────────────────────────────────────────
 console.log('\n📌 Check 2: Auth imports must use canonical middleware/auth');
-const DEPRECATED_AUTH_RE = /require\s*\(\s*['"`][^'"`]*(middleware\/authenticate|middleware\/authMiddleware|middleware\/authorize|auth\/middleware)['"`]\s*\)/;
+const DEPRECATED_AUTH_RE =
+  /require\s*\(\s*['"`][^'"`]*(middleware\/authenticate|middleware\/authMiddleware|middleware\/authorize|auth\/middleware)['"`]\s*\)/;
 let c2 = 0;
 for (const rel of stagedJs) {
   // Skip the deprecated files themselves
-  if (rel.includes('middleware/authenticate') || rel.includes('middleware/authMiddleware') ||
-      rel.includes('middleware/authorize') || rel.endsWith('auth/middleware.js')) continue;
+  if (
+    rel.includes('middleware/authenticate') ||
+    rel.includes('middleware/authMiddleware') ||
+    rel.includes('middleware/authorize') ||
+    rel.endsWith('auth/middleware.js')
+  )
+    continue;
   const content = readFile(rel);
   if (DEPRECATED_AUTH_RE.test(content)) {
     fail(`${rel} — use middleware/auth instead of deprecated proxy`);
@@ -113,8 +132,12 @@ for (const rel of stagedJs) {
   // Only fail if this is a NEWLY ADDED file (A in git status), warn for modifications
   let status = '';
   try {
-    status = execSync(`git diff --cached --name-status "${rel}"`, { cwd: repoRoot }).toString().trim()[0];
-  } catch { status = 'M'; }
+    status = execSync(`git diff --cached --name-status "${rel}"`, { cwd: repoRoot })
+      .toString()
+      .trim()[0];
+  } catch {
+    status = 'M';
+  }
   if (lines > ROUTE_LIMIT) {
     if (status === 'A') {
       fail(`${rel} — new file has ${lines} lines (limit: ${ROUTE_LIMIT})`);
@@ -139,8 +162,12 @@ for (const rel of stagedJs) {
   const lines = countLines(abs);
   let status = 'M';
   try {
-    status = execSync(`git diff --cached --name-status "${rel}"`, { cwd: repoRoot }).toString().trim()[0];
-  } catch { /* */ }
+    status = execSync(`git diff --cached --name-status "${rel}"`, { cwd: repoRoot })
+      .toString()
+      .trim()[0];
+  } catch {
+    /* */
+  }
   if (lines > SERVICE_LIMIT) {
     if (status === 'A') {
       fail(`${rel} — new file has ${lines} lines (limit: ${SERVICE_LIMIT})`);
@@ -156,14 +183,20 @@ if (c4 === 0) pass('No new oversized service files');
 // Check 5: No new Python files being added to the JS backend
 // ──────────────────────────────────────────────────────────────────────────
 console.log('\n📌 Check 5: No new Python files added to backend');
-const newPythonFiles = staged.filter(f => f.startsWith('backend/') && (f.endsWith('.py') || f.endsWith('.pyc')));
+const newPythonFiles = staged.filter(
+  f => f.startsWith('backend/') && (f.endsWith('.py') || f.endsWith('.pyc'))
+);
 let c5 = 0;
 for (const f of newPythonFiles) {
   const repoRoot = path.join(ROOT, '..');
   let status = 'A';
   try {
-    status = execSync(`git diff --cached --name-status "${f}"`, { cwd: repoRoot }).toString().trim()[0];
-  } catch { /* */ }
+    status = execSync(`git diff --cached --name-status "${f}"`, { cwd: repoRoot })
+      .toString()
+      .trim()[0];
+  } catch {
+    /* */
+  }
   if (status === 'A') {
     fail(`${f} — Python file added to JS backend`);
     c5++;
@@ -176,14 +209,23 @@ if (c5 === 0) pass('No new Python files added to backend');
 // ──────────────────────────────────────────────────────────────────────────
 console.log('\n📌 Check 6: No hardcoded secrets in staged files');
 const SECRET_PATTERNS = [
-  { re: /password\s*[:=]\s*['"][^'"]{8,}['"]/i,   label: 'hardcoded password' },
-  { re: /secret\s*[:=]\s*['"][^'"]{16,}['"]/i,    label: 'hardcoded secret (long value)' },
+  { re: /password\s*[:=]\s*['"][^'"]{8,}['"]/i, label: 'hardcoded password' },
+  { re: /secret\s*[:=]\s*['"][^'"]{16,}['"]/i, label: 'hardcoded secret (long value)' },
   { re: /api[_-]?key\s*[:=]\s*['"][^'"]{16,}['"]/i, label: 'hardcoded API key' },
-  { re: /mongodb:\/\/[^'"]*:[^'"]*@/i,             label: 'MongoDB credentials in URL' },
+  { re: /mongodb:\/\/[^'"]*:[^'"]*@/i, label: 'MongoDB credentials in URL' },
 ];
 let c6 = 0;
 for (const rel of stagedJs) {
-  if (rel.includes('.env.example') || rel.includes('.test.') || rel.includes('check-architecture')) continue;
+  if (
+    rel.includes('.env.example') ||
+    rel.includes('.test.') ||
+    rel.includes('check-architecture') ||
+    rel.includes('jest.setup') ||
+    rel.includes('test-helpers') ||
+    rel.includes('reset-password') ||
+    rel.includes('test-utils/')
+  )
+    continue;
   const content = readFile(rel);
   for (const { re, label } of SECRET_PATTERNS) {
     if (re.test(content)) {

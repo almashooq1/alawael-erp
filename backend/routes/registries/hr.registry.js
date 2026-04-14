@@ -78,9 +78,7 @@ module.exports = function registerHrRoutes(app, { safeRequire, dualMount, safeMo
   // ── HR Smart System — AI, Analytics, Onboarding, Documents ─────────────
   // ══════════════════════════════════════════════════════════════════════════
   // PHANTOM-FIX: dualMount(app, 'hr-smart', hrSmartRoutes);
-  logger.info(
-    '[HR] HR Smart routes SKIPPED (phantom import)'
-  );
+  logger.info('[HR] HR Smart routes SKIPPED (phantom import)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Employee Affairs (4 phases — شؤون الموظفين) ─────────────────────────

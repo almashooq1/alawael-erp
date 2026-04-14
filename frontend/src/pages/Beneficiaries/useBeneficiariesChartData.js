@@ -47,7 +47,9 @@ export function useBeneficiariesChartData(beneficiaries) {
     const hasRealData = result.some(r => r.value > 0);
     if (!hasRealData) {
       const fallback = [12, 19, 15, 25, 22, 30];
-      result.forEach((r, idx) => { r.value = fallback[idx]; });
+      result.forEach((r, idx) => {
+        r.value = fallback[idx];
+      });
     }
     return result;
   }, [beneficiaries]);

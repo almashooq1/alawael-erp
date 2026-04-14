@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node server-clean.js",
-    "test": "jest --testEnvironment=node",
-    "test:watch": "jest --watch --testEnvironment=node",
-    "test:coverage": "jest --coverage --testEnvironment=node",
     "dev": "nodemon server-clean.js",
     "lint": "echo '✅ Supply chain lint check passed'",
-    "quality:guard": "echo '✅ Supply chain quality guard check passed'",
-    "quality:fast": "npm run lint && npm test -- --passWithNoTests --no-coverage",
+    "quality": "npm run quality:ci",
     "quality:ci": "npm run quality:guard && npm test -- --passWithNoTests --ci --runInBand",
-    "quality": "npm run quality:ci"
+    "quality:fast": "npm run lint && npm test -- --passWithNoTests --no-coverage",
+    "quality:guard": "echo '✅ Supply chain quality guard check passed'",
+    "start": "node server-clean.js",
+    "test": "jest --testEnvironment=node",
+    "test:coverage": "jest --coverage --testEnvironment=node",
+    "test:watch": "jest --watch --testEnvironment=node"
   },
   "dependencies": {
     "bcrypt": "^5.0.0",

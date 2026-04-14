@@ -44,7 +44,9 @@ module.exports = function registerStudentParentRoutes(
   dualMount(app, 'students', studentsRouter);
   dualMount(app, 'student-reports', studentReportsRouter);
   // PHANTOM-FIX: dualMount(app, 'student-management', studentMgmtRoutes);
-  logger.info('[Student] Core student routes mounted (students, reports — management skipped: phantom)');
+  logger.info(
+    '[Student] Core student routes mounted (students, reports — management skipped: phantom)'
+  );
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Student Portal Extended Services (خدمات بوابة الطالب الموسّعة) ────
@@ -55,9 +57,7 @@ module.exports = function registerStudentParentRoutes(
   // PHANTOM-FIX: dualMount(app, 'student-rewards', studentRewardsStoreRoutes);
   // PHANTOM-FIX: dualMount(app, 'student-events', studentEventsRoutes);
   // PHANTOM-FIX: dualMount(app, 'student-elearning', studentElearningRoutes);
-  logger.info(
-    '[Student] Student portal extended services SKIPPED (6 phantom imports)'
-  );
+  logger.info('[Student] Student portal extended services SKIPPED (6 phantom imports)');
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Parents & Guardian ─────────────────────────────────────────────────

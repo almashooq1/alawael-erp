@@ -20,13 +20,7 @@ mongoose.plugin(schema => {
 // ==================== GLOBAL MASS-ASSIGNMENT GUARD (Round 33) ====================
 // Strip privileged / internal fields from every update operation.
 // Admin / system operations can bypass by setting option { _adminBypass: true }.
-const MASS_ASSIGN_BLACKLIST = new Set([
-  '__proto__',
-  'constructor',
-  'prototype',
-  '_id',
-  '__v',
-]);
+const MASS_ASSIGN_BLACKLIST = new Set(['__proto__', 'constructor', 'prototype', '_id', '__v']);
 
 // Sensitive fields that admin operations may legitimately need to update
 const MASS_ASSIGN_SENSITIVE = new Set([

@@ -11,7 +11,7 @@ const DocumentVersionSchema = new mongoose.Schema(
     documentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Document',
-      required: true
+      required: true,
     },
 
     // Version Tracking
@@ -177,7 +177,7 @@ const DocumentVersionSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
 
     updatedAt: {
@@ -191,7 +191,7 @@ const DocumentVersionSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 // Indexes
@@ -269,9 +269,7 @@ DocumentVersionSchema.methods.resolveComment = async function (commentId) {
 };
 
 DocumentVersionSchema.methods.startEditSession = async function (userId) {
-  const activeSession = this.editSessions.find(
-    s => s.userId.toString() === userId.toString() && s.status === 'active'
-  );
+  const activeSession = this.editSessions.find(s => s.userId.toString() === userId.toString() && s.status === 'active');
 
   if (activeSession) {
     return activeSession;
@@ -287,9 +285,7 @@ DocumentVersionSchema.methods.startEditSession = async function (userId) {
 };
 
 DocumentVersionSchema.methods.endEditSession = async function (userId) {
-  const session = this.editSessions.find(
-    s => s.userId.toString() === userId.toString() && s.status === 'active'
-  );
+  const session = this.editSessions.find(s => s.userId.toString() === userId.toString() && s.status === 'active');
 
   if (session) {
     session.status = 'ended';
@@ -330,10 +326,7 @@ DocumentVersionSchema.statics.findLatestVersion = async function (documentId) {
 };
 
 DocumentVersionSchema.statics.findVersionByNumber = async function (documentId, versionNumber) {
-  return this.findOne({ documentId, versionNumber })
-    .populate('createdBy', 'email username')
-    .populate('updatedBy', 'email username')
-    .exec();
+  return this.findOne({ documentId, versionNumber }).populate('createdBy', 'email username').populate('updatedBy', 'email username').exec();
 };
 
 DocumentVersionSchema.statics.getVersionHistory = async function (documentId, options = {}) {
@@ -343,12 +336,7 @@ DocumentVersionSchema.statics.getVersionHistory = async function (documentId, op
   const sortObj = { [sortBy]: order === 'desc' ? -1 : 1 };
 
   const [versions, total] = await Promise.all([
-    this.find(query)
-      .sort(sortObj)
-      .limit(limit)
-      .skip(skip)
-      .populate('createdBy', 'email username')
-      .exec(),
+    this.find(query).sort(sortObj).limit(limit).skip(skip).populate('createdBy', 'email username').exec(),
     this.countDocuments(query),
   ]);
 

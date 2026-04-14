@@ -11,11 +11,11 @@ const InvoiceSchema = new mongoose.Schema(
     invoiceNumber: {
       type: String,
       unique: true,
-      required: true
+      required: true,
     },
 
     invoiceId: {
-      type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.ObjectId,
     },
 
     // Date Information
@@ -36,7 +36,7 @@ const InvoiceSchema = new mongoose.Schema(
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Customer',
-      required: true
+      required: true,
     },
 
     customerName: String,
@@ -107,17 +107,8 @@ const InvoiceSchema = new mongoose.Schema(
     // Payment Tracking
     status: {
       type: String,
-      enum: [
-        'draft',
-        'sent',
-        'viewed',
-        'partially_paid',
-        'paid',
-        'overdue',
-        'cancelled',
-        'disputed',
-      ],
-      default: 'draft'
+      enum: ['draft', 'sent', 'viewed', 'partially_paid', 'paid', 'overdue', 'cancelled', 'disputed'],
+      default: 'draft',
     },
 
     paymentStatus: {
@@ -250,7 +241,7 @@ const InvoiceSchema = new mongoose.Schema(
     // Timestamps
     createdAt: {
       type: Date,
-      default: Date.now
+      default: Date.now,
     },
 
     updatedAt: {
@@ -258,7 +249,7 @@ const InvoiceSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Indexes

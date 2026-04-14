@@ -83,10 +83,7 @@ describe('Financial Intelligence System - Phase 4', () => {
 
       expect(result.transactionId).toBe('TXN-123456789');
       expect(result.amount).toBe(10000);
-      expect(financialService.emit).toHaveBeenCalledWith(
-        'payment-created',
-        expect.objectContaining({ amount: 10000 })
-      );
+      expect(financialService.emit).toHaveBeenCalledWith('payment-created', expect.objectContaining({ amount: 10000 }));
     });
 
     test('should complete payment transaction', async () => {
@@ -102,11 +99,7 @@ describe('Financial Intelligence System - Phase 4', () => {
         return completedTransaction;
       });
 
-      const result = await financialService.completePayment(
-        'TXN-123456789',
-        'STRIPE-abc123',
-        'ref-123'
-      );
+      const result = await financialService.completePayment('TXN-123456789', 'STRIPE-abc123', 'ref-123');
 
       expect(result.status).toBe('completed');
       expect(result.gatewayTransactionId).toBe('STRIPE-abc123');
@@ -123,11 +116,7 @@ describe('Financial Intelligence System - Phase 4', () => {
 
       financialService.processRefund.mockResolvedValue(refundTransaction);
 
-      const result = await financialService.processRefund(
-        'TXN-123456789',
-        5000,
-        'Customer requested refund'
-      );
+      const result = await financialService.processRefund('TXN-123456789', 5000, 'Customer requested refund');
 
       expect(result.type).toBe('refund');
       expect(result.refundStatus).toBe('pending');
@@ -422,11 +411,7 @@ describe('Financial Intelligence System - Phase 4', () => {
 
       financialService.getFinancialSummary.mockResolvedValue(summary);
 
-      const result = await financialService.getFinancialSummary(
-        '2026-01-01',
-        '2026-02-13',
-        'customer-123'
-      );
+      const result = await financialService.getFinancialSummary('2026-01-01', '2026-02-13', 'customer-123');
 
       expect(result.paymentMetrics.totalAmount).toBe(100000);
       expect(result.outstandingInvoices.totalOutstanding).toBe(50000);
@@ -557,9 +542,7 @@ describe('Financial Intelligence System - Phase 4', () => {
     });
 
     test('should handle negative amounts in refund', async () => {
-      financialService.processRefund.mockRejectedValue(
-        new Error('Refund amount cannot exceed original transaction')
-      );
+      financialService.processRefund.mockRejectedValue(new Error('Refund amount cannot exceed original transaction'));
 
       try {
         await financialService.processRefund('TXN-123', 20000, 'reason');
@@ -586,10 +569,7 @@ describe('Financial Intelligence System - Phase 4', () => {
         paymentMethod: 'card',
       });
 
-      expect(financialService.emit).toHaveBeenCalledWith(
-        'payment-created',
-        expect.objectContaining({ amount: 5000 })
-      );
+      expect(financialService.emit).toHaveBeenCalledWith('payment-created', expect.objectContaining({ amount: 5000 }));
     });
 
     test('should emit invoice-created event', async () => {
@@ -609,10 +589,7 @@ describe('Financial Intelligence System - Phase 4', () => {
         items: [],
       });
 
-      expect(financialService.emit).toHaveBeenCalledWith(
-        'invoice-created',
-        expect.objectContaining({ invoiceNumber: 'INV-20260213-ABC' })
-      );
+      expect(financialService.emit).toHaveBeenCalledWith('invoice-created', expect.objectContaining({ invoiceNumber: 'INV-20260213-ABC' }));
     });
 
     test('should emit budget-created event', async () => {
@@ -634,10 +611,7 @@ describe('Financial Intelligence System - Phase 4', () => {
         endDate: '2026-03-31',
       });
 
-      expect(financialService.emit).toHaveBeenCalledWith(
-        'budget-created',
-        expect.objectContaining({ department: 'Marketing' })
-      );
+      expect(financialService.emit).toHaveBeenCalledWith('budget-created', expect.objectContaining({ department: 'Marketing' }));
     });
   });
 });

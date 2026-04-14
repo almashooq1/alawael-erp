@@ -536,9 +536,7 @@ class MLService extends EventEmitter {
       for (const model of modelsToRetrain) {
         // Simulate retraining
         model.health.lastRetrained = new Date();
-        model.health.nextRetrainingScheduled = model.calculateNextRetrain(
-          model.health.retrainingFrequency
-        );
+        model.health.nextRetrainingScheduled = model.calculateNextRetrain(model.health.retrainingFrequency);
         await model.save();
 
         this.emit('model-retrained', {

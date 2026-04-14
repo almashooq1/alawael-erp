@@ -21,19 +21,7 @@ const {
   dashboard,
 } = require('../controllers/rehab-expansion.controller');
 
-// ─── Auth middleware (optional, won't break if missing) ──────────────────────
-let authMiddleware;
-try {
-  const authModule = require('../middleware/auth');
-  authMiddleware = authModule.protect || authModule.authenticate || authModule.auth || authModule;
-  if (typeof authMiddleware !== 'function') {
-    authMiddleware = (req, res, next) => next();
-  }
-} catch (e) {
-  authMiddleware = (req, res, next) => next();
-}
-
-const auth = authMiddleware;
+const { authenticateToken: auth } = require('../middleware/auth');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Dashboard — لوحة القيادة الشاملة

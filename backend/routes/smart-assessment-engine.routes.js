@@ -90,16 +90,7 @@ const {
 } = require('../models/clinical-assessment-battery.model');
 
 /* ─── Middleware ────────────────────────────────────────────────────────── */
-let authenticateToken;
-try {
-  authenticateToken = require('../middleware/auth.middleware').authenticateToken;
-} catch (e) {
-  try {
-    authenticateToken = require('../middleware/authMiddleware');
-  } catch (e2) {
-    authenticateToken = (req, res, next) => next(); // fallback
-  }
-}
+const { authenticateToken } = require('../middleware/auth');
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

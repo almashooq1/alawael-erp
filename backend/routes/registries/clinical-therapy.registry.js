@@ -23,13 +23,32 @@ module.exports = function registerClinicalTherapyRoutes(
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Therapist Portal (5 Tiers) ──────────────────────────────────────────
+  // All 5 tiers have non-overlapping route paths, so they are co-mounted at
+  // the primary /api/therapist prefix. Clients can use a single base URL.
+  // Legacy tier-specific paths kept as deprecated aliases for compatibility.
   // ══════════════════════════════════════════════════════════════════════════
-  dualMount(app, 'therapist', safeRequire('../routes/therapist'));
-  dualMount(app, 'therapist-extended', safeRequire('../routes/therapistExtended.routes'));
-  dualMount(app, 'therapist-pro', safeRequire('../routes/therapistPro.routes'));
-  dualMount(app, 'therapist-ultra', safeRequire('../routes/therapistUltra.routes'));
-  dualMount(app, 'therapist-elite', safeRequire('../routes/therapistElite.routes'));
-  logger.info('Therapist Portal routes mounted (5 tiers: base → extended → pro → ultra → elite)');
+  const therapistBase = safeRequire('../routes/therapist');
+  const therapistExtended = safeRequire('../routes/therapistExtended.routes');
+  const therapistPro = safeRequire('../routes/therapistPro.routes');
+  const therapistUltra = safeRequire('../routes/therapistUltra.routes');
+  const therapistElite = safeRequire('../routes/therapistElite.routes');
+
+  // Primary — all 5 feature sets reachable under /api/therapist
+  dualMount(app, 'therapist', therapistBase);
+  dualMount(app, 'therapist', therapistExtended);
+  dualMount(app, 'therapist', therapistPro);
+  dualMount(app, 'therapist', therapistUltra);
+  dualMount(app, 'therapist', therapistElite);
+
+  // @deprecated backward-compat aliases (retain until callers migrate)
+  dualMount(app, 'therapist-extended', therapistExtended);
+  dualMount(app, 'therapist-pro', therapistPro);
+  dualMount(app, 'therapist-ultra', therapistUltra);
+  dualMount(app, 'therapist-elite', therapistElite);
+
+  logger.info(
+    'Therapist Portal routes co-mounted at /api/therapist (5 tiers: base → extended → pro → ultra → elite, 148 endpoints)'
+  );
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Disability Rehabilitation — التأهيل الموحد لذوي الإعاقة ─────────────

@@ -71,8 +71,6 @@ nitaqatCalculationSchema.index({ nitaqatBand: 1, organization: 1 });
 
 const NitaqatCalculation =
   mongoose.models.NitaqatCalculation ||
-  mongoose.models.NitaqatCalculation ||
-  mongoose.models.NitaqatCalculation ||
   mongoose.model('NitaqatCalculation', nitaqatCalculationSchema);
 
 /* ═══════════════════════════════════════════════════════
@@ -204,8 +202,6 @@ employmentContractSchema.index({ organization: 1, status: 1 });
 
 const EmploymentContract =
   mongoose.models.EmploymentContract ||
-  mongoose.models.EmploymentContract ||
-  mongoose.models.EmploymentContract ||
   mongoose.model('EmploymentContract', employmentContractSchema);
 
 /* ═══════════════════════════════════════════════════════
@@ -246,8 +242,6 @@ nitaqatActivityParamSchema.index(
 );
 
 const NitaqatActivityParam =
-  mongoose.models.NitaqatActivityParam ||
-  mongoose.models.NitaqatActivityParam ||
   mongoose.models.NitaqatActivityParam ||
   mongoose.model('NitaqatActivityParam', nitaqatActivityParamSchema);
 

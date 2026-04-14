@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // نموذج الطالب
@@ -154,9 +153,6 @@ module.exports = {
   MediaFile: mongoose.models.MediaFile || mongoose.model('MediaFile', MediaFileSchema),
   Report: mongoose.models.MontessoriReport || mongoose.model('MontessoriReport', ReportSchema),
   MontessoriProgram:
-    mongoose.models.MontessoriProgram ||
-    mongoose.models.MontessoriProgram ||
-    mongoose.models.MontessoriProgram ||
     mongoose.models.MontessoriProgram ||
     mongoose.model('MontessoriProgram', MontessoriProgramSchema),
 };

@@ -264,7 +264,6 @@ const InventoryStock =
   mongoose.models.InventoryStock || mongoose.model('InventoryStock', inventoryStockSchema);
 const InventoryTransaction =
   mongoose.models.InventoryTransaction ||
-  mongoose.models.InventoryTransaction ||
   mongoose.model('InventoryTransaction', inventoryTransactionSchema);
 const Supplier = mongoose.models.Supplier || mongoose.model('Supplier', supplierSchema);
 const PurchaseOrder =

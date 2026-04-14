@@ -54,4 +54,4 @@ maintenanceRequestSchema.index({ assignedTo: 1 });
 
 module.exports =
   mongoose.models.MaintenanceRequest ||
-  mongoose.models.MaintenanceRequest || mongoose.model('MaintenanceRequest', maintenanceRequestSchema);
+  mongoose.model('MaintenanceRequest', maintenanceRequestSchema);

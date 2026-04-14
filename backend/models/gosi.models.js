@@ -196,9 +196,6 @@ gosiComplianceReportSchema.index({ organization: 1, 'period.startDate': -1 });
 
 const GOSIComplianceReport =
   mongoose.models.GOSIComplianceReport ||
-  mongoose.models.GOSIComplianceReport ||
-  mongoose.models.GOSIComplianceReport ||
-  mongoose.models.GOSIComplianceReport ||
   mongoose.model('GOSIComplianceReport', gosiComplianceReportSchema);
 
 /* ═══════════════════════════════════════════════════════
@@ -348,8 +345,6 @@ endOfServiceSchema.index({ employee: 1, status: 1 });
 endOfServiceSchema.index({ organization: 1, createdAt: -1 });
 
 const EndOfServiceCalculation =
-  mongoose.models.EndOfServiceCalculation ||
-  mongoose.models.EndOfServiceCalculation ||
   mongoose.models.EndOfServiceCalculation ||
   mongoose.model('EndOfServiceCalculation', endOfServiceSchema);
 

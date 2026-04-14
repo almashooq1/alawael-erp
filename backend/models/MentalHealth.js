@@ -698,15 +698,15 @@ const CounselingSession =
 
 const MentalHealthProgram =
   mongoose.models.MentalHealthProgram ||
-  mongoose.models.MentalHealthProgram || mongoose.model('MentalHealthProgram', mentalHealthProgramSchema);
+  mongoose.model('MentalHealthProgram', mentalHealthProgramSchema);
 
 const PsychologicalAssessment =
   mongoose.models.PsychologicalAssessment ||
-  mongoose.models.PsychologicalAssessment || mongoose.model('PsychologicalAssessment', psychologicalAssessmentSchema);
+  mongoose.model('PsychologicalAssessment', psychologicalAssessmentSchema);
 
 const CrisisIntervention =
   mongoose.models.CrisisIntervention ||
-  mongoose.models.CrisisIntervention || mongoose.model('CrisisIntervention', crisisInterventionSchema);
+  mongoose.model('CrisisIntervention', crisisInterventionSchema);
 
 const SupportGroup =
   mongoose.models.SupportGroup || mongoose.model('SupportGroup', supportGroupSchema);

@@ -44,4 +44,4 @@ strategicInitiativeSchema.index({ owner: 1 });
 
 module.exports =
   mongoose.models.StrategicInitiative ||
-  mongoose.models.StrategicInitiative || mongoose.model('StrategicInitiative', strategicInitiativeSchema);
+  mongoose.model('StrategicInitiative', strategicInitiativeSchema);

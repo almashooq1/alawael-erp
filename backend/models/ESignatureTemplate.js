@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Signature Template Model
  * نموذج قوالب التوقيع الإلكتروني
@@ -113,4 +112,4 @@ eSignatureTemplateSchema.index({ category: 1, isActive: 1 });
 
 module.exports =
   mongoose.models.ESignatureTemplate ||
-  mongoose.models.ESignatureTemplate || mongoose.model('ESignatureTemplate', eSignatureTemplateSchema);
+  mongoose.model('ESignatureTemplate', eSignatureTemplateSchema);

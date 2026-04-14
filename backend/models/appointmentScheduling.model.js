@@ -225,8 +225,6 @@ const ScheduleTemplate =
 const TimeSlot = mongoose.models.TimeSlot || mongoose.model('TimeSlot', timeSlotSchema);
 const AppointmentReminder =
   mongoose.models.AppointmentReminder ||
-  mongoose.models.AppointmentReminder ||
-  mongoose.models.AppointmentReminder ||
   mongoose.model('AppointmentReminder', appointmentReminderSchema);
 const WaitlistEntry =
   mongoose.models.WaitlistEntry || mongoose.model('WaitlistEntry', waitlistEntrySchema);

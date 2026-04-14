@@ -65,5 +65,4 @@ maintenanceWorkOrderSchema.index({ branchId: 1 });
 
 module.exports =
   mongoose.models.MaintenanceWorkOrder ||
-  mongoose.models.MaintenanceWorkOrder ||
   mongoose.model('MaintenanceWorkOrder', maintenanceWorkOrderSchema);

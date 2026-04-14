@@ -277,8 +277,6 @@ TreatmentAuthorizationSchema.index({ branch: 1, createdAt: -1 });
 
 const TreatmentAuthorization =
   mongoose.models.TreatmentAuthorization ||
-  mongoose.models.TreatmentAuthorization ||
-  mongoose.models.TreatmentAuthorization ||
   mongoose.model('TreatmentAuthorization', TreatmentAuthorizationSchema);
 
 module.exports = { TreatmentAuthorization };

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // ==========================================
@@ -873,12 +872,8 @@ const SurpriseAudit =
   mongoose.models.SurpriseAudit || mongoose.model('SurpriseAudit', SurpriseAuditSchema);
 const NonConformanceReport =
   mongoose.models.NonConformanceReport ||
-  mongoose.models.NonConformanceReport ||
-  mongoose.models.NonConformanceReport ||
   mongoose.model('NonConformanceReport', NonConformanceReportSchema);
 const CorrectivePreventiveAction =
-  mongoose.models.CorrectivePreventiveAction ||
-  mongoose.models.CorrectivePreventiveAction ||
   mongoose.models.CorrectivePreventiveAction ||
   mongoose.model('CorrectivePreventiveAction', CorrectivePreventiveActionSchema);
 const ClosureFollowUp =

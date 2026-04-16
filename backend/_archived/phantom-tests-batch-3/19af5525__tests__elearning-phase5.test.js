@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const { ELearningService: ELearningServiceClass } = require('../services/eLearningService');
 const eLearningService = new ELearningServiceClass();
 const _Course = require('../models/course.model');

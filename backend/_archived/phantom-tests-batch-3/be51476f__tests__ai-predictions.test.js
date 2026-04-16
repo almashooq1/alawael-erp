@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const request = require('supertest');
 const { app } = require('../server');
 const AIPredictionsServiceClass = require('../services/ai-predictions.service');

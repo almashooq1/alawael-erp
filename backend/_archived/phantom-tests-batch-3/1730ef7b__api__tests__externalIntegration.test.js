@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
+ 
 /**
  * External Integration Service Tests
  * اختبارات خدمة التكامل الخارجي

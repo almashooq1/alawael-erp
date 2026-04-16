@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const { encrypt, decrypt, isEncrypted } = require('../../utils/fieldEncryption');
 
 describe('fieldEncryption', () => {

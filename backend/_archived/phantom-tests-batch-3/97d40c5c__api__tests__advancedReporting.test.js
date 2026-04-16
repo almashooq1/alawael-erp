@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
+ 
+ 
 /**
  * Advanced Reporting Service Tests
  * اختبارات الخدمة المتقدمة للتقارير

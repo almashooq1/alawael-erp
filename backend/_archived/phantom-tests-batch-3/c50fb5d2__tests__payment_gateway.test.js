@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const _mongoose = require('mongoose');
 const PaymentServiceClass = require('../services/payment-gateway.service');
 const paymentService = new PaymentServiceClass();

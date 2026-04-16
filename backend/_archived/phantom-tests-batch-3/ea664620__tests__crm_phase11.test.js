@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const SmartCRMServiceClass = require('../services/smartCRM.service');
 const SmartMarketingServiceClass = require('../services/smartMarketing.service');
 

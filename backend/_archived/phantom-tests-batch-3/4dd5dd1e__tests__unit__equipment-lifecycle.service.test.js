@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 'use strict';
 /**
  * EquipmentLifecycle — Service Unit Tests

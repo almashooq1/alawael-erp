@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 /**
  * Cross-Phase Integration Tests
  * Tests complete workflows across multiple phases of the system

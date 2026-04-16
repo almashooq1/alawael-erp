@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 // Simple test to verify Parts 6-8 integration
 
 // This is an integration test file that calls process.exit, not a proper Jest test

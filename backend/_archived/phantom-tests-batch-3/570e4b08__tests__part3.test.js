@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * Automated Testing Configuration
  * إعداد الاختبارات الآلية

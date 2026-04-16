@@ -1,5 +1,5 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
+ 
+ 
 /**
  * Advanced Search Service Tests
  * اختبارات الخدمة المتقدمة للبحث

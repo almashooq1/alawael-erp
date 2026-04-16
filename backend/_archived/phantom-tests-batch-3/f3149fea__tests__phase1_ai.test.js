@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const AIPredictionsServiceClass = require('../services/ai-predictions.service');
 const Prediction = require('../models/prediction.model');
 const Analytics = require('../models/analytics.model');

@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const _mongoose = require('mongoose');
 
 // Force mock mode for this test

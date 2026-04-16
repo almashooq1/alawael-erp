@@ -1,10 +1,10 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 /**
  * Integration Tests for Disability Rehabilitation API
  * Jest + Supertest Integration Test Suite
  */
 
-/* eslint-disable no-undef */
+ 
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 

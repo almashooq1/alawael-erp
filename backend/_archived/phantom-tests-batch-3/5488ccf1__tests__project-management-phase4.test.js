@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const mongoose = require('mongoose');
 
 // Use mock DB for testing with mocked models

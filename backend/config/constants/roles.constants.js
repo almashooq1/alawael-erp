@@ -92,6 +92,69 @@ const CROSS_BRANCH_ROLES = [ROLES.SUPER_ADMIN, ROLES.HEAD_OFFICE_ADMIN, ROLES.AD
  */
 const TENANT_BYPASS_ROLES = [ROLES.SUPER_ADMIN, ROLES.HEAD_OFFICE_ADMIN, ROLES.ADMIN];
 
+// ═══════════════════════════════════════════════════════════════
+// Role Hierarchy (ADR-005) — مستويات الأدوار الستة
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Canonical 6-level role hierarchy.
+ * See docs/architecture/decisions/005-canonical-role-hierarchy.md
+ *
+ * L1 — Platform (full platform technical access)
+ * L2 — Group (HQ) — cross-branch supervision
+ * L3 — Branch — single branch operations
+ * L4 — Department — within branch
+ * L5 — Professional — caseload / role-specific
+ * L6 — Self-Service — own records only
+ */
+const ROLE_LEVELS = {
+  [ROLES.SUPER_ADMIN]: 1,
+
+  [ROLES.HEAD_OFFICE_ADMIN]: 2,
+
+  [ROLES.ADMIN]: 3,
+  [ROLES.MANAGER]: 3,
+  [ROLES.ACCOUNTANT]: 3,
+  [ROLES.HR_MANAGER]: 3,
+
+  [ROLES.SUPERVISOR]: 4,
+  [ROLES.FINANCE]: 4,
+
+  [ROLES.DOCTOR]: 5,
+  [ROLES.THERAPIST]: 5,
+  [ROLES.TEACHER]: 5,
+  [ROLES.RECEPTIONIST]: 5,
+  [ROLES.DATA_ENTRY]: 5,
+  [ROLES.HR]: 5,
+
+  [ROLES.PARENT]: 6,
+  [ROLES.STUDENT]: 6,
+  [ROLES.VIEWER]: 6,
+  [ROLES.USER]: 6,
+  [ROLES.GUEST]: 6,
+};
+
+/**
+ * Return the hierarchy level (1-6) for a role name.
+ * Unknown roles fall back to L6 (lowest scope).
+ * @param {string} role
+ * @returns {number} 1-6
+ */
+function levelOf(role) {
+  return ROLE_LEVELS[resolveRole(role)] ?? 6;
+}
+
+/**
+ * Does the user's highest role meet or exceed the required level?
+ * (Numerically lower level = higher privilege.)
+ * @param {string[]} userRoles
+ * @param {number} requiredLevel
+ */
+function hasLevel(userRoles, requiredLevel) {
+  if (!userRoles || !userRoles.length) return false;
+  return userRoles.some(r => levelOf(r) <= requiredLevel);
+}
+
 module.exports = {
   ROLES,
   ALL_ROLES,
@@ -99,4 +162,7 @@ module.exports = {
   resolveRole,
   CROSS_BRANCH_ROLES,
   TENANT_BYPASS_ROLES,
+  ROLE_LEVELS,
+  levelOf,
+  hasLevel,
 };

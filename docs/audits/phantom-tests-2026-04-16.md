@@ -1,0 +1,1125 @@
+# Phantom Test Files — Broken Module Imports
+
+Total test files: 2029
+Files with broken requires: 536
+Total broken require statements: 548
+
+## Top 30 Missing Modules
+
+- 5× `../../services/aiAnalyticsService`
+- 3× `../../services/advancedReportingService`
+- 3× `../../services/advancedSearchService`
+- 3× `../../services/externalIntegrationService`
+- 3× `../services/ai-predictions.service`
+- 2× `../models/disability-rehabilitation.model`
+- 2× `../services/dmsService`
+- 2× `../services/eLearningService`
+- 2× `../../services/realtimeMonitoring.service`
+- 2× `../../services/advancedCaching.service`
+- 2× `../../services/mlIntegration.service`
+- 2× `../services/payment-gateway.service`
+- 2× `../services/projectManagementService`
+- 2× `../services/smartNotificationService`
+- 2× `../../services/mfaService`
+- 2× `../../services/sso-security.service`
+- 2× `../../services/dddAccreditationManager`
+- 2× `../../services/dddAdvocacyProgram`
+- 2× `../../services/dddAnnouncementManager`
+- 2× `../../services/dddAppointmentEngine`
+- 2× `../../services/dddApprovalChain`
+- 2× `../../services/dddArchiveManager`
+- 2× `../../services/dddAssetTracker`
+- 2× `../../services/dddAssetTracking`
+- 2× `../../services/AuthenticationService`
+- 2× `../../services/dddBackupManager`
+- 2× `../../services/dddBillingEngine`
+- 2× `../../services/dddBusinessContinuity`
+- 2× `../../services/dddCareerPathway`
+- 2× `../../services/dddCircuitBreaker`
+
+## Full List of Phantom Test Files
+
+- `api/tests/advancedReporting.test.js`
+  - missing: `../../services/advancedReportingService`
+- `api/tests/advancedSearch.test.js`
+  - missing: `../../services/advancedSearchService`
+- `api/tests/aiAnalytics.test.js`
+  - missing: `../../services/aiAnalyticsService`
+- `api/tests/externalIntegration.test.js`
+  - missing: `../../services/externalIntegrationService`
+- `tests/ai-predictions.test.js`
+  - missing: `../services/ai-predictions.service`
+- `tests/crm_phase11.test.js`
+  - missing: `../services/smartCRM.service`
+  - missing: `../services/smartMarketing.service`
+- `tests/disability-rehabilitation.integration.test.js`
+  - missing: `../models/disability-rehabilitation.model`
+- `tests/disability-rehabilitation.service.test.js`
+  - missing: `../services/disability-rehabilitation.service`
+  - missing: `../models/disability-rehabilitation.model`
+- `tests/dms-phase8.test.js`
+  - missing: `../services/dmsService`
+- `tests/dms_phase8.test.js`
+  - missing: `../services/dmsService`
+- `tests/elearning-phase5.test.js`
+  - missing: `../services/eLearningService`
+- `tests/elearning.test.js`
+  - missing: `../services/eLearningService`
+- `tests/integration/cross-phase-workflows.test.js`
+  - missing: `../../services/realtimeMonitoring.service`
+  - missing: `../../services/advancedCaching.service`
+  - missing: `../../services/mlIntegration.service`
+- `tests/part3.test.js`
+  - missing: `../utils/performanceMetrics`
+- `tests/parts-6-8.test.js`
+  - missing: `../security/jwtManager`
+  - missing: `../security/rbacSystem`
+  - missing: `../devops/autoScaling`
+- `tests/payment-gateway.test.js`
+  - missing: `../services/payment-gateway.service`
+- `tests/payment_gateway.test.js`
+  - missing: `../services/payment-gateway.service`
+- `tests/phase1-ai-enhanced.test.js`
+  - missing: `../services/ai-predictions.service`
+- `tests/phase1_ai.test.js`
+  - missing: `../services/ai-predictions.service`
+- `tests/project-management-phase4.test.js`
+  - missing: `../services/projectManagementService`
+- `tests/project_management.test.js`
+  - missing: `../services/projectManagementService`
+- `tests/qa_phase12.test.js`
+  - missing: `../services/smartQuality.service`
+  - missing: `../services/smartNotificationService`
+- `tests/reporting_phase10.test.js`
+  - missing: `../services/advancedReportingService`
+- `tests/security_phase7.test.js`
+  - missing: `../services/saudiComplianceService`
+- `tests/smartNotifications.test.js`
+  - missing: `../services/smartNotificationService`
+- `tests/tests/advanced-features.integration.test.js`
+  - missing: `../../middleware/cacheLayer`
+  - missing: `../../services/notificationSystem`
+  - missing: `../../services/featureFlags`
+- `tests/tests/communityAwareness.test.js`
+  - missing: `../../models/EducationalContent`
+  - missing: `../../models/DigitalLibrary`
+- `tests/tests/mfa.service.test.js`
+  - missing: `../../services/mfaService`
+- `tests/tests/services/mlService.test.js`
+  - missing: `../../../services/MLService`
+- `tests/tests/sso.comprehensive.test.js`
+  - missing: `../../services/sso-security.service`
+- `tests/tests/unit/integrationHub.test.js`
+  - missing: `../../../services/integrationHub.service`
+- `tests/unit/ApprovalRequestController.controller.test.js`
+  - missing: `../../controllers/ApprovalRequestController`
+- `tests/unit/AttendancePolicy.model.test.js`
+  - missing: `../../models/AttendancePolicy`
+- `tests/unit/AuthService.test.js`
+  - missing: `../../services/AuthService`
+- `tests/unit/AuthenticationService.test.js`
+  - missing: `../../services/AuthenticationService`
+- `tests/unit/BIKPI.model.test.js`
+  - missing: `../../models/BIKPI`
+- `tests/unit/BIReport.model.test.js`
+  - missing: `../../models/BIReport`
+- `tests/unit/Barcode.model.test.js`
+  - missing: `../../models/Barcode`
+- `tests/unit/BeneficiaryFile.model.test.js`
+  - missing: `../../models/BeneficiaryFile`
+- `tests/unit/Camera.model.test.js`
+  - missing: `../../models/Camera`
+- `tests/unit/DisabilityCard.model.test.js`
+  - missing: `../../models/DisabilityCard`
+- `tests/unit/EmployeeProfile.model.test.js`
+  - missing: `../../models/EmployeeProfile`
+- `tests/unit/FleetCompliance.model.test.js`
+  - missing: `../../models/FleetCompliance`
+- `tests/unit/FleetFuel.model.test.js`
+  - missing: `../../models/FleetFuel`
+- `tests/unit/FleetKPI.model.test.js`
+  - missing: `../../models/FleetKPI`
+- `tests/unit/Geofence.model.test.js`
+  - missing: `../../models/Geofence`
+- `tests/unit/LicenseAlert.model.test.js`
+  - missing: `../../models/LicenseAlert`
+- `tests/unit/NotificationAnalytics.model.test.js`
+  - missing: `../../models/NotificationAnalytics`
+- `tests/unit/Organization.model.test.js`
+  - missing: `../../models/Organization`
+- `tests/unit/RehabilitationPlan.model.test.js`
+  - missing: `../../models/RehabilitationPlan`
+- `tests/unit/ReportingService.test.js`
+  - missing: `../../services/ReportingService`
+- `tests/unit/StandardAssessment.model.test.js`
+  - missing: `../../models/StandardAssessment`
+- `tests/unit/TrafficFine.model.test.js`
+  - missing: `../../models/TrafficFine`
+- `tests/unit/VehicleInsurance.model.test.js`
+  - missing: `../../models/VehicleInsurance`
+- `tests/unit/WorkforceAnalytics.model.test.js`
+  - missing: `../../models/WorkforceAnalytics`
+- `tests/unit/accreditation-manager.service.test.js`
+  - missing: `../../services/dddAccreditationManager`
+- `tests/unit/advanced-analytics.utils.test.js`
+  - missing: `../../utils/advanced-analytics`
+- `tests/unit/advanced-logger.utils.test.js`
+  - missing: `../../utils/advanced-logger`
+- `tests/unit/advanced-reporting.service.test.js`
+  - missing: `../../services/advancedReportingService`
+- `tests/unit/advanced-search.service.test.js`
+  - missing: `../../services/advancedSearchService`
+- `tests/unit/advancedAnalytics.utils.test.js`
+  - missing: `../../utils/advancedAnalytics`
+- `tests/unit/advancedCaching.service.test.js`
+  - missing: `../../services/advancedCaching.service`
+- `tests/unit/advancedReporting.utils.test.js`
+  - missing: `../../utils/advancedReporting`
+- `tests/unit/advancedReportingService.test.js`
+  - missing: `../../services/advancedReportingService`
+- `tests/unit/advancedSearchService.test.js`
+  - missing: `../../services/advancedSearchService`
+- `tests/unit/advanced_hr_system.lib.test.js`
+  - missing: `../../lib/advanced_hr_system`
+- `tests/unit/advocacy-program.service.test.js`
+  - missing: `../../services/dddAdvocacyProgram`
+- `tests/unit/ai-analytics.service.test.js`
+  - missing: `../../services/aiAnalyticsService`
+  - missing: `../../services/aiAnalyticsService`
+- `tests/unit/ai-predictions.service.test.js`
+  - missing: `../../services/ai-predictions.service`
+- `tests/unit/aiAnalyticsService.test.js`
+  - missing: `../../services/aiAnalyticsService`
+  - missing: `../../services/aiAnalyticsService`
+- `tests/unit/analytics-dashboard.utils.test.js`
+  - missing: `../../utils/analytics-dashboard`
+- `tests/unit/announcement-manager.service.test.js`
+  - missing: `../../services/dddAnnouncementManager`
+- `tests/unit/anomalyDetector.utils.test.js`
+  - missing: `../../utils/anomalyDetector`
+- `tests/unit/appointment-engine.service.test.js`
+  - missing: `../../services/dddAppointmentEngine`
+- `tests/unit/approval-chain.service.test.js`
+  - missing: `../../services/dddApprovalChain`
+- `tests/unit/approvalRequests.route.test.js`
+  - missing: `../../routes/approvalRequests`
+- `tests/unit/archive-manager.service.test.js`
+  - missing: `../../services/dddArchiveManager`
+- `tests/unit/archiveService.test.js`
+  - missing: `../../services/archiveService`
+- `tests/unit/assessment.model.model.test.js`
+  - missing: `../../models/assessment.model`
+- `tests/unit/asset-tracker.service.test.js`
+  - missing: `../../services/dddAssetTracker`
+- `tests/unit/asset-tracking.service.test.js`
+  - missing: `../../services/dddAssetTracking`
+- `tests/unit/audit-logger.test.js`
+  - missing: `../../services/audit-logger`
+- `tests/unit/audit.service.test.js`
+  - missing: `../../services/audit.service`
+- `tests/unit/auditLog.service.test.js`
+  - missing: `../../services/auditLog.service`
+- `tests/unit/authentication.middleware.singleton.middleware.test.js`
+  - missing: `../../middleware/authentication.middleware.singleton`
+- `tests/unit/authentication.service.test.js`
+  - missing: `../../services/AuthenticationService`
+- `tests/unit/authorization.middleware.singleton.middleware.test.js`
+  - missing: `../../middleware/authorization.middleware.singleton`
+- `tests/unit/backup-manager.service.test.js`
+  - missing: `../../services/dddBackupManager`
+- `tests/unit/barcode.utils.test.js`
+  - missing: `../../utils/barcode`
+- `tests/unit/beneficiary.service.test.js`
+  - missing: `../../services/beneficiary.service`
+- `tests/unit/billing-engine.service.test.js`
+  - missing: `../../services/dddBillingEngine`
+- `tests/unit/billing-engine.validation.test.js`
+  - missing: `../../validations/billing-engine.validation`
+- `tests/unit/budget.model.model.test.js`
+  - missing: `../../models/budget.model`
+- `tests/unit/business-continuity.service.test.js`
+  - missing: `../../services/dddBusinessContinuity`
+- `tests/unit/capacity-planner.service.test.js`
+  - missing: `../../services/dddCapacityPlanner`
+- `tests/unit/career-pathway.service.test.js`
+  - missing: `../../services/dddCareerPathway`
+- `tests/unit/circuit-breaker.service.test.js`
+  - missing: `../../services/dddCircuitBreaker`
+- `tests/unit/claims-processor.service.test.js`
+  - missing: `../../services/dddClaimsProcessor`
+- `tests/unit/claims-processor.validation.test.js`
+  - missing: `../../validations/claims-processor.validation`
+- `tests/unit/clinical-engine.validation.test.js`
+  - missing: `../../validations/clinical-engine.validation`
+- `tests/unit/clinical-research.service.test.js`
+  - missing: `../../services/dddClinicalResearch`
+- `tests/unit/clinical-trial.service.test.js`
+  - missing: `../../services/dddClinicalTrial`
+- `tests/unit/clinical-trials.service.test.js`
+  - missing: `../../services/dddClinicalTrials`
+- `tests/unit/communication-log.service.test.js`
+  - missing: `../../services/dddCommunicationLog`
+- `tests/unit/community-outreach.service.test.js`
+  - missing: `../../services/dddCommunityOutreach`
+- `tests/unit/community-program.service.test.js`
+  - missing: `../../services/dddCommunityProgram`
+- `tests/unit/competency-tracker.service.test.js`
+  - missing: `../../services/dddCompetencyTracker`
+- `tests/unit/complaint-manager.service.test.js`
+  - missing: `../../services/dddComplaintManager`
+- `tests/unit/connection-pool-manager.utils.test.js`
+  - missing: `../../utils/connection-pool-manager`
+- `tests/unit/consent-manager.validation.test.js`
+  - missing: `../../validations/consent-manager.validation`
+- `tests/unit/continuous-education.service.test.js`
+  - missing: `../../services/dddContinuousEducation`
+- `tests/unit/contract-manager.service.test.js`
+  - missing: `../../services/dddContractManager`
+- `tests/unit/costBudgetService.test.js`
+  - missing: `../../services/costBudgetService`
+- `tests/unit/credential-manager.service.test.js`
+  - missing: `../../services/dddCredentialManager`
+- `tests/unit/crm-advanced.service.test.js`
+  - missing: `../../services/crm-advanced.service`
+- `tests/unit/crm.model.model.test.js`
+  - missing: `../../models/crm.model`
+- `tests/unit/data-exchange.service.test.js`
+  - missing: `../../services/dddDataExchange`
+- `tests/unit/database-enhancements.utils.test.js`
+  - missing: `../../utils/database-enhancements`
+- `tests/unit/database.optimization.utils.test.js`
+  - missing: `../../utils/database.optimization`
+- `tests/unit/ddd-access-control.routes.test.js`
+  - missing: `../../routes/ddd-access-control.routes`
+- `tests/unit/ddd-accreditation-manager.routes.test.js`
+  - missing: `../../routes/ddd-accreditation-manager.routes`
+- `tests/unit/ddd-activity-feed.routes.test.js`
+  - missing: `../../routes/ddd-activity-feed.routes`
+- `tests/unit/ddd-advocacy-program.routes.test.js`
+  - missing: `../../routes/ddd-advocacy-program.routes`
+- `tests/unit/ddd-analytics-dashboard.routes.test.js`
+  - missing: `../../routes/ddd-analytics-dashboard.routes`
+- `tests/unit/ddd-announcement-manager.routes.test.js`
+  - missing: `../../routes/ddd-announcement-manager.routes`
+- `tests/unit/ddd-api-gateway.routes.test.js`
+  - missing: `../../routes/ddd-api-gateway.routes`
+- `tests/unit/ddd-appointment-engine.routes.test.js`
+  - missing: `../../routes/ddd-appointment-engine.routes`
+- `tests/unit/ddd-approval-chain.routes.test.js`
+  - missing: `../../routes/ddd-approval-chain.routes`
+- `tests/unit/ddd-archive-manager.routes.test.js`
+  - missing: `../../routes/ddd-archive-manager.routes`
+- `tests/unit/ddd-asset-tracker.routes.test.js`
+  - missing: `../../routes/ddd-asset-tracker.routes`
+- `tests/unit/ddd-asset-tracking.routes.test.js`
+  - missing: `../../routes/ddd-asset-tracking.routes`
+- `tests/unit/ddd-backup-manager.routes.test.js`
+  - missing: `../../routes/ddd-backup-manager.routes`
+- `tests/unit/ddd-baseline-validation.middleware.test.js`
+  - missing: `../../middleware/ddd-baseline-validation`
+- `tests/unit/ddd-billing-engine.routes.test.js`
+  - missing: `../../routes/ddd-billing-engine.routes`
+- `tests/unit/ddd-business-continuity.routes.test.js`
+  - missing: `../../routes/ddd-business-continuity.routes`
+- `tests/unit/ddd-business-intelligence.routes.test.js`
+  - missing: `../../routes/ddd-business-intelligence.routes`
+- `tests/unit/ddd-capacity-planner.routes.test.js`
+  - missing: `../../routes/ddd-capacity-planner.routes`
+- `tests/unit/ddd-career-pathway.routes.test.js`
+  - missing: `../../routes/ddd-career-pathway.routes`
+- `tests/unit/ddd-case-conference.routes.test.js`
+  - missing: `../../routes/ddd-case-conference.routes`
+- `tests/unit/ddd-circuit-breaker.routes.test.js`
+  - missing: `../../routes/ddd-circuit-breaker.routes`
+- `tests/unit/ddd-claims-processor.routes.test.js`
+  - missing: `../../routes/ddd-claims-processor.routes`
+- `tests/unit/ddd-clinical-engine.routes.test.js`
+  - missing: `../../routes/ddd-clinical-engine.routes`
+- `tests/unit/ddd-clinical-research.routes.test.js`
+  - missing: `../../routes/ddd-clinical-research.routes`
+- `tests/unit/ddd-clinical-trial.routes.test.js`
+  - missing: `../../routes/ddd-clinical-trial.routes`
+- `tests/unit/ddd-clinical-trials.routes.test.js`
+  - missing: `../../routes/ddd-clinical-trials.routes`
+- `tests/unit/ddd-collaboration-hub.routes.test.js`
+  - missing: `../../routes/ddd-collaboration-hub.routes`
+- `tests/unit/ddd-communication-log.routes.test.js`
+  - missing: `../../routes/ddd-communication-log.routes`
+- `tests/unit/ddd-community-outreach.routes.test.js`
+  - missing: `../../routes/ddd-community-outreach.routes`
+- `tests/unit/ddd-community-program.routes.test.js`
+  - missing: `../../routes/ddd-community-program.routes`
+- `tests/unit/ddd-competency-tracker.routes.test.js`
+  - missing: `../../routes/ddd-competency-tracker.routes`
+- `tests/unit/ddd-complaint-manager.routes.test.js`
+  - missing: `../../routes/ddd-complaint-manager.routes`
+- `tests/unit/ddd-compliance-dashboard.routes.test.js`
+  - missing: `../../routes/ddd-compliance-dashboard.routes`
+- `tests/unit/ddd-config-manager.routes.test.js`
+  - missing: `../../routes/ddd-config-manager.routes`
+- `tests/unit/ddd-consent-manager.routes.test.js`
+  - missing: `../../routes/ddd-consent-manager.routes`
+- `tests/unit/ddd-continuous-education.routes.test.js`
+  - missing: `../../routes/ddd-continuous-education.routes`
+- `tests/unit/ddd-contract-manager.routes.test.js`
+  - missing: `../../routes/ddd-contract-manager.routes`
+- `tests/unit/ddd-credential-manager.routes.test.js`
+  - missing: `../../routes/ddd-credential-manager.routes`
+- `tests/unit/ddd-data-exchange.routes.test.js`
+  - missing: `../../routes/ddd-data-exchange.routes`
+- `tests/unit/ddd-data-migration.routes.test.js`
+  - missing: `../../routes/ddd-data-migration.routes`
+- `tests/unit/ddd-data-quality-monitor.routes.test.js`
+  - missing: `../../routes/ddd-data-quality-monitor.routes`
+- `tests/unit/ddd-data-warehouse.routes.test.js`
+  - missing: `../../routes/ddd-data-warehouse.routes`
+- `tests/unit/ddd-dev-portal.routes.test.js`
+  - missing: `../../routes/ddd-dev-portal.routes`
+- `tests/unit/ddd-digital-signature.routes.test.js`
+  - missing: `../../routes/ddd-digital-signature.routes`
+- `tests/unit/ddd-disaster-recovery.routes.test.js`
+  - missing: `../../routes/ddd-disaster-recovery.routes`
+- `tests/unit/ddd-document-collaboration.routes.test.js`
+  - missing: `../../routes/ddd-document-collaboration.routes`
+- `tests/unit/ddd-document-generator.routes.test.js`
+  - missing: `../../routes/ddd-document-generator.routes`
+- `tests/unit/ddd-document-vault.routes.test.js`
+  - missing: `../../routes/ddd-document-vault.routes`
+- `tests/unit/ddd-donation-manager.routes.test.js`
+  - missing: `../../routes/ddd-donation-manager.routes`
+- `tests/unit/ddd-donor-relations.routes.test.js`
+  - missing: `../../routes/ddd-donor-relations.routes`
+- `tests/unit/ddd-emergency-response.routes.test.js`
+  - missing: `../../routes/ddd-emergency-response.routes`
+- `tests/unit/ddd-encryption-service.routes.test.js`
+  - missing: `../../routes/ddd-encryption-service.routes`
+- `tests/unit/ddd-environmental-monitor.routes.test.js`
+  - missing: `../../routes/ddd-environmental-monitor.routes`
+- `tests/unit/ddd-environmental-monitoring.routes.test.js`
+  - missing: `../../routes/ddd-environmental-monitoring.routes`
+- `tests/unit/ddd-equipment-lifecycle.routes.test.js`
+  - missing: `../../routes/ddd-equipment-lifecycle.routes`
+- `tests/unit/ddd-error-tracker.routes.test.js`
+  - missing: `../../routes/ddd-error-tracker.routes`
+- `tests/unit/ddd-evidence-library.routes.test.js`
+  - missing: `../../routes/ddd-evidence-library.routes`
+- `tests/unit/ddd-facility-manager.routes.test.js`
+  - missing: `../../routes/ddd-facility-manager.routes`
+- `tests/unit/ddd-feature-flags.routes.test.js`
+  - missing: `../../routes/ddd-feature-flags.routes`
+- `tests/unit/ddd-feedback-manager.routes.test.js`
+  - missing: `../../routes/ddd-feedback-manager.routes`
+- `tests/unit/ddd-fhir-integration.routes.test.js`
+  - missing: `../../routes/ddd-fhir-integration.routes`
+- `tests/unit/ddd-fleet-tracker.routes.test.js`
+  - missing: `../../routes/ddd-fleet-tracker.routes`
+- `tests/unit/ddd-form-builder.routes.test.js`
+  - missing: `../../routes/ddd-form-builder.routes`
+- `tests/unit/ddd-h-l7-messaging.routes.test.js`
+  - missing: `../../routes/ddd-h-l7-messaging.routes`
+- `tests/unit/ddd-health-education.routes.test.js`
+  - missing: `../../routes/ddd-health-education.routes`
+- `tests/unit/ddd-health-monitor.routes.test.js`
+  - missing: `../../routes/ddd-health-monitor.routes`
+- `tests/unit/ddd-incident-response.routes.test.js`
+  - missing: `../../routes/ddd-incident-response.routes`
+- `tests/unit/ddd-incident-tracker.routes.test.js`
+  - missing: `../../routes/ddd-incident-tracker.routes`
+- `tests/unit/ddd-inspection-tracker.routes.test.js`
+  - missing: `../../routes/ddd-inspection-tracker.routes`
+- `tests/unit/ddd-insurance-manager.routes.test.js`
+  - missing: `../../routes/ddd-insurance-manager.routes`
+- `tests/unit/ddd-interoperability-gateway.routes.test.js`
+  - missing: `../../routes/ddd-interoperability-gateway.routes`
+- `tests/unit/ddd-interoperability-hub.routes.test.js`
+  - missing: `../../routes/ddd-interoperability-hub.routes`
+- `tests/unit/ddd-inventory-manager.routes.test.js`
+  - missing: `../../routes/ddd-inventory-manager.routes`
+- `tests/unit/ddd-knowledge-base.routes.test.js`
+  - missing: `../../routes/ddd-knowledge-base.routes`
+- `tests/unit/ddd-learning-management.routes.test.js`
+  - missing: `../../routes/ddd-learning-management.routes`
+- `tests/unit/ddd-leave-manager.routes.test.js`
+  - missing: `../../routes/ddd-leave-manager.routes`
+- `tests/unit/ddd-legal-case-tracker.routes.test.js`
+  - missing: `../../routes/ddd-legal-case-tracker.routes`
+- `tests/unit/ddd-licensure-manager.routes.test.js`
+  - missing: `../../routes/ddd-licensure-manager.routes`
+- `tests/unit/ddd-loader.route.test.js`
+  - missing: `../../routes/ddd-loader`
+- `tests/unit/ddd-localization-engine.routes.test.js`
+  - missing: `../../routes/ddd-localization-engine.routes`
+- `tests/unit/ddd-maintenance-tracker.routes.test.js`
+  - missing: `../../routes/ddd-maintenance-tracker.routes`
+- `tests/unit/ddd-mentorship-program.routes.test.js`
+  - missing: `../../routes/ddd-mentorship-program.routes`
+- `tests/unit/ddd-message-center.routes.test.js`
+  - missing: `../../routes/ddd-message-center.routes`
+- `tests/unit/ddd-metrics-collector.routes.test.js`
+  - missing: `../../routes/ddd-metrics-collector.routes`
+- `tests/unit/ddd-notification-engine.routes.test.js`
+  - missing: `../../routes/ddd-notification-engine.routes`
+- `tests/unit/ddd-outcome-research.routes.test.js`
+  - missing: `../../routes/ddd-outcome-research.routes`
+- `tests/unit/ddd-outcome-tracker.routes.test.js`
+  - missing: `../../routes/ddd-outcome-tracker.routes`
+- `tests/unit/ddd-outreach-tracker.routes.test.js`
+  - missing: `../../routes/ddd-outreach-tracker.routes`
+- `tests/unit/ddd-patient-community.routes.test.js`
+  - missing: `../../routes/ddd-patient-community.routes`
+- `tests/unit/ddd-patient-experience.routes.test.js`
+  - missing: `../../routes/ddd-patient-experience.routes`
+- `tests/unit/ddd-patient-portal.routes.test.js`
+  - missing: `../../routes/ddd-patient-portal.routes`
+- `tests/unit/ddd-patient-transport.routes.test.js`
+  - missing: `../../routes/ddd-patient-transport.routes`
+- `tests/unit/ddd-payment-gateway.routes.test.js`
+  - missing: `../../routes/ddd-payment-gateway.routes`
+- `tests/unit/ddd-performance-evaluator.routes.test.js`
+  - missing: `../../routes/ddd-performance-evaluator.routes`
+- `tests/unit/ddd-policy-governance.routes.test.js`
+  - missing: `../../routes/ddd-policy-governance.routes`
+- `tests/unit/ddd-predictive-engine.routes.test.js`
+  - missing: `../../routes/ddd-predictive-engine.routes`
+- `tests/unit/ddd-procurement-engine.routes.test.js`
+  - missing: `../../routes/ddd-procurement-engine.routes`
+- `tests/unit/ddd-publication-manager.routes.test.js`
+  - missing: `../../routes/ddd-publication-manager.routes`
+- `tests/unit/ddd-publication-tracker.routes.test.js`
+  - missing: `../../routes/ddd-publication-tracker.routes`
+- `tests/unit/ddd-record-manager.routes.test.js`
+  - missing: `../../routes/ddd-record-manager.routes`
+- `tests/unit/ddd-regulatory-tracker.routes.test.js`
+  - missing: `../../routes/ddd-regulatory-tracker.routes`
+- `tests/unit/ddd-remote-monitoring.routes.test.js`
+  - missing: `../../routes/ddd-remote-monitoring.routes`
+- `tests/unit/ddd-report-builder.routes.test.js`
+  - missing: `../../routes/ddd-report-builder.routes`
+- `tests/unit/ddd-research-protocol.routes.test.js`
+  - missing: `../../routes/ddd-research-protocol.routes`
+- `tests/unit/ddd-resource-manager.routes.test.js`
+  - missing: `../../routes/ddd-resource-manager.routes`
+- `tests/unit/ddd-risk-stratification.routes.test.js`
+  - missing: `../../routes/ddd-risk-stratification.routes`
+- `tests/unit/ddd-route-optimizer.routes.test.js`
+  - missing: `../../routes/ddd-route-optimizer.routes`
+- `tests/unit/ddd-safety-manager.routes.test.js`
+  - missing: `../../routes/ddd-safety-manager.routes`
+- `tests/unit/ddd-satisfaction-tracker.routes.test.js`
+  - missing: `../../routes/ddd-satisfaction-tracker.routes`
+- `tests/unit/ddd-security-auditor.routes.test.js`
+  - missing: `../../routes/ddd-security-auditor.routes`
+- `tests/unit/ddd-session-manager.routes.test.js`
+  - missing: `../../routes/ddd-session-manager.routes`
+- `tests/unit/ddd-shift-scheduler.routes.test.js`
+  - missing: `../../routes/ddd-shift-scheduler.routes`
+- `tests/unit/ddd-smart-scheduler.routes.test.js`
+  - missing: `../../routes/ddd-smart-scheduler.routes`
+- `tests/unit/ddd-space-allocator.routes.test.js`
+  - missing: `../../routes/ddd-space-allocator.routes`
+- `tests/unit/ddd-space-management.routes.test.js`
+  - missing: `../../routes/ddd-space-management.routes`
+- `tests/unit/ddd-staff-manager.routes.test.js`
+  - missing: `../../routes/ddd-staff-manager.routes`
+- `tests/unit/ddd-standards-compliance.routes.test.js`
+  - missing: `../../routes/ddd-standards-compliance.routes`
+- `tests/unit/ddd-supply-chain-tracker.routes.test.js`
+  - missing: `../../routes/ddd-supply-chain-tracker.routes`
+- `tests/unit/ddd-system-failover.routes.test.js`
+  - missing: `../../routes/ddd-system-failover.routes`
+- `tests/unit/ddd-task-queue.routes.test.js`
+  - missing: `../../routes/ddd-task-queue.routes`
+- `tests/unit/ddd-tenant-manager.routes.test.js`
+  - missing: `../../routes/ddd-tenant-manager.routes`
+- `tests/unit/ddd-transport-manager.routes.test.js`
+  - missing: `../../routes/ddd-transport-manager.routes`
+- `tests/unit/ddd-volunteer-management.routes.test.js`
+  - missing: `../../routes/ddd-volunteer-management.routes`
+- `tests/unit/ddd-volunteer-manager.routes.test.js`
+  - missing: `../../routes/ddd-volunteer-manager.routes`
+- `tests/unit/ddd-warehouse-manager.routes.test.js`
+  - missing: `../../routes/ddd-warehouse-manager.routes`
+- `tests/unit/ddd-workflow-engine.routes.test.js`
+  - missing: `../../routes/ddd-workflow-engine.routes`
+- `tests/unit/ddd-workforce-analytics.routes.test.js`
+  - missing: `../../routes/ddd-workforce-analytics.routes`
+- `tests/unit/dddAccessControl.test.js`
+  - missing: `../../services/dddAccessControl`
+- `tests/unit/dddAccreditationManager.test.js`
+  - missing: `../../services/dddAccreditationManager`
+- `tests/unit/dddActivityFeed.test.js`
+  - missing: `../../services/dddActivityFeed`
+- `tests/unit/dddAdvocacyProgram.test.js`
+  - missing: `../../services/dddAdvocacyProgram`
+- `tests/unit/dddAnalyticsDashboard.test.js`
+  - missing: `../../services/dddAnalyticsDashboard`
+- `tests/unit/dddAnnouncementManager.test.js`
+  - missing: `../../services/dddAnnouncementManager`
+- `tests/unit/dddApiGateway.test.js`
+  - missing: `../../services/dddApiGateway`
+- `tests/unit/dddAppointmentEngine.test.js`
+  - missing: `../../services/dddAppointmentEngine`
+- `tests/unit/dddApprovalChain.test.js`
+  - missing: `../../services/dddApprovalChain`
+- `tests/unit/dddArchiveManager.test.js`
+  - missing: `../../services/dddArchiveManager`
+- `tests/unit/dddAssetTracker.test.js`
+  - missing: `../../services/dddAssetTracker`
+- `tests/unit/dddAssetTracking.test.js`
+  - missing: `../../services/dddAssetTracking`
+- `tests/unit/dddAudit.middleware.middleware.test.js`
+  - missing: `../../middleware/dddAudit.middleware`
+- `tests/unit/dddBackupManager.test.js`
+  - missing: `../../services/dddBackupManager`
+- `tests/unit/dddBillingEngine.test.js`
+  - missing: `../../services/dddBillingEngine`
+- `tests/unit/dddBusinessContinuity.test.js`
+  - missing: `../../services/dddBusinessContinuity`
+- `tests/unit/dddBusinessIntelligence.test.js`
+  - missing: `../../services/dddBusinessIntelligence`
+- `tests/unit/dddCareerPathway.test.js`
+  - missing: `../../services/dddCareerPathway`
+- `tests/unit/dddCaseConference.test.js`
+  - missing: `../../services/dddCaseConference`
+- `tests/unit/dddCircuitBreaker.test.js`
+  - missing: `../../services/dddCircuitBreaker`
+- `tests/unit/dddClaimsProcessor.test.js`
+  - missing: `../../services/dddClaimsProcessor`
+- `tests/unit/dddClinicalEngine.test.js`
+  - missing: `../../services/dddClinicalEngine`
+- `tests/unit/dddClinicalResearch.test.js`
+  - missing: `../../services/dddClinicalResearch`
+- `tests/unit/dddClinicalTrial.test.js`
+  - missing: `../../services/dddClinicalTrial`
+- `tests/unit/dddClinicalTrials.test.js`
+  - missing: `../../services/dddClinicalTrials`
+- `tests/unit/dddCollaborationHub.test.js`
+  - missing: `../../services/dddCollaborationHub`
+- `tests/unit/dddCommunicationLog.test.js`
+  - missing: `../../services/dddCommunicationLog`
+- `tests/unit/dddCommunityOutreach.test.js`
+  - missing: `../../services/dddCommunityOutreach`
+- `tests/unit/dddCommunityProgram.test.js`
+  - missing: `../../services/dddCommunityProgram`
+- `tests/unit/dddCompetencyTracker.test.js`
+  - missing: `../../services/dddCompetencyTracker`
+- `tests/unit/dddComplaintManager.test.js`
+  - missing: `../../services/dddComplaintManager`
+- `tests/unit/dddComplianceDashboard.test.js`
+  - missing: `../../services/dddComplianceDashboard`
+- `tests/unit/dddConfigManager.test.js`
+  - missing: `../../services/dddConfigManager`
+- `tests/unit/dddConsentManager.test.js`
+  - missing: `../../services/dddConsentManager`
+- `tests/unit/dddContinuousEducation.test.js`
+  - missing: `../../services/dddContinuousEducation`
+- `tests/unit/dddContractManager.test.js`
+  - missing: `../../services/dddContractManager`
+- `tests/unit/dddCredentialManager.test.js`
+  - missing: `../../services/dddCredentialManager`
+- `tests/unit/dddDataExchange.test.js`
+  - missing: `../../services/dddDataExchange`
+- `tests/unit/dddDataMigration.test.js`
+  - missing: `../../services/dddDataMigration`
+- `tests/unit/dddDataQualityMonitor.test.js`
+  - missing: `../../services/dddDataQualityMonitor`
+- `tests/unit/dddDataWarehouse.test.js`
+  - missing: `../../services/dddDataWarehouse`
+- `tests/unit/dddDevPortal.test.js`
+  - missing: `../../services/dddDevPortal`
+- `tests/unit/dddDigitalSignature.test.js`
+  - missing: `../../services/dddDigitalSignature`
+- `tests/unit/dddDisasterRecovery.test.js`
+  - missing: `../../services/dddDisasterRecovery`
+- `tests/unit/dddDocumentCollaboration.test.js`
+  - missing: `../../services/dddDocumentCollaboration`
+- `tests/unit/dddDocumentGenerator.test.js`
+  - missing: `../../services/dddDocumentGenerator`
+- `tests/unit/dddDocumentVault.test.js`
+  - missing: `../../services/dddDocumentVault`
+- `tests/unit/dddDonationManager.test.js`
+  - missing: `../../services/dddDonationManager`
+- `tests/unit/dddDonorRelations.test.js`
+  - missing: `../../services/dddDonorRelations`
+- `tests/unit/dddEmergencyResponse.test.js`
+  - missing: `../../services/dddEmergencyResponse`
+- `tests/unit/dddEncryptionService.test.js`
+  - missing: `../../services/dddEncryptionService`
+- `tests/unit/dddEnvironmentalMonitor.test.js`
+  - missing: `../../services/dddEnvironmentalMonitor`
+- `tests/unit/dddEnvironmentalMonitoring.test.js`
+  - missing: `../../services/dddEnvironmentalMonitoring`
+- `tests/unit/dddEquipmentLifecycle.test.js`
+  - missing: `../../services/dddEquipmentLifecycle`
+- `tests/unit/dddErrorTracker.test.js`
+  - missing: `../../services/dddErrorTracker`
+- `tests/unit/dddEvidenceLibrary.test.js`
+  - missing: `../../services/dddEvidenceLibrary`
+- `tests/unit/dddExportService.test.js`
+  - missing: `../../services/dddExportService`
+- `tests/unit/dddFacilityManager.test.js`
+  - missing: `../../services/dddFacilityManager`
+- `tests/unit/dddFeatureFlags.test.js`
+  - missing: `../../services/dddFeatureFlags`
+- `tests/unit/dddFeedbackManager.test.js`
+  - missing: `../../services/dddFeedbackManager`
+- `tests/unit/dddFhirIntegration.test.js`
+  - missing: `../../services/dddFhirIntegration`
+- `tests/unit/dddFleetTracker.test.js`
+  - missing: `../../services/dddFleetTracker`
+- `tests/unit/dddFormBuilder.test.js`
+  - missing: `../../services/dddFormBuilder`
+- `tests/unit/dddHL7Messaging.test.js`
+  - missing: `../../services/dddHL7Messaging`
+- `tests/unit/dddHealthEducation.test.js`
+  - missing: `../../services/dddHealthEducation`
+- `tests/unit/dddHealthMonitor.test.js`
+  - missing: `../../services/dddHealthMonitor`
+- `tests/unit/dddIncidentResponse.test.js`
+  - missing: `../../services/dddIncidentResponse`
+- `tests/unit/dddIncidentTracker.test.js`
+  - missing: `../../services/dddIncidentTracker`
+- `tests/unit/dddInspectionTracker.test.js`
+  - missing: `../../services/dddInspectionTracker`
+- `tests/unit/dddInsuranceManager.test.js`
+  - missing: `../../services/dddInsuranceManager`
+- `tests/unit/dddInteroperabilityGateway.test.js`
+  - missing: `../../services/dddInteroperabilityGateway`
+- `tests/unit/dddInteroperabilityHub.test.js`
+  - missing: `../../services/dddInteroperabilityHub`
+- `tests/unit/dddInventoryManager.test.js`
+  - missing: `../../services/dddInventoryManager`
+- `tests/unit/dddKnowledgeBase.test.js`
+  - missing: `../../services/dddKnowledgeBase`
+- `tests/unit/dddLearningManagement.test.js`
+  - missing: `../../services/dddLearningManagement`
+- `tests/unit/dddLeaveManager.test.js`
+  - missing: `../../services/dddLeaveManager`
+- `tests/unit/dddLegalCaseTracker.test.js`
+  - missing: `../../services/dddLegalCaseTracker`
+- `tests/unit/dddLicensureManager.test.js`
+  - missing: `../../services/dddLicensureManager`
+- `tests/unit/dddLocalizationEngine.test.js`
+  - missing: `../../services/dddLocalizationEngine`
+- `tests/unit/dddMaintenanceTracker.test.js`
+  - missing: `../../services/dddMaintenanceTracker`
+- `tests/unit/dddMentorshipProgram.test.js`
+  - missing: `../../services/dddMentorshipProgram`
+- `tests/unit/dddMessageCenter.test.js`
+  - missing: `../../services/dddMessageCenter`
+- `tests/unit/dddMetricsCollector.test.js`
+  - missing: `../../services/dddMetricsCollector`
+- `tests/unit/dddNotificationDispatcher.test.js`
+  - missing: `../../services/dddNotificationDispatcher`
+- `tests/unit/dddNotificationEngine.test.js`
+  - missing: `../../services/dddNotificationEngine`
+- `tests/unit/dddOutcomeResearch.test.js`
+  - missing: `../../services/dddOutcomeResearch`
+- `tests/unit/dddOutcomeTracker.test.js`
+  - missing: `../../services/dddOutcomeTracker`
+- `tests/unit/dddOutreachTracker.test.js`
+  - missing: `../../services/dddOutreachTracker`
+- `tests/unit/dddPatientCommunity.test.js`
+  - missing: `../../services/dddPatientCommunity`
+- `tests/unit/dddPatientExperience.test.js`
+  - missing: `../../services/dddPatientExperience`
+- `tests/unit/dddPatientPortal.test.js`
+  - missing: `../../services/dddPatientPortal`
+- `tests/unit/dddPatientTransport.test.js`
+  - missing: `../../services/dddPatientTransport`
+- `tests/unit/dddPaymentGateway.test.js`
+  - missing: `../../services/dddPaymentGateway`
+- `tests/unit/dddPerformanceEvaluator.test.js`
+  - missing: `../../services/dddPerformanceEvaluator`
+- `tests/unit/dddPolicyGovernance.test.js`
+  - missing: `../../services/dddPolicyGovernance`
+- `tests/unit/dddPredictiveEngine.test.js`
+  - missing: `../../services/dddPredictiveEngine`
+- `tests/unit/dddProcurementEngine.test.js`
+  - missing: `../../services/dddProcurementEngine`
+- `tests/unit/dddPublicationManager.test.js`
+  - missing: `../../services/dddPublicationManager`
+- `tests/unit/dddPublicationTracker.test.js`
+  - missing: `../../services/dddPublicationTracker`
+- `tests/unit/dddRecordManager.test.js`
+  - missing: `../../services/dddRecordManager`
+- `tests/unit/dddRegulatoryTracker.test.js`
+  - missing: `../../services/dddRegulatoryTracker`
+- `tests/unit/dddRemoteMonitoring.test.js`
+  - missing: `../../services/dddRemoteMonitoring`
+- `tests/unit/dddReportBuilder.test.js`
+  - missing: `../../services/dddReportBuilder`
+- `tests/unit/dddResearchProtocol.test.js`
+  - missing: `../../services/dddResearchProtocol`
+- `tests/unit/dddResourceManager.test.js`
+  - missing: `../../services/dddResourceManager`
+- `tests/unit/dddRiskStratification.test.js`
+  - missing: `../../services/dddRiskStratification`
+- `tests/unit/dddRouteOptimizer.test.js`
+  - missing: `../../services/dddRouteOptimizer`
+- `tests/unit/dddSafetyManager.test.js`
+  - missing: `../../services/dddSafetyManager`
+- `tests/unit/dddSatisfactionTracker.test.js`
+  - missing: `../../services/dddSatisfactionTracker`
+- `tests/unit/dddScheduler.test.js`
+  - missing: `../../services/dddScheduler`
+- `tests/unit/dddSecurityAuditor.test.js`
+  - missing: `../../services/dddSecurityAuditor`
+- `tests/unit/dddSessionManager.test.js`
+  - missing: `../../services/dddSessionManager`
+- `tests/unit/dddShiftScheduler.test.js`
+  - missing: `../../services/dddShiftScheduler`
+- `tests/unit/dddSmartScheduler.test.js`
+  - missing: `../../services/dddSmartScheduler`
+- `tests/unit/dddSpaceAllocator.test.js`
+  - missing: `../../services/dddSpaceAllocator`
+- `tests/unit/dddSpaceManagement.test.js`
+  - missing: `../../services/dddSpaceManagement`
+- `tests/unit/dddStaffManager.test.js`
+  - missing: `../../services/dddStaffManager`
+- `tests/unit/dddStandardsCompliance.test.js`
+  - missing: `../../services/dddStandardsCompliance`
+- `tests/unit/dddSupplyChainTracker.test.js`
+  - missing: `../../services/dddSupplyChainTracker`
+- `tests/unit/dddSystemFailover.test.js`
+  - missing: `../../services/dddSystemFailover`
+- `tests/unit/dddTaskQueue.test.js`
+  - missing: `../../services/dddTaskQueue`
+- `tests/unit/dddTenantManager.test.js`
+  - missing: `../../services/dddTenantManager`
+- `tests/unit/dddTransportManager.test.js`
+  - missing: `../../services/dddTransportManager`
+- `tests/unit/dddVolunteerManagement.test.js`
+  - missing: `../../services/dddVolunteerManagement`
+- `tests/unit/dddVolunteerManager.test.js`
+  - missing: `../../services/dddVolunteerManager`
+- `tests/unit/dddWarehouseManager.test.js`
+  - missing: `../../services/dddWarehouseManager`
+- `tests/unit/dddWorkflowEngine.test.js`
+  - missing: `../../services/dddWorkflowEngine`
+- `tests/unit/digital-signature.service.test.js`
+  - missing: `../../services/dddDigitalSignature`
+- `tests/unit/disability-rehabilitation.model.model.test.js`
+  - missing: `../../models/disability-rehabilitation.model`
+- `tests/unit/disability-rehabilitation.route.test.js`
+  - missing: `../../routes/disability-rehabilitation`
+- `tests/unit/disabilityRehabilitationService.test.js`
+  - missing: `../../services/disabilityRehabilitationService`
+- `tests/unit/disaster-recovery.service.test.js`
+  - missing: `../../services/dddDisasterRecovery`
+- `tests/unit/dispatchService.test.js`
+  - missing: `../../services/dispatchService`
+- `tests/unit/dmsService.test.js`
+  - missing: `../../services/dmsService`
+- `tests/unit/document-enhanced.routes.test.js`
+  - missing: `../../routes/document-enhanced.routes`
+- `tests/unit/document-generator.service.test.js`
+  - missing: `../../services/dddDocumentGenerator`
+- `tests/unit/document-vault.service.test.js`
+  - missing: `../../services/dddDocumentVault`
+- `tests/unit/documentCollaborationService.test.js`
+  - missing: `../../services/documentCollaborationService`
+- `tests/unit/donation-manager.service.test.js`
+  - missing: `../../services/dddDonationManager`
+- `tests/unit/donor-relations.service.test.js`
+  - missing: `../../services/dddDonorRelations`
+- `tests/unit/eSignatureService.test.js`
+  - missing: `../../services/eSignatureService`
+- `tests/unit/elearning_system.lib.test.js`
+  - missing: `../../lib/elearning_system`
+- `tests/unit/emergency-response.service.test.js`
+  - missing: `../../services/dddEmergencyResponse`
+- `tests/unit/employee-affairs-phase2.service.test.js`
+  - missing: `../../services/employeeAffairs.phase2.service`
+- `tests/unit/employeeAffairs.phase2.service.test.js`
+  - missing: `../../services/employeeAffairs.phase2.service`
+- `tests/unit/encryptionService.test.js`
+  - missing: `../../services/EncryptionService`
+- `tests/unit/environmental-monitor.service.test.js`
+  - missing: `../../services/dddEnvironmentalMonitor`
+- `tests/unit/environmental-monitoring.service.test.js`
+  - missing: `../../services/dddEnvironmentalMonitoring`
+- `tests/unit/equipment-lifecycle.service.test.js`
+  - missing: `../../services/dddEquipmentLifecycle`
+- `tests/unit/evidence-library.service.test.js`
+  - missing: `../../services/dddEvidenceLibrary`
+- `tests/unit/external-integration.service.test.js`
+  - missing: `../../services/externalIntegrationService`
+- `tests/unit/externalIntegrationService.test.js`
+  - missing: `../../services/externalIntegrationService`
+- `tests/unit/facility-manager.service.test.js`
+  - missing: `../../services/dddFacilityManager`
+- `tests/unit/feedback-manager.service.test.js`
+  - missing: `../../services/dddFeedbackManager`
+- `tests/unit/fhir-integration.service.test.js`
+  - missing: `../../services/dddFhirIntegration`
+- `tests/unit/fieldEncryption.test.js`
+  - missing: `../../utils/fieldEncryption`
+- `tests/unit/finance.routes.test.js`
+  - missing: `../../routes/finance.routes`
+- `tests/unit/fleet-tracker.service.test.js`
+  - missing: `../../services/dddFleetTracker`
+- `tests/unit/form-builder.service.test.js`
+  - missing: `../../services/dddFormBuilder`
+- `tests/unit/form-template.service.test.js`
+  - missing: `../../services/formTemplate.service`
+- `tests/unit/formTemplate.service.test.js`
+  - missing: `../../services/formTemplate.service`
+- `tests/unit/fuelService.test.js`
+  - missing: `../../services/fuelService`
+- `tests/unit/generators.utils.test.js`
+  - missing: `../../utils/generators`
+- `tests/unit/guardian.service.test.js`
+  - missing: `../../services/guardian.service`
+- `tests/unit/health-education.service.test.js`
+  - missing: `../../services/dddHealthEducation`
+- `tests/unit/hl7messaging.service.test.js`
+  - missing: `../../services/dddHL7Messaging`
+- `tests/unit/hr-advanced.service.test.js`
+  - missing: `../../services/hr-advanced.service`
+- `tests/unit/hr-dashboard.service.test.js`
+  - missing: `../../services/hr-dashboard.service`
+- `tests/unit/i18n.utils.test.js`
+  - missing: `../../utils/i18n`
+- `tests/unit/incident-response.service.test.js`
+  - missing: `../../services/dddIncidentResponse`
+- `tests/unit/incident-tracker.service.test.js`
+  - missing: `../../services/dddIncidentTracker`
+- `tests/unit/inspection-tracker.service.test.js`
+  - missing: `../../services/dddInspectionTracker`
+- `tests/unit/insurance-manager.service.test.js`
+  - missing: `../../services/dddInsuranceManager`
+- `tests/unit/insurance-manager.validation.test.js`
+  - missing: `../../validations/insurance-manager.validation`
+- `tests/unit/integrationHub.service.test.js`
+  - missing: `../../services/integrationHub.service`
+- `tests/unit/integrations.utils.test.js`
+  - missing: `../../utils/integrations`
+- `tests/unit/intelligence-engine.lib.test.js`
+  - missing: `../../lib/intelligence-engine`
+- `tests/unit/interactive_games_rehab_system.lib.test.js`
+  - missing: `../../lib/interactive_games_rehab_system`
+- `tests/unit/interoperability-hub.service.test.js`
+  - missing: `../../services/dddInteroperabilityHub`
+- `tests/unit/inventory-manager.service.test.js`
+  - missing: `../../services/dddInventoryManager`
+- `tests/unit/inventory.routes.test.js`
+  - missing: `../../routes/inventory.routes`
+- `tests/unit/knowledge-base.service.test.js`
+  - missing: `../../services/dddKnowledgeBase`
+- `tests/unit/kpiCalculator.utils.test.js`
+  - missing: `../../utils/kpiCalculator`
+- `tests/unit/learning-management.service.test.js`
+  - missing: `../../services/dddLearningManagement`
+- `tests/unit/leave-manager.service.test.js`
+  - missing: `../../services/dddLeaveManager`
+- `tests/unit/legal-case-tracker.service.test.js`
+  - missing: `../../services/dddLegalCaseTracker`
+- `tests/unit/licensure-manager.service.test.js`
+  - missing: `../../services/dddLicensureManager`
+- `tests/unit/maintenance-tracker.service.test.js`
+  - missing: `../../services/dddMaintenanceTracker`
+- `tests/unit/maintenanceAIService.test.js`
+  - missing: `../../services/maintenanceAIService`
+- `tests/unit/maintenanceAnalyticsService.test.js`
+  - missing: `../../services/maintenanceAnalyticsService`
+- `tests/unit/maintenanceService.test.js`
+  - missing: `../../services/maintenanceService`
+- `tests/unit/memory-optimizer.utils.test.js`
+  - missing: `../../utils/memory-optimizer`
+- `tests/unit/mentorship-program.service.test.js`
+  - missing: `../../services/dddMentorshipProgram`
+- `tests/unit/message-center.service.test.js`
+  - missing: `../../services/dddMessageCenter`
+- `tests/unit/metricsService.test.js`
+  - missing: `../../services/metricsService`
+- `tests/unit/mfaService.test.js`
+  - missing: `../../services/mfaService`
+- `tests/unit/ml.routes.test.js`
+  - missing: `../../routes/ml.routes`
+- `tests/unit/mlIntegration.service.test.js`
+  - missing: `../../services/mlIntegration.service`
+- `tests/unit/money.utils.test.js`
+  - missing: `../../utils/money`
+- `tests/unit/monitoring.route.test.js`
+  - missing: `../../routes/monitoring`
+- `tests/unit/monitoringService.test.js`
+  - missing: `../../services/monitoringService`
+- `tests/unit/multi-tenant.utils.test.js`
+  - missing: `../../utils/multi-tenant`
+- `tests/unit/notification-engine.service.test.js`
+  - missing: `../../services/dddNotificationEngine`
+- `tests/unit/notifications.utils.test.js`
+  - missing: `../../utils/notifications`
+- `tests/unit/outcome-research.service.test.js`
+  - missing: `../../services/dddOutcomeResearch`
+- `tests/unit/outreach-tracker.service.test.js`
+  - missing: `../../services/dddOutreachTracker`
+- `tests/unit/patient-community.service.test.js`
+  - missing: `../../services/dddPatientCommunity`
+- `tests/unit/patient-experience.service.test.js`
+  - missing: `../../services/dddPatientExperience`
+- `tests/unit/patient-portal.service.test.js`
+  - missing: `../../services/dddPatientPortal`
+- `tests/unit/patient-transport.service.test.js`
+  - missing: `../../services/dddPatientTransport`
+- `tests/unit/payment-gateway.service.test.js`
+  - missing: `../../services/dddPaymentGateway`
+- `tests/unit/payment-gateway.validation.test.js`
+  - missing: `../../validations/payment-gateway.validation`
+- `tests/unit/paymentService.test.js`
+  - missing: `../../services/paymentService`
+- `tests/unit/pdfExportService.test.js`
+  - missing: `../../services/pdfExportService`
+- `tests/unit/performance-evaluator.service.test.js`
+  - missing: `../../services/dddPerformanceEvaluator`
+- `tests/unit/performanceMetrics.utils.test.js`
+  - missing: `../../utils/performanceMetrics`
+- `tests/unit/phase28-iot.utils.test.js`
+  - missing: `../../utils/phase28-iot`
+- `tests/unit/phase31-xr.utils.test.js`
+  - missing: `../../utils/phase31-xr`
+- `tests/unit/platform.routes.test.js`
+  - missing: `../../routes/platform.routes`
+- `tests/unit/policy-governance.service.test.js`
+  - missing: `../../services/dddPolicyGovernance`
+- `tests/unit/procurement-engine.service.test.js`
+  - missing: `../../services/dddProcurementEngine`
+- `tests/unit/publication-manager.service.test.js`
+  - missing: `../../services/dddPublicationManager`
+- `tests/unit/publication-tracker.service.test.js`
+  - missing: `../../services/dddPublicationTracker`
+- `tests/unit/pushService.test.js`
+  - missing: `../../services/pushService`
+- `tests/unit/queryOptimizer.utils.test.js`
+  - missing: `../../utils/queryOptimizer`
+- `tests/unit/realtimeMonitoring.service.test.js`
+  - missing: `../../services/realtimeMonitoring.service`
+- `tests/unit/record-manager.service.test.js`
+  - missing: `../../services/dddRecordManager`
+- `tests/unit/recruitment.model.model.test.js`
+  - missing: `../../models/recruitment.model`
+- `tests/unit/regulatory-tracker.service.test.js`
+  - missing: `../../services/dddRegulatoryTracker`
+- `tests/unit/rehabilitation.routes.test.js`
+  - missing: `../../routes/rehabilitation.routes`
+- `tests/unit/remote-monitoring.service.test.js`
+  - missing: `../../services/dddRemoteMonitoring`
+- `tests/unit/reporting.model.model.test.js`
+  - missing: `../../models/reporting.model`
+- `tests/unit/reporting.routes.test.js`
+  - missing: `../../routes/reporting.routes`
+- `tests/unit/research-protocol.service.test.js`
+  - missing: `../../services/dddResearchProtocol`
+- `tests/unit/resource-manager.service.test.js`
+  - missing: `../../services/dddResourceManager`
+- `tests/unit/resource-manager.utils.test.js`
+  - missing: `../../utils/resource-manager`
+- `tests/unit/route-optimizer.service.test.js`
+  - missing: `../../services/dddRouteOptimizer`
+- `tests/unit/safeModel.utils.test.js`
+  - missing: `../../utils/safeModel`
+- `tests/unit/safety-manager.service.test.js`
+  - missing: `../../services/dddSafetyManager`
+- `tests/unit/satisfaction-tracker.service.test.js`
+  - missing: `../../services/dddSatisfactionTracker`
+- `tests/unit/saudiComplianceService.test.js`
+  - missing: `../../services/saudiComplianceService`
+- `tests/unit/services.singleton.test.js`
+  - missing: `../../services/services.singleton`
+- `tests/unit/shift-scheduler.service.test.js`
+  - missing: `../../services/dddShiftScheduler`
+- `tests/unit/smart-attendance.routes.test.js`
+  - missing: `../../routes/smart-attendance.routes`
+- `tests/unit/smart-automation.lib.test.js`
+  - missing: `../../lib/smart-automation`
+- `tests/unit/smart-document.service.test.js`
+  - missing: `../../services/smartDocument.service`
+- `tests/unit/smart-ui-engine.lib.test.js`
+  - missing: `../../lib/smart-ui-engine`
+- `tests/unit/smartAutoPrescription.service.test.js`
+  - missing: `../../services/smartAutoPrescription.service`
+- `tests/unit/smartCRM.service.test.js`
+  - missing: `../../services/smartCRM.service`
+- `tests/unit/smartClinicalCommand.service.test.js`
+  - missing: `../../services/smartClinicalCommand.service`
+- `tests/unit/smartDocument.service.test.js`
+  - missing: `../../services/smartDocument.service`
+- `tests/unit/smartMarketing.service.test.js`
+  - missing: `../../services/smartMarketing.service`
+- `tests/unit/smartNotifications.utils.test.js`
+  - missing: `../../utils/smartNotifications`
+- `tests/unit/smartPatient.service.test.js`
+  - missing: `../../services/smartPatient.service`
+- `tests/unit/smartPredictiveAI.service.test.js`
+  - missing: `../../services/smartPredictiveAI.service`
+- `tests/unit/smartQuality.service.test.js`
+  - missing: `../../services/smartQuality.service`
+- `tests/unit/smartScheduler.route.test.js`
+  - missing: `../../routes/smartScheduler`
+- `tests/unit/smartSensoryDiet.service.test.js`
+  - missing: `../../services/smartSensoryDiet.service`
+- `tests/unit/space-allocator.service.test.js`
+  - missing: `../../services/dddSpaceAllocator`
+- `tests/unit/space-management.service.test.js`
+  - missing: `../../services/dddSpaceManagement`
+- `tests/unit/specializedProgram.model.test.js`
+  - missing: `../../models/specializedProgram`
+- `tests/unit/sso-security.service.test.js`
+  - missing: `../../services/sso-security.service`
+- `tests/unit/staff-manager.service.test.js`
+  - missing: `../../services/dddStaffManager`
+- `tests/unit/standards-compliance.service.test.js`
+  - missing: `../../services/dddStandardsCompliance`
+- `tests/unit/student.model.model.test.js`
+  - missing: `../../models/student.model`
+- `tests/unit/successionPlanning.route.test.js`
+  - missing: `../../routes/successionPlanning`
+- `tests/unit/supply-chain-tracker.service.test.js`
+  - missing: `../../services/dddSupplyChainTracker`
+- `tests/unit/supply_support_system.lib.test.js`
+  - missing: `../../lib/supply_support_system`
+- `tests/unit/supportService.test.js`
+  - missing: `../../services/supportService`
+- `tests/unit/system-failover.service.test.js`
+  - missing: `../../services/dddSystemFailover`
+- `tests/unit/templates.route.test.js`
+  - missing: `../../routes/templates`
+- `tests/unit/test-db-helper.utils.test.js`
+  - missing: `../../utils/test-db-helper`
+- `tests/unit/therapeutic-session.service.test.js`
+  - missing: `../../services/therapeutic-session.service`
+- `tests/unit/traffic-accident.service.test.js`
+  - missing: `../../services/trafficAccidentService`
+- `tests/unit/trafficAccidentService.test.js`
+  - missing: `../../services/trafficAccidentService`
+- `tests/unit/transport-manager.service.test.js`
+  - missing: `../../services/dddTransportManager`
+- `tests/unit/transport.services.test.js`
+  - missing: `../../services/transport.services`
+- `tests/unit/tripService.test.js`
+  - missing: `../../services/tripService`
+- `tests/unit/userService.test.js`
+  - missing: `../../services/userService`
+- `tests/unit/validation.utils.test.js`
+  - missing: `../../utils/validation`
+- `tests/unit/validator.middleware.middleware.test.js`
+  - missing: `../../middleware/validator.middleware`
+- `tests/unit/validators.utils.test.js`
+  - missing: `../../utils/validators`
+- `tests/unit/virusScan.middleware.test.js`
+  - missing: `../../middleware/virusScan`
+- `tests/unit/volunteer-management.service.test.js`
+  - missing: `../../services/dddVolunteerManagement`
+- `tests/unit/volunteer-manager.service.test.js`
+  - missing: `../../services/dddVolunteerManager`
+- `tests/unit/warehouse-manager.service.test.js`
+  - missing: `../../services/dddWarehouseManager`
+- `tests/unit/websocket-enhancements.utils.test.js`
+  - missing: `../../utils/websocket-enhancements`
+- `tests/unit/whatsapp-integration.service.test.js`
+  - missing: `../../services/whatsapp-integration.service`
+- `tests/unit/workflow-engine.service.test.js`
+  - missing: `../../services/dddWorkflowEngine`
+- `tests/unit/workforce-analytics.service.test.js`
+  - missing: `../../services/dddWorkforceAnalytics`

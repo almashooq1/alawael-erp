@@ -9,11 +9,12 @@ const router = express.Router();
 const settingsService = require('../services/settingsService');
 const { GlobalSetting } = require('../models/BranchSetting');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // ─── Middleware: يتطلب مصادقة لجميع المسارات ─────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Helper للتحقق من دور المدير ──────────────────────────────────────────────
 function requireAdmin(req, res, next) {
   const adminRoles = ['admin', 'super_admin', 'manager'];

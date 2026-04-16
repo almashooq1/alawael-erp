@@ -5,11 +5,12 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // GET /dashboard/stats — vendor dashboard statistics
 router.get('/dashboard/stats', async (req, res) => {
   try {

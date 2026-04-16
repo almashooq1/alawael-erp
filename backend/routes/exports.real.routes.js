@@ -6,12 +6,13 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const importExportService = require('../services/importExportPro.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // GET /:format — Export a module in the given format
 router.get('/:format', async (req, res) => {
   try {

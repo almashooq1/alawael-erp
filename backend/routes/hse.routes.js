@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { SafetyIncident, SafetyInspection } = require('../models/HSE');
@@ -8,7 +9,7 @@ const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Dashboard ────────────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const [
       totalIncidents,
@@ -63,7 +64,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
 });
 
 // ── Incidents CRUD ───────────────────────────────────────────────────
-router.get('/incidents', authenticate, async (req, res) => {
+router.get('/incidents', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 20, status, severity } = req.query;
     const filter = {};
@@ -85,7 +86,7 @@ router.get('/incidents', authenticate, async (req, res) => {
   }
 });
 
-router.post('/incidents', authenticate, validate(schemas.hse.reportIncident), async (req, res) => {
+router.post('/incidents', authenticate, requireBranchAccess, validate(schemas.hse.reportIncident), async (req, res) => {
   try {
     const doc = new SafetyIncident({ ...req.body, reportedBy: req.user._id || req.user.id });
     await doc.save();
@@ -95,7 +96,7 @@ router.post('/incidents', authenticate, validate(schemas.hse.reportIncident), as
   }
 });
 
-router.put('/incidents/:id', authenticate, async (req, res) => {
+router.put('/incidents/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -110,7 +111,7 @@ router.put('/incidents/:id', authenticate, async (req, res) => {
 
 router.delete(
   '/incidents/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'hse_manager'),
   async (req, res) => {
     try {
@@ -124,7 +125,7 @@ router.delete(
 );
 
 // ── Inspections CRUD ─────────────────────────────────────────────────
-router.get('/inspections', authenticate, async (req, res) => {
+router.get('/inspections', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 20, status } = req.query;
     const filter = {};
@@ -145,7 +146,7 @@ router.get('/inspections', authenticate, async (req, res) => {
   }
 });
 
-router.post('/inspections', authenticate, async (req, res) => {
+router.post('/inspections', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const doc = new SafetyInspection({ ...req.body, inspector: req.user._id || req.user.id });
     await doc.save();
@@ -155,7 +156,7 @@ router.post('/inspections', authenticate, async (req, res) => {
   }
 });
 
-router.put('/inspections/:id', authenticate, async (req, res) => {
+router.put('/inspections/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -170,7 +171,7 @@ router.put('/inspections/:id', authenticate, async (req, res) => {
 
 router.delete(
   '/inspections/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'hse_manager'),
   async (req, res) => {
     try {

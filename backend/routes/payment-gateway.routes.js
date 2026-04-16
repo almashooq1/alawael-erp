@@ -4,12 +4,13 @@ const router = require('express').Router();
 const paymentGatewayService = require('../services/paymentGateway.service');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 // ── قائمة المعاملات ─────────────────────────────────────────────────────────
 router.get(
   '/transactions',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.list({ ...req.query, branchId: req.user.branchId });
@@ -20,7 +21,7 @@ router.get(
 // ── إحصائيات ────────────────────────────────────────────────────────────────
 router.get(
   '/stats',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.getStats(req.user.branchId);
@@ -31,7 +32,7 @@ router.get(
 // ── تقرير التسوية ───────────────────────────────────────────────────────────
 router.get(
   '/reconciliation',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const { dateFrom, dateTo, gateway } = req.query;
@@ -48,7 +49,7 @@ router.get(
 // ── بدء معاملة دفع ──────────────────────────────────────────────────────────
 router.post(
   '/initiate',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap(async (req, res) => {
     const data = await paymentGatewayService.initiatePayment({
       ...req.body,
@@ -62,7 +63,7 @@ router.post(
 // ── استرداد مبلغ ────────────────────────────────────────────────────────────
 router.post(
   '/:id/refund',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.processRefund(req.params.id, {
@@ -76,7 +77,7 @@ router.post(
 // ── إعادة محاولة المعاملات الفاشلة ─────────────────────────────────────────
 router.post(
   '/retry-failed',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.retryFailedPayments(req.user.branchId);
@@ -87,7 +88,7 @@ router.post(
 // ── عرض معاملة واحدة ────────────────────────────────────────────────────────
 router.get(
   '/transactions/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const PaymentTransaction = require('../models/PaymentTransaction');

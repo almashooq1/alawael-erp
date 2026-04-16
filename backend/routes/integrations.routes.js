@@ -7,13 +7,14 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const _crypto = require('crypto');
 const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ===========================
 // WEBHOOK ROUTES
 // ===========================

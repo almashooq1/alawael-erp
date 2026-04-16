@@ -8,6 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const mudadService = require('../services/mudad.service');
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -23,7 +24,7 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
  */
 router.get(
   '/config',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const result = await mudadService.getConfig(req.user.organizationId);
@@ -38,7 +39,7 @@ router.get(
  */
 router.put(
   '/config',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const config = await mudadService.saveConfig(
@@ -61,7 +62,7 @@ router.put(
  */
 router.post(
   '/salary-records/generate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { salaryMonth, establishmentId } = req.body;
@@ -87,7 +88,7 @@ router.post(
  */
 router.get(
   '/salary-records',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { salaryMonth, establishmentId, status, mudadStatus, branch } = req.query;
@@ -117,7 +118,7 @@ router.get(
  */
 router.post(
   '/batches',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { salaryMonth, establishmentId } = req.body;
@@ -137,7 +138,7 @@ router.post(
  */
 router.get(
   '/batches',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { establishmentId, status, salaryMonth } = req.query;
@@ -153,7 +154,7 @@ router.get(
  */
 router.post(
   '/batches/:id/validate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const result = await mudadService.validateBatch(req.params.id);
@@ -168,7 +169,7 @@ router.post(
  */
 router.post(
   '/batches/:id/generate-file',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const result = await mudadService.generateWPSFile(req.params.id);
@@ -183,7 +184,7 @@ router.post(
  */
 router.post(
   '/batches/:id/upload',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const result = await mudadService.uploadBatch(req.params.id, req.user._id || req.user.id);
@@ -202,7 +203,7 @@ router.post(
  */
 router.post(
   '/compliance/generate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { reportMonth, establishmentId } = req.body;
@@ -222,7 +223,7 @@ router.post(
  */
 router.get(
   '/compliance',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance_manager']),
   asyncHandler(async (req, res) => {
     const { establishmentId, year } = req.query;
@@ -242,7 +243,7 @@ router.get(
  */
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance_manager']),
   asyncHandler(async (req, res) => {
     const { establishmentId } = req.query;

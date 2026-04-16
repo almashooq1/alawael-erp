@@ -16,6 +16,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   MixedRealityEngine,
   HolographicDataVisualization,
@@ -35,7 +36,7 @@ const immersiveAnalytics = new ImmersiveAnalyticsDashboard('default');
 
 // ── All AR/XR routes require authentication ───────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════
 // MR SESSIONS — جلسات الواقع المختلط
 // ═══════════════════════════════════════════════════════════════════════════

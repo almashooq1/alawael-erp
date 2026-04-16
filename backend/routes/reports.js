@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { ReportService } = require('../services/reportService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -26,7 +27,7 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const reports = await reportService.getAvailableReports(req.query);
@@ -48,7 +49,7 @@ router.get(
  */
 router.post(
   '/generate',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const { reportType, filters, format } = req.body;
@@ -85,7 +86,7 @@ router.post(
  */
 router.get(
   '/type/disability-summary',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const report = await reportService.getDisabilitySummary(req.query);
@@ -107,7 +108,7 @@ router.get(
  */
 router.get(
   '/type/maintenance-schedule',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const report = await reportService.getMaintenanceSchedule(req.query);
@@ -129,7 +130,7 @@ router.get(
  */
 router.get(
   '/:reportId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const report = await reportService.getReportById(req.params.reportId);
@@ -158,7 +159,7 @@ router.get(
  */
 router.get(
   '/:reportId/download',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const file = await reportService.downloadReport(req.params.reportId, req.query.format);
@@ -187,7 +188,7 @@ router.get(
  */
 router.delete(
   '/:reportId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -217,7 +218,7 @@ router.delete(
  */
 router.post(
   '/export-batch',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const { reportIds, format } = req.body;
@@ -255,7 +256,7 @@ router.post(
  */
 router.get(
   '/schedule/:reportId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedule = await reportService.getReportSchedule(req.params.reportId);

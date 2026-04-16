@@ -7,10 +7,11 @@ const router = express.Router();
 const trafficAccidentAnalytics = require('../services/trafficAccidentAnalytics');
 const logger = require('../utils/logger');
 const { authenticateToken: authenticate, requirePermission: authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /**
  * GET /api/traffic-accidents/analytics/timeline-trends
  * تحليل الاتجاهات على مدى الوقت

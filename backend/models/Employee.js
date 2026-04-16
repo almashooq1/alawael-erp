@@ -1,68 +1,29 @@
-/* eslint-disable no-unused-vars */
-const mongoose = require('mongoose');
+/**
+ * Employee Model — Proxy
+ *
+ * @deprecated Use require('./HR/Employee') directly.
+ *
+ * This file re-exports the comprehensive HR/Employee model which includes:
+ * - Saudi compliance fields (GOSI, SCFHS, iqama)
+ * - branch_id (branchId) for multi-tenant isolation
+ * - Full employment lifecycle management
+ *
+ * The root Employee.js previously had a minimal schema without branch support.
+ * All 21+ consumers now automatically get the full HR/Employee schema.
+ */
 
-const contractSchema = new mongoose.Schema({
-  type: { type: String, enum: ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN'], required: true },
-  startDate: { type: Date, required: true },
-  endDate: { type: Date },
-  basicSalary: { type: Number, required: true },
-  allowances: {
-    housing: { type: Number, default: 0 },
-    transport: { type: Number, default: 0 },
-    other: { type: Number, default: 0 },
-  },
-  status: { type: String, enum: ['ACTIVE', 'TERMINATED', 'EXPIRED'], default: 'ACTIVE' },
-  documentUrl: String, // Link to uploaded PDF
-});
+'use strict';
 
-const employeeSchema = new mongoose.Schema(
-  {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Link to auth user
-    employeeId: { type: String, required: true, unique: true }, // e.g. EMP-2024-001
+let _warned = false;
 
-    // Personal Data
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    phone: { type: String },
-    nationalId: { type: String },
+const HREmployee = require('./HR/Employee');
 
-    // Job Data
-    department: { type: String, required: true, index: true }, // HR, Medical, Rehab
-    position: { type: String, required: true }, // e.g. Senior Therapist
-    role: {
-      type: String,
-      enum: ['ADMIN', 'DOCTOR', 'THERAPIST', 'NURSE', 'HR', 'ACCOUNTANT'],
-      default: 'THERAPIST',
-    },
+if (!_warned && process.env.NODE_ENV !== 'production') {
+  _warned = true;
+  const caller = new Error().stack?.split('\n')[2]?.trim() || '';
+  console.warn(
+    `[DEPRECATION] require("models/Employee") → use require("models/HR/Employee") instead. Called from: ${caller}`
+  );
+}
 
-    // Schedule
-    currentShift: { type: mongoose.Schema.Types.ObjectId, ref: 'Shift' },
-
-    // Contracts History
-    contracts: [contractSchema],
-
-    // Status
-    status: { type: String, enum: ['ACTIVE', 'ON_LEAVE', 'TERMINATED'], default: 'ACTIVE' },
-    statusNote: String,
-
-    joinDate: { type: Date, default: Date.now },
-  },
-  { timestamps: true }
-);
-
-// Virtual for Full Name
-employeeSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-// ─── Indexes ─────────────────────────────────────────────────────────────────
-// employeeId + email already have { unique: true } → implicit unique index
-// department already has { index: true }
-// REMOVED DUPLICATE: employeeSchema.index({ status: 1 }); // Filter active/terminated employees — field already has index:true
-employeeSchema.index({ role: 1 }); // Role-based queries (doctors, therapists)
-employeeSchema.index({ department: 1, status: 1 }); // Department + status filters
-// REMOVED DUPLICATE: employeeSchema.index({ userId: 1 }); // Lookup employee by auth user — field already has index:true
-employeeSchema.index({ joinDate: -1 }); // Sorted hiring reports
-
-module.exports = mongoose.models.Employee || mongoose.model('Employee', employeeSchema);
+module.exports = HREmployee;

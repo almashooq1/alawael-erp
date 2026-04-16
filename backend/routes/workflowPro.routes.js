@@ -15,6 +15,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   WorkflowFormTemplate,
   WorkflowEscalationRule,
@@ -32,7 +33,7 @@ const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
 // ═══════════════════════════════════════════════════════════════════════════════

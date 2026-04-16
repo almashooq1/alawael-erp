@@ -7,6 +7,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const StrategicGoal = require('../models/StrategicGoal');
 const StrategicInitiative = require('../models/StrategicInitiative');
@@ -15,7 +16,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════
 //  GOALS (الأهداف الاستراتيجية)
 // ═══════════════════════════════════════════════════════════════

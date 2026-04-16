@@ -40,9 +40,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  branch: {
+  branchId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Branch',
+    alias: 'branch', // backward compat: user.branch still works
+    index: true,
   },
   emailVerified: {
     type: Boolean,
@@ -64,6 +66,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: [
       'super_admin',
+      'head_office_admin',
       'admin',
       'manager',
       'supervisor',
@@ -268,6 +271,7 @@ userSchema.index({ role: 1 }); // RBAC queries: list users by role
 userSchema.index({ createdAt: -1 }); // Admin listings sorted by newest
 userSchema.index({ lastLogin: -1 }); // Last-active reports
 userSchema.index({ role: 1, createdAt: -1 }); // Role-based admin listing
+userSchema.index({ branchId: 1, role: 1 }); // Branch-scoped role queries
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 

@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/inventory/inventory-enhanced.service');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
-router.get('/alerts/reorder', authenticate, async (req, res) => {
+router.get('/alerts/reorder', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = await svc.getReorderAlerts();
     res.json({ success: true, data });
@@ -15,7 +16,7 @@ router.get('/alerts/reorder', authenticate, async (req, res) => {
   }
 });
 
-router.get('/alerts/expiring', authenticate, async (req, res) => {
+router.get('/alerts/expiring', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = await svc.getExpiringItems(req.query.days ? Number(req.query.days) : 30);
     res.json({ success: true, data });
@@ -25,7 +26,7 @@ router.get('/alerts/expiring', authenticate, async (req, res) => {
 });
 
 // ── الأصناف ───────────────────────────────────────────
-router.get('/items', authenticate, async (req, res) => {
+router.get('/items', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { InventoryItem } = require('../models/InventoryItem');
     const { page = 1, limit = 20, search, categoryId, type } = req.query;
@@ -51,7 +52,7 @@ router.get('/items', authenticate, async (req, res) => {
 
 router.post(
   '/items',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -64,7 +65,7 @@ router.post(
   }
 );
 
-router.get('/items/:itemId', authenticate, async (req, res) => {
+router.get('/items/:itemId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { InventoryItem } = require('../models/InventoryItem');
     const escapeRegex = require('../utils/escapeRegex');
@@ -78,7 +79,7 @@ router.get('/items/:itemId', authenticate, async (req, res) => {
 
 router.put(
   '/items/:itemId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -98,7 +99,7 @@ router.put(
   }
 );
 
-router.get('/items/:itemId/stock', authenticate, async (req, res) => {
+router.get('/items/:itemId/stock', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { InventoryStock } = require('../models/InventoryStock');
     const stock = await InventoryStock.find({ itemId: req.params.itemId }).populate('warehouseId');
@@ -108,7 +109,7 @@ router.get('/items/:itemId/stock', authenticate, async (req, res) => {
   }
 });
 
-router.get('/items/:itemId/transactions', authenticate, async (req, res) => {
+router.get('/items/:itemId/transactions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { InventoryTransaction } = require('../models/InventoryStock');
     const transactions = await InventoryTransaction.find({ itemId: req.params.itemId })
@@ -121,7 +122,7 @@ router.get('/items/:itemId/transactions', authenticate, async (req, res) => {
 });
 
 // ── تصنيفات الأصناف ───────────────────────────────────
-router.get('/categories', authenticate, async (req, res) => {
+router.get('/categories', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ItemCategory } = require('../models/InventoryItem');
     const categories = await ItemCategory.find({ isActive: true }).sort({ nameAr: 1 });
@@ -131,7 +132,7 @@ router.get('/categories', authenticate, async (req, res) => {
   }
 });
 
-router.post('/categories', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
+router.post('/categories', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const { ItemCategory } = require('../models/InventoryItem');
     const cat = await ItemCategory.create(stripUpdateMeta(req.body));
@@ -142,7 +143,7 @@ router.post('/categories', authenticate, authorize('admin', 'super_admin'), asyn
 });
 
 // ── المستودعات ───────────────────────────────────────
-router.get('/warehouses', authenticate, async (req, res) => {
+router.get('/warehouses', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Warehouse = require('../models/Warehouse');
     const warehouses = await Warehouse.find({ isActive: true }).populate('branchId');
@@ -152,7 +153,7 @@ router.get('/warehouses', authenticate, async (req, res) => {
   }
 });
 
-router.post('/warehouses', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
+router.post('/warehouses', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const Warehouse = require('../models/Warehouse');
     const warehouse = await Warehouse.create(stripUpdateMeta(req.body));
@@ -163,7 +164,7 @@ router.post('/warehouses', authenticate, authorize('admin', 'super_admin'), asyn
 });
 
 // ── الموردون ──────────────────────────────────────────
-router.get('/suppliers', authenticate, async (req, res) => {
+router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Supplier } = require('../models/InventoryStock');
     const suppliers = await Supplier.find({ isActive: true }).sort({ nameAr: 1 });
@@ -175,7 +176,7 @@ router.get('/suppliers', authenticate, async (req, res) => {
 
 router.post(
   '/suppliers',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -190,7 +191,7 @@ router.post(
 
 router.put(
   '/suppliers/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -208,7 +209,7 @@ router.put(
 // ── حركات المخزون ────────────────────────────────────
 router.post(
   '/transactions/receive',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -226,7 +227,7 @@ router.post(
 
 router.post(
   '/transactions/issue',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -244,7 +245,7 @@ router.post(
 
 router.post(
   '/transactions/transfer',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -259,7 +260,7 @@ router.post(
 
 router.post(
   '/transactions/adjust',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -273,7 +274,7 @@ router.post(
 );
 
 // ── أوامر الشراء ─────────────────────────────────────
-router.get('/purchase-orders', authenticate, async (req, res) => {
+router.get('/purchase-orders', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { PurchaseOrder } = require('../models/InventoryStock');
     const { status, branchId } = req.query;
@@ -289,7 +290,7 @@ router.get('/purchase-orders', authenticate, async (req, res) => {
   }
 });
 
-router.post('/purchase-orders', authenticate, async (req, res) => {
+router.post('/purchase-orders', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const po = await svc.createPurchaseOrder({ ...req.body, requestedBy: req.user._id });
     res.status(201).json({ success: true, data: po });
@@ -298,7 +299,7 @@ router.post('/purchase-orders', authenticate, async (req, res) => {
   }
 });
 
-router.get('/purchase-orders/:poId', authenticate, async (req, res) => {
+router.get('/purchase-orders/:poId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { PurchaseOrder } = require('../models/InventoryStock');
     const po = await PurchaseOrder.findById(req.params.poId).populate(
@@ -313,7 +314,7 @@ router.get('/purchase-orders/:poId', authenticate, async (req, res) => {
 
 router.put(
   '/purchase-orders/:poId/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'finance_manager'),
   async (req, res) => {
     try {
@@ -332,7 +333,7 @@ router.put(
 
 router.post(
   '/purchase-orders/:poId/receive',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -345,7 +346,7 @@ router.post(
 );
 
 // ── الأصول الثابتة ───────────────────────────────────
-router.get('/assets', authenticate, async (req, res) => {
+router.get('/assets', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
     const { branchId, status, category } = req.query;
@@ -362,7 +363,7 @@ router.get('/assets', authenticate, async (req, res) => {
 
 router.post(
   '/assets',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -375,7 +376,7 @@ router.post(
   }
 );
 
-router.get('/assets/:assetId', authenticate, async (req, res) => {
+router.get('/assets/:assetId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
     const asset = await Asset.findById(req.params.assetId).populate('branchId assignedTo');
@@ -388,7 +389,7 @@ router.get('/assets/:assetId', authenticate, async (req, res) => {
 
 router.put(
   '/assets/:assetId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -403,7 +404,7 @@ router.put(
   }
 );
 
-router.get('/assets/:assetId/depreciation', authenticate, async (req, res) => {
+router.get('/assets/:assetId/depreciation', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
     const asset = await Asset.findById(req.params.assetId);
@@ -415,7 +416,7 @@ router.get('/assets/:assetId/depreciation', authenticate, async (req, res) => {
   }
 });
 
-router.post('/assets/:assetId/maintenance', authenticate, async (req, res) => {
+router.post('/assets/:assetId/maintenance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Asset } = require('../models/InventoryStock');
     const { notes, nextMaintenanceDate, cost } = req.body;
@@ -440,7 +441,7 @@ router.post('/assets/:assetId/maintenance', authenticate, async (req, res) => {
 });
 
 // ── الجرد الدوري ──────────────────────────────────────
-router.get('/stock-counts', authenticate, async (req, res) => {
+router.get('/stock-counts', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { StockCount } = require('../models/InventoryStock');
     const counts = await StockCount.find()
@@ -454,7 +455,7 @@ router.get('/stock-counts', authenticate, async (req, res) => {
 
 router.post(
   '/stock-counts',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -466,7 +467,7 @@ router.post(
   }
 );
 
-router.post('/stock-counts/:countId/items/:itemId/count', authenticate, async (req, res) => {
+router.post('/stock-counts/:countId/items/:itemId/count', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await svc.recordStockCount(
       req.params.countId,
@@ -482,7 +483,7 @@ router.post('/stock-counts/:countId/items/:itemId/count', authenticate, async (r
 
 router.put(
   '/stock-counts/:countId/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin'),
   async (req, res) => {
     try {

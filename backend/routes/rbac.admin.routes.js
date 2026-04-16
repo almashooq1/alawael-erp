@@ -16,6 +16,7 @@
  */
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { body, param, validationResult } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth.middleware');
@@ -39,7 +40,7 @@ const logger = require('../utils/logger');
 
 // All routes require authentication
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ─────────────────────────────────────────────────────────────────────────
 // GET /roles — جميع الأدوار مع المستويات والتسميات
 // ─────────────────────────────────────────────────────────────────────────

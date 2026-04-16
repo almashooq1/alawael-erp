@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Mock AI Service for development
@@ -21,7 +22,7 @@ const mockAiService = {
  * @desc    Predict employee performance based on metrics
  * @access  Private
  */
-router.post('/predict-performance', authenticate, async (req, res) => {
+router.post('/predict-performance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { data } = req.body;
 
@@ -48,7 +49,7 @@ router.post('/predict-performance', authenticate, async (req, res) => {
  * @desc    Predict employee absence probability
  * @access  Private
  */
-router.post('/predict-absence/:employeeId', authenticate, async (req, res) => {
+router.post('/predict-absence/:employeeId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { employeeId } = req.params;
     const prediction = await mockAiService.predictAbsence(employeeId);
@@ -67,7 +68,7 @@ router.post('/predict-absence/:employeeId', authenticate, async (req, res) => {
  * @desc    Predict performance trend
  * @access  Private
  */
-router.post('/predict-trend', authenticate, async (req, res) => {
+router.post('/predict-trend', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { data } = req.body;
 
@@ -94,7 +95,7 @@ router.post('/predict-trend', authenticate, async (req, res) => {
  * @desc    Forecast revenue based on historical data
  * @access  Private
  */
-router.post('/forecast-revenue', authenticate, async (req, res) => {
+router.post('/forecast-revenue', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const params = req.body;
     const forecast = await mockAiService.forecastRevenue(params);

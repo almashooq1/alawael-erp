@@ -37,6 +37,12 @@ const EmergencyContactSchema = new mongoose.Schema(
     // هل يستقبل إشعارات؟
     receivesNotifications: { type: Boolean, default: false },
     notes: { type: String },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -46,6 +52,7 @@ const EmergencyContactSchema = new mongoose.Schema(
 
 EmergencyContactSchema.index({ beneficiary: 1 });
 EmergencyContactSchema.index({ beneficiary: 1, priority: 1 });
+EmergencyContactSchema.index({ branchId: 1 });
 
 module.exports =
   mongoose.models.EmergencyContact || mongoose.model('EmergencyContact', EmergencyContactSchema);

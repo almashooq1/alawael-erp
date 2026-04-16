@@ -10,6 +10,7 @@ const SmartFleetDashboardService = require('../services/smartFleetDashboard.serv
 const GPSSecurityService = require('../services/gpsSecurityService');
 const SmartGPSWebSocketService = require('../services/smartGPSWebSocket.service');
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 

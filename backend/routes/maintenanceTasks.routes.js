@@ -6,13 +6,14 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenanceTask = require('../models/MaintenanceTask');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-tasks — list tasks */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       vehicle,
@@ -24,7 +25,7 @@ router.get('/', requireAuth, async (req, res) => {
       page = 1,
       limit = 25,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (vehicle) filter.vehicle = vehicle;
     if (schedule) filter.schedule = schedule;
     if (status) filter.status = status;
@@ -50,9 +51,11 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-tasks/stats — task statistics */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const stats = await MaintenanceTask.aggregate([
+      { $match: { ...scope } },
       {
         $group: {
           _id: null,
@@ -76,6 +79,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     ]);
     const byCategory = await MaintenanceTask.aggregate([
+      { $match: { ...scope } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]);
@@ -86,9 +90,10 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-tasks/overdue — overdue tasks */
-router.get('/overdue', requireAuth, async (req, res) => {
+router.get('/overdue', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const data = await MaintenanceTask.find({
+      ...branchFilter(req),
       scheduledDate: { $lt: new Date() },
       status: { $nin: ['مكتملة', 'ملغاة'] },
     })
@@ -102,9 +107,9 @@ router.get('/overdue', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-tasks/:id — get single task */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const task = await MaintenanceTask.findById(req.params.id)
+    const task = await MaintenanceTask.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('vehicle')
       .populate('schedule')
       .populate('assignedTechnician', 'name email');
@@ -119,10 +124,15 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const task = await MaintenanceTask.create(stripUpdateMeta(req.body));
+      const body = { ...stripUpdateMeta(req.body) };
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const task = await MaintenanceTask.create(body);
       res.status(201).json({ success: true, data: task });
     } catch (err) {
       logger.error('maintenanceTask create error:', err);
@@ -132,12 +142,16 @@ router.post(
 );
 
 /** PUT /api/maintenance-tasks/:id — update task */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const task = await MaintenanceTask.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const task = await MaintenanceTask.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     res.json({ success: true, data: task });
   } catch (err) {
@@ -147,18 +161,27 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/maintenance-tasks/:id — delete task (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const task = await MaintenanceTask.findByIdAndDelete(req.params.id);
-    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
-    res.json({ success: true, message: 'Task deleted' });
-  } catch (err) {
-    safeError(res, err, 'maintenanceTask delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const task = await MaintenanceTask.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+      res.json({ success: true, message: 'Task deleted' });
+    } catch (err) {
+      safeError(res, err, 'maintenanceTask delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/maintenance-tasks/:id/status — update task status */
-router.patch('/:id/status', requireAuth, async (req, res) => {
+router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status, progress } = req.body;
     const update = { status };
@@ -169,10 +192,14 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
       update.progress = 100;
     }
 
-    const task = await MaintenanceTask.findByIdAndUpdate(req.params.id, update, {
-      new: true,
-      runValidators: true,
-    });
+    const task = await MaintenanceTask.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      update,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
     task.activityLog.push({
@@ -190,11 +217,11 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
 });
 
 /** POST /api/maintenance-tasks/:id/quality-check — submit quality checklist */
-router.post('/:id/quality-check', requireAuth, async (req, res) => {
+router.post('/:id/quality-check', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { qualityChecklist, qualityScore } = req.body;
-    const task = await MaintenanceTask.findByIdAndUpdate(
-      req.params.id,
+    const task = await MaintenanceTask.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { qualityChecklist, qualityScore },
       { new: true, runValidators: true }
     );

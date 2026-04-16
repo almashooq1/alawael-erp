@@ -8,6 +8,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const PortalNotification = require('../models/PortalNotification');
 const { requireAuth, _requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -22,7 +23,7 @@ const toId = v => {
 };
 
 // ── GET / — list notifications (filter by guardian, beneficiary, type, priority, status, read) ──
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       guardianId,
@@ -36,7 +37,7 @@ router.get('/', requireAuth, async (req, res) => {
       limit = 25,
     } = req.query;
 
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (guardianId) filter.guardianId = guardianId;
     if (beneficiaryId) filter.beneficiaryId = beneficiaryId;
     if (type) filter.type = type;
@@ -72,7 +73,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // ── GET /stats — notification statistics for a guardian ─────────────────
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { guardianId } = req.query;
     if (!guardianId) {
@@ -81,7 +82,7 @@ router.get('/stats', requireAuth, async (req, res) => {
 
     const gId = toId(guardianId);
     const stats = await PortalNotification.aggregate([
-      { $match: { guardianId: gId, isArchived: false } },
+      { $match: { guardianId: gId, isArchived: false, ...branchFilter(req) } },
       {
         $group: {
           _id: null,
@@ -96,7 +97,7 @@ router.get('/stats', requireAuth, async (req, res) => {
     ]);
 
     const byType = await PortalNotification.aggregate([
-      { $match: { guardianId: gId, isArchived: false } },
+      { $match: { guardianId: gId, isArchived: false, ...branchFilter(req) } },
       { $group: { _id: '$type', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]);
@@ -114,7 +115,7 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 // ── GET /guardian/:guardianId — shortcut: all notifications for guardian ──
-router.get('/guardian/:guardianId', requireAuth, async (req, res) => {
+router.get('/guardian/:guardianId', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { limit = 50 } = req.query;
     const data = await PortalNotification.getForGuardian(req.params.guardianId, Number(limit));
@@ -125,7 +126,7 @@ router.get('/guardian/:guardianId', requireAuth, async (req, res) => {
 });
 
 // ── GET /guardian/:guardianId/unread — unread notifications ─────────────
-router.get('/guardian/:guardianId/unread', requireAuth, async (req, res) => {
+router.get('/guardian/:guardianId/unread', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const data = await PortalNotification.getUnreadForGuardian(req.params.guardianId);
     const count = await PortalNotification.getUnreadCountForGuardian(req.params.guardianId);
@@ -136,7 +137,7 @@ router.get('/guardian/:guardianId/unread', requireAuth, async (req, res) => {
 });
 
 // ── GET /guardian/:guardianId/urgent — urgent unread ────────────────────
-router.get('/guardian/:guardianId/urgent', requireAuth, async (req, res) => {
+router.get('/guardian/:guardianId/urgent', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const data = await PortalNotification.getUrgentNotifications(req.params.guardianId);
     res.json({ success: true, data, count: data.length });
@@ -146,9 +147,9 @@ router.get('/guardian/:guardianId/urgent', requireAuth, async (req, res) => {
 });
 
 // ── GET /:id — single notification ─────────────────────────────────────
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findById(req.params.id)
+    const doc = await PortalNotification.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('guardianId', 'name phone')
       .populate('beneficiaryId', 'name')
       .populate('sentBy', 'name');
@@ -160,10 +161,14 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // ── POST / — create notification ───────────────────────────────────────
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const body = { ...req.body };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
     const doc = await PortalNotification.create({
-      ...req.body,
+      ...body,
       sentBy: req.body.sentBy || req.user?._id,
       sentAt: new Date(),
     });
@@ -175,7 +180,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // ── POST /send — create + send helper (uses model static) ─────────────
-router.post('/send', requireAuth, async (req, res) => {
+router.post('/send', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       guardianId,
@@ -208,12 +213,16 @@ router.post('/send', requireAuth, async (req, res) => {
 });
 
 // ── PUT /:id — update notification ─────────────────────────────────────
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await PortalNotification.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -223,9 +232,12 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // ── DELETE /:id — remove notification ──────────────────────────────────
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findByIdAndDelete(req.params.id);
+    const doc = await PortalNotification.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     res.json({ success: true, message: 'Notification deleted' });
   } catch (err) {
@@ -234,9 +246,9 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 // ── PATCH /:id/read — mark as read ────────────────────────────────────
-router.patch('/:id/read', requireAuth, async (req, res) => {
+router.patch('/:id/read', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findById(req.params.id);
+    const doc = await PortalNotification.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     await doc.markAsRead();
     res.json({ success: true, data: doc });
@@ -246,9 +258,9 @@ router.patch('/:id/read', requireAuth, async (req, res) => {
 });
 
 // ── PATCH /:id/unread — mark as unread ─────────────────────────────────
-router.patch('/:id/unread', requireAuth, async (req, res) => {
+router.patch('/:id/unread', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findById(req.params.id);
+    const doc = await PortalNotification.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     await doc.markAsUnread();
     res.json({ success: true, data: doc });
@@ -258,9 +270,9 @@ router.patch('/:id/unread', requireAuth, async (req, res) => {
 });
 
 // ── PATCH /:id/archive — archive notification ─────────────────────────
-router.patch('/:id/archive', requireAuth, async (req, res) => {
+router.patch('/:id/archive', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findById(req.params.id);
+    const doc = await PortalNotification.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     await doc.archive();
     res.json({ success: true, data: doc });
@@ -270,9 +282,9 @@ router.patch('/:id/archive', requireAuth, async (req, res) => {
 });
 
 // ── PATCH /:id/unarchive — unarchive notification ─────────────────────
-router.patch('/:id/unarchive', requireAuth, async (req, res) => {
+router.patch('/:id/unarchive', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await PortalNotification.findById(req.params.id);
+    const doc = await PortalNotification.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!doc) return res.status(404).json({ success: false, message: 'Notification not found' });
     await doc.unarchive();
     res.json({ success: true, data: doc });
@@ -282,7 +294,7 @@ router.patch('/:id/unarchive', requireAuth, async (req, res) => {
 });
 
 // ── POST /mark-all-read — mark all as read for guardian ────────────────
-router.post('/mark-all-read', requireAuth, async (req, res) => {
+router.post('/mark-all-read', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { guardianId } = req.body;
     if (!guardianId) {

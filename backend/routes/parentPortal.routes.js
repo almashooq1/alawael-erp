@@ -46,6 +46,7 @@ const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
 const safeError = require('../utils/safeError');
@@ -282,7 +283,7 @@ router.post('/auth/logout', authenticate, async (req, res) => {
 // جميع المسارات التالية تتطلب مصادقة
 // ──────────────────────────────────────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ──────────────────────────────────────────────────────────────────────────────
 // 2. لوحة التحكم
 // ──────────────────────────────────────────────────────────────────────────────

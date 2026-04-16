@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const TherapyProgram = require('../models/TherapyProgram');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/therapy-programs — list programs */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { department, isActive, search, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (department) filter.department = { $regex: escapeRegex(String(department)), $options: 'i' };
     if (isActive !== undefined) filter.isActive = isActive === 'true';
     if (search)
@@ -41,7 +42,7 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/therapy-programs/departments — list distinct departments */
-router.get('/departments', requireAuth, async (req, res) => {
+router.get('/departments', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const departments = await TherapyProgram.distinct('department', { isActive: true });
     res.json({ success: true, data: departments.filter(Boolean).sort() });
@@ -51,9 +52,9 @@ router.get('/departments', requireAuth, async (req, res) => {
 });
 
 /** GET /api/therapy-programs/:id — get single program */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const program = await TherapyProgram.findById(req.params.id);
+    const program = await TherapyProgram.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
     res.json({ success: true, data: program });
   } catch (err) {
@@ -62,54 +63,80 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** POST /api/therapy-programs — create program */
-router.post('/', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
-  try {
-    const program = await TherapyProgram.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: program });
-  } catch (err) {
-    logger.error('therapyProgram create error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.post(
+  '/',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'supervisor']),
+  async (req, res) => {
+    try {
+      const body = stripUpdateMeta(req.body);
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const program = await TherapyProgram.create(body);
+      res.status(201).json({ success: true, data: program });
+    } catch (err) {
+      logger.error('therapyProgram create error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** PUT /api/therapy-programs/:id — update program */
-router.put('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
-  try {
-    const program = await TherapyProgram.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
-    res.json({ success: true, data: program });
-  } catch (err) {
-    logger.error('therapyProgram update error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'supervisor']),
+  async (req, res) => {
+    try {
+      const program = await TherapyProgram.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+      if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
+      res.json({ success: true, data: program });
+    } catch (err) {
+      logger.error('therapyProgram update error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** DELETE /api/therapy-programs/:id — delete program (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const program = await TherapyProgram.findByIdAndDelete(req.params.id);
-    if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
-    res.json({ success: true, message: 'Program deleted' });
-  } catch (err) {
-    safeError(res, err, 'therapyProgram delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const program = await TherapyProgram.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
+      res.json({ success: true, message: 'Program deleted' });
+    } catch (err) {
+      safeError(res, err, 'therapyProgram delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/therapy-programs/:id/toggle-active — toggle active status */
 router.patch(
   '/:id/toggle-active',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor']),
   async (req, res) => {
     try {
-      const program = await TherapyProgram.findById(req.params.id);
+      const program = await TherapyProgram.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!program) return res.status(404).json({ success: false, message: 'Program not found' });
       program.isActive = !program.isActive;
       await program.save();

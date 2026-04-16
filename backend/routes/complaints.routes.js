@@ -7,13 +7,14 @@ const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Complaint = require('../models/Complaint');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const CREATE_FIELDS = [
   'subject',

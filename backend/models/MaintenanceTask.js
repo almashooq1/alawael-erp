@@ -31,6 +31,12 @@ const MaintenanceTaskSchema = new Schema(
       ref: 'MaintenanceSchedule',
       required: true,
     },
+    branchId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // تفاصيل المهمة
     title: {
@@ -231,4 +237,5 @@ MaintenanceTaskSchema.virtual('durationOverrun').get(function () {
   return null;
 });
 
-module.exports = mongoose.models.MaintenanceTask || mongoose.model('MaintenanceTask', MaintenanceTaskSchema);
+module.exports =
+  mongoose.models.MaintenanceTask || mongoose.model('MaintenanceTask', MaintenanceTaskSchema);

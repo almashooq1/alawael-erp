@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
@@ -96,6 +97,7 @@ const ROLE_LABELS = {
 
 // ─── Middleware ────────────────────────────────────────────
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(authorize(['admin', 'super_admin', 'hr', 'hr_manager', 'manager']));
 
 // ─── Helper: Log Audit ────────────────────────────────────

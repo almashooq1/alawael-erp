@@ -27,6 +27,12 @@ const MaintenanceIssueSchema = new Schema(
       required: true,
     },
     plateNumber: String,
+    branchId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // وصف المشكلة
     title: {
@@ -287,4 +293,5 @@ MaintenanceIssueSchema.virtual('isOverdue').get(function () {
   return false;
 });
 
-module.exports = mongoose.models.MaintenanceIssue || mongoose.model('MaintenanceIssue', MaintenanceIssueSchema);
+module.exports =
+  mongoose.models.MaintenanceIssue || mongoose.model('MaintenanceIssue', MaintenanceIssueSchema);

@@ -13,6 +13,13 @@ const standardizedAssessmentSchema = new mongoose.Schema(
     beneficiary: { type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary', required: true },
     evaluator: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
 
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
+
     // Test Details
     name: { type: String, required: true }, // e.g. "GMFM-88", "CARS", "Vineland-3"
     date: { type: Date, default: Date.now },
@@ -28,11 +35,13 @@ const standardizedAssessmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 // ── Indexes ───────────────────────────────────────────────────────────────
 sectionSchema.index({ beneficiary: 1 });
 sectionSchema.index({ evaluator: 1 });
 sectionSchema.index({ date: -1 });
 sectionSchema.index({ beneficiary: 1, date: -1 });
 sectionSchema.index({ name: 1 });
-module.exports = mongoose.models.StandardizedAssessment || mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);
+standardizedAssessmentSchema.index({ branchId: 1, beneficiary: 1 });
+module.exports =
+  mongoose.models.StandardizedAssessment ||
+  mongoose.model('StandardizedAssessment', standardizedAssessmentSchema);

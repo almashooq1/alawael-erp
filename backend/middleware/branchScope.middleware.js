@@ -14,17 +14,8 @@
 'use strict';
 
 const logger = require('../utils/logger');
-
-// الأدوار التي تملك صلاحية رؤية جميع الفروع
-// ملاحظة: 'super-admin' مضاف لدعم أدوار نظام التأهيل (rehab-roles.js)
-const CROSS_BRANCH_ROLES = [
-  'super_admin',
-  'hq_super_admin',
-  'hq_admin',
-  'ceo',
-  'admin',
-  'super-admin',
-];
+const { CROSS_BRANCH_ROLES, resolveRole } = require('../config/constants/roles.constants');
+const { TENANT_FIELD } = require('../config/constants/tenant.constants');
 
 /**
  * requireBranchAccess
@@ -37,7 +28,7 @@ const requireBranchAccess = (req, res, next) => {
     return res.status(401).json({ success: false, message: 'غير مصرح — يجب تسجيل الدخول' });
   }
 
-  const role = req.user.role || req.user.roles?.[0];
+  const role = resolveRole(req.user.role || req.user.roles?.[0]);
 
   // المستخدمون ذوو الصلاحية العامة يستطيعون الوصول لكل الفروع
   if (CROSS_BRANCH_ROLES.includes(role)) {
@@ -87,13 +78,8 @@ const branchFilter = req => {
   if (!req.branchScope || req.branchScope.allBranches) {
     return {}; // بدون قيود — كل الفروع
   }
-  return {
-    $or: [
-      { branchId: req.branchScope.branchId },
-      { branch: req.branchScope.branchId },
-      { branch_id: req.branchScope.branchId },
-    ],
-  };
+  // استخدام الحقل الموحد branchId فقط (بعد توحيد النماذج)
+  return { [TENANT_FIELD]: req.branchScope.branchId };
 };
 
 /**

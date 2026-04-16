@@ -15,6 +15,7 @@ const controller = require('../controllers/disability-rehabilitation.controller'
 // Middleware (basic auth only for tests)
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // ============================================
 // برامج التأهيل - Programs
 // ============================================
@@ -24,7 +25,7 @@ const { authenticateToken } = require('../middleware/auth');
  * @desc    إنشاء برنامج تأهيل جديد
  * @access  Private (Admins, Therapists)
  */
-router.post('/programs', authenticateToken, controller.createProgram);
+router.post('/programs', authenticateToken, requireBranchAccess, controller.createProgram);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/programs
@@ -32,28 +33,28 @@ router.post('/programs', authenticateToken, controller.createProgram);
  * @access  Private
  * @query   disability_type, status, beneficiary_id, severity, date_from, date_to, search, page, limit, sort
  */
-router.get('/programs', authenticateToken, controller.getAllPrograms);
+router.get('/programs', authenticateToken, requireBranchAccess, controller.getAllPrograms);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/programs/:id
  * @desc    الحصول على برنامج محدد
  * @access  Private
  */
-router.get('/programs/:id', authenticateToken, controller.getProgramById);
+router.get('/programs/:id', authenticateToken, requireBranchAccess, controller.getProgramById);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id
  * @desc    تحديث برنامج التأهيل
  * @access  Private (Admins, Therapists, Case Managers)
  */
-router.put('/programs/:id', authenticateToken, controller.updateProgram);
+router.put('/programs/:id', authenticateToken, requireBranchAccess, controller.updateProgram);
 
 /**
  * @route   DELETE /api/v1/disability-rehabilitation/programs/:id
  * @desc    حذف برنامج (soft delete)
  * @access  Private (Admins only)
  */
-router.delete('/programs/:id', authenticateToken, controller.deleteProgram);
+router.delete('/programs/:id', authenticateToken, requireBranchAccess, controller.deleteProgram);
 
 // ============================================
 // الجلسات - Sessions
@@ -64,7 +65,7 @@ router.delete('/programs/:id', authenticateToken, controller.deleteProgram);
  * @desc    إضافة جلسة جديدة
  * @access  Private (Therapists, Case Managers)
  */
-router.post('/programs/:id/sessions', authenticateToken, controller.addSession);
+router.post('/programs/:id/sessions', authenticateToken, requireBranchAccess, controller.addSession);
 
 // ============================================
 // الأهداف - Goals
@@ -75,7 +76,7 @@ router.post('/programs/:id/sessions', authenticateToken, controller.addSession);
  * @desc    تحديث حالة هدف
  * @access  Private (Therapists, Case Managers)
  */
-router.put('/programs/:id/goals/:goalId', authenticateToken, controller.updateGoalStatus);
+router.put('/programs/:id/goals/:goalId', authenticateToken, requireBranchAccess, controller.updateGoalStatus);
 
 // ============================================
 // التقييمات - Assessments
@@ -86,7 +87,7 @@ router.put('/programs/:id/goals/:goalId', authenticateToken, controller.updateGo
  * @desc    إضافة تقييم
  * @access  Private (Therapists, Assessors)
  */
-router.post('/programs/:id/assessments', authenticateToken, controller.addAssessment);
+router.post('/programs/:id/assessments', authenticateToken, requireBranchAccess, controller.addAssessment);
 
 // ============================================
 // إدارة البرنامج - Program Management
@@ -97,28 +98,28 @@ router.post('/programs/:id/assessments', authenticateToken, controller.addAssess
  * @desc    إنهاء البرنامج
  * @access  Private (Admins, Case Managers)
  */
-router.put('/programs/:id/complete', authenticateToken, controller.completeProgram);
+router.put('/programs/:id/complete', authenticateToken, requireBranchAccess, controller.completeProgram);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/suspend
  * @desc    تعليق برنامج تأهيل
  * @access  Private (Admins, Case Managers)
  */
-router.put('/programs/:id/suspend', authenticateToken, controller.suspendProgram);
+router.put('/programs/:id/suspend', authenticateToken, requireBranchAccess, controller.suspendProgram);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/resume
  * @desc    استئناف برنامج معلق
  * @access  Private (Admins, Case Managers)
  */
-router.put('/programs/:id/resume', authenticateToken, controller.resumeProgram);
+router.put('/programs/:id/resume', authenticateToken, requireBranchAccess, controller.resumeProgram);
 
 /**
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/transfer
  * @desc    تحويل المستفيد إلى برنامج آخر
  * @access  Private (Admins, Case Managers)
  */
-router.post('/programs/:id/transfer', authenticateToken, controller.transferProgram);
+router.post('/programs/:id/transfer', authenticateToken, requireBranchAccess, controller.transferProgram);
 
 // ============================================
 // تقييمات المخاطر وجودة الحياة - Risk & QoL
@@ -129,14 +130,14 @@ router.post('/programs/:id/transfer', authenticateToken, controller.transferProg
  * @desc    تحديث تقييم المخاطر
  * @access  Private (Therapists, Case Managers)
  */
-router.put('/programs/:id/risk-assessment', authenticateToken, controller.updateRiskAssessment);
+router.put('/programs/:id/risk-assessment', authenticateToken, requireBranchAccess, controller.updateRiskAssessment);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/quality-of-life
  * @desc    تحديث تقييم جودة الحياة
  * @access  Private (Therapists, Assessors)
  */
-router.put('/programs/:id/quality-of-life', authenticateToken, controller.updateQualityOfLife);
+router.put('/programs/:id/quality-of-life', authenticateToken, requireBranchAccess, controller.updateQualityOfLife);
 
 // ============================================
 // خطة الانتقال والتخريج - Transition & Discharge
@@ -147,14 +148,14 @@ router.put('/programs/:id/quality-of-life', authenticateToken, controller.update
  * @desc    تحديث خطة الانتقال
  * @access  Private (Case Managers, Admins)
  */
-router.put('/programs/:id/transition-plan', authenticateToken, controller.updateTransitionPlan);
+router.put('/programs/:id/transition-plan', authenticateToken, requireBranchAccess, controller.updateTransitionPlan);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/discharge-plan
  * @desc    تحديث خطة التخريج
  * @access  Private (Case Managers, Admins)
  */
-router.put('/programs/:id/discharge-plan', authenticateToken, controller.updateDischargePlan);
+router.put('/programs/:id/discharge-plan', authenticateToken, requireBranchAccess, controller.updateDischargePlan);
 
 // ============================================
 // الأدوية والقياسات الحيوية - Medications & Vitals
@@ -165,14 +166,14 @@ router.put('/programs/:id/discharge-plan', authenticateToken, controller.updateD
  * @desc    إضافة/تحديث الأدوية
  * @access  Private (Medical Staff)
  */
-router.post('/programs/:id/medications', authenticateToken, controller.manageMedications);
+router.post('/programs/:id/medications', authenticateToken, requireBranchAccess, controller.manageMedications);
 
 /**
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/vitals
  * @desc    إضافة قياسات حيوية
  * @access  Private (Medical Staff, Therapists)
  */
-router.post('/programs/:id/vitals', authenticateToken, controller.addVitals);
+router.post('/programs/:id/vitals', authenticateToken, requireBranchAccess, controller.addVitals);
 
 // ============================================
 // التواصل والاستبيانات - Communication & Surveys
@@ -183,7 +184,7 @@ router.post('/programs/:id/vitals', authenticateToken, controller.addVitals);
  * @desc    إضافة رسالة تواصل فريق
  * @access  Private (All Team Members)
  */
-router.post('/programs/:id/team-communication', authenticateToken, controller.addTeamCommunication);
+router.post('/programs/:id/team-communication', authenticateToken, requireBranchAccess, controller.addTeamCommunication);
 
 /**
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/satisfaction-survey
@@ -192,7 +193,7 @@ router.post('/programs/:id/team-communication', authenticateToken, controller.ad
  */
 router.post(
   '/programs/:id/satisfaction-survey',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.addSatisfactionSurvey
 );
 
@@ -205,14 +206,14 @@ router.post(
  * @desc    تحديث البرنامج المنزلي
  * @access  Private (Therapists, Case Managers)
  */
-router.put('/programs/:id/home-program', authenticateToken, controller.updateHomeProgram);
+router.put('/programs/:id/home-program', authenticateToken, requireBranchAccess, controller.updateHomeProgram);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/iep
  * @desc    تحديث الخطة التعليمية الفردية
  * @access  Private (Educators, Case Managers)
  */
-router.put('/programs/:id/iep', authenticateToken, controller.updateIEP);
+router.put('/programs/:id/iep', authenticateToken, requireBranchAccess, controller.updateIEP);
 
 // ============================================
 // ملخصات وتقارير متقدمة - Advanced Reports
@@ -223,7 +224,7 @@ router.put('/programs/:id/iep', authenticateToken, controller.updateIEP);
  * @desc    ملخص التقدم الشامل
  * @access  Private
  */
-router.get('/programs/:id/progress-summary', authenticateToken, controller.getProgressSummary);
+router.get('/programs/:id/progress-summary', authenticateToken, requireBranchAccess, controller.getProgressSummary);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/programs/:id/export
@@ -231,7 +232,7 @@ router.get('/programs/:id/progress-summary', authenticateToken, controller.getPr
  * @access  Private
  * @query   format (json, csv, pdf)
  */
-router.get('/programs/:id/export', authenticateToken, controller.exportProgramReport);
+router.get('/programs/:id/export', authenticateToken, requireBranchAccess, controller.exportProgramReport);
 
 // ============================================
 // الإحصائيات والتقارير - Statistics & Reports
@@ -243,35 +244,35 @@ router.get('/programs/:id/export', authenticateToken, controller.exportProgramRe
  * @access  Private (Admins, Managers)
  * @query   date_from, date_to
  */
-router.get('/statistics', authenticateToken, controller.getStatistics);
+router.get('/statistics', authenticateToken, requireBranchAccess, controller.getStatistics);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/waiting-list
  * @desc    قائمة الانتظار
  * @access  Private (Admins, Managers)
  */
-router.get('/waiting-list', authenticateToken, controller.getWaitingList);
+router.get('/waiting-list', authenticateToken, requireBranchAccess, controller.getWaitingList);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/dashboard
  * @desc    لوحة المعلومات الشاملة
  * @access  Private (Admins, Managers)
  */
-router.get('/dashboard', authenticateToken, controller.getDashboard);
+router.get('/dashboard', authenticateToken, requireBranchAccess, controller.getDashboard);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/performance/:year/:month
  * @desc    تقرير الأداء الشهري
  * @access  Private (Admins, Managers)
  */
-router.get('/performance/:year/:month', authenticateToken, controller.getMonthlyPerformance);
+router.get('/performance/:year/:month', authenticateToken, requireBranchAccess, controller.getMonthlyPerformance);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/programs/:id/report
  * @desc    تقرير تفصيلي عن برنامج
  * @access  Private
  */
-router.get('/programs/:id/report', authenticateToken, controller.getDetailedReport);
+router.get('/programs/:id/report', authenticateToken, requireBranchAccess, controller.getDetailedReport);
 
 // ============================================
 // برامج المستفيد - Beneficiary Programs
@@ -284,7 +285,7 @@ router.get('/programs/:id/report', authenticateToken, controller.getDetailedRepo
  */
 router.get(
   '/beneficiary/:beneficiaryId/programs',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.getBeneficiaryPrograms
 );
 
@@ -296,7 +297,7 @@ router.get(
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/behavioral-plans
  * @desc    إضافة خطة تدخل سلوكي
  */
-router.post('/programs/:id/behavioral-plans', authenticateToken, controller.addBehavioralPlan);
+router.post('/programs/:id/behavioral-plans', authenticateToken, requireBranchAccess, controller.addBehavioralPlan);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/behavioral-plans/:planId
@@ -304,7 +305,7 @@ router.post('/programs/:id/behavioral-plans', authenticateToken, controller.addB
  */
 router.put(
   '/programs/:id/behavioral-plans/:planId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateBehavioralPlan
 );
 
@@ -312,7 +313,7 @@ router.put(
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/incidents
  * @desc    إضافة تقرير حادثة
  */
-router.post('/programs/:id/incidents', authenticateToken, controller.addIncidentReport);
+router.post('/programs/:id/incidents', authenticateToken, requireBranchAccess, controller.addIncidentReport);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/incidents/:incidentId
@@ -320,7 +321,7 @@ router.post('/programs/:id/incidents', authenticateToken, controller.addIncident
  */
 router.put(
   '/programs/:id/incidents/:incidentId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateIncidentReport
 );
 
@@ -328,7 +329,7 @@ router.put(
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/appointments
  * @desc    إضافة موعد جديد
  */
-router.post('/programs/:id/appointments', authenticateToken, controller.addAppointment);
+router.post('/programs/:id/appointments', authenticateToken, requireBranchAccess, controller.addAppointment);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/appointments/:appointmentId
@@ -336,7 +337,7 @@ router.post('/programs/:id/appointments', authenticateToken, controller.addAppoi
  */
 router.put(
   '/programs/:id/appointments/:appointmentId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateAppointment
 );
 
@@ -344,19 +345,19 @@ router.put(
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/documents
  * @desc    إضافة مستند
  */
-router.post('/programs/:id/documents', authenticateToken, controller.addDocument);
+router.post('/programs/:id/documents', authenticateToken, requireBranchAccess, controller.addDocument);
 
 /**
  * @route   DELETE /api/v1/disability-rehabilitation/programs/:id/documents/:documentId
  * @desc    حذف مستند
  */
-router.delete('/programs/:id/documents/:documentId', authenticateToken, controller.deleteDocument);
+router.delete('/programs/:id/documents/:documentId', authenticateToken, requireBranchAccess, controller.deleteDocument);
 
 /**
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/group-activities
  * @desc    إضافة نشاط مجموعة
  */
-router.post('/programs/:id/group-activities', authenticateToken, controller.addGroupActivity);
+router.post('/programs/:id/group-activities', authenticateToken, requireBranchAccess, controller.addGroupActivity);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/emergency-contacts
@@ -364,7 +365,7 @@ router.post('/programs/:id/group-activities', authenticateToken, controller.addG
  */
 router.put(
   '/programs/:id/emergency-contacts',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateEmergencyContacts
 );
 
@@ -374,7 +375,7 @@ router.put(
  */
 router.put(
   '/programs/:id/cultural-preferences',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateCulturalPreferences
 );
 
@@ -384,7 +385,7 @@ router.put(
  */
 router.put(
   '/programs/:id/attendance-summary',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.updateAttendanceSummary
 );
 
@@ -392,78 +393,78 @@ router.put(
  * @route   POST /api/v1/disability-rehabilitation/programs/:id/alerts
  * @desc    إضافة تنبيه
  */
-router.post('/programs/:id/alerts', authenticateToken, controller.addAlert);
+router.post('/programs/:id/alerts', authenticateToken, requireBranchAccess, controller.addAlert);
 
 /**
  * @route   PUT /api/v1/disability-rehabilitation/programs/:id/alerts/:alertId/dismiss
  * @desc    تجاهل تنبيه
  */
-router.put('/programs/:id/alerts/:alertId/dismiss', authenticateToken, controller.dismissAlert);
+router.put('/programs/:id/alerts/:alertId/dismiss', authenticateToken, requireBranchAccess, controller.dismissAlert);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/analytics
  * @desc    تحليلات متقدمة
  */
-router.get('/analytics', authenticateToken, controller.getAnalytics);
+router.get('/analytics', authenticateToken, requireBranchAccess, controller.getAnalytics);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/upcoming-appointments
  * @desc    المواعيد القادمة
  */
-router.get('/upcoming-appointments', authenticateToken, controller.getUpcomingAppointments);
+router.get('/upcoming-appointments', authenticateToken, requireBranchAccess, controller.getUpcomingAppointments);
 
 /**
  * @route   GET /api/v1/disability-rehabilitation/active-alerts
  * @desc    التنبيهات النشطة
  */
-router.get('/active-alerts', authenticateToken, controller.getActiveAlerts);
+router.get('/active-alerts', authenticateToken, requireBranchAccess, controller.getActiveAlerts);
 
 // ============================================
 // Phase 4: الرعاية عن بعد، المالية، الملاحظات، الإحالات، النقل
 // ============================================
 
 /** @route PUT /:id/telehealth - تحديث بيانات الرعاية عن بعد */
-router.put('/:id/telehealth', authenticateToken, controller.updateTelehealth);
+router.put('/:id/telehealth', authenticateToken, requireBranchAccess, controller.updateTelehealth);
 
 /** @route POST /:id/telehealth/connectivity-issue - تسجيل مشكلة اتصال */
 router.post(
   '/:id/telehealth/connectivity-issue',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   controller.addConnectivityIssue
 );
 
 /** @route PUT /:id/financial - تحديث المعلومات المالية */
-router.put('/:id/financial', authenticateToken, controller.updateFinancialInfo);
+router.put('/:id/financial', authenticateToken, requireBranchAccess, controller.updateFinancialInfo);
 
 /** @route POST /:id/invoices - إضافة فاتورة */
-router.post('/:id/invoices', authenticateToken, controller.addInvoice);
+router.post('/:id/invoices', authenticateToken, requireBranchAccess, controller.addInvoice);
 
 /** @route PUT /:id/insurance - تحديث معلومات التأمين */
-router.put('/:id/insurance', authenticateToken, controller.updateInsuranceInfo);
+router.put('/:id/insurance', authenticateToken, requireBranchAccess, controller.updateInsuranceInfo);
 
 /** @route POST /:id/notes - إضافة ملاحظة */
-router.post('/:id/notes', authenticateToken, controller.addNote);
+router.post('/:id/notes', authenticateToken, requireBranchAccess, controller.addNote);
 
 /** @route PUT /:id/notes/:noteId - تحديث ملاحظة */
-router.put('/:id/notes/:noteId', authenticateToken, controller.updateNote);
+router.put('/:id/notes/:noteId', authenticateToken, requireBranchAccess, controller.updateNote);
 
 /** @route DELETE /:id/notes/:noteId - حذف ملاحظة */
-router.delete('/:id/notes/:noteId', authenticateToken, controller.deleteNote);
+router.delete('/:id/notes/:noteId', authenticateToken, requireBranchAccess, controller.deleteNote);
 
 /** @route POST /:id/referrals - إضافة إحالة */
-router.post('/:id/referrals', authenticateToken, controller.addReferral);
+router.post('/:id/referrals', authenticateToken, requireBranchAccess, controller.addReferral);
 
 /** @route PUT /:id/referrals/:referralId - تحديث إحالة */
-router.put('/:id/referrals/:referralId', authenticateToken, controller.updateReferral);
+router.put('/:id/referrals/:referralId', authenticateToken, requireBranchAccess, controller.updateReferral);
 
 /** @route PUT /:id/transportation - تحديث بيانات النقل */
-router.put('/:id/transportation', authenticateToken, controller.updateTransportation);
+router.put('/:id/transportation', authenticateToken, requireBranchAccess, controller.updateTransportation);
 
 /** @route PUT /:id/treatment-team - تحديث فريق العلاج */
-router.put('/:id/treatment-team', authenticateToken, controller.updateTreatmentTeam);
+router.put('/:id/treatment-team', authenticateToken, requireBranchAccess, controller.updateTreatmentTeam);
 
 /** @route GET /financial-summary - ملخص مالي شامل */
-router.get('/financial-summary', authenticateToken, controller.getFinancialSummary);
+router.get('/financial-summary', authenticateToken, requireBranchAccess, controller.getFinancialSummary);
 
 // ============================================
 // معلومات إضافية - Additional Info

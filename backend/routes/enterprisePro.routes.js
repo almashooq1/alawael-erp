@@ -13,6 +13,7 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 
@@ -195,7 +196,7 @@ const FIELDS = {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ── Audit Trail ─────────────────────────────────────────────────────────────
-router.get('/audit-hub/trail', authenticateToken, async (req, res) => {
+router.get('/audit-hub/trail', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const {
       module,
@@ -233,7 +234,7 @@ router.get('/audit-hub/trail', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/audit-hub/trail/:id', authenticateToken, async (req, res) => {
+router.get('/audit-hub/trail/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const entry = await AuditTrailEntry.findById(req.params.id).populate(
       'performedBy',
@@ -246,7 +247,7 @@ router.get('/audit-hub/trail/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/audit-hub/trail/entity/:type/:id', authenticateToken, async (req, res) => {
+router.get('/audit-hub/trail/entity/:type/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const entries = await AuditTrailEntry.find({
       entityType: req.params.type,
@@ -261,7 +262,7 @@ router.get('/audit-hub/trail/entity/:type/:id', authenticateToken, async (req, r
   }
 });
 
-router.get('/audit-hub/stats', authenticateToken, async (req, res) => {
+router.get('/audit-hub/stats', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [byModule, byAction, bySeverity, recentCount] = await Promise.all([
       AuditTrailEntry.aggregate([
@@ -283,7 +284,7 @@ router.get('/audit-hub/stats', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/audit-hub/modules', authenticateToken, async (_req, res) => {
+router.get('/audit-hub/modules', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const modules = await AuditTrailEntry.distinct('module');
     res.json(modules);
@@ -293,7 +294,7 @@ router.get('/audit-hub/modules', authenticateToken, async (_req, res) => {
 });
 
 // ── Compliance Checklists ───────────────────────────────────────────────────
-router.get('/audit-hub/checklists', authenticateToken, async (req, res) => {
+router.get('/audit-hub/checklists', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { category, isActive } = req.query;
     const q = {};
@@ -309,7 +310,7 @@ router.get('/audit-hub/checklists', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
+router.get('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const cl = await ComplianceChecklist.findById(req.params.id)
       .populate('createdBy', 'name')
@@ -323,7 +324,7 @@ router.get('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/audit-hub/checklists', authenticateToken, async (req, res) => {
+router.post('/audit-hub/checklists', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const cl = await ComplianceChecklist.create({
       ...pick(req.body, FIELDS.checklist),
@@ -335,7 +336,7 @@ router.post('/audit-hub/checklists', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
+router.put('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     // Recalculate overall score
     const data = pick(req.body, FIELDS.checklist);
@@ -351,7 +352,7 @@ router.put('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/audit-hub/checklists/:id', authenticateToken, async (req, res) => {
+router.delete('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await ComplianceChecklist.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -360,7 +361,7 @@ router.delete('/audit-hub/checklists/:id', authenticateToken, async (req, res) =
   }
 });
 
-router.get('/audit-hub/compliance-dashboard', authenticateToken, async (_req, res) => {
+router.get('/audit-hub/compliance-dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const checklists = await ComplianceChecklist.find({ isActive: true }).lean();
     const totalItems = checklists.reduce((s, c) => s + c.items.length, 0);
@@ -403,7 +404,7 @@ router.get('/audit-hub/compliance-dashboard', authenticateToken, async (_req, re
 });
 
 // ── Compliance Alerts ───────────────────────────────────────────────────────
-router.get('/audit-hub/alerts', authenticateToken, async (req, res) => {
+router.get('/audit-hub/alerts', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { severity, isResolved } = req.query;
     const q = {};
@@ -419,7 +420,7 @@ router.get('/audit-hub/alerts', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/audit-hub/alerts/:id/resolve', authenticateToken, async (req, res) => {
+router.post('/audit-hub/alerts/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const alert = await ComplianceAlert.findByIdAndUpdate(
       req.params.id,
@@ -436,7 +437,7 @@ router.post('/audit-hub/alerts/:id/resolve', authenticateToken, async (req, res)
 // ║  2. ADVANCED REPORT BUILDER — مولد التقارير المتقدم                         ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-router.get('/report-builder/templates', authenticateToken, async (req, res) => {
+router.get('/report-builder/templates', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { module, reportType, isPublic } = req.query;
     const q = {};
@@ -453,7 +454,7 @@ router.get('/report-builder/templates', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/report-builder/templates/:id', authenticateToken, async (req, res) => {
+router.get('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ReportTemplate.findById(req.params.id)
       .populate('createdBy', 'name')
@@ -466,7 +467,7 @@ router.get('/report-builder/templates/:id', authenticateToken, async (req, res) 
   }
 });
 
-router.post('/report-builder/templates', authenticateToken, async (req, res) => {
+router.post('/report-builder/templates', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ReportTemplate.create({
       ...pick(req.body, FIELDS.report),
@@ -478,7 +479,7 @@ router.post('/report-builder/templates', authenticateToken, async (req, res) => 
   }
 });
 
-router.put('/report-builder/templates/:id', authenticateToken, async (req, res) => {
+router.put('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ReportTemplate.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.report), {
       new: true,
@@ -489,7 +490,7 @@ router.put('/report-builder/templates/:id', authenticateToken, async (req, res) 
   }
 });
 
-router.delete('/report-builder/templates/:id', authenticateToken, async (req, res) => {
+router.delete('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await ReportTemplate.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -498,7 +499,7 @@ router.delete('/report-builder/templates/:id', authenticateToken, async (req, re
   }
 });
 
-router.post('/report-builder/templates/:id/clone', authenticateToken, async (req, res) => {
+router.post('/report-builder/templates/:id/clone', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const src = await ReportTemplate.findById(req.params.id).lean();
     if (!src) return res.status(404).json({ error: 'Not found' });
@@ -515,7 +516,7 @@ router.post('/report-builder/templates/:id/clone', authenticateToken, async (req
   }
 });
 
-router.post('/report-builder/execute/:id', authenticateToken, async (req, res) => {
+router.post('/report-builder/execute/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const template = await ReportTemplate.findById(req.params.id).lean();
     if (!template) return res.status(404).json({ error: 'Not found' });
@@ -534,7 +535,7 @@ router.post('/report-builder/execute/:id', authenticateToken, async (req, res) =
   }
 });
 
-router.get('/report-builder/executions', authenticateToken, async (req, res) => {
+router.get('/report-builder/executions', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { template, status, page = 1, limit = 20 } = req.query;
     const q = {};
@@ -555,7 +556,7 @@ router.get('/report-builder/executions', authenticateToken, async (req, res) => 
   }
 });
 
-router.get('/report-builder/modules', authenticateToken, async (_req, res) => {
+router.get('/report-builder/modules', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const mods = [
       'hr',
@@ -575,7 +576,7 @@ router.get('/report-builder/modules', authenticateToken, async (_req, res) => {
   }
 });
 
-router.get('/report-builder/stats', authenticateToken, async (_req, res) => {
+router.get('/report-builder/stats', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const [templateCount, executionCount, byModule] = await Promise.all([
       ReportTemplate.countDocuments(),
@@ -592,7 +593,7 @@ router.get('/report-builder/stats', authenticateToken, async (_req, res) => {
 // ║  3. UNIFIED CALENDAR HUB — التقويم الموحد                                   ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-router.get('/calendar-hub/events', authenticateToken, async (req, res) => {
+router.get('/calendar-hub/events', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { start, end, eventType, module: mod, priority } = req.query;
     const q = {};
@@ -613,7 +614,7 @@ router.get('/calendar-hub/events', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
+router.get('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const ev = await CalendarEvent.findById(req.params.id)
       .populate('createdBy', 'name')
@@ -626,7 +627,7 @@ router.get('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/calendar-hub/events', authenticateToken, async (req, res) => {
+router.post('/calendar-hub/events', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const ev = await CalendarEvent.create({ ...pick(req.body, FIELDS.event), createdBy: uid(req) });
     res.status(201).json(ev);
@@ -635,7 +636,7 @@ router.post('/calendar-hub/events', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
+router.put('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const ev = await CalendarEvent.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.event), {
       new: true,
@@ -646,7 +647,7 @@ router.put('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/calendar-hub/events/:id', authenticateToken, async (req, res) => {
+router.delete('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await CalendarEvent.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -655,7 +656,7 @@ router.delete('/calendar-hub/events/:id', authenticateToken, async (req, res) =>
   }
 });
 
-router.post('/calendar-hub/events/:id/rsvp', authenticateToken, async (req, res) => {
+router.post('/calendar-hub/events/:id/rsvp', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const ev = await CalendarEvent.findById(req.params.id).lean();
     if (!ev) return res.status(404).json({ error: 'Not found' });
@@ -669,7 +670,7 @@ router.post('/calendar-hub/events/:id/rsvp', authenticateToken, async (req, res)
   }
 });
 
-router.get('/calendar-hub/my-events', authenticateToken, async (req, res) => {
+router.get('/calendar-hub/my-events', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const events = await CalendarEvent.find({
       $or: [{ createdBy: uid(req) }, { 'attendees.user': uid(req) }],
@@ -683,7 +684,7 @@ router.get('/calendar-hub/my-events', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/calendar-hub/today', authenticateToken, async (_req, res) => {
+router.get('/calendar-hub/today', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -700,7 +701,7 @@ router.get('/calendar-hub/today', authenticateToken, async (_req, res) => {
 });
 
 // ── Room Bookings ───────────────────────────────────────────────────────────
-router.get('/calendar-hub/rooms', authenticateToken, async (_req, res) => {
+router.get('/calendar-hub/rooms', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const rooms = await RoomBooking.distinct('room');
     res.json(rooms);
@@ -709,7 +710,7 @@ router.get('/calendar-hub/rooms', authenticateToken, async (_req, res) => {
   }
 });
 
-router.get('/calendar-hub/room-bookings', authenticateToken, async (req, res) => {
+router.get('/calendar-hub/room-bookings', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { room, start, end } = req.query;
     const q = {};
@@ -726,7 +727,7 @@ router.get('/calendar-hub/room-bookings', authenticateToken, async (req, res) =>
   }
 });
 
-router.post('/calendar-hub/room-bookings', authenticateToken, async (req, res) => {
+router.post('/calendar-hub/room-bookings', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     // Check for conflicts
     const conflict = await RoomBooking.findOne({
@@ -745,7 +746,7 @@ router.post('/calendar-hub/room-bookings', authenticateToken, async (req, res) =
   }
 });
 
-router.delete('/calendar-hub/room-bookings/:id', authenticateToken, async (req, res) => {
+router.delete('/calendar-hub/room-bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await RoomBooking.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
     res.json({ success: true });
@@ -754,7 +755,7 @@ router.delete('/calendar-hub/room-bookings/:id', authenticateToken, async (req, 
   }
 });
 
-router.get('/calendar-hub/stats', authenticateToken, async (_req, res) => {
+router.get('/calendar-hub/stats', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -783,7 +784,7 @@ router.get('/calendar-hub/stats', authenticateToken, async (_req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ── Contacts ────────────────────────────────────────────────────────────────
-router.get('/crm-pro/contacts', authenticateToken, async (req, res) => {
+router.get('/crm-pro/contacts', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { search, source, assignedTo, page = 1, limit = 30 } = req.query;
     const q = {};
@@ -812,7 +813,7 @@ router.get('/crm-pro/contacts', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
+router.get('/crm-pro/contacts/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const c = await CRMContact.findById(req.params.id).populate('assignedTo', 'name email').lean();
     if (!c) return res.status(404).json({ error: 'Not found' });
@@ -822,7 +823,7 @@ router.get('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/crm-pro/contacts', authenticateToken, async (req, res) => {
+router.post('/crm-pro/contacts', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const c = await CRMContact.create({ ...pick(req.body, FIELDS.contact), createdBy: uid(req) });
     res.status(201).json(c);
@@ -831,7 +832,7 @@ router.post('/crm-pro/contacts', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
+router.put('/crm-pro/contacts/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const c = await CRMContact.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.contact), {
       new: true,
@@ -842,7 +843,7 @@ router.put('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
+router.delete('/crm-pro/contacts/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await CRMContact.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -852,7 +853,7 @@ router.delete('/crm-pro/contacts/:id', authenticateToken, async (req, res) => {
 });
 
 // ── Pipelines ───────────────────────────────────────────────────────────────
-router.get('/crm-pro/pipelines', authenticateToken, async (_req, res) => {
+router.get('/crm-pro/pipelines', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const pipes = await CRMPipeline.find({ isActive: true }).sort({ updatedAt: -1 }).lean();
     res.json(pipes);
@@ -861,7 +862,7 @@ router.get('/crm-pro/pipelines', authenticateToken, async (_req, res) => {
   }
 });
 
-router.get('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
+router.get('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await CRMPipeline.findById(req.params.id).lean();
     if (!p) return res.status(404).json({ error: 'Not found' });
@@ -871,7 +872,7 @@ router.get('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/crm-pro/pipelines', authenticateToken, async (req, res) => {
+router.post('/crm-pro/pipelines', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await CRMPipeline.create({ ...pick(req.body, FIELDS.pipeline), createdBy: uid(req) });
     res.status(201).json(p);
@@ -880,7 +881,7 @@ router.post('/crm-pro/pipelines', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
+router.put('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await CRMPipeline.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.pipeline), {
       new: true,
@@ -891,7 +892,7 @@ router.put('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
+router.delete('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await CRMPipeline.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -901,7 +902,7 @@ router.delete('/crm-pro/pipelines/:id', authenticateToken, async (req, res) => {
 });
 
 // ── Deals ───────────────────────────────────────────────────────────────────
-router.get('/crm-pro/deals', authenticateToken, async (req, res) => {
+router.get('/crm-pro/deals', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { pipeline, stage, status, assignedTo, page = 1, limit = 30 } = req.query;
     const q = {};
@@ -924,7 +925,7 @@ router.get('/crm-pro/deals', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
+router.get('/crm-pro/deals/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const d = await CRMDeal.findById(req.params.id)
       .populate('contact')
@@ -938,7 +939,7 @@ router.get('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/crm-pro/deals', authenticateToken, async (req, res) => {
+router.post('/crm-pro/deals', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const d = await CRMDeal.create({ ...pick(req.body, FIELDS.deal), createdBy: uid(req) });
     res.status(201).json(d);
@@ -947,7 +948,7 @@ router.post('/crm-pro/deals', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
+router.put('/crm-pro/deals/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const d = await CRMDeal.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.deal), {
       new: true,
@@ -958,7 +959,7 @@ router.put('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
+router.delete('/crm-pro/deals/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await CRMDeal.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -967,7 +968,7 @@ router.delete('/crm-pro/deals/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/crm-pro/deals/:id/move', authenticateToken, async (req, res) => {
+router.put('/crm-pro/deals/:id/move', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const d = await CRMDeal.findByIdAndUpdate(
       req.params.id,
@@ -980,7 +981,7 @@ router.put('/crm-pro/deals/:id/move', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, async (req, res) => {
+router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const pipeline = await CRMPipeline.findById(req.params.pipelineId).lean();
     if (!pipeline) return res.status(404).json({ error: 'Not found' });
@@ -999,7 +1000,7 @@ router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, async (req,
 });
 
 // ── Activities ──────────────────────────────────────────────────────────────
-router.get('/crm-pro/activities', authenticateToken, async (req, res) => {
+router.get('/crm-pro/activities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { contact, deal, type, status } = req.query;
     const q = {};
@@ -1019,7 +1020,7 @@ router.get('/crm-pro/activities', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/crm-pro/activities', authenticateToken, async (req, res) => {
+router.post('/crm-pro/activities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const a = await CRMActivity.create({
       ...pick(req.body, FIELDS.activity),
@@ -1031,7 +1032,7 @@ router.post('/crm-pro/activities', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/crm-pro/activities/:id', authenticateToken, async (req, res) => {
+router.put('/crm-pro/activities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const a = await CRMActivity.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.activity), {
       new: true,
@@ -1042,7 +1043,7 @@ router.put('/crm-pro/activities/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/crm-pro/dashboard', authenticateToken, async (_req, res) => {
+router.get('/crm-pro/dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const [totalContacts, totalDeals, openDeals, wonDeals, totalValue] = await Promise.all([
       CRMContact.countDocuments(),
@@ -1075,7 +1076,7 @@ router.get('/crm-pro/dashboard', authenticateToken, async (_req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ── Warehouses ──────────────────────────────────────────────────────────────
-router.get('/warehouse-intel/warehouses', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/warehouses', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { type, isActive } = req.query;
     const q = {};
@@ -1088,7 +1089,7 @@ router.get('/warehouse-intel/warehouses', authenticateToken, async (req, res) =>
   }
 });
 
-router.get('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const wh = await Warehouse.findById(req.params.id).populate('manager', 'name email').lean();
     if (!wh) return res.status(404).json({ error: 'Not found' });
@@ -1098,7 +1099,7 @@ router.get('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res
   }
 });
 
-router.post('/warehouse-intel/warehouses', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/warehouses', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const wh = await Warehouse.create(pick(req.body, FIELDS.warehouse));
     res.status(201).json(wh);
@@ -1107,7 +1108,7 @@ router.post('/warehouse-intel/warehouses', authenticateToken, async (req, res) =
   }
 });
 
-router.put('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res) => {
+router.put('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const wh = await Warehouse.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.warehouse), {
       new: true,
@@ -1118,7 +1119,7 @@ router.put('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res
   }
 });
 
-router.delete('/warehouse-intel/warehouses/:id', authenticateToken, async (req, res) => {
+router.delete('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await Warehouse.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -1128,7 +1129,7 @@ router.delete('/warehouse-intel/warehouses/:id', authenticateToken, async (req, 
 });
 
 // ── Bins ────────────────────────────────────────────────────────────────────
-router.get('/warehouse-intel/bins', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/bins', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { warehouse } = req.query;
     const q = {};
@@ -1140,7 +1141,7 @@ router.get('/warehouse-intel/bins', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/warehouse-intel/bins', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/bins', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const bin = await WarehouseBin.create(pick(req.body, FIELDS.bin));
     res.status(201).json(bin);
@@ -1149,7 +1150,7 @@ router.post('/warehouse-intel/bins', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/warehouse-intel/bins/:id', authenticateToken, async (req, res) => {
+router.put('/warehouse-intel/bins/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const bin = await WarehouseBin.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.bin), {
       new: true,
@@ -1161,7 +1162,7 @@ router.put('/warehouse-intel/bins/:id', authenticateToken, async (req, res) => {
 });
 
 // ── Stock Levels ────────────────────────────────────────────────────────────
-router.get('/warehouse-intel/stock', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/stock', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { warehouse, lowStock, page = 1, limit = 50 } = req.query;
     const q = {};
@@ -1182,7 +1183,7 @@ router.get('/warehouse-intel/stock', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/warehouse-intel/stock/:id', authenticateToken, async (req, res) => {
+router.put('/warehouse-intel/stock/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     if (req.body.quantity !== undefined) {
       req.body.availableQty = req.body.quantity - (req.body.reservedQty || 0);
@@ -1200,7 +1201,7 @@ router.put('/warehouse-intel/stock/:id', authenticateToken, async (req, res) => 
 });
 
 // ── Stock Alerts ────────────────────────────────────────────────────────────
-router.get('/warehouse-intel/alerts', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/alerts', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { alertType, severity, isResolved } = req.query;
     const q = {};
@@ -1219,7 +1220,7 @@ router.get('/warehouse-intel/alerts', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/warehouse-intel/alerts/:id/resolve', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/alerts/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const a = await StockAlert.findByIdAndUpdate(
       req.params.id,
@@ -1233,7 +1234,7 @@ router.post('/warehouse-intel/alerts/:id/resolve', authenticateToken, async (req
 });
 
 // ── Stock Transfers ─────────────────────────────────────────────────────────
-router.get('/warehouse-intel/transfers', authenticateToken, async (req, res) => {
+router.get('/warehouse-intel/transfers', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, page = 1, limit = 20 } = req.query;
     const q = {};
@@ -1254,7 +1255,7 @@ router.get('/warehouse-intel/transfers', authenticateToken, async (req, res) => 
   }
 });
 
-router.post('/warehouse-intel/transfers', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/transfers', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await StockTransferOrder.countDocuments();
     const transferNumber = `TRF-${String(count + 1).padStart(6, '0')}`;
@@ -1269,7 +1270,7 @@ router.post('/warehouse-intel/transfers', authenticateToken, async (req, res) =>
   }
 });
 
-router.put('/warehouse-intel/transfers/:id', authenticateToken, async (req, res) => {
+router.put('/warehouse-intel/transfers/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await StockTransferOrder.findByIdAndUpdate(
       req.params.id,
@@ -1282,7 +1283,7 @@ router.put('/warehouse-intel/transfers/:id', authenticateToken, async (req, res)
   }
 });
 
-router.post('/warehouse-intel/transfers/:id/approve', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/transfers/:id/approve', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await StockTransferOrder.findByIdAndUpdate(
       req.params.id,
@@ -1295,7 +1296,7 @@ router.post('/warehouse-intel/transfers/:id/approve', authenticateToken, async (
   }
 });
 
-router.post('/warehouse-intel/transfers/:id/ship', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/transfers/:id/ship', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await StockTransferOrder.findByIdAndUpdate(
       req.params.id,
@@ -1308,7 +1309,7 @@ router.post('/warehouse-intel/transfers/:id/ship', authenticateToken, async (req
   }
 });
 
-router.post('/warehouse-intel/transfers/:id/receive', authenticateToken, async (req, res) => {
+router.post('/warehouse-intel/transfers/:id/receive', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await StockTransferOrder.findByIdAndUpdate(
       req.params.id,
@@ -1321,7 +1322,7 @@ router.post('/warehouse-intel/transfers/:id/receive', authenticateToken, async (
   }
 });
 
-router.get('/warehouse-intel/dashboard', authenticateToken, async (_req, res) => {
+router.get('/warehouse-intel/dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const [whCount, totalStock, lowStockCount, alertCount, transferCount] = await Promise.all([
       Warehouse.countDocuments({ isActive: true }),
@@ -1358,7 +1359,7 @@ router.get('/warehouse-intel/dashboard', authenticateToken, async (_req, res) =>
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ── Projects ────────────────────────────────────────────────────────────────
-router.get('/project-pro/projects', authenticateToken, async (req, res) => {
+router.get('/project-pro/projects', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, priority, manager, page = 1, limit = 20 } = req.query;
     const q = {};
@@ -1380,7 +1381,7 @@ router.get('/project-pro/projects', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/project-pro/projects/:id', authenticateToken, async (req, res) => {
+router.get('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await ProjectPro.findById(req.params.id)
       .populate('manager', 'name email')
@@ -1393,7 +1394,7 @@ router.get('/project-pro/projects/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/project-pro/projects', authenticateToken, async (req, res) => {
+router.post('/project-pro/projects', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await ProjectPro.countDocuments();
     const code = req.body.code || `PRJ-${String(count + 1).padStart(4, '0')}`;
@@ -1408,7 +1409,7 @@ router.post('/project-pro/projects', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/project-pro/projects/:id', authenticateToken, async (req, res) => {
+router.put('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const p = await ProjectPro.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.project), {
       new: true,
@@ -1419,7 +1420,7 @@ router.put('/project-pro/projects/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/project-pro/projects/:id', authenticateToken, async (req, res) => {
+router.delete('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await ProjectPro.findByIdAndDelete(req.params.id);
     await ProjectTask.deleteMany({ project: req.params.id });
@@ -1429,7 +1430,7 @@ router.delete('/project-pro/projects/:id', authenticateToken, async (req, res) =
   }
 });
 
-router.post('/project-pro/projects/:id/clone', authenticateToken, async (req, res) => {
+router.post('/project-pro/projects/:id/clone', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const src = await ProjectPro.findById(req.params.id).lean();
     if (!src) return res.status(404).json({ error: 'Not found' });
@@ -1464,7 +1465,7 @@ router.post('/project-pro/projects/:id/clone', authenticateToken, async (req, re
 });
 
 // ── Tasks (Kanban) ──────────────────────────────────────────────────────────
-router.get('/project-pro/tasks', authenticateToken, async (req, res) => {
+router.get('/project-pro/tasks', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { project, status, assignee, priority, milestone } = req.query;
     const q = {};
@@ -1485,7 +1486,7 @@ router.get('/project-pro/tasks', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
+router.get('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ProjectTask.findById(req.params.id)
       .populate('assignee', 'name email')
@@ -1500,7 +1501,7 @@ router.get('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/project-pro/tasks', authenticateToken, async (req, res) => {
+router.post('/project-pro/tasks', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ProjectTask.create({ ...pick(req.body, FIELDS.task), reporter: uid(req) });
     res.status(201).json(t);
@@ -1509,7 +1510,7 @@ router.post('/project-pro/tasks', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
+router.put('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ProjectTask.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.task), {
       new: true,
@@ -1527,7 +1528,7 @@ router.put('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
+router.delete('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await ProjectTask.findByIdAndDelete(req.params.id);
     res.json({ success: true });
@@ -1536,7 +1537,7 @@ router.delete('/project-pro/tasks/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/project-pro/tasks/:id/comment', authenticateToken, async (req, res) => {
+router.post('/project-pro/tasks/:id/comment', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const t = await ProjectTask.findById(req.params.id).lean();
     if (!t) return res.status(404).json({ error: 'Not found' });
@@ -1548,7 +1549,7 @@ router.post('/project-pro/tasks/:id/comment', authenticateToken, async (req, res
   }
 });
 
-router.put('/project-pro/tasks/reorder', authenticateToken, async (req, res) => {
+router.put('/project-pro/tasks/reorder', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { tasks } = req.body; // [{ id, order, status }]
     if (tasks && tasks.length) {
@@ -1563,7 +1564,7 @@ router.put('/project-pro/tasks/reorder', authenticateToken, async (req, res) => 
   }
 });
 
-router.get('/project-pro/kanban/:projectId', authenticateToken, async (req, res) => {
+router.get('/project-pro/kanban/:projectId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const tasks = await ProjectTask.find({ project: req.params.projectId })
       .sort({ order: 1 })
@@ -1581,7 +1582,7 @@ router.get('/project-pro/kanban/:projectId', authenticateToken, async (req, res)
 });
 
 // ── Time Logs ───────────────────────────────────────────────────────────────
-router.get('/project-pro/timelogs', authenticateToken, async (req, res) => {
+router.get('/project-pro/timelogs', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { project, task, user, from, to } = req.query;
     const q = {};
@@ -1605,7 +1606,7 @@ router.get('/project-pro/timelogs', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/project-pro/timelogs', authenticateToken, async (req, res) => {
+router.post('/project-pro/timelogs', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const log = await ProjectTimeLog.create({ ...pick(req.body, FIELDS.timeLog), user: uid(req) });
     // Update task actual hours
@@ -1622,7 +1623,7 @@ router.post('/project-pro/timelogs', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/project-pro/dashboard', authenticateToken, async (_req, res) => {
+router.get('/project-pro/dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
     const [totalProjects, activeProjects, totalTasks, doneTasks, overdueProjects, totalHours] =
       await Promise.all([
@@ -1658,7 +1659,7 @@ router.get('/project-pro/dashboard', authenticateToken, async (_req, res) => {
   }
 });
 
-router.get('/project-pro/my-tasks', authenticateToken, async (req, res) => {
+router.get('/project-pro/my-tasks', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const tasks = await ProjectTask.find({ assignee: uid(req), status: { $ne: 'done' } })
       .sort({ dueDate: 1 })

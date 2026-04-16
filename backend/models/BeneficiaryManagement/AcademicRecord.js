@@ -16,6 +16,12 @@ const academicRecordSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Enrollment Information
     enrollmentStatus: {
@@ -177,6 +183,7 @@ academicRecordSchema.index({ cumulativeGPA: -1 });
 academicRecordSchema.index({ academicStanding: 1 });
 academicRecordSchema.index({ semesterId: 1 });
 academicRecordSchema.index({ enrollmentDate: -1 });
+academicRecordSchema.index({ branchId: 1, enrollmentStatus: 1 });
 
 // Pre-save middleware
 academicRecordSchema.pre('save', function (next) {

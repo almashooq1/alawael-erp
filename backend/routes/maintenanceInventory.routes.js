@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenanceInventory = require('../models/MaintenanceInventory');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-inventory — list inventory items */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { category, status, search, lowStock, needsReorder, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (category) filter.category = category;
     if (status) filter.status = status;
     if (search)
@@ -43,9 +44,11 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-inventory/stats — inventory statistics */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const stats = await MaintenanceInventory.aggregate([
+      { $match: { ...scope } },
       {
         $group: {
           _id: null,
@@ -59,6 +62,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     ]);
     const categoryBreakdown = await MaintenanceInventory.aggregate([
+      { $match: { ...scope } },
       { $group: { _id: '$category', count: { $sum: 1 }, totalStock: { $sum: '$currentStock' } } },
       { $sort: { count: -1 } },
     ]);
@@ -69,9 +73,10 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-inventory/low-stock — items below minimum stock */
-router.get('/low-stock', requireAuth, async (req, res) => {
+router.get('/low-stock', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const data = await MaintenanceInventory.find({
+      ...branchFilter(req),
       $expr: { $lt: ['$currentStock', '$minimumStock'] },
     })
       .populate('preferredSupplier', 'providerName')
@@ -83,9 +88,9 @@ router.get('/low-stock', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-inventory/:id — get single item */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const item = await MaintenanceInventory.findById(req.params.id)
+    const item = await MaintenanceInventory.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('preferredSupplier')
       .populate('suppliers.supplierId', 'providerName')
       .populate('createdBy', 'name')
@@ -101,11 +106,15 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const data = { ...req.body, createdBy: req.user?._id || req.user?.id };
-      const item = await MaintenanceInventory.create(data);
+      const body = { ...req.body, createdBy: req.user?._id || req.user?.id };
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const item = await MaintenanceInventory.create(body);
       res.status(201).json({ success: true, data: item });
     } catch (err) {
       logger.error('maintenanceInventory create error:', err);
@@ -118,14 +127,19 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
       req.body.lastUpdatedBy = req.user?._id || req.user?.id;
-      const item = await MaintenanceInventory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-        runValidators: true,
-      });
+      const item = await MaintenanceInventory.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
       res.json({ success: true, data: item });
     } catch (err) {
@@ -136,21 +150,30 @@ router.put(
 );
 
 /** DELETE /api/maintenance-inventory/:id — delete item (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const item = await MaintenanceInventory.findByIdAndDelete(req.params.id);
-    if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
-    res.json({ success: true, message: 'Item deleted' });
-  } catch (err) {
-    safeError(res, err, 'maintenanceInventory delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const item = await MaintenanceInventory.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+      res.json({ success: true, message: 'Item deleted' });
+    } catch (err) {
+      safeError(res, err, 'maintenanceInventory delete error');
+    }
   }
-});
+);
 
 /** POST /api/maintenance-inventory/:id/stock-movement — record stock movement */
-router.post('/:id/stock-movement', requireAuth, async (req, res) => {
+router.post('/:id/stock-movement', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { type, quantity, reference, reason, notes } = req.body;
-    const item = await MaintenanceInventory.findById(req.params.id);
+    const item = await MaintenanceInventory.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
 
     const movement = {

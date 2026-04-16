@@ -17,6 +17,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Models
@@ -52,7 +53,7 @@ const genAmendmentNumber = () => {
 };
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════════
 // CONTRACT TEMPLATES
 // ═══════════════════════════════════════════════════════════════════════════════

@@ -42,6 +42,7 @@ const {
 } = require('../models/WorkflowEnhanced');
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 const { validateOutboundUrl } = require('../utils/validateUrl');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -53,7 +54,7 @@ const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List comments for an instance */
-router.get('/comments/instance/:instanceId', authMiddleware, async (req, res) => {
+router.get('/comments/instance/:instanceId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 30 } = req.query;
     const query = { workflowInstance: req.params.instanceId, isDeleted: false, isReply: false };
@@ -111,7 +112,7 @@ router.get('/comments/instance/:instanceId', authMiddleware, async (req, res) =>
 });
 
 /** List comments for a task */
-router.get('/comments/task/:taskId', authMiddleware, async (req, res) => {
+router.get('/comments/task/:taskId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const comments = await WorkflowComment.find({
       taskInstance: req.params.taskId,
@@ -128,7 +129,7 @@ router.get('/comments/task/:taskId', authMiddleware, async (req, res) => {
 });
 
 /** Add a comment */
-router.post('/comments', authMiddleware, async (req, res) => {
+router.post('/comments', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const {
       workflowInstance,
@@ -169,7 +170,7 @@ router.post('/comments', authMiddleware, async (req, res) => {
 });
 
 /** Edit a comment */
-router.put('/comments/:id', authMiddleware, async (req, res) => {
+router.put('/comments/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const comment = await WorkflowComment.findById(req.params.id);
     if (!comment) return res.status(404).json({ success: false, message: 'التعليق غير موجود' });
@@ -193,7 +194,7 @@ router.put('/comments/:id', authMiddleware, async (req, res) => {
 });
 
 /** Delete (soft) a comment */
-router.delete('/comments/:id', authMiddleware, async (req, res) => {
+router.delete('/comments/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const comment = await WorkflowComment.findById(req.params.id);
     if (!comment) return res.status(404).json({ success: false, message: 'التعليق غير موجود' });
@@ -207,7 +208,7 @@ router.delete('/comments/:id', authMiddleware, async (req, res) => {
 });
 
 /** Pin / unpin a comment */
-router.post('/comments/:id/pin', authMiddleware, async (req, res) => {
+router.post('/comments/:id/pin', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const comment = await WorkflowComment.findById(req.params.id);
     if (!comment) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -220,7 +221,7 @@ router.post('/comments/:id/pin', authMiddleware, async (req, res) => {
 });
 
 /** Add reaction to a comment */
-router.post('/comments/:id/react', authMiddleware, async (req, res) => {
+router.post('/comments/:id/react', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { emoji } = req.body;
     const comment = await WorkflowComment.findById(req.params.id);
@@ -247,7 +248,7 @@ router.post('/comments/:id/react', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List my favorites */
-router.get('/favorites', authMiddleware, async (req, res) => {
+router.get('/favorites', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const favorites = await WorkflowFavorite.find({ user: userId })
@@ -279,7 +280,7 @@ router.get('/favorites', authMiddleware, async (req, res) => {
 });
 
 /** Toggle favorite */
-router.post('/favorites/toggle', authMiddleware, async (req, res) => {
+router.post('/favorites/toggle', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { targetType, targetId, label, color } = req.body;
     const userId = uid(req);
@@ -312,7 +313,7 @@ router.post('/favorites/toggle', authMiddleware, async (req, res) => {
 });
 
 /** Check if favorited */
-router.get('/favorites/check/:targetType/:targetId', authMiddleware, async (req, res) => {
+router.get('/favorites/check/:targetType/:targetId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const exists = await WorkflowFavorite.exists({
       user: uid(req),
@@ -326,7 +327,7 @@ router.get('/favorites/check/:targetType/:targetId', authMiddleware, async (req,
 });
 
 /** Reorder favorites */
-router.put('/favorites/reorder', authMiddleware, async (req, res) => {
+router.put('/favorites/reorder', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { items } = req.body; // [{id, sortOrder}]
     const ops = (items || []).map(i =>
@@ -344,7 +345,7 @@ router.put('/favorites/reorder', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List my delegations (as delegator or delegate) */
-router.get('/delegations', authMiddleware, async (req, res) => {
+router.get('/delegations', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const { role = 'all', status } = req.query;
@@ -368,7 +369,7 @@ router.get('/delegations', authMiddleware, async (req, res) => {
 });
 
 /** Create delegation */
-router.post('/delegations', authMiddleware, async (req, res) => {
+router.post('/delegations', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const {
@@ -436,7 +437,7 @@ router.post('/delegations', authMiddleware, async (req, res) => {
 });
 
 /** Cancel delegation */
-router.post('/delegations/:id/cancel', authMiddleware, async (req, res) => {
+router.post('/delegations/:id/cancel', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const delegation = await WorkflowDelegation.findById(req.params.id);
     if (!delegation) return res.status(404).json({ success: false, message: 'التفويض غير موجود' });
@@ -453,7 +454,7 @@ router.post('/delegations/:id/cancel', authMiddleware, async (req, res) => {
 });
 
 /** Get active delegation for a user (used by task assignment) */
-router.get('/delegations/active/:userId', authMiddleware, async (req, res) => {
+router.get('/delegations/active/:userId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const now = new Date();
     const delegation = await WorkflowDelegation.findOne({
@@ -472,7 +473,7 @@ router.get('/delegations/active/:userId', authMiddleware, async (req, res) => {
 });
 
 /** Auto-activate/expire delegations (cron-friendly) */
-router.post('/delegations/process', authMiddleware, async (req, res) => {
+router.post('/delegations/process', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const now = new Date();
 
@@ -502,7 +503,7 @@ router.post('/delegations/process', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List my reminders */
-router.get('/reminders', authMiddleware, async (req, res) => {
+router.get('/reminders', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { status = 'pending' } = req.query;
     const reminders = await WorkflowReminder.find({ user: uid(req), status })
@@ -517,7 +518,7 @@ router.get('/reminders', authMiddleware, async (req, res) => {
 });
 
 /** Create reminder */
-router.post('/reminders', authMiddleware, async (req, res) => {
+router.post('/reminders', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const {
       workflowInstance,
@@ -559,7 +560,7 @@ router.post('/reminders', authMiddleware, async (req, res) => {
 });
 
 /** Cancel reminder */
-router.delete('/reminders/:id', authMiddleware, async (req, res) => {
+router.delete('/reminders/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     await WorkflowReminder.findOneAndUpdate(
       { _id: req.params.id, user: uid(req) },
@@ -572,7 +573,7 @@ router.delete('/reminders/:id', authMiddleware, async (req, res) => {
 });
 
 /** Process due reminders (cron-friendly) */
-router.post('/reminders/process', authMiddleware, async (req, res) => {
+router.post('/reminders/process', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const now = new Date();
     const dueReminders = await WorkflowReminder.find({
@@ -620,7 +621,7 @@ function _getNextDate(reminder) {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List webhooks */
-router.get('/webhooks', authMiddleware, async (req, res) => {
+router.get('/webhooks', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const webhooks = await WorkflowWebhook.find({})
       .limit(200)
@@ -635,7 +636,7 @@ router.get('/webhooks', authMiddleware, async (req, res) => {
 });
 
 /** Get webhook by ID */
-router.get('/webhooks/:id', authMiddleware, async (req, res) => {
+router.get('/webhooks/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const wh = await WorkflowWebhook.findById(req.params.id)
       .populate('workflowDefinition', 'name nameAr')
@@ -648,7 +649,7 @@ router.get('/webhooks/:id', authMiddleware, async (req, res) => {
 });
 
 /** Create webhook */
-router.post('/webhooks', authMiddleware, async (req, res) => {
+router.post('/webhooks', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     // SSRF protection: validate webhook URL
     if (req.body.url) {
@@ -670,7 +671,7 @@ router.post('/webhooks', authMiddleware, async (req, res) => {
 });
 
 /** Update webhook */
-router.put('/webhooks/:id', authMiddleware, async (req, res) => {
+router.put('/webhooks/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     // SSRF protection: validate webhook URL if being updated
     if (req.body.url) {
@@ -690,7 +691,7 @@ router.put('/webhooks/:id', authMiddleware, async (req, res) => {
 });
 
 /** Delete webhook */
-router.delete('/webhooks/:id', authMiddleware, async (req, res) => {
+router.delete('/webhooks/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     await WorkflowWebhook.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم الحذف' });
@@ -700,7 +701,7 @@ router.delete('/webhooks/:id', authMiddleware, async (req, res) => {
 });
 
 /** Test webhook */
-router.post('/webhooks/:id/test', authMiddleware, async (req, res) => {
+router.post('/webhooks/:id/test', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const wh = await WorkflowWebhook.findById(req.params.id);
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -758,7 +759,7 @@ router.post('/webhooks/:id/test', authMiddleware, async (req, res) => {
 });
 
 /** Webhook delivery log */
-router.get('/webhooks/:id/logs', authMiddleware, async (req, res) => {
+router.get('/webhooks/:id/logs', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const wh = await WorkflowWebhook.findById(req.params.id).lean();
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -782,7 +783,7 @@ router.get('/webhooks/:id/logs', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List reports */
-router.get('/reports', authMiddleware, async (req, res) => {
+router.get('/reports', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const reports = await WorkflowSavedReport.find({
@@ -798,7 +799,7 @@ router.get('/reports', authMiddleware, async (req, res) => {
 });
 
 /** Get single report */
-router.get('/reports/:id', authMiddleware, async (req, res) => {
+router.get('/reports/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const report = await WorkflowSavedReport.findById(req.params.id)
       .populate('createdBy', 'name')
@@ -813,7 +814,7 @@ router.get('/reports/:id', authMiddleware, async (req, res) => {
 });
 
 /** Create report */
-router.post('/reports', authMiddleware, async (req, res) => {
+router.post('/reports', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const report = await WorkflowSavedReport.create({
       ...req.body,
@@ -826,7 +827,7 @@ router.post('/reports', authMiddleware, async (req, res) => {
 });
 
 /** Update report */
-router.put('/reports/:id', authMiddleware, async (req, res) => {
+router.put('/reports/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const report = await WorkflowSavedReport.findByIdAndUpdate(
       req.params.id,
@@ -841,7 +842,7 @@ router.put('/reports/:id', authMiddleware, async (req, res) => {
 });
 
 /** Delete report */
-router.delete('/reports/:id', authMiddleware, async (req, res) => {
+router.delete('/reports/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     await WorkflowSavedReport.findOneAndDelete({ _id: req.params.id, createdBy: uid(req) });
     res.json({ success: true, message: 'تم حذف التقرير' });
@@ -851,7 +852,7 @@ router.delete('/reports/:id', authMiddleware, async (req, res) => {
 });
 
 /** Generate report data on-the-fly */
-router.post('/reports/:id/generate', authMiddleware, async (req, res) => {
+router.post('/reports/:id/generate', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const report = await WorkflowSavedReport.findById(req.params.id).lean();
     if (!report) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -1057,7 +1058,7 @@ router.post('/reports/:id/generate', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List all tags */
-router.get('/tags', authMiddleware, async (req, res) => {
+router.get('/tags', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { category } = req.query;
     const query = {};
@@ -1070,7 +1071,7 @@ router.get('/tags', authMiddleware, async (req, res) => {
 });
 
 /** Create tag */
-router.post('/tags', authMiddleware, async (req, res) => {
+router.post('/tags', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const tag = await WorkflowTag.create({ ...req.body, createdBy: uid(req) });
     res.status(201).json({ success: true, data: tag });
@@ -1083,7 +1084,7 @@ router.post('/tags', authMiddleware, async (req, res) => {
 });
 
 /** Update tag */
-router.put('/tags/:id', authMiddleware, async (req, res) => {
+router.put('/tags/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const tag = await WorkflowTag.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
     if (!tag) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -1094,7 +1095,7 @@ router.put('/tags/:id', authMiddleware, async (req, res) => {
 });
 
 /** Delete tag */
-router.delete('/tags/:id', authMiddleware, async (req, res) => {
+router.delete('/tags/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     await WorkflowTag.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'تم حذف الوسم' });
@@ -1104,7 +1105,7 @@ router.delete('/tags/:id', authMiddleware, async (req, res) => {
 });
 
 /** Add tags to an instance */
-router.post('/tags/assign/:instanceId', authMiddleware, async (req, res) => {
+router.post('/tags/assign/:instanceId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { tags } = req.body; // Array of tag names
     const instance = await WorkflowInstance.findById(req.params.instanceId);
@@ -1126,7 +1127,7 @@ router.post('/tags/assign/:instanceId', authMiddleware, async (req, res) => {
 });
 
 /** Remove tag from instance */
-router.delete('/tags/assign/:instanceId/:tagName', authMiddleware, async (req, res) => {
+router.delete('/tags/assign/:instanceId/:tagName', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const instance = await WorkflowInstance.findById(req.params.instanceId);
     if (!instance) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -1147,7 +1148,7 @@ router.delete('/tags/assign/:instanceId/:tagName', authMiddleware, async (req, r
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** Get version history for a definition */
-router.get('/versions/:definitionId', authMiddleware, async (req, res) => {
+router.get('/versions/:definitionId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const versions = await WorkflowVersion.find({ workflowDefinition: req.params.definitionId })
       .populate('createdBy', 'name')
@@ -1160,7 +1161,7 @@ router.get('/versions/:definitionId', authMiddleware, async (req, res) => {
 });
 
 /** Get specific version snapshot */
-router.get('/versions/:definitionId/:version', authMiddleware, async (req, res) => {
+router.get('/versions/:definitionId/:version', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const ver = await WorkflowVersion.findOne({
       workflowDefinition: req.params.definitionId,
@@ -1176,7 +1177,7 @@ router.get('/versions/:definitionId/:version', authMiddleware, async (req, res) 
 });
 
 /** Create version snapshot manually */
-router.post('/versions/:definitionId', authMiddleware, async (req, res) => {
+router.post('/versions/:definitionId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await WorkflowDefinition.findById(req.params.definitionId).lean();
     if (!def) return res.status(404).json({ success: false, message: 'التعريف غير موجود' });
@@ -1202,7 +1203,7 @@ router.post('/versions/:definitionId', authMiddleware, async (req, res) => {
 });
 
 /** Compare two versions */
-router.get('/versions/:definitionId/compare/:v1/:v2', authMiddleware, async (req, res) => {
+router.get('/versions/:definitionId/compare/:v1/:v2', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const [ver1, ver2] = await Promise.all([
       WorkflowVersion.findOne({
@@ -1249,7 +1250,7 @@ router.get('/versions/:definitionId/compare/:v1/:v2', authMiddleware, async (req
 });
 
 /** Restore a version */
-router.post('/versions/:definitionId/:version/restore', authMiddleware, async (req, res) => {
+router.post('/versions/:definitionId/:version/restore', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const ver = await WorkflowVersion.findOne({
       workflowDefinition: req.params.definitionId,
@@ -1290,7 +1291,7 @@ router.post('/versions/:definitionId/:version/restore', authMiddleware, async (r
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** Get my notification preferences */
-router.get('/notification-prefs', authMiddleware, async (req, res) => {
+router.get('/notification-prefs', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     let prefs = await WorkflowNotifPref.findOne({ user: uid(req) }).lean();
     if (!prefs) {
@@ -1304,7 +1305,7 @@ router.get('/notification-prefs', authMiddleware, async (req, res) => {
 });
 
 /** Update notification preferences */
-router.put('/notification-prefs', authMiddleware, async (req, res) => {
+router.put('/notification-prefs', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const prefs = await WorkflowNotifPref.findOneAndUpdate(
       { user: uid(req) },
@@ -1322,7 +1323,7 @@ router.put('/notification-prefs', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** Get calendar events (tasks + instance deadlines) */
-router.get('/calendar', authMiddleware, async (req, res) => {
+router.get('/calendar', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const { start, end, _view = 'month' } = req.query;
@@ -2652,7 +2653,7 @@ const EXTENDED_TEMPLATES = [
 ];
 
 /** List extended templates */
-router.get('/templates/extended', authMiddleware, async (_req, res) => {
+router.get('/templates/extended', authMiddleware, requireBranchAccess, async (_req, res) => {
   try {
     const templates = EXTENDED_TEMPLATES.map(t => ({
       id: t.id,
@@ -2671,7 +2672,7 @@ router.get('/templates/extended', authMiddleware, async (_req, res) => {
 });
 
 /** Get extended template detail */
-router.get('/templates/extended/:templateId', authMiddleware, async (req, res) => {
+router.get('/templates/extended/:templateId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
@@ -2682,7 +2683,7 @@ router.get('/templates/extended/:templateId', authMiddleware, async (req, res) =
 });
 
 /** Deploy extended template */
-router.post('/templates/extended/:templateId/deploy', authMiddleware, async (req, res) => {
+router.post('/templates/extended/:templateId/deploy', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
     if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
@@ -2727,7 +2728,7 @@ router.post('/templates/extended/:templateId/deploy', authMiddleware, async (req
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** Bulk reassign tasks */
-router.post('/batch/reassign', authMiddleware, async (req, res) => {
+router.post('/batch/reassign', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { taskIds, newAssignee, reason } = req.body;
     if (!taskIds?.length || !newAssignee) {
@@ -2761,7 +2762,7 @@ router.post('/batch/reassign', authMiddleware, async (req, res) => {
 });
 
 /** Bulk cancel instances */
-router.post('/batch/cancel-instances', authMiddleware, async (req, res) => {
+router.post('/batch/cancel-instances', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { instanceIds, reason } = req.body;
     if (!instanceIds?.length) {
@@ -2802,7 +2803,7 @@ router.post('/batch/cancel-instances', authMiddleware, async (req, res) => {
 });
 
 /** Bulk update task priority */
-router.post('/batch/update-priority', authMiddleware, async (req, res) => {
+router.post('/batch/update-priority', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { instanceIds, priority } = req.body;
     if (!instanceIds?.length || !priority) {
@@ -2818,7 +2819,7 @@ router.post('/batch/update-priority', authMiddleware, async (req, res) => {
 });
 
 /** Batch add tags to instances */
-router.post('/batch/add-tags', authMiddleware, async (req, res) => {
+router.post('/batch/add-tags', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { instanceIds, tags } = req.body;
     if (!instanceIds?.length || !tags?.length) {
@@ -2841,7 +2842,7 @@ router.post('/batch/add-tags', authMiddleware, async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** Get comprehensive workflow statistics */
-router.get('/stats/comprehensive', authMiddleware, async (req, res) => {
+router.get('/stats/comprehensive', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const now = new Date();
     const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
@@ -2959,7 +2960,7 @@ router.get('/stats/comprehensive', authMiddleware, async (req, res) => {
 });
 
 /** Get workload distribution */
-router.get('/stats/workload', authMiddleware, async (req, res) => {
+router.get('/stats/workload', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const workload = await TaskInstance.aggregate([
       { $match: { status: { $in: ['assigned', 'in_progress'] } } },
@@ -3011,7 +3012,7 @@ router.get('/stats/workload', authMiddleware, async (req, res) => {
 });
 
 /** Global search across workflows */
-router.get('/search', authMiddleware, async (req, res) => {
+router.get('/search', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { q, type = 'all', page = 1, limit = 20 } = req.query;
     if (!q || q.length < 2) {

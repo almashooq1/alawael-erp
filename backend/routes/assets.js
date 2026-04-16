@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { AssetManagementService } = require('../services/assetManagementService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -26,7 +27,7 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const assets = await assetService.getAllAssets(req.query);
@@ -48,7 +49,7 @@ router.get(
  */
 router.post(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -88,7 +89,7 @@ router.post(
  */
 router.get(
   '/category/:category',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const assets = await assetService.getAssetsByCategory(req.params.category);
@@ -111,7 +112,7 @@ router.get(
  */
 router.get(
   '/depreciation/report',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const report = await assetService.getDepreciationReport();
@@ -133,7 +134,7 @@ router.get(
  */
 router.get(
   '/:assetId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const asset = await assetService.getAssetById(req.params.assetId);
@@ -162,7 +163,7 @@ router.get(
  */
 router.put(
   '/:assetId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -192,7 +193,7 @@ router.put(
  */
 router.delete(
   '/:assetId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {

@@ -10,9 +10,10 @@ const router = express.Router();
 const controller = require('../controllers/rehabCenterLicense.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب مصادقة
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ==================== Lookup / Reference Data ====================
 router.get('/types', controller.getLicenseTypes);
 

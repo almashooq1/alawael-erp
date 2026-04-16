@@ -12,6 +12,7 @@ const GratuityService = require('../services/hr/gratuityService');
 const Gratuity = require('../models/gratuity.model');
 const _GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 
 const MAX_PAGE_LIMIT = 100;
@@ -51,7 +52,7 @@ router.param('gratuityId', (req, res, next, val) => {
  */
 router.post(
   '/calculate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'manager', 'admin']),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
@@ -99,7 +100,7 @@ router.post(
  * POST /api/gratuity/preview
  * عرض معاينة الحساب بدون حفظ
  */
-router.post('/preview', authenticateToken, async (req, res) => {
+router.post('/preview', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { employeeId, terminationDate, scenario = 'RESIGNATION' } = req.body;
 
@@ -125,7 +126,7 @@ router.post('/preview', authenticateToken, async (req, res) => {
  */
 router.post(
   '/custom-calculation',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -184,7 +185,7 @@ router.post(
  */
 router.post(
   '/create',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
@@ -236,7 +237,7 @@ router.post(
  * GET /api/gratuity/:gratuityId
  * جلب تفاصيل سجل محدد
  */
-router.get('/:gratuityId', authenticateToken, async (req, res) => {
+router.get('/:gratuityId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const gratuity = await Gratuity.findById(req.params.gratuityId)
       .populate('employeeId', 'name position department')
@@ -259,7 +260,7 @@ router.get('/:gratuityId', authenticateToken, async (req, res) => {
  * GET /api/gratuity/employee/:employeeId
  * جلب سجلات المكافآت للموظف
  */
-router.get('/employee/:employeeId', authenticateToken, async (req, res) => {
+router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const gratuities = await Gratuity.find({ employeeId: req.params.employeeId })
       .sort({ createdAt: -1 })
@@ -287,7 +288,7 @@ router.get('/employee/:employeeId', authenticateToken, async (req, res) => {
  * - page: رقم الصفحة
  * - limit: عدد النتائج
  */
-router.get('/', authenticateToken, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
+router.get('/', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
   try {
     const { status, scenario, department, fromDate, toDate, page = 1, limit = 20 } = req.query;
     const safePage = Math.max(1, parseInt(page) || 1);
@@ -341,7 +342,7 @@ router.get('/', authenticateToken, authorizeRole(['hr', 'finance', 'admin']), as
  */
 router.post(
   '/:gratuityId/approve',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -367,7 +368,7 @@ router.post(
  */
 router.post(
   '/:gratuityId/reject',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -414,7 +415,7 @@ router.post(
  */
 router.post(
   '/:gratuityId/edit',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -474,7 +475,7 @@ router.post(
  */
 router.post(
   '/:gratuityId/process-payment',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['finance', 'admin']),
   [body('paymentMethod').trim().notEmpty().withMessage('طريقة الدفع مطلوبة'), validate],
   async (req, res) => {
@@ -501,7 +502,7 @@ router.post(
  */
 router.post(
   '/:gratuityId/complete-payment',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['finance', 'admin']),
   async (req, res) => {
     try {
@@ -529,7 +530,7 @@ router.post(
  * GET /api/gratuity/:gratuityId/audit-trail
  * جلب سجل التدقيق الكامل
  */
-router.get('/:gratuityId/audit-trail', authenticateToken, async (req, res) => {
+router.get('/:gratuityId/audit-trail', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const auditLogs = await GratuityService.getAuditTrail(req.params.gratuityId);
 
@@ -549,7 +550,7 @@ router.get('/:gratuityId/audit-trail', authenticateToken, async (req, res) => {
  */
 router.get(
   '/reports/summary',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -610,7 +611,7 @@ router.get(
  */
 router.get(
   '/reports/detailed',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -652,7 +653,7 @@ router.get(
  */
 router.get(
   '/reports/compliance',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['hr', 'compliance', 'admin']),
   async (req, res) => {
     try {

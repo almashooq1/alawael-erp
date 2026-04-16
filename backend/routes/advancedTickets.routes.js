@@ -5,13 +5,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const AdvancedTicket = require('../models/AdvancedTicket');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── SLA stats (before /:id) ─────────────────────────────────────────────────
 router.get('/stats/sla', async (req, res) => {
   try {

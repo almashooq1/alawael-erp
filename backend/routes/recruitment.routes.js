@@ -34,6 +34,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const escapeRegex = require('../utils/escapeRegex');
@@ -41,7 +42,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 
 // 🔒 All recruitment routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Models
 const JobPosting = require('../models/JobPosting');
 const JobApplication = require('../models/JobApplication');

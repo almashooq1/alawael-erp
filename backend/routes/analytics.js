@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { PerformanceAnalyticsService } = require('../services/performanceAnalyticsService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -26,7 +27,7 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/overview',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const overview = await analyticsService.getOverview(req.query);
@@ -47,7 +48,7 @@ router.get(
  */
 router.get(
   '/dashboard',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const dashboard = await analyticsService.getDashboard(req.query);
@@ -68,7 +69,7 @@ router.get(
  */
 router.get(
   '/module/:moduleName',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const analytics = await analyticsService.getModuleAnalytics(req.params.moduleName, req.query);
@@ -90,7 +91,7 @@ router.get(
  */
 router.get(
   '/user/:userId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const analytics = await analyticsService.getUserAnalytics(req.params.userId);
@@ -119,7 +120,7 @@ router.get(
  */
 router.get(
   '/performance-trends',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const trends = await analyticsService.getPerformanceTrends(req.query);
@@ -141,7 +142,7 @@ router.get(
  */
 router.get(
   '/kpi',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const kpis = await analyticsService.getKPIs(req.query);
@@ -163,7 +164,7 @@ router.get(
  */
 router.post(
   '/track-event',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const { eventName, eventData, metadata } = req.body;
@@ -200,7 +201,7 @@ router.post(
  */
 router.get(
   '/health-check',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const health = await analyticsService.getHealthStatus();

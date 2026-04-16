@@ -12,6 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   EmergencyPlan,
   CrisisIncident,
@@ -23,7 +24,7 @@ const { safeError } = require('../utils/safeError');
 
 // ── All crisis routes require authentication ──────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── Field whitelists (mass-assignment protection) ─────────────────
 const PLAN_FIELDS = [
   'title',

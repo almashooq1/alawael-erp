@@ -8,6 +8,7 @@ const router = express.Router();
 const civilDefenseController = require('../controllers/civilDefense.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // ==================== Safety Certificates ====================
 /**
  * @route   POST /api/civil-defense/certificates/request
@@ -16,7 +17,7 @@ const { authenticate, authorize } = require('../middleware/auth');
  */
 router.post(
   '/certificates/request',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('create_certificate', 'admin'),
   civilDefenseController.requestSafetyCertificate
 );
@@ -28,7 +29,7 @@ router.post(
  */
 router.get(
   '/certificates/:certificateId/status',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getCertificateStatus
 );
 
@@ -39,7 +40,7 @@ router.get(
  */
 router.post(
   '/certificates/:certificateId/renew',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('renew_certificate', 'admin'),
   civilDefenseController.renewSafetyCertificate
 );
@@ -51,7 +52,7 @@ router.post(
  */
 router.get(
   '/certificates/facility/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getCertificatesForFacility
 );
 
@@ -62,7 +63,7 @@ router.get(
  */
 router.get(
   '/certificates',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('view_certificates', 'admin'),
   civilDefenseController.listCertificates
 );
@@ -75,7 +76,7 @@ router.get(
  */
 router.post(
   '/audits/schedule',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('schedule_audit', 'admin'),
   civilDefenseController.scheduleSafetyAudit
 );
@@ -85,7 +86,7 @@ router.post(
  * @desc    Get audit details
  * @access  Private
  */
-router.get('/audits/:auditId', authenticate, civilDefenseController.getAuditDetails);
+router.get('/audits/:auditId', authenticate, requireBranchAccess, civilDefenseController.getAuditDetails);
 
 /**
  * @route   GET /api/civil-defense/audits/facility/:facilityId
@@ -94,7 +95,7 @@ router.get('/audits/:auditId', authenticate, civilDefenseController.getAuditDeta
  */
 router.get(
   '/audits/facility/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getAuditsByFacility
 );
 
@@ -103,7 +104,7 @@ router.get(
  * @desc    Get available audit appointment slots
  * @access  Private
  */
-router.get('/audit-slots/available', authenticate, civilDefenseController.getAvailableAuditSlots);
+router.get('/audit-slots/available', authenticate, requireBranchAccess, civilDefenseController.getAvailableAuditSlots);
 
 /**
  * @route   POST /api/civil-defense/audits/:auditId/complete
@@ -112,7 +113,7 @@ router.get('/audit-slots/available', authenticate, civilDefenseController.getAva
  */
 router.post(
   '/audits/:auditId/complete',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('complete_audit', 'admin'),
   civilDefenseController.completeAudit
 );
@@ -123,7 +124,7 @@ router.post(
  * @desc    Get compliance status for a facility
  * @access  Private
  */
-router.get('/compliance/:facilityId', authenticate, civilDefenseController.getComplianceStatus);
+router.get('/compliance/:facilityId', authenticate, requireBranchAccess, civilDefenseController.getComplianceStatus);
 
 /**
  * @route   GET /api/civil-defense/compliance/:facilityId/violations
@@ -132,7 +133,7 @@ router.get('/compliance/:facilityId', authenticate, civilDefenseController.getCo
  */
 router.get(
   '/compliance/:facilityId/violations',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getViolations
 );
 
@@ -143,7 +144,7 @@ router.get(
  */
 router.post(
   '/compliance/:facilityId/resolve-violation',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('resolve_violation', 'admin'),
   civilDefenseController.resolveViolation
 );
@@ -155,7 +156,7 @@ router.post(
  */
 router.get(
   '/compliance/report/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.generateComplianceReport
 );
 
@@ -167,7 +168,7 @@ router.get(
  */
 router.post(
   '/fire-safety/inspections/schedule',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('schedule_inspection', 'admin'),
   civilDefenseController.scheduleFireSafetyInspection
 );
@@ -179,7 +180,7 @@ router.post(
  */
 router.get(
   '/fire-safety/status/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getFireSafetyStatus
 );
 
@@ -190,7 +191,7 @@ router.get(
  */
 router.post(
   '/fire-safety/equipment/update',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('update_equipment', 'admin'),
   civilDefenseController.updateFireSafetyEquipment
 );
@@ -202,7 +203,7 @@ router.post(
  */
 router.post(
   '/fire-safety/maintenance/log',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('log_maintenance', 'admin'),
   civilDefenseController.logMaintenanceActivity
 );
@@ -215,7 +216,7 @@ router.post(
  */
 router.post(
   '/emergency-drills/schedule',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('schedule_drill', 'admin'),
   civilDefenseController.scheduleEmergencyDrill
 );
@@ -227,7 +228,7 @@ router.post(
  */
 router.get(
   '/emergency-drills/:drillId/results',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getEmergencyDrillResults
 );
 
@@ -238,7 +239,7 @@ router.get(
  */
 router.get(
   '/emergency-drills/facility/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getEmergencyDrillsByFacility
 );
 
@@ -249,7 +250,7 @@ router.get(
  */
 router.post(
   '/emergency-drills/:drillId/complete',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('complete_drill', 'admin'),
   civilDefenseController.completeEmergencyDrill
 );
@@ -262,7 +263,7 @@ router.post(
  */
 router.post(
   '/documents/upload',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('upload_documents', 'admin'),
   civilDefenseController.uploadSafetyDocuments
 );
@@ -272,7 +273,7 @@ router.post(
  * @desc    Get documents for a facility
  * @access  Private
  */
-router.get('/documents/:facilityId', authenticate, civilDefenseController.getFacilityDocuments);
+router.get('/documents/:facilityId', authenticate, requireBranchAccess, civilDefenseController.getFacilityDocuments);
 
 /**
  * @route   DELETE /api/civil-defense/documents/:documentId
@@ -281,7 +282,7 @@ router.get('/documents/:facilityId', authenticate, civilDefenseController.getFac
  */
 router.delete(
   '/documents/:documentId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('delete_documents', 'admin'),
   civilDefenseController.deleteDocument
 );
@@ -301,7 +302,7 @@ router.get('/documents/requirements/:buildingType', civilDefenseController.getRe
  */
 router.get(
   '/notifications/facility/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.getFacilityNotifications
 );
 
@@ -312,7 +313,7 @@ router.get(
  */
 router.post(
   '/notifications/:notificationId/acknowledge',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.acknowledgeNotification
 );
 
@@ -324,7 +325,7 @@ router.post(
  */
 router.get(
   '/reports/dashboard',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('view_reports', 'admin'),
   civilDefenseController.getDashboardData
 );
@@ -336,7 +337,7 @@ router.get(
  */
 router.get(
   '/reports/facility/:facilityId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   civilDefenseController.generateFacilityReport
 );
 
@@ -347,7 +348,7 @@ router.get(
  */
 router.post(
   '/reports/export',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('export_reports', 'admin'),
   civilDefenseController.exportReport
 );
@@ -358,21 +359,21 @@ router.post(
  * @desc    Get Civil Defense integration settings
  * @access  Private (Admin)
  */
-router.get('/settings', authenticate, authorize('admin'), civilDefenseController.getSettings);
+router.get('/settings', authenticate, requireBranchAccess, authorize('admin'), civilDefenseController.getSettings);
 
 /**
  * @route   PUT /api/civil-defense/settings
  * @desc    Update Civil Defense integration settings
  * @access  Private (Admin)
  */
-router.put('/settings', authenticate, authorize('admin'), civilDefenseController.updateSettings);
+router.put('/settings', authenticate, requireBranchAccess, authorize('admin'), civilDefenseController.updateSettings);
 
 /**
  * @route   GET /api/civil-defense/health
  * @desc    Check API health and connectivity
  * @access  Private (Admin)
  */
-router.get('/health', authenticate, authorize('admin'), civilDefenseController.checkHealth);
+router.get('/health', authenticate, requireBranchAccess, authorize('admin'), civilDefenseController.checkHealth);
 
 // ==================== Search & Filter ====================
 /**
@@ -380,7 +381,7 @@ router.get('/health', authenticate, authorize('admin'), civilDefenseController.c
  * @desc    Search across all records
  * @access  Private
  */
-router.post('/search', authenticate, civilDefenseController.globalSearch);
+router.post('/search', authenticate, requireBranchAccess, civilDefenseController.globalSearch);
 
 /**
  * @route   GET /api/civil-defense/facilities/compliance-summary
@@ -389,7 +390,7 @@ router.post('/search', authenticate, civilDefenseController.globalSearch);
  */
 router.get(
   '/facilities/compliance-summary',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin'),
   civilDefenseController.getFacilitiesComplianceSummary
 );

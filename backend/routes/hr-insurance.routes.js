@@ -17,6 +17,7 @@ const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const authorizeRole = authorize;
 const {
   EmployeeInsurance,
@@ -33,7 +34,7 @@ const safeError = require('../utils/safeError');
 /**
  * GET /companies — قائمة شركات التأمين الصحي السعودية
  */
-router.get('/companies', authenticateToken, (req, res) => {
+router.get('/companies', authenticateToken, requireBranchAccess, (req, res) => {
   const companies = Object.entries(SAUDI_HEALTH_INSURANCE_COMPANIES).map(([key, val]) => ({
     id: key,
     ...val,
@@ -44,7 +45,7 @@ router.get('/companies', authenticateToken, (req, res) => {
 /**
  * GET /coverage-classes — فئات التغطية (CCHI)
  */
-router.get('/coverage-classes', authenticateToken, (req, res) => {
+router.get('/coverage-classes', authenticateToken, requireBranchAccess, (req, res) => {
   const classes = Object.entries(COVERAGE_CLASSES).map(([key, val]) => ({
     id: key,
     ...val,
@@ -59,7 +60,7 @@ router.get('/coverage-classes', authenticateToken, (req, res) => {
 /**
  * GET /stats — إحصائيات التأمين الصحي الشاملة
  */
-router.get('/stats', authenticateToken, async (req, res) => {
+router.get('/stats', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const stats = await EmployeeInsurance.getInsuranceStats();
     res.json({ success: true, data: stats });
@@ -73,7 +74,7 @@ router.get('/stats', authenticateToken, async (req, res) => {
 /**
  * GET /expiring — الوثائق المنتهية قريباً
  */
-router.get('/expiring', authenticateToken, async (req, res) => {
+router.get('/expiring', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 30;
     const policies = await EmployeeInsurance.getExpiringPolicies(days);
@@ -92,7 +93,7 @@ router.get('/expiring', authenticateToken, async (req, res) => {
 /**
  * GET / — قائمة وثائق التأمين مع الفلترة والبحث
  */
-router.get('/', authenticateToken, async (req, res) => {
+router.get('/', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const {
       page = 1,
@@ -165,7 +166,7 @@ router.get('/', authenticateToken, async (req, res) => {
 /**
  * GET /:id — تفاصيل وثيقة تأمين
  */
-router.get('/:id', authenticateToken, async (req, res) => {
+router.get('/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id).populate(
       'employee',
@@ -187,7 +188,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
  */
 router.post(
   '/',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -225,7 +226,7 @@ router.post(
  */
 router.put(
   '/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -257,7 +258,7 @@ router.put(
 /**
  * DELETE /:id — حذف/إلغاء وثيقة تأمين
  */
-router.delete('/:id', authenticateToken, authorizeRole(['Admin', 'admin']), async (req, res) => {
+router.delete('/:id', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'admin']), async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id);
     if (!policy) {
@@ -290,7 +291,7 @@ router.delete('/:id', authenticateToken, authorizeRole(['Admin', 'admin']), asyn
  */
 router.post(
   '/:id/dependents',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -327,7 +328,7 @@ router.post(
  */
 router.put(
   '/:id/dependents/:depId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -365,7 +366,7 @@ router.put(
  */
 router.delete(
   '/:id/dependents/:depId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -408,7 +409,7 @@ router.delete(
 /**
  * GET /:id/claims — مطالبات وثيقة تأمين
  */
-router.get('/:id/claims', authenticateToken, async (req, res) => {
+router.get('/:id/claims', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id).select(
       'claims employeeName policyNumber'
@@ -427,7 +428,7 @@ router.get('/:id/claims', authenticateToken, async (req, res) => {
 /**
  * POST /:id/claims — تقديم مطالبة طبية جديدة
  */
-router.post('/:id/claims', authenticateToken, async (req, res) => {
+router.post('/:id/claims', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const policy = await EmployeeInsurance.findById(req.params.id);
     if (!policy) {
@@ -469,7 +470,7 @@ router.post('/:id/claims', authenticateToken, async (req, res) => {
  */
 router.put(
   '/:id/claims/:claimId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -522,7 +523,7 @@ router.put(
  */
 router.post(
   '/:id/renew',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -578,7 +579,7 @@ router.post(
  */
 router.post(
   '/bulk-enroll',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['Admin', 'admin']),
   async (req, res) => {
     try {
@@ -653,7 +654,7 @@ router.post(
 /**
  * GET /reports/summary — تقرير ملخص التأمين الصحي
  */
-router.get('/reports/summary', authenticateToken, async (req, res) => {
+router.get('/reports/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const stats = await EmployeeInsurance.getInsuranceStats();
 
@@ -696,7 +697,7 @@ router.get('/reports/summary', authenticateToken, async (req, res) => {
 /**
  * GET /reports/payroll-deductions — تقرير خصومات التأمين من الرواتب
  */
-router.get('/reports/payroll-deductions', authenticateToken, async (req, res) => {
+router.get('/reports/payroll-deductions', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { month, year } = req.query;
 
@@ -730,7 +731,7 @@ router.get('/reports/payroll-deductions', authenticateToken, async (req, res) =>
 /**
  * GET /employee/:employeeId — وثائق تأمين موظف محدد
  */
-router.get('/employee/:employeeId', authenticateToken, async (req, res) => {
+router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const policies = await EmployeeInsurance.find({
       $or: [{ employee: req.params.employeeId }, { employeeId: req.params.employeeId }],

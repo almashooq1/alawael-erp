@@ -17,6 +17,11 @@
 const { AsyncLocalStorage } = require('async_hooks');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const { TENANT_BYPASS_ROLES, resolveRole } = require('../config/constants/roles.constants');
+const {
+  TENANT_FIELD: DEFAULT_TENANT_FIELD,
+  TENANT_EXCLUDED_MODELS,
+} = require('../config/constants/tenant.constants');
 
 // ══════════════════════════════════════════════════════════════════
 // Tenant Context Store (Thread-local via AsyncLocalStorage)
@@ -28,23 +33,11 @@ const tenantStore = new AsyncLocalStorage();
 // ══════════════════════════════════════════════════════════════════
 class MultiTenantIsolator {
   constructor(options = {}) {
-    this._tenantField = options.tenantField || 'branchId';
+    this._tenantField = options.tenantField || DEFAULT_TENANT_FIELD;
     this._enabled = options.enabled !== false;
     this._strict = options.strict !== false; // Reject queries without tenant context
-    this._bypassRoles = new Set(options.bypassRoles || ['superAdmin', 'systemAdmin']);
-    this._excludeModels = new Set(
-      options.excludeModels || [
-        'User',
-        'Branch',
-        'Setting',
-        'SystemConfig',
-        'AuditLog',
-        'BackupMeta',
-        'MigrationRecord',
-        'ArchiveMeta',
-        'Counter',
-      ]
-    );
+    this._bypassRoles = new Set(options.bypassRoles || TENANT_BYPASS_ROLES);
+    this._excludeModels = new Set(options.excludeModels || TENANT_EXCLUDED_MODELS);
     this._quotas = new Map(); // tenantId -> { maxDocs, maxStorage }
     this._stats = new Map(); // tenantId -> { queries, writes, reads }
   }
@@ -61,8 +54,8 @@ class MultiTenantIsolator {
       {
         tenantId: context.tenantId || context.branchId,
         userId: context.userId,
-        role: context.role,
-        isBypass: this._bypassRoles.has(context.role),
+        role: resolveRole(context.role),
+        isBypass: this._bypassRoles.has(resolveRole(context.role)),
       },
       fn
     );
@@ -85,8 +78,8 @@ class MultiTenantIsolator {
       const context = {
         tenantId,
         userId: req.user?._id,
-        role: req.user?.role,
-        isBypass: self._bypassRoles.has(req.user?.role),
+        role: resolveRole(req.user?.role),
+        isBypass: self._bypassRoles.has(resolveRole(req.user?.role)),
       };
 
       tenantStore.run(context, () => {

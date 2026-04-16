@@ -13,6 +13,8 @@
 
 'use strict';
 
+const { resolveRole, CROSS_BRANCH_ROLES } = require('./constants/roles.constants');
+
 // ═══════════════════════════════════════════════════════════════
 // الأدوار الـ 12 لنظام مراكز التأهيل
 // ═══════════════════════════════════════════════════════════════
@@ -1523,7 +1525,7 @@ const ROLE_PERMISSIONS_MAP = {
  * الأدوار التي تملك صلاحية الوصول لجميع الفروع
  * مُتوافق مع CROSS_BRANCH_ROLES في branchScope.middleware.js
  */
-const REHAB_CROSS_BRANCH_ROLES = ['super-admin'];
+const REHAB_CROSS_BRANCH_ROLES = ['super_admin', 'head_office_admin', 'admin'];
 
 /**
  * دالة مساعدة: هل يملك الدور صلاحية معينة؟
@@ -1584,10 +1586,10 @@ function requireRehabPermission(permissionName) {
       });
     }
 
-    const userRole = user.rehabRole || user.role;
+    const userRole = resolveRole(user.rehabRole || user.role);
 
-    // مدير النظام يملك كل الصلاحيات
-    if (userRole === 'super-admin' || userRole === 'super_admin' || userRole === 'admin') {
+    // مدير النظام وإدارة المقر الرئيسي يملكون كل الصلاحيات
+    if (CROSS_BRANCH_ROLES.includes(userRole)) {
       return next();
     }
 

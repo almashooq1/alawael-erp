@@ -8,13 +8,14 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const QualityIndicator = require('../models/quality/QualityIndicator');
 const QualityMeasurement = require('../models/quality/QualityMeasurement');
 const IncidentReport = require('../models/quality/IncidentReport');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════
 // مؤشرات الجودة — Quality Indicators
 // ═══════════════════════════════════════════════════════

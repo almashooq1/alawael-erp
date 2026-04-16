@@ -10,6 +10,7 @@ const { validate } = require('../middleware/validate');
 const SuccessionPlan = require('../models/SuccessionPlan');
 const DevelopmentPlan = require('../models/DevelopmentPlan');
 const { authenticate: authMiddleware, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -20,7 +21,7 @@ const safeError = require('../utils/safeError');
 // ═══════════════════════════════════════════════════════════════
 
 // GET / — List all succession plans (paginated)
-router.get('/', authMiddleware, async (req, res) => {
+router.get('/', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { status, department, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -44,7 +45,7 @@ router.get('/', authMiddleware, async (req, res) => {
 });
 
 // GET /stats — Succession planning statistics
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const [total, byStatus, byRisk, avgReadiness] = await Promise.all([
       SuccessionPlan.countDocuments(),
@@ -81,7 +82,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
 });
 
 // GET /reports/top-candidates — Alias for frontend compatibility
-router.get('/reports/top-candidates', authMiddleware, async (req, res) => {
+router.get('/reports/top-candidates', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const plans = await SuccessionPlan.find({ status: { $in: ['active', 'approved'] } }).lean();
     const candidates = [];
@@ -108,7 +109,7 @@ router.get('/reports/top-candidates', authMiddleware, async (req, res) => {
 // POST / — Create plan (frontend-compatible alias)
 router.post(
   '/',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   adminOnly,
   validate([
     body('positionTitle').trim().notEmpty().withMessage('عنوان المنصب مطلوب'),
@@ -131,7 +132,7 @@ router.post(
 );
 
 // POST /create — Original create endpoint (kept for backward compatibility)
-router.post('/create', authMiddleware, adminOnly, async (req, res) => {
+router.post('/create', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const { positionId, positionTitle, department, currentHolder, requiredCompetencies } = req.body;
 
@@ -158,7 +159,7 @@ router.post('/create', authMiddleware, adminOnly, async (req, res) => {
 });
 
 // POST /:planId/candidates — Add candidate (frontend-compatible alias)
-router.post('/:planId/candidates', authMiddleware, adminOnly, async (req, res) => {
+router.post('/:planId/candidates', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const plan = await SuccessionPlan.findByIdAndUpdate(
       req.params.planId,
@@ -181,7 +182,7 @@ router.post('/:planId/candidates', authMiddleware, adminOnly, async (req, res) =
 });
 
 // PUT /:planId/candidates/:candidateId — Update candidate
-router.put('/:planId/candidates/:candidateId', authMiddleware, adminOnly, async (req, res) => {
+router.put('/:planId/candidates/:candidateId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const updateFields = {};
     Object.keys(req.body).forEach(key => {
@@ -200,7 +201,7 @@ router.put('/:planId/candidates/:candidateId', authMiddleware, adminOnly, async 
 });
 
 // GET /:planId/candidates/:candidateId/development — Get candidate development plan
-router.get('/:planId/candidates/:candidateId/development', authMiddleware, async (req, res) => {
+router.get('/:planId/candidates/:candidateId/development', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const devPlan = await DevelopmentPlan.findOne({
       employeeId: req.params.candidateId,
@@ -217,7 +218,7 @@ router.get('/:planId/candidates/:candidateId/development', authMiddleware, async
 // POST /:planId/candidates/:candidateId/readiness — Assess readiness
 router.post(
   '/:planId/candidates/:candidateId/readiness',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -246,7 +247,7 @@ router.post(
 // PUT /:planId — Update plan
 router.put(
   '/:planId',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   adminOnly,
   validate([
     param('planId').isMongoId().withMessage('معرف الخطة غير صالح'),
@@ -274,7 +275,7 @@ router.put(
 );
 
 // POST /:planId/add-successor — Original add-successor (kept for backward compatibility)
-router.post('/:planId/add-successor', authMiddleware, adminOnly, async (req, res) => {
+router.post('/:planId/add-successor', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const {
       candidateId,
@@ -321,7 +322,7 @@ router.post('/:planId/add-successor', authMiddleware, adminOnly, async (req, res
 // POST - إنشاء خطة تطوير فردية
 router.post(
   '/:planId/create-development-plan/:successorId',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -363,7 +364,7 @@ router.post(
 );
 
 // PUT - تحديث خطة التطوير
-router.put('/development-plan/:planId/update', authMiddleware, adminOnly, async (req, res) => {
+router.put('/development-plan/:planId/update', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const { developmentGoals, plannedTrainings, expandedResponsibilities, notes } = req.body;
 
@@ -396,7 +397,7 @@ router.put('/development-plan/:planId/update', authMiddleware, adminOnly, async 
 // PUT - تحديث حالة الهدف التطويري
 router.put(
   '/development-plan/:planId/goal-status/:goalIndex',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -429,7 +430,7 @@ router.put(
 );
 
 // POST - إضافة برنامج الإعداد القيادي
-router.post('/:planId/add-leadership-program', authMiddleware, adminOnly, async (req, res) => {
+router.post('/:planId/add-leadership-program', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const { programName, provider, startDate, endDate, objectives, participants } = req.body;
 
@@ -464,7 +465,7 @@ router.post('/:planId/add-leadership-program', authMiddleware, adminOnly, async 
 });
 
 // POST - إضافة برنامج التوجيه الفردي (Mentorship)
-router.post('/:planId/add-mentorship/:successorId', authMiddleware, adminOnly, async (req, res) => {
+router.post('/:planId/add-mentorship/:successorId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const { mentorId, startDate, objectives } = req.body;
 
@@ -496,7 +497,7 @@ router.post('/:planId/add-mentorship/:successorId', authMiddleware, adminOnly, a
 });
 
 // GET - الحصول على خطة تطوير
-router.get('/development-plan/:planId', authMiddleware, async (req, res) => {
+router.get('/development-plan/:planId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const plan = await DevelopmentPlan.findById(req.params.planId).populate(
       'employeeId',
@@ -520,7 +521,7 @@ router.get('/development-plan/:planId', authMiddleware, async (req, res) => {
 });
 
 // GET - الحصول على خطط التعاقب للموضع
-router.get('/position/:positionId/plans', authMiddleware, async (req, res) => {
+router.get('/position/:positionId/plans', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const plans = await SuccessionPlan.find({ positionId: req.params.positionId }).sort({
       createdAt: -1,
@@ -537,7 +538,7 @@ router.get('/position/:positionId/plans', authMiddleware, async (req, res) => {
 });
 
 // GET - تقرير أفضل مرشحي الخلافة
-router.get('/reports/best-candidates', authMiddleware, async (req, res) => {
+router.get('/reports/best-candidates', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const plans = await SuccessionPlan.find({ status: { $in: ['active', 'approved'] } }).populate(
       'successors.candidateId',
@@ -562,7 +563,7 @@ router.get('/reports/best-candidates', authMiddleware, async (req, res) => {
 });
 
 // GET - تقرير مؤشرات المخاطر
-router.get('/reports/risk-assessment', authMiddleware, async (req, res) => {
+router.get('/reports/risk-assessment', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     // Aggregation pipeline بدلاً من جلب كل المستندات — أداء أفضل
     const result = await SuccessionPlan.aggregate([
@@ -635,7 +636,7 @@ router.get('/reports/risk-assessment', authMiddleware, async (req, res) => {
 });
 
 // GET - الحصول على خطة تعاقب
-router.get('/:planId', authMiddleware, async (req, res) => {
+router.get('/:planId', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const plan = await SuccessionPlan.findById(req.params.planId)
       .populate('currentHolder', 'email name')
@@ -660,7 +661,7 @@ router.get('/:planId', authMiddleware, async (req, res) => {
 });
 
 // DELETE - حذف خطة تعاقب
-router.delete('/:planId', authMiddleware, adminOnly, async (req, res) => {
+router.delete('/:planId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const plan = await SuccessionPlan.findByIdAndDelete(req.params.planId);
 
@@ -678,7 +679,7 @@ router.delete('/:planId', authMiddleware, adminOnly, async (req, res) => {
 });
 
 // DELETE - حذف خطة تطوير
-router.delete('/development-plan/:planId', authMiddleware, adminOnly, async (req, res) => {
+router.delete('/development-plan/:planId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
   try {
     const plan = await DevelopmentPlan.findByIdAndDelete(req.params.planId);
 

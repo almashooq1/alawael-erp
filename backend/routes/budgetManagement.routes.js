@@ -5,12 +5,13 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Budget = require('../models/Budget');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Overview stats (before /:id) ────────────────────────────────────────────
 router.get('/stats/overview', async (req, res) => {
   try {

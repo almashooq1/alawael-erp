@@ -5,13 +5,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { Curriculum } = require('../models/Curriculum');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth guard ──────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── Get all curricula ────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {

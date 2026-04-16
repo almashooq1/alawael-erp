@@ -14,11 +14,12 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // Apply authentication to all routes in this file
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Helper: wrap every response with preview flag
 const preview = data => ({ success: true, preview: true, ...data });
 

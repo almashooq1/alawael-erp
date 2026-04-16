@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Contract = require('../models/Contract.model');
 const safeError = require('../utils/safeError');
@@ -27,7 +28,7 @@ const validObjectId = (req, res) => {
 };
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── List contracts ──────────────────────────────────────────────────────────
 router.get('/', async (req, res) => {
   try {

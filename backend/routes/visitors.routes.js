@@ -22,11 +22,12 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { visitorAdvancedService } = require('../services/visitor-advanced.service');
 const logger = require('../utils/logger');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const wrap = fn => async (req, res) => {
   try {

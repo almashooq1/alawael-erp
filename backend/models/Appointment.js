@@ -158,6 +158,11 @@ const appointmentSchema = new mongoose.Schema(
     },
 
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      index: true,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
@@ -191,5 +196,6 @@ appointmentSchema.index({ room: 1, date: 1, startTime: 1 });
 appointmentSchema.index({ status: 1, date: 1 });
 appointmentSchema.index({ bookedBy: 1 });
 appointmentSchema.index({ recurrenceParent: 1 });
+appointmentSchema.index({ branchId: 1, date: 1 });
 
 module.exports = mongoose.models.Appointment || mongoose.model('Appointment', appointmentSchema);

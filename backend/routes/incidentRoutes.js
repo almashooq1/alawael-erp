@@ -9,10 +9,11 @@ const router = express.Router();
 const IncidentController = require('../controllers/incidentController');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const controller = IncidentController;
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // CRUD
 router.post('/', authorize(['admin', 'manager']), (req, res) =>
   controller.createIncident(req, res)

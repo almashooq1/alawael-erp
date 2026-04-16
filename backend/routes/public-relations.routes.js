@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 
 const safeModel = n =>
@@ -12,7 +13,7 @@ const safeModel = n =>
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Dashboard ────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (_req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const Camp = safeModel('Campaign');
@@ -52,7 +53,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
 });
 
 // ── Media Coverage CRUD ──────────────────────────────────────
-router.get('/media', authenticate, async (req, res) => {
+router.get('/media', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const { status, type, page = 1, limit = 20 } = req.query;
@@ -74,7 +75,7 @@ router.get('/media', authenticate, async (req, res) => {
   }
 });
 
-router.post('/media', authenticate, async (req, res) => {
+router.post('/media', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const doc = await Media.create({ ...req.body, createdBy: req.user?._id });
@@ -84,7 +85,7 @@ router.post('/media', authenticate, async (req, res) => {
   }
 });
 
-router.put('/media/:id', authenticate, async (req, res) => {
+router.put('/media/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     const doc = await Media.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
@@ -95,7 +96,7 @@ router.put('/media/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/media/:id', authenticate, async (req, res) => {
+router.delete('/media/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
     await Media.findByIdAndDelete(req.params.id);
@@ -106,7 +107,7 @@ router.delete('/media/:id', authenticate, async (req, res) => {
 });
 
 // ── Campaigns CRUD ───────────────────────────────────────────
-router.get('/campaigns', authenticate, async (req, res) => {
+router.get('/campaigns', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Camp = safeModel('Campaign');
     const { status, page = 1, limit = 20 } = req.query;
@@ -127,7 +128,7 @@ router.get('/campaigns', authenticate, async (req, res) => {
   }
 });
 
-router.post('/campaigns', authenticate, async (req, res) => {
+router.post('/campaigns', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Camp = safeModel('Campaign');
     const doc = await Camp.create({ ...req.body, createdBy: req.user?._id });
@@ -137,7 +138,7 @@ router.post('/campaigns', authenticate, async (req, res) => {
   }
 });
 
-router.put('/campaigns/:id', authenticate, async (req, res) => {
+router.put('/campaigns/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Camp = safeModel('Campaign');
     const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
@@ -149,7 +150,7 @@ router.put('/campaigns/:id', authenticate, async (req, res) => {
 });
 
 // ── Partnerships CRUD ────────────────────────────────────────
-router.get('/partnerships', authenticate, async (req, res) => {
+router.get('/partnerships', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Part = safeModel('Partnership');
     const docs = await Part.find().sort({ createdAt: -1 }).lean();
@@ -159,7 +160,7 @@ router.get('/partnerships', authenticate, async (req, res) => {
   }
 });
 
-router.post('/partnerships', authenticate, async (req, res) => {
+router.post('/partnerships', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Part = safeModel('Partnership');
     const doc = await Part.create({ ...req.body, createdBy: req.user?._id });
@@ -169,7 +170,7 @@ router.post('/partnerships', authenticate, async (req, res) => {
   }
 });
 
-router.put('/partnerships/:id', authenticate, async (req, res) => {
+router.put('/partnerships/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Part = safeModel('Partnership');
     const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });

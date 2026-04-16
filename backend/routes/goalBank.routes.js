@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
@@ -14,7 +15,7 @@ const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 // ── List / Search ────────────────────────────────────────────────
 
 /** GET /api/goal-bank — list goals (filter by domain, category, difficulty, age) */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       domain,
@@ -26,7 +27,7 @@ router.get('/', requireAuth, async (req, res) => {
       page = 1,
       limit = 50,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (domain) filter.domain = domain;
     if (category) filter.category = { $regex: escapeRegex(String(category)), $options: 'i' };
     if (difficulty) filter.difficulty = difficulty;
@@ -49,9 +50,10 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/goal-bank/domains — list distinct domains with counts */
-router.get('/domains', requireAuth, async (req, res) => {
+router.get('/domains', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const domains = await GoalBank.aggregate([
+      { $match: branchFilter(req) },
       { $group: { _id: '$domain', count: { $sum: 1 } } },
       { $sort: { _id: 1 } },
     ]);
@@ -62,10 +64,10 @@ router.get('/domains', requireAuth, async (req, res) => {
 });
 
 /** GET /api/goal-bank/categories — list distinct categories per domain */
-router.get('/categories', requireAuth, async (req, res) => {
+router.get('/categories', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { domain } = req.query;
-    const match = domain ? { domain } : {};
+    const match = domain ? { domain, ...branchFilter(req) } : { ...branchFilter(req) };
     const categories = await GoalBank.aggregate([
       { $match: match },
       { $group: { _id: { domain: '$domain', category: '$category' }, count: { $sum: 1 } } },
@@ -78,9 +80,9 @@ router.get('/categories', requireAuth, async (req, res) => {
 });
 
 /** GET /api/goal-bank/:id — get single goal */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const goal = await GoalBank.findById(req.params.id);
+    const goal = await GoalBank.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
     res.json({ success: true, data: goal });
   } catch (err) {
@@ -94,10 +96,11 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const goal = await GoalBank.create(stripUpdateMeta(req.body));
+      const goal = await GoalBank.create({ ...stripUpdateMeta(req.body), branchId: req.branchId });
       res.status(201).json({ success: true, data: goal });
     } catch (err) {
       logger.error('goalBank create error:', err);
@@ -110,13 +113,18 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'therapist']),
   async (req, res) => {
     try {
-      const goal = await GoalBank.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-        runValidators: true,
-      });
+      const goal = await GoalBank.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
       res.json({ success: true, data: goal });
     } catch (err) {
@@ -127,24 +135,33 @@ router.put(
 );
 
 /** DELETE /api/goal-bank/:id — delete goal (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const goal = await GoalBank.findByIdAndDelete(req.params.id);
-    if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
-    res.json({ success: true, message: 'Goal deleted' });
-  } catch (err) {
-    safeError(res, err, 'goalBank delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const goal = await GoalBank.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
+      if (!goal) return res.status(404).json({ success: false, message: 'Goal not found' });
+      res.json({ success: true, message: 'Goal deleted' });
+    } catch (err) {
+      safeError(res, err, 'goalBank delete error');
+    }
   }
-});
+);
 
 /** POST /api/goal-bank/bulk — bulk import goals (admin) */
-router.post('/bulk', requireAuth, requireRole(['admin']), async (req, res) => {
+router.post('/bulk', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const { goals } = req.body;
     if (!Array.isArray(goals) || goals.length === 0) {
       return res.status(400).json({ success: false, message: 'goals array is required' });
     }
-    const result = await GoalBank.insertMany(goals, { ordered: false });
+    const result = await GoalBank.insertMany(
+      goals.map(g => ({ ...g, branchId: req.branchId })),
+      { ordered: false }
+    );
     res.status(201).json({ success: true, inserted: result.length });
   } catch (err) {
     logger.error('goalBank bulk error:', err);

@@ -7,6 +7,7 @@ const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Room = require('../models/Room');
 const RoomBooking = require('../models/RoomBooking');
@@ -15,7 +16,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════
 //  ROOMS (الغرف والمرافق)
 // ═══════════════════════════════════════════════════════════════

@@ -8,6 +8,7 @@ const router = express.Router();
 const FamilySatisfactionService = require('../services/familySatisfaction.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const SURVEY_ROLES = [
@@ -26,7 +27,7 @@ const SURVEY_ROLES = [
 // جلب القوالب
 router.get(
   '/templates',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const templates = await FamilySatisfactionService.getTemplates(req.query);
@@ -37,7 +38,7 @@ router.get(
 // إنشاء قالب
 router.post(
   '/templates',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const template = await FamilySatisfactionService.createTemplate(
@@ -51,7 +52,7 @@ router.post(
 // تهيئة القوالب الافتراضية
 router.post(
   '/templates/seed',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const result = await FamilySatisfactionService.seedDefaultTemplates(
@@ -64,7 +65,7 @@ router.post(
 // جلب قالب واحد
 router.get(
   '/templates/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const template = await FamilySatisfactionService.getTemplateById(req.params.id);
@@ -76,7 +77,7 @@ router.get(
 // تحديث قالب
 router.put(
   '/templates/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const template = await FamilySatisfactionService.updateTemplate(req.params.id, req.body);
@@ -91,7 +92,7 @@ router.put(
 // إرسال استبيان
 router.post(
   '/send',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const { templateId, ...recipientData } = req.body;
@@ -103,7 +104,7 @@ router.post(
 // إنشاء استجابة جديدة
 router.post(
   '/responses',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const { templateId, ...data } = req.body;
@@ -127,7 +128,7 @@ router.post(
 // إنشاء استجابة مباشرة
 router.post(
   '/responses/direct',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const { templateCode, ...data } = req.body;
@@ -139,7 +140,7 @@ router.post(
 // جلب الاستجابات
 router.get(
   '/responses',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const result = await FamilySatisfactionService.getResponses(req.query);
@@ -150,7 +151,7 @@ router.get(
 // جلب استجابة واحدة
 router.get(
   '/responses/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const response = await FamilySatisfactionService.getResponseById(req.params.id);
@@ -162,7 +163,7 @@ router.get(
 // تحديث حالة المتابعة
 router.put(
   '/responses/:id/follow-up',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const response = await FamilySatisfactionService.updateFollowUp(
@@ -181,7 +182,7 @@ router.put(
 // حساب NPS
 router.get(
   '/analytics/nps',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const nps = await FamilySatisfactionService.calculateNPS(req.query);
@@ -192,7 +193,7 @@ router.get(
 // توليد تقرير تحليلات
 router.post(
   '/analytics/generate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'center_manager', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const { startDate, endDate, branch } = req.body;
@@ -209,7 +210,7 @@ router.post(
 // لوحة المعلومات
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(SURVEY_ROLES),
   asyncHandler(async (req, res) => {
     const data = await FamilySatisfactionService.getDashboard(req.query.branch);

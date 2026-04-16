@@ -12,10 +12,12 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // حماية جميع مسارات RBAC - Admin/System Admin فقط
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(authorize(['admin', 'system_admin']));
 
 // Import advanced RBAC components (each module exports a singleton instance)

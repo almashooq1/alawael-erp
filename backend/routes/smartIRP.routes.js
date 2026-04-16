@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const SmartIRPService = require('../services/smartIRP.service');
 const SmartIRP = require('../models/SmartIRP');
 const logger = require('../utils/logger');
@@ -15,11 +16,11 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // ── IRP CRUD ─────────────────────────────────────────────────────
 
 /** GET /api/smart-irp — list IRPs (with pagination & filters) */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 20, status, beneficiary } = req.query;
     const skip = (page - 1) * limit;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (beneficiary) filter.beneficiary = beneficiary;
 
@@ -40,9 +41,9 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/smart-irp/:id — get single IRP with full details */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const irp = await SmartIRP.findById(req.params.id)
+    const irp = await SmartIRP.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('beneficiary', 'name fileNumber dateOfBirth')
       .populate('createdBy', 'name')
       .populate('goals.assignedTo', 'name');
@@ -54,9 +55,13 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** POST /api/smart-irp — create new IRP */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const irp = await SmartIRPService.createIRP(req.body, req.user._id);
+    const body = { ...req.body };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
+    const irp = await SmartIRPService.createIRP(body, req.user._id);
     res.status(201).json({ success: true, data: irp });
   } catch (err) {
     logger.error('smart-irp create error:', err);
@@ -65,12 +70,13 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 /** PUT /api/smart-irp/:id — update IRP metadata */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const irp = await SmartIRP.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const irp = await SmartIRP.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      { new: true, runValidators: true }
+    );
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     res.json({ success: true, data: irp });
   } catch (err) {
@@ -80,24 +86,30 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/smart-irp/:id — archive IRP */
-router.delete('/:id', requireAuth, requireRole(['admin', 'manager']), async (req, res) => {
-  try {
-    const irp = await SmartIRP.findByIdAndUpdate(
-      req.params.id,
-      { status: 'archived' },
-      { new: true }
-    );
-    if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
-    res.json({ success: true, message: 'IRP archived', data: irp });
-  } catch (err) {
-    safeError(res, err, 'smart-irp archive error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'manager']),
+  async (req, res) => {
+    try {
+      const irp = await SmartIRP.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        { status: 'archived' },
+        { new: true }
+      );
+      if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
+      res.json({ success: true, message: 'IRP archived', data: irp });
+    } catch (err) {
+      safeError(res, err, 'smart-irp archive error');
+    }
   }
-});
+);
 
 // ── Goals ────────────────────────────────────────────────────────
 
 /** POST /api/smart-irp/:id/goals — add SMART goal to IRP */
-router.post('/:id/goals', requireAuth, async (req, res) => {
+router.post('/:id/goals', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const irp = await SmartIRPService.addGoal(req.params.id, req.body, req.user._id);
     res.status(201).json({ success: true, data: irp });
@@ -108,7 +120,7 @@ router.post('/:id/goals', requireAuth, async (req, res) => {
 });
 
 /** PUT /api/smart-irp/:id/goals/:goalId/progress — update goal progress */
-router.put('/:id/goals/:goalId/progress', requireAuth, async (req, res) => {
+router.put('/:id/goals/:goalId/progress', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const irp = await SmartIRPService.updateGoalProgress(
       req.params.id,
@@ -124,7 +136,7 @@ router.put('/:id/goals/:goalId/progress', requireAuth, async (req, res) => {
 });
 
 /** POST /api/smart-irp/:id/goals/validate — validate SMART goal (dry-run) */
-router.post('/:id/goals/validate', requireAuth, (req, res) => {
+router.post('/:id/goals/validate', requireAuth, requireBranchAccess, (req, res) => {
   try {
     const result = SmartIRPService.validateSMARTGoal(req.body);
     res.json({ success: true, data: result });
@@ -137,7 +149,7 @@ router.post('/:id/goals/validate', requireAuth, (req, res) => {
 // ── Assessment & Reports ─────────────────────────────────────────
 
 /** POST /api/smart-irp/:id/assess — perform assessment */
-router.post('/:id/assess', requireAuth, async (req, res) => {
+router.post('/:id/assess', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const irp = await SmartIRPService.performAssessment(req.params.id, req.body, req.user._id);
     res.json({ success: true, data: irp });
@@ -148,7 +160,7 @@ router.post('/:id/assess', requireAuth, async (req, res) => {
 });
 
 /** GET /api/smart-irp/:id/analytics — get IRP analytics */
-router.get('/:id/analytics', requireAuth, async (req, res) => {
+router.get('/:id/analytics', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const analytics = await SmartIRPService.getAnalytics(req.params.id);
     res.json({ success: true, data: analytics });
@@ -158,9 +170,11 @@ router.get('/:id/analytics', requireAuth, async (req, res) => {
 });
 
 /** GET /api/smart-irp/:id/family-report — generate family-friendly report */
-router.get('/:id/family-report', requireAuth, async (req, res) => {
+router.get('/:id/family-report', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const irp = await SmartIRP.findById(req.params.id).populate('beneficiary');
+    const irp = await SmartIRP.findOne({ _id: req.params.id, ...branchFilter(req) }).populate(
+      'beneficiary'
+    );
     if (!irp) return res.status(404).json({ success: false, message: 'IRP not found' });
     const report = await SmartIRPService.generateFamilyReport(irp);
     res.json({ success: true, data: report });
@@ -173,6 +187,7 @@ router.get('/:id/family-report', requireAuth, async (req, res) => {
 router.post(
   '/:id/auto-review',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'manager']),
   async (req, res) => {
     try {

@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const GoalProgressHistory = require('../models/GoalProgressHistory');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/goal-progress — list progress records (filter by planId, goalId) */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { planId, goalId, startDate, endDate, page = 1, limit = 50 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (planId) filter.planId = planId;
     if (goalId) filter.goalId = goalId;
     if (startDate || endDate) {
@@ -42,9 +43,9 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/goal-progress/:id — get single record */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const record = await GoalProgressHistory.findById(req.params.id)
+    const record = await GoalProgressHistory.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('planId')
       .populate('recordedBy', 'name')
       .populate('sessionRef');
@@ -56,10 +57,10 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** GET /api/goal-progress/plan/:planId/trend — get progress trend for a plan */
-router.get('/plan/:planId/trend', requireAuth, async (req, res) => {
+router.get('/plan/:planId/trend', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { goalId } = req.query;
-    const filter = { planId: req.params.planId };
+    const filter = { planId: req.params.planId, ...branchFilter(req) };
     if (goalId) filter.goalId = goalId;
 
     const records = await GoalProgressHistory.find(filter)
@@ -72,9 +73,12 @@ router.get('/plan/:planId/trend', requireAuth, async (req, res) => {
 });
 
 /** POST /api/goal-progress — create progress record */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const data = { ...req.body, recordedBy: req.user?._id || req.user?.id };
+    if (req.branchScope && req.branchScope.branchId) {
+      data.branchId = req.branchScope.branchId;
+    }
     const record = await GoalProgressHistory.create(data);
     res.status(201).json({ success: true, data: record });
   } catch (err) {
@@ -84,12 +88,13 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 /** PUT /api/goal-progress/:id — update progress record */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const record = await GoalProgressHistory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const record = await GoalProgressHistory.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      { new: true, runValidators: true }
+    );
     if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
     res.json({ success: true, data: record });
   } catch (err) {
@@ -99,14 +104,23 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/goal-progress/:id — delete progress record (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
-  try {
-    const record = await GoalProgressHistory.findByIdAndDelete(req.params.id);
-    if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
-    res.json({ success: true, message: 'Record deleted' });
-  } catch (err) {
-    safeError(res, err, 'goalProgress delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'supervisor']),
+  async (req, res) => {
+    try {
+      const record = await GoalProgressHistory.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!record) return res.status(404).json({ success: false, message: 'Record not found' });
+      res.json({ success: true, message: 'Record deleted' });
+    } catch (err) {
+      safeError(res, err, 'goalProgress delete error');
+    }
   }
-});
+);
 
 module.exports = router;

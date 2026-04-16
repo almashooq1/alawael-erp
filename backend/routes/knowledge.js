@@ -4,6 +4,7 @@ const {
   authenticateToken: authMiddleware,
   authorizeRole: roleMiddleware,
 } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   KnowledgeArticle,
   KnowledgeCategory,
@@ -205,7 +206,7 @@ router.get('/top-rated', async (req, res) => {
 // Create category
 router.post(
   '/categories',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -226,7 +227,7 @@ router.post(
 // Update category
 router.put(
   '/categories/:id',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -257,7 +258,7 @@ router.put(
 );
 
 // Delete category
-router.delete('/categories/:id', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+router.delete('/categories/:id', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
   try {
     // Check if category has articles
     const articleCount = await KnowledgeArticle.countDocuments({ category: req.params.id });
@@ -284,7 +285,7 @@ router.delete('/categories/:id', authMiddleware, roleMiddleware(['admin']), asyn
 });
 
 // Create article
-router.post('/articles', authMiddleware, roleMiddleware(['admin', 'manager']), async (req, res) => {
+router.post('/articles', authMiddleware, requireBranchAccess, roleMiddleware(['admin', 'manager']), async (req, res) => {
   try {
     const { title, description, content, category, tags, sections } = req.body;
 
@@ -320,7 +321,7 @@ router.post('/articles', authMiddleware, roleMiddleware(['admin', 'manager']), a
 });
 
 // Rate article
-router.post('/articles/:id/rate', authMiddleware, async (req, res) => {
+router.post('/articles/:id/rate', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { rating, helpful, feedback } = req.body;
 
@@ -384,7 +385,7 @@ router.post('/articles/:id/rate', authMiddleware, async (req, res) => {
 // Update article
 router.put(
   '/articles/:id',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -430,7 +431,7 @@ router.put(
 // Delete article
 router.delete(
   '/articles/:id',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -459,7 +460,7 @@ router.delete(
 // ============ ANALYTICS ENDPOINTS ============
 
 // Get search analytics
-router.get('/analytics/searches', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+router.get('/analytics/searches', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
   try {
     const { days = 30 } = req.query;
     const startDate = new Date();
@@ -484,7 +485,7 @@ router.get('/analytics/searches', authMiddleware, roleMiddleware(['admin']), asy
 });
 
 // Get article statistics
-router.get('/analytics/stats', authMiddleware, roleMiddleware(['admin']), async (req, res) => {
+router.get('/analytics/stats', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
   try {
     const stats = await KnowledgeArticle.aggregate([
       {

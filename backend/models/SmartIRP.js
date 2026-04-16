@@ -266,6 +266,13 @@ const smartIRPSchema = new mongoose.Schema(
     beneficiaryAge: Number,
     beneficiaryGender: String,
 
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
+
     // Program Info
     program: {
       type: mongoose.Schema.Types.ObjectId,
@@ -427,6 +434,7 @@ const smartIRPSchema = new mongoose.Schema(
 
 // Indexes (irpNumber already has unique:true, creates automatic index)
 smartIRPSchema.index({ beneficiary: 1, status: 1 });
+smartIRPSchema.index({ branchId: 1, status: 1 });
 smartIRPSchema.index({ 'team.member': 1 });
 smartIRPSchema.index({ status: 1, 'autoReview.nextReviewDate': 1 });
 smartIRPSchema.index({ createdAt: -1 });

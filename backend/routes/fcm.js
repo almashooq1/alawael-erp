@@ -4,9 +4,10 @@ const router = express.Router();
 const fcmController = require('../controllers/fcmController');
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب مصادقة
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // تسجيل توكن FCM
 router.post('/register', fcmController.registerToken);
 // حذف توكن FCM

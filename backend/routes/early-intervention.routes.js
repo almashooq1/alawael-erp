@@ -15,6 +15,7 @@ const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { validationResult } = require('express-validator');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const earlyInterventionService = require('../services/earlyIntervention.service');
 const logger = require('../utils/logger');
 
@@ -81,7 +82,7 @@ const EIS_ADMIN_ROLES = ['admin', 'super_admin', 'service_coordinator'];
  */
 router.post(
   '/children',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateCreateChild,
   handleValidation,
@@ -105,7 +106,7 @@ router.post(
  */
 router.get(
   '/children',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateGetChildren,
   handleValidation,
@@ -143,7 +144,7 @@ router.get(
  */
 router.get(
   '/children/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -163,7 +164,7 @@ router.get(
  */
 router.get(
   '/children/:id/full-profile',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -183,7 +184,7 @@ router.get(
  */
 router.put(
   '/children/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateChild,
   handleValidation,
@@ -207,7 +208,7 @@ router.put(
  */
 router.delete(
   '/children/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ADMIN_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -227,7 +228,7 @@ router.delete(
  */
 router.post(
   '/children/:id/initialize-milestones',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -258,7 +259,7 @@ router.post(
  */
 router.post(
   '/screenings',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateCreateScreening,
   handleValidation,
@@ -282,7 +283,7 @@ router.post(
  */
 router.get(
   '/screenings',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateGetScreenings,
   handleValidation,
@@ -318,7 +319,7 @@ router.get(
  */
 router.get(
   '/screenings/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -338,7 +339,7 @@ router.get(
  */
 router.get(
   '/screenings/child/:childId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('childId'),
   handleValidation,
@@ -360,7 +361,7 @@ router.get(
  */
 router.put(
   '/screenings/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateScreening,
   handleValidation,
@@ -384,7 +385,7 @@ router.put(
  */
 router.delete(
   '/screenings/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ADMIN_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -408,7 +409,7 @@ router.delete(
  */
 router.post(
   '/milestones',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateCreateMilestone,
   handleValidation,
@@ -432,7 +433,7 @@ router.post(
  */
 router.get(
   '/milestones',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateGetMilestones,
   handleValidation,
@@ -465,7 +466,7 @@ router.get(
  */
 router.get(
   '/milestones/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -485,7 +486,7 @@ router.get(
  */
 router.get(
   '/milestones/child/:childId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('childId'),
   handleValidation,
@@ -504,7 +505,7 @@ router.get(
  */
 router.get(
   '/milestones/child/:childId/report',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('childId'),
   handleValidation,
@@ -523,7 +524,7 @@ router.get(
  */
 router.put(
   '/milestones/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateMilestone,
   handleValidation,
@@ -547,7 +548,7 @@ router.put(
  */
 router.delete(
   '/milestones/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ADMIN_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -571,7 +572,7 @@ router.delete(
  */
 router.post(
   '/ifsps',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateCreateIFSP,
   handleValidation,
@@ -595,7 +596,7 @@ router.post(
  */
 router.get(
   '/ifsps',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateGetIFSPs,
   handleValidation,
@@ -630,7 +631,7 @@ router.get(
  */
 router.get(
   '/ifsps/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -650,7 +651,7 @@ router.get(
  */
 router.get(
   '/ifsps/child/:childId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('childId'),
   handleValidation,
@@ -669,7 +670,7 @@ router.get(
  */
 router.put(
   '/ifsps/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateIFSP,
   handleValidation,
@@ -689,7 +690,7 @@ router.put(
  */
 router.delete(
   '/ifsps/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ADMIN_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -709,7 +710,7 @@ router.delete(
  */
 router.post(
   '/ifsps/:id/reviews',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateAddIFSPReview,
   handleValidation,
@@ -737,7 +738,7 @@ router.post(
  */
 router.put(
   '/ifsps/:id/goals/:goalId/progress',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateGoalProgress,
   handleValidation,
@@ -766,7 +767,7 @@ router.put(
  */
 router.post(
   '/referrals',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateCreateReferral,
   handleValidation,
@@ -790,7 +791,7 @@ router.post(
  */
 router.get(
   '/referrals',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateGetReferrals,
   handleValidation,
@@ -827,7 +828,7 @@ router.get(
  */
 router.get(
   '/referrals/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -847,7 +848,7 @@ router.get(
  */
 router.get(
   '/referrals/child/:childId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   mongoIdParam('childId'),
   handleValidation,
@@ -866,7 +867,7 @@ router.get(
  */
 router.put(
   '/referrals/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateReferral,
   handleValidation,
@@ -890,7 +891,7 @@ router.put(
  */
 router.delete(
   '/referrals/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ADMIN_ROLES),
   mongoIdParam('id'),
   handleValidation,
@@ -910,7 +911,7 @@ router.delete(
  */
 router.patch(
   '/referrals/:id/status',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateUpdateReferralStatus,
   handleValidation,
@@ -934,7 +935,7 @@ router.patch(
  */
 router.post(
   '/referrals/:id/communications',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(EIS_ROLES),
   validateAddCommunication,
   handleValidation,
@@ -964,7 +965,7 @@ router.post(
 /**
  * GET /dashboard — إحصائيات نظام التدخل المبكر
  */
-router.get('/dashboard', authenticate, authorize(EIS_ROLES), async (req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, authorize(EIS_ROLES), async (req, res) => {
   try {
     const stats = await earlyInterventionService.getDashboardStats(req.query.organization);
     res.json({

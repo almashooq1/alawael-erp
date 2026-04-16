@@ -21,6 +21,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 
 // ── Service ──
@@ -41,7 +42,7 @@ function handleValidation(req, res) {
 // DASHBOARD — لوحة المعلومات
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/dashboard', authenticate, async (req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getDashboard();
     res.json({ success: true, data });
@@ -50,7 +51,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
   }
 });
 
-router.get('/statistics', authenticate, async (req, res) => {
+router.get('/statistics', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getStatistics();
     res.json({ success: true, data });
@@ -59,7 +60,7 @@ router.get('/statistics', authenticate, async (req, res) => {
   }
 });
 
-router.get('/resource-types', authenticate, async (req, res) => {
+router.get('/resource-types', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getResourceTypes();
     res.json({ success: true, data });
@@ -72,7 +73,7 @@ router.get('/resource-types', authenticate, async (req, res) => {
 // CATEGORIES — الفئات
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/categories', authenticate, async (req, res) => {
+router.get('/categories', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getCategories();
     res.json({ success: true, data, total: data.length });
@@ -83,7 +84,7 @@ router.get('/categories', authenticate, async (req, res) => {
 
 router.get(
   '/categories/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -98,7 +99,7 @@ router.get(
 
 router.post(
   '/categories',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم الفئة مطلوب'),
@@ -117,7 +118,7 @@ router.post(
 
 router.put(
   '/categories/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
@@ -133,7 +134,7 @@ router.put(
 
 router.delete(
   '/categories/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
@@ -151,7 +152,7 @@ router.delete(
 // RESOURCES — الموارد
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/resources', authenticate, async (req, res) => {
+router.get('/resources', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = library.getResources(req.query);
     res.json({ success: true, ...result });
@@ -162,7 +163,7 @@ router.get('/resources', authenticate, async (req, res) => {
 
 router.get(
   '/resources/search',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [query('q').notEmpty().withMessage('نص البحث مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -177,7 +178,7 @@ router.get(
 
 router.get(
   '/resources/barcode/:barcode',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('barcode').notEmpty().withMessage('الباركود مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -192,7 +193,7 @@ router.get(
 
 router.get(
   '/resources/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -207,7 +208,7 @@ router.get(
 
 router.post(
   '/resources',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم المورد مطلوب'),
@@ -227,7 +228,7 @@ router.post(
 
 router.put(
   '/resources/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
@@ -243,7 +244,7 @@ router.put(
 
 router.delete(
   '/resources/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
@@ -259,7 +260,7 @@ router.delete(
 
 router.post(
   '/resources/bulk-import',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [body('items').isArray({ min: 1, max: 200 }).withMessage('يجب تقديم قائمة موارد (بحد أقصى 200)')],
   async (req, res) => {
@@ -277,7 +278,7 @@ router.post(
 // LOANS — الإعارة
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/loans', authenticate, async (req, res) => {
+router.get('/loans', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = library.getLoans(req.query);
     res.json({ success: true, ...result });
@@ -286,7 +287,7 @@ router.get('/loans', authenticate, async (req, res) => {
   }
 });
 
-router.get('/loans/overdue', authenticate, async (req, res) => {
+router.get('/loans/overdue', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = library.getLoans({ ...req.query, overdue: 'true' });
     res.json({ success: true, ...result });
@@ -297,7 +298,7 @@ router.get('/loans/overdue', authenticate, async (req, res) => {
 
 router.get(
   '/loans/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -312,7 +313,7 @@ router.get(
 
 router.post(
   '/loans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),
@@ -331,7 +332,7 @@ router.post(
 
 router.post(
   '/loans/:id/return',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
@@ -347,7 +348,7 @@ router.post(
 
 router.post(
   '/loans/:id/renew',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
@@ -365,7 +366,7 @@ router.post(
 // RESERVATIONS — الحجوزات
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/reservations', authenticate, async (req, res) => {
+router.get('/reservations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getReservations(req.query);
     res.json({ success: true, data, total: data.length });
@@ -376,7 +377,7 @@ router.get('/reservations', authenticate, async (req, res) => {
 
 router.post(
   '/reservations',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),
@@ -395,7 +396,7 @@ router.post(
 
 router.post(
   '/reservations/:id/cancel',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الحجز مطلوب')],
   async (req, res) => {
@@ -413,7 +414,7 @@ router.post(
 // MEMBERS — الأعضاء
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/members', authenticate, async (req, res) => {
+router.get('/members', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getMembers(req.query);
     res.json({ success: true, data, total: data.length });
@@ -424,7 +425,7 @@ router.get('/members', authenticate, async (req, res) => {
 
 router.get(
   '/members/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف العضو مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -439,7 +440,7 @@ router.get(
 
 router.post(
   '/members',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم العضو مطلوب'),
@@ -458,7 +459,7 @@ router.post(
 
 router.put(
   '/members/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف العضو مطلوب')],
   async (req, res) => {
@@ -478,7 +479,7 @@ router.put(
 
 router.get(
   '/resources/:id/reviews',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -493,7 +494,7 @@ router.get(
 
 router.post(
   '/resources/:id/reviews',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المورد مطلوب'),
     body('rating').isInt({ min: 1, max: 5 }).withMessage('التقييم يجب أن يكون بين 1 و 5'),
@@ -517,7 +518,7 @@ router.post(
 // SUPPLIERS — الموردون
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/suppliers', authenticate, async (req, res) => {
+router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getSuppliers();
     res.json({ success: true, data, total: data.length });
@@ -528,7 +529,7 @@ router.get('/suppliers', authenticate, async (req, res) => {
 
 router.post(
   '/suppliers',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [body('name').notEmpty().withMessage('اسم المورّد مطلوب')],
   async (req, res) => {
@@ -546,7 +547,7 @@ router.post(
 // MAINTENANCE — صيانة الموارد
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/maintenance', authenticate, async (req, res) => {
+router.get('/maintenance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = library.getMaintenanceRecords(req.query.resourceId);
     res.json({ success: true, data, total: data.length });
@@ -557,7 +558,7 @@ router.get('/maintenance', authenticate, async (req, res) => {
 
 router.post(
   '/maintenance',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),

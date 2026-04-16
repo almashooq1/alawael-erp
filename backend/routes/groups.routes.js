@@ -12,13 +12,14 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const Group = require('../models/Group');
 const { escapeRegex } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 // حماية جميع المسارات
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── GET /api/groups — قائمة مجموعات المستخدم ───
 router.get('/', async (req, res) => {
   try {

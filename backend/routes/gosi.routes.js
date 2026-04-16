@@ -9,6 +9,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const govService = require('../services/governmentIntegration.service');
 
 // ─── Async wrapper ──────────────────────────────────────────────────────────
@@ -20,7 +21,7 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 
 router.get(
   '/compliance/report',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getGOSIComplianceReport(req.query);
@@ -34,7 +35,7 @@ router.get(
 
 router.post(
   '/calculate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { basicSalary, housingAllowance = 0, isSaudi = true } = req.body;
     if (!basicSalary) {
@@ -51,7 +52,7 @@ router.post(
 
 router.post(
   '/:employeeId/register',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.registerEmployeeGOSI(req.params.employeeId);
@@ -61,7 +62,7 @@ router.post(
 
 router.get(
   '/:employeeId/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getEmployeeGOSIStatus(req.params.employeeId);
@@ -71,7 +72,7 @@ router.get(
 
 router.put(
   '/:employeeId/wage',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { newSalary } = req.body;
@@ -85,7 +86,7 @@ router.put(
 
 router.post(
   '/:employeeId/cancel',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { reason } = req.body;
@@ -99,7 +100,7 @@ router.post(
 
 router.get(
   '/:employeeId/certificate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { type = 'standard' } = req.query;

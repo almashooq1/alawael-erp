@@ -4,6 +4,7 @@ const express = require('express');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
@@ -11,7 +12,7 @@ const notifSvc = require('../services/notifications/notification-enhanced.servic
 // ============================================================
 // قوالب الإشعارات — تستخدم النموذج مباشرةً
 // ============================================================
-router.get('/templates', authenticate, async (req, res) => {
+router.get('/templates', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const { category, isActive, code } = req.query;
@@ -28,7 +29,7 @@ router.get('/templates', authenticate, async (req, res) => {
   }
 });
 
-router.post('/templates', authenticate, async (req, res) => {
+router.post('/templates', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.create({
@@ -41,7 +42,7 @@ router.post('/templates', authenticate, async (req, res) => {
   }
 });
 
-router.get('/templates/:id', authenticate, async (req, res) => {
+router.get('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.findById(req.params.id);
@@ -52,7 +53,7 @@ router.get('/templates/:id', authenticate, async (req, res) => {
   }
 });
 
-router.put('/templates/:id', authenticate, async (req, res) => {
+router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     const template = await NotificationTemplate.findByIdAndUpdate(
@@ -67,7 +68,7 @@ router.put('/templates/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/templates/:id', authenticate, async (req, res) => {
+router.delete('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationTemplate = require('../models/NotificationTemplate');
     await NotificationTemplate.findByIdAndUpdate(req.params.id, { isActive: false });
@@ -78,7 +79,7 @@ router.delete('/templates/:id', authenticate, async (req, res) => {
 });
 
 // اختبار إرسال قالب
-router.post('/templates/:code/test', authenticate, async (req, res) => {
+router.post('/templates/:code/test', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await notifSvc.sendFromTemplate(
       req.params.code,
@@ -95,7 +96,7 @@ router.post('/templates/:code/test', authenticate, async (req, res) => {
 // ============================================================
 // الإشعارات للمستخدم الحالي
 // ============================================================
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await notifSvc.getNotifications(req.user._id, req.query);
     res.json({ success: true, ...result });
@@ -104,7 +105,7 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
-router.post('/mark-all-read', authenticate, async (req, res) => {
+router.post('/mark-all-read', authenticate, requireBranchAccess, async (req, res) => {
   try {
     res.json({ success: true, message: 'تم تعيين جميع الإشعارات كمقروءة' });
   } catch (err) {
@@ -112,7 +113,7 @@ router.post('/mark-all-read', authenticate, async (req, res) => {
   }
 });
 
-router.put('/:id/read', authenticate, async (req, res) => {
+router.put('/:id/read', authenticate, requireBranchAccess, async (req, res) => {
   try {
     res.json({ success: true, message: 'تم تعيين الإشعار كمقروء' });
   } catch (err) {
@@ -123,7 +124,7 @@ router.put('/:id/read', authenticate, async (req, res) => {
 // ============================================================
 // تفضيلات الإشعارات
 // ============================================================
-router.get('/preferences', authenticate, async (req, res) => {
+router.get('/preferences', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationPreference = require('../models/NotificationPreference');
     const prefs = await NotificationPreference.find({ userId: req.user._id });
@@ -133,7 +134,7 @@ router.get('/preferences', authenticate, async (req, res) => {
   }
 });
 
-router.put('/preferences/:category', authenticate, async (req, res) => {
+router.put('/preferences/:category', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const NotificationPreference = require('../models/NotificationPreference');
     const pref = await NotificationPreference.findOneAndUpdate(
@@ -150,7 +151,7 @@ router.put('/preferences/:category', authenticate, async (req, res) => {
 // ============================================================
 // الرسائل الجماعية
 // ============================================================
-router.get('/broadcasts', authenticate, async (req, res) => {
+router.get('/broadcasts', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const { status, branchId } = req.query;
@@ -166,7 +167,7 @@ router.get('/broadcasts', authenticate, async (req, res) => {
   }
 });
 
-router.post('/broadcasts', authenticate, async (req, res) => {
+router.post('/broadcasts', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const broadcast = await BroadcastMessage.create({
@@ -180,7 +181,7 @@ router.post('/broadcasts', authenticate, async (req, res) => {
   }
 });
 
-router.get('/broadcasts/:id', authenticate, async (req, res) => {
+router.get('/broadcasts/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const broadcast = await BroadcastMessage.findById(req.params.id);
@@ -191,7 +192,7 @@ router.get('/broadcasts/:id', authenticate, async (req, res) => {
   }
 });
 
-router.post('/broadcasts/:id/approve', authenticate, async (req, res) => {
+router.post('/broadcasts/:id/approve', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BroadcastMessage = require('../models/BroadcastMessage');
     const broadcast = await BroadcastMessage.findByIdAndUpdate(
@@ -205,7 +206,7 @@ router.post('/broadcasts/:id/approve', authenticate, async (req, res) => {
   }
 });
 
-router.post('/broadcasts/:id/send', authenticate, async (req, res) => {
+router.post('/broadcasts/:id/send', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await notifSvc.sendBroadcast(req.params.id);
     res.json({ success: true, data: result });
@@ -217,7 +218,7 @@ router.post('/broadcasts/:id/send', authenticate, async (req, res) => {
 // ============================================================
 // التصعيدات — تستخدم النموذج مباشرةً
 // ============================================================
-router.get('/escalations', authenticate, async (req, res) => {
+router.get('/escalations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
     const { status, priority, branchId, type } = req.query;
@@ -235,7 +236,7 @@ router.get('/escalations', authenticate, async (req, res) => {
   }
 });
 
-router.post('/escalations', authenticate, async (req, res) => {
+router.post('/escalations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
     const {
@@ -276,7 +277,7 @@ router.post('/escalations', authenticate, async (req, res) => {
   }
 });
 
-router.get('/escalations/:id', authenticate, async (req, res) => {
+router.get('/escalations/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
     const escalation = await Escalation.findById(req.params.id);
@@ -287,7 +288,7 @@ router.get('/escalations/:id', authenticate, async (req, res) => {
   }
 });
 
-router.put('/escalations/:id/acknowledge', authenticate, async (req, res) => {
+router.put('/escalations/:id/acknowledge', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
     const escalation = await Escalation.findByIdAndUpdate(
@@ -302,7 +303,7 @@ router.put('/escalations/:id/acknowledge', authenticate, async (req, res) => {
   }
 });
 
-router.put('/escalations/:id/resolve', authenticate, async (req, res) => {
+router.put('/escalations/:id/resolve', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Escalation = require('../models/Escalation');
     const escalation = await Escalation.findByIdAndUpdate(
@@ -321,7 +322,7 @@ router.put('/escalations/:id/resolve', authenticate, async (req, res) => {
   }
 });
 
-router.post('/escalations/:id/auto-escalate', authenticate, async (req, res) => {
+router.post('/escalations/:id/auto-escalate', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const escalation = await notifSvc.autoEscalate(req.params.id);
     res.json({ success: true, data: escalation });

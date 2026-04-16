@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
@@ -12,7 +13,7 @@ const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EventManagement`)[n];
 
 // ── Dashboard ────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (_req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     const Ev = safeModel('Event');
     const Reg = safeModel('EventRegistration');
@@ -51,7 +52,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
 });
 
 // ── Events CRUD ──────────────────────────────────────────────
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     const { status, type, page = 1, limit = 20 } = req.query;
@@ -73,7 +74,7 @@ router.get('/', authenticate, async (req, res) => {
   }
 });
 
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     const doc = await Ev.create({ ...req.body, createdBy: req.user?._id });
@@ -83,7 +84,7 @@ router.post('/', authenticate, async (req, res) => {
   }
 });
 
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     const doc = await Ev.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
@@ -94,7 +95,7 @@ router.put('/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Ev = safeModel('Event');
     await Ev.findByIdAndDelete(req.params.id);
@@ -105,7 +106,7 @@ router.delete('/:id', authenticate, async (req, res) => {
 });
 
 // ── Registrations ────────────────────────────────────────────
-router.get('/:eventId/registrations', authenticate, async (req, res) => {
+router.get('/:eventId/registrations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Reg = safeModel('EventRegistration');
     const docs = await Reg.find({ event: req.params.eventId }).sort({ createdAt: -1 }).lean();
@@ -115,7 +116,7 @@ router.get('/:eventId/registrations', authenticate, async (req, res) => {
   }
 });
 
-router.post('/:eventId/registrations', authenticate, async (req, res) => {
+router.post('/:eventId/registrations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Reg = safeModel('EventRegistration');
     const doc = await Reg.create({ ...req.body, event: req.params.eventId });

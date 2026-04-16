@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const DatabaseMigrationService = require('../services/database-migration-service');
 const DatabaseBackupService = require('../services/database-backup-service');
 const { seedDatabase, clearDatabase } = require('../database/seeders/database-seeder');
@@ -15,6 +16,7 @@ const safeError = require('../utils/safeError');
 
 // حماية جميع مسارات قاعدة البيانات - Admin/System Admin فقط
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(authorize(['admin', 'system_admin']));
 
 // تهيئة الخدمات

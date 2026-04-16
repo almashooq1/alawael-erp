@@ -176,7 +176,7 @@
   "telemetry.telemetryLevel": "off",
   "workbench.startupEditor": "none",
   "workbench.settings.enableNaturalLanguageSearch": false,
-  "workbench.colorTheme": "Default Dark Modern",
+  "workbench.colorTheme": "Dark Modern",
   "window.zoomLevel": 0,
   "extensions.ignoreRecommendations": true,
   "security.workspace.trust.enabled": false,

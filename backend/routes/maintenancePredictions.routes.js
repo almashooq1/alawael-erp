@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenancePrediction = require('../models/MaintenancePrediction');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-predictions — list predictions */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { assetId, predictionType, riskLevel, status, urgency, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (assetId) filter.assetId = assetId;
     if (predictionType) filter.predictionType = predictionType;
     if (riskLevel) filter.riskLevel = riskLevel;
@@ -39,19 +40,24 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-predictions/dashboard — prediction dashboard */
-router.get('/dashboard', requireAuth, async (req, res) => {
+router.get('/dashboard', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const [byStatus, byRisk, byUrgency, upcoming] = await Promise.all([
-      MaintenancePrediction.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
       MaintenancePrediction.aggregate([
-        { $match: { status: { $nin: ['resolved', 'ignored'] } } },
+        { $match: { ...scope } },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+      ]),
+      MaintenancePrediction.aggregate([
+        { $match: { ...scope, status: { $nin: ['resolved', 'ignored'] } } },
         { $group: { _id: '$riskLevel', count: { $sum: 1 } } },
       ]),
       MaintenancePrediction.aggregate([
-        { $match: { status: { $nin: ['resolved', 'ignored'] } } },
+        { $match: { ...scope, status: { $nin: ['resolved', 'ignored'] } } },
         { $group: { _id: '$urgency', count: { $sum: 1 } } },
       ]),
       MaintenancePrediction.find({
+        ...scope,
         status: { $nin: ['resolved', 'ignored'] },
         predictedDate: { $lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) },
       })
@@ -66,9 +72,12 @@ router.get('/dashboard', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-predictions/:id — get single prediction */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const prediction = await MaintenancePrediction.findById(req.params.id)
+    const prediction = await MaintenancePrediction.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    })
       .populate('assetId')
       .populate('acknowledgedBy', 'name');
     if (!prediction)
@@ -83,10 +92,15 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const prediction = await MaintenancePrediction.create(stripUpdateMeta(req.body));
+      const body = { ...stripUpdateMeta(req.body) };
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const prediction = await MaintenancePrediction.create(body);
       res.status(201).json({ success: true, data: prediction });
     } catch (err) {
       logger.error('maintenancePrediction create error:', err);
@@ -96,10 +110,10 @@ router.post(
 );
 
 /** PUT /api/maintenance-predictions/:id — update prediction */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const prediction = await MaintenancePrediction.findByIdAndUpdate(
-      req.params.id,
+    const prediction = await MaintenancePrediction.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
       {
         new: true,
@@ -116,22 +130,31 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/maintenance-predictions/:id — delete prediction (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const prediction = await MaintenancePrediction.findByIdAndDelete(req.params.id);
-    if (!prediction)
-      return res.status(404).json({ success: false, message: 'Prediction not found' });
-    res.json({ success: true, message: 'Prediction deleted' });
-  } catch (err) {
-    safeError(res, err, 'maintenancePrediction delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const prediction = await MaintenancePrediction.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!prediction)
+        return res.status(404).json({ success: false, message: 'Prediction not found' });
+      res.json({ success: true, message: 'Prediction deleted' });
+    } catch (err) {
+      safeError(res, err, 'maintenancePrediction delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/maintenance-predictions/:id/acknowledge — acknowledge prediction */
-router.patch('/:id/acknowledge', requireAuth, async (req, res) => {
+router.patch('/:id/acknowledge', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const prediction = await MaintenancePrediction.findByIdAndUpdate(
-      req.params.id,
+    const prediction = await MaintenancePrediction.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         status: 'acknowledged',
         acknowledgedBy: req.user?._id || req.user?.id,
@@ -149,11 +172,11 @@ router.patch('/:id/acknowledge', requireAuth, async (req, res) => {
 });
 
 /** PATCH /api/maintenance-predictions/:id/resolve — resolve prediction */
-router.patch('/:id/resolve', requireAuth, async (req, res) => {
+router.patch('/:id/resolve', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { actualResult } = req.body;
-    const prediction = await MaintenancePrediction.findByIdAndUpdate(
-      req.params.id,
+    const prediction = await MaintenancePrediction.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status: 'resolved', resolutionDate: new Date(), actualResult },
       { new: true }
     );

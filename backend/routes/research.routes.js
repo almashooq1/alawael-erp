@@ -19,9 +19,10 @@ const router = express.Router();
 const controller = require('../controllers/research.controller');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // All routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Dashboard ─────────────────────────────────────────────────────────────
 router.get('/dashboard', controller.getDashboard);
 

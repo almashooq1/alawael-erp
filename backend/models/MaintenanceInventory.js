@@ -28,6 +28,12 @@ const MaintenanceInventorySchema = new Schema(
       required: true,
       trim: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
     partNumber: {
       type: String,
       unique: true,
@@ -357,4 +363,6 @@ MaintenanceInventorySchema.virtual('turnoverRatio').get(function () {
   return 0;
 });
 
-module.exports = mongoose.models.MaintenanceInventory || mongoose.model('MaintenanceInventory', MaintenanceInventorySchema);
+module.exports =
+  mongoose.models.MaintenanceInventory ||
+  mongoose.model('MaintenanceInventory', MaintenanceInventorySchema);

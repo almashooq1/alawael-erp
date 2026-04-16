@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Unified email service
@@ -42,7 +43,7 @@ function pick(src, fields) {
 }
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // GET /attendance
 router.get('/attendance', async (req, res) => {
   try {

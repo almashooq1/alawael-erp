@@ -11,6 +11,7 @@
  */
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const logger = require('../utils/logger');

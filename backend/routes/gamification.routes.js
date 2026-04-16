@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const SmartGamificationService = require('../services/smartGamification.service');
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
 const logger = require('../utils/logger');
@@ -15,7 +16,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // ── Badges CRUD ──────────────────────────────────────────────────
 
 /** GET /api/gamification/badges — list all badges */
-router.get('/badges', requireAuth, async (req, res) => {
+router.get('/badges', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const badges = await Badge.find().sort({ category: 1, threshold: 1 });
     res.json({ success: true, data: badges, count: badges.length });
@@ -25,7 +26,7 @@ router.get('/badges', requireAuth, async (req, res) => {
 });
 
 /** POST /api/gamification/badges — create badge (admin) */
-router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => {
+router.post('/badges', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const badge = await Badge.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: badge });
@@ -36,7 +37,7 @@ router.post('/badges', requireAuth, requireRole(['admin']), async (req, res) => 
 });
 
 /** PUT /api/gamification/badges/:id — update badge (admin) */
-router.put('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) => {
+router.put('/badges/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -51,7 +52,7 @@ router.put('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) 
 });
 
 /** DELETE /api/gamification/badges/:id — delete badge (admin) */
-router.delete('/badges/:id', requireAuth, requireRole(['admin']), async (req, res) => {
+router.delete('/badges/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const badge = await Badge.findByIdAndDelete(req.params.id);
     if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
@@ -62,7 +63,7 @@ router.delete('/badges/:id', requireAuth, requireRole(['admin']), async (req, re
 });
 
 /** POST /api/gamification/badges/seed — seed default badges (admin) */
-router.post('/badges/seed', requireAuth, requireRole(['admin']), async (req, res) => {
+router.post('/badges/seed', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     await SmartGamificationService.seedBadges();
     const count = await Badge.countDocuments();
@@ -75,7 +76,7 @@ router.post('/badges/seed', requireAuth, requireRole(['admin']), async (req, res
 // ── Wallets ──────────────────────────────────────────────────────
 
 /** GET /api/gamification/wallets — list all wallets */
-router.get('/wallets', requireAuth, async (req, res) => {
+router.get('/wallets', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 20 } = req.query;
     const skip = (page - 1) * limit;
@@ -94,7 +95,7 @@ router.get('/wallets', requireAuth, async (req, res) => {
 });
 
 /** GET /api/gamification/wallets/:beneficiaryId — get wallet by beneficiary */
-router.get('/wallets/:beneficiaryId', requireAuth, async (req, res) => {
+router.get('/wallets/:beneficiaryId', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const wallet = await BeneficiaryWallet.findOne({ beneficiary: req.params.beneficiaryId })
       .populate('beneficiary', 'name fileNumber')
@@ -107,7 +108,7 @@ router.get('/wallets/:beneficiaryId', requireAuth, async (req, res) => {
 });
 
 /** POST /api/gamification/award — award points to beneficiary */
-router.post('/award', requireAuth, async (req, res) => {
+router.post('/award', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { beneficiaryId, actionType, points } = req.body;
     if (!beneficiaryId || !actionType) {
@@ -127,7 +128,7 @@ router.post('/award', requireAuth, async (req, res) => {
 });
 
 /** GET /api/gamification/leaderboard — top wallets */
-router.get('/leaderboard', requireAuth, async (req, res) => {
+router.get('/leaderboard', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { limit = 10 } = req.query;
     const leaders = await BeneficiaryWallet.find()

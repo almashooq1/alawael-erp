@@ -8,6 +8,7 @@ const safeError = require('../utils/safeError');
 const router = express.Router();
 const EcommerceService = require('../services/EcommerceService');
 const { authenticateToken: authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // RBAC Integration (Role-Based Access Control)
@@ -174,7 +175,7 @@ router.get('/products/:id/similar', async (req, res) => {
  * POST /api/ecommerce/products/:id/reviews
  * Add product review
  */
-router.post('/products/:id/reviews', authenticate, async (req, res) => {
+router.post('/products/:id/reviews', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { id } = req.params;
     const { rating, title, comment } = req.body;
@@ -199,7 +200,7 @@ router.post('/products/:id/reviews', authenticate, async (req, res) => {
  * POST /api/ecommerce/cart
  * Add item to cart
  */
-router.post('/cart', authenticate, async (req, res) => {
+router.post('/cart', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { productId, quantity, variant } = req.body;
     const userId = req.user.id;
@@ -223,7 +224,7 @@ router.post('/cart', authenticate, async (req, res) => {
  * GET /api/ecommerce/cart
  * Get shopping cart
  */
-router.get('/cart', authenticate, async (req, res) => {
+router.get('/cart', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -242,7 +243,7 @@ router.get('/cart', authenticate, async (req, res) => {
  * PUT /api/ecommerce/cart/:productId
  * Update cart item quantity
  */
-router.put('/cart/:productId', authenticate, async (req, res) => {
+router.put('/cart/:productId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { productId } = req.params;
     const { quantity } = req.body;
@@ -267,7 +268,7 @@ router.put('/cart/:productId', authenticate, async (req, res) => {
  * DELETE /api/ecommerce/cart/:productId
  * Remove item from cart
  */
-router.delete('/cart/:productId', authenticate, async (req, res) => {
+router.delete('/cart/:productId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { productId } = req.params;
     const userId = req.user.id;
@@ -287,7 +288,7 @@ router.delete('/cart/:productId', authenticate, async (req, res) => {
  * DELETE /api/ecommerce/cart
  * Clear shopping cart
  */
-router.delete('/cart', authenticate, async (req, res) => {
+router.delete('/cart', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -307,7 +308,7 @@ router.delete('/cart', authenticate, async (req, res) => {
  * POST /api/ecommerce/cart/coupon
  * Apply coupon to cart
  */
-router.post('/cart/coupon', authenticate, async (req, res) => {
+router.post('/cart/coupon', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { couponCode } = req.body;
     const userId = req.user.id;
@@ -335,7 +336,7 @@ router.post('/cart/coupon', authenticate, async (req, res) => {
  * POST /api/ecommerce/checkout
  * Create checkout session
  */
-router.post('/checkout', authenticate, async (req, res) => {
+router.post('/checkout', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const userId = req.user.id;
     const { shippingAddress } = req.body;
@@ -359,7 +360,7 @@ router.post('/checkout', authenticate, async (req, res) => {
  * GET /api/ecommerce/checkout/:sessionId
  * Get checkout details
  */
-router.get('/checkout/:sessionId', authenticate, async (req, res) => {
+router.get('/checkout/:sessionId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { sessionId } = req.params;
 
@@ -378,7 +379,7 @@ router.get('/checkout/:sessionId', authenticate, async (req, res) => {
  * PUT /api/ecommerce/checkout/:sessionId/payment
  * Process payment
  */
-router.put('/checkout/:sessionId/payment', authenticate, async (req, res) => {
+router.put('/checkout/:sessionId/payment', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { method, cardToken, paypalEmail } = req.body;
@@ -410,7 +411,7 @@ router.put('/checkout/:sessionId/payment', authenticate, async (req, res) => {
  * GET /api/ecommerce/wishlist
  * Get user's wishlist
  */
-router.get('/wishlist', authenticate, async (req, res) => {
+router.get('/wishlist', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const userId = req.user.id;
 
@@ -429,7 +430,7 @@ router.get('/wishlist', authenticate, async (req, res) => {
  * POST /api/ecommerce/wishlist/:productId
  * Add product to wishlist
  */
-router.post('/wishlist/:productId', authenticate, async (req, res) => {
+router.post('/wishlist/:productId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { productId } = req.params;
     const userId = req.user.id;
@@ -450,7 +451,7 @@ router.post('/wishlist/:productId', authenticate, async (req, res) => {
  * DELETE /api/ecommerce/wishlist/:productId
  * Remove product from wishlist
  */
-router.delete('/wishlist/:productId', authenticate, async (req, res) => {
+router.delete('/wishlist/:productId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { productId } = req.params;
     const userId = req.user.id;

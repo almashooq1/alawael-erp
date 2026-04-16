@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { sensitiveOperationLimiter } = require('../middleware/rateLimiter');
 const logger = require('../utils/logger');
 const Payment = require('../models/Payment');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── Payment-specific rate limiter (5 write operations / hour) ──
 router.use(['/', '/:id'], (req, res, next) => {
   // Only rate-limit write operations, not reads

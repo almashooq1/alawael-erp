@@ -7,9 +7,10 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Authentication required for all branch routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 router.get('/', (_req, res) => res.json({ success: true, data: [], message: 'قائمة الفروع' }));
 router.get('/:id', (req, res) =>
   res.json({ success: true, data: { id: req.params.id }, message: 'بيانات الفرع' })

@@ -51,6 +51,7 @@ const bcrypt = require('bcryptjs');
 const safeError = require('../utils/safeError');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { jwtSecret } = require('../config/secrets');
 
@@ -233,7 +234,7 @@ router.post('/verify-otp', parentOtpVerifyLimiter, async (req, res) => {
 
 // ─── AUTHENTICATED ROUTES ─────────────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /**
  * POST /logout — تسجيل الخروج
  */

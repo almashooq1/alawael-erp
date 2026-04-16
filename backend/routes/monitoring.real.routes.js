@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, _authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const os = require('os');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const getSystemMetrics = () => ({
   uptime: process.uptime(),
   memoryUsage: process.memoryUsage(),

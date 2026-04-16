@@ -7,6 +7,13 @@ const goalProgressHistorySchema = new mongoose.Schema(
     planId: { type: mongoose.Schema.Types.ObjectId, ref: 'TherapeuticPlan', required: true },
     goalId: { type: mongoose.Schema.Types.ObjectId, required: true }, // Logic link to goal inside plan
 
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
+
     percentage: { type: Number, required: true },
 
     recordedDate: { type: Date, default: Date.now },
@@ -18,11 +25,13 @@ const goalProgressHistorySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 // ── Indexes ───────────────────────────────────────────────────────────────
 goalProgressHistorySchema.index({ planId: 1 });
 goalProgressHistorySchema.index({ goalId: 1 });
 goalProgressHistorySchema.index({ planId: 1, goalId: 1 });
 goalProgressHistorySchema.index({ recordedDate: -1 });
 goalProgressHistorySchema.index({ recordedBy: 1 });
-module.exports = mongoose.models.GoalProgressHistory || mongoose.model('GoalProgressHistory', goalProgressHistorySchema);
+goalProgressHistorySchema.index({ branchId: 1, planId: 1 });
+module.exports =
+  mongoose.models.GoalProgressHistory ||
+  mongoose.model('GoalProgressHistory', goalProgressHistorySchema);

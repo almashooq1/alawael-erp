@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const {
   Standard,
@@ -14,7 +15,7 @@ const safeError = require('../utils/safeError');
 // ============================================
 // ROOT ENDPOINT — GET /api/quality
 // ============================================
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const [standardsCount, accreditationsCount, auditsCount, complianceCount, indicatorsCount] =
       await Promise.all([
@@ -55,7 +56,7 @@ router.get('/', authenticate, async (req, res) => {
 // ============================================
 
 // Get all standards
-router.get('/standards', authenticate, async (req, res) => {
+router.get('/standards', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, status, search, page = 1, limit = 20 } = req.query;
 
@@ -99,7 +100,7 @@ router.get('/standards', authenticate, async (req, res) => {
 });
 
 // Get single standard
-router.get('/standards/:id', authenticate, async (req, res) => {
+router.get('/standards/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const standard = await Standard.findById(req.params.id)
       .populate('createdBy', 'name email')
@@ -124,7 +125,7 @@ router.get('/standards/:id', authenticate, async (req, res) => {
 // Create standard
 router.post(
   '/standards',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -154,7 +155,7 @@ router.post(
 // Update standard
 router.put(
   '/standards/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -191,7 +192,7 @@ router.put(
 );
 
 // Delete standard
-router.delete('/standards/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/standards/:id', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
   try {
     const standard = await Standard.findByIdAndDelete(req.params.id);
 
@@ -216,7 +217,7 @@ router.delete('/standards/:id', authenticate, authorize(['admin']), async (req, 
 // ============================================
 
 // Get all accreditations
-router.get('/accreditations', authenticate, async (req, res) => {
+router.get('/accreditations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { type, status, expiringSoon } = req.query;
 
@@ -250,7 +251,7 @@ router.get('/accreditations', authenticate, async (req, res) => {
 });
 
 // Get single accreditation
-router.get('/accreditations/:id', authenticate, async (req, res) => {
+router.get('/accreditations/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const accreditation = await Accreditation.findById(req.params.id)
       .populate('standards')
@@ -275,7 +276,7 @@ router.get('/accreditations/:id', authenticate, async (req, res) => {
 // Create accreditation
 router.post(
   '/accreditations',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -300,7 +301,7 @@ router.post(
 // Update accreditation
 router.put(
   '/accreditations/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -371,7 +372,7 @@ router.put(
 );
 
 // Delete accreditation
-router.delete('/accreditations/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/accreditations/:id', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
   try {
     const accreditation = await Accreditation.findByIdAndDelete(req.params.id);
 
@@ -396,7 +397,7 @@ router.delete('/accreditations/:id', authenticate, authorize(['admin']), async (
 // ============================================
 
 // Get all audits
-router.get('/audits', authenticate, async (req, res) => {
+router.get('/audits', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { type, status, fromDate, toDate } = req.query;
 
@@ -426,7 +427,7 @@ router.get('/audits', authenticate, async (req, res) => {
 });
 
 // Get single audit
-router.get('/audits/:id', authenticate, async (req, res) => {
+router.get('/audits/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const audit = await QualityAudit.findById(req.params.id)
       .populate('accreditation')
@@ -453,7 +454,7 @@ router.get('/audits/:id', authenticate, async (req, res) => {
 // Create audit
 router.post(
   '/audits',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -483,7 +484,7 @@ router.post(
 // Update audit
 router.put(
   '/audits/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -552,7 +553,7 @@ router.put(
 // Delete audit
 router.delete(
   '/audits/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -578,7 +579,7 @@ router.delete(
 // Add finding to audit
 router.post(
   '/audits/:id/findings',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -610,7 +611,7 @@ router.post(
 );
 
 // Update finding status
-router.patch('/audits/:auditId/findings/:findingId/status', authenticate, async (req, res) => {
+router.patch('/audits/:auditId/findings/:findingId/status', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.body;
 
@@ -652,7 +653,7 @@ router.patch('/audits/:auditId/findings/:findingId/status', authenticate, async 
 // ============================================
 
 // Get compliance trackings
-router.get('/compliance', authenticate, async (req, res) => {
+router.get('/compliance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { standard, department, complianceLevel } = req.query;
 
@@ -679,7 +680,7 @@ router.get('/compliance', authenticate, async (req, res) => {
 // Create compliance tracking
 router.post(
   '/compliance',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -707,7 +708,7 @@ router.post(
 );
 
 // Get single compliance tracking
-router.get('/compliance/:id', authenticate, async (req, res) => {
+router.get('/compliance/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const tracking = await ComplianceTracking.findById(req.params.id)
       .populate('standard')
@@ -733,7 +734,7 @@ router.get('/compliance/:id', authenticate, async (req, res) => {
 // Update compliance tracking
 router.put(
   '/compliance/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -794,7 +795,7 @@ router.put(
 // Delete compliance tracking
 router.delete(
   '/compliance/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -818,7 +819,7 @@ router.delete(
 );
 
 // Update gap status
-router.patch('/compliance/:trackingId/gaps/:gapIndex/status', authenticate, async (req, res) => {
+router.patch('/compliance/:trackingId/gaps/:gapIndex/status', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.body;
     const { trackingId, gapIndex } = req.params;
@@ -860,7 +861,7 @@ router.patch('/compliance/:trackingId/gaps/:gapIndex/status', authenticate, asyn
 // ============================================
 
 // Get all indicators
-router.get('/indicators', authenticate, async (req, res) => {
+router.get('/indicators', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, status } = req.query;
 
@@ -884,7 +885,7 @@ router.get('/indicators', authenticate, async (req, res) => {
 });
 
 // Get single indicator
-router.get('/indicators/:id', authenticate, async (req, res) => {
+router.get('/indicators/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const indicator = await QualityIndicator.findById(req.params.id)
       .populate('relatedStandards')
@@ -910,7 +911,7 @@ router.get('/indicators/:id', authenticate, async (req, res) => {
 // Create indicator
 router.post(
   '/indicators',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -935,7 +936,7 @@ router.post(
 // Update indicator
 router.put(
   '/indicators/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -1000,7 +1001,7 @@ router.put(
 // Delete indicator
 router.delete(
   '/indicators/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -1026,7 +1027,7 @@ router.delete(
 // Add measurement to indicator
 router.post(
   '/indicators/:id/measurements',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager', 'data_collector']),
   async (req, res) => {
     try {
@@ -1067,7 +1068,7 @@ router.post(
 // ============================================
 
 // Quality dashboard overview
-router.get('/dashboard', authenticate, async (req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     // Count standards by category
     const standardsByCategory = await Standard.aggregate([
@@ -1142,7 +1143,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
 });
 
 // Compliance report by department
-router.get('/reports/compliance-by-department', authenticate, async (req, res) => {
+router.get('/reports/compliance-by-department', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = await ComplianceTracking.aggregate([
       {
@@ -1179,7 +1180,7 @@ router.get('/reports/compliance-by-department', authenticate, async (req, res) =
 });
 
 // Audit findings trend
-router.get('/reports/findings-trend', authenticate, async (req, res) => {
+router.get('/reports/findings-trend', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fromDate, toDate } = req.query;
 

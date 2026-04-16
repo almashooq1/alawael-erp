@@ -9,6 +9,7 @@ const router = express.Router();
 const IndependentLivingController = require('../controllers/independentLiving.controller');
 const { protect, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // ═══════════════════════════════════════════════════════
 //  لوحة المعلومات والتقارير
 // ═══════════════════════════════════════════════════════

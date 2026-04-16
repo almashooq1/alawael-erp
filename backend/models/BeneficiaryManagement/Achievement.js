@@ -16,6 +16,12 @@ const achievementSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Achievement Details
     title: {
@@ -131,6 +137,7 @@ achievementSchema.index({ achievedDate: -1 });
 achievementSchema.index({ verificationStatus: 1 });
 achievementSchema.index({ pointsAwarded: 1 });
 achievementSchema.index({ tags: 1 });
+achievementSchema.index({ branchId: 1, type: 1 });
 
 // Pre-save middleware
 achievementSchema.pre('save', function (next) {

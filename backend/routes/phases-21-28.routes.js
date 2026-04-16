@@ -5,11 +5,12 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // Apply authentication to all routes in this file
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // === PHASE 21: Advanced Analytics (18 endpoints) ===
 router.get('/analytics/dashboard', (_req, res) => {
   res.json({ success: true, phase: 21, endpoint: 'analytics/dashboard' });

@@ -13,6 +13,7 @@
 
 const express = require('express');
 const { safeError } = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
@@ -133,7 +134,7 @@ const buildMediaUrl = (req, fileName) => {
  * GET /api/media
  * Media library dashboard: stats, recent files, storage breakdown
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const userId = req.user?._id;
     const [stats, recent, albums, favorites] = await Promise.all([
@@ -190,7 +191,7 @@ router.get('/', authenticate, async (req, res) => {
  * GET /api/media/stats
  * Detailed storage analytics
  */
-router.get('/stats', authenticate, async (req, res) => {
+router.get('/stats', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const [overall, monthly, topUploaders] = await Promise.all([
       Media.getStorageStats(),
@@ -272,7 +273,7 @@ router.get('/stats', authenticate, async (req, res) => {
  */
 router.post(
   '/upload',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   upload.single('file'),
   validateUploadedFile,
   async (req, res) => {
@@ -348,7 +349,7 @@ router.post(
  */
 router.post(
   '/upload-bulk',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   upload.array('files', 20),
   validateUploadedFile,
   async (req, res) => {
@@ -423,7 +424,7 @@ router.post(
  * GET /api/media/list
  * List media with filtering, sorting, searching, pagination
  */
-router.get('/list', authenticate, async (req, res) => {
+router.get('/list', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const {
       page = 1,
@@ -502,7 +503,7 @@ router.get('/list', authenticate, async (req, res) => {
  * GET /api/media/:id
  * Get single media details
  */
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
       return res.status(400).json({ success: false, message: 'معرف غير صالح' });
@@ -545,7 +546,7 @@ router.get('/:id', authenticate, async (req, res) => {
  * PUT /api/media/:id
  * Update media metadata
  */
-router.put('/:id', authenticate, async (req, res) => {
+router.put('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const {
       title,
@@ -617,7 +618,7 @@ router.put('/:id', authenticate, async (req, res) => {
  * DELETE /api/media/:id
  * Soft-delete media
  */
-router.delete('/:id', authenticate, async (req, res) => {
+router.delete('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findByIdAndUpdate(
       req.params.id,
@@ -654,7 +655,7 @@ router.delete('/:id', authenticate, async (req, res) => {
  * POST /api/media/:id/restore
  * Restore soft-deleted media
  */
-router.post('/:id/restore', authenticate, async (req, res) => {
+router.post('/:id/restore', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findByIdAndUpdate(
       req.params.id,
@@ -688,7 +689,7 @@ router.post('/:id/restore', authenticate, async (req, res) => {
  * DELETE /api/media/:id/permanent
  * Permanently delete media and file from disk
  */
-router.delete('/:id/permanent', authenticate, async (req, res) => {
+router.delete('/:id/permanent', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ success: false, message: 'الوسيط غير موجود' });
@@ -726,7 +727,7 @@ router.delete('/:id/permanent', authenticate, async (req, res) => {
  * POST /api/media/:id/favorite
  * Toggle favorite
  */
-router.post('/:id/favorite', authenticate, async (req, res) => {
+router.post('/:id/favorite', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ success: false, message: 'الوسيط غير موجود' });
@@ -753,7 +754,7 @@ router.post('/:id/favorite', authenticate, async (req, res) => {
  * POST /api/media/:id/pin
  * Toggle pin
  */
-router.post('/:id/pin', authenticate, async (req, res) => {
+router.post('/:id/pin', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media) return res.status(404).json({ success: false, message: 'الوسيط غير موجود' });
@@ -779,7 +780,7 @@ router.post('/:id/pin', authenticate, async (req, res) => {
  * GET /api/media/file/:filename
  * Serve / stream media file
  */
-router.get('/file/:filename', authenticate, (req, res) => {
+router.get('/file/:filename', authenticate, requireBranchAccess, (req, res) => {
   try {
     // Path-traversal protection: strip directory components
     const safeName = path.basename(req.params.filename);
@@ -858,7 +859,7 @@ router.get('/file/:filename', authenticate, (req, res) => {
  * GET /api/media/:id/download
  * Force-download with proper filename
  */
-router.get('/:id/download', authenticate, async (req, res) => {
+router.get('/:id/download', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const media = await Media.findById(req.params.id);
     if (!media || media.status === 'محذوف') {
@@ -898,7 +899,7 @@ router.get('/:id/download', authenticate, async (req, res) => {
  * POST /api/media/bulk-delete
  * Soft-delete multiple media
  */
-router.post('/bulk-delete', authenticate, async (req, res) => {
+router.post('/bulk-delete', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ids } = req.body;
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -928,7 +929,7 @@ router.post('/bulk-delete', authenticate, async (req, res) => {
  * POST /api/media/bulk-move
  * Move multiple media to an album
  */
-router.post('/bulk-move', authenticate, async (req, res) => {
+router.post('/bulk-move', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ids, album } = req.body;
     if (!ids || !Array.isArray(ids) || ids.length === 0) {
@@ -965,7 +966,7 @@ router.post('/bulk-move', authenticate, async (req, res) => {
  * POST /api/media/bulk-tag
  * Add tags to multiple media
  */
-router.post('/bulk-tag', authenticate, async (req, res) => {
+router.post('/bulk-tag', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ids, tags } = req.body;
     if (!ids?.length || !tags?.length) {
@@ -1008,7 +1009,7 @@ router.post('/bulk-tag', authenticate, async (req, res) => {
  * GET /api/media/albums
  * List all albums
  */
-router.get('/albums', authenticate, async (req, res) => {
+router.get('/albums', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { parent, search } = req.query;
     const query = { status: 'نشط' };
@@ -1032,7 +1033,7 @@ router.get('/albums', authenticate, async (req, res) => {
  * POST /api/media/albums
  * Create a new album
  */
-router.post('/albums', authenticate, async (req, res) => {
+router.post('/albums', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { name, description, parentAlbum, color, icon, visibility } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'اسم الألبوم مطلوب' });
@@ -1058,7 +1059,7 @@ router.post('/albums', authenticate, async (req, res) => {
  * PUT /api/media/albums/:id
  * Update an album
  */
-router.put('/albums/:id', authenticate, async (req, res) => {
+router.put('/albums/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     // ── Mass-assignment protection: whitelist allowed fields ──
     const { name, description, coverImage, parentAlbum, color, icon, visibility, sortOrder } =
@@ -1089,7 +1090,7 @@ router.put('/albums/:id', authenticate, async (req, res) => {
  * DELETE /api/media/albums/:id
  * Soft-delete an album
  */
-router.delete('/albums/:id', authenticate, async (req, res) => {
+router.delete('/albums/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const album = await MediaAlbum.findByIdAndUpdate(
       req.params.id,
@@ -1115,7 +1116,7 @@ router.delete('/albums/:id', authenticate, async (req, res) => {
  * GET /api/media/tags
  * Get all unique tags with counts
  */
-router.get('/tags', authenticate, async (req, res) => {
+router.get('/tags', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const tags = await Media.aggregate([
       { $match: { status: 'نشط' } },
@@ -1139,7 +1140,7 @@ router.get('/tags', authenticate, async (req, res) => {
  * GET /api/media/trash
  * List soft-deleted media
  */
-router.get('/trash', authenticate, async (req, res) => {
+router.get('/trash', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const items = await Media.find({ status: 'محذوف' })
       .sort({ updatedAt: -1 })
@@ -1163,7 +1164,7 @@ router.get('/trash', authenticate, async (req, res) => {
  * POST /api/media/trash/empty
  * Permanently delete all trashed media
  */
-router.post('/trash/empty', authenticate, async (req, res) => {
+router.post('/trash/empty', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const trashed = await Media.find({ status: 'محذوف' });
 

@@ -11,11 +11,12 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const InsuranceController = require('../controllers/insurance.controller');
 
 // ─── Authentication Middleware ────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── البيانات المرجعية ───────────────────────────────────────────────
 router.get('/companies', InsuranceController.getInsuranceCompanies);
 router.get('/policy-types', InsuranceController.getPolicyTypes);

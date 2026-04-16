@@ -20,6 +20,7 @@ const {
 } = require('../workflow/intelligent-workflow-engine');
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 
 const engine = new IntelligentWorkflowEngine();
@@ -31,7 +32,7 @@ const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 // DASHBOARD  ─  GET /dashboard
 // ============================================================================
 
-router.get('/dashboard', authMiddleware, async (req, res) => {
+router.get('/dashboard', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const userId = uid(req);
     const now = new Date();
@@ -142,7 +143,7 @@ router.get('/dashboard', authMiddleware, async (req, res) => {
 // DEFINITIONS  ─  CRUD + publish/clone/export
 // ============================================================================
 
-router.get('/definitions', authMiddleware, async (req, res) => {
+router.get('/definitions', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { status, category, search, page = 1, limit = 20 } = req.query;
     const query = {};
@@ -177,7 +178,7 @@ router.get('/definitions', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/definitions/:id', authMiddleware, async (req, res) => {
+router.get('/definitions/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await WorkflowDefinition.findById(req.params.id)
       .populate('createdBy', 'name')
@@ -189,7 +190,7 @@ router.get('/definitions/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/definitions', authMiddleware, async (req, res) => {
+router.post('/definitions', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     req.body.createdBy = uid(req);
     const def = await engine.createWorkflow(req.body);
@@ -199,7 +200,7 @@ router.post('/definitions', authMiddleware, async (req, res) => {
   }
 });
 
-router.put('/definitions/:id', authMiddleware, async (req, res) => {
+router.put('/definitions/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await WorkflowDefinition.findByIdAndUpdate(
       req.params.id,
@@ -213,7 +214,7 @@ router.put('/definitions/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/definitions/:id/publish', authMiddleware, async (req, res) => {
+router.post('/definitions/:id/publish', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await engine.publishWorkflow(req.params.id, uid(req));
     res.json({ success: true, data: def, message: 'تم نشر سير العمل وتفعيله' });
@@ -222,7 +223,7 @@ router.post('/definitions/:id/publish', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/definitions/:id/clone', authMiddleware, async (req, res) => {
+router.post('/definitions/:id/clone', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const original = await WorkflowDefinition.findById(req.params.id).lean();
     if (!original) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -243,7 +244,7 @@ router.post('/definitions/:id/clone', authMiddleware, async (req, res) => {
   }
 });
 
-router.delete('/definitions/:id', authMiddleware, async (req, res) => {
+router.delete('/definitions/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await WorkflowDefinition.findByIdAndUpdate(
       req.params.id,
@@ -258,7 +259,7 @@ router.delete('/definitions/:id', authMiddleware, async (req, res) => {
 });
 
 // Export definition as JSON
-router.get('/definitions/:id/export', authMiddleware, async (req, res) => {
+router.get('/definitions/:id/export', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const def = await WorkflowDefinition.findById(req.params.id).lean();
     if (!def) return res.status(404).json({ success: false, message: 'غير موجود' });
@@ -271,7 +272,7 @@ router.get('/definitions/:id/export', authMiddleware, async (req, res) => {
 });
 
 // Import definition from JSON
-router.post('/definitions/import', authMiddleware, async (req, res) => {
+router.post('/definitions/import', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const data = req.body;
     data.code = `imported_${Date.now()}`;
@@ -803,7 +804,7 @@ function getBuiltInTemplates() {
   ];
 }
 
-router.get('/templates', authMiddleware, async (_req, res) => {
+router.get('/templates', authMiddleware, requireBranchAccess, async (_req, res) => {
   try {
     const templates = getBuiltInTemplates();
     res.json({ success: true, data: templates });
@@ -813,7 +814,7 @@ router.get('/templates', authMiddleware, async (_req, res) => {
 });
 
 // Deploy template as new definition — looks up template server-side
-router.post('/templates/:templateId/deploy', authMiddleware, async (req, res) => {
+router.post('/templates/:templateId/deploy', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     // Use the same template list from GET /templates (extracted as helper)
     const templates = getBuiltInTemplates();
@@ -842,7 +843,7 @@ router.post('/templates/:templateId/deploy', authMiddleware, async (req, res) =>
 // INSTANCES  ─  Start / list / detail / cancel / suspend / resume
 // ============================================================================
 
-router.post('/instances/start', authMiddleware, async (req, res) => {
+router.post('/instances/start', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { workflowCode, title, variables, priority } = req.body;
     const instance = await engine.startWorkflow(workflowCode, uid(req), variables || {}, title);
@@ -856,7 +857,7 @@ router.post('/instances/start', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/instances', authMiddleware, async (req, res) => {
+router.get('/instances', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { status, priority, _category, _search, mine, page = 1, limit = 20 } = req.query;
     const query = {};
@@ -896,7 +897,7 @@ router.get('/instances', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/instances/:id', authMiddleware, async (req, res) => {
+router.get('/instances/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const instance = await WorkflowInstance.findById(req.params.id)
       .populate('definition')
@@ -923,7 +924,7 @@ router.get('/instances/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/instances/:id/cancel', authMiddleware, async (req, res) => {
+router.post('/instances/:id/cancel', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const instance = await engine.cancelWorkflow(req.params.id, uid(req), req.body.reason || '');
     res.json({ success: true, data: instance, message: 'تم إلغاء سير العمل' });
@@ -932,7 +933,7 @@ router.post('/instances/:id/cancel', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/instances/:id/suspend', authMiddleware, async (req, res) => {
+router.post('/instances/:id/suspend', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const instance = await WorkflowInstance.findById(req.params.id);
     if (!instance || instance.status !== 'running')
@@ -951,7 +952,7 @@ router.post('/instances/:id/suspend', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/instances/:id/resume', authMiddleware, async (req, res) => {
+router.post('/instances/:id/resume', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const instance = await WorkflowInstance.findById(req.params.id);
     if (!instance || instance.status !== 'suspended')
@@ -974,7 +975,7 @@ router.post('/instances/:id/resume', authMiddleware, async (req, res) => {
 // TASKS  ─  My tasks / detail / complete / reassign / delegate / bulk
 // ============================================================================
 
-router.get('/tasks', authMiddleware, async (req, res) => {
+router.get('/tasks', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { status, _priority, overdue, _search, page = 1, limit = 20 } = req.query;
     const query = { assignee: uid(req) };
@@ -1023,7 +1024,7 @@ router.get('/tasks', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/tasks/:id', authMiddleware, async (req, res) => {
+router.get('/tasks/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const task = await TaskInstance.findById(req.params.id)
       .populate({
@@ -1046,7 +1047,7 @@ router.get('/tasks/:id', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/tasks/:id/start', authMiddleware, async (req, res) => {
+router.post('/tasks/:id/start', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const task = await TaskInstance.findById(req.params.id);
     if (!task) return res.status(404).json({ success: false, message: 'غير موجودة' });
@@ -1059,7 +1060,7 @@ router.post('/tasks/:id/start', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/tasks/:id/complete', authMiddleware, async (req, res) => {
+router.post('/tasks/:id/complete', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { action, comment, attachments } = req.body;
     const task = await engine.completeTask(
@@ -1075,7 +1076,7 @@ router.post('/tasks/:id/complete', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/tasks/:id/reassign', authMiddleware, async (req, res) => {
+router.post('/tasks/:id/reassign', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { assigneeId, reason } = req.body;
     const task = await engine.reassignTask(req.params.id, assigneeId, uid(req), reason || '');
@@ -1086,7 +1087,7 @@ router.post('/tasks/:id/reassign', authMiddleware, async (req, res) => {
 });
 
 // Bulk complete tasks
-router.post('/tasks/bulk/complete', authMiddleware, async (req, res) => {
+router.post('/tasks/bulk/complete', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { taskIds, action, comment } = req.body;
     const results = [];
@@ -1108,7 +1109,7 @@ router.post('/tasks/bulk/complete', authMiddleware, async (req, res) => {
 // ANALYTICS  ─  Statistics / performance / bottlenecks / SLA compliance
 // ============================================================================
 
-router.get('/analytics/overview', authMiddleware, async (req, res) => {
+router.get('/analytics/overview', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { startDate, endDate, workflowId } = req.query;
     const match = {};
@@ -1243,7 +1244,7 @@ router.get('/analytics/overview', authMiddleware, async (req, res) => {
   }
 });
 
-router.get('/analytics/performance', authMiddleware, async (req, res) => {
+router.get('/analytics/performance', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     // Average processing time per step
     const stepPerformance = await TaskInstance.aggregate([
@@ -1330,7 +1331,7 @@ router.get('/analytics/performance', authMiddleware, async (req, res) => {
 // SLA  ─  Check violations (cron-friendly)
 // ============================================================================
 
-router.post('/sla/check', authMiddleware, async (req, res) => {
+router.post('/sla/check', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const result = await engine.checkSLAViolations();
     res.json({ success: true, data: result });
@@ -1343,7 +1344,7 @@ router.post('/sla/check', authMiddleware, async (req, res) => {
 // AUDIT LOG
 // ============================================================================
 
-router.get('/audit-log', authMiddleware, async (req, res) => {
+router.get('/audit-log', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { instanceId, action, page = 1, limit = 50 } = req.query;
     const query = {};

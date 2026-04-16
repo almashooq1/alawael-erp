@@ -37,6 +37,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
@@ -44,7 +45,7 @@ const router = express.Router();
 
 // 🔒 All CDSS routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const ClinicalRule = require('../models/ClinicalRule');
 const DrugLibrary = require('../models/DrugLibrary');
 const CdssAlert = require('../models/CdssAlert');

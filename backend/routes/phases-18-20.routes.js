@@ -5,11 +5,12 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // Apply authentication to all routes in this file
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // === PHASE 18: Enterprise Multi-Tenant ===
 router.post('/tenants/create', authorize(['admin', 'system_admin']), (_req, res) => {
   res.json({ success: true, phase: 18, feature: 'Create Tenant' });

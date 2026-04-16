@@ -5,13 +5,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { Exam, ExamSubmission } = require('../models/Exam');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth guard ──────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ══════════════════════════════════════════════════════════════
 //  EXAM CRUD
 // ══════════════════════════════════════════════════════════════

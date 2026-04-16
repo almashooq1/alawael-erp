@@ -6,13 +6,14 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const Feedback = require('../models/Feedback');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/feedback — list feedback (filter by beneficiary, therapist, sentiment, followUp) */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       beneficiary,
@@ -23,7 +24,7 @@ router.get('/', requireAuth, async (req, res) => {
       page = 1,
       limit = 25,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (beneficiary) filter.beneficiary = beneficiary;
     if (therapist) filter.therapist = therapist;
     if (sentiment) filter.sentiment = sentiment;
@@ -48,10 +49,10 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/feedback/stats — NPS and rating statistics */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { therapist, startDate, endDate } = req.query;
-    const match = {};
+    const match = { ...branchFilter(req) };
     if (therapist) match.therapist = require('mongoose').Types.ObjectId(therapist);
     if (startDate || endDate) {
       match.createdAt = {};
@@ -126,9 +127,9 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 /** GET /api/feedback/:id — get single feedback */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const feedback = await Feedback.findById(req.params.id)
+    const feedback = await Feedback.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('session')
       .populate('beneficiary', 'name fileNumber')
       .populate('therapist', 'name');
@@ -140,9 +141,13 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** POST /api/feedback — create feedback */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const feedback = await Feedback.create(stripUpdateMeta(req.body));
+    const body = { ...stripUpdateMeta(req.body) };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
+    const feedback = await Feedback.create(body);
     res.status(201).json({ success: true, data: feedback });
   } catch (err) {
     logger.error('feedback create error:', err);
@@ -151,12 +156,16 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 /** PUT /api/feedback/:id — update feedback */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const feedback = await Feedback.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const feedback = await Feedback.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!feedback) return res.status(404).json({ success: false, message: 'Feedback not found' });
     res.json({ success: true, data: feedback });
   } catch (err) {
@@ -166,22 +175,31 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/feedback/:id — delete feedback (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const feedback = await Feedback.findByIdAndDelete(req.params.id);
-    if (!feedback) return res.status(404).json({ success: false, message: 'Feedback not found' });
-    res.json({ success: true, message: 'Feedback deleted' });
-  } catch (err) {
-    safeError(res, err, 'feedback delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const feedback = await Feedback.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!feedback) return res.status(404).json({ success: false, message: 'Feedback not found' });
+      res.json({ success: true, message: 'Feedback deleted' });
+    } catch (err) {
+      safeError(res, err, 'feedback delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/feedback/:id/follow-up — resolve follow-up */
-router.patch('/:id/follow-up', requireAuth, async (req, res) => {
+router.patch('/:id/follow-up', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { followUpStatus, followUpNotes } = req.body;
-    const feedback = await Feedback.findByIdAndUpdate(
-      req.params.id,
+    const feedback = await Feedback.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { followUpStatus, followUpNotes },
       { new: true, runValidators: true }
     );

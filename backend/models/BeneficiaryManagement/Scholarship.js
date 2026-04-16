@@ -16,6 +16,12 @@ const scholarshipSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Application Details
     applicationStatus: {
@@ -188,6 +194,7 @@ const scholarshipSchema = new mongoose.Schema(
 scholarshipSchema.index({ academicYear: 1 });
 scholarshipSchema.index({ applicationDate: -1 });
 scholarshipSchema.index({ approvalDate: -1 });
+scholarshipSchema.index({ branchId: 1, applicationStatus: 1 });
 
 // Pre-save middleware
 scholarshipSchema.pre('save', function (next) {

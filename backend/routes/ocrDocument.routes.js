@@ -5,6 +5,7 @@
 const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/ocrDocument.service');
 
 const router = express.Router();
@@ -23,7 +24,7 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
    ════════════════════════════════════════════ */
 router.get(
   '/dashboard',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getDashboard();
     res.json({ success: true, data });
@@ -33,24 +34,24 @@ router.get(
 /* ════════════════════════════════════════════
    REFERENCE DATA — البيانات المرجعية
    ════════════════════════════════════════════ */
-router.get('/document-types', authenticate, (req, res) =>
+router.get('/document-types', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getDocumentTypes() })
 );
-router.get('/ocr-engines', authenticate, (req, res) =>
+router.get('/ocr-engines', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getOCREngines() })
 );
-router.get('/processing-statuses', authenticate, (req, res) =>
+router.get('/processing-statuses', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getProcessingStatuses() })
 );
-router.get('/medical-fields', authenticate, (req, res) =>
+router.get('/medical-fields', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getMedicalFields() })
 );
-router.get('/supported-formats', authenticate, (req, res) =>
+router.get('/supported-formats', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getSupportedFormats() })
 );
 router.get(
   '/statistics',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.getStatistics() }))
 );
 
@@ -59,7 +60,7 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/documents',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const { beneficiaryId, documentType, status, search, fromDate, toDate } = req.query;
     const data = svc.listDocuments({
@@ -76,7 +77,7 @@ router.get(
 
 router.get(
   '/documents/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -88,7 +89,7 @@ router.get(
 
 router.post(
   '/documents',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist', 'receptionist']),
   [
     body('fileName').notEmpty().withMessage('اسم الملف مطلوب'),
@@ -103,7 +104,7 @@ router.post(
 
 router.put(
   '/documents/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -116,7 +117,7 @@ router.put(
 
 router.delete(
   '/documents/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -132,7 +133,7 @@ router.delete(
    ════════════════════════════════════════════ */
 router.post(
   '/documents/:id/reprocess',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -148,7 +149,7 @@ router.post(
    ════════════════════════════════════════════ */
 router.get(
   '/documents/:id/extraction',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -163,7 +164,7 @@ router.get(
 
 router.get(
   '/extractions/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -179,7 +180,7 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/documents/:id/corrections',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -190,7 +191,7 @@ router.get(
 
 router.post(
   '/documents/:id/corrections',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [
     param('id').notEmpty(),
@@ -213,7 +214,7 @@ router.post(
    ════════════════════════════════════════════ */
 router.put(
   '/documents/:id/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -227,7 +228,7 @@ router.put(
 
 router.put(
   '/documents/:id/reject',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   [param('id').notEmpty(), body('reason').notEmpty().withMessage('سبب الرفض مطلوب')],
   handleValidation,
@@ -244,7 +245,7 @@ router.put(
    ════════════════════════════════════════════ */
 router.get(
   '/templates',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listTemplates();
     res.json({ success: true, data });
@@ -253,7 +254,7 @@ router.get(
 
 router.get(
   '/templates/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -265,7 +266,7 @@ router.get(
 
 router.post(
   '/templates',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [
     body('name').notEmpty().withMessage('اسم القالب مطلوب'),
@@ -280,7 +281,7 @@ router.post(
 
 router.put(
   '/templates/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -293,7 +294,7 @@ router.put(
 
 router.delete(
   '/templates/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -309,7 +310,7 @@ router.delete(
    ════════════════════════════════════════════ */
 router.get(
   '/batches',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listBatches();
     res.json({ success: true, data });
@@ -318,7 +319,7 @@ router.get(
 
 router.get(
   '/batches/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -330,7 +331,7 @@ router.get(
 
 router.post(
   '/batches',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   wrap((req, res) => {
     const data = svc.createBatch(req.body, getUserId(req));
@@ -340,7 +341,7 @@ router.post(
 
 router.post(
   '/batches/:id/add-document',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty(), body('documentId').notEmpty().withMessage('معرف المستند مطلوب')],
   handleValidation,
@@ -354,7 +355,7 @@ router.post(
 
 router.post(
   '/batches/:id/process',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -370,7 +371,7 @@ router.post(
    ════════════════════════════════════════════ */
 router.get(
   '/search',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   query('q').notEmpty().withMessage('عبارة البحث مطلوبة'),
   handleValidation,
   wrap((req, res) => {
@@ -384,7 +385,7 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/beneficiaries/:beneficiaryId/documents',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -395,7 +396,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/medical-summary',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -409,7 +410,7 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/documents/:id/export',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('id').notEmpty(), query('format').optional().isIn(['json', 'csv'])],
   handleValidation,
   wrap((req, res) => {
@@ -427,7 +428,7 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/audit-log',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   wrap((req, res) => {
     const { documentId } = req.query;
@@ -438,7 +439,7 @@ router.get(
 
 router.get(
   '/documents/:id/audit-log',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {

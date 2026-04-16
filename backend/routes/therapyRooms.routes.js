@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/therapy-rooms — list rooms */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { type, isMaintenance } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (type) filter.type = type;
     if (isMaintenance !== undefined) filter.isMaintenance = isMaintenance === 'true';
 
@@ -27,10 +28,10 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/therapy-rooms/available — rooms not under maintenance */
-router.get('/available', requireAuth, async (req, res) => {
+router.get('/available', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { type, minCapacity } = req.query;
-    const filter = { isMaintenance: false };
+    const filter = { isMaintenance: false, ...branchFilter(req) };
     if (type) filter.type = type;
     if (minCapacity) filter.capacity = { $gte: Number(minCapacity) };
 
@@ -42,9 +43,9 @@ router.get('/available', requireAuth, async (req, res) => {
 });
 
 /** GET /api/therapy-rooms/:id — get single room */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const room = await TherapyRoom.findById(req.params.id);
+    const room = await TherapyRoom.findOne({ _id: req.params.id, ...branchFilter(req) });
     if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
     res.json({ success: true, data: room });
   } catch (err) {
@@ -53,50 +54,77 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** POST /api/therapy-rooms — create room (admin) */
-router.post('/', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
-  try {
-    const room = await TherapyRoom.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: room });
-  } catch (err) {
-    logger.error('therapyRoom create error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.post(
+  '/',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'supervisor']),
+  async (req, res) => {
+    try {
+      const body = stripUpdateMeta(req.body);
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const room = await TherapyRoom.create(body);
+      res.status(201).json({ success: true, data: room });
+    } catch (err) {
+      logger.error('therapyRoom create error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** PUT /api/therapy-rooms/:id — update room */
-router.put('/:id', requireAuth, requireRole(['admin', 'supervisor']), async (req, res) => {
-  try {
-    const room = await TherapyRoom.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
-    if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
-    res.json({ success: true, data: room });
-  } catch (err) {
-    logger.error('therapyRoom update error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin', 'supervisor']),
+  async (req, res) => {
+    try {
+      const room = await TherapyRoom.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
+      if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
+      res.json({ success: true, data: room });
+    } catch (err) {
+      logger.error('therapyRoom update error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** DELETE /api/therapy-rooms/:id — delete room (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const room = await TherapyRoom.findByIdAndDelete(req.params.id);
-    if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
-    res.json({ success: true, message: 'Room deleted' });
-  } catch (err) {
-    safeError(res, err, 'therapyRoom delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const room = await TherapyRoom.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
+      if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
+      res.json({ success: true, message: 'Room deleted' });
+    } catch (err) {
+      safeError(res, err, 'therapyRoom delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/therapy-rooms/:id/maintenance — toggle maintenance */
 router.patch(
   '/:id/maintenance',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor']),
   async (req, res) => {
     try {
-      const room = await TherapyRoom.findById(req.params.id);
+      const room = await TherapyRoom.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!room) return res.status(404).json({ success: false, message: 'Room not found' });
       room.isMaintenance = !room.isMaintenance;
       await room.save();

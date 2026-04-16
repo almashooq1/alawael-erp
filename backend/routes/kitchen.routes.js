@@ -15,11 +15,12 @@ const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../model
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // All kitchen routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── Field whitelists ────────────────────────────────────────────────────────
 const pick = (obj, keys) => Object.fromEntries(keys.filter(k => k in obj).map(k => [k, obj[k]]));
 

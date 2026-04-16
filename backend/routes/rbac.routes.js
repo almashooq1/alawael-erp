@@ -9,6 +9,7 @@ const express = require('express');
 const rbacController = require('../controllers/rbac.controller');
 const { protect } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 let rbacManager;
 try {
   rbacManager = require('../services/rbacManager.service');

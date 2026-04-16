@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // GET /incentives
 router.get('/incentives', async (req, res) => {
   try {

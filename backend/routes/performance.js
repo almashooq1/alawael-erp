@@ -3,12 +3,14 @@ const express = require('express');
 const PerformanceService = require('../services/performanceService');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 const router = express.Router();
 
 // All performance routes require authentication and admin access
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(authorize(['admin', 'system_admin']));
 
 // Get performance analysis

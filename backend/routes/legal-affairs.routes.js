@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 function safeModel(name) {
   try {
     return require('mongoose').model(name);
@@ -20,7 +21,7 @@ const safeError = require('../utils/safeError');
 }
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ── Field whitelists ───────────────────────────────────── */
 const CASE_FIELDS = [
   'title',

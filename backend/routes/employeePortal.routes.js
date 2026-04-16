@@ -13,6 +13,7 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Employee = require('../models/Employee');
 const LeaveRequest = require('../models/LeaveRequest');
@@ -21,7 +22,7 @@ const Document = require('../models/Document');
 const EmployeeRequest = require('../models/EmployeeRequest');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Root endpoint — GET /api/employee-portal ────────────────────────────────
 router.get('/', async (req, res) => {
   res.json({

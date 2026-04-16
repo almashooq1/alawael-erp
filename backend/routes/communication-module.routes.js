@@ -16,6 +16,7 @@ const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // ─── Models ───────────────────────────────────────────────────────────────────
 const Announcement = require('../models/communication/Announcement');
 const InternalMessage = require('../models/communication/InternalMessage');
@@ -26,7 +27,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ══════════════════════════════════════════════════════════════
 // ANNOUNCEMENTS — الإعلانات
 // ══════════════════════════════════════════════════════════════

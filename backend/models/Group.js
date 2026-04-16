@@ -45,6 +45,11 @@ const groupSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      index: true,
+    },
     totalExpenses: {
       type: Number,
       default: 0,
@@ -69,5 +74,6 @@ groupSchema.virtual('memberCount').get(function () {
 groupSchema.index({ createdBy: 1 });
 groupSchema.index({ 'members.user': 1 });
 groupSchema.index({ status: 1 });
+groupSchema.index({ branchId: 1, status: 1 }); // Branch-scoped group queries
 
 module.exports = mongoose.models.Group || mongoose.model('Group', groupSchema);

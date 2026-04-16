@@ -16,6 +16,12 @@ const financialSupportSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Support Request Information
     supportType: {
@@ -231,6 +237,7 @@ financialSupportSchema.index({ requestDate: -1 });
 financialSupportSchema.index({ urgencyLevel: 1 });
 financialSupportSchema.index({ eligibilityStatus: 1 });
 financialSupportSchema.index({ approvalDate: -1 });
+financialSupportSchema.index({ branchId: 1, requestStatus: 1 });
 
 // Pre-save middleware
 financialSupportSchema.pre('save', function (next) {

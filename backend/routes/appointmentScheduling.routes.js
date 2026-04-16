@@ -13,6 +13,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   ScheduleTemplate,
   TimeSlot,
@@ -23,7 +24,7 @@ const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ── Field whitelists ───────────────────────────────────────────── */
 const TEMPLATE_FIELDS = [
   'name',

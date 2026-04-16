@@ -6,13 +6,14 @@ const express = require('express');
 const router = express.Router();
 const { AcademicYear } = require('../models/AcademicYear');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const validateObjectId = require('../middleware/validateObjectId');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── Get all academic years ───────────────────────────────────
 router.get('/', async (req, res) => {
   try {

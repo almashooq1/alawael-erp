@@ -7,12 +7,13 @@ const router = express.Router();
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const RiskAssessment = require('../models/RiskAssessment');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Risk matrix overview (before /:id) ──────────────────────────────────────
 router.get('/matrix/overview', async (req, res) => {
   try {

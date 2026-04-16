@@ -15,6 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken: authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // ── Service ──
@@ -29,7 +30,7 @@ const service = new LearningDevelopmentService();
 /**
  * POST / — Create a learning program
  */
-router.post('/', authenticate, async (req, res) => {
+router.post('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.createLearningProgram(req.body);
     res.status(201).json({ success: true, data });
@@ -42,7 +43,7 @@ router.post('/', authenticate, async (req, res) => {
 /**
  * GET / — List learning programs (with filters)
  */
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.listPrograms(req.query);
     res.json({ success: true, data });
@@ -54,7 +55,7 @@ router.get('/', authenticate, async (req, res) => {
 /**
  * GET /programs/:programId — Get a single program
  */
-router.get('/programs/:programId', authenticate, async (req, res) => {
+router.get('/programs/:programId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getProgram(req.params.programId);
     res.json({ success: true, data });
@@ -67,7 +68,7 @@ router.get('/programs/:programId', authenticate, async (req, res) => {
 /**
  * PUT /programs/:programId — Update a program
  */
-router.put('/programs/:programId', authenticate, async (req, res) => {
+router.put('/programs/:programId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.updateProgram(req.params.programId, req.body);
     res.json({ success: true, data });
@@ -80,7 +81,7 @@ router.put('/programs/:programId', authenticate, async (req, res) => {
 /**
  * PATCH /programs/:programId/archive — Archive a program
  */
-router.patch('/programs/:programId/archive', authenticate, async (req, res) => {
+router.patch('/programs/:programId/archive', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.archiveProgram(req.params.programId);
     res.json({ success: true, data });
@@ -97,7 +98,7 @@ router.patch('/programs/:programId/archive', authenticate, async (req, res) => {
 /**
  * POST /enrollments — Enroll an employee in a program
  */
-router.post('/enrollments', authenticate, async (req, res) => {
+router.post('/enrollments', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.enrollEmployee(req.body);
     res.status(201).json({ success: true, data });
@@ -110,7 +111,7 @@ router.post('/enrollments', authenticate, async (req, res) => {
 /**
  * PATCH /enrollments/:enrollmentId/status — Update enrollment status / progress
  */
-router.patch('/enrollments/:enrollmentId/status', authenticate, async (req, res) => {
+router.patch('/enrollments/:enrollmentId/status', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status, ...additionalData } = req.body;
     const data = service.updateEnrollmentStatus(req.params.enrollmentId, status, additionalData);
@@ -124,7 +125,7 @@ router.patch('/enrollments/:enrollmentId/status', authenticate, async (req, res)
 /**
  * GET /enrollments/:enrollmentId — Get enrollment details
  */
-router.get('/enrollments/:enrollmentId', authenticate, async (req, res) => {
+router.get('/enrollments/:enrollmentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getEnrollment(req.params.enrollmentId);
     res.json({ success: true, data });
@@ -137,7 +138,7 @@ router.get('/enrollments/:enrollmentId', authenticate, async (req, res) => {
 /**
  * GET /enrollments/mandatory/:employeeId — Track mandatory training
  */
-router.get('/enrollments/mandatory/:employeeId', authenticate, async (req, res) => {
+router.get('/enrollments/mandatory/:employeeId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.trackMandatoryTraining(req.params.employeeId);
     res.json({ success: true, data });
@@ -153,7 +154,7 @@ router.get('/enrollments/mandatory/:employeeId', authenticate, async (req, res) 
 /**
  * GET /analytics/completion — Completion rates
  */
-router.get('/analytics/completion', authenticate, async (req, res) => {
+router.get('/analytics/completion', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getCompletionRates(req.query);
     res.json({ success: true, data });
@@ -165,7 +166,7 @@ router.get('/analytics/completion', authenticate, async (req, res) => {
 /**
  * GET /analytics/scores/:employeeId — Assessment scores for employee
  */
-router.get('/analytics/scores/:employeeId', authenticate, async (req, res) => {
+router.get('/analytics/scores/:employeeId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getAssessmentScores(req.params.employeeId);
     res.json({ success: true, data });
@@ -177,7 +178,7 @@ router.get('/analytics/scores/:employeeId', authenticate, async (req, res) => {
 /**
  * GET /analytics/skills/:employeeId — Skill improvement tracking
  */
-router.get('/analytics/skills/:employeeId', authenticate, async (req, res) => {
+router.get('/analytics/skills/:employeeId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.trackSkillImprovement(req.params.employeeId);
     res.json({ success: true, data });
@@ -189,7 +190,7 @@ router.get('/analytics/skills/:employeeId', authenticate, async (req, res) => {
 /**
  * GET /analytics/roi/:programId — Learning ROI for a program
  */
-router.get('/analytics/roi/:programId', authenticate, async (req, res) => {
+router.get('/analytics/roi/:programId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.measureLearningROI(req.params.programId);
     res.json({ success: true, data });
@@ -201,7 +202,7 @@ router.get('/analytics/roi/:programId', authenticate, async (req, res) => {
 /**
  * GET /analytics/report — Generate learning report
  */
-router.get('/analytics/report', authenticate, async (req, res) => {
+router.get('/analytics/report', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.generateLearningReport(req.query);
     res.json({ success: true, data });
@@ -217,7 +218,7 @@ router.get('/analytics/report', authenticate, async (req, res) => {
 /**
  * POST /certifications — Define a certification path
  */
-router.post('/certifications', authenticate, async (req, res) => {
+router.post('/certifications', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.defineCertificationPath(req.body);
     res.status(201).json({ success: true, data });
@@ -230,7 +231,7 @@ router.post('/certifications', authenticate, async (req, res) => {
 /**
  * POST /certifications/:certificationId/exams — Track exam status
  */
-router.post('/certifications/:certificationId/exams', authenticate, async (req, res) => {
+router.post('/certifications/:certificationId/exams', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { employeeId, ...examData } = req.body;
     const data = service.trackExamStatus(employeeId, req.params.certificationId, examData);
@@ -244,7 +245,7 @@ router.post('/certifications/:certificationId/exams', authenticate, async (req, 
 /**
  * POST /certifications/:certificationId/renewal — Manage license renewal
  */
-router.post('/certifications/:certificationId/renewal', authenticate, async (req, res) => {
+router.post('/certifications/:certificationId/renewal', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { employeeId, ...renewalData } = req.body;
     const data = service.manageLicenseRenewal(employeeId, req.params.certificationId, renewalData);
@@ -262,7 +263,7 @@ router.post('/certifications/:certificationId/renewal', authenticate, async (req
 /**
  * POST /integrations — Connect third-party learning platform
  */
-router.post('/integrations', authenticate, async (req, res) => {
+router.post('/integrations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.integrateThirdPartyPlatform(req.body);
     res.status(201).json({ success: true, data });
@@ -275,7 +276,7 @@ router.post('/integrations', authenticate, async (req, res) => {
 /**
  * POST /integrations/:integrationId/sync — Sync learning content
  */
-router.post('/integrations/:integrationId/sync', authenticate, async (req, res) => {
+router.post('/integrations/:integrationId/sync', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.syncLearningContent(req.params.integrationId);
     res.json({ success: true, data });

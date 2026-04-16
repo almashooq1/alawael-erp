@@ -20,6 +20,7 @@
 'use strict';
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const zatcaService = require('../services/zatca-phase2.service');
 const { authenticateToken } = require('../middleware/auth.middleware');
@@ -31,7 +32,7 @@ const requireAuth = authenticateToken;
  * POST /api/zatca-phase2/onboarding
  * تسجيل فرع جديد واستخراج Compliance CSID
  */
-router.post('/onboarding', requireAuth, async (req, res) => {
+router.post('/onboarding', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { branchId, orgData, otp } = req.body;
     if (!branchId || !orgData || !otp) {
@@ -52,7 +53,7 @@ router.post('/onboarding', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/production-csid
  * الحصول على Production CSID بعد نجاح Compliance Check
  */
-router.post('/production-csid', requireAuth, async (req, res) => {
+router.post('/production-csid', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { branchId } = req.body;
     if (!branchId) {
@@ -70,7 +71,7 @@ router.post('/production-csid', requireAuth, async (req, res) => {
  * GET /api/zatca-phase2/credential-status/:branchId
  * فحص حالة اعتماد ZATCA للفرع
  */
-router.get('/credential-status/:branchId', requireAuth, async (req, res) => {
+router.get('/credential-status/:branchId', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const result = await zatcaService.getCredentialStatus(req.params.branchId);
     return res.json({ success: true, data: result });
@@ -84,7 +85,7 @@ router.get('/credential-status/:branchId', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/invoice/process
  * معالجة فاتورة كاملة: بناء XML + PIH + Hash + QR + إرسال
  */
-router.post('/invoice/process', requireAuth, async (req, res) => {
+router.post('/invoice/process', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const invoiceData = req.body;
     const required = [
@@ -135,7 +136,7 @@ router.post('/invoice/process', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/invoice/build-xml
  * بناء XML الفاتورة وفق UBL 2.1 بدون إرسال
  */
-router.post('/invoice/build-xml', requireAuth, async (req, res) => {
+router.post('/invoice/build-xml', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const invoiceData = req.body;
     const xml = zatcaService.buildInvoiceXml(invoiceData);
@@ -152,7 +153,7 @@ router.post('/invoice/build-xml', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/invoice/qr
  * توليد QR Code وفق مواصفات ZATCA (TLV Base64 - Tags 1-9)
  */
-router.post('/invoice/qr', requireAuth, async (req, res) => {
+router.post('/invoice/qr', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       sellerName,
@@ -196,7 +197,7 @@ router.post('/invoice/qr', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/invoice/qr/decode
  * فك ترميز QR Code وعرض البيانات المضمنة
  */
-router.post('/invoice/qr/decode', requireAuth, (req, res) => {
+router.post('/invoice/qr/decode', requireAuth, requireBranchAccess, (req, res) => {
   try {
     const { qrCode } = req.body;
     if (!qrCode) {
@@ -214,7 +215,7 @@ router.post('/invoice/qr/decode', requireAuth, (req, res) => {
  * POST /api/zatca-phase2/invoice/report
  * إرسال فاتورة مبسطة للإبلاغ (Simplified Invoice Reporting)
  */
-router.post('/invoice/report', requireAuth, async (req, res) => {
+router.post('/invoice/report', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { invoiceXml, invoiceHash, uuid, csid, secret } = req.body;
     if (!invoiceXml || !invoiceHash) {
@@ -241,7 +242,7 @@ router.post('/invoice/report', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/invoice/clear
  * إرسال فاتورة ضريبية للمقاصة (Standard Invoice Clearance)
  */
-router.post('/invoice/clear', requireAuth, async (req, res) => {
+router.post('/invoice/clear', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { invoiceXml, invoiceHash, uuid, csid, secret } = req.body;
     if (!invoiceXml || !invoiceHash) {
@@ -264,7 +265,7 @@ router.post('/invoice/clear', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/compliance/check
  * فحص التوافق مع ZATCA لفاتورة معينة
  */
-router.post('/compliance/check', requireAuth, async (req, res) => {
+router.post('/compliance/check', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { invoiceXml, invoiceHash, csid, secret } = req.body;
     if (!invoiceXml || !invoiceHash) {
@@ -286,7 +287,7 @@ router.post('/compliance/check', requireAuth, async (req, res) => {
  * POST /api/zatca-phase2/vat/calculate
  * حساب ضريبة القيمة المضافة السعودية (15%)
  */
-router.post('/vat/calculate', requireAuth, (req, res) => {
+router.post('/vat/calculate', requireAuth, requireBranchAccess, (req, res) => {
   try {
     const { amount, rate } = req.body;
     if (amount == null || isNaN(parseFloat(amount))) {
@@ -304,7 +305,7 @@ router.post('/vat/calculate', requireAuth, (req, res) => {
  * POST /api/zatca-phase2/vat/validate
  * التحقق من صحة رقم الضريبة السعودي (15 رقم)
  */
-router.post('/vat/validate', requireAuth, (req, res) => {
+router.post('/vat/validate', requireAuth, requireBranchAccess, (req, res) => {
   try {
     const { vatNumber } = req.body;
     const isValid = zatcaService.validateVatNumber(vatNumber);
@@ -326,7 +327,7 @@ router.post('/vat/validate', requireAuth, (req, res) => {
  * GET /api/zatca-phase2/cpt-codes
  * قائمة رموز CPT المستخدمة في مراكز تأهيل ذوي الإعاقة
  */
-router.get('/cpt-codes', requireAuth, (req, res) => {
+router.get('/cpt-codes', requireAuth, requireBranchAccess, (req, res) => {
   try {
     const codes = zatcaService.getRehabCptCodes();
     const list = Object.entries(codes).map(([code, info]) => ({
@@ -348,7 +349,7 @@ router.get('/cpt-codes', requireAuth, (req, res) => {
  * GET /api/zatca-phase2/status
  * حالة تكامل ZATCA Phase 2
  */
-router.get('/status', requireAuth, async (req, res) => {
+router.get('/status', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const branchId = req.query.branchId || null;
     let credentialStatus = null;

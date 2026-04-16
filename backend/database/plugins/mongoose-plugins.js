@@ -237,7 +237,7 @@ function auditPlugin(schema) {
 function branchPlugin(schema, options = {}) {
   if (options.required !== false) {
     schema.add({
-      branch: {
+      branchId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Branch',
         index: true,
@@ -249,7 +249,7 @@ function branchPlugin(schema, options = {}) {
 
   // Scope queries to branch
   schema.statics.forBranch = function (branchId) {
-    return this.find({ branch: branchId });
+    return this.find({ branchId });
   };
 
   schema.statics.forBranchCode = function (code) {

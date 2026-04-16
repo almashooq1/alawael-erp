@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const nphiesService = require('../services/nphies.service');
 const { authenticateToken, requirePermission } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
@@ -21,7 +22,7 @@ const safeError = require('../utils/safeError');
  */
 router.post(
   '/eligibility/check',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:eligibility:check'),
   async (req, res) => {
     try {
@@ -67,7 +68,7 @@ router.post(
  */
 router.post(
   '/prior-auth/request',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:prior-auth:request'),
   async (req, res) => {
     try {
@@ -122,7 +123,7 @@ router.post(
  */
 router.post(
   '/claims/submit',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:claims:submit'),
   async (req, res) => {
     try {
@@ -173,7 +174,7 @@ router.post(
  */
 router.get(
   '/claims/:claimId/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:claims:read'),
   async (req, res) => {
     try {
@@ -206,7 +207,7 @@ router.get(
  */
 router.delete(
   '/claims/:claimId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:claims:cancel'),
   async (req, res) => {
     try {
@@ -236,7 +237,7 @@ router.delete(
  */
 router.post(
   '/communication/respond',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:communication:respond'),
   async (req, res) => {
     try {
@@ -281,7 +282,7 @@ router.post(
  */
 router.post(
   '/payment/reconcile',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:payment:reconcile'),
   async (req, res) => {
     try {
@@ -315,7 +316,7 @@ router.post(
  * GET /api/nphies/cpt-codes
  * الحصول على قائمة رموز CPT لمراكز التأهيل
  */
-router.get('/cpt-codes', authenticateToken, async (req, res) => {
+router.get('/cpt-codes', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { specialty } = req.query;
     let codes = nphiesService.getRehabCptCodes();
@@ -345,7 +346,7 @@ router.get('/cpt-codes', authenticateToken, async (req, res) => {
  * GET /api/nphies/cpt-codes/:code
  * الحصول على تفاصيل رمز CPT محدد
  */
-router.get('/cpt-codes/:code', authenticateToken, async (req, res) => {
+router.get('/cpt-codes/:code', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { code } = req.params;
     const description = nphiesService.getCptDescription(code);
@@ -377,7 +378,7 @@ router.get('/cpt-codes/:code', authenticateToken, async (req, res) => {
  * GET /api/nphies/status
  * التحقق من حالة خدمة NPHIES وإعداداتها
  */
-router.get('/status', authenticateToken, async (req, res) => {
+router.get('/status', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const status = nphiesService.getStatus();
 
@@ -401,7 +402,7 @@ router.get('/status', authenticateToken, async (req, res) => {
  */
 router.post(
   '/fhir/bundle',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   requirePermission('nphies:admin'),
   async (req, res) => {
     try {

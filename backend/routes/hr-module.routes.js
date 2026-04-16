@@ -2,6 +2,7 @@ const express = require('express');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const Employee = require('../models/HR/Employee');
 const EmploymentContract = require('../models/HR/EmploymentContract');
@@ -20,7 +21,7 @@ const {
 } = require('../services/hr/HRService');
 
 // ===== الموظفون =====
-router.get('/employees', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/employees', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const {
       branch_id,
@@ -57,7 +58,7 @@ router.get('/employees', authenticate, authorize('hr.view'), async (req, res) =>
   }
 });
 
-router.post('/employees', authenticate, authorize('hr.create'), async (req, res) => {
+router.post('/employees', authenticate, requireBranchAccess, authorize('hr.create'), async (req, res) => {
   try {
     const employee = await Employee.create({
       ...stripUpdateMeta(req.body),
@@ -69,7 +70,7 @@ router.post('/employees', authenticate, authorize('hr.create'), async (req, res)
   }
 });
 
-router.get('/employees/:id', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/employees/:id', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const emp = await Employee.findOne({ _id: req.params.id, deleted_at: null }).populate(
       'branch_id'
@@ -81,7 +82,7 @@ router.get('/employees/:id', authenticate, authorize('hr.view'), async (req, res
   }
 });
 
-router.put('/employees/:id', authenticate, authorize('hr.edit'), async (req, res) => {
+router.put('/employees/:id', authenticate, requireBranchAccess, authorize('hr.edit'), async (req, res) => {
   try {
     const emp = await Employee.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
@@ -95,7 +96,7 @@ router.put('/employees/:id', authenticate, authorize('hr.edit'), async (req, res
   }
 });
 
-router.delete('/employees/:id', authenticate, authorize('hr.delete'), async (req, res) => {
+router.delete('/employees/:id', authenticate, requireBranchAccess, authorize('hr.delete'), async (req, res) => {
   try {
     await Employee.findByIdAndUpdate(req.params.id, { deleted_at: new Date() });
     res.json({ message: 'تم حذف الموظف بنجاح' });
@@ -105,7 +106,7 @@ router.delete('/employees/:id', authenticate, authorize('hr.delete'), async (req
 });
 
 // ===== كشوف الرواتب =====
-router.post('/payroll/calculate', authenticate, authorize('hr.payroll'), async (req, res) => {
+router.post('/payroll/calculate', authenticate, requireBranchAccess, authorize('hr.payroll'), async (req, res) => {
   try {
     const { employee_id, month, year } = req.body;
     const data = await PayrollCalculationService.calculatePayroll(employee_id, month, year);
@@ -117,7 +118,7 @@ router.post('/payroll/calculate', authenticate, authorize('hr.payroll'), async (
 
 router.post(
   '/payroll/generate-monthly',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('hr.payroll'),
   async (req, res) => {
     try {
@@ -134,7 +135,7 @@ router.post(
   }
 );
 
-router.get('/payroll', authenticate, authorize('hr.payroll'), async (req, res) => {
+router.get('/payroll', authenticate, requireBranchAccess, authorize('hr.payroll'), async (req, res) => {
   try {
     const { branch_id, month, year, status, page = 1, limit = 25 } = req.query;
     const query = { deleted_at: null };
@@ -154,7 +155,7 @@ router.get('/payroll', authenticate, authorize('hr.payroll'), async (req, res) =
   }
 });
 
-router.patch('/payroll/:id/approve', authenticate, authorize('hr.payroll'), async (req, res) => {
+router.patch('/payroll/:id/approve', authenticate, requireBranchAccess, authorize('hr.payroll'), async (req, res) => {
   try {
     const record = await PayrollRecord.findByIdAndUpdate(
       req.params.id,
@@ -168,7 +169,7 @@ router.patch('/payroll/:id/approve', authenticate, authorize('hr.payroll'), asyn
 });
 
 // ===== الإجازات =====
-router.post('/leaves', authenticate, async (req, res) => {
+router.post('/leaves', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { employee_id, leave_type, start_date, end_date, reason } = req.body;
     const leave = await LeaveService.applyLeave(
@@ -186,7 +187,7 @@ router.post('/leaves', authenticate, async (req, res) => {
   }
 });
 
-router.get('/leaves', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/leaves', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const { employee_id, leave_type, status, branch_id, page = 1, limit = 25 } = req.query;
     const query = { deleted_at: null };
@@ -208,7 +209,7 @@ router.get('/leaves', authenticate, authorize('hr.view'), async (req, res) => {
 
 router.patch(
   '/leaves/:id/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('hr.approve_leave'),
   async (req, res) => {
     try {
@@ -226,7 +227,7 @@ router.patch(
 
 router.patch(
   '/leaves/:id/reject',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('hr.approve_leave'),
   async (req, res) => {
     try {
@@ -242,7 +243,7 @@ router.patch(
   }
 );
 
-router.get('/leave-balance/:employee_id', authenticate, async (req, res) => {
+router.get('/leave-balance/:employee_id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const year = req.query.year || new Date().getFullYear();
     const balance = await LeaveBalance.getOrCreate(req.params.employee_id, +year);
@@ -253,7 +254,7 @@ router.get('/leave-balance/:employee_id', authenticate, async (req, res) => {
 });
 
 // ===== الحضور =====
-router.post('/attendance', authenticate, async (req, res) => {
+router.post('/attendance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const record = await AttendanceRecord.create({
       ...stripUpdateMeta(req.body),
@@ -265,7 +266,7 @@ router.post('/attendance', authenticate, async (req, res) => {
   }
 });
 
-router.get('/attendance', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/attendance', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const { employee_id, branch_id, date_from, date_to, status, page = 1, limit = 50 } = req.query;
     const query = { deleted_at: null };
@@ -290,7 +291,7 @@ router.get('/attendance', authenticate, authorize('hr.view'), async (req, res) =
 });
 
 // ===== نهاية الخدمة =====
-router.post('/end-of-service', authenticate, authorize('hr.eos'), async (req, res) => {
+router.post('/end-of-service', authenticate, requireBranchAccess, authorize('hr.eos'), async (req, res) => {
   try {
     const { employee_id, termination_date, termination_reason } = req.body;
     const eos = await EndOfServiceService.calculate(
@@ -304,7 +305,7 @@ router.post('/end-of-service', authenticate, authorize('hr.eos'), async (req, re
   }
 });
 
-router.patch('/end-of-service/:id/approve', authenticate, authorize('hr.eos'), async (req, res) => {
+router.patch('/end-of-service/:id/approve', authenticate, requireBranchAccess, authorize('hr.eos'), async (req, res) => {
   try {
     const eos = await EndOfServiceCalculation.findByIdAndUpdate(
       req.params.id,
@@ -318,7 +319,7 @@ router.patch('/end-of-service/:id/approve', authenticate, authorize('hr.eos'), a
 });
 
 // ===== التنبيهات =====
-router.get('/alerts/expiring-documents', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/alerts/expiring-documents', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const alerts = await HRAlertService.getExpiringDocuments(
       req.query.branch_id,
@@ -330,7 +331,7 @@ router.get('/alerts/expiring-documents', authenticate, authorize('hr.view'), asy
   }
 });
 
-router.get('/alerts/probation-ending', authenticate, authorize('hr.view'), async (req, res) => {
+router.get('/alerts/probation-ending', authenticate, requireBranchAccess, authorize('hr.view'), async (req, res) => {
   try {
     const employees = await HRAlertService.getProbationEndingSoon(
       req.query.branch_id,

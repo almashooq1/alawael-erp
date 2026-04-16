@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // استيراد النماذج
 const {
   AnnualAuditPlan,
@@ -17,7 +18,7 @@ const safeError = require('../utils/safeError');
 // ==========================================
 
 // إنشاء خطة تدقيق سنوية جديدة
-router.post('/audit-plans', authenticate, authorize('admin', 'audit_manager'), async (req, res) => {
+router.post('/audit-plans', authenticate, requireBranchAccess, authorize('admin', 'audit_manager'), async (req, res) => {
   try {
     const plan = new AnnualAuditPlan({
       ...req.body,
@@ -35,7 +36,7 @@ router.post('/audit-plans', authenticate, authorize('admin', 'audit_manager'), a
 });
 
 // الحصول على جميع خطط التدقيق
-router.get('/audit-plans', authenticate, async (req, res) => {
+router.get('/audit-plans', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { year, status, page = 1, limit = 10 } = req.query;
     const filter = {};
@@ -61,7 +62,7 @@ router.get('/audit-plans', authenticate, async (req, res) => {
 });
 
 // الحصول على خطة تدقيق محددة
-router.get('/audit-plans/:planId', authenticate, async (req, res) => {
+router.get('/audit-plans/:planId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const plan = await AnnualAuditPlan.findOne({ planId: req.params.planId });
     if (!plan) {
@@ -79,7 +80,7 @@ router.get('/audit-plans/:planId', authenticate, async (req, res) => {
 // تحديث خطة تدقيق
 router.put(
   '/audit-plans/:planId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -109,7 +110,7 @@ router.put(
 // حذف خطة تدقيق
 router.delete(
   '/audit-plans/:planId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -131,7 +132,7 @@ router.delete(
 // إنشاء تدقيق مفاجئ
 router.post(
   '/surprise-audits',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -152,7 +153,7 @@ router.post(
 );
 
 // الحصول على عمليات التدقيق المفاجئة
-router.get('/surprise-audits', authenticate, async (req, res) => {
+router.get('/surprise-audits', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status, department, page = 1, limit = 10 } = req.query;
     const filter = {};
@@ -178,7 +179,7 @@ router.get('/surprise-audits', authenticate, async (req, res) => {
 });
 
 // الحصول على تفاصيل تدقيق محدد
-router.get('/surprise-audits/:auditId', authenticate, async (req, res) => {
+router.get('/surprise-audits/:auditId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const audit = await SurpriseAudit.findOne({ auditId: req.params.auditId });
     if (!audit) {
@@ -196,7 +197,7 @@ router.get('/surprise-audits/:auditId', authenticate, async (req, res) => {
 // تحديث حالة التدقيق
 router.put(
   '/surprise-audits/:auditId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -226,7 +227,7 @@ router.put(
 // حذف تدقيق مفاجئ
 router.delete(
   '/surprise-audits/:auditId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -244,7 +245,7 @@ router.delete(
 // إضافة ملاحظات تدقيق
 router.post(
   '/surprise-audits/:auditId/observations',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -273,7 +274,7 @@ router.post(
 // ==========================================
 
 // إنشاء تقرير عدم مطابقة
-router.post('/non-conformance-reports', authenticate, async (req, res) => {
+router.post('/non-conformance-reports', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = new NonConformanceReport({
       ...req.body,
@@ -292,7 +293,7 @@ router.post('/non-conformance-reports', authenticate, async (req, res) => {
 });
 
 // الحصول على جميع تقارير عدم المطابقة
-router.get('/non-conformance-reports', authenticate, async (req, res) => {
+router.get('/non-conformance-reports', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status, category, department, page = 1, limit = 10 } = req.query;
     const filter = {};
@@ -319,7 +320,7 @@ router.get('/non-conformance-reports', authenticate, async (req, res) => {
 });
 
 // الحصول على تقرير محدد
-router.get('/non-conformance-reports/:ncrId', authenticate, async (req, res) => {
+router.get('/non-conformance-reports/:ncrId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = await NonConformanceReport.findOne({ ncrId: req.params.ncrId });
     if (!report) {
@@ -335,7 +336,7 @@ router.get('/non-conformance-reports/:ncrId', authenticate, async (req, res) => 
 });
 
 // تحديث تقرير عدم المطابقة
-router.put('/non-conformance-reports/:ncrId', authenticate, async (req, res) => {
+router.put('/non-conformance-reports/:ncrId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = await NonConformanceReport.findOneAndUpdate(
       { ncrId: req.params.ncrId },
@@ -362,7 +363,7 @@ router.put('/non-conformance-reports/:ncrId', authenticate, async (req, res) => 
 // تعيين المالك للتقرير
 router.put(
   '/non-conformance-reports/:ncrId/assign',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -394,7 +395,7 @@ router.put(
 // إغلاق تقرير عدم المطابقة
 router.put(
   '/non-conformance-reports/:ncrId/close',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -426,7 +427,7 @@ router.put(
 // ==========================================
 
 // إنشاء إجراء تصحيحي أو وقائي
-router.post('/corrective-preventive-actions', authenticate, async (req, res) => {
+router.post('/corrective-preventive-actions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const action = new CorrectivePreventiveAction({
       ...req.body,
@@ -444,7 +445,7 @@ router.post('/corrective-preventive-actions', authenticate, async (req, res) => 
 });
 
 // الحصول على جميع الإجراءات
-router.get('/corrective-preventive-actions', authenticate, async (req, res) => {
+router.get('/corrective-preventive-actions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { type, status, page = 1, limit = 10 } = req.query;
     const filter = {};
@@ -470,7 +471,7 @@ router.get('/corrective-preventive-actions', authenticate, async (req, res) => {
 });
 
 // الحصول على إجراء محدد
-router.get('/corrective-preventive-actions/:actionId', authenticate, async (req, res) => {
+router.get('/corrective-preventive-actions/:actionId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const action = await CorrectivePreventiveAction.findOne({ actionId: req.params.actionId });
     if (!action) {
@@ -486,7 +487,7 @@ router.get('/corrective-preventive-actions/:actionId', authenticate, async (req,
 });
 
 // تحديث الإجراء
-router.put('/corrective-preventive-actions/:actionId', authenticate, async (req, res) => {
+router.put('/corrective-preventive-actions/:actionId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const action = await CorrectivePreventiveAction.findOneAndUpdate(
       { actionId: req.params.actionId },
@@ -511,7 +512,7 @@ router.put('/corrective-preventive-actions/:actionId', authenticate, async (req,
 });
 
 // تحديث التقدم
-router.put('/corrective-preventive-actions/:actionId/progress', authenticate, async (req, res) => {
+router.put('/corrective-preventive-actions/:actionId/progress', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const action = await CorrectivePreventiveAction.findOneAndUpdate(
       { actionId: req.params.actionId },
@@ -535,7 +536,7 @@ router.put('/corrective-preventive-actions/:actionId/progress', authenticate, as
 // التحقق من الفعالية
 router.put(
   '/corrective-preventive-actions/:actionId/verify-effectiveness',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -566,7 +567,7 @@ router.put(
 // إغلاق الإجراء
 router.put(
   '/corrective-preventive-actions/:actionId/close',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -597,7 +598,7 @@ router.put(
 // ==========================================
 
 // إنشاء متابعة إغلاق
-router.post('/closure-followups', authenticate, async (req, res) => {
+router.post('/closure-followups', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const followUp = new ClosureFollowUp({
       ...req.body,
@@ -615,7 +616,7 @@ router.post('/closure-followups', authenticate, async (req, res) => {
 });
 
 // الحصول على متابعات الإغلاق
-router.get('/closure-followups', authenticate, async (req, res) => {
+router.get('/closure-followups', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status, linkedType, page = 1, limit = 10 } = req.query;
     const filter = {};
@@ -641,7 +642,7 @@ router.get('/closure-followups', authenticate, async (req, res) => {
 });
 
 // الحصول على متابعة محددة
-router.get('/closure-followups/:followUpId', authenticate, async (req, res) => {
+router.get('/closure-followups/:followUpId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const followUp = await ClosureFollowUp.findOne({ followUpId: req.params.followUpId });
     if (!followUp) {
@@ -657,7 +658,7 @@ router.get('/closure-followups/:followUpId', authenticate, async (req, res) => {
 });
 
 // تحديث متابعة الإغلاق
-router.put('/closure-followups/:followUpId', authenticate, async (req, res) => {
+router.put('/closure-followups/:followUpId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const followUp = await ClosureFollowUp.findOneAndUpdate(
       { followUpId: req.params.followUpId },
@@ -684,7 +685,7 @@ router.put('/closure-followups/:followUpId', authenticate, async (req, res) => {
 // التحقق من معايير الإغلاق
 router.put(
   '/closure-followups/:followUpId/verify-closure',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -714,7 +715,7 @@ router.put(
 // الموافقة النهائية والإغلاق
 router.put(
   '/closure-followups/:followUpId/final-closure',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -750,7 +751,7 @@ router.put(
 // حذف تقرير عدم المطابقة
 router.delete(
   '/non-conformance-reports/:ncrId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -768,7 +769,7 @@ router.delete(
 // حذف الإجراء التصحيحي/الوقائي
 router.delete(
   '/corrective-preventive-actions/:actionId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -788,7 +789,7 @@ router.delete(
 // حذف متابعة الإغلاق
 router.delete(
   '/closure-followups/:followUpId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'audit_manager'),
   async (req, res) => {
     try {
@@ -806,7 +807,7 @@ router.delete(
 );
 
 // لوحة تحكم التدقيق الداخلي
-router.get('/internal-audit-dashboard', authenticate, async (req, res) => {
+router.get('/internal-audit-dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const totalPlans = await AnnualAuditPlan.countDocuments();
     const activePlans = await AnnualAuditPlan.countDocuments({ status: 'active' });
@@ -867,7 +868,7 @@ router.get('/internal-audit-dashboard', authenticate, async (req, res) => {
 });
 
 // تقرير الامتثال بواسطة القسم
-router.get('/reports/compliance-by-department', authenticate, async (req, res) => {
+router.get('/reports/compliance-by-department', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = await NonConformanceReport.aggregate([
       {
@@ -904,7 +905,7 @@ router.get('/reports/compliance-by-department', authenticate, async (req, res) =
 });
 
 // تقرير حالة الإجراءات التصحيحية
-router.get('/reports/actions-status', authenticate, async (req, res) => {
+router.get('/reports/actions-status', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = await CorrectivePreventiveAction.aggregate([
       {

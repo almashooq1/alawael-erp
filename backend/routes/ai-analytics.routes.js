@@ -9,6 +9,7 @@ const express = require('express');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Models
@@ -20,7 +21,7 @@ const AiModelConfig = require('../models/AiModelConfig');
 
 // Auth middleware
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Helper: safe try-catch wrapper ──────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

@@ -5,6 +5,7 @@
 'use strict';
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const muqeemService = require('../services/muqeem.service');
 const { authenticateToken } = require('../middleware/auth.middleware');
@@ -16,7 +17,7 @@ const requireAuth = authenticateToken;
  * GET /api/muqeem/residence/:iqamaNumber
  * الاستعلام عن بيانات الإقامة لرقم إقامة محدد
  */
-router.get('/residence/:iqamaNumber', requireAuth, async (req, res) => {
+router.get('/residence/:iqamaNumber', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { iqamaNumber } = req.params;
     if (!iqamaNumber || !/^\d{10}$/.test(iqamaNumber)) {
@@ -41,7 +42,7 @@ router.get('/residence/:iqamaNumber', requireAuth, async (req, res) => {
  * GET /api/muqeem/workers
  * جلب قائمة الموظفين المسجلين في المنشأة لدى مقيم
  */
-router.get('/workers', requireAuth, async (req, res) => {
+router.get('/workers', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { page = 1, limit = 50 } = req.query;
     const result = await muqeemService.getEstablishmentWorkers(Number(page), Number(limit));
@@ -61,7 +62,7 @@ router.get('/workers', requireAuth, async (req, res) => {
  * GET /api/muqeem/expiring
  * الحصول على الموظفين الذين تنتهي إقاماتهم خلال عدد أيام محدد
  */
-router.get('/expiring', requireAuth, async (req, res) => {
+router.get('/expiring', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { daysAhead = 90 } = req.query;
     const result = await muqeemService.getExpiringResidencies(Number(daysAhead));
@@ -81,7 +82,7 @@ router.get('/expiring', requireAuth, async (req, res) => {
  * POST /api/muqeem/residence/renew
  * تجديد إقامة موظف
  */
-router.post('/residence/renew', requireAuth, async (req, res) => {
+router.post('/residence/renew', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { iqamaNumber, renewalPeriod } = req.body;
     if (!iqamaNumber) {
@@ -104,7 +105,7 @@ router.post('/residence/renew', requireAuth, async (req, res) => {
  * POST /api/muqeem/visa/exit-reentry
  * إصدار تأشيرة خروج وعودة لموظف
  */
-router.post('/visa/exit-reentry', requireAuth, async (req, res) => {
+router.post('/visa/exit-reentry', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { iqamaNumber, duration, numberOfTrips, purpose } = req.body;
     if (!iqamaNumber) {
@@ -135,7 +136,7 @@ router.post('/visa/exit-reentry', requireAuth, async (req, res) => {
  * POST /api/muqeem/visa/final-exit
  * إصدار تأشيرة خروج نهائي لموظف (إنهاء الخدمة)
  */
-router.post('/visa/final-exit', requireAuth, async (req, res) => {
+router.post('/visa/final-exit', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { iqamaNumber } = req.body;
     if (!iqamaNumber) {
@@ -162,7 +163,7 @@ router.post('/visa/final-exit', requireAuth, async (req, res) => {
  * POST /api/muqeem/worker/change-occupation
  * تغيير مهنة موظف في مقيم
  */
-router.post('/worker/change-occupation', requireAuth, async (req, res) => {
+router.post('/worker/change-occupation', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { iqamaNumber, newOccupation } = req.body;
     if (!iqamaNumber || !newOccupation) {

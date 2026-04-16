@@ -55,6 +55,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
@@ -105,7 +106,7 @@ function groupByField(field, countField = 'count') {
 // ══════════════════════════════════════════════════════════════════
 
 // GET /templates — قائمة القوالب
-router.get('/templates', authenticate, async (req, res) => {
+router.get('/templates', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, search, is_active, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -147,7 +148,7 @@ router.get('/templates', authenticate, async (req, res) => {
 });
 
 // GET /templates/:id — تفاصيل قالب
-router.get('/templates/:id', authenticate, async (req, res) => {
+router.get('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const template = await ReportTemplate.findById(req.params.id)
       .populate('created_by', 'name email')
@@ -160,7 +161,7 @@ router.get('/templates/:id', authenticate, async (req, res) => {
 });
 
 // POST /templates — إنشاء قالب
-router.post('/templates', authenticate, async (req, res) => {
+router.post('/templates', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const template = await ReportTemplate.create({
       ...req.body,
@@ -176,7 +177,7 @@ router.post('/templates', authenticate, async (req, res) => {
 });
 
 // PUT /templates/:id — تعديل قالب
-router.put('/templates/:id', authenticate, async (req, res) => {
+router.put('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const template = await ReportTemplate.findById(req.params.id);
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
@@ -194,7 +195,7 @@ router.put('/templates/:id', authenticate, async (req, res) => {
 });
 
 // DELETE /templates/:id — حذف ناعم
-router.delete('/templates/:id', authenticate, async (req, res) => {
+router.delete('/templates/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const template = await ReportTemplate.findById(req.params.id);
     if (!template) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
@@ -213,7 +214,7 @@ router.delete('/templates/:id', authenticate, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 
 // POST /jobs — تشغيل تقرير
-router.post('/jobs', authenticate, async (req, res) => {
+router.post('/jobs', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { template_id, parameters = {}, export_format = 'preview' } = req.body;
     if (!template_id) {
@@ -277,7 +278,7 @@ router.post('/jobs', authenticate, async (req, res) => {
 });
 
 // GET /jobs — سجل التقارير
-router.get('/jobs', authenticate, async (req, res) => {
+router.get('/jobs', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { template_id, status, export_format, page = 1, limit = 20 } = req.query;
 
@@ -319,7 +320,7 @@ router.get('/jobs', authenticate, async (req, res) => {
 });
 
 // GET /jobs/:id — حالة / نتيجة تقرير
-router.get('/jobs/:id', authenticate, async (req, res) => {
+router.get('/jobs/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const job = await ReportJob.findById(req.params.id)
       .populate('template_id', 'name_ar category code columns')
@@ -333,7 +334,7 @@ router.get('/jobs/:id', authenticate, async (req, res) => {
 });
 
 // GET /jobs/:id/download — تحميل ملف التقرير
-router.get('/jobs/:id/download', authenticate, async (req, res) => {
+router.get('/jobs/:id/download', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const job = await ReportJob.findById(req.params.id).lean();
     if (!job) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
@@ -378,7 +379,7 @@ router.get('/jobs/:id/download', authenticate, async (req, res) => {
 });
 
 // DELETE /jobs/:id — حذف تقرير
-router.delete('/jobs/:id', authenticate, async (req, res) => {
+router.delete('/jobs/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const job = await ReportJob.findById(req.params.id);
     if (!job) return res.status(404).json({ success: false, message: 'التقرير غير موجود' });
@@ -395,7 +396,7 @@ router.delete('/jobs/:id', authenticate, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 
 // GET /schedules
-router.get('/schedules', authenticate, async (req, res) => {
+router.get('/schedules', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { is_active, template_id, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -430,7 +431,7 @@ router.get('/schedules', authenticate, async (req, res) => {
 });
 
 // POST /schedules
-router.post('/schedules', authenticate, async (req, res) => {
+router.post('/schedules', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const schedule = await ReportSchedule.create({
       ...req.body,
@@ -443,7 +444,7 @@ router.post('/schedules', authenticate, async (req, res) => {
 });
 
 // PUT /schedules/:id
-router.put('/schedules/:id', authenticate, async (req, res) => {
+router.put('/schedules/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const schedule = await ReportSchedule.findById(req.params.id);
     if (!schedule) return res.status(404).json({ success: false, message: 'الجدولة غير موجودة' });
@@ -456,7 +457,7 @@ router.put('/schedules/:id', authenticate, async (req, res) => {
 });
 
 // PATCH /schedules/:id/toggle — تفعيل / إيقاف
-router.patch('/schedules/:id/toggle', authenticate, async (req, res) => {
+router.patch('/schedules/:id/toggle', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const schedule = await ReportSchedule.findById(req.params.id);
     if (!schedule) return res.status(404).json({ success: false, message: 'الجدولة غير موجودة' });
@@ -474,7 +475,7 @@ router.patch('/schedules/:id/toggle', authenticate, async (req, res) => {
 });
 
 // DELETE /schedules/:id
-router.delete('/schedules/:id', authenticate, async (req, res) => {
+router.delete('/schedules/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const schedule = await ReportSchedule.findById(req.params.id);
     if (!schedule) return res.status(404).json({ success: false, message: 'الجدولة غير موجودة' });
@@ -492,7 +493,7 @@ router.delete('/schedules/:id', authenticate, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 
 // GET /analytics/executive — لوحة الإدارة التنفيذية
-router.get('/analytics/executive', authenticate, async (req, res) => {
+router.get('/analytics/executive', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const params = { date_from, date_to, branch_id };
@@ -587,7 +588,7 @@ router.get('/analytics/executive', authenticate, async (req, res) => {
 });
 
 // GET /analytics/beneficiaries — تحليلات المستفيدين
-router.get('/analytics/beneficiaries', authenticate, async (req, res) => {
+router.get('/analytics/beneficiaries', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -675,7 +676,7 @@ router.get('/analytics/beneficiaries', authenticate, async (req, res) => {
 });
 
 // GET /analytics/clinical — التحليلات السريرية
-router.get('/analytics/clinical', authenticate, async (req, res) => {
+router.get('/analytics/clinical', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -797,7 +798,7 @@ router.get('/analytics/clinical', authenticate, async (req, res) => {
 });
 
 // GET /analytics/financial — التحليلات المالية
-router.get('/analytics/financial', authenticate, async (req, res) => {
+router.get('/analytics/financial', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -940,7 +941,7 @@ router.get('/analytics/financial', authenticate, async (req, res) => {
 });
 
 // GET /analytics/hr — تحليلات الموارد البشرية
-router.get('/analytics/hr', authenticate, async (req, res) => {
+router.get('/analytics/hr', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -1033,7 +1034,7 @@ router.get('/analytics/hr', authenticate, async (req, res) => {
 });
 
 // GET /analytics/operational — التحليلات التشغيلية
-router.get('/analytics/operational', authenticate, async (req, res) => {
+router.get('/analytics/operational', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -1135,7 +1136,7 @@ router.get('/analytics/operational', authenticate, async (req, res) => {
 });
 
 // GET /analytics/quality — تحليلات الجودة
-router.get('/analytics/quality', authenticate, async (req, res) => {
+router.get('/analytics/quality', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -1233,7 +1234,7 @@ router.get('/analytics/quality', authenticate, async (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 
 // GET /built-in/beneficiary-list — قائمة المستفيدين
-router.get('/built-in/beneficiary-list', authenticate, async (req, res) => {
+router.get('/built-in/beneficiary-list', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const {
       status,
@@ -1309,7 +1310,7 @@ router.get('/built-in/beneficiary-list', authenticate, async (req, res) => {
 });
 
 // GET /built-in/beneficiary-progress — تقدم المستفيدين
-router.get('/built-in/beneficiary-progress', authenticate, async (req, res) => {
+router.get('/built-in/beneficiary-progress', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { branch_id, date_from, date_to, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1379,7 +1380,7 @@ router.get('/built-in/beneficiary-progress', authenticate, async (req, res) => {
 });
 
 // GET /built-in/assessments-summary — ملخص التقييمات
-router.get('/built-in/assessments-summary', authenticate, async (req, res) => {
+router.get('/built-in/assessments-summary', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id, tool_id, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1462,7 +1463,7 @@ router.get('/built-in/assessments-summary', authenticate, async (req, res) => {
 });
 
 // GET /built-in/sessions-log — سجل الجلسات
-router.get('/built-in/sessions-log', authenticate, async (req, res) => {
+router.get('/built-in/sessions-log', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id, therapist_id, status, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1536,7 +1537,7 @@ router.get('/built-in/sessions-log', authenticate, async (req, res) => {
 });
 
 // GET /built-in/attendance — تقرير الحضور
-router.get('/built-in/attendance', authenticate, async (req, res) => {
+router.get('/built-in/attendance', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id, employee_id, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1613,7 +1614,7 @@ router.get('/built-in/attendance', authenticate, async (req, res) => {
 });
 
 // GET /built-in/financial-summary — الملخص المالي
-router.get('/built-in/financial-summary', authenticate, async (req, res) => {
+router.get('/built-in/financial-summary', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { date_from, date_to, branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -1697,7 +1698,7 @@ router.get('/built-in/financial-summary', authenticate, async (req, res) => {
 });
 
 // GET /built-in/hr-headcount — تعداد الموظفين
-router.get('/built-in/hr-headcount', authenticate, async (req, res) => {
+router.get('/built-in/hr-headcount', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { branch_id } = req.query;
     const db = mongoose.connection.db;
@@ -1744,7 +1745,7 @@ router.get('/built-in/hr-headcount', authenticate, async (req, res) => {
 });
 
 // GET /built-in/inventory-status — حالة المخزون
-router.get('/built-in/inventory-status', authenticate, async (req, res) => {
+router.get('/built-in/inventory-status', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1818,7 +1819,7 @@ router.get('/built-in/inventory-status', authenticate, async (req, res) => {
 });
 
 // GET /built-in/quality-indicators — مؤشرات الجودة
-router.get('/built-in/quality-indicators', authenticate, async (req, res) => {
+router.get('/built-in/quality-indicators', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, performance_status, page = 1, limit = 50 } = req.query;
     const db = mongoose.connection.db;
@@ -1895,7 +1896,7 @@ router.get('/built-in/quality-indicators', authenticate, async (req, res) => {
 //  6. إحصاءات وحدة التقارير — Stats
 // ══════════════════════════════════════════════════════════════════
 
-router.get('/stats', authenticate, async (req, res) => {
+router.get('/stats', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const [totalTemplates, activeSchedules, jobsToday, jobsThisMonth, failedJobs, topTemplates] =
       await Promise.all([

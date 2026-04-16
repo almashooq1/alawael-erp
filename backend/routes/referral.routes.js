@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
@@ -69,7 +70,7 @@ const upload = multer({
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 /**

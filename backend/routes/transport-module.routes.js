@@ -13,12 +13,13 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 
 // 🔒 All transport routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Models ──────────────────────────────────────────────────────────────────
 const Vehicle = require('../models/transport/Vehicle');
 const TransportRoute = require('../models/transport/TransportRoute');

@@ -8,6 +8,7 @@ const router = express.Router();
 const SmartNotificationsController = require('../controllers/smartNotifications.controller');
 const { protect, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب المصادقة
 router.use(protect);
 

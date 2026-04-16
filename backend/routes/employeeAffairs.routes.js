@@ -10,6 +10,7 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const service = require('../services/employeeAffairs.service');
 const logger = require('../utils/logger');
 
@@ -22,7 +23,7 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const data = await service.getDashboard();
     res.json({ success: true, data });
@@ -31,7 +32,7 @@ router.get(
 
 router.get(
   '/stats/department/:department',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const data = await service.getDepartmentStatistics(req.params.department);
     res.json({ success: true, data });
@@ -44,7 +45,7 @@ router.get(
 
 router.get(
   '/leaves',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const result = await service.listLeaves(req.query);
     res.json({ success: true, ...result });
@@ -53,7 +54,7 @@ router.get(
 
 router.post(
   '/leaves',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const leave = await service.requestLeave({
       ...req.body,
@@ -65,7 +66,7 @@ router.post(
 
 router.get(
   '/leaves/balance/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const balance = await service.getLeaveBalance(req.params.employeeId);
     res.json({ success: true, data: balance });
@@ -74,7 +75,7 @@ router.get(
 
 router.post(
   '/leaves/:id/approve-manager',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'manager']),
   asyncHandler(async (req, res) => {
     const leave = await service.approveLeaveByManager(
@@ -89,7 +90,7 @@ router.post(
 
 router.post(
   '/leaves/:id/approve-hr',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const leave = await service.approveLeaveByHR(
@@ -104,7 +105,7 @@ router.post(
 
 router.post(
   '/leaves/:id/reject',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'manager']),
   asyncHandler(async (req, res) => {
     const leave = await service.rejectLeave(
@@ -120,7 +121,7 @@ router.post(
 
 router.post(
   '/leaves/:id/cancel',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const leave = await service.cancelLeave(
       req.params.id,
@@ -137,7 +138,7 @@ router.post(
 
 router.post(
   '/attendance/check-in',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const record = await service.checkIn(req.body.employeeId || req.user?.id, req.body);
     res.json({ success: true, data: record });
@@ -146,7 +147,7 @@ router.post(
 
 router.post(
   '/attendance/check-out',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const record = await service.checkOut(req.body.employeeId || req.user?.id, req.body);
     res.json({ success: true, data: record });
@@ -155,7 +156,7 @@ router.post(
 
 router.get(
   '/attendance/report/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { month = new Date().getMonth() + 1, year = new Date().getFullYear() } = req.query;
     const report = await service.getMonthlyAttendanceReport(req.params.employeeId, month, year);
@@ -169,7 +170,7 @@ router.get(
 
 router.post(
   '/performance/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'manager']),
   asyncHandler(async (req, res) => {
     const review = await service.createPerformanceReview(req.params.employeeId, {
@@ -182,7 +183,7 @@ router.post(
 
 router.get(
   '/performance/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const history = await service.getPerformanceHistory(req.params.employeeId);
     res.json({ success: true, data: history });
@@ -191,7 +192,7 @@ router.get(
 
 router.put(
   '/performance/:employeeId/goals',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'manager']),
   asyncHandler(async (req, res) => {
     const goals = await service.setEmployeeGoals(req.params.employeeId, req.body.goals);
@@ -205,7 +206,7 @@ router.put(
 
 router.get(
   '/contracts/expiring',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days) || 30;
@@ -216,7 +217,7 @@ router.get(
 
 router.post(
   '/contracts/:employeeId/renew',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { endDate, contractType } = req.body;
@@ -231,7 +232,7 @@ router.post(
 
 router.post(
   '/career/:employeeId/promote',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { toPosition, newSalary, reason } = req.body;
@@ -247,7 +248,7 @@ router.post(
 
 router.post(
   '/career/:employeeId/certification',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const certs = await service.addCertification(req.params.employeeId, req.body);
@@ -257,7 +258,7 @@ router.post(
 
 router.post(
   '/career/:employeeId/training',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const trainings = await service.addTraining(req.params.employeeId, req.body);
@@ -267,7 +268,7 @@ router.post(
 
 router.post(
   '/career/:employeeId/skill',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const skills = await service.addSkill(req.params.employeeId, req.body);
     res.json({ success: true, data: skills });
@@ -280,7 +281,7 @@ router.post(
 
 router.post(
   '/documents/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const docs = await service.addDocument(req.params.employeeId, req.body);
@@ -290,7 +291,7 @@ router.post(
 
 router.get(
   '/documents/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const docs = await service.getDocuments(req.params.employeeId);
     res.json({ success: true, data: docs });
@@ -303,7 +304,7 @@ router.get(
 
 router.get(
   '/',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const result = await service.listEmployees(req.query);
     res.json({ success: true, ...result });
@@ -312,7 +313,7 @@ router.get(
 
 router.post(
   '/',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const employee = await service.createEmployee(req.body);
@@ -322,7 +323,7 @@ router.post(
 
 router.get(
   '/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const employee = await service.getEmployeeById(req.params.id);
     res.json({ success: true, data: employee });
@@ -331,7 +332,7 @@ router.get(
 
 router.get(
   '/:id/profile',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(async (req, res) => {
     const profile = await service.getEmployeeProfile(req.params.id);
     res.json({ success: true, data: profile });
@@ -340,7 +341,7 @@ router.get(
 
 router.put(
   '/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const employee = await service.updateEmployee(req.params.id, req.body);
@@ -350,7 +351,7 @@ router.put(
 
 router.post(
   '/:id/terminate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { reason, terminationDate } = req.body;
@@ -365,7 +366,7 @@ router.post(
 
 router.get(
   '/government/saudization',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await service.getSaudizationReport();
@@ -375,7 +376,7 @@ router.get(
 
 router.get(
   '/government/expiring-documents',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const days = parseInt(req.query.days, 10) || 30;
@@ -386,7 +387,7 @@ router.get(
 
 router.get(
   '/:id/government-summary',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await service.getEmployeeGovernmentSummary(req.params.id);
@@ -396,7 +397,7 @@ router.get(
 
 router.put(
   '/:id/mol',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const data = await service.updateEmployeeMOLData(req.params.id, req.body);
@@ -406,7 +407,7 @@ router.put(
 
 router.put(
   '/:id/sponsorship',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const data = await service.updateEmployeeSponsorshipData(req.params.id, req.body);

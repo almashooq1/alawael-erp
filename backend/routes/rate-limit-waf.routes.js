@@ -10,10 +10,12 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const RateLimitWafService = require('../services/rate-limit-waf.service');
 
 // All WAF/rate-limit endpoints require admin auth
 if (typeof authenticate === 'function') router.use(authenticate);
+router.use(requireBranchAccess);
 if (typeof authorize === 'function') router.use(authorize('admin', 'system_admin', 'super_admin'));
 
 const wafService = new RateLimitWafService();

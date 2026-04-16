@@ -26,6 +26,13 @@ const groupProgramSchema = new mongoose.Schema(
 
     supervisor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
+
     targets: [String], // General goals of the group
 
     schedule: {
@@ -48,5 +55,6 @@ const groupProgramSchema = new mongoose.Schema(
 groupProgramSchema.index({ status: 1, type: 1 });
 groupProgramSchema.index({ supervisor: 1 });
 groupProgramSchema.index({ students: 1 });
+groupProgramSchema.index({ branchId: 1, status: 1 });
 
 module.exports = mongoose.models.GroupProgram || mongoose.model('GroupProgram', groupProgramSchema);

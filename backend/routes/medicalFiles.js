@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 const { validateUploadedFile } = require('../utils/uploadValidator');
@@ -142,7 +143,7 @@ const handleMulterError = (err, _req, res, next) => {
 // رفع ملف واحد
 router.post(
   '/single',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   upload.single('file'),
   validateUploadedFile,
   handleMulterError,
@@ -192,7 +193,7 @@ router.post(
 // رفع عدة ملفات
 router.post(
   '/multiple',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   upload.array('files', 10),
   validateUploadedFile,
   handleMulterError,
@@ -246,7 +247,7 @@ router.post(
 );
 
 // عرض ملف
-router.get('/view/:fileType/:fileName', authenticate, async (req, res) => {
+router.get('/view/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
@@ -276,7 +277,7 @@ router.get('/view/:fileType/:fileName', authenticate, async (req, res) => {
 });
 
 // تحميل ملف
-router.get('/download/:fileType/:fileName', authenticate, async (req, res) => {
+router.get('/download/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
@@ -315,7 +316,7 @@ router.get('/download/:fileType/:fileName', authenticate, async (req, res) => {
 // حذف ملف
 router.delete(
   '/:fileType/:fileName',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -353,7 +354,7 @@ router.delete(
 );
 
 // الحصول على معلومات ملف
-router.get('/info/:fileType/:fileName', authenticate, async (req, res) => {
+router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { fileType, fileName } = req.params;
     const subDir = UPLOAD_DIRS[fileType] || 'other';
@@ -399,7 +400,7 @@ router.get('/info/:fileType/:fileName', authenticate, async (req, res) => {
 });
 
 // إحصائيات المساحة المستخدمة
-router.get('/storage/statistics', authenticate, authorize(['admin']), async (req, res) => {
+router.get('/storage/statistics', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
   try {
     const baseDir = path.join(__dirname, '../uploads/medical-files');
     const stats = {};

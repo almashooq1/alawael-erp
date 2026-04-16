@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const FinanceService = require('../services/finance.service');
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { validate } = require('../middleware/validate');
 const finV = require('../middleware/validators/finance.validators');
 const logger = require('../utils/logger');
@@ -77,7 +78,7 @@ try {
 
 // Middleware: Authentication and authorization
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ============================================================================
 // ROOT ENDPOINT — GET /api/finance (Dashboard)
 // ============================================================================

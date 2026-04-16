@@ -10,8 +10,9 @@ const HRAttendanceService = require('../services/hr/attendanceService');
 const HRNotificationService = require('../services/hr/notificationService');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // تسجيل الحضور
-router.post('/attendance/check-in', authenticateToken, async (req, res) => {
+router.post('/attendance/check-in', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const result = await HRAttendanceService.recordAttendance(req.user.employeeId, {
       checkInTime: new Date(),
@@ -26,7 +27,7 @@ router.post('/attendance/check-in', authenticateToken, async (req, res) => {
 });
 
 // تسجيل الخروج
-router.post('/attendance/check-out', authenticateToken, async (req, res) => {
+router.post('/attendance/check-out', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const result = await HRAttendanceService.recordCheckOut(req.user.employeeId, req.body);
 
@@ -37,7 +38,7 @@ router.post('/attendance/check-out', authenticateToken, async (req, res) => {
 });
 
 // جلب سجل الحضور الشهري
-router.get('/attendance/monthly-report', authenticateToken, async (req, res) => {
+router.get('/attendance/monthly-report', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { month = new Date().getMonth() + 1, year = new Date().getFullYear() } = req.query;
 
@@ -56,7 +57,7 @@ router.get('/attendance/monthly-report', authenticateToken, async (req, res) => 
 // جلب سجل موظف معين (للمديرين)
 router.get(
   '/attendance/employee/:employeeId/monthly',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -78,7 +79,7 @@ router.get(
 // تحليل أنماط الغياب
 router.get(
   '/attendance/absence-patterns/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -99,7 +100,7 @@ router.get(
 // حساب الراتب مع الحضور
 router.get(
   '/attendance/salary-calculation/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['finance', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -123,7 +124,7 @@ router.get(
 // طلب إجازة
 router.post(
   '/leave/request',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   validate([
     body('type').trim().notEmpty().withMessage('نوع الإجازة مطلوب'),
     body('startDate')
@@ -165,7 +166,7 @@ router.post(
 // الموافقة على الإجازة
 router.patch(
   '/leave/:leaveId/approve',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -184,7 +185,7 @@ router.patch(
 // رفض الإجازة
 router.patch(
   '/leave/:leaveId/reject',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -203,7 +204,7 @@ router.patch(
 // الحصول على الطلبات المعلقة
 router.get(
   '/leave/pending',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -223,7 +224,7 @@ router.get(
 );
 
 // جلب أيام الإجازة المتبقية
-router.get('/leave/remaining-days', authenticateToken, async (req, res) => {
+router.get('/leave/remaining-days', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const result = await HRAttendanceService.getRemainingLeaveDays(req.user.employeeId);
 
@@ -236,7 +237,7 @@ router.get('/leave/remaining-days', authenticateToken, async (req, res) => {
 // جلب أيام الإجازة المتبقية لموظف معين
 router.get(
   '/leave/remaining-days/:employeeId',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { WebhookService } = require('../services/webhookService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -26,7 +27,7 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -49,7 +50,7 @@ router.get(
  */
 router.post(
   '/register',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -102,7 +103,7 @@ router.post(
  */
 router.get(
   '/:webhookId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -132,7 +133,7 @@ router.get(
  */
 router.put(
   '/:webhookId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -162,7 +163,7 @@ router.put(
  */
 router.delete(
   '/:webhookId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -192,7 +193,7 @@ router.delete(
  */
 router.post(
   '/:webhookId/trigger',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -228,7 +229,7 @@ router.post(
  */
 router.post(
   '/:webhookId/test',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -260,7 +261,7 @@ router.post(
  */
 router.get(
   '/:webhookId/deliveries',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {

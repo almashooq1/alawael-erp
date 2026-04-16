@@ -4,6 +4,7 @@
  */
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const SSOService = require('../services/sso.service');
 const OAuthService = require('../services/oauth.service');

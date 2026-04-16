@@ -16,10 +16,11 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/therapistPortal.service');
 
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 // ═══════════════════════════════════════════════════════════════════════════

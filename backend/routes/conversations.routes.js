@@ -6,11 +6,12 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 /**
  * PATCH /api/conversations/:id/mark-read
  * Mark a conversation as read

@@ -9,6 +9,7 @@ const router = express.Router();
 const systemDashboard = require('../services/systemDashboard');
 const responseFormatter = require('../services/responseFormatter');
 const { requireAdmin, optionalAuth } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 /**

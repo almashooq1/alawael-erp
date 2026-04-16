@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { protect, _authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const dashboardController = require('../controllers/dashboardWidget.controller');
 
 /**

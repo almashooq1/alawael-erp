@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const AuditLog = require('../models/AuditLog');
@@ -20,6 +21,7 @@ const ALLOWED_ROLES = [
 ];
 
 router.use(authenticate);
+router.use(requireBranchAccess);
 router.use(authorize(['admin', 'super_admin']));
 
 // Maximum records per page — prevents DoS via unbounded queries

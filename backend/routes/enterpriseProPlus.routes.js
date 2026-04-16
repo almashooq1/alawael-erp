@@ -14,6 +14,7 @@ const router = require('express').Router();
 const mongoose = require('mongoose');
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   JobPosting,
   Candidate,
@@ -56,7 +57,7 @@ const _safeBody = (body, fields) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- Job Postings ---
-router.get('/talent/jobs', authenticateToken, async (req, res) => {
+router.get('/talent/jobs', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, department, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -79,7 +80,7 @@ router.get('/talent/jobs', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/talent/jobs', authenticateToken, async (req, res) => {
+router.post('/talent/jobs', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const job = await JobPosting.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: job });
@@ -88,7 +89,7 @@ router.post('/talent/jobs', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/talent/jobs/:id', authenticateToken, async (req, res) => {
+router.get('/talent/jobs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const job = await JobPosting.findById(req.params.id)
       .populate('hiringManager', 'name email')
@@ -100,7 +101,7 @@ router.get('/talent/jobs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/talent/jobs/:id', authenticateToken, async (req, res) => {
+router.put('/talent/jobs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const job = await JobPosting.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -113,7 +114,7 @@ router.put('/talent/jobs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/talent/jobs/:id', authenticateToken, async (req, res) => {
+router.delete('/talent/jobs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await JobPosting.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -122,7 +123,7 @@ router.delete('/talent/jobs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/talent/jobs/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/talent/jobs/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, open, filled, apps] = await Promise.all([
       JobPosting.countDocuments(),
@@ -140,7 +141,7 @@ router.get('/talent/jobs/statistics/summary', authenticateToken, async (req, res
 });
 
 // --- Candidates ---
-router.get('/talent/candidates', authenticateToken, async (req, res) => {
+router.get('/talent/candidates', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, source, search, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -168,7 +169,7 @@ router.get('/talent/candidates', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/talent/candidates', authenticateToken, async (req, res) => {
+router.post('/talent/candidates', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const candidate = await Candidate.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: candidate });
@@ -177,7 +178,7 @@ router.post('/talent/candidates', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/talent/candidates/:id', authenticateToken, async (req, res) => {
+router.put('/talent/candidates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Candidate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -190,7 +191,7 @@ router.put('/talent/candidates/:id', authenticateToken, async (req, res) => {
 });
 
 // --- Applications ---
-router.get('/talent/applications', authenticateToken, async (req, res) => {
+router.get('/talent/applications', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { jobPosting, stage, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -214,7 +215,7 @@ router.get('/talent/applications', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/talent/applications', authenticateToken, async (req, res) => {
+router.post('/talent/applications', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const app = await JobApplication.create({ ...req.body, appliedAt: new Date() });
     res.status(201).json({ success: true, data: app });
@@ -223,7 +224,7 @@ router.post('/talent/applications', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/talent/applications/:id/stage', authenticateToken, async (req, res) => {
+router.put('/talent/applications/:id/stage', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { stage } = req.body;
     const doc = await JobApplication.findById(req.params.id);
@@ -237,7 +238,7 @@ router.put('/talent/applications/:id/stage', authenticateToken, async (req, res)
   }
 });
 
-router.get('/talent/pipeline', authenticateToken, async (req, res) => {
+router.get('/talent/pipeline', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const pipeline = await JobApplication.aggregate([
       { $group: { _id: '$stage', count: { $sum: 1 } } },
@@ -250,7 +251,7 @@ router.get('/talent/pipeline', authenticateToken, async (req, res) => {
 });
 
 // --- Interviews ---
-router.get('/talent/interviews', authenticateToken, async (req, res) => {
+router.get('/talent/interviews', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const data = await InterviewSchedule.find()
       .sort({ scheduledAt: 1 })
@@ -263,7 +264,7 @@ router.get('/talent/interviews', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/talent/interviews', authenticateToken, async (req, res) => {
+router.post('/talent/interviews', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const interview = await InterviewSchedule.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: interview });
@@ -272,7 +273,7 @@ router.post('/talent/interviews', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/talent/interviews/:id', authenticateToken, async (req, res) => {
+router.put('/talent/interviews/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await InterviewSchedule.findByIdAndUpdate(
       req.params.id,
@@ -291,7 +292,7 @@ router.put('/talent/interviews/:id', authenticateToken, async (req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- Facilities ---
-router.get('/facilities', authenticateToken, async (req, res) => {
+router.get('/facilities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { type, status } = req.query;
     const filter = {};
@@ -304,7 +305,7 @@ router.get('/facilities', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/facilities', authenticateToken, async (req, res) => {
+router.post('/facilities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Facility.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -313,7 +314,7 @@ router.post('/facilities', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/facilities/:id', authenticateToken, async (req, res) => {
+router.get('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Facility.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -323,7 +324,7 @@ router.get('/facilities/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/facilities/:id', authenticateToken, async (req, res) => {
+router.put('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Facility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -335,7 +336,7 @@ router.put('/facilities/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/facilities/:id', authenticateToken, async (req, res) => {
+router.delete('/facilities/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await Facility.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -344,7 +345,7 @@ router.delete('/facilities/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/facilities/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/facilities/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, active, maintenance, bookings, leases] = await Promise.all([
       Facility.countDocuments(),
@@ -369,7 +370,7 @@ router.get('/facilities/statistics/summary', authenticateToken, async (req, res)
 });
 
 // --- Space Bookings ---
-router.get('/facilities/bookings/list', authenticateToken, async (req, res) => {
+router.get('/facilities/bookings/list', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { facility, status, from, to } = req.query;
     const filter = {};
@@ -391,7 +392,7 @@ router.get('/facilities/bookings/list', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/facilities/bookings', authenticateToken, async (req, res) => {
+router.post('/facilities/bookings', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const booking = await SpaceBooking.create({ ...req.body, bookedBy: req.user?.id });
     res.status(201).json({ success: true, data: booking });
@@ -400,7 +401,7 @@ router.post('/facilities/bookings', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/facilities/bookings/:id', authenticateToken, async (req, res) => {
+router.put('/facilities/bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SpaceBooking.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -412,7 +413,7 @@ router.put('/facilities/bookings/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/facilities/bookings/:id', authenticateToken, async (req, res) => {
+router.delete('/facilities/bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await SpaceBooking.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -422,7 +423,7 @@ router.delete('/facilities/bookings/:id', authenticateToken, async (req, res) =>
 });
 
 // --- Lease Contracts ---
-router.get('/facilities/leases', authenticateToken, async (req, res) => {
+router.get('/facilities/leases', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.query;
     const filter = {};
@@ -437,7 +438,7 @@ router.get('/facilities/leases', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/facilities/leases', authenticateToken, async (req, res) => {
+router.post('/facilities/leases', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await LeaseContract.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -446,7 +447,7 @@ router.post('/facilities/leases', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/facilities/leases/:id', authenticateToken, async (req, res) => {
+router.put('/facilities/leases/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await LeaseContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -459,7 +460,7 @@ router.put('/facilities/leases/:id', authenticateToken, async (req, res) => {
 });
 
 // --- Utility Readings ---
-router.get('/facilities/utilities', authenticateToken, async (req, res) => {
+router.get('/facilities/utilities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { facility, type } = req.query;
     const filter = {};
@@ -476,7 +477,7 @@ router.get('/facilities/utilities', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/facilities/utilities', authenticateToken, async (req, res) => {
+router.post('/facilities/utilities', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await UtilityReading.create({ ...req.body, recordedBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
@@ -490,7 +491,7 @@ router.post('/facilities/utilities', authenticateToken, async (req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- Vendors ---
-router.get('/vendors', authenticateToken, async (req, res) => {
+router.get('/vendors', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { category, qualificationStatus, search, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -517,7 +518,7 @@ router.get('/vendors', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/vendors', authenticateToken, async (req, res) => {
+router.post('/vendors', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Vendor.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
@@ -526,7 +527,7 @@ router.post('/vendors', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/vendors/:id', authenticateToken, async (req, res) => {
+router.get('/vendors/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Vendor.findById(req.params.id).lean();
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -536,7 +537,7 @@ router.get('/vendors/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/vendors/:id', authenticateToken, async (req, res) => {
+router.put('/vendors/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await Vendor.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -549,7 +550,7 @@ router.put('/vendors/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/vendors/:id', authenticateToken, async (req, res) => {
+router.delete('/vendors/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await Vendor.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -558,7 +559,7 @@ router.delete('/vendors/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/vendors/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/vendors/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, qualified, preferred, rfqs, pendingEvals] = await Promise.all([
       Vendor.countDocuments(),
@@ -583,7 +584,7 @@ router.get('/vendors/statistics/summary', authenticateToken, async (req, res) =>
 });
 
 // --- RFQs ---
-router.get('/vendors/rfqs/list', authenticateToken, async (req, res) => {
+router.get('/vendors/rfqs/list', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.query;
     const filter = {};
@@ -598,7 +599,7 @@ router.get('/vendors/rfqs/list', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/vendors/rfqs', authenticateToken, async (req, res) => {
+router.post('/vendors/rfqs', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await RFQ.countDocuments();
     const doc = await RFQ.create({
@@ -612,7 +613,7 @@ router.post('/vendors/rfqs', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/vendors/rfqs/:id', authenticateToken, async (req, res) => {
+router.put('/vendors/rfqs/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await RFQ.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -624,7 +625,7 @@ router.put('/vendors/rfqs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/vendors/rfqs/:id/award', authenticateToken, async (req, res) => {
+router.put('/vendors/rfqs/:id/award', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { vendorId } = req.body;
     const doc = await RFQ.findByIdAndUpdate(
@@ -640,7 +641,7 @@ router.put('/vendors/rfqs/:id/award', authenticateToken, async (req, res) => {
 });
 
 // --- Vendor Evaluations ---
-router.get('/vendors/evaluations/list', authenticateToken, async (req, res) => {
+router.get('/vendors/evaluations/list', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const data = await VendorEvaluation.find()
       .sort({ createdAt: -1 })
@@ -653,7 +654,7 @@ router.get('/vendors/evaluations/list', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/vendors/evaluations', authenticateToken, async (req, res) => {
+router.post('/vendors/evaluations', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const scores = req.body.scores || {};
     let weightedScore = 0;
@@ -680,7 +681,7 @@ router.post('/vendors/evaluations', authenticateToken, async (req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- IT Incidents ---
-router.get('/itsm/incidents', authenticateToken, async (req, res) => {
+router.get('/itsm/incidents', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, priority, category, assignedTo, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -706,7 +707,7 @@ router.get('/itsm/incidents', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/itsm/incidents', authenticateToken, async (req, res) => {
+router.post('/itsm/incidents', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await ITIncident.countDocuments();
     const doc = await ITIncident.create({
@@ -720,7 +721,7 @@ router.post('/itsm/incidents', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/itsm/incidents/:id', authenticateToken, async (req, res) => {
+router.get('/itsm/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITIncident.findById(req.params.id)
       .populate('reportedBy', 'name email')
@@ -734,7 +735,7 @@ router.get('/itsm/incidents/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/itsm/incidents/:id', authenticateToken, async (req, res) => {
+router.put('/itsm/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -746,7 +747,7 @@ router.put('/itsm/incidents/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/itsm/incidents/:id/comments', authenticateToken, async (req, res) => {
+router.post('/itsm/incidents/:id/comments', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITIncident.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -762,7 +763,7 @@ router.post('/itsm/incidents/:id/comments', authenticateToken, async (req, res) 
   }
 });
 
-router.put('/itsm/incidents/:id/resolve', authenticateToken, async (req, res) => {
+router.put('/itsm/incidents/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITIncident.findByIdAndUpdate(
       req.params.id,
@@ -783,7 +784,7 @@ router.put('/itsm/incidents/:id/resolve', authenticateToken, async (req, res) =>
   }
 });
 
-router.get('/itsm/incidents/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/itsm/incidents/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, open, critical, breached, resolved] = await Promise.all([
       ITIncident.countDocuments(),
@@ -799,7 +800,7 @@ router.get('/itsm/incidents/statistics/summary', authenticateToken, async (req, 
 });
 
 // --- IT Assets ---
-router.get('/itsm/assets', authenticateToken, async (req, res) => {
+router.get('/itsm/assets', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { type, status, department, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -823,7 +824,7 @@ router.get('/itsm/assets', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/itsm/assets', authenticateToken, async (req, res) => {
+router.post('/itsm/assets', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITAsset.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -832,7 +833,7 @@ router.post('/itsm/assets', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/itsm/assets/:id', authenticateToken, async (req, res) => {
+router.put('/itsm/assets/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ITAsset.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -844,7 +845,7 @@ router.put('/itsm/assets/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/itsm/assets/:id', authenticateToken, async (req, res) => {
+router.delete('/itsm/assets/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await ITAsset.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -854,7 +855,7 @@ router.delete('/itsm/assets/:id', authenticateToken, async (req, res) => {
 });
 
 // --- Service Catalog ---
-router.get('/itsm/catalog', authenticateToken, async (req, res) => {
+router.get('/itsm/catalog', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const data = await ServiceCatalogItem.find({ isActive: true }).sort({ sortOrder: 1 }).lean();
     res.json({ success: true, data });
@@ -863,7 +864,7 @@ router.get('/itsm/catalog', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/itsm/catalog', authenticateToken, async (req, res) => {
+router.post('/itsm/catalog', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ServiceCatalogItem.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -872,7 +873,7 @@ router.post('/itsm/catalog', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/itsm/catalog/:id', authenticateToken, async (req, res) => {
+router.put('/itsm/catalog/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ServiceCatalogItem.findByIdAndUpdate(
       req.params.id,
@@ -887,7 +888,7 @@ router.put('/itsm/catalog/:id', authenticateToken, async (req, res) => {
 });
 
 // --- Change Requests ---
-router.get('/itsm/changes', authenticateToken, async (req, res) => {
+router.get('/itsm/changes', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, type } = req.query;
     const filter = {};
@@ -904,7 +905,7 @@ router.get('/itsm/changes', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/itsm/changes', authenticateToken, async (req, res) => {
+router.post('/itsm/changes', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await ChangeRequest.countDocuments();
     const doc = await ChangeRequest.create({
@@ -918,7 +919,7 @@ router.post('/itsm/changes', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/itsm/changes/:id', authenticateToken, async (req, res) => {
+router.put('/itsm/changes/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ChangeRequest.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -930,7 +931,7 @@ router.put('/itsm/changes/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/itsm/changes/:id/approve', authenticateToken, async (req, res) => {
+router.put('/itsm/changes/:id/approve', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await ChangeRequest.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -953,7 +954,7 @@ router.put('/itsm/changes/:id/approve', authenticateToken, async (req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- Safety Incidents ---
-router.get('/ehs/incidents', authenticateToken, async (req, res) => {
+router.get('/ehs/incidents', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, severity, type, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -978,7 +979,7 @@ router.get('/ehs/incidents', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/ehs/incidents', authenticateToken, async (req, res) => {
+router.post('/ehs/incidents', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await SafetyIncident.countDocuments();
     const doc = await SafetyIncident.create({
@@ -992,7 +993,7 @@ router.post('/ehs/incidents', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/ehs/incidents/:id', authenticateToken, async (req, res) => {
+router.get('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyIncident.findById(req.params.id)
       .populate('reportedBy', 'name')
@@ -1005,7 +1006,7 @@ router.get('/ehs/incidents/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/ehs/incidents/:id', authenticateToken, async (req, res) => {
+router.put('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyIncident.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -1017,7 +1018,7 @@ router.put('/ehs/incidents/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/ehs/incidents/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/ehs/incidents/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, open, critical, lostDays] = await Promise.all([
       SafetyIncident.countDocuments(),
@@ -1040,7 +1041,7 @@ router.get('/ehs/incidents/statistics/summary', authenticateToken, async (req, r
 });
 
 // --- Safety Inspections ---
-router.get('/ehs/inspections', authenticateToken, async (req, res) => {
+router.get('/ehs/inspections', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, facility } = req.query;
     const filter = {};
@@ -1056,7 +1057,7 @@ router.get('/ehs/inspections', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/ehs/inspections', authenticateToken, async (req, res) => {
+router.post('/ehs/inspections', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await SafetyInspection.countDocuments();
     const doc = await SafetyInspection.create({
@@ -1070,7 +1071,7 @@ router.post('/ehs/inspections', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/ehs/inspections/:id', authenticateToken, async (req, res) => {
+router.put('/ehs/inspections/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SafetyInspection.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -1083,7 +1084,7 @@ router.put('/ehs/inspections/:id', authenticateToken, async (req, res) => {
 });
 
 // --- Hazard Register ---
-router.get('/ehs/hazards', authenticateToken, async (req, res) => {
+router.get('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { category, status, riskLevel } = req.query;
     const filter = {};
@@ -1100,7 +1101,7 @@ router.get('/ehs/hazards', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/ehs/hazards', authenticateToken, async (req, res) => {
+router.post('/ehs/hazards', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const count = await HazardRegister.countDocuments();
     const doc = await HazardRegister.create({
@@ -1113,7 +1114,7 @@ router.post('/ehs/hazards', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/ehs/hazards/:id', authenticateToken, async (req, res) => {
+router.put('/ehs/hazards/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await HazardRegister.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -1126,7 +1127,7 @@ router.put('/ehs/hazards/:id', authenticateToken, async (req, res) => {
 });
 
 // --- PPE Records ---
-router.get('/ehs/ppe', authenticateToken, async (req, res) => {
+router.get('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { employee, department } = req.query;
     const filter = {};
@@ -1143,7 +1144,7 @@ router.get('/ehs/ppe', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/ehs/ppe', authenticateToken, async (req, res) => {
+router.post('/ehs/ppe', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await PPERecord.create({ ...req.body, issuedBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
@@ -1152,7 +1153,7 @@ router.post('/ehs/ppe', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/ehs/ppe/:id', authenticateToken, async (req, res) => {
+router.put('/ehs/ppe/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await PPERecord.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -1169,7 +1170,7 @@ router.put('/ehs/ppe/:id', authenticateToken, async (req, res) => {
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // --- Strategic Objectives / OKR ---
-router.get('/strategy/objectives', authenticateToken, async (req, res) => {
+router.get('/strategy/objectives', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { status, perspective, level, year, page = 1, limit = 20 } = req.query;
     const filter = {};
@@ -1194,7 +1195,7 @@ router.get('/strategy/objectives', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/strategy/objectives', authenticateToken, async (req, res) => {
+router.post('/strategy/objectives', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicObjective.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -1203,7 +1204,7 @@ router.post('/strategy/objectives', authenticateToken, async (req, res) => {
   }
 });
 
-router.get('/strategy/objectives/:id', authenticateToken, async (req, res) => {
+router.get('/strategy/objectives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicObjective.findById(req.params.id)
       .populate('owner', 'name email')
@@ -1216,7 +1217,7 @@ router.get('/strategy/objectives/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/strategy/objectives/:id', authenticateToken, async (req, res) => {
+router.put('/strategy/objectives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicObjective.findByIdAndUpdate(
       req.params.id,
@@ -1230,7 +1231,7 @@ router.put('/strategy/objectives/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/strategy/objectives/:id', authenticateToken, async (req, res) => {
+router.delete('/strategy/objectives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await StrategicObjective.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -1239,7 +1240,7 @@ router.delete('/strategy/objectives/:id', authenticateToken, async (req, res) =>
   }
 });
 
-router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, async (req, res) => {
+router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicObjective.findById(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
@@ -1269,7 +1270,7 @@ router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, a
   }
 });
 
-router.get('/strategy/objectives/statistics/summary', authenticateToken, async (req, res) => {
+router.get('/strategy/objectives/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const [total, active, onTrack, atRisk, behind, completed, initiatives] = await Promise.all([
       StrategicObjective.countDocuments(),
@@ -1303,7 +1304,7 @@ router.get('/strategy/objectives/statistics/summary', authenticateToken, async (
 });
 
 // --- Strategic Initiatives ---
-router.get('/strategy/initiatives', authenticateToken, async (req, res) => {
+router.get('/strategy/initiatives', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const { objective, status } = req.query;
     const filter = {};
@@ -1320,7 +1321,7 @@ router.get('/strategy/initiatives', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/strategy/initiatives', authenticateToken, async (req, res) => {
+router.post('/strategy/initiatives', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicInitiative.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data: doc });
@@ -1329,7 +1330,7 @@ router.post('/strategy/initiatives', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/strategy/initiatives/:id', authenticateToken, async (req, res) => {
+router.put('/strategy/initiatives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await StrategicInitiative.findByIdAndUpdate(
       req.params.id,
@@ -1343,7 +1344,7 @@ router.put('/strategy/initiatives/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/strategy/initiatives/:id', authenticateToken, async (req, res) => {
+router.delete('/strategy/initiatives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await StrategicInitiative.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });
@@ -1353,7 +1354,7 @@ router.delete('/strategy/initiatives/:id', authenticateToken, async (req, res) =
 });
 
 // --- SWOT Analysis ---
-router.get('/strategy/swot', authenticateToken, async (req, res) => {
+router.get('/strategy/swot', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const data = await SWOTAnalysis.find()
       .sort({ createdAt: -1 })
@@ -1365,7 +1366,7 @@ router.get('/strategy/swot', authenticateToken, async (req, res) => {
   }
 });
 
-router.post('/strategy/swot', authenticateToken, async (req, res) => {
+router.post('/strategy/swot', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SWOTAnalysis.create({ ...req.body, createdBy: req.user?.id });
     res.status(201).json({ success: true, data: doc });
@@ -1374,7 +1375,7 @@ router.post('/strategy/swot', authenticateToken, async (req, res) => {
   }
 });
 
-router.put('/strategy/swot/:id', authenticateToken, async (req, res) => {
+router.put('/strategy/swot/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     const doc = await SWOTAnalysis.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
       new: true,
@@ -1386,7 +1387,7 @@ router.put('/strategy/swot/:id', authenticateToken, async (req, res) => {
   }
 });
 
-router.delete('/strategy/swot/:id', authenticateToken, async (req, res) => {
+router.delete('/strategy/swot/:id', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
     await SWOTAnalysis.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Deleted' });

@@ -3,6 +3,7 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { paginate } = require('../utils/paginate');
 
 const MAX_PAGE_LIMIT = 100;
@@ -33,7 +34,7 @@ const measurementService = new MeasurementService();
 
 // All data routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ============================
 // 1. مسارات أنواع المقاييس
 // ============================

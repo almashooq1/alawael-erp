@@ -83,6 +83,12 @@ docker_volumes/
 .docker/
 docker-compose.override.local.yml
 
+# Claude CLI session artifacts (cwd marker files + config)
+tmpclaude-*
+**/tmpclaude-*
+.claude/
+nul
+
 # ───────────────────────────────────────────────────────────────
 # 6. SSL & Certificates
 # ───────────────────────────────────────────────────────────────

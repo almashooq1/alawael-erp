@@ -46,12 +46,18 @@ const programSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
     tags: [String],
   },
   { timestamps: true }
 );
 
-programSchema.index({ category: 1, status: 1 });
+programSchema.index({ branchId: 1, category: 1, status: 1 });
 programSchema.index({ createdBy: 1, createdAt: -1 });
 
 module.exports = mongoose.models.Program || mongoose.model('Program', programSchema);

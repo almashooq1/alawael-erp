@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticate, _authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Mock database storage
@@ -60,7 +61,7 @@ function validateFieldLengths(body, limits = COMMUNITY_FIELD_LIMITS) {
 }
 
 // POST /api/community/content - Create educational content
-router.post('/content', authenticate, (req, res) => {
+router.post('/content', authenticate, requireBranchAccess, (req, res) => {
   try {
     const lengthErr = validateFieldLengths(req.body);
     if (lengthErr) {
@@ -265,7 +266,7 @@ router.post('/content/:id/rate', (req, res) => {
 // ================== VIRTUAL SESSIONS ==================
 
 // PUT /api/community/content/:id - Update educational content
-router.put('/content/:id', authenticate, (req, res) => {
+router.put('/content/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const contentId = parseInt(req.params.id);
     const content = communityData.content.find(c => c._id === contentId);
@@ -303,7 +304,7 @@ router.put('/content/:id', authenticate, (req, res) => {
 });
 
 // DELETE /api/community/content/:id - Delete educational content
-router.delete('/content/:id', authenticate, (req, res) => {
+router.delete('/content/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const contentId = parseInt(req.params.id);
     const index = communityData.content.findIndex(c => c._id === contentId);
@@ -342,7 +343,7 @@ router.get('/sessions/:id', (req, res) => {
 });
 
 // PUT /api/community/sessions/:id - Update session
-router.put('/sessions/:id', authenticate, (req, res) => {
+router.put('/sessions/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     const session = communityData.sessions.find(s => s._id === sessionId);
@@ -378,7 +379,7 @@ router.put('/sessions/:id', authenticate, (req, res) => {
 });
 
 // DELETE /api/community/sessions/:id - Delete session
-router.delete('/sessions/:id', authenticate, (req, res) => {
+router.delete('/sessions/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const sessionId = parseInt(req.params.id);
     const index = communityData.sessions.findIndex(s => s._id === sessionId);
@@ -412,7 +413,7 @@ router.get('/library/:id', (req, res) => {
 });
 
 // PUT /api/community/library/:id - Update library resource
-router.put('/library/:id', authenticate, (req, res) => {
+router.put('/library/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const resource = communityData.library.find(r => r._id === req.params.id);
 
@@ -441,7 +442,7 @@ router.put('/library/:id', authenticate, (req, res) => {
 });
 
 // DELETE /api/community/library/:id - Delete library resource
-router.delete('/library/:id', authenticate, (req, res) => {
+router.delete('/library/:id', authenticate, requireBranchAccess, (req, res) => {
   try {
     const index = communityData.library.findIndex(r => r._id === req.params.id);
 
@@ -457,7 +458,7 @@ router.delete('/library/:id', authenticate, (req, res) => {
 });
 
 // POST /api/community/sessions - Create virtual session
-router.post('/sessions', authenticate, (req, res) => {
+router.post('/sessions', authenticate, requireBranchAccess, (req, res) => {
   try {
     const lengthErr = validateFieldLengths(req.body);
     if (lengthErr) {

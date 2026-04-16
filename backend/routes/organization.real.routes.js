@@ -3,13 +3,14 @@ const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const Department = require('../models/Department');
 const Position = require('../models/Position');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════
 //  STRUCTURE (الهيكل التنظيمي)
 // ═══════════════════════════════════════════════════════════════

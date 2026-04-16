@@ -25,9 +25,10 @@ function safeModel(name) {
 
 // ── Auth ─────────────────────────────────────────────────────────
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════
 // 1. DASHBOARD — لوحة المعلومات
 // ═══════════════════════════════════════════════════════════════════

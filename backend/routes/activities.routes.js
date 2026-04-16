@@ -7,16 +7,17 @@ const express = require('express');
 const router = express.Router();
 const Activity = require('../models/Activity');
 const { requireAuth, _requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── GET / — list activities (filter by program, type, status, date range) ──
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { programId, type, status, dateFrom, dateTo, page = 1, limit = 25 } = req.query;
 
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (programId) filter.programId = programId;
     if (type) filter.type = type;
     if (status) filter.status = status;
@@ -52,10 +53,10 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // ── GET /stats — activity statistics ───────────────────────────────────
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { programId } = req.query;
-    const match = {};
+    const match = { ...branchFilter(req) };
     if (programId) match.programId = require('mongoose').Types.ObjectId(programId);
 
     const [byStatus, byType] = await Promise.all([
@@ -83,10 +84,10 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 // ── GET /program/:programId — activities for a specific program ────────
-router.get('/program/:programId', requireAuth, async (req, res) => {
+router.get('/program/:programId', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status, page = 1, limit = 25 } = req.query;
-    const filter = { programId: req.params.programId };
+    const filter = { programId: req.params.programId, ...branchFilter(req) };
     if (status) filter.status = status;
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -114,7 +115,7 @@ router.get('/program/:programId', requireAuth, async (req, res) => {
 });
 
 // ── GET /upcoming — upcoming scheduled activities ──────────────────────
-router.get('/upcoming', requireAuth, async (req, res) => {
+router.get('/upcoming', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { days = 7 } = req.query;
     const endDate = new Date();
@@ -123,6 +124,7 @@ router.get('/upcoming', requireAuth, async (req, res) => {
     const data = await Activity.find({
       status: 'scheduled',
       date: { $gte: new Date(), $lte: endDate },
+      ...branchFilter(req),
     })
       .sort({ date: 1 })
       .populate('programId', 'name')
@@ -137,9 +139,9 @@ router.get('/upcoming', requireAuth, async (req, res) => {
 });
 
 // ── GET /:id — single activity ─────────────────────────────────────────
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await Activity.findById(req.params.id)
+    const doc = await Activity.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('programId', 'name')
       .populate('createdBy', 'name')
       .populate('participants', 'name');
@@ -151,10 +153,14 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // ── POST / — create activity ───────────────────────────────────────────
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const body = stripUpdateMeta(req.body);
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
     const doc = await Activity.create({
-      ...stripUpdateMeta(req.body),
+      ...body,
       createdBy: req.body.createdBy || req.user?._id,
     });
     res.status(201).json({ success: true, data: doc });
@@ -165,12 +171,16 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // ── PUT /:id — update activity ─────────────────────────────────────────
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await Activity.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await Activity.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -180,9 +190,9 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // ── DELETE /:id — remove activity ──────────────────────────────────────
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const doc = await Activity.findByIdAndDelete(req.params.id);
+    const doc = await Activity.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
     if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
     res.json({ success: true, message: 'Activity deleted' });
   } catch (err) {
@@ -191,7 +201,7 @@ router.delete('/:id', requireAuth, async (req, res) => {
 });
 
 // ── PATCH /:id/status — update activity status ────────────────────────
-router.patch('/:id/status', requireAuth, async (req, res) => {
+router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.body;
     const allowed = ['scheduled', 'in-progress', 'completed', 'cancelled'];
@@ -202,8 +212,8 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
       });
     }
 
-    const doc = await Activity.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Activity.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { status },
       { new: true, runValidators: true }
     );
@@ -215,15 +225,15 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
 });
 
 // ── POST /:id/participants — add participants ─────────────────────────
-router.post('/:id/participants', requireAuth, async (req, res) => {
+router.post('/:id/participants', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { participantIds } = req.body;
     if (!Array.isArray(participantIds) || participantIds.length === 0) {
       return res.status(400).json({ success: false, message: 'participantIds array is required' });
     }
 
-    const doc = await Activity.findByIdAndUpdate(
-      req.params.id,
+    const doc = await Activity.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       { $addToSet: { participants: { $each: participantIds } } },
       { new: true }
     ).populate('participants', 'name');
@@ -236,19 +246,24 @@ router.post('/:id/participants', requireAuth, async (req, res) => {
 });
 
 // ── DELETE /:id/participants/:participantId — remove participant ───────
-router.delete('/:id/participants/:participantId', requireAuth, async (req, res) => {
-  try {
-    const doc = await Activity.findByIdAndUpdate(
-      req.params.id,
-      { $pull: { participants: req.params.participantId } },
-      { new: true }
-    ).populate('participants', 'name');
+router.delete(
+  '/:id/participants/:participantId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await Activity.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        { $pull: { participants: req.params.participantId } },
+        { new: true }
+      ).populate('participants', 'name');
 
-    if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    safeError(res, err, 'Activities DELETE /:id/participants/:pid error');
+      if (!doc) return res.status(404).json({ success: false, message: 'Activity not found' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      safeError(res, err, 'Activities DELETE /:id/participants/:pid error');
+    }
   }
-});
+);
 
 module.exports = router;

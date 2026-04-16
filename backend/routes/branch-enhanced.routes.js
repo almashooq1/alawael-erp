@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/branches/branch-enhanced.service');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // مقارنة أداء الفروع
-router.get('/compare', authenticate, async (req, res) => {
+router.get('/compare', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { branch_ids, period } = req.query;
     const ids = Array.isArray(branch_ids) ? branch_ids : [branch_ids].filter(Boolean);
@@ -18,7 +19,7 @@ router.get('/compare', authenticate, async (req, res) => {
 });
 
 // قائمة الفروع
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Branch = require('../models/Branch');
     const branches = await Branch.find({ isActive: true }).select('-__v');
@@ -29,7 +30,7 @@ router.get('/', authenticate, async (req, res) => {
 });
 
 // إنشاء فرع جديد
-router.post('/', authenticate, authorize('admin', 'super_admin'), async (req, res) => {
+router.post('/', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
   try {
     const Branch = require('../models/Branch');
     const branch = await Branch.create(stripUpdateMeta(req.body));
@@ -41,7 +42,7 @@ router.post('/', authenticate, authorize('admin', 'super_admin'), async (req, re
 });
 
 // تفاصيل فرع
-router.get('/:branchId', authenticate, async (req, res) => {
+router.get('/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Branch = require('../models/Branch');
     const branch = await Branch.findById(req.params.branchId);
@@ -55,7 +56,7 @@ router.get('/:branchId', authenticate, async (req, res) => {
 // تحديث فرع
 router.put(
   '/:branchId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -74,7 +75,7 @@ router.put(
 );
 
 // لوحة إحصاءات الفرع
-router.get('/:branchId/dashboard', authenticate, async (req, res) => {
+router.get('/:branchId/dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { period } = req.query;
     const data = await svc.compareBranches([req.params.branchId], period || 'month');
@@ -85,7 +86,7 @@ router.get('/:branchId/dashboard', authenticate, async (req, res) => {
 });
 
 // ── إعدادات الفرع ──────────────────────────────────
-router.get('/:branchId/settings', authenticate, async (req, res) => {
+router.get('/:branchId/settings', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BranchSetting = require('../models/BranchSetting');
     const settings = await BranchSetting.find({ branchId: req.params.branchId });
@@ -97,7 +98,7 @@ router.get('/:branchId/settings', authenticate, async (req, res) => {
 
 router.put(
   '/:branchId/settings',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -120,7 +121,7 @@ router.put(
 );
 
 // ── الغرف ──────────────────────────────────────────
-router.get('/:branchId/rooms', authenticate, async (req, res) => {
+router.get('/:branchId/rooms', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Room = require('../models/Room');
     const rooms = await Room.find({ branchId: req.params.branchId, isActive: true });
@@ -132,7 +133,7 @@ router.get('/:branchId/rooms', authenticate, async (req, res) => {
 
 router.post(
   '/:branchId/rooms',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -146,7 +147,7 @@ router.post(
 
 router.put(
   '/:branchId/rooms/:roomId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -166,7 +167,7 @@ router.put(
 
 router.delete(
   '/:branchId/rooms/:roomId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin'),
   async (req, res) => {
     try {
@@ -183,7 +184,7 @@ router.delete(
 );
 
 // ── الخدمات ────────────────────────────────────────
-router.get('/:branchId/services', authenticate, async (req, res) => {
+router.get('/:branchId/services', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BranchService = require('../models/BranchService');
     const services = await BranchService.find({ branchId: req.params.branchId, isActive: true });
@@ -195,7 +196,7 @@ router.get('/:branchId/services', authenticate, async (req, res) => {
 
 router.post(
   '/:branchId/services',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -209,7 +210,7 @@ router.post(
 
 router.put(
   '/:branchId/services/:serviceId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -228,7 +229,7 @@ router.put(
 );
 
 // ── نقل المستفيدين ──────────────────────────────────
-router.get('/transfers', authenticate, async (req, res) => {
+router.get('/transfers', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
     const transfers = await BeneficiaryTransfer.find()
@@ -245,7 +246,7 @@ router.get('/transfers', authenticate, async (req, res) => {
   }
 });
 
-router.post('/transfers', authenticate, async (req, res) => {
+router.post('/transfers', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
     const transfer = await BeneficiaryTransfer.create({
@@ -261,7 +262,7 @@ router.post('/transfers', authenticate, async (req, res) => {
 
 router.put(
   '/transfers/:transferId/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -280,7 +281,7 @@ router.put(
 
 router.put(
   '/transfers/:transferId/reject',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -299,7 +300,7 @@ router.put(
 
 router.post(
   '/transfers/:transferId/complete',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {

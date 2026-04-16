@@ -5,12 +5,13 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // Apply authentication to all routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /**
  * @route   GET /api/v1/communication
  * @desc   获取通信服务状态

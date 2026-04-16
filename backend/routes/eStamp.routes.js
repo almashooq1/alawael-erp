@@ -28,6 +28,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const EStamp = require('../models/EStamp');
 const { escapeRegex } = require('../utils/sanitize');
@@ -50,7 +51,7 @@ const stampImageUpload = multer({
 });
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ─── Validate :id param as ObjectId on all sub-routes ────────────────────── */
 router.param('id', (req, res, next, val) => {
   const mongoose = require('mongoose');

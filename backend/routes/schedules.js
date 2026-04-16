@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { ScheduleManagementService } = require('../services/scheduleManagementService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
@@ -26,7 +27,7 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedules = await scheduleService.getAllSchedules(req.query);
@@ -48,7 +49,7 @@ router.get(
  */
 router.post(
   '/',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -88,7 +89,7 @@ router.post(
  */
 router.get(
   '/resource/:resourceId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByResource(req.params.resourceId);
@@ -111,7 +112,7 @@ router.get(
  */
 router.get(
   '/date-range/:startDate/:endDate',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByDateRange(
@@ -137,7 +138,7 @@ router.get(
  */
 router.get(
   '/:scheduleId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedule = await scheduleService.getScheduleById(req.params.scheduleId);
@@ -166,7 +167,7 @@ router.get(
  */
 router.put(
   '/:scheduleId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -196,7 +197,7 @@ router.put(
  */
 router.delete(
   '/:scheduleId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -226,7 +227,7 @@ router.delete(
  */
 router.post(
   '/:scheduleId/confirm',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   async (req, res) => {
     try {
       const schedule = await scheduleService.confirmSchedule(req.params.scheduleId, req.user.id);

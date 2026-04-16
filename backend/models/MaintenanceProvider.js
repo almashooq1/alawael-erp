@@ -26,6 +26,12 @@ const MaintenanceProviderSchema = new Schema(
       required: true,
       trim: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
     providerType: {
       type: String,
       enum: ['مركز معتمد', 'مركز خاص', 'ورشة صغيرة', 'عامل مستقل'],
@@ -312,4 +318,6 @@ MaintenanceProviderSchema.virtual('overallScore').get(function () {
   );
 });
 
-module.exports = mongoose.models.MaintenanceProvider || mongoose.model('MaintenanceProvider', MaintenanceProviderSchema);
+module.exports =
+  mongoose.models.MaintenanceProvider ||
+  mongoose.model('MaintenanceProvider', MaintenanceProviderSchema);

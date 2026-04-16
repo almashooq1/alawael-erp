@@ -11,6 +11,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const ESignature = require('../models/ESignature');
 const EStamp = require('../models/EStamp');
@@ -122,7 +123,7 @@ router.get('/public/verify/:code', async (req, res) => {
    Protected endpoints — require authentication
    ═══════════════════════════════════════════════════════════════════════════ */
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ═══════════════════════════════════════════════════════════════════════════
    Upload Document — attach PDF/image to a signature request
    ═══════════════════════════════════════════════════════════════════════════ */

@@ -10,10 +10,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Safe-load all models needed for aggregation
 function safeModel(name) {
   try {

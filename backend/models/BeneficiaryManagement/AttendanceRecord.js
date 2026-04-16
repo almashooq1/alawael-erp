@@ -16,6 +16,12 @@ const attendanceRecordSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Attendance Details
     attendanceDate: {
@@ -113,6 +119,7 @@ attendanceRecordSchema.index({ status: 1 });
 // attendanceDate: removed — index:true creates implicit index
 attendanceRecordSchema.index({ attendanceAlert: 1 });
 attendanceRecordSchema.index({ 'consecutiveAbsences.count': 1 });
+attendanceRecordSchema.index({ branchId: 1, attendanceDate: -1 });
 
 // Pre-save middleware
 attendanceRecordSchema.pre('save', function (next) {

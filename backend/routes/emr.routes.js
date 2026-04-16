@@ -21,13 +21,14 @@ const {
   Allergy,
 } = require('../models/emr.model');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
 
 // ── Auth: all EMR routes require authentication (PHI data) ───────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════
 // MEDICAL RECORDS — السجلات الطبية
 // ═══════════════════════════════════════════════════════════════════════════

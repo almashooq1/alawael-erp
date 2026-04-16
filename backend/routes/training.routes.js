@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 
 /** Max page size to prevent memory exhaustion */
@@ -24,7 +25,7 @@ const safeModel = n => (mongoose.models[n] ? mongoose.model(n) : require(`../mod
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── Dashboard ────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (_req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     const Course = safeModel('TrainingCourse');
     const Session = safeModel('TrainingSession');
@@ -61,7 +62,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
 });
 
 // ── Courses CRUD ─────────────────────────────────────────────
-router.get('/courses', authenticate, async (req, res) => {
+router.get('/courses', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Course = safeModel('TrainingCourse');
     const { status, category, page = 1, limit: rawLimit = 20 } = req.query;
@@ -84,7 +85,7 @@ router.get('/courses', authenticate, async (req, res) => {
   }
 });
 
-router.post('/courses', authenticate, async (req, res) => {
+router.post('/courses', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Course = safeModel('TrainingCourse');
     const doc = await Course.create({ ...req.body, createdBy: req.user?._id });
@@ -94,7 +95,7 @@ router.post('/courses', authenticate, async (req, res) => {
   }
 });
 
-router.put('/courses/:id', authenticate, async (req, res) => {
+router.put('/courses/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Course = safeModel('TrainingCourse');
@@ -106,7 +107,7 @@ router.put('/courses/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/courses/:id', authenticate, async (req, res) => {
+router.delete('/courses/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const _Course = safeModel('TrainingCourse');
@@ -117,7 +118,7 @@ router.delete('/courses/:id', authenticate, async (req, res) => {
 });
 
 // ── Sessions CRUD ────────────────────────────────────────────
-router.get('/sessions', authenticate, async (req, res) => {
+router.get('/sessions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Session = safeModel('TrainingSession');
     const { status, page = 1, limit: rawLimit = 20 } = req.query;
@@ -144,7 +145,7 @@ router.get('/sessions', authenticate, async (req, res) => {
   }
 });
 
-router.post('/sessions', authenticate, async (req, res) => {
+router.post('/sessions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Session = safeModel('TrainingSession');
     const doc = await Session.create({ ...req.body, createdBy: req.user?._id });
@@ -154,7 +155,7 @@ router.post('/sessions', authenticate, async (req, res) => {
   }
 });
 
-router.put('/sessions/:id', authenticate, async (req, res) => {
+router.put('/sessions/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Session = safeModel('TrainingSession');
@@ -167,7 +168,7 @@ router.put('/sessions/:id', authenticate, async (req, res) => {
 });
 
 // ── Plans CRUD ───────────────────────────────────────────────
-router.get('/plans', authenticate, async (req, res) => {
+router.get('/plans', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Plan = safeModel('TrainingPlan');
     const docs = await Plan.find().sort({ year: -1 }).lean();
@@ -177,7 +178,7 @@ router.get('/plans', authenticate, async (req, res) => {
   }
 });
 
-router.post('/plans', authenticate, async (req, res) => {
+router.post('/plans', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Plan = safeModel('TrainingPlan');
     const doc = await Plan.create({ ...req.body, createdBy: req.user?._id });
@@ -187,7 +188,7 @@ router.post('/plans', authenticate, async (req, res) => {
   }
 });
 
-router.put('/plans/:id', authenticate, async (req, res) => {
+router.put('/plans/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const Plan = safeModel('TrainingPlan');

@@ -13,6 +13,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const govService = require('../services/governmentIntegration.service');
 
 // ─── Async wrapper ──────────────────────────────────────────────────────────
@@ -24,7 +25,7 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getGovernmentComplianceDashboard();
@@ -34,7 +35,7 @@ router.get(
 
 router.get(
   '/nitaqat/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getNitaqatStatus();
@@ -44,7 +45,7 @@ router.get(
 
 router.get(
   '/nitaqat/compliance',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getNitaqatCompliance();
@@ -54,7 +55,7 @@ router.get(
 
 router.get(
   '/gosi/compliance',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getGOSIComplianceReport(req.query);
@@ -68,7 +69,7 @@ router.get(
 
 router.post(
   '/bulk-sync',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const data = await govService.bulkSyncGovernmentRegistrations();
@@ -82,7 +83,7 @@ router.post(
 
 router.post(
   '/wps/submit',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const data = await govService.submitPayrollToWPS(req.body);
@@ -96,7 +97,7 @@ router.post(
 
 router.get(
   '/:employeeId/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getEmployeeGovernmentStatus(req.params.employeeId);
@@ -106,7 +107,7 @@ router.get(
 
 router.post(
   '/:employeeId/register-all',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const data = await govService.fullGovernmentRegistration(req.params.employeeId);
@@ -116,7 +117,7 @@ router.post(
 
 router.post(
   '/:employeeId/terminate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { reason } = req.body;
@@ -129,7 +130,7 @@ router.post(
 
 router.post(
   '/:employeeId/gosi/register',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.registerEmployeeGOSI(req.params.employeeId);
@@ -139,7 +140,7 @@ router.post(
 
 router.get(
   '/:employeeId/gosi/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getEmployeeGOSIStatus(req.params.employeeId);
@@ -149,7 +150,7 @@ router.get(
 
 router.put(
   '/:employeeId/gosi/wage',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { newSalary } = req.body;
@@ -163,7 +164,7 @@ router.put(
 
 router.post(
   '/:employeeId/qiwa/contract',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.registerEmployeeQiwaContract(req.params.employeeId, req.body);
@@ -173,7 +174,7 @@ router.post(
 
 router.get(
   '/:employeeId/qiwa/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getEmployeeQiwaStatus(req.params.employeeId);
@@ -183,7 +184,7 @@ router.get(
 
 router.put(
   '/:employeeId/qiwa/wage',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const data = await govService.updateEmployeeWageInQiwa(req.params.employeeId, req.body);
@@ -193,7 +194,7 @@ router.put(
 
 router.get(
   '/:employeeId/qiwa/verify',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.verifyEmployeeInQiwa(req.params.employeeId);
@@ -203,7 +204,7 @@ router.get(
 
 router.get(
   '/:employeeId/mol/labor-record',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await govService.getEmployeeLaborRecord(req.params.employeeId);

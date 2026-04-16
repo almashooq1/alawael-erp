@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const NotificationsService = require('../domains/notifications/services/notificationService');
 const { authenticateToken } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const { asyncHandler } = require('../errors/errorHandler');
@@ -40,7 +41,7 @@ try {
 
 // Middleware
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 /**
  * @route POST /api/notifications
  * @desc Create a new notification

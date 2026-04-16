@@ -9,6 +9,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { getCacheStats, clearCache } = require('../utils/performance-optimizer');
 const logger = require('../utils/logger');
@@ -16,7 +17,7 @@ const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Debug middleware to log all requests to this router
 router.use((_req, _res, next) => {
   next();

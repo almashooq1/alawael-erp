@@ -20,6 +20,7 @@
 'use strict';
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 
@@ -42,7 +43,7 @@ const validateId = (req, res, next) => {
 
 // ─── جميع المسارات تتطلب مصادقة ───────────────────────────────────────────────
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ══════════════════════════════════════════════════════════════════════════════
 // GET /api/beneficiary-transfers — قائمة طلبات النقل
 // ══════════════════════════════════════════════════════════════════════════════

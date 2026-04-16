@@ -24,11 +24,12 @@ const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { knowledgeCenterService } = require('../services/knowledge-center.service');
 const logger = require('../utils/logger');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const wrap = fn => async (req, res) => {
   try {

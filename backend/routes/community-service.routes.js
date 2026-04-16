@@ -34,13 +34,14 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 
 // 🔒 All community service routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Models
 const CommunityProgram = require('../models/CommunityProgram');
 const CommunityEvent = require('../models/CommunityEvent');

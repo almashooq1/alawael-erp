@@ -7,6 +7,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const {
   Teleconsultation,
   TelehealthWaitingRoom,
@@ -38,7 +39,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Dashboard & Stats ────────────────────────────────────────────────────────
 
 /**

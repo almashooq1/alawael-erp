@@ -18,6 +18,7 @@ const {
   ClaimItem,
 } = require('../models/insuranceClaim.model');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { safeError } = require('../utils/safeError');
@@ -41,7 +42,7 @@ const _optNumber = (field, label) =>
 
 // ── Auth: all insurance routes require authentication ────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════
 // INSURANCE CONTRACTS — عقود التأمين
 // ═══════════════════════════════════════════════════════════════════════════

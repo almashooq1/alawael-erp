@@ -8,6 +8,7 @@
 
 const express = require('express');
 const { protect, _authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const mobileAppController = require('../controllers/mobileApp.controller');
 
 const router = express.Router();

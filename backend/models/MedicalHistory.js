@@ -12,6 +12,12 @@ const MedicalHistorySchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
     // أمراض مزمنة
     chronicConditions: [{ type: String, trim: true }],
     // حساسيات

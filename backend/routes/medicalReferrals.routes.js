@@ -13,10 +13,11 @@ const { MedicalReferral, ReferralFollowUp } = require('../models/medicalReferral
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════
 // REFERRALS — الإحالات
 // ═══════════════════════════════════════════════════════════════════════════

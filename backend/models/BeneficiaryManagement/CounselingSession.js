@@ -16,6 +16,12 @@ const counselingSessionSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Session Information
     sessionStatus: {
@@ -204,6 +210,7 @@ counselingSessionSchema.index({ counselorId: 1 });
 // scheduledDate: removed — index:true creates implicit index
 counselingSessionSchema.index({ riskLevel: 1 });
 counselingSessionSchema.index({ createdAt: -1 });
+counselingSessionSchema.index({ branchId: 1, sessionStatus: 1 });
 
 // Pre-save middleware
 counselingSessionSchema.pre('save', function (next) {

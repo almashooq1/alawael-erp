@@ -23,6 +23,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const ESignature = require('../models/ESignature');
 const ESignatureTemplate = require('../models/ESignatureTemplate');
@@ -30,7 +31,7 @@ const { escapeRegex } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ═══════════════════════════════════════════════════════════════════════════
    Dashboard Statistics
    ═══════════════════════════════════════════════════════════════════════════ */

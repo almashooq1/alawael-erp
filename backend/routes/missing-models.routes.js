@@ -11,6 +11,13 @@ const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const requireAuth = authenticateToken;
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+
+// Local helper — some legacy models use 'branch' not 'branchId'
+const branchFilterFor = (req, field = 'branchId') => {
+  if (!req.branchScope || req.branchScope.allBranches) return {};
+  return { [field]: req.branchScope.branchId };
+};
 
 const MedicalHistory = require('../models/MedicalHistory');
 const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
@@ -35,26 +42,37 @@ const serverError = (res, err) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /medical-history/:beneficiaryId
-router.get('/medical-history/:beneficiaryId', requireAuth, async (req, res) => {
-  try {
-    const record = await MedicalHistory.findOne({ beneficiary: req.params.beneficiaryId })
-      .populate('beneficiary', 'fileNumber firstNameAr lastNameAr')
-      .populate('recordedBy', 'nameAr');
-    if (!record) return fail(res, 'لا يوجد تاريخ طبي مسجل لهذا المستفيد', 404);
-    ok(res, record);
-  } catch (err) {
-    serverError(res, err);
+router.get(
+  '/medical-history/:beneficiaryId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const record = await MedicalHistory.findOne({
+        beneficiary: req.params.beneficiaryId,
+        ...branchFilter(req),
+      })
+        .populate('beneficiary', 'fileNumber firstNameAr lastNameAr')
+        .populate('recordedBy', 'nameAr');
+      if (!record) return fail(res, 'لا يوجد تاريخ طبي مسجل لهذا المستفيد', 404);
+      ok(res, record);
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // POST /medical-history — إنشاء أو تحديث (upsert)
-router.post('/medical-history', requireAuth, async (req, res) => {
+router.post('/medical-history', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { beneficiaryId, ...rest } = req.body;
     if (!beneficiaryId) return fail(res, 'beneficiaryId مطلوب');
     rest.recordedBy = req.user?._id || req.user?.id;
+    if (req.branchScope && req.branchScope.branchId) {
+      rest.branchId = req.branchScope.branchId;
+    }
     const record = await MedicalHistory.findOneAndUpdate(
-      { beneficiary: beneficiaryId },
+      { beneficiary: beneficiaryId, ...branchFilter(req) },
       { ...rest, beneficiary: beneficiaryId },
       { upsert: true, new: true, runValidators: true }
     );
@@ -65,55 +83,66 @@ router.post('/medical-history', requireAuth, async (req, res) => {
 });
 
 // PATCH /medical-history/:beneficiaryId — تحديث جزئي
-router.patch('/medical-history/:beneficiaryId', requireAuth, async (req, res) => {
-  try {
-    // ── Mass-assignment protection: whitelist allowed fields ──
-    const allowedFields = [
-      'diagnoses',
-      'chronicConditions',
-      'allergies',
-      'medications',
-      'surgeries',
-      'familyHistory',
-      'immunizations',
-      'bloodType',
-      'disabilities',
-      'notes',
-      'lastCheckupDate',
-      'nextCheckupDate',
-      'currentTreatmentPlan',
-      'emergencyMedicalInfo',
-    ];
-    const updates = {};
-    for (const key of allowedFields) {
-      if (req.body[key] !== undefined) updates[key] = req.body[key];
-    }
-    updates.recordedBy = req.user?._id || req.user?.id;
+router.patch(
+  '/medical-history/:beneficiaryId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      // ── Mass-assignment protection: whitelist allowed fields ──
+      const allowedFields = [
+        'diagnoses',
+        'chronicConditions',
+        'allergies',
+        'medications',
+        'surgeries',
+        'familyHistory',
+        'immunizations',
+        'bloodType',
+        'disabilities',
+        'notes',
+        'lastCheckupDate',
+        'nextCheckupDate',
+        'currentTreatmentPlan',
+        'emergencyMedicalInfo',
+      ];
+      const updates = {};
+      for (const key of allowedFields) {
+        if (req.body[key] !== undefined) updates[key] = req.body[key];
+      }
+      updates.recordedBy = req.user?._id || req.user?.id;
 
-    const record = await MedicalHistory.findOneAndUpdate(
-      { beneficiary: req.params.beneficiaryId },
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
-    if (!record) return fail(res, 'السجل غير موجود', 404);
-    ok(res, record, { message: 'تم التحديث' });
-  } catch (err) {
-    serverError(res, err);
+      const record = await MedicalHistory.findOneAndUpdate(
+        { beneficiary: req.params.beneficiaryId, ...branchFilter(req) },
+        { $set: updates },
+        { new: true, runValidators: true }
+      );
+      if (!record) return fail(res, 'السجل غير موجود', 404);
+      ok(res, record, { message: 'تم التحديث' });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 2. BENEFICIARY TRANSFERS — نقل المستفيدين
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// GET /beneficiary-transfers — قائمة الطلبات
-router.get('/beneficiary-transfers', requireAuth, async (req, res) => {
+// GET /beneficiary-transfers — قائمة الطلبات (scoped: user sees transfers involving their branch)
+router.get('/beneficiary-transfers', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status, fromBranch, toBranch, page = 1, limit = 20 } = req.query;
     const filter = {};
     if (status) filter.status = status;
     if (fromBranch) filter.fromBranch = fromBranch;
     if (toBranch) filter.toBranch = toBranch;
+
+    // Branch isolation: user sees transfers involving their branch (from or to)
+    if (req.branchScope && !req.branchScope.allBranches && req.branchScope.branchId) {
+      const bid = req.branchScope.branchId;
+      filter.$or = [{ fromBranch: bid }, { toBranch: bid }];
+    }
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
@@ -135,7 +164,7 @@ router.get('/beneficiary-transfers', requireAuth, async (req, res) => {
 });
 
 // GET /beneficiary-transfers/:id
-router.get('/beneficiary-transfers/:id', requireAuth, async (req, res) => {
+router.get('/beneficiary-transfers/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const record = await BeneficiaryTransfer.findById(req.params.id)
       .populate('beneficiary', 'fileNumber firstNameAr lastNameAr')
@@ -144,6 +173,16 @@ router.get('/beneficiary-transfers/:id', requireAuth, async (req, res) => {
       .populate('requestedBy', 'nameAr')
       .populate('approvedBy', 'nameAr');
     if (!record) return fail(res, 'الطلب غير موجود', 404);
+    // Verify branch access for non-cross-branch users
+    if (req.branchScope && !req.branchScope.allBranches && req.branchScope.branchId) {
+      const bid = String(req.branchScope.branchId);
+      if (
+        String(record.fromBranch?._id || record.fromBranch) !== bid &&
+        String(record.toBranch?._id || record.toBranch) !== bid
+      ) {
+        return fail(res, 'الطلب غير موجود', 404);
+      }
+    }
     ok(res, record);
   } catch (err) {
     serverError(res, err);
@@ -151,9 +190,13 @@ router.get('/beneficiary-transfers/:id', requireAuth, async (req, res) => {
 });
 
 // POST /beneficiary-transfers — طلب نقل جديد
-router.post('/beneficiary-transfers', requireAuth, async (req, res) => {
+router.post('/beneficiary-transfers', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const body = { ...req.body, requestedBy: req.user?._id || req.user?.id };
+    // Auto-set fromBranch if not provided
+    if (!body.fromBranch && req.branchScope && req.branchScope.branchId) {
+      body.fromBranch = req.branchScope.branchId;
+    }
     const record = await BeneficiaryTransfer.create(body);
     ok(res, record, { message: 'تم إنشاء طلب النقل' });
   } catch (err) {
@@ -162,63 +205,83 @@ router.post('/beneficiary-transfers', requireAuth, async (req, res) => {
 });
 
 // PATCH /beneficiary-transfers/:id/approve — الموافقة
-router.patch('/beneficiary-transfers/:id/approve', requireAuth, async (req, res) => {
-  try {
-    const record = await BeneficiaryTransfer.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'approved',
-        approvedBy: req.user?._id || req.user?.id,
-        approvedAt: new Date(),
-        transferDate: req.body.transferDate || new Date(),
-      },
-      { new: true }
-    );
-    if (!record) return fail(res, 'الطلب غير موجود', 404);
-    ok(res, record, { message: 'تمت الموافقة على الطلب' });
-  } catch (err) {
-    serverError(res, err);
+router.patch(
+  '/beneficiary-transfers/:id/approve',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const record = await BeneficiaryTransfer.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: 'approved',
+          approvedBy: req.user?._id || req.user?.id,
+          approvedAt: new Date(),
+          transferDate: req.body.transferDate || new Date(),
+        },
+        { new: true }
+      );
+      if (!record) return fail(res, 'الطلب غير موجود', 404);
+      ok(res, record, { message: 'تمت الموافقة على الطلب' });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // PATCH /beneficiary-transfers/:id/reject — الرفض
-router.patch('/beneficiary-transfers/:id/reject', requireAuth, async (req, res) => {
-  try {
-    const record = await BeneficiaryTransfer.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'rejected',
-        rejectionReason: req.body.rejectionReason || 'لم يُذكر سبب',
-      },
-      { new: true }
-    );
-    if (!record) return fail(res, 'الطلب غير موجود', 404);
-    ok(res, record, { message: 'تم رفض الطلب' });
-  } catch (err) {
-    serverError(res, err);
+router.patch(
+  '/beneficiary-transfers/:id/reject',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const record = await BeneficiaryTransfer.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: 'rejected',
+          rejectionReason: req.body.rejectionReason || 'لم يُذكر سبب',
+        },
+        { new: true }
+      );
+      if (!record) return fail(res, 'الطلب غير موجود', 404);
+      ok(res, record, { message: 'تم رفض الطلب' });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. EMERGENCY CONTACTS — جهات الاتصال الطارئة
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /emergency-contacts/:beneficiaryId
-router.get('/emergency-contacts/:beneficiaryId', requireAuth, async (req, res) => {
-  try {
-    const contacts = await EmergencyContact.find({ beneficiary: req.params.beneficiaryId }).sort({
-      priority: 1,
-    });
-    ok(res, contacts, { total: contacts.length });
-  } catch (err) {
-    serverError(res, err);
+router.get(
+  '/emergency-contacts/:beneficiaryId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const contacts = await EmergencyContact.find({
+        beneficiary: req.params.beneficiaryId,
+        ...branchFilter(req),
+      }).sort({ priority: 1 });
+      ok(res, contacts, { total: contacts.length });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // POST /emergency-contacts
-router.post('/emergency-contacts', requireAuth, async (req, res) => {
+router.post('/emergency-contacts', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contact = await EmergencyContact.create(stripUpdateMeta(req.body));
+    const body = { ...stripUpdateMeta(req.body) };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
+    const contact = await EmergencyContact.create(body);
     ok(res, contact, { message: 'تمت إضافة جهة الاتصال' });
   } catch (err) {
     serverError(res, err);
@@ -226,15 +289,12 @@ router.post('/emergency-contacts', requireAuth, async (req, res) => {
 });
 
 // PATCH /emergency-contacts/:id
-router.patch('/emergency-contacts/:id', requireAuth, async (req, res) => {
+router.patch('/emergency-contacts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndUpdate(
-      req.params.id,
+    const contact = await EmergencyContact.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
     if (!contact) return fail(res, 'جهة الاتصال غير موجودة', 404);
     ok(res, contact, { message: 'تم التحديث' });
@@ -244,9 +304,12 @@ router.patch('/emergency-contacts/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /emergency-contacts/:id
-router.delete('/emergency-contacts/:id', requireAuth, async (req, res) => {
+router.delete('/emergency-contacts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contact = await EmergencyContact.findByIdAndDelete(req.params.id);
+    const contact = await EmergencyContact.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!contact) return fail(res, 'جهة الاتصال غير موجودة', 404);
     ok(res, null, { message: 'تم الحذف' });
   } catch (err) {
@@ -259,12 +322,13 @@ router.delete('/emergency-contacts/:id', requireAuth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /leave-balances/:employeeId — أرصدة موظف محدد
-router.get('/leave-balances/:employeeId', requireAuth, async (req, res) => {
+router.get('/leave-balances/:employeeId', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const year = req.query.year || new Date().getFullYear().toString();
     const balances = await LeaveBalance.find({
       employee: req.params.employeeId,
       year,
+      ...branchFilterFor(req, 'branch'),
     }).populate('employee', 'nameAr employeeNumber');
     ok(res, balances, { year, total: balances.length });
   } catch (err) {
@@ -273,7 +337,7 @@ router.get('/leave-balances/:employeeId', requireAuth, async (req, res) => {
 });
 
 // GET /leave-balances — قائمة عامة
-router.get('/leave-balances', requireAuth, async (req, res) => {
+router.get('/leave-balances', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       year = new Date().getFullYear().toString(),
@@ -282,9 +346,9 @@ router.get('/leave-balances', requireAuth, async (req, res) => {
       page = 1,
       limit = 50,
     } = req.query;
-    const filter = { year };
+    const filter = { year, ...branchFilterFor(req, 'branch') };
     if (leaveType) filter.leaveType = leaveType;
-    if (branch) filter.branch = branch;
+    if (branch) filter.branch = branch; // explicit override if admin
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
     const [data, total] = await Promise.all([
@@ -302,9 +366,12 @@ router.get('/leave-balances', requireAuth, async (req, res) => {
 });
 
 // POST /leave-balances — إنشاء/تحديث رصيد
-router.post('/leave-balances', requireAuth, async (req, res) => {
+router.post('/leave-balances', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { employee, year, leaveType, ...rest } = req.body;
+    if (req.branchScope && req.branchScope.branchId && !rest.branch) {
+      rest.branch = req.branchScope.branchId;
+    }
     const balance = await LeaveBalance.findOneAndUpdate(
       { employee, year, leaveType },
       { employee, year, leaveType, ...rest },
@@ -317,11 +384,14 @@ router.post('/leave-balances', requireAuth, async (req, res) => {
 });
 
 // PATCH /leave-balances/:id/deduct — خصم أيام
-router.patch('/leave-balances/:id/deduct', requireAuth, async (req, res) => {
+router.patch('/leave-balances/:id/deduct', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { days } = req.body;
     if (!days || days <= 0) return fail(res, 'عدد الأيام يجب أن يكون موجباً');
-    const balance = await LeaveBalance.findById(req.params.id);
+    const balance = await LeaveBalance.findOne({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    });
     if (!balance) return fail(res, 'السجل غير موجود', 404);
     if (balance.remainingDays < days) return fail(res, 'الرصيد غير كافٍ');
     balance.usedDays += days;
@@ -337,12 +407,12 @@ router.patch('/leave-balances/:id/deduct', requireAuth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /employment-contracts
-router.get('/employment-contracts', requireAuth, async (req, res) => {
+router.get('/employment-contracts', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status, branch, contractType, page = 1, limit = 20 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilterFor(req, 'branch') };
     if (status) filter.status = status;
-    if (branch) filter.branch = branch;
+    if (branch) filter.branch = branch; // explicit override if admin
     if (contractType) filter.contractType = contractType;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -363,19 +433,27 @@ router.get('/employment-contracts', requireAuth, async (req, res) => {
 });
 
 // GET /employment-contracts/employee/:employeeId
-router.get('/employment-contracts/employee/:employeeId', requireAuth, async (req, res) => {
-  try {
-    const contracts = await EmploymentContract.find({ employee: req.params.employeeId })
-      .populate('branch', 'nameAr code')
-      .sort({ startDate: -1 });
-    ok(res, contracts, { total: contracts.length });
-  } catch (err) {
-    serverError(res, err);
+router.get(
+  '/employment-contracts/employee/:employeeId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const contracts = await EmploymentContract.find({
+        employee: req.params.employeeId,
+        ...branchFilterFor(req, 'branch'),
+      })
+        .populate('branch', 'nameAr code')
+        .sort({ startDate: -1 });
+      ok(res, contracts, { total: contracts.length });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // GET /employment-contracts/expiring — عقود قاربت الانتهاء
-router.get('/employment-contracts/expiring', requireAuth, async (req, res) => {
+router.get('/employment-contracts/expiring', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const days = parseInt(req.query.days) || 30;
     const now = new Date();
@@ -383,6 +461,7 @@ router.get('/employment-contracts/expiring', requireAuth, async (req, res) => {
     const contracts = await EmploymentContract.find({
       status: 'active',
       endDate: { $ne: null, $lte: future, $gte: now },
+      ...branchFilterFor(req, 'branch'),
     })
       .populate('employee', 'nameAr employeeNumber phone')
       .populate('branch', 'nameAr code')
@@ -394,9 +473,12 @@ router.get('/employment-contracts/expiring', requireAuth, async (req, res) => {
 });
 
 // GET /employment-contracts/:id
-router.get('/employment-contracts/:id', requireAuth, async (req, res) => {
+router.get('/employment-contracts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contract = await EmploymentContract.findById(req.params.id)
+    const contract = await EmploymentContract.findOne({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    })
       .populate('employee', 'nameAr employeeNumber jobTitleAr phone')
       .populate('branch', 'nameAr code')
       .populate('preparedBy', 'nameAr')
@@ -410,9 +492,12 @@ router.get('/employment-contracts/:id', requireAuth, async (req, res) => {
 });
 
 // POST /employment-contracts
-router.post('/employment-contracts', requireAuth, async (req, res) => {
+router.post('/employment-contracts', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const body = { ...req.body, preparedBy: req.user?._id || req.user?.id };
+    if (req.branchScope && req.branchScope.branchId && !body.branch) {
+      body.branch = req.branchScope.branchId;
+    }
     const contract = await EmploymentContract.create(body);
     ok(res, contract, { message: 'تم إنشاء العقد' });
   } catch (err) {
@@ -421,15 +506,12 @@ router.post('/employment-contracts', requireAuth, async (req, res) => {
 });
 
 // PATCH /employment-contracts/:id
-router.patch('/employment-contracts/:id', requireAuth, async (req, res) => {
+router.patch('/employment-contracts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contract = await EmploymentContract.findByIdAndUpdate(
-      req.params.id,
+    const contract = await EmploymentContract.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
     if (!contract) return fail(res, 'العقد غير موجود', 404);
     ok(res, contract, { message: 'تم التحديث' });
@@ -439,29 +521,34 @@ router.patch('/employment-contracts/:id', requireAuth, async (req, res) => {
 });
 
 // PATCH /employment-contracts/:id/approve
-router.patch('/employment-contracts/:id/approve', requireAuth, async (req, res) => {
-  try {
-    const contract = await EmploymentContract.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'active',
-        approvedBy: req.user?._id || req.user?.id,
-        approvedAt: new Date(),
-      },
-      { new: true }
-    );
-    if (!contract) return fail(res, 'العقد غير موجود', 404);
-    ok(res, contract, { message: 'تم اعتماد العقد' });
-  } catch (err) {
-    serverError(res, err);
+router.patch(
+  '/employment-contracts/:id/approve',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const contract = await EmploymentContract.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilterFor(req, 'branch') },
+        {
+          status: 'active',
+          approvedBy: req.user?._id || req.user?.id,
+          approvedAt: new Date(),
+        },
+        { new: true }
+      );
+      if (!contract) return fail(res, 'العقد غير موجود', 404);
+      ok(res, contract, { message: 'تم اعتماد العقد' });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
-// DELETE /employment-contracts/:id (soft: set to draft)
-router.delete('/employment-contracts/:id', requireAuth, async (req, res) => {
+// DELETE /employment-contracts/:id (soft: set to terminated)
+router.delete('/employment-contracts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const contract = await EmploymentContract.findByIdAndUpdate(
-      req.params.id,
+    const contract = await EmploymentContract.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       { status: 'terminated' },
       { new: true }
     );
@@ -477,12 +564,12 @@ router.delete('/employment-contracts/:id', requireAuth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /chart-of-accounts — شجرة الحسابات
-router.get('/chart-of-accounts', requireAuth, async (req, res) => {
+router.get('/chart-of-accounts', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { type, isActive = 'true', branch } = req.query;
-    const filter = {};
+    const filter = { ...branchFilterFor(req, 'branch') };
     if (type) filter.type = type;
-    if (branch) filter.branch = branch;
+    if (branch) filter.branch = branch; // explicit override if admin
     if (isActive !== 'all') filter.isActive = isActive === 'true';
 
     const accounts = await ChartOfAccounts.find(filter)
@@ -495,16 +582,18 @@ router.get('/chart-of-accounts', requireAuth, async (req, res) => {
 });
 
 // GET /chart-of-accounts/tree — شجرة هرمية
-router.get('/chart-of-accounts/tree', requireAuth, async (req, res) => {
+router.get('/chart-of-accounts/tree', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const branch = req.query.branch;
-    const filter = { parent: null, isActive: true };
+    const filter = { parent: null, isActive: true, ...branchFilterFor(req, 'branch') };
     if (branch) filter.branch = branch;
 
+    const scopeFilter = branchFilterFor(req, 'branch');
     const buildTree = async parentId => {
       const children = await ChartOfAccounts.find({
         parent: parentId,
         isActive: true,
+        ...scopeFilter,
       }).sort({ code: 1 });
       return Promise.all(
         children.map(async node => ({
@@ -542,9 +631,12 @@ router.get('/chart-of-accounts/tree', requireAuth, async (req, res) => {
 });
 
 // GET /chart-of-accounts/:id
-router.get('/chart-of-accounts/:id', requireAuth, async (req, res) => {
+router.get('/chart-of-accounts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.findById(req.params.id).populate('parent', 'code nameAr');
+    const account = await ChartOfAccounts.findOne({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    }).populate('parent', 'code nameAr');
     if (!account) return fail(res, 'الحساب غير موجود', 404);
     ok(res, account);
   } catch (err) {
@@ -553,9 +645,13 @@ router.get('/chart-of-accounts/:id', requireAuth, async (req, res) => {
 });
 
 // POST /chart-of-accounts
-router.post('/chart-of-accounts', requireAuth, async (req, res) => {
+router.post('/chart-of-accounts', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.create(stripUpdateMeta(req.body));
+    const body = { ...stripUpdateMeta(req.body) };
+    if (req.branchScope && req.branchScope.branchId && !body.branch) {
+      body.branch = req.branchScope.branchId;
+    }
+    const account = await ChartOfAccounts.create(body);
     // إذا كان له أب، تحديث isParent للأب
     if (account.parent) {
       await ChartOfAccounts.findByIdAndUpdate(account.parent, { isParent: true });
@@ -567,15 +663,12 @@ router.post('/chart-of-accounts', requireAuth, async (req, res) => {
 });
 
 // PATCH /chart-of-accounts/:id
-router.patch('/chart-of-accounts/:id', requireAuth, async (req, res) => {
+router.patch('/chart-of-accounts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.findByIdAndUpdate(
-      req.params.id,
+    const account = await ChartOfAccounts.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilterFor(req, 'branch') },
       stripUpdateMeta(req.body),
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
     if (!account) return fail(res, 'الحساب غير موجود', 404);
     ok(res, account, { message: 'تم التحديث' });
@@ -585,9 +678,12 @@ router.patch('/chart-of-accounts/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /chart-of-accounts/:id (soft delete)
-router.delete('/chart-of-accounts/:id', requireAuth, async (req, res) => {
+router.delete('/chart-of-accounts/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const account = await ChartOfAccounts.findById(req.params.id);
+    const account = await ChartOfAccounts.findOne({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    });
     if (!account) return fail(res, 'الحساب غير موجود', 404);
     if (account.isSystem) return fail(res, 'لا يمكن حذف الحسابات النظامية', 403);
     // فحص وجود أبناء
@@ -606,23 +702,34 @@ router.delete('/chart-of-accounts/:id', requireAuth, async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // GET /assessment-comparisons/beneficiary/:beneficiaryId
-router.get('/assessment-comparisons/beneficiary/:beneficiaryId', requireAuth, async (req, res) => {
-  try {
-    const comparisons = await AssessmentComparison.find({ beneficiary: req.params.beneficiaryId })
-      .populate('baselineAssessment', 'assessmentNumber assessmentDate totalScore')
-      .populate('currentAssessment', 'assessmentNumber assessmentDate totalScore')
-      .populate('generatedBy', 'nameAr')
-      .sort({ createdAt: -1 });
-    ok(res, comparisons, { total: comparisons.length });
-  } catch (err) {
-    serverError(res, err);
+router.get(
+  '/assessment-comparisons/beneficiary/:beneficiaryId',
+  requireAuth,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const comparisons = await AssessmentComparison.find({
+        beneficiary: req.params.beneficiaryId,
+        ...branchFilterFor(req, 'branch'),
+      })
+        .populate('baselineAssessment', 'assessmentNumber assessmentDate totalScore')
+        .populate('currentAssessment', 'assessmentNumber assessmentDate totalScore')
+        .populate('generatedBy', 'nameAr')
+        .sort({ createdAt: -1 });
+      ok(res, comparisons, { total: comparisons.length });
+    } catch (err) {
+      serverError(res, err);
+    }
   }
-});
+);
 
 // GET /assessment-comparisons/:id
-router.get('/assessment-comparisons/:id', requireAuth, async (req, res) => {
+router.get('/assessment-comparisons/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const comparison = await AssessmentComparison.findById(req.params.id)
+    const comparison = await AssessmentComparison.findOne({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    })
       .populate('beneficiary', 'fileNumber firstNameAr lastNameAr')
       .populate('baselineAssessment')
       .populate('currentAssessment')
@@ -635,9 +742,12 @@ router.get('/assessment-comparisons/:id', requireAuth, async (req, res) => {
 });
 
 // POST /assessment-comparisons — إنشاء مقارنة جديدة
-router.post('/assessment-comparisons', requireAuth, async (req, res) => {
+router.post('/assessment-comparisons', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const body = { ...req.body, generatedBy: req.user?._id || req.user?.id };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branch = req.branchScope.branchId;
+    }
 
     // حساب نسبة التحسن الإجمالية تلقائياً إذا لم تُرسَل
     if (!body.improvementPercentage && body.comparisonData?.length) {
@@ -667,9 +777,12 @@ router.post('/assessment-comparisons', requireAuth, async (req, res) => {
 });
 
 // DELETE /assessment-comparisons/:id
-router.delete('/assessment-comparisons/:id', requireAuth, async (req, res) => {
+router.delete('/assessment-comparisons/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const comparison = await AssessmentComparison.findByIdAndDelete(req.params.id);
+    const comparison = await AssessmentComparison.findOneAndDelete({
+      _id: req.params.id,
+      ...branchFilterFor(req, 'branch'),
+    });
     if (!comparison) return fail(res, 'المقارنة غير موجودة', 404);
     ok(res, null, { message: 'تم الحذف' });
   } catch (err) {
@@ -681,8 +794,10 @@ router.delete('/assessment-comparisons/:id', requireAuth, async (req, res) => {
 // STATISTICS — إحصاءات شاملة
 // ═══════════════════════════════════════════════════════════════════════════════
 
-router.get('/missing-models/stats', requireAuth, async (req, res) => {
+router.get('/missing-models/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
+    const branchScope = branchFilterFor(req, 'branch');
     const [
       medicalHistories,
       pendingTransfers,
@@ -691,15 +806,16 @@ router.get('/missing-models/stats', requireAuth, async (req, res) => {
       totalAccounts,
       comparisons,
     ] = await Promise.all([
-      MedicalHistory.countDocuments(),
+      MedicalHistory.countDocuments(scope),
       BeneficiaryTransfer.countDocuments({ status: 'pending' }),
       EmploymentContract.countDocuments({
         status: 'active',
         endDate: { $lte: new Date() },
+        ...branchScope,
       }),
-      EmploymentContract.countDocuments({ status: 'active' }),
-      ChartOfAccounts.countDocuments({ isActive: true }),
-      AssessmentComparison.countDocuments(),
+      EmploymentContract.countDocuments({ status: 'active', ...branchScope }),
+      ChartOfAccounts.countDocuments({ isActive: true, ...branchScope }),
+      AssessmentComparison.countDocuments(branchScope),
     ]);
     ok(res, {
       medicalHistories,

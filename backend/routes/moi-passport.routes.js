@@ -9,6 +9,7 @@ const router = express.Router();
 const MOIPassportService = require('../services/moi-passport.service');
 const Logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Initialize service

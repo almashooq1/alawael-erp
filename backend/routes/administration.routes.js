@@ -12,6 +12,7 @@ const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MAX_PAGE_LIMIT = 100;
 
 /* ━━━ Sort Whitelist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
@@ -35,7 +36,7 @@ const safeSortOf = raw => (ADMIN_SAFE_SORTS.has(raw) ? raw : '-createdAt');
 
 /* ━━━ Auth ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ━━━ Field Whitelists ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
 const DECISION_FIELDS = [
   'title',

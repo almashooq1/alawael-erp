@@ -13,11 +13,12 @@ const express = require('express');
 const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const systemSettingsService = require('../services/systemSettings.service');
 const logger = require('../utils/logger');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const wrap = fn => async (req, res) => {
   try {
     const result = await fn(req, res);

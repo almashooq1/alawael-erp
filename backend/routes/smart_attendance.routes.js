@@ -12,6 +12,7 @@ const {
   authenticateToken: authMiddleware,
   requireRole: roleMiddleware,
 } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ========================
@@ -22,7 +23,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
  * تسجيل الدخول الذكي
  * POST /api/attendance/check-in
  */
-router.post('/check-in', authMiddleware, async (req, res) => {
+router.post('/check-in', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const result = await SmartAttendanceService.recordSmartCheckIn(req.user.id, req.body);
 
@@ -43,7 +44,7 @@ router.post('/check-in', authMiddleware, async (req, res) => {
  * تسجيل الخروج الذكي
  * POST /api/attendance/check-out
  */
-router.post('/check-out', authMiddleware, async (req, res) => {
+router.post('/check-out', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const result = await SmartAttendanceService.recordSmartCheckOut(req.user.id, req.body);
 
@@ -64,7 +65,7 @@ router.post('/check-out', authMiddleware, async (req, res) => {
  * الحصول على سجل حضور اليوم
  * GET /api/attendance/today
  */
-router.get('/today', authMiddleware, async (req, res) => {
+router.get('/today', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const record = await SmartAttendanceService.getTodayRecord(req.user.id);
 
@@ -84,7 +85,7 @@ router.get('/today', authMiddleware, async (req, res) => {
  * الحصول على سجلات الحضور الشهرية
  * GET /api/attendance/monthly/:month/:year
  */
-router.get('/monthly/:month/:year', authMiddleware, async (req, res) => {
+router.get('/monthly/:month/:year', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { month, year } = req.params;
 
@@ -110,7 +111,7 @@ router.get('/monthly/:month/:year', authMiddleware, async (req, res) => {
  * الحصول على إحصائيات الحضور الشخصية
  * GET /api/attendance/stats
  */
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { month, year } = req.query;
 
@@ -167,7 +168,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
  */
 router.get(
   '/employee/:employeeId',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -210,7 +211,7 @@ router.get(
  */
 router.put(
   '/:attendanceId',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -264,7 +265,7 @@ router.put(
  */
 router.post(
   '/:attendanceId/approve',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -302,7 +303,7 @@ router.post(
  */
 router.post(
   '/:attendanceId/reject',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -342,7 +343,7 @@ router.post(
  * طلب إجازة جديد
  * POST /api/attendance/leave/request
  */
-router.post('/leave/request', authMiddleware, async (req, res) => {
+router.post('/leave/request', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const newLeave = new SmartLeave({
       employeeId: req.user.id,
@@ -383,7 +384,7 @@ router.post('/leave/request', authMiddleware, async (req, res) => {
  * الحصول على طلبات الإجازة الشخصية
  * GET /api/attendance/leave/my-requests
  */
-router.get('/leave/my-requests', authMiddleware, async (req, res) => {
+router.get('/leave/my-requests', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const leaves = await SmartLeave.find({ employeeId: req.user.id, isDeleted: false })
       .populate('approvals.approverId', 'name')
@@ -407,7 +408,7 @@ router.get('/leave/my-requests', authMiddleware, async (req, res) => {
  */
 router.get(
   '/leave/pending',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -436,7 +437,7 @@ router.get(
  */
 router.post(
   '/leave/:leaveId/approve',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -474,7 +475,7 @@ router.post(
  */
 router.post(
   '/leave/:leaveId/reject',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -510,7 +511,7 @@ router.post(
  * إلغاء طلب إجازة
  * POST /api/attendance/leave/:leaveId/cancel
  */
-router.post('/leave/:leaveId/cancel', authMiddleware, async (req, res) => {
+router.post('/leave/:leaveId/cancel', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
     const { leaveId } = req.params;
     const { reason } = req.body;
@@ -557,7 +558,7 @@ router.post('/leave/:leaveId/cancel', authMiddleware, async (req, res) => {
  */
 router.get(
   '/report/comprehensive',
-  authMiddleware,
+  authMiddleware, requireBranchAccess,
   roleMiddleware(['hr', 'admin']),
   async (req, res) => {
     try {

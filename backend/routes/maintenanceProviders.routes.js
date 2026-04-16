@@ -6,16 +6,17 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenanceProvider = require('../models/MaintenanceProvider');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-providers — list providers */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status, providerType, preferredProvider, search, page = 1, limit = 25 } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (status) filter.status = status;
     if (providerType) filter.providerType = providerType;
     if (preferredProvider !== undefined) filter.preferredProvider = preferredProvider === 'true';
@@ -40,9 +41,11 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-providers/stats — providers overview */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const stats = await MaintenanceProvider.aggregate([
+      { $match: { ...scope } },
       {
         $group: {
           _id: null,
@@ -54,6 +57,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     ]);
     const byType = await MaintenanceProvider.aggregate([
+      { $match: { ...scope } },
       { $group: { _id: '$providerType', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]);
@@ -64,9 +68,9 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-providers/:id — get single provider */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const provider = await MaintenanceProvider.findById(req.params.id)
+    const provider = await MaintenanceProvider.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('verifiedBy', 'name')
       .populate('lastModifiedBy', 'name');
     if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
@@ -80,10 +84,15 @@ router.get('/:id', requireAuth, async (req, res) => {
 router.post(
   '/',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
-      const provider = await MaintenanceProvider.create(stripUpdateMeta(req.body));
+      const body = { ...stripUpdateMeta(req.body) };
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const provider = await MaintenanceProvider.create(body);
       res.status(201).json({ success: true, data: provider });
     } catch (err) {
       logger.error('maintenanceProvider create error:', err);
@@ -96,12 +105,13 @@ router.post(
 router.put(
   '/:id',
   requireAuth,
+  requireBranchAccess,
   requireRole(['admin', 'supervisor', 'fleet_manager']),
   async (req, res) => {
     try {
       req.body.lastModifiedBy = req.user?._id || req.user?.id;
-      const provider = await MaintenanceProvider.findByIdAndUpdate(
-        req.params.id,
+      const provider = await MaintenanceProvider.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
         stripUpdateMeta(req.body),
         {
           new: true,
@@ -118,21 +128,33 @@ router.put(
 );
 
 /** DELETE /api/maintenance-providers/:id — delete provider (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const provider = await MaintenanceProvider.findByIdAndDelete(req.params.id);
-    if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
-    res.json({ success: true, message: 'Provider deleted' });
-  } catch (err) {
-    safeError(res, err, 'maintenanceProvider delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const provider = await MaintenanceProvider.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
+      res.json({ success: true, message: 'Provider deleted' });
+    } catch (err) {
+      safeError(res, err, 'maintenanceProvider delete error');
+    }
   }
-});
+);
 
 /** POST /api/maintenance-providers/:id/reviews — add a review */
-router.post('/:id/reviews', requireAuth, async (req, res) => {
+router.post('/:id/reviews', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { rating, comment } = req.body;
-    const provider = await MaintenanceProvider.findById(req.params.id);
+    const provider = await MaintenanceProvider.findOne({
+      _id: req.params.id,
+      ...branchFilter(req),
+    });
     if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
 
     provider.performance.reviews.push({
@@ -157,19 +179,25 @@ router.post('/:id/reviews', requireAuth, async (req, res) => {
 });
 
 /** PATCH /api/maintenance-providers/:id/verify — verify provider */
-router.patch('/:id/verify', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const provider = await MaintenanceProvider.findByIdAndUpdate(
-      req.params.id,
-      { verifiedAt: new Date(), verifiedBy: req.user?._id || req.user?.id },
-      { new: true }
-    );
-    if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
-    res.json({ success: true, data: provider });
-  } catch (err) {
-    logger.error('maintenanceProvider verify error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.patch(
+  '/:id/verify',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const provider = await MaintenanceProvider.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        { verifiedAt: new Date(), verifiedBy: req.user?._id || req.user?.id },
+        { new: true }
+      );
+      if (!provider) return res.status(404).json({ success: false, message: 'Provider not found' });
+      res.json({ success: true, data: provider });
+    } catch (err) {
+      logger.error('maintenanceProvider verify error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 module.exports = router;

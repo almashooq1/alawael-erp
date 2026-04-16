@@ -5,6 +5,7 @@
 const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/aiDiagnostic.service');
 
 const router = express.Router();
@@ -23,7 +24,7 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
    ──────────────────────────────────────────── */
 router.get(
   '/dashboard',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getDashboard();
     res.json({ success: true, data });
@@ -33,16 +34,16 @@ router.get(
 /* ────────────────────────────────────────────
    REFERENCE DATA — بيانات مرجعية
    ──────────────────────────────────────────── */
-router.get('/scales', authenticate, (req, res) =>
+router.get('/scales', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getClinicalScales() })
 );
-router.get('/disability-types', authenticate, (req, res) =>
+router.get('/disability-types', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getDisabilityTypes() })
 );
-router.get('/therapy-types', authenticate, (req, res) =>
+router.get('/therapy-types', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getTherapyTypes() })
 );
-router.get('/ai-models', authenticate, (req, res) =>
+router.get('/ai-models', authenticate, requireBranchAccess, (req, res) =>
   res.json({ success: true, data: svc.getAIModels() })
 );
 
@@ -51,7 +52,7 @@ router.get('/ai-models', authenticate, (req, res) =>
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const { page, limit, status, disabilityType, search } = req.query;
     const data = svc.listBeneficiaries({
@@ -67,7 +68,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -78,7 +79,7 @@ router.get(
 
 router.post(
   '/beneficiaries',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   [
     body('name').notEmpty().withMessage('اسم المستفيد مطلوب'),
@@ -94,7 +95,7 @@ router.post(
 
 router.put(
   '/beneficiaries/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -109,7 +110,7 @@ router.put(
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries/:beneficiaryId/assessments',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -121,7 +122,7 @@ router.get(
 
 router.get(
   '/assessments/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -132,7 +133,7 @@ router.get(
 
 router.post(
   '/beneficiaries/:beneficiaryId/assessments',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [
     param('beneficiaryId').notEmpty(),
@@ -149,7 +150,7 @@ router.post(
 
 router.get(
   '/beneficiaries/:beneficiaryId/assessments/compare',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [
     param('beneficiaryId').notEmpty(),
     query('id1').notEmpty().withMessage('معرف التقييم الأول مطلوب'),
@@ -167,7 +168,7 @@ router.get(
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries/:beneficiaryId/sessions',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -179,7 +180,7 @@ router.get(
 
 router.get(
   '/sessions/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -190,7 +191,7 @@ router.get(
 
 router.post(
   '/beneficiaries/:beneficiaryId/sessions',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [
     param('beneficiaryId').notEmpty(),
@@ -206,7 +207,7 @@ router.post(
 
 router.put(
   '/sessions/:id/complete',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [
     param('id').notEmpty(),
@@ -225,7 +226,7 @@ router.put(
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries/:beneficiaryId/goals',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -237,7 +238,7 @@ router.get(
 
 router.get(
   '/goals/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -248,7 +249,7 @@ router.get(
 
 router.post(
   '/beneficiaries/:beneficiaryId/goals',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   [
     param('beneficiaryId').notEmpty(),
@@ -265,7 +266,7 @@ router.post(
 
 router.put(
   '/goals/:id/progress',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [param('id').notEmpty(), body('progress').isNumeric().withMessage('نسبة التقدم مطلوبة')],
   handleValidation,
@@ -280,7 +281,7 @@ router.put(
    ──────────────────────────────────────────── */
 router.get(
   '/treatment-plans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const { beneficiaryId, status } = req.query;
     const data = svc.listTreatmentPlans({ beneficiaryId, status });
@@ -290,7 +291,7 @@ router.get(
 
 router.get(
   '/treatment-plans/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -301,7 +302,7 @@ router.get(
 
 router.post(
   '/treatment-plans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   [
     body('beneficiaryId').notEmpty().withMessage('معرف المستفيد مطلوب'),
@@ -316,7 +317,7 @@ router.post(
 
 router.put(
   '/treatment-plans/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -328,7 +329,7 @@ router.put(
 
 router.post(
   '/treatment-plans/:id/optimize',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,
@@ -343,7 +344,7 @@ router.post(
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries/:beneficiaryId/analysis',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -354,7 +355,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/recommendations',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -365,7 +366,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/predictions/:goalId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   [param('beneficiaryId').notEmpty(), param('goalId').notEmpty()],
   handleValidation,
   wrap((req, res) => {
@@ -376,7 +377,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/patterns',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -387,7 +388,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/risk',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -398,7 +399,7 @@ router.get(
 
 router.get(
   '/beneficiaries/:beneficiaryId/report',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -412,7 +413,7 @@ router.get(
    ──────────────────────────────────────────── */
 router.get(
   '/beneficiaries/:beneficiaryId/behaviors',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   param('beneficiaryId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -424,7 +425,7 @@ router.get(
 
 router.post(
   '/beneficiaries/:beneficiaryId/behaviors',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor', 'therapist']),
   [
     param('beneficiaryId').notEmpty(),
@@ -444,7 +445,7 @@ router.post(
    ──────────────────────────────────────────── */
 router.get(
   '/alerts',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   wrap((req, res) => {
     const { beneficiaryId, resolved, severity } = req.query;
     const data = svc.listAlerts({
@@ -458,7 +459,7 @@ router.get(
 
 router.put(
   '/alerts/:id/resolve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'manager', 'doctor']),
   param('id').notEmpty(),
   handleValidation,

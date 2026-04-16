@@ -7,6 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
@@ -30,11 +31,11 @@ function buildCrud(Model, modelName, opts = {}) {
   const sub = express.Router();
   const { filterFields = [], searchFields = [], defaultSort = { createdAt: -1 } } = opts;
 
-  // GET /
-  sub.get('/', requireAuth, async (req, res) => {
+  // GET / (branch-scoped)
+  sub.get('/', requireAuth, requireBranchAccess, async (req, res) => {
     try {
       const { page = 1, limit = 25, search, beneficiary_id, status, ...rest } = req.query;
-      const filter = {};
+      const filter = { ...branchFilter(req) };
       if (beneficiary_id) filter.beneficiary_id = beneficiary_id;
       if (status) filter.status = status;
       filterFields.forEach(f => {
@@ -62,11 +63,13 @@ function buildCrud(Model, modelName, opts = {}) {
     }
   });
 
-  // GET /stats
-  sub.get('/stats', requireAuth, async (req, res) => {
+  // GET /stats (branch-scoped)
+  sub.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
     try {
-      const total = await Model.countDocuments();
+      const scope = branchFilter(req);
+      const total = await Model.countDocuments(scope);
       const byStatus = await Model.aggregate([
+        { $match: scope },
         { $group: { _id: '$status', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
       ]);
@@ -76,10 +79,10 @@ function buildCrud(Model, modelName, opts = {}) {
     }
   });
 
-  // GET /:id
-  sub.get('/:id', requireAuth, async (req, res) => {
+  // GET /:id (branch-scoped)
+  sub.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     try {
-      const doc = await Model.findById(req.params.id);
+      const doc = await Model.findOne({ _id: req.params.id, ...branchFilter(req) });
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -87,10 +90,14 @@ function buildCrud(Model, modelName, opts = {}) {
     }
   });
 
-  // POST /
-  sub.post('/', requireAuth, async (req, res) => {
+  // POST / (branch-scoped — auto-injects branchId)
+  sub.post('/', requireAuth, requireBranchAccess, async (req, res) => {
     try {
-      const doc = await Model.create(stripUpdateMeta(req.body));
+      const body = { ...req.body };
+      if (req.branchScope && req.branchScope.branchId) {
+        body.branchId = req.branchScope.branchId;
+      }
+      const doc = await Model.create(stripUpdateMeta(body));
       res.status(201).json({ success: true, data: doc });
     } catch (err) {
       logger.error(`${modelName} POST / error:`, err);
@@ -98,13 +105,14 @@ function buildCrud(Model, modelName, opts = {}) {
     }
   });
 
-  // PUT /:id
-  sub.put('/:id', requireAuth, async (req, res) => {
+  // PUT /:id (branch-scoped)
+  sub.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     try {
-      const doc = await Model.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-        runValidators: true,
-      });
+      const doc = await Model.findOneAndUpdate(
+        { _id: req.params.id, ...branchFilter(req) },
+        stripUpdateMeta(req.body),
+        { new: true, runValidators: true }
+      );
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, data: doc });
     } catch (err) {
@@ -113,10 +121,10 @@ function buildCrud(Model, modelName, opts = {}) {
     }
   });
 
-  // DELETE /:id
-  sub.delete('/:id', requireAuth, async (req, res) => {
+  // DELETE /:id (branch-scoped)
+  sub.delete('/:id', requireAuth, requireBranchAccess, async (req, res) => {
     try {
-      const doc = await Model.findByIdAndDelete(req.params.id);
+      const doc = await Model.findOneAndDelete({ _id: req.params.id, ...branchFilter(req) });
       if (!doc) return res.status(404).json({ success: false, message: `${modelName} not found` });
       res.json({ success: true, message: `${modelName} deleted` });
     } catch (err) {

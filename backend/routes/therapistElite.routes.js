@@ -3,6 +3,7 @@
  */
 const express = require('express');
 const { safeError } = require('../utils/safeError');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 let authenticateToken;
@@ -30,7 +31,7 @@ function wrap(fn) {
 }
 
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 /* ─── 1. Telehealth ─── */
 router.get(
   '/telehealth',

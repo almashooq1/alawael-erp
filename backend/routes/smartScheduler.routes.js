@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const SmartScheduler = require('../models/smartScheduler');
 const TherapySession = require('../models/TherapySession');
 const appointmentService = require('../services/appointment.service');
@@ -13,7 +14,7 @@ const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── List smart schedules ─────────────────────────────────────────────
 
 router.get('/', async (req, res) => {

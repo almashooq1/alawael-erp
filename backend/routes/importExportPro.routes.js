@@ -48,12 +48,13 @@ const upload = multer({
 // Auth middleware
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Controller
 const controller = require('../controllers/importExportPro.controller');
 
 // Apply auth to all routes
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ─────────────────────────────────────────────────
 // INFO
 // ─────────────────────────────────────────────────

@@ -52,6 +52,12 @@ const beneficiarySchema = new mongoose.Schema(
       enum: ['male', 'female', 'other'],
       required: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
     address: {
       street: String,
       city: String,
@@ -187,6 +193,7 @@ beneficiarySchema.index({ enrollmentDate: 1 });
 beneficiarySchema.index({ currentGPA: 1 });
 beneficiarySchema.index({ totalPoints: -1 });
 beneficiarySchema.index({ createdAt: -1 });
+beneficiarySchema.index({ branchId: 1, academicStatus: 1 });
 
 // Virtual for full name
 beneficiarySchema.virtual('fullName').get(function () {

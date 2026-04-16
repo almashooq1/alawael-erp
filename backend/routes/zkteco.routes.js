@@ -12,9 +12,10 @@ const {
   requireRole: roleMiddleware,
 } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب تسجيل الدخول
 router.use(authMiddleware);
-
+router.use(requireBranchAccess);
 // ════════════════════════════════════════════════════════════════════════════════
 //  إدارة الأجهزة (Device Management) — CRUD
 // ════════════════════════════════════════════════════════════════════════════════

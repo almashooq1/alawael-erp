@@ -8,6 +8,7 @@ const router = express.Router();
 const DisabilityAuthorityService = require('../services/disabilityAuthority.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const AUTHORITY_ROLES = [
@@ -25,7 +26,7 @@ const AUTHORITY_ROLES = [
 // إنشاء تقرير جديد
 router.post(
   '/reports',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const report = await DisabilityAuthorityService.createReport(
@@ -39,7 +40,7 @@ router.post(
 // جلب جميع التقارير
 router.get(
   '/reports',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const result = await DisabilityAuthorityService.getReports(req.query);
@@ -50,7 +51,7 @@ router.get(
 // جلب تقرير واحد
 router.get(
   '/reports/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const report = await DisabilityAuthorityService.getReportById(req.params.id);
@@ -62,7 +63,7 @@ router.get(
 // تحديث تقرير
 router.put(
   '/reports/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const report = await DisabilityAuthorityService.updateReport(
@@ -77,7 +78,7 @@ router.put(
 // مراجعة / اعتماد / تقديم تقرير
 router.post(
   '/reports/:id/review',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'center_manager', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const { action, feedback } = req.body;
@@ -94,7 +95,7 @@ router.post(
 // توليد بيانات التقرير تلقائياً من النظام
 router.post(
   '/reports/generate',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const { reportType, branch, startDate, endDate } = req.body;
@@ -111,7 +112,7 @@ router.post(
 // لوحة معلومات تقارير الهيئة
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const data = await DisabilityAuthorityService.getDashboard(req.query.branch);
@@ -126,7 +127,7 @@ router.get(
 // جلب معايير CBAHI
 router.get(
   '/cbahi/standards',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const standards = await DisabilityAuthorityService.getStandards(req.query);
@@ -137,7 +138,7 @@ router.get(
 // إضافة / تحديث معيار CBAHI
 router.post(
   '/cbahi/standards',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const standard = await DisabilityAuthorityService.upsertStandard(req.body);
@@ -148,7 +149,7 @@ router.post(
 // تهيئة المعايير الافتراضية
 router.post(
   '/cbahi/standards/seed',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const result = await DisabilityAuthorityService.seedDefaultStandards();
@@ -163,7 +164,7 @@ router.post(
 // إنشاء تقييم جديد
 router.post(
   '/cbahi/assessments',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const assessment = await DisabilityAuthorityService.createAssessment(
@@ -177,7 +178,7 @@ router.post(
 // جلب التقييمات
 router.get(
   '/cbahi/assessments',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const result = await DisabilityAuthorityService.getAssessments(req.query);
@@ -188,7 +189,7 @@ router.get(
 // جلب تقييم واحد
 router.get(
   '/cbahi/assessments/:id',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const assessment = await DisabilityAuthorityService.getAssessmentById(req.params.id);
@@ -200,7 +201,7 @@ router.get(
 // تحديث نتيجة معيار في تقييم
 router.put(
   '/cbahi/assessments/:id/standards/:code',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const assessment = await DisabilityAuthorityService.updateStandardResult(
@@ -215,7 +216,7 @@ router.put(
 // إتمام التقييم
 router.post(
   '/cbahi/assessments/:id/complete',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   asyncHandler(async (req, res) => {
     const assessment = await DisabilityAuthorityService.completeAssessment(
@@ -229,7 +230,7 @@ router.post(
 // لوحة معلومات CBAHI
 router.get(
   '/cbahi/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(AUTHORITY_ROLES),
   asyncHandler(async (req, res) => {
     const data = await DisabilityAuthorityService.getCBAHIDashboard(req.query.branch);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const CaseManagement = require('../models/CaseManagement');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
@@ -115,7 +116,7 @@ const upload = multer({
 // ============= CRUD الأساسية =============
 
 // 1. إنشاء حالة جديدة
-router.post('/', authenticate, authorize(['admin', 'doctor', 'case_manager']), async (req, res) => {
+router.post('/', authenticate, requireBranchAccess, authorize(['admin', 'doctor', 'case_manager']), async (req, res) => {
   try {
     const caseData = {
       ...pick(req.body, CASE_FIELDS),
@@ -138,7 +139,7 @@ router.post('/', authenticate, authorize(['admin', 'doctor', 'case_manager']), a
 });
 
 // 2. الحصول على جميع الحالات مع فلترة وترتيب
-router.get('/', authenticate, async (req, res) => {
+router.get('/', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const {
       status,
@@ -195,7 +196,7 @@ router.get('/', authenticate, async (req, res) => {
 // ============= إحصائيات وتقارير =============
 
 // إحصائيات عامة
-router.get('/statistics/overview', authenticate, async (req, res) => {
+router.get('/statistics/overview', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const totalCases = await CaseManagement.countDocuments();
     const activeCases = await CaseManagement.countDocuments({ status: 'نشطة' });
@@ -230,7 +231,7 @@ router.get('/statistics/overview', authenticate, async (req, res) => {
 });
 
 // 3. الحصول على حالة محددة بالتفصيل
-router.get('/:id', authenticate, async (req, res) => {
+router.get('/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const caseDoc = await CaseManagement.findById(req.params.id)
       .populate('team.member', 'name email role specialization')
@@ -266,7 +267,7 @@ router.get('/:id', authenticate, async (req, res) => {
 // 4. تحديث حالة
 router.put(
   '/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -303,7 +304,7 @@ router.put(
 );
 
 // 5. حذف حالة
-router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
+router.delete('/:id', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
   try {
     const caseDoc = await CaseManagement.findByIdAndDelete(req.params.id);
 
@@ -328,7 +329,7 @@ router.delete('/:id', authenticate, authorize(['admin']), async (req, res) => {
 // إضافة تشخيص جديد
 router.post(
   '/:id/diagnoses',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -367,7 +368,7 @@ router.post(
 // تحديث تشخيص
 router.put(
   '/:id/diagnoses/:diagnosisId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -407,7 +408,7 @@ router.put(
 // ============= إدارة الملفات الطبية =============
 
 // رفع ملف طبي
-router.post('/:id/files', authenticate, upload.single('file'), async (req, res) => {
+router.post('/:id/files', authenticate, requireBranchAccess, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({
@@ -452,7 +453,7 @@ router.post('/:id/files', authenticate, upload.single('file'), async (req, res) 
 // حذف ملف طبي
 router.delete(
   '/:id/files/:fileId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -501,7 +502,7 @@ router.delete(
 // إنشاء خطة علاج جديدة
 router.post(
   '/:id/treatment-plans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['doctor', 'therapist', 'case_manager']),
   async (req, res) => {
     try {
@@ -532,7 +533,7 @@ router.post(
 // تحديث خطة علاج
 router.put(
   '/:id/treatment-plans/:planId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['doctor', 'therapist', 'case_manager']),
   async (req, res) => {
     try {
@@ -572,7 +573,7 @@ router.put(
 // إضافة جلسة لخطة العلاج
 router.post(
   '/:id/treatment-plans/:planId/sessions',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['doctor', 'therapist', 'case_manager']),
   async (req, res) => {
     try {
@@ -622,7 +623,7 @@ router.post(
 // ============= إدارة الملاحظات =============
 
 // إضافة ملاحظة
-router.post('/:id/notes', authenticate, async (req, res) => {
+router.post('/:id/notes', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const caseDoc = await CaseManagement.findById(req.params.id);
 
@@ -656,7 +657,7 @@ router.post('/:id/notes', authenticate, async (req, res) => {
 });
 
 // تقرير تفصيلي لحالة
-router.get('/:id/report', authenticate, async (req, res) => {
+router.get('/:id/report', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const caseDoc = await CaseManagement.findById(req.params.id)
       .populate('team.member', 'name email role specialization')

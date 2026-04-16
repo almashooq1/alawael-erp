@@ -9,9 +9,10 @@ const ctrl = require('../controllers/rehab-pro.controller');
 
 const { authenticateToken } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Global auth: all rehab-pro endpoints require authentication
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════════════════
 // Dashboard — لوحة التحكم
 // ═══════════════════════════════════════════════════════════════════════════════

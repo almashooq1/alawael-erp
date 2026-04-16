@@ -5,6 +5,7 @@
  */
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');

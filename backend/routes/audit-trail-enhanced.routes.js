@@ -18,6 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Model — نستخدم AuditLog الموجود في النظام
@@ -95,7 +96,7 @@ const safeError = require('../utils/safeError');
 }
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Middleware: يتطلب دور auditor أو admin ──────────────────────────────────
 function requireAuditor(req, res, next) {
   const allowedRoles = ['admin', 'super_admin', 'auditor', 'manager'];

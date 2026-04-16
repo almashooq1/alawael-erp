@@ -5,6 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
@@ -12,7 +13,7 @@ const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EnterpriseRisk`)[n];
 
 // ── Dashboard ────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (_req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     const Assessment = safeModel('RiskAssessment');
@@ -55,7 +56,7 @@ router.get('/dashboard', authenticate, async (_req, res) => {
 });
 
 // ── Risks CRUD ───────────────────────────────────────────────
-router.get('/risks', authenticate, async (req, res) => {
+router.get('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     const { status, category, priority, page = 1, limit = 20 } = req.query;
@@ -82,7 +83,7 @@ router.get('/risks', authenticate, async (req, res) => {
   }
 });
 
-router.post('/risks', authenticate, async (req, res) => {
+router.post('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     const doc = await Risk.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
@@ -92,7 +93,7 @@ router.post('/risks', authenticate, async (req, res) => {
   }
 });
 
-router.put('/risks/:id', authenticate, async (req, res) => {
+router.put('/risks/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     const doc = await Risk.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
@@ -106,7 +107,7 @@ router.put('/risks/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/risks/:id', authenticate, async (req, res) => {
+router.delete('/risks/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     await Risk.findByIdAndDelete(req.params.id);
@@ -117,7 +118,7 @@ router.delete('/risks/:id', authenticate, async (req, res) => {
 });
 
 // ── Risk Mitigations ─────────────────────────────────────────
-router.post('/risks/:id/mitigations', authenticate, async (req, res) => {
+router.post('/risks/:id/mitigations', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Risk = safeModel('EnterpriseRisk');
     const risk = await Risk.findById(req.params.id);
@@ -132,7 +133,7 @@ router.post('/risks/:id/mitigations', authenticate, async (req, res) => {
 });
 
 // ── Assessments CRUD ─────────────────────────────────────────
-router.get('/assessments', authenticate, async (req, res) => {
+router.get('/assessments', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
     const docs = await Assessment.find().sort({ assessmentDate: -1 }).limit(200).lean();
@@ -142,7 +143,7 @@ router.get('/assessments', authenticate, async (req, res) => {
   }
 });
 
-router.post('/assessments', authenticate, async (req, res) => {
+router.post('/assessments', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
     const doc = await Assessment.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
@@ -152,7 +153,7 @@ router.post('/assessments', authenticate, async (req, res) => {
   }
 });
 
-router.put('/assessments/:id', authenticate, async (req, res) => {
+router.put('/assessments/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
     const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });

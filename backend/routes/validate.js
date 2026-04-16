@@ -9,6 +9,7 @@ const router = express.Router();
 const validator = require('../services/validator');
 const responseFormatter = require('../services/responseFormatter');
 const { optionalAuth } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Register default schemas

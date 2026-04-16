@@ -18,6 +18,7 @@ const router = express.Router();
 const muqeemService = require('../services/muqeem-full.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // ── Async wrapper ─────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -38,7 +39,7 @@ const buildContext = req => ({
  */
 router.get(
   '/dashboard',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -58,7 +59,7 @@ router.get(
  */
 router.get(
   '/residencies',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -78,7 +79,7 @@ router.get(
  */
 router.get(
   '/residencies/expiring',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const daysAhead = parseInt(req.query.daysAhead || '90', 10);
@@ -98,7 +99,7 @@ router.get(
  */
 router.get(
   '/iqama/:iqamaNumber',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { iqamaNumber } = req.params;
@@ -121,7 +122,7 @@ router.get(
  */
 router.post(
   '/iqama/issue',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { employeeId, ...data } = req.body;
@@ -148,7 +149,7 @@ router.post(
  */
 router.post(
   '/iqama/renew',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { iqamaNumber, durationYears = 1 } = req.body;
@@ -170,7 +171,7 @@ router.post(
  */
 router.get(
   '/passport/:passportNumber',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -190,7 +191,7 @@ router.get(
  */
 router.post(
   '/visa/exit-reentry',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { employeeId, type, durationDays, destination, purpose } = req.body;
@@ -219,7 +220,7 @@ router.post(
  */
 router.post(
   '/visa/final-exit',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { employeeId, reason } = req.body;
@@ -241,7 +242,7 @@ router.post(
  */
 router.put(
   '/visa/:visaId/cancel',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -257,7 +258,7 @@ router.put(
  */
 router.post(
   '/visa/extend',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { visaNumber, additionalDays } = req.body;
@@ -282,7 +283,7 @@ router.post(
  */
 router.post(
   '/transfer/request',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { employeeId, fromEstablishment } = req.body;
@@ -306,7 +307,7 @@ router.post(
  */
 router.put(
   '/transfer/:transferId/approve',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -326,7 +327,7 @@ router.put(
  */
 router.put(
   '/transfer/:transferId/reject',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { reason } = req.body;
@@ -345,7 +346,7 @@ router.put(
  */
 router.get(
   '/transfer/pending',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -360,7 +361,7 @@ router.get(
  */
 router.get(
   '/transfer/:muqeemRequestId/status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -379,7 +380,7 @@ router.get(
  */
 router.get(
   '/reports/visa-status',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -394,7 +395,7 @@ router.get(
  */
 router.post(
   '/alerts/check',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin']),
   asyncHandler(async (req, res) => {
     const stats = await muqeemService.checkAndSendExpiryAlerts();
@@ -412,7 +413,7 @@ router.post(
  */
 router.get(
   '/employee/:employeeId/transactions',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await muqeemService.getEmployeeTransactions(req.params.employeeId);
@@ -427,7 +428,7 @@ router.get(
  */
 router.get(
   '/reports/expiring',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const withinDays = parseInt(req.query.withinDays || '90', 10);

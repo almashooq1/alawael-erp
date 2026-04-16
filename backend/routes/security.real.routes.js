@@ -5,6 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { securityService } = require('../services/securityService');
 
 /* wrap async handlers */
@@ -12,7 +13,7 @@ const wrap = fn => (req, res, next) => fn(req, res, next).catch(next);
 
 /* ── All routes require authentication ── */
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 /* ══════════════════ Security Profile ══════════════════ */
 router.get(
   '/profile',

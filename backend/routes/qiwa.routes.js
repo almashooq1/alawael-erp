@@ -22,6 +22,7 @@ const QiwaService = require('../services/qiwa.service');
 const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const qiwaService = new QiwaService();
 
 // Middleware for request validation
@@ -38,7 +39,7 @@ router.use(validateRequest);
 
 // Authentication required for all Qiwa routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // =====================================================
 // EMPLOYEES LIST & GENERIC VERIFY
 // =====================================================

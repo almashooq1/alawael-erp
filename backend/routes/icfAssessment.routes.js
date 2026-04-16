@@ -36,6 +36,7 @@
  */
 
 const express = require('express');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const ICFAssessmentController = require('../controllers/icfAssessment.controller');
 const { authenticateToken } = require('../middleware/auth.middleware');
@@ -49,50 +50,50 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 // ── Statistics (إحصائيات) ──────────────────────────────────────────────────
-router.get('/statistics', authenticateToken, asyncHandler(ICFAssessmentController.statistics));
+router.get('/statistics', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.statistics));
 router.get(
   '/domain-distribution',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.domainDistribution)
 );
 
 // ── ICF Code Reference (مرجع رموز ICF) ────────────────────────────────────
-router.get('/codes', authenticateToken, asyncHandler(ICFAssessmentController.searchCodes));
+router.get('/codes', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.searchCodes));
 router.get(
   '/codes/tree/:component',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.codeTree)
 );
 
 // ── Benchmarks Management (إدارة المعايير) ────────────────────────────────
-router.get('/benchmarks', authenticateToken, asyncHandler(ICFAssessmentController.listBenchmarks));
+router.get('/benchmarks', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.listBenchmarks));
 router.post(
   '/benchmarks',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.createBenchmark)
 );
 router.post(
   '/benchmarks/import',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.importBenchmarks)
 );
 
 // ── Organization Report (تقرير مؤسسي) ─────────────────────────────────────
 router.get(
   '/organization-report',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.organizationReport)
 );
 
 // ── Beneficiary Timeline & Comparative Report ─────────────────────────────
 router.get(
   '/beneficiary/:beneficiaryId/timeline',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.timeline)
 );
 router.get(
   '/beneficiary/:beneficiaryId/comparative-report',
-  authenticateToken,
+  authenticateToken, requireBranchAccess, requireBranchAccess,
   asyncHandler(ICFAssessmentController.comparativeReport)
 );
 
@@ -100,22 +101,22 @@ router.get(
  *  CRUD Routes
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-router.post('/', authenticateToken, asyncHandler(ICFAssessmentController.create));
-router.get('/', authenticateToken, asyncHandler(ICFAssessmentController.list));
-router.get('/:id', authenticateToken, asyncHandler(ICFAssessmentController.getById));
-router.put('/:id', authenticateToken, asyncHandler(ICFAssessmentController.update));
-router.delete('/:id', authenticateToken, asyncHandler(ICFAssessmentController.delete));
+router.post('/', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.create));
+router.get('/', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.list));
+router.get('/:id', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.getById));
+router.put('/:id', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.update));
+router.delete('/:id', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.delete));
 
 // ── Status Change ─────────────────────────────────────────────────────────
-router.patch('/:id/status', authenticateToken, asyncHandler(ICFAssessmentController.changeStatus));
+router.patch('/:id/status', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.changeStatus));
 
 // ── Comparison ────────────────────────────────────────────────────────────
-router.get('/:id/compare', authenticateToken, asyncHandler(ICFAssessmentController.compare));
+router.get('/:id/compare', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.compare));
 
 // ── Benchmarking ──────────────────────────────────────────────────────────
-router.get('/:id/benchmark', authenticateToken, asyncHandler(ICFAssessmentController.benchmark));
+router.get('/:id/benchmark', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.benchmark));
 
 // ── Reports ───────────────────────────────────────────────────────────────
-router.get('/:id/report', authenticateToken, asyncHandler(ICFAssessmentController.getReport));
+router.get('/:id/report', authenticateToken, requireBranchAccess, asyncHandler(ICFAssessmentController.getReport));
 
 module.exports = router;

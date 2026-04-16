@@ -9,10 +9,11 @@ const router = express.Router();
 const PolicyController = require('../controllers/policyController');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const controller = PolicyController;
 
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // CRUD
 router.post('/', authorize(['admin', 'manager']), (req, res) => controller.createPolicy(req, res));
 router.get('/', (req, res) => controller.getPolicies(req, res));

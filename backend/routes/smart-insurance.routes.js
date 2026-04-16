@@ -36,6 +36,7 @@ const InsuranceClaim = require('../models/InsuranceClaim');
 const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
@@ -44,7 +45,7 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
 
 // ── Auth على جميع المسارات ────────────────────────────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ══════════════════════════════════════════════════════════════════════════════
 // STATS — الإحصائيات
 // ══════════════════════════════════════════════════════════════════════════════

@@ -18,6 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // ── Service ──
@@ -32,7 +33,7 @@ const service = new WorkforceAnalyticsService();
 /**
  * GET /health-score — Workforce health score
  */
-router.get('/health-score', authenticate, async (req, res) => {
+router.get('/health-score', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getWorkforceHealthScore();
     res.json({ success: true, data });
@@ -44,7 +45,7 @@ router.get('/health-score', authenticate, async (req, res) => {
 /**
  * GET /analytics/department/:departmentId — Department analytics
  */
-router.get('/analytics/department/:departmentId', authenticate, async (req, res) => {
+router.get('/analytics/department/:departmentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = service.getDepartmentAnalytics(req.params.departmentId);
     res.json({ success: true, data });
@@ -62,7 +63,7 @@ router.get('/analytics/department/:departmentId', authenticate, async (req, res)
  */
 router.post(
   '/headcount-plans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -78,7 +79,7 @@ router.post(
 /**
  * GET /headcount-plans — List headcount plans
  */
-router.get('/headcount-plans', authenticate, async (_req, res) => {
+router.get('/headcount-plans', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     res.json({ success: true, data: service.headcountPlans || [] });
   } catch (err) {
@@ -91,7 +92,7 @@ router.get('/headcount-plans', authenticate, async (_req, res) => {
  */
 router.put(
   '/headcount-plans/:planId/approve',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'ceo']),
   async (req, res) => {
     try {
@@ -113,7 +114,7 @@ router.put(
  */
 router.post(
   '/forecasts',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager', 'analyst']),
   async (req, res) => {
     try {
@@ -129,7 +130,7 @@ router.post(
 /**
  * GET /forecasts — List forecasts
  */
-router.get('/forecasts', authenticate, async (_req, res) => {
+router.get('/forecasts', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     res.json({ success: true, data: service.forecasts || [] });
   } catch (err) {
@@ -140,7 +141,7 @@ router.get('/forecasts', authenticate, async (_req, res) => {
 /**
  * PUT /forecasts/:forecastId/accuracy — Update forecast accuracy
  */
-router.put('/forecasts/:forecastId/accuracy', authenticate, async (req, res) => {
+router.put('/forecasts/:forecastId/accuracy', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const forecast = service.updateForecastAccuracy(req.params.forecastId, req.body);
     res.json({ success: true, data: forecast });
@@ -159,7 +160,7 @@ router.put('/forecasts/:forecastId/accuracy', authenticate, async (req, res) => 
  */
 router.post(
   '/succession-plans',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -175,7 +176,7 @@ router.post(
 /**
  * GET /succession-plans — List succession plans
  */
-router.get('/succession-plans', authenticate, async (_req, res) => {
+router.get('/succession-plans', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     res.json({ success: true, data: service.successionPlans || [] });
   } catch (err) {
@@ -188,7 +189,7 @@ router.get('/succession-plans', authenticate, async (_req, res) => {
  */
 router.post(
   '/succession-plans/:planId/successors',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -208,7 +209,7 @@ router.post(
 /**
  * POST /skills — Create skill mapping
  */
-router.post('/skills', authenticate, async (req, res) => {
+router.post('/skills', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const mapping = service.createSkillMapping(req.body);
     res.status(201).json({ success: true, data: mapping });
@@ -221,7 +222,7 @@ router.post('/skills', authenticate, async (req, res) => {
 /**
  * PUT /skills/:skillMappingId — Update skill proficiency
  */
-router.put('/skills/:skillMappingId', authenticate, async (req, res) => {
+router.put('/skills/:skillMappingId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const mapping = service.updateSkillProficiency(req.params.skillMappingId, req.body);
     res.json({ success: true, data: mapping });
@@ -238,7 +239,7 @@ router.put('/skills/:skillMappingId', authenticate, async (req, res) => {
 /**
  * POST /retention/analyze — Analyze retention
  */
-router.post('/retention/analyze', authenticate, async (req, res) => {
+router.post('/retention/analyze', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const analysis = service.analyzeRetention(req.body);
     res.status(201).json({ success: true, data: analysis });
@@ -251,7 +252,7 @@ router.post('/retention/analyze', authenticate, async (req, res) => {
 /**
  * POST /attrition-risk — Predict attrition risk for employee
  */
-router.post('/attrition-risk', authenticate, async (req, res) => {
+router.post('/attrition-risk', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const risk = service.predictAttritionRisk(req.body);
     res.json({ success: true, data: risk });
@@ -270,7 +271,7 @@ router.post('/attrition-risk', authenticate, async (req, res) => {
  */
 router.post(
   '/salary-bands',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -286,7 +287,7 @@ router.post(
 /**
  * GET /salary-bands — List salary bands
  */
-router.get('/salary-bands', authenticate, async (_req, res) => {
+router.get('/salary-bands', authenticate, requireBranchAccess, async (_req, res) => {
   try {
     res.json({ success: true, data: service.salaryBands || [] });
   } catch (err) {
@@ -297,7 +298,7 @@ router.get('/salary-bands', authenticate, async (_req, res) => {
 /**
  * POST /compensation/analyze — Analyze compensation
  */
-router.post('/compensation/analyze', authenticate, async (req, res) => {
+router.post('/compensation/analyze', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const analysis = service.analyzeCompensation(req.body);
     res.status(201).json({ success: true, data: analysis });
@@ -310,7 +311,7 @@ router.post('/compensation/analyze', authenticate, async (req, res) => {
 /**
  * POST /compensation/adjustments — Identify compensation adjustments
  */
-router.post('/compensation/adjustments', authenticate, async (req, res) => {
+router.post('/compensation/adjustments', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const adjustment = service.identifyCompensationAdjustments(req.body.employeeId, req.body);
     res.json({ success: true, data: adjustment });
@@ -327,7 +328,7 @@ router.post('/compensation/adjustments', authenticate, async (req, res) => {
 /**
  * POST /reports — Generate workforce report
  */
-router.post('/reports', authenticate, async (req, res) => {
+router.post('/reports', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const report = service.generateWorkforceReport(req.body);
     res.status(201).json({ success: true, data: report });

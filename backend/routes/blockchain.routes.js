@@ -18,13 +18,14 @@ const {
   VerificationLog,
 } = require('../models/blockchain.model');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // ── Auth: all routes below require authentication ────────────────────────────
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ── ObjectId param validation ────────────────────────────────────────────────
 router.param('id', (req, res, next, id) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {

@@ -39,11 +39,12 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // 🔒 All e-learning routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const ElearningCourse = require('../models/ElearningCourse');
 const CourseModule = require('../models/CourseModule');
 const CourseEnrollment = require('../models/CourseEnrollment');

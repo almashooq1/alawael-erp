@@ -5,12 +5,13 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // Apply authentication to all routes
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // Performance metrics tracking
 const metricsCollector = {
   requests: [],

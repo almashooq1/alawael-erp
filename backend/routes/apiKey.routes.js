@@ -6,12 +6,13 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const ApiKey = require('../models/ApiKey');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 /** GET /api/api-keys — list all API keys (admin) */
-router.get('/', requireAuth, requireRole(['admin']), async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const keys = await ApiKey.find()
       .populate('owner', 'name email')
@@ -24,7 +25,7 @@ router.get('/', requireAuth, requireRole(['admin']), async (req, res) => {
 });
 
 /** GET /api/api-keys/:id — get single key details (admin) */
-router.get('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const key = await ApiKey.findById(req.params.id).populate('owner', 'name email');
     if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
@@ -35,7 +36,7 @@ router.get('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
 });
 
 /** POST /api/api-keys — generate new API key (admin) */
-router.post('/', requireAuth, requireRole(['admin']), async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const { name, permissions = [], expiresAt } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'name is required' });
@@ -63,7 +64,7 @@ router.post('/', requireAuth, requireRole(['admin']), async (req, res) => {
 });
 
 /** PUT /api/api-keys/:id — update key metadata (admin) */
-router.put('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
   try {
     const { name, permissions, expiresAt, isActive } = req.body;
     const update = {};
@@ -85,25 +86,37 @@ router.put('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
 });
 
 /** PUT /api/api-keys/:id/revoke — revoke/deactivate key (admin) */
-router.put('/:id/revoke', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const key = await ApiKey.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
-    if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
-    res.json({ success: true, message: 'API key revoked', data: key });
-  } catch (err) {
-    safeError(res, err, 'api-key revoke error');
+router.put(
+  '/:id/revoke',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const key = await ApiKey.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+      if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
+      res.json({ success: true, message: 'API key revoked', data: key });
+    } catch (err) {
+      safeError(res, err, 'api-key revoke error');
+    }
   }
-});
+);
 
 /** DELETE /api/api-keys/:id — permanently delete key (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const key = await ApiKey.findByIdAndDelete(req.params.id);
-    if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
-    res.json({ success: true, message: 'API key deleted permanently' });
-  } catch (err) {
-    safeError(res, err, 'api-key delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const key = await ApiKey.findByIdAndDelete(req.params.id);
+      if (!key) return res.status(404).json({ success: false, message: 'API key not found' });
+      res.json({ success: true, message: 'API key deleted permanently' });
+    } catch (err) {
+      safeError(res, err, 'api-key delete error');
+    }
   }
-});
+);
 
 module.exports = router;

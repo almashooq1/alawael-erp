@@ -16,6 +16,7 @@ const {
 } = require('../models/montessori');
 const { authenticateToken, requireRole: authorizeRoles } = require('../middleware/auth');
 
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Async error safety wrapper — catches unhandled promise rejections in route handlers
 const wrapAsync = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const _get = router.get.bind(router);
@@ -30,7 +31,7 @@ router.delete = (path, ...h) => _delete(path, ...wrapHandlers(...h));
 
 // حماية جميع المسارات - يجب تسجيل الدخول
 router.use(authenticateToken);
-
+router.use(requireBranchAccess);
 // ─── برامج المنتسوري CRUD (المسار الجذري) ────────────────────
 router.get('/', authorizeRoles('مدير', 'معلم', 'أخصائي'), async (req, res) => {
   const query = MontessoriProgram.find().sort({ createdAt: -1 });

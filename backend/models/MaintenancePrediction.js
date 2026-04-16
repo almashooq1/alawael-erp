@@ -16,6 +16,12 @@ const maintenancePredictionSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Prediction Data
     predictedDate: {
@@ -110,4 +116,6 @@ maintenancePredictionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.MaintenancePrediction || mongoose.model('MaintenancePrediction', maintenancePredictionSchema);
+module.exports =
+  mongoose.models.MaintenancePrediction ||
+  mongoose.model('MaintenancePrediction', maintenancePredictionSchema);

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { HelpDeskTicket, HelpDeskArticle } = require('../models/HelpDesk');
@@ -22,7 +23,7 @@ const validObjectId = (req, res) => {
 };
 
 // ── Dashboard ────────────────────────────────────────────────────────
-router.get('/dashboard', authenticate, async (req, res) => {
+router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const [total, open, inProgress, resolved, critical] = await Promise.all([
       HelpDeskTicket.countDocuments(),
@@ -75,7 +76,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
 });
 
 // ── Tickets CRUD ─────────────────────────────────────────────────────
-router.get('/tickets', authenticate, async (req, res) => {
+router.get('/tickets', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { status, priority, category, page = 1, limit: rawLimit = 10 } = req.query;
     const limit = clampLimit(rawLimit);
@@ -101,7 +102,7 @@ router.get('/tickets', authenticate, async (req, res) => {
   }
 });
 
-router.post('/tickets', authenticate, validate(schemas.helpdesk.createTicket), async (req, res) => {
+router.post('/tickets', authenticate, requireBranchAccess, validate(schemas.helpdesk.createTicket), async (req, res) => {
   try {
     const ticket = new HelpDeskTicket({ ...req.body, requester: req.user._id });
     await ticket.save();
@@ -111,7 +112,7 @@ router.post('/tickets', authenticate, validate(schemas.helpdesk.createTicket), a
   }
 });
 
-router.put('/tickets/:id', authenticate, async (req, res) => {
+router.put('/tickets/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
@@ -125,7 +126,7 @@ router.put('/tickets/:id', authenticate, async (req, res) => {
   }
 });
 
-router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res) => {
+router.delete('/tickets/:id', authenticate, requireBranchAccess, authorize('admin'), async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findByIdAndDelete(req.params.id);
@@ -137,7 +138,7 @@ router.delete('/tickets/:id', authenticate, authorize('admin'), async (req, res)
 });
 
 // ── Ticket comments ──────────────────────────────────────────────────
-router.post('/tickets/:id/comments', authenticate, async (req, res) => {
+router.post('/tickets/:id/comments', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
     const ticket = await HelpDeskTicket.findById(req.params.id);
@@ -155,7 +156,7 @@ router.post('/tickets/:id/comments', authenticate, async (req, res) => {
 });
 
 // ── Knowledge Articles ───────────────────────────────────────────────
-router.get('/articles', authenticate, async (req, res) => {
+router.get('/articles', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { category, status = 'published', page = 1, limit: rawLimit = 10 } = req.query;
     const limit = clampLimit(rawLimit);
@@ -178,7 +179,7 @@ router.get('/articles', authenticate, async (req, res) => {
   }
 });
 
-router.post('/articles', authenticate, async (req, res) => {
+router.post('/articles', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const article = new HelpDeskArticle({ ...req.body, createdBy: req.user._id });
     await article.save();

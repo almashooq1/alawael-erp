@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // Service exports a singleton instance — use directly (no `new`)
 const svc = require('../services/quality/quality-enhanced.service');
 const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ── لوحة مؤشرات الجودة ───────────────────────────────
-router.get('/dashboard/:branchId', authenticate, async (req, res) => {
+router.get('/dashboard/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const data = await svc.getQualityDashboard(req.params.branchId, req.query.period || 'month');
     res.json({ success: true, data });
@@ -17,7 +18,7 @@ router.get('/dashboard/:branchId', authenticate, async (req, res) => {
 });
 
 // ── معايير الجودة ─────────────────────────────────────
-router.get('/standards', authenticate, async (req, res) => {
+router.get('/standards', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { QualityStandard } = require('../models/QualityModels');
     const { source, chapter } = req.query;
@@ -33,7 +34,7 @@ router.get('/standards', authenticate, async (req, res) => {
 
 router.post(
   '/standards',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -48,7 +49,7 @@ router.post(
 
 router.put(
   '/standards/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -68,7 +69,7 @@ router.put(
 );
 
 // ── قوائم الفحص ───────────────────────────────────────
-router.get('/checklists', authenticate, async (req, res) => {
+router.get('/checklists', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Checklist } = require('../models/QualityModels');
     const { type, frequency, branchId } = req.query;
@@ -85,7 +86,7 @@ router.get('/checklists', authenticate, async (req, res) => {
 
 router.post(
   '/checklists',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -100,7 +101,7 @@ router.post(
 
 router.put(
   '/checklists/:id',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -118,7 +119,7 @@ router.put(
 );
 
 // ── تقديم قوائم الفحص ────────────────────────────────
-router.get('/checklist-submissions', authenticate, async (req, res) => {
+router.get('/checklist-submissions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ChecklistSubmission } = require('../models/QualityModels');
     const { branchId, checklistId, status, from, to } = req.query;
@@ -139,7 +140,7 @@ router.get('/checklist-submissions', authenticate, async (req, res) => {
   }
 });
 
-router.post('/checklist-submissions', authenticate, async (req, res) => {
+router.post('/checklist-submissions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await svc.submitChecklist(req.body, req.user._id);
     res.status(201).json({ success: true, data: result });
@@ -149,7 +150,7 @@ router.post('/checklist-submissions', authenticate, async (req, res) => {
 });
 
 // ── الحوادث ───────────────────────────────────────────
-router.get('/incidents', authenticate, async (req, res) => {
+router.get('/incidents', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
     const { branchId, status, severity, type, from, to } = req.query;
@@ -170,7 +171,7 @@ router.get('/incidents', authenticate, async (req, res) => {
   }
 });
 
-router.post('/incidents', authenticate, async (req, res) => {
+router.post('/incidents', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const incident = await svc.reportIncident({ ...req.body, reportedBy: req.user._id });
     res.status(201).json({ success: true, data: incident });
@@ -179,7 +180,7 @@ router.post('/incidents', authenticate, async (req, res) => {
   }
 });
 
-router.get('/incidents/:incidentId', authenticate, async (req, res) => {
+router.get('/incidents/:incidentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findById(req.params.incidentId).populate(
@@ -192,7 +193,7 @@ router.get('/incidents/:incidentId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/incidents/:incidentId', authenticate, async (req, res) => {
+router.put('/incidents/:incidentId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findByIdAndUpdate(
@@ -208,7 +209,7 @@ router.put('/incidents/:incidentId', authenticate, async (req, res) => {
   }
 });
 
-router.post('/incidents/:incidentId/rca', authenticate, async (req, res) => {
+router.post('/incidents/:incidentId/rca', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findById(req.params.incidentId);
@@ -220,7 +221,7 @@ router.post('/incidents/:incidentId/rca', authenticate, async (req, res) => {
   }
 });
 
-router.post('/incidents/:incidentId/actions', authenticate, async (req, res) => {
+router.post('/incidents/:incidentId/actions', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Incident } = require('../models/QualityModels');
     const incident = await Incident.findByIdAndUpdate(
@@ -243,7 +244,7 @@ router.post('/incidents/:incidentId/actions', authenticate, async (req, res) => 
 
 router.put(
   '/incidents/:incidentId/close',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager', 'branch_manager'),
   async (req, res) => {
     try {
@@ -266,7 +267,7 @@ router.put(
 );
 
 // ── الشكاوى ────────────────────────────────────────────
-router.get('/complaints', authenticate, async (req, res) => {
+router.get('/complaints', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
     const { branchId, status, category, priority } = req.query;
@@ -284,7 +285,7 @@ router.get('/complaints', authenticate, async (req, res) => {
   }
 });
 
-router.post('/complaints', authenticate, async (req, res) => {
+router.post('/complaints', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const complaint = await svc.createComplaint(req.body, req.user._id);
     res.status(201).json({ success: true, data: complaint });
@@ -293,7 +294,7 @@ router.post('/complaints', authenticate, async (req, res) => {
   }
 });
 
-router.get('/complaints/:complaintId', authenticate, async (req, res) => {
+router.get('/complaints/:complaintId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
     const complaint = await Complaint.findById(req.params.complaintId).populate(
@@ -306,7 +307,7 @@ router.get('/complaints/:complaintId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/complaints/:complaintId', authenticate, async (req, res) => {
+router.put('/complaints/:complaintId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Complaint } = require('../models/QualityModels');
     const complaint = await Complaint.findByIdAndUpdate(
@@ -322,7 +323,7 @@ router.put('/complaints/:complaintId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/complaints/:complaintId/resolve', authenticate, async (req, res) => {
+router.put('/complaints/:complaintId/resolve', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const result = await svc.resolveComplaint(
       req.params.complaintId,
@@ -336,7 +337,7 @@ router.put('/complaints/:complaintId/resolve', authenticate, async (req, res) =>
 });
 
 // ── استبيانات الرضا والـ NPS ──────────────────────────
-router.get('/surveys', authenticate, async (req, res) => {
+router.get('/surveys', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { SatisfactionSurvey } = require('../models/QualityModels');
     const { branchId, surveyType, from, to } = req.query;
@@ -364,7 +365,7 @@ router.post('/surveys', async (req, res) => {
   }
 });
 
-router.get('/surveys/nps/:branchId', authenticate, async (req, res) => {
+router.get('/surveys/nps/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { from, to } = req.query;
     const data = await svc.calculateNps(req.params.branchId, from, to);
@@ -375,7 +376,7 @@ router.get('/surveys/nps/:branchId', authenticate, async (req, res) => {
 });
 
 // ── عمليات التدقيق ────────────────────────────────────
-router.get('/audits', authenticate, async (req, res) => {
+router.get('/audits', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Audit } = require('../models/QualityModels');
     const { branchId, standard, status, type } = req.query;
@@ -393,7 +394,7 @@ router.get('/audits', authenticate, async (req, res) => {
 
 router.post(
   '/audits',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -409,7 +410,7 @@ router.post(
   }
 );
 
-router.get('/audits/:auditId', authenticate, async (req, res) => {
+router.get('/audits/:auditId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Audit } = require('../models/QualityModels');
     const audit = await Audit.findById(req.params.auditId);
@@ -422,7 +423,7 @@ router.get('/audits/:auditId', authenticate, async (req, res) => {
 
 router.put(
   '/audits/:auditId',
-  authenticate,
+  authenticate, requireBranchAccess, requireBranchAccess,
   authorize('admin', 'super_admin', 'quality_manager'),
   async (req, res) => {
     try {
@@ -438,7 +439,7 @@ router.put(
 );
 
 // ── مشاريع التحسين PDCA ───────────────────────────────
-router.get('/improvements', authenticate, async (req, res) => {
+router.get('/improvements', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
     const { branchId, status, currentPhase } = req.query;
@@ -455,7 +456,7 @@ router.get('/improvements', authenticate, async (req, res) => {
   }
 });
 
-router.post('/improvements', authenticate, async (req, res) => {
+router.post('/improvements', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
     const project = await ImprovementProject.create({
@@ -469,7 +470,7 @@ router.post('/improvements', authenticate, async (req, res) => {
   }
 });
 
-router.get('/improvements/:projectId', authenticate, async (req, res) => {
+router.get('/improvements/:projectId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
     const project = await ImprovementProject.findById(req.params.projectId).populate('ownerId');
@@ -480,7 +481,7 @@ router.get('/improvements/:projectId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/improvements/:projectId', authenticate, async (req, res) => {
+router.put('/improvements/:projectId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
     const project = await ImprovementProject.findByIdAndUpdate(
@@ -496,7 +497,7 @@ router.put('/improvements/:projectId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/improvements/:projectId/phase', authenticate, async (req, res) => {
+router.put('/improvements/:projectId/phase', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { ImprovementProject } = require('../models/QualityModels');
     const { phase, data: phaseData } = req.body;
@@ -512,7 +513,7 @@ router.put('/improvements/:projectId/phase', authenticate, async (req, res) => {
 });
 
 // ── إدارة المخاطر ─────────────────────────────────────
-router.get('/risks', authenticate, async (req, res) => {
+router.get('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
     const { branchId, category, status, riskLevel } = req.query;
@@ -528,7 +529,7 @@ router.get('/risks', authenticate, async (req, res) => {
   }
 });
 
-router.post('/risks', authenticate, async (req, res) => {
+router.post('/risks', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
     const riskLevel = svc.assessRiskLevel(req.body.likelihood, req.body.impact);
@@ -544,7 +545,7 @@ router.post('/risks', authenticate, async (req, res) => {
   }
 });
 
-router.get('/risks/matrix/:branchId', authenticate, async (req, res) => {
+router.get('/risks/matrix/:branchId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
     const risks = await Risk.find({
@@ -565,7 +566,7 @@ router.get('/risks/matrix/:branchId', authenticate, async (req, res) => {
   }
 });
 
-router.get('/risks/:riskId', authenticate, async (req, res) => {
+router.get('/risks/:riskId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
     const risk = await Risk.findById(req.params.riskId).populate('ownerId');
@@ -576,7 +577,7 @@ router.get('/risks/:riskId', authenticate, async (req, res) => {
   }
 });
 
-router.put('/risks/:riskId', authenticate, async (req, res) => {
+router.put('/risks/:riskId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { Risk } = require('../models/QualityModels');
     if (req.body.likelihood || req.body.impact) {

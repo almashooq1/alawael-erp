@@ -16,6 +16,12 @@ const skillsDevelopmentSchema = new mongoose.Schema(
       required: [true, 'Beneficiary ID is required'],
       index: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Branch',
+      required: true,
+      index: true,
+    },
 
     // Skill Information
     skillName: {
@@ -165,7 +171,7 @@ const skillsDevelopmentSchema = new mongoose.Schema(
 );
 
 // Indexes
-skillsDevelopmentSchema.index({ beneficiaryId: 1, skillCategory: 1 });
+skillsDevelopmentSchema.index({ branchId: 1, beneficiaryId: 1, skillCategory: 1 });
 skillsDevelopmentSchema.index({ skillName: 1 });
 skillsDevelopmentSchema.index({ currentLevel: -1 });
 skillsDevelopmentSchema.index({ endorsementCount: -1 });

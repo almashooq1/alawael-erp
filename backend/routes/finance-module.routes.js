@@ -16,12 +16,13 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate, requireAdmin } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 
 // 🔒 All finance routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 // ─── Models ─────────────────────────────────────────────────────────────────
 const ChartOfAccount = require('../models/finance/ChartOfAccount');
 const JournalEntry = require('../models/finance/JournalEntry');

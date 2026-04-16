@@ -12,12 +12,13 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // 🔒 All gamification routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const {
   GamificationEnhancedService,
   GamificationProfile,

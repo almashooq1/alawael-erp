@@ -7,13 +7,14 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // 🔒 All leave request routes require authentication
 router.use(authenticate);
-
+router.use(requireBranchAccess);
 const LeaveBalance = require('../models/LeaveBalance');
 const leaveService = require('../services/leaveManagement.service');
 

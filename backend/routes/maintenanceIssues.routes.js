@@ -6,13 +6,14 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenanceIssue = require('../models/MaintenanceIssue');
 const logger = require('../utils/logger');
 const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 /** GET /api/maintenance-issues — list issues */
-router.get('/', requireAuth, async (req, res) => {
+router.get('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const {
       vehicle,
@@ -24,7 +25,7 @@ router.get('/', requireAuth, async (req, res) => {
       page = 1,
       limit = 25,
     } = req.query;
-    const filter = {};
+    const filter = { ...branchFilter(req) };
     if (vehicle) filter.vehicle = vehicle;
     if (status) filter.status = status;
     if (severity) filter.severity = severity;
@@ -51,9 +52,11 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-issues/stats — issue statistics */
-router.get('/stats', requireAuth, async (req, res) => {
+router.get('/stats', requireAuth, requireBranchAccess, async (req, res) => {
   try {
+    const scope = branchFilter(req);
     const stats = await MaintenanceIssue.aggregate([
+      { $match: { ...scope } },
       {
         $group: {
           _id: null,
@@ -68,6 +71,7 @@ router.get('/stats', requireAuth, async (req, res) => {
       },
     ]);
     const byCategory = await MaintenanceIssue.aggregate([
+      { $match: { ...scope } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
     ]);
@@ -78,9 +82,9 @@ router.get('/stats', requireAuth, async (req, res) => {
 });
 
 /** GET /api/maintenance-issues/:id — get single issue */
-router.get('/:id', requireAuth, async (req, res) => {
+router.get('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const issue = await MaintenanceIssue.findById(req.params.id)
+    const issue = await MaintenanceIssue.findOne({ _id: req.params.id, ...branchFilter(req) })
       .populate('vehicle')
       .populate('reportedBy', 'name email')
       .populate('diagnosis.diagnostician', 'name')
@@ -95,10 +99,13 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 /** POST /api/maintenance-issues — create issue */
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const data = { ...req.body, reportedBy: req.body.reportedBy || req.user?._id || req.user?.id };
-    const issue = await MaintenanceIssue.create(data);
+    const body = { ...req.body, reportedBy: req.body.reportedBy || req.user?._id || req.user?.id };
+    if (req.branchScope && req.branchScope.branchId) {
+      body.branchId = req.branchScope.branchId;
+    }
+    const issue = await MaintenanceIssue.create(body);
     res.status(201).json({ success: true, data: issue });
   } catch (err) {
     logger.error('maintenanceIssue create error:', err);
@@ -107,12 +114,16 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 /** PUT /api/maintenance-issues/:id — update issue */
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const issue = await MaintenanceIssue.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const issue = await MaintenanceIssue.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
     res.json({ success: true, data: issue });
   } catch (err) {
@@ -122,18 +133,27 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 /** DELETE /api/maintenance-issues/:id — delete issue (admin) */
-router.delete('/:id', requireAuth, requireRole(['admin']), async (req, res) => {
-  try {
-    const issue = await MaintenanceIssue.findByIdAndDelete(req.params.id);
-    if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
-    res.json({ success: true, message: 'Issue deleted' });
-  } catch (err) {
-    safeError(res, err, 'maintenanceIssue delete error');
+router.delete(
+  '/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const issue = await MaintenanceIssue.findOneAndDelete({
+        _id: req.params.id,
+        ...branchFilter(req),
+      });
+      if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
+      res.json({ success: true, message: 'Issue deleted' });
+    } catch (err) {
+      safeError(res, err, 'maintenanceIssue delete error');
+    }
   }
-});
+);
 
 /** PATCH /api/maintenance-issues/:id/status — update issue status */
-router.patch('/:id/status', requireAuth, async (req, res) => {
+router.patch('/:id/status', requireAuth, requireBranchAccess, async (req, res) => {
   try {
     const { status } = req.body;
     const update = { status };
@@ -143,10 +163,14 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
       update['resolution.successfullyClosed'] = true;
     }
 
-    const issue = await MaintenanceIssue.findByIdAndUpdate(req.params.id, update, {
-      new: true,
-      runValidators: true,
-    });
+    const issue = await MaintenanceIssue.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
+      update,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!issue) return res.status(404).json({ success: false, message: 'Issue not found' });
 
     // Log activity
@@ -165,10 +189,10 @@ router.patch('/:id/status', requireAuth, async (req, res) => {
 });
 
 /** POST /api/maintenance-issues/:id/diagnosis — add diagnosis */
-router.post('/:id/diagnosis', requireAuth, async (req, res) => {
+router.post('/:id/diagnosis', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const issue = await MaintenanceIssue.findByIdAndUpdate(
-      req.params.id,
+    const issue = await MaintenanceIssue.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         diagnosis: {
           ...req.body,
@@ -187,10 +211,10 @@ router.post('/:id/diagnosis', requireAuth, async (req, res) => {
 });
 
 /** POST /api/maintenance-issues/:id/comments — add comment */
-router.post('/:id/comments', requireAuth, async (req, res) => {
+router.post('/:id/comments', requireAuth, requireBranchAccess, async (req, res) => {
   try {
-    const issue = await MaintenanceIssue.findByIdAndUpdate(
-      req.params.id,
+    const issue = await MaintenanceIssue.findOneAndUpdate(
+      { _id: req.params.id, ...branchFilter(req) },
       {
         $push: {
           comments: {

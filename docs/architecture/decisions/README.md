@@ -39,7 +39,13 @@ What becomes easier or more difficult to do because of this change?
 1. [Monolithic Architecture](001-monolithic-architecture.md)
 2. [Technology Stack Selection](002-technology-stack.md)
 3. [Bilingual Support Strategy](003-bilingual-support.md)
+4. [Multi-Tenant Isolation Strategy](004-multi-tenant-isolation-strategy.md)
+5. [Canonical Role Hierarchy (6 Levels)](005-canonical-role-hierarchy.md)
+6. [Domain Event Bus](006-domain-event-bus.md)
+7. [PDPL Compliance Baseline](007-pdpl-compliance-baseline.md)
+8. [Nafath as Primary E-Signature Provider](008-nafath-e-signature.md)
+9. [Audit Trail Standard](009-audit-trail-standard.md)
 
 ---
 
-**Last Updated:** January 18, 2026
+**Last Updated:** April 17, 2026

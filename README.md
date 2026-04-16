@@ -22,13 +22,15 @@
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [MODULES.md](docs/MODULES.md) | 🗺️ **خريطة الوحدات** — 127 backend module + 80+ frontend page |
-| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System architecture, design decisions, module breakdown |
-| [DEVELOPMENT.md](docs/DEVELOPMENT.md) | Developer setup guide, code standards, git workflow |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines and PR process |
-| [CHANGELOG.md](CHANGELOG.md) | Full release history |
+| Document                                                | Description                                                                                                                           |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [blueprint/README.md](docs/blueprint/README.md)         | 🎯 **Unified Platform Blueprint** — ERP+EMR+CRM+Rehab vision, 14 bounded contexts, canonical data model, 6-level RBAC, phased roadmap |
+| [MODULES.md](docs/MODULES.md)                           | 🗺️ **خريطة الوحدات** — 127 backend module + 80+ frontend page                                                                         |
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md)                 | System architecture, design decisions, module breakdown                                                                               |
+| [architecture/decisions/](docs/architecture/decisions/) | Architecture Decision Records (ADRs 001–009)                                                                                          |
+| [DEVELOPMENT.md](docs/DEVELOPMENT.md)                   | Developer setup guide, code standards, git workflow                                                                                   |
+| [CONTRIBUTING.md](CONTRIBUTING.md)                      | Contribution guidelines and PR process                                                                                                |
+| [CHANGELOG.md](CHANGELOG.md)                            | Full release history                                                                                                                  |
 
 ---
 
@@ -128,17 +130,17 @@ alawael-erp/
 
 **Key Components:**
 
-| Layer              | Technology                                               |
-| ------------------ | -------------------------------------------------------- |
-| API Server         | Express 4.18 + express-async-errors                     |
-| Database           | MongoDB (Mongoose 9) + MongoMemoryServer (tests)        |
-| Cache              | Redis (ioredis 5) with circuit breaker                   |
-| Real-time          | Socket.IO 4.7 (cluster-aware)                            |
-| Auth               | JWT + RBAC (role-based + permission-based)                |
-| Observability      | Winston logging, OpenTelemetry, Prometheus metrics        |
-| Security           | Helmet, CSRF, rate limiting, mongo-sanitize, XSS filter   |
-| Process Manager    | PM2 (cluster mode, graceful shutdown)                     |
-| Frontend           | React 18 + Material-UI 5 + React Router 6                |
+| Layer           | Technology                                              |
+| --------------- | ------------------------------------------------------- |
+| API Server      | Express 4.18 + express-async-errors                     |
+| Database        | MongoDB (Mongoose 9) + MongoMemoryServer (tests)        |
+| Cache           | Redis (ioredis 5) with circuit breaker                  |
+| Real-time       | Socket.IO 4.7 (cluster-aware)                           |
+| Auth            | JWT + RBAC (role-based + permission-based)              |
+| Observability   | Winston logging, OpenTelemetry, Prometheus metrics      |
+| Security        | Helmet, CSRF, rate limiting, mongo-sanitize, XSS filter |
+| Process Manager | PM2 (cluster mode, graceful shutdown)                   |
+| Frontend        | React 18 + Material-UI 5 + React Router 6               |
 
 ---
 
@@ -248,24 +250,24 @@ GitHub Actions CI validates PRs and main branch pushes.
 
 Copy `.env.example` to `.env` and adjust:
 
-| Variable              | Required | Default       | Description                                        |
-| --------------------- | -------- | ------------- | -------------------------------------------------- |
-| `PORT`                | No       | `3001`        | HTTP server port                                   |
-| `NODE_ENV`            | Yes      | `development` | `development` / `production` / `test`              |
-| `MONGODB_URI`         | Yes*     | localhost     | MongoDB connection string (* required in prod)     |
-| `JWT_SECRET`          | Yes      | —             | JWT signing key (min 32 chars recommended)          |
-| `REDIS_HOST`          | No       | `localhost`   | Redis server hostname                              |
-| `REDIS_PORT`          | No       | `6379`        | Redis server port                                  |
-| `REDIS_PASSWORD`      | No       | —             | Redis auth password                                |
-| `CORS_ORIGINS`        | Prod     | —             | Comma-separated allowed origins                    |
-| `FRONTEND_URL`        | No       | —             | Frontend URL for CORS fallback                     |
-| `SSL_ENABLED`         | No       | `false`       | Enable HSTS and secure cookies                     |
-| `ENABLE_SWAGGER`      | No       | `true`        | Enable Swagger UI at `/api-docs`                   |
-| `METRICS_TOKEN`       | No       | —             | Bearer token for `/metrics` endpoint               |
-| `ENABLE_AUTO_BACKUP`  | No       | `false`       | Enable scheduled MongoDB backups                   |
-| `SLOW_QUERY_THRESHOLD_MS` | No   | `500`         | Mongoose slow query warning threshold              |
-| `MONGOOSE_DEBUG`      | No       | `false`       | Log all Mongoose queries                           |
-| `OTEL_ENABLED`        | No       | `false`       | Enable OpenTelemetry tracing                       |
+| Variable                  | Required | Default       | Description                                     |
+| ------------------------- | -------- | ------------- | ----------------------------------------------- |
+| `PORT`                    | No       | `3001`        | HTTP server port                                |
+| `NODE_ENV`                | Yes      | `development` | `development` / `production` / `test`           |
+| `MONGODB_URI`             | Yes\*    | localhost     | MongoDB connection string (\* required in prod) |
+| `JWT_SECRET`              | Yes      | —             | JWT signing key (min 32 chars recommended)      |
+| `REDIS_HOST`              | No       | `localhost`   | Redis server hostname                           |
+| `REDIS_PORT`              | No       | `6379`        | Redis server port                               |
+| `REDIS_PASSWORD`          | No       | —             | Redis auth password                             |
+| `CORS_ORIGINS`            | Prod     | —             | Comma-separated allowed origins                 |
+| `FRONTEND_URL`            | No       | —             | Frontend URL for CORS fallback                  |
+| `SSL_ENABLED`             | No       | `false`       | Enable HSTS and secure cookies                  |
+| `ENABLE_SWAGGER`          | No       | `true`        | Enable Swagger UI at `/api-docs`                |
+| `METRICS_TOKEN`           | No       | —             | Bearer token for `/metrics` endpoint            |
+| `ENABLE_AUTO_BACKUP`      | No       | `false`       | Enable scheduled MongoDB backups                |
+| `SLOW_QUERY_THRESHOLD_MS` | No       | `500`         | Mongoose slow query warning threshold           |
+| `MONGOOSE_DEBUG`          | No       | `false`       | Log all Mongoose queries                        |
+| `OTEL_ENABLED`            | No       | `false`       | Enable OpenTelemetry tracing                    |
 
 ---
 

@@ -3,7 +3,11 @@ const globals = require('globals');
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const importPlugin = require('eslint-plugin-import');
-const unusedImportsPlugin = require('eslint-plugin-unused-imports');
+// eslint-plugin-unused-imports@4.4.1 (latest) still calls context.getFilename(),
+// which ESLint 10 removed. Temporarily disabled until upstream releases a
+// compat build; covered in the interim by the built-in `no-unused-vars` rule
+// with `varsIgnorePattern: '^_'`.
+// const unusedImportsPlugin = require('eslint-plugin-unused-imports');
 
 // This flat config is used by ESLint v8+ when linting frontend files.
 // It mirrors the rules from .eslintrc.json but in flat config format.
@@ -23,7 +27,7 @@ module.exports = [
       react: reactPlugin,
       'react-hooks': reactHooksPlugin,
       import: importPlugin,
-      'unused-imports': unusedImportsPlugin,
+      // 'unused-imports': unusedImportsPlugin,  // see top-of-file note
     },
     languageOptions: {
       ecmaVersion: 2022,
@@ -50,9 +54,11 @@ module.exports = [
       'react-hooks/rules-of-hooks': 'error',
       // Import
       'import/no-anonymous-default-export': 'off',
-      // Unused imports
-      'unused-imports/no-unused-imports': 'warn',
-      'unused-imports/no-unused-vars': [
+      // Unused imports (plugin temporarily disabled — see top of file)
+      // 'unused-imports/no-unused-imports': 'warn',
+      // 'unused-imports/no-unused-vars': [ ... ],
+      // Fall back to built-in until unused-imports ships ESLint-10 compat.
+      'no-unused-vars': [
         'warn',
         {
           vars: 'all',
@@ -62,8 +68,6 @@ module.exports = [
           caughtErrors: 'none',
         },
       ],
-      // Disable base rule — unused-imports/no-unused-vars covers it (avoids duplicate warnings)
-      'no-unused-vars': 'off',
       'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
       'no-undef': 'warn',
       // Security rules (warn to avoid blocking lint)

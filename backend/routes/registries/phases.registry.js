@@ -543,4 +543,14 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   logger.info(
     'Branch Management System mounted (25 endpoints — HQ dashboard, cross-branch comparison, financials, staff optimizer, emergency override, branch dashboards, patients, schedule, staff, finance, transport, reports, KPIs, settings, audit logs, RBAC matrix — 12 branches + HQ Riyadh)'
   );
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ── Phase 37: Advanced Platform Enhancement — التطوير المتقدم للمنصة ────
+  // 8 أنظمة جديدة: اعتماد، تدريب الأسرة، CDSS، كفاءات الموظفين،
+  //                 توعية مجتمعية، علاجات رقمية، تعاقد بالنتائج، محتوى
+  // ══════════════════════════════════════════════════════════════════════════
+  safeMount(app, ['/api/phase37', '/api/v1/phase37'], '../routes/phase37.routes');
+  logger.info(
+    'Phase 37 mounted (8 systems, 80+ endpoints: accreditation CARF/CBAHI/JCI, family-training, cdss smart-alerts, staff-competency/cpd, community-outreach, digital-therapeutics, outcome-contracts, multilang-content)'
+  );
 };

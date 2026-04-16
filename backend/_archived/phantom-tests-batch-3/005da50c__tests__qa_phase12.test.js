@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+ 
 const SmartQualityService = require('../services/smartQuality.service');
 const SmartNotificationService = require('../services/smartNotificationService');
 const Employee = require('../models/Employee');

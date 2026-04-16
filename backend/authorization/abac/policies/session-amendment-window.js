@@ -26,9 +26,10 @@ module.exports = {
 
   evaluate({ subject, resource, env }) {
     const now = env.time instanceof Date ? env.time.getTime() : Date.now();
-    const signedAt = resource.signedAt instanceof Date
-      ? resource.signedAt.getTime()
-      : new Date(resource.signedAt || 0).getTime();
+    const signedAt =
+      resource.signedAt instanceof Date
+        ? resource.signedAt.getTime()
+        : new Date(resource.signedAt || 0).getTime();
     const withinWindow = signedAt > 0 && now - signedAt < AMENDMENT_WINDOW_MS;
     const sameSigner = String(resource.signedBy || '') === String(subject.userId || '');
 

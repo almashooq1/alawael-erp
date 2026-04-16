@@ -50,9 +50,9 @@ module.exports = {
   id: 'caseload-access',
   description: 'Therapist may read beneficiary only if assigned',
   applies({ subject, action, resource }) {
-    return subject.roles.includes('therapist') &&
-           action === 'read' &&
-           resource.type === 'Beneficiary';
+    return (
+      subject.roles.includes('therapist') && action === 'read' && resource.type === 'Beneficiary'
+    );
   },
   evaluate({ subject, action, resource, env }) {
     if (resource.caseTeam?.includes(subject.userId)) return { effect: 'permit' };
@@ -62,6 +62,7 @@ module.exports = {
 ```
 
 Multiple policies may apply; combination algorithm is **deny-overrides**:
+
 - If any applicable policy returns `deny` → deny.
 - Else if any returns `permit` → permit.
 - Else → not applicable (falls back to RBAC).

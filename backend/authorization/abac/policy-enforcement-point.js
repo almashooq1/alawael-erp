@@ -16,9 +16,7 @@ const { PERMIT, DENY, NOT_APPLICABLE } = require('./policy-decision-point');
  */
 function subjectFromReq(req) {
   const u = req.user || {};
-  const roles = Array.isArray(u.roles)
-    ? u.roles
-    : (u.role ? [u.role] : []);
+  const roles = Array.isArray(u.roles) ? u.roles : u.role ? [u.role] : [];
   return {
     userId: u.id || u._id || u.userId,
     roles,

@@ -23,10 +23,9 @@ module.exports = {
   },
 
   evaluate({ subject, resource }) {
-    const userBranches = new Set([
-      subject.defaultBranchId,
-      ...(subject.accessibleBranches || []),
-    ].filter(Boolean).map(String));
+    const userBranches = new Set(
+      [subject.defaultBranchId, ...(subject.accessibleBranches || [])].filter(Boolean).map(String)
+    );
 
     const targetBranch = String(resource.branchId);
 

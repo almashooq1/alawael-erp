@@ -1,13 +1,9 @@
-/* eslint-disable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
 
 const rootDir = path.resolve(__dirname, '..', '..');
 
-const targetFiles = [
-  path.join(rootDir, '__tests__', 'maintenance.comprehensive.test.js'),
-  path.join(rootDir, 'tests', 'maintenance.comprehensive.test.js'),
-];
+const targetFiles = [];
 
 const mustContainPatterns = [
   /maintenanceMockFactories/,

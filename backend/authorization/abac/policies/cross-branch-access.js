@@ -38,6 +38,14 @@ module.exports = {
       return { effect: 'permit', audit: 'cross_branch_access' };
     }
 
+    // Active delegation to the target branch is also acceptable.
+    const delegated = (subject.activeDelegations || []).some(
+      d => String(d.branchId) === targetBranch
+    );
+    if (delegated) {
+      return { effect: 'permit', audit: 'delegated_branch_access' };
+    }
+
     return { effect: 'deny', reason: 'branch_isolation' };
   },
 };

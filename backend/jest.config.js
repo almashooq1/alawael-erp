@@ -84,6 +84,8 @@ module.exports = {
     '/node_modules/',
     '/dist/',
     '/.git/',
+    // Match _archived anywhere in the path (handles Windows `\` and POSIX `/`).
+    '[\\\\/]_archived[\\\\/]',
     '/_archived/',
     // Exclude memory-heavy stress/performance tests from regular runs
     // Run separately with: npm run test:perf

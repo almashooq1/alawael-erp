@@ -21,8 +21,12 @@ describe('api/routes/documents-pro-extended.routes.js', () => {
     expect(fs.existsSync(SRC)).toBe(true);
   });
 
-  test('has known syntax issue (Unexpected token)', () => {
-    expect(() => new vm.Script(source, { filename: 'documents-pro-extended.routes.js' })).toThrow();
+  test('parses cleanly (syntax issue fixed in 5ce328bc)', () => {
+    // This file previously had an unclosed error handler (router.use(...
+    // missing `});`); the fix in commit 5ce328bc repaired the parse error.
+    expect(() =>
+      new vm.Script(source, { filename: 'documents-pro-extended.routes.js' })
+    ).not.toThrow();
   });
 
   test('defines GET routes (18)', () => {

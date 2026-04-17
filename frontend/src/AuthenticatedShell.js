@@ -138,6 +138,7 @@ const AdminInvoices = lazyWithRetry(() => import('./pages/Admin/AdminInvoices'))
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
+const ChatV2 = lazyWithRetry(() => import('./pages/Chat/ChatV2'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
 const ExportImportManager = lazyWithRetry(() => import('./components/ExportImportManager'));
@@ -253,6 +254,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/notifications" element={<AdminNotifications />} />
                   <Route path="my-children" element={<MyChildrenPortal />} />
                   <Route path="workbench" element={<TherapistWorkbench />} />
+                  <Route path="chat" element={<ChatV2 />} />
 
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}

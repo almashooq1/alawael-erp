@@ -678,6 +678,13 @@ const getNavigationItems = () => [
     icon: <MessageIcon />,
     roles: ['*'],
     children: [
+      {
+        id: 'chat-v2',
+        label: 'الرسائل (جديد)',
+        path: '/chat',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
       { id: 'comm-messages', label: 'الرسائل', path: '/messages' },
       { id: 'comm-system', label: 'نظام التواصل', path: '/communications-system' },
     ],

@@ -2547,6 +2547,248 @@ function Stories() {
   );
 }
 
+/* ══════════════════════ Comparison ══════════════════════ */
+function Comparison() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.12);
+  const c = content.comparison;
+  return (
+    <section id="comparison" ref={ref} className="py-28 bg-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(16,185,129,0.05),transparent)]" />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          className={`text-center mb-12 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold tracking-wider uppercase mb-4">
+            مقارنة
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{c.title}</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{c.subtitle}</p>
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-emerald-500 to-primary-500 mt-5" />
+        </div>
+
+        <div
+          className={`rounded-3xl overflow-hidden shadow-xl ring-1 ring-gray-200 bg-white transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+        >
+          <div className="grid grid-cols-[2fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr]">
+            <div className="p-5 bg-gray-50 font-bold text-gray-700 text-sm">الميزة</div>
+            <div className="p-5 bg-gradient-to-br from-primary-600 to-emerald-600 text-white text-center">
+              <div className="text-xs opacity-90">{c.weLabel}</div>
+              <div className="text-xl font-bold mt-1">✨</div>
+            </div>
+            <div className="p-5 bg-gray-100 text-gray-600 text-center">
+              <div className="text-xs">{c.otherLabel}</div>
+              <div className="text-xl font-bold mt-1">🏢</div>
+            </div>
+          </div>
+
+          {c.rows.map((row, i) => (
+            <div
+              key={row.feature}
+              className={`grid grid-cols-[2fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr] items-center ${i % 2 ? 'bg-gray-50/50' : 'bg-white'} hover:bg-primary-50/30 transition-colors`}
+            >
+              <div className="p-4 text-sm sm:text-base font-medium text-gray-900">
+                {row.feature}
+              </div>
+              <div className="p-4 text-center">
+                {row.us === true ? (
+                  <div className="inline-flex w-8 h-8 rounded-full bg-emerald-500 text-white items-center justify-center shadow-md">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={3}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
+                    </svg>
+                  </div>
+                ) : (
+                  <span className="text-sm font-semibold text-emerald-700">{row.us}</span>
+                )}
+              </div>
+              <div className="p-4 text-center">
+                {row.other === false ? (
+                  <div className="inline-flex w-8 h-8 rounded-full bg-gray-200 text-gray-500 items-center justify-center">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-500">{row.other}</span>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-xs text-gray-400 mt-6 max-w-lg mx-auto">
+          المقارنة تعكس ملامح السوق الشائعة — قد تختلف المراكز الأخرى في بعض التفاصيل.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Newsletter ══════════════════════ */
+function Newsletter() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.15);
+  const n = content.newsletter;
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [website, setWebsite] = useState(''); // honeypot
+  const [status, setStatus] = useState('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    if (status === 'loading') return;
+    setStatus('loading');
+    setMessage('');
+    try {
+      const resp = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name, website, locale: 'ar' }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok && data.success) {
+        setStatus('success');
+        setMessage(data.message || n.successMessage);
+        setEmail('');
+        setName('');
+      } else {
+        setStatus('error');
+        setMessage(data.message || n.errorMessage);
+      }
+    } catch (_err) {
+      setStatus('error');
+      setMessage(n.errorMessage);
+    }
+  };
+
+  return (
+    <section
+      id="newsletter"
+      ref={ref}
+      className="py-24 bg-gradient-to-br from-primary-600 via-primary-700 to-emerald-700 relative overflow-hidden"
+    >
+      <div
+        className="absolute inset-0 opacity-[0.06]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
+      <div className="absolute top-0 right-1/3 w-96 h-96 bg-white/5 rounded-full blur-[120px]" />
+      <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-emerald-300/10 rounded-full blur-[120px]" />
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`grid lg:grid-cols-2 gap-10 items-center transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+        >
+          <div className="text-white">
+            <div className="inline-flex w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 items-center justify-center mb-5">
+              <svg
+                className="w-7 h-7"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={1.8}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+                />
+              </svg>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3">{n.title}</h2>
+            <p className="text-white/85 text-lg leading-relaxed mb-5">{n.subtitle}</p>
+            <ul className="space-y-2.5">
+              {n.perks.map(p => (
+                <li key={p} className="flex items-center gap-2 text-white/80 text-sm">
+                  <span className="w-5 h-5 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8">
+            <div className="space-y-3">
+              <input
+                type="text"
+                placeholder={n.placeholderName}
+                value={name}
+                onChange={e => setName(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all text-sm"
+              />
+              <input
+                type="email"
+                required
+                placeholder={n.placeholderEmail}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                dir="ltr"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all text-sm"
+              />
+              <div className="absolute w-0 h-0 overflow-hidden" aria-hidden="true">
+                <input
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={website}
+                  onChange={e => setWebsite(e.target.value)}
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={status === 'loading' || status === 'success'}
+                className="w-full px-6 py-3 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg shadow-primary-600/25 transition-all hover:-translate-y-0.5 disabled:hover:translate-y-0"
+              >
+                {status === 'loading'
+                  ? n.ctaSubmitting
+                  : status === 'success'
+                    ? '✓ تم'
+                    : n.ctaSubmit}
+              </button>
+              {message && (
+                <div
+                  className={`text-sm text-center mt-2 ${status === 'success' ? 'text-emerald-600' : 'text-rose-600'}`}
+                >
+                  {message}
+                </div>
+              )}
+              <p className="text-[11px] text-gray-400 text-center">
+                بالاشتراك، أنت توافق على استلام بريد دوري. يمكنك إلغاء الاشتراك في أي وقت.
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ About ══════════════════════ */
 function About() {
   const ref = useRef(null);
@@ -3360,11 +3602,13 @@ export default function LandingPage() {
         <PlatformFeatures />
         <HowItWorks />
         <WhyUs />
+        <Comparison />
         <Team />
         <Stories />
         <Stats />
         <Testimonials />
         <FAQ />
+        <Newsletter />
         <Contact />
         <CTA />
         <Footer />

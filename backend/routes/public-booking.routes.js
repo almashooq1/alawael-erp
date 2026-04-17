@@ -23,8 +23,19 @@ const router = express.Router();
 
 const PublicBookingRequest = require('../models/PublicBookingRequest');
 const { createCustomLimiter } = require('../middleware/rateLimiter');
+const { authenticateToken, requireRole } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
+
+// Staff roles allowed to view/manage bookings (broad set — front-desk + managers).
+const STAFF_ROLES = [
+  'admin',
+  'superadmin',
+  'super_admin',
+  'manager',
+  'receptionist',
+  'coordinator',
+];
 
 // Rate limit: 5 bookings per hour from the same IP.
 const bookingLimiter = createCustomLimiter({
@@ -125,6 +136,180 @@ router.post('/public', bookingLimiter, async (req, res) => {
       return res.status(400).json({ success: false, message: err.message });
     }
     return safeError(res, err, 'public-booking.create');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// Admin-facing endpoints (staff-only) — list, stats, update, export.
+// ═══════════════════════════════════════════════════════════════════════
+
+// GET /admin — list with filters + pagination.
+//   Query: ?status=new&branch=فرع%20المغرزات&from=ISO&to=ISO&q=search&page=1&limit=25
+router.get('/admin', authenticateToken, requireRole(STAFF_ROLES), async (req, res) => {
+  try {
+    const { status, branch, from, to, q, page = 1, limit = 25 } = req.query;
+
+    const filter = {};
+    if (status) filter.status = status;
+    if (branch) filter.branchPreference = branch;
+    if (from || to) {
+      filter.createdAt = {};
+      if (from) filter.createdAt.$gte = new Date(from);
+      if (to) filter.createdAt.$lte = new Date(to);
+    }
+    if (q && typeof q === 'string' && q.trim()) {
+      const rx = new RegExp(q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      filter.$or = [
+        { parentName: rx },
+        { parentPhone: rx },
+        { childName: rx },
+        { confirmationNumber: rx },
+      ];
+    }
+
+    const p = Math.max(1, parseInt(page, 10) || 1);
+    const l = Math.min(100, Math.max(1, parseInt(limit, 10) || 25));
+
+    const [items, total] = await Promise.all([
+      PublicBookingRequest.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((p - 1) * l)
+        .limit(l)
+        .lean(),
+      PublicBookingRequest.countDocuments(filter),
+    ]);
+
+    res.json({
+      success: true,
+      items,
+      pagination: { page: p, limit: l, total, pages: Math.ceil(total / l) },
+    });
+  } catch (err) {
+    return safeError(res, err, 'public-booking.admin.list');
+  }
+});
+
+// GET /admin/stats — aggregated dashboard counters.
+router.get('/admin/stats', authenticateToken, requireRole(STAFF_ROLES), async (_req, res) => {
+  try {
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+
+    const [byStatus, byBranch, last30days, total] = await Promise.all([
+      PublicBookingRequest.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+      PublicBookingRequest.aggregate([
+        { $group: { _id: '$branchPreference', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      PublicBookingRequest.countDocuments({ createdAt: { $gte: since } }),
+      PublicBookingRequest.countDocuments({}),
+    ]);
+
+    const statusMap = {};
+    PublicBookingRequest.STATUSES.forEach(s => {
+      statusMap[s] = 0;
+    });
+    byStatus.forEach(r => {
+      statusMap[r._id] = r.count;
+    });
+
+    res.json({
+      success: true,
+      total,
+      last30days,
+      byStatus: statusMap,
+      byBranch: byBranch.map(r => ({ branch: r._id, count: r.count })),
+    });
+  } catch (err) {
+    return safeError(res, err, 'public-booking.admin.stats');
+  }
+});
+
+// PATCH /admin/:id/status — advance lifecycle.
+router.patch('/admin/:id/status', authenticateToken, requireRole(STAFF_ROLES), async (req, res) => {
+  try {
+    const { status, internalNotes } = req.body || {};
+    if (!status || !PublicBookingRequest.STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: 'حالة غير صالحة' });
+    }
+    const update = { status };
+    if (status === 'contacted') update.contactedAt = new Date();
+    if (status === 'converted') update.convertedAt = new Date();
+    if (typeof internalNotes === 'string') update.internalNotes = internalNotes.slice(0, 4000);
+    if (req.user?.id) update.assignedTo = req.user.id;
+
+    const doc = await PublicBookingRequest.findByIdAndUpdate(req.params.id, update, {
+      new: true,
+    }).lean();
+    if (!doc) return res.status(404).json({ success: false, message: 'الطلب غير موجود' });
+
+    logger.info('[public-booking] status update', {
+      id: req.params.id,
+      by: req.user?.id,
+      status,
+    });
+
+    res.json({ success: true, item: doc });
+  } catch (err) {
+    return safeError(res, err, 'public-booking.admin.updateStatus');
+  }
+});
+
+// GET /admin/export.csv — CSV export (UTF-8 + BOM for Excel Arabic).
+router.get('/admin/export.csv', authenticateToken, requireRole(STAFF_ROLES), async (req, res) => {
+  try {
+    const filter = {};
+    if (req.query.status) filter.status = req.query.status;
+
+    const rows = await PublicBookingRequest.find(filter).sort({ createdAt: -1 }).limit(5000).lean();
+
+    const escape = v => {
+      if (v === null || v === undefined) return '';
+      const s = String(v).replace(/"/g, '""');
+      return /[",\n\r]/.test(s) ? `"${s}"` : s;
+    };
+
+    const header = [
+      'رقم التأكيد',
+      'التاريخ',
+      'الحالة',
+      'ولي الأمر',
+      'الجوال',
+      'الطفل',
+      'العمر',
+      'نوع الحالة',
+      'الفرع',
+      'الفترة',
+      'الملاحظات',
+    ].join(',');
+
+    const lines = rows.map(r =>
+      [
+        r.confirmationNumber,
+        r.createdAt?.toISOString() || '',
+        r.status,
+        r.parentName,
+        r.parentPhone,
+        r.childName,
+        r.childAge,
+        r.conditionType,
+        r.branchPreference,
+        r.preferredTime,
+        r.notes || '',
+      ]
+        .map(escape)
+        .join(',')
+    );
+
+    const csv = '\uFEFF' + header + '\n' + lines.join('\n');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="alawael-bookings-${Date.now()}.csv"`
+    );
+    res.send(csv);
+  } catch (err) {
+    return safeError(res, err, 'public-booking.admin.export');
   }
 });
 

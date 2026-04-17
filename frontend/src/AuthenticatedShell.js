@@ -126,6 +126,7 @@ const ProDashboard = lazyWithRetry(
   () => import('./components/dashboard/AdvancedDashboard/ProDashboardLayout')
 );
 const AdvancedReportsPage = lazyWithRetry(() => import('./pages/Reports/AdvancedReportsPage'));
+const AdminBookings = lazyWithRetry(() => import('./pages/Admin/AdminBookings'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
 const ExportImportManager = lazyWithRetry(() => import('./components/ExportImportManager'));
@@ -229,6 +230,7 @@ export default function AuthenticatedShell() {
                   <Route path="dashboard/pro" element={<ProDashboard />} />
                   <Route path="activity" element={<Activity />} />
                   <Route path="reports" element={<AdvancedReportsPage />} />
+                  <Route path="admin/bookings" element={<AdminBookings />} />
 
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}

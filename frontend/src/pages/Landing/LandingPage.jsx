@@ -1583,8 +1583,12 @@ function BookingModal({ open, onClose }) {
     branchPreference: '',
     preferredTime: '',
     notes: '',
+    website: '', // honeypot — humans leave empty
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmationNumber, setConfirmationNumber] = useState('');
+  const [apiError, setApiError] = useState('');
 
   useEffect(() => {
     if (!open) return;
@@ -1601,8 +1605,48 @@ function BookingModal({ open, onClose }) {
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setApiError('');
+
+    // 1) Post to backend (/api/bookings/public). Server-recorded leads don't
+    //    depend on WhatsApp being available; we still open WhatsApp afterward
+    //    as a convenience channel.
+    let serverConfirmation = '';
+    try {
+      const resp = await fetch('/api/bookings/public', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          parentName: form.parentName,
+          parentPhone: form.parentPhone,
+          childName: form.childName,
+          childAge: Number(form.childAge),
+          conditionType: form.conditionType,
+          branchPreference: form.branchPreference,
+          preferredTime: form.preferredTime,
+          notes: form.notes,
+          website: form.website, // honeypot
+          consentMarketing: false,
+        }),
+      });
+      if (resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        serverConfirmation = data.confirmationNumber || '';
+      } else if (resp.status === 429) {
+        setApiError('تجاوزت عدد الطلبات المسموح. حاول بعد قليل.');
+      } else {
+        const data = await resp.json().catch(() => ({}));
+        setApiError(data.message || 'تعذّر إرسال الطلب للخادم — سنحاول واتساب.');
+      }
+    } catch (err) {
+      // Network failure — fall through to WhatsApp as a fallback channel.
+      setApiError('تعذّر الاتصال بالخادم — سنرسل طلبك عبر واتساب.');
+    }
+
+    // 2) Open WhatsApp with pre-filled message (works even if API failed).
     const lines = [
       `اسم ولي الأمر: ${form.parentName}`,
       `رقم الجوال: ${form.parentPhone}`,
@@ -1612,6 +1656,7 @@ function BookingModal({ open, onClose }) {
       `الفرع المفضّل: ${form.branchPreference}`,
       `الفترة المفضّلة: ${form.preferredTime}`,
       form.notes ? `ملاحظات: ${form.notes}` : '',
+      serverConfirmation ? `رقم التأكيد: ${serverConfirmation}` : '',
     ]
       .filter(Boolean)
       .join('\n');
@@ -1621,11 +1666,14 @@ function BookingModal({ open, onClose }) {
       '_blank',
       'noopener'
     );
+
+    setConfirmationNumber(serverConfirmation);
     setSubmitted(true);
+    setSubmitting(false);
     try {
       localStorage.setItem(
         'alawael:lastBooking',
-        JSON.stringify({ ...form, at: new Date().toISOString() })
+        JSON.stringify({ ...form, confirmation: serverConfirmation, at: new Date().toISOString() })
       );
     } catch {
       /* storage may be blocked */
@@ -1678,13 +1726,27 @@ function BookingModal({ open, onClose }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">تم إرسال طلبك بنجاح</h3>
-            <p className="text-gray-600 mb-6">
-              فتحنا لك محادثة واتساب مع فريق الحجز. سيرد عليك أخصائي الاستقبال خلال 24 ساعة.
+            <h3 className="text-xl font-bold text-gray-900 mb-2">تم استلام طلبك بنجاح</h3>
+            {confirmationNumber ? (
+              <div className="mb-4">
+                <p className="text-gray-600 mb-2">رقم التأكيد الخاص بك:</p>
+                <code
+                  className="inline-block px-4 py-2 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-lg tracking-wider border border-emerald-200"
+                  dir="ltr"
+                >
+                  {confirmationNumber}
+                </code>
+              </div>
+            ) : null}
+            <p className="text-gray-600 mb-6 max-w-md">
+              سيتواصل معك فريق الاستقبال خلال 24 ساعة. فتحنا لك أيضاً محادثة واتساب إن أردت التواصل
+              فوراً.
             </p>
             <button
               onClick={() => {
                 setSubmitted(false);
+                setConfirmationNumber('');
+                setApiError('');
                 onClose();
                 setForm({
                   parentName: '',
@@ -1695,6 +1757,7 @@ function BookingModal({ open, onClose }) {
                   branchPreference: '',
                   preferredTime: '',
                   notes: '',
+                  website: '',
                 });
               }}
               className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
@@ -1769,15 +1832,71 @@ function BookingModal({ open, onClose }) {
                 placeholder="أي تفاصيل تساعدنا في تجهيز الزيارة..."
               />
             </div>
+
+            {/* Honeypot — hidden from users, catches bots. */}
+            <div className="absolute w-0 h-0 overflow-hidden" aria-hidden="true">
+              <label>
+                Website (do not fill)
+                <input
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form.website}
+                  onChange={e => update('website', e.target.value)}
+                />
+              </label>
+            </div>
+
+            {apiError ? (
+              <div className="mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                {apiError}
+              </div>
+            ) : null}
+
             <div className="flex flex-col sm:flex-row gap-3">
               <button
                 type="submit"
-                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold rounded-2xl shadow-lg shadow-[#25D366]/25 transition-all hover:-translate-y-0.5"
+                disabled={submitting}
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/25 transition-all hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                </svg>
-                أرسل عبر واتساب
+                {submitting ? (
+                  <>
+                    <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeOpacity="0.25"
+                      />
+                      <path
+                        d="M12 2a10 10 0 0110 10"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                    جارٍ الإرسال...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 3h18M3 8h18M3 13h18M3 18h12"
+                      />
+                    </svg>
+                    أرسل طلب الحجز
+                  </>
+                )}
               </button>
               <a
                 href={`tel:${content.contact.mainPhone}`}
@@ -1800,7 +1919,8 @@ function BookingModal({ open, onClose }) {
               </a>
             </div>
             <p className="text-xs text-gray-500 text-center mt-4">
-              يتم إرسال بياناتك عبر واتساب إلى فريق الحجز. لا تُحفظ على خوادمنا إلا بعد موافقتك.
+              سيتم إرسال طلبك لخادمنا المحلي + فتح واتساب كقناة تواصل سريعة. نلتزم بسرية بياناتكم
+              وفق نظام حماية البيانات الشخصية (PDPL).
             </p>
           </form>
         )}
@@ -1865,7 +1985,7 @@ function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="تواصل واتساب"
-      className="fixed bottom-6 left-6 z-40 group flex items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5a] text-white px-4 py-3 rounded-full shadow-2xl shadow-[#25D366]/40 hover:-translate-y-1 transition-all duration-300"
+      className="hidden sm:flex fixed bottom-6 left-6 z-40 group items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5a] text-white px-4 py-3 rounded-full shadow-2xl shadow-[#25D366]/40 hover:-translate-y-1 transition-all duration-300"
     >
       <span className="relative flex w-11 h-11 items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
@@ -2174,6 +2294,27 @@ function Branches() {
                       {branch.phoneSecondary}
                     </a>
                   )}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${content.brand.nameArFull} ${branch.name} ${branch.address}`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary-700 hover:text-primary-900 transition-colors"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                      />
+                    </svg>
+                    فتح على الخريطة
+                  </a>
                 </div>
               </div>
             </article>
@@ -2181,6 +2322,71 @@ function Branches() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ══════════════════════ Mobile Action Bar ══════════════════════ */
+// Sticky bottom bar on mobile with 3 primary actions: book / call / whatsapp.
+// Hidden on sm+ (landing has full CTAs there). Improves thumb-reach conversion.
+function MobileActionBar() {
+  const booking = useBooking();
+  const ap = content.appointment;
+  const whatsappUrl = `https://wa.me/${ap.whatsappNumber}?text=${encodeURIComponent(ap.whatsappTemplate)}`;
+  return (
+    <div className="sm:hidden fixed bottom-0 right-0 left-0 z-40 bg-white/95 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="grid grid-cols-3 gap-1 p-2">
+        <button
+          type="button"
+          onClick={booking.open}
+          className="flex flex-col items-center justify-center py-2 rounded-xl text-primary-700 hover:bg-primary-50 active:bg-primary-100 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mb-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.8}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+            />
+          </svg>
+          <span className="text-[11px] font-bold">احجز زيارة</span>
+        </button>
+        <a
+          href={`tel:${content.contact.mainPhone}`}
+          className="flex flex-col items-center justify-center py-2 rounded-xl text-emerald-700 hover:bg-emerald-50 active:bg-emerald-100 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mb-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.8}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+            />
+          </svg>
+          <span className="text-[11px] font-bold">اتصل</span>
+        </a>
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center py-2 rounded-xl text-[#25D366] hover:bg-[#25D366]/10 active:bg-[#25D366]/15 transition-colors"
+        >
+          <svg className="w-5 h-5 mb-1" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+          </svg>
+          <span className="text-[11px] font-bold">واتساب</span>
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -2679,6 +2885,7 @@ export default function LandingPage() {
         <Footer />
         <BackToTop />
         <WhatsAppFab />
+        <MobileActionBar />
         <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
       </div>
     </BookingContext.Provider>

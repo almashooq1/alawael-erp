@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom';
 import content from '../../data/landingContent';
 import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesContent';
+import jobs from '../../data/careersContent';
 
 /* ══════════════════════ helpers ══════════════════════ */
 function useOnScreen(ref, threshold = 0.15) {
@@ -2067,6 +2068,85 @@ function SeoJsonLd() {
   return null;
 }
 
+/* ══════════════════════ Careers teaser ══════════════════════ */
+function CareersTeaser() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.12);
+  const featured = useMemo(() => jobs.filter(j => j.featured).slice(0, 3), []);
+  return (
+    <section
+      id="careers-teaser"
+      ref={ref}
+      className="py-24 bg-gradient-to-br from-amber-50 via-white to-primary-50/40 relative overflow-hidden"
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          className={`grid lg:grid-cols-2 gap-10 items-center transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <div>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold tracking-wider uppercase mb-4">
+              انضم إلينا
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              نحن نبحث عن المميّزين
+            </h2>
+            <p className="text-lg text-gray-600 leading-relaxed mb-6">
+              فريق الأوائل يتوسّع باستمرار. إذا كنت شغوفاً بخدمة ذوي الاحتياجات الخاصة — نحن نقدّم
+              لك بيئة داعمة، تدريباً مستمراً، ومسار تطوّر مهني واضح.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                to="/careers"
+                className="inline-flex items-center gap-2 px-7 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/25 hover:-translate-y-0.5 transition-all"
+              >
+                عرض كل الوظائف ({jobs.length})
+                <svg
+                  className="w-4 h-4 rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2.2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {featured.map((job, i) => (
+              <Link
+                key={job.id}
+                to="/careers"
+                className={`group flex items-center gap-4 p-4 bg-white rounded-2xl ring-1 ring-gray-100 hover:ring-primary-200 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-500 ${visible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'}`}
+                style={{ transitionDelay: `${i * 100}ms` }}
+              >
+                <div
+                  className={`flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br ${job.gradient} text-white flex items-center justify-center text-2xl`}
+                >
+                  {job.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-gray-900 truncate group-hover:text-primary-700 transition-colors">
+                    {job.title}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {job.branches[0]}
+                    {job.branches.length > 1 ? ` +${job.branches.length - 1}` : ''}
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold flex-shrink-0">
+                  ⭐ مميّزة
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ Articles teaser ══════════════════════ */
 function ArticlesTeaser() {
   const ref = useRef(null);
@@ -3713,6 +3793,7 @@ export default function LandingPage() {
         <Testimonials />
         <FAQ />
         <ArticlesTeaser />
+        <CareersTeaser />
         <Newsletter />
         <Contact />
         <CTA />

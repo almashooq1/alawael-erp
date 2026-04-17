@@ -19,6 +19,7 @@ const LoginPage = React.lazy(() => import('./pages/Landing/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
 const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
 const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
+const CareersPage = React.lazy(() => import('./pages/Careers/CareersPage'));
 
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
@@ -125,6 +126,15 @@ function AppRoutes() {
         element={
           <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
             <ArticleDetail />
+          </Suspense>
+        }
+      />
+      {/* Careers — public */}
+      <Route
+        path="/careers"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <CareersPage />
           </Suspense>
         }
       />

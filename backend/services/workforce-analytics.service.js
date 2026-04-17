@@ -1,80 +1,17 @@
-/* eslint-disable no-unused-vars */
 /**
  * ALAWAEL ERP - PHASE 21: WORKFORCE ANALYTICS & PLANNING SYSTEM
  * ──────────────────────────────────────────────────────────────
- * PROXY — delegates to the canonical DB-backed service at:
- *   backend/services/dddWorkforceAnalytics.js
+ * In-memory implementation of the Phase-21 workforce analytics features
+ * consumed by routes/workforce-analytics.routes.js.
  *
- * Kept for backward compatibility with workforce-analytics.routes.js.
- * The canonical service uses Mongoose models and persists to MongoDB.
+ * History: originally a proxy to a DB-backed canonical service
+ * (dddWorkforceAnalytics) which was removed. The canonical-delegate
+ * methods have been dropped; the in-memory methods below are the
+ * ones the route actually uses.
  */
 
-const canonical = require('./dddWorkforceAnalytics');
-
 class WorkforceAnalyticsService {
-  /* ── Delegated methods (DB-backed) ── */
-  async healthCheck() {
-    return canonical.healthCheck();
-  }
-  async createSnapshot(d, uid) {
-    return canonical.createSnapshot(d, uid);
-  }
-  async listSnapshots(f, p, l) {
-    return canonical.listSnapshots(f, p, l);
-  }
-  async getSnapshotById(id) {
-    return canonical.getSnapshotById(id);
-  }
-  async createStaffProfile(d, u) {
-    return canonical.createStaffProfile(d, u);
-  }
-  async listStaffProfiles(f, p, l) {
-    return canonical.listStaffProfiles(f, p, l);
-  }
-  async getStaffProfileById(id) {
-    return canonical.getStaffProfileById(id);
-  }
-  async updateStaffProfile(id, d, u) {
-    return canonical.updateStaffProfile(id, d, u);
-  }
-  async deleteStaffProfile(id) {
-    return canonical.deleteStaffProfile(id);
-  }
-  async createWorkloadEntry(d, u) {
-    return canonical.createWorkloadEntry(d, u);
-  }
-  async listWorkloadEntries(f, p, l) {
-    return canonical.listWorkloadEntries(f, p, l);
-  }
-  async createKPIRecord(d, u) {
-    return canonical.createKPIRecord(d, u);
-  }
-  async listKPIRecords(f, p, l) {
-    return canonical.listKPIRecords(f, p, l);
-  }
-  async getKPIDashboard(dept) {
-    return canonical.getKPIDashboard(dept);
-  }
-  getKPITemplates() {
-    return canonical.getKPITemplates();
-  }
-  async getDepartmentSummary(d) {
-    return canonical.getDepartmentSummary(d);
-  }
-  async getWorkloadDistribution() {
-    return canonical.getWorkloadDistribution();
-  }
-  async getTurnoverTrend(d, m) {
-    return canonical.getTurnoverTrend(d, m);
-  }
-  async getOvertimeAnalysis() {
-    return canonical.getOvertimeAnalysis();
-  }
-  async predictAttritionRisk(id) {
-    return canonical.predictAttritionRisk(id);
-  }
-
-  /* ── Phase 21 legacy methods (kept for route compat) ── */
+  /* ── Phase 21 methods ── */
   createHeadcountPlan(planData) {
     if (!planData.departmentId || !planData.planYear || !planData.targetHeadcount) {
       throw new Error('Missing required fields: departmentId, planYear, targetHeadcount');
@@ -213,7 +150,7 @@ class WorkforceAnalyticsService {
     return analysis;
   }
 
-  predictAttritionRiskLegacy(employeeData) {
+  predictAttritionRisk(employeeData) {
     if (!employeeData.employeeId) throw new Error('Missing required field: employeeId');
     let riskScore = 0;
     if ((employeeData.yearsWithCompany || 0) < 2) riskScore += 25;

@@ -172,6 +172,14 @@ jobs:
           CI: "false"
           DISABLE_ESLINT_PLUGIN: "true"
 
+      - name: Upload build log (always — success or failure)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.sha }}
+          path: frontend/build.log
+          if-no-files-found: ignore
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:

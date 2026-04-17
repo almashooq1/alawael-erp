@@ -1297,6 +1297,7 @@ const getNavigationItems = () => [
       { id: 'admin-therapy-sessions', label: 'الجلسات العلاجية', path: '/admin/therapy-sessions' },
       { id: 'admin-assessments', label: 'التقييمات السريرية', path: '/admin/assessments' },
       { id: 'admin-care-plans', label: 'خطط الرعاية (IEP)', path: '/admin/care-plans' },
+      { id: 'admin-bi-analytics', label: 'تحليلات BI', path: '/admin/analytics', badge: 'BI' },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },

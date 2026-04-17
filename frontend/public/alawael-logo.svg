@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Alawael Centers For Rehabilitation — brand logo (SVG reconstruction).
+  Based on the provided logo PDF. Colors:
+    orange  #F59E0B  — figure + stars
+    blue    #1E3A8A  — supporting hand + wordmarks
+  Intended usage: any size. View-box scales; text below can be hidden by
+  rendering a CSS fixed-width crop on the mark alone.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 140" role="img" aria-label="مراكز الأوائل للرعاية والتأهيل — Alawael Centers For Rehabilitation">
+  <!-- ── Decorative stars (orange) ── -->
+  <g fill="#F59E0B" transform="translate(230 14)">
+    <path d="M0 0 L2 6 L8 6 L3 10 L5 16 L0 12 L-5 16 L-3 10 L-8 6 L-2 6 Z" />
+    <path transform="translate(18 6) scale(0.6)" d="M0 0 L2 6 L8 6 L3 10 L5 16 L0 12 L-5 16 L-3 10 L-8 6 L-2 6 Z" />
+    <path transform="translate(-18 10) scale(0.5)" d="M0 0 L2 6 L8 6 L3 10 L5 16 L0 12 L-5 16 L-3 10 L-8 6 L-2 6 Z" />
+  </g>
+
+  <!-- ── Mark: supporting hand (blue) cradling figure (orange) ── -->
+  <!-- Blue bowl / hand shape -->
+  <path d="M210 82 Q210 105 235 110 Q260 112 280 100 Q290 92 287 82 Z"
+        fill="#1E3A8A" opacity="0.92"/>
+
+  <!-- Orange figure with raised arm (stylised) -->
+  <g fill="#F59E0B">
+    <!-- head -->
+    <circle cx="250" cy="52" r="7"/>
+    <!-- body/arc: a sweeping S-curve suggesting movement -->
+    <path d="M240 60
+             C238 68 244 75 252 78
+             C268 82 280 72 282 58
+             C284 48 272 40 262 44
+             C256 46 252 52 250 58
+             C248 62 244 58 240 60 Z"/>
+    <!-- small eye dot (blue) -->
+    <circle cx="247" cy="51" r="1.6" fill="#1E3A8A"/>
+  </g>
+
+  <!-- ── Arabic wordmark (right-to-left, dominant) ── -->
+  <text x="195" y="58"
+        text-anchor="end" direction="rtl"
+        font-family="'Cairo', 'Noto Sans Arabic', 'Tahoma', sans-serif"
+        font-weight="800" font-size="26" fill="#1E3A8A">
+    مراكز الأوائل
+  </text>
+  <text x="195" y="78"
+        text-anchor="end" direction="rtl"
+        font-family="'Cairo', 'Noto Sans Arabic', 'Tahoma', sans-serif"
+        font-weight="500" font-size="14" fill="#1E3A8A" opacity="0.85">
+    للرعاية والتأهيل
+  </text>
+
+  <!-- ── English wordmark ── -->
+  <text x="195" y="102"
+        text-anchor="end"
+        font-family="'Inter', 'Segoe UI', sans-serif"
+        font-weight="800" font-size="18" fill="#1E3A8A" letter-spacing="1">
+    ALAWAEL
+  </text>
+  <text x="195" y="118"
+        text-anchor="end"
+        font-family="'Inter', 'Segoe UI', sans-serif"
+        font-weight="500" font-size="9" fill="#1E3A8A" opacity="0.75" letter-spacing="0.6">
+    Centers For Rehabilitation
+  </text>
+</svg>

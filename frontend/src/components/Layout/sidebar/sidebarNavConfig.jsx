@@ -1400,16 +1400,20 @@ const getNavigationItems = () => [
   // ─── الطب عن بُعد (Telehealth) ───
   {
     id: 'telehealth',
-    label: 'الطب عن بُعد',
+    label: 'جلسات الفيديو',
     icon: <TelehealthIcon />,
     path: '/telehealth',
-    roles: ['admin', 'super_admin', 'therapist', 'doctor', 'specialist', 'manager'],
-    children: [
-      { id: 'telehealth-dashboard', label: 'لوحة التحكم', path: '/telehealth' },
-      { id: 'telehealth-sessions', label: 'إدارة الجلسات', path: '/telehealth/sessions' },
-      { id: 'telehealth-waiting', label: 'غرفة الانتظار', path: '/telehealth/waiting-room' },
-      { id: 'telehealth-video', label: 'غرفة الفيديو', path: '/telehealth/video-room' },
-      { id: 'telehealth-recordings', label: 'التسجيلات والتقارير', path: '/telehealth/recordings' },
+    badge: 'جديد',
+    badgeColor: 'success',
+    roles: [
+      'admin',
+      'super_admin',
+      'therapist',
+      'specialist',
+      'clinical_supervisor',
+      'manager',
+      'parent',
+      'guardian',
     ],
   },
   {

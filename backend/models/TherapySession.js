@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const therapySessionSchema = new mongoose.Schema(
@@ -119,6 +118,23 @@ const therapySessionSchema = new mongoose.Schema(
         reason: String,
       },
     ],
+
+    // ── Telehealth (video session) ───────────────────────────────────────
+    telehealth: {
+      enabled: { type: Boolean, default: false },
+      provider: {
+        type: String,
+        enum: ['jitsi', 'zoom', 'googlemeet', 'custom'],
+        default: 'jitsi',
+      },
+      roomName: String, // unique room id
+      roomUrl: String, // full join URL
+      hostJoinedAt: Date,
+      guestJoinedAt: Date,
+      endedAt: Date,
+      durationSeconds: Number,
+      recordingUrl: String,
+    },
   },
   { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );

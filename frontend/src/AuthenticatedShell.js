@@ -140,6 +140,8 @@ const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifi
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
 const ChatV2 = lazyWithRetry(() => import('./pages/Chat/ChatV2'));
+const TelehealthList = lazyWithRetry(() => import('./pages/Telehealth/TelehealthList'));
+const TelehealthRoom = lazyWithRetry(() => import('./pages/Telehealth/TelehealthRoom'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
 const ExportImportManager = lazyWithRetry(() => import('./components/ExportImportManager'));
@@ -257,6 +259,8 @@ export default function AuthenticatedShell() {
                   <Route path="my-children" element={<MyChildrenPortal />} />
                   <Route path="workbench" element={<TherapistWorkbench />} />
                   <Route path="chat" element={<ChatV2 />} />
+                  <Route path="telehealth" element={<TelehealthList />} />
+                  <Route path="telehealth/:sessionId" element={<TelehealthRoom />} />
 
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}

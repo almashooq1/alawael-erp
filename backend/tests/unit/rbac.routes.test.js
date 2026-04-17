@@ -32,18 +32,42 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../controllers/rbac.controller', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})) }));
+jest.mock(
+  '../../controllers/rbac.controller',
+  () =>
+    new Proxy(
+      {},
+      {
+        get: (t, p) =>
+          p === '__esModule' ? false : jest.fn((req, res) => res && res.json && res.json({})),
+      }
+    )
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../services/rbacManager.service', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../services/rbacManager.service',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/rbac.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/rbac.routes');
+} catch (e) {
+  /* load fail */
+}
 
 describe('routes/rbac.routes', () => {
   test('module loads without crash', () => {
@@ -58,6 +82,7 @@ describe('routes/rbac.routes', () => {
 
   test('express.Router() was called', () => {
     const express = require('express');
+    const safeError = require('../../utils/safeError');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);
@@ -112,5 +137,4 @@ describe('routes/rbac.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

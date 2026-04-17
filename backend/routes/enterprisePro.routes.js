@@ -16,6 +16,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 const {
   AuditTrailEntry,
@@ -38,7 +39,6 @@ const {
   ProjectTask,
   ProjectTimeLog,
 } = require('../models/EnterprisePro');
-const safeError = require('../utils/safeError');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -247,20 +247,25 @@ router.get('/audit-hub/trail/:id', authenticateToken, requireBranchAccess, async
   }
 });
 
-router.get('/audit-hub/trail/entity/:type/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const entries = await AuditTrailEntry.find({
-      entityType: req.params.type,
-      entityId: req.params.id,
-    })
-      .sort({ createdAt: -1 })
-      .limit(100)
-      .populate('performedBy', 'name email');
-    res.json(entries);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/audit-hub/trail/entity/:type/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const entries = await AuditTrailEntry.find({
+        entityType: req.params.type,
+        entityId: req.params.id,
+      })
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .populate('performedBy', 'name email');
+      res.json(entries);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.get('/audit-hub/stats', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -310,19 +315,24 @@ router.get('/audit-hub/checklists', authenticateToken, requireBranchAccess, asyn
   }
 });
 
-router.get('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const cl = await ComplianceChecklist.findById(req.params.id)
-      .populate('createdBy', 'name')
-      .populate('items.assignedTo', 'name')
-      .populate('items.checkedBy', 'name')
-      .lean();
-    if (!cl) return res.status(404).json({ error: 'Not found' });
-    res.json(cl);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/audit-hub/checklists/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const cl = await ComplianceChecklist.findById(req.params.id)
+        .populate('createdBy', 'name')
+        .populate('items.assignedTo', 'name')
+        .populate('items.checkedBy', 'name')
+        .lean();
+      if (!cl) return res.status(404).json({ error: 'Not found' });
+      res.json(cl);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.post('/audit-hub/checklists', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -336,72 +346,87 @@ router.post('/audit-hub/checklists', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.put('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    // Recalculate overall score
-    const data = pick(req.body, FIELDS.checklist);
-    if (data.items) {
-      const total = data.items.length;
-      const compliant = data.items.filter(i => i.status === 'compliant').length;
-      data.overallScore = total > 0 ? Math.round((compliant / total) * 100) : 0;
+router.put(
+  '/audit-hub/checklists/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      // Recalculate overall score
+      const data = pick(req.body, FIELDS.checklist);
+      if (data.items) {
+        const total = data.items.length;
+        const compliant = data.items.filter(i => i.status === 'compliant').length;
+        data.overallScore = total > 0 ? Math.round((compliant / total) * 100) : 0;
+      }
+      const cl = await ComplianceChecklist.findByIdAndUpdate(req.params.id, data, { new: true });
+      res.json(cl);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
     }
-    const cl = await ComplianceChecklist.findByIdAndUpdate(req.params.id, data, { new: true });
-    res.json(cl);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
   }
-});
+);
 
-router.delete('/audit-hub/checklists/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await ComplianceChecklist.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/audit-hub/checklists/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await ComplianceChecklist.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.get('/audit-hub/compliance-dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
-  try {
-    const checklists = await ComplianceChecklist.find({ isActive: true }).lean();
-    const totalItems = checklists.reduce((s, c) => s + c.items.length, 0);
-    const compliantItems = checklists.reduce(
-      (s, c) => s + c.items.filter(i => i.status === 'compliant').length,
-      0
-    );
-    const nonCompliant = checklists.reduce(
-      (s, c) => s + c.items.filter(i => i.status === 'non_compliant').length,
-      0
-    );
-    const overdue = checklists.reduce(
-      (s, c) =>
-        s +
-        c.items.filter(
-          i => i.dueDate && new Date(i.dueDate) < new Date() && i.status !== 'compliant'
-        ).length,
-      0
-    );
-    const avgScore =
-      checklists.length > 0
-        ? Math.round(checklists.reduce((s, c) => s + c.overallScore, 0) / checklists.length)
-        : 0;
-    const byCategory = {};
-    checklists.forEach(c => {
-      byCategory[c.category] = (byCategory[c.category] || 0) + 1;
-    });
-    res.json({
-      totalChecklists: checklists.length,
-      totalItems,
-      compliantItems,
-      nonCompliant,
-      overdue,
-      avgScore,
-      byCategory,
-    });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/audit-hub/compliance-dashboard',
+  authenticateToken,
+  requireBranchAccess,
+  async (_req, res) => {
+    try {
+      const checklists = await ComplianceChecklist.find({ isActive: true }).lean();
+      const totalItems = checklists.reduce((s, c) => s + c.items.length, 0);
+      const compliantItems = checklists.reduce(
+        (s, c) => s + c.items.filter(i => i.status === 'compliant').length,
+        0
+      );
+      const nonCompliant = checklists.reduce(
+        (s, c) => s + c.items.filter(i => i.status === 'non_compliant').length,
+        0
+      );
+      const overdue = checklists.reduce(
+        (s, c) =>
+          s +
+          c.items.filter(
+            i => i.dueDate && new Date(i.dueDate) < new Date() && i.status !== 'compliant'
+          ).length,
+        0
+      );
+      const avgScore =
+        checklists.length > 0
+          ? Math.round(checklists.reduce((s, c) => s + c.overallScore, 0) / checklists.length)
+          : 0;
+      const byCategory = {};
+      checklists.forEach(c => {
+        byCategory[c.category] = (byCategory[c.category] || 0) + 1;
+      });
+      res.json({
+        totalChecklists: checklists.length,
+        totalItems,
+        compliantItems,
+        nonCompliant,
+        overdue,
+        avgScore,
+        byCategory,
+      });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Compliance Alerts ───────────────────────────────────────────────────────
 router.get('/audit-hub/alerts', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -420,141 +445,190 @@ router.get('/audit-hub/alerts', authenticateToken, requireBranchAccess, async (r
   }
 });
 
-router.post('/audit-hub/alerts/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const alert = await ComplianceAlert.findByIdAndUpdate(
-      req.params.id,
-      { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
-      { new: true }
-    );
-    res.json(alert);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/audit-hub/alerts/:id/resolve',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const alert = await ComplianceAlert.findByIdAndUpdate(
+        req.params.id,
+        { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
+        { new: true }
+      );
+      res.json(alert);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  2. ADVANCED REPORT BUILDER — مولد التقارير المتقدم                         ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-router.get('/report-builder/templates', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { module, reportType, isPublic } = req.query;
-    const q = {};
-    if (module) q.module = module;
-    if (reportType) q.reportType = reportType;
-    if (isPublic !== undefined) q.isPublic = isPublic === 'true';
-    const templates = await ReportTemplate.find(q)
-      .sort({ updatedAt: -1 })
-      .populate('createdBy', 'name')
-      .lean();
-    res.json(templates);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/report-builder/templates',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { module, reportType, isPublic } = req.query;
+      const q = {};
+      if (module) q.module = module;
+      if (reportType) q.reportType = reportType;
+      if (isPublic !== undefined) q.isPublic = isPublic === 'true';
+      const templates = await ReportTemplate.find(q)
+        .sort({ updatedAt: -1 })
+        .populate('createdBy', 'name')
+        .lean();
+      res.json(templates);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.get('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await ReportTemplate.findById(req.params.id)
-      .populate('createdBy', 'name')
-      .populate('schedule.recipients', 'name email')
-      .lean();
-    if (!t) return res.status(404).json({ error: 'Not found' });
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/report-builder/templates/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await ReportTemplate.findById(req.params.id)
+        .populate('createdBy', 'name')
+        .populate('schedule.recipients', 'name email')
+        .lean();
+      if (!t) return res.status(404).json({ error: 'Not found' });
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/report-builder/templates', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await ReportTemplate.create({
-      ...pick(req.body, FIELDS.report),
-      createdBy: uid(req),
-    });
-    res.status(201).json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/report-builder/templates',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await ReportTemplate.create({
+        ...pick(req.body, FIELDS.report),
+        createdBy: uid(req),
+      });
+      res.status(201).json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.put('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await ReportTemplate.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.report), {
-      new: true,
-    });
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.put(
+  '/report-builder/templates/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await ReportTemplate.findByIdAndUpdate(
+        req.params.id,
+        pick(req.body, FIELDS.report),
+        {
+          new: true,
+        }
+      );
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.delete('/report-builder/templates/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await ReportTemplate.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/report-builder/templates/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await ReportTemplate.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/report-builder/templates/:id/clone', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const src = await ReportTemplate.findById(req.params.id).lean();
-    if (!src) return res.status(404).json({ error: 'Not found' });
-    delete src._id;
-    delete src.createdAt;
-    delete src.updatedAt;
-    src.name = `${src.name} (نسخة)`;
-    if (src.nameAr) src.nameAr = `${src.nameAr} (نسخة)`;
-    src.createdBy = uid(req);
-    const clone = await ReportTemplate.create(src);
-    res.status(201).json(clone);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/report-builder/templates/:id/clone',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const src = await ReportTemplate.findById(req.params.id).lean();
+      if (!src) return res.status(404).json({ error: 'Not found' });
+      delete src._id;
+      delete src.createdAt;
+      delete src.updatedAt;
+      src.name = `${src.name} (نسخة)`;
+      if (src.nameAr) src.nameAr = `${src.nameAr} (نسخة)`;
+      src.createdBy = uid(req);
+      const clone = await ReportTemplate.create(src);
+      res.status(201).json(clone);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/report-builder/execute/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const template = await ReportTemplate.findById(req.params.id).lean();
-    if (!template) return res.status(404).json({ error: 'Not found' });
-    const execution = await ReportExecution.create({
-      template: template._id,
-      filters: req.body.filters || template.filters,
-      executedBy: uid(req),
-      status: 'completed',
-      resultCount: Math.floor(Math.random() * 1000) + 1,
-      executionTime: Math.floor(Math.random() * 5000) + 200,
-      fileFormat: req.body.format || 'pdf',
-    });
-    res.status(201).json(execution);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/report-builder/execute/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const template = await ReportTemplate.findById(req.params.id).lean();
+      if (!template) return res.status(404).json({ error: 'Not found' });
+      const execution = await ReportExecution.create({
+        template: template._id,
+        filters: req.body.filters || template.filters,
+        executedBy: uid(req),
+        status: 'completed',
+        resultCount: Math.floor(Math.random() * 1000) + 1,
+        executionTime: Math.floor(Math.random() * 5000) + 200,
+        fileFormat: req.body.format || 'pdf',
+      });
+      res.status(201).json(execution);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.get('/report-builder/executions', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { template, status, page = 1, limit = 20 } = req.query;
-    const q = {};
-    if (template) q.template = template;
-    if (status) q.status = status;
-    const [execs, total] = await Promise.all([
-      ReportExecution.find(q)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(+limit)
-        .populate('template', 'name nameAr module')
-        .populate('executedBy', 'name'),
-      ReportExecution.countDocuments(q),
-    ]);
-    res.json({ executions: execs, total, page: +page, pages: Math.ceil(total / limit) });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/report-builder/executions',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { template, status, page = 1, limit = 20 } = req.query;
+      const q = {};
+      if (template) q.template = template;
+      if (status) q.status = status;
+      const [execs, total] = await Promise.all([
+        ReportExecution.find(q)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(+limit)
+          .populate('template', 'name nameAr module')
+          .populate('executedBy', 'name'),
+        ReportExecution.countDocuments(q),
+      ]);
+      res.json({ executions: execs, total, page: +page, pages: Math.ceil(total / limit) });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.get('/report-builder/modules', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
@@ -647,28 +721,38 @@ router.put('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, a
   }
 });
 
-router.delete('/calendar-hub/events/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await CalendarEvent.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/calendar-hub/events/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await CalendarEvent.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/calendar-hub/events/:id/rsvp', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const ev = await CalendarEvent.findById(req.params.id).lean();
-    if (!ev) return res.status(404).json({ error: 'Not found' });
-    const att = ev.attendees.find(a => String(a.user) === String(uid(req))).lean();
-    if (att) att.status = req.body.status || 'accepted';
-    else ev.attendees.push({ user: uid(req), status: req.body.status || 'accepted' });
-    await ev.save();
-    res.json(ev);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/calendar-hub/events/:id/rsvp',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const ev = await CalendarEvent.findById(req.params.id).lean();
+      if (!ev) return res.status(404).json({ error: 'Not found' });
+      const att = ev.attendees.find(a => String(a.user) === String(uid(req))).lean();
+      if (att) att.status = req.body.status || 'accepted';
+      else ev.attendees.push({ user: uid(req), status: req.body.status || 'accepted' });
+      await ev.save();
+      res.json(ev);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.get('/calendar-hub/my-events', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -710,50 +794,66 @@ router.get('/calendar-hub/rooms', authenticateToken, requireBranchAccess, async 
   }
 });
 
-router.get('/calendar-hub/room-bookings', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { room, start, end } = req.query;
-    const q = {};
-    if (room) q.room = room;
-    if (start) q.start = { $gte: new Date(start) };
-    if (end) q.end = { ...(q.end || {}), $lte: new Date(end) };
-    const bookings = await RoomBooking.find(q)
-      .sort({ start: 1 })
-      .populate('bookedBy', 'name')
-      .lean();
-    res.json(bookings);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/calendar-hub/room-bookings',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { room, start, end } = req.query;
+      const q = {};
+      if (room) q.room = room;
+      if (start) q.start = { $gte: new Date(start) };
+      if (end) q.end = { ...(q.end || {}), $lte: new Date(end) };
+      const bookings = await RoomBooking.find(q)
+        .sort({ start: 1 })
+        .populate('bookedBy', 'name')
+        .lean();
+      res.json(bookings);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/calendar-hub/room-bookings', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    // Check for conflicts
-    const conflict = await RoomBooking.findOne({
-      room: req.body.room,
-      status: { $ne: 'cancelled' },
-      $or: [{ start: { $lt: new Date(req.body.end) }, end: { $gt: new Date(req.body.start) } }],
-    });
-    if (conflict) return res.status(409).json({ error: 'Room already booked for this time slot' });
-    const booking = await RoomBooking.create({
-      ...pick(req.body, ['room', 'title', 'start', 'end', 'attendees', 'notes']),
-      bookedBy: uid(req),
-    });
-    res.status(201).json(booking);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/calendar-hub/room-bookings',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      // Check for conflicts
+      const conflict = await RoomBooking.findOne({
+        room: req.body.room,
+        status: { $ne: 'cancelled' },
+        $or: [{ start: { $lt: new Date(req.body.end) }, end: { $gt: new Date(req.body.start) } }],
+      });
+      if (conflict)
+        return res.status(409).json({ error: 'Room already booked for this time slot' });
+      const booking = await RoomBooking.create({
+        ...pick(req.body, ['room', 'title', 'start', 'end', 'attendees', 'notes']),
+        bookedBy: uid(req),
+      });
+      res.status(201).json(booking);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.delete('/calendar-hub/room-bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await RoomBooking.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/calendar-hub/room-bookings/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await RoomBooking.findByIdAndUpdate(req.params.id, { status: 'cancelled' });
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.get('/calendar-hub/stats', authenticateToken, requireBranchAccess, async (_req, res) => {
   try {
@@ -892,14 +992,19 @@ router.put('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.delete('/crm-pro/pipelines/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await CRMPipeline.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/crm-pro/pipelines/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await CRMPipeline.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Deals ───────────────────────────────────────────────────────────────────
 router.get('/crm-pro/deals', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -981,23 +1086,28 @@ router.put('/crm-pro/deals/:id/move', authenticateToken, requireBranchAccess, as
   }
 });
 
-router.get('/crm-pro/pipeline-board/:pipelineId', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const pipeline = await CRMPipeline.findById(req.params.pipelineId).lean();
-    if (!pipeline) return res.status(404).json({ error: 'Not found' });
-    const deals = await CRMDeal.find({ pipeline: req.params.pipelineId, status: 'open' })
-      .populate('contact', 'firstName lastName company')
-      .populate('assignedTo', 'name')
-      .lean();
-    const board = pipeline.stages.map(s => ({
-      stage: s,
-      deals: deals.filter(d => String(d.stage) === String(s._id)),
-    }));
-    res.json({ pipeline, board });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/crm-pro/pipeline-board/:pipelineId',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const pipeline = await CRMPipeline.findById(req.params.pipelineId).lean();
+      if (!pipeline) return res.status(404).json({ error: 'Not found' });
+      const deals = await CRMDeal.find({ pipeline: req.params.pipelineId, status: 'open' })
+        .populate('contact', 'firstName lastName company')
+        .populate('assignedTo', 'name')
+        .lean();
+      const board = pipeline.stages.map(s => ({
+        stage: s,
+        deals: deals.filter(d => String(d.stage) === String(s._id)),
+      }));
+      res.json({ pipeline, board });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Activities ──────────────────────────────────────────────────────────────
 router.get('/crm-pro/activities', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1076,57 +1186,86 @@ router.get('/crm-pro/dashboard', authenticateToken, requireBranchAccess, async (
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 // ── Warehouses ──────────────────────────────────────────────────────────────
-router.get('/warehouse-intel/warehouses', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { type, isActive } = req.query;
-    const q = {};
-    if (type) q.type = type;
-    if (isActive !== undefined) q.isActive = isActive === 'true';
-    const whs = await Warehouse.find(q).sort({ name: 1 }).populate('manager', 'name').lean();
-    res.json(whs);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/warehouse-intel/warehouses',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { type, isActive } = req.query;
+      const q = {};
+      if (type) q.type = type;
+      if (isActive !== undefined) q.isActive = isActive === 'true';
+      const whs = await Warehouse.find(q).sort({ name: 1 }).populate('manager', 'name').lean();
+      res.json(whs);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.get('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const wh = await Warehouse.findById(req.params.id).populate('manager', 'name email').lean();
-    if (!wh) return res.status(404).json({ error: 'Not found' });
-    res.json(wh);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/warehouse-intel/warehouses/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const wh = await Warehouse.findById(req.params.id).populate('manager', 'name email').lean();
+      if (!wh) return res.status(404).json({ error: 'Not found' });
+      res.json(wh);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/warehouse-intel/warehouses', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const wh = await Warehouse.create(pick(req.body, FIELDS.warehouse));
-    res.status(201).json(wh);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/warehouses',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const wh = await Warehouse.create(pick(req.body, FIELDS.warehouse));
+      res.status(201).json(wh);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.put('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const wh = await Warehouse.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.warehouse), {
-      new: true,
-    });
-    res.json(wh);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.put(
+  '/warehouse-intel/warehouses/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const wh = await Warehouse.findByIdAndUpdate(
+        req.params.id,
+        pick(req.body, FIELDS.warehouse),
+        {
+          new: true,
+        }
+      );
+      res.json(wh);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.delete('/warehouse-intel/warehouses/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await Warehouse.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.delete(
+  '/warehouse-intel/warehouses/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await Warehouse.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Bins ────────────────────────────────────────────────────────────────────
 router.get('/warehouse-intel/bins', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1150,16 +1289,21 @@ router.post('/warehouse-intel/bins', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.put('/warehouse-intel/bins/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const bin = await WarehouseBin.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.bin), {
-      new: true,
-    });
-    res.json(bin);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.put(
+  '/warehouse-intel/bins/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const bin = await WarehouseBin.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.bin), {
+        new: true,
+      });
+      res.json(bin);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Stock Levels ────────────────────────────────────────────────────────────
 router.get('/warehouse-intel/stock', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1183,22 +1327,27 @@ router.get('/warehouse-intel/stock', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.put('/warehouse-intel/stock/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    if (req.body.quantity !== undefined) {
-      req.body.availableQty = req.body.quantity - (req.body.reservedQty || 0);
-      req.body.totalValue = req.body.quantity * (req.body.unitCost || 0);
+router.put(
+  '/warehouse-intel/stock/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      if (req.body.quantity !== undefined) {
+        req.body.availableQty = req.body.quantity - (req.body.reservedQty || 0);
+        req.body.totalValue = req.body.quantity * (req.body.unitCost || 0);
+      }
+      const sl = await StockLevel.findByIdAndUpdate(
+        req.params.id,
+        pick(req.body, FIELDS.stockLevel),
+        { new: true }
+      );
+      res.json(sl);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
     }
-    const sl = await StockLevel.findByIdAndUpdate(
-      req.params.id,
-      pick(req.body, FIELDS.stockLevel),
-      { new: true }
-    );
-    res.json(sl);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
   }
-});
+);
 
 // ── Stock Alerts ────────────────────────────────────────────────────────────
 router.get('/warehouse-intel/alerts', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1220,139 +1369,179 @@ router.get('/warehouse-intel/alerts', authenticateToken, requireBranchAccess, as
   }
 });
 
-router.post('/warehouse-intel/alerts/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const a = await StockAlert.findByIdAndUpdate(
-      req.params.id,
-      { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
-      { new: true }
-    );
-    res.json(a);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/alerts/:id/resolve',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const a = await StockAlert.findByIdAndUpdate(
+        req.params.id,
+        { isResolved: true, resolvedBy: uid(req), resolvedAt: new Date() },
+        { new: true }
+      );
+      res.json(a);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ── Stock Transfers ─────────────────────────────────────────────────────────
-router.get('/warehouse-intel/transfers', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const q = {};
-    if (status) q.status = status;
-    const [transfers, total] = await Promise.all([
-      StockTransferOrder.find(q)
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(+limit)
-        .populate('fromWarehouse', 'name code')
-        .populate('toWarehouse', 'name code')
-        .populate('requestedBy', 'name'),
-      StockTransferOrder.countDocuments(q),
-    ]);
-    res.json({ transfers, total, page: +page, pages: Math.ceil(total / limit) });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/warehouse-intel/transfers',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { status, page = 1, limit = 20 } = req.query;
+      const q = {};
+      if (status) q.status = status;
+      const [transfers, total] = await Promise.all([
+        StockTransferOrder.find(q)
+          .sort({ createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(+limit)
+          .populate('fromWarehouse', 'name code')
+          .populate('toWarehouse', 'name code')
+          .populate('requestedBy', 'name'),
+        StockTransferOrder.countDocuments(q),
+      ]);
+      res.json({ transfers, total, page: +page, pages: Math.ceil(total / limit) });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/warehouse-intel/transfers', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const count = await StockTransferOrder.countDocuments();
-    const transferNumber = `TRF-${String(count + 1).padStart(6, '0')}`;
-    const t = await StockTransferOrder.create({
-      ...req.body,
-      transferNumber,
-      requestedBy: uid(req),
-    });
-    res.status(201).json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/transfers',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const count = await StockTransferOrder.countDocuments();
+      const transferNumber = `TRF-${String(count + 1).padStart(6, '0')}`;
+      const t = await StockTransferOrder.create({
+        ...req.body,
+        transferNumber,
+        requestedBy: uid(req),
+      });
+      res.status(201).json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.put('/warehouse-intel/transfers/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await StockTransferOrder.findByIdAndUpdate(
-      req.params.id,
-      pick(req.body, FIELDS.transfer),
-      { new: true }
-    );
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.put(
+  '/warehouse-intel/transfers/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await StockTransferOrder.findByIdAndUpdate(
+        req.params.id,
+        pick(req.body, FIELDS.transfer),
+        { new: true }
+      );
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/warehouse-intel/transfers/:id/approve', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await StockTransferOrder.findByIdAndUpdate(
-      req.params.id,
-      { status: 'approved', approvedBy: uid(req) },
-      { new: true }
-    );
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/transfers/:id/approve',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await StockTransferOrder.findByIdAndUpdate(
+        req.params.id,
+        { status: 'approved', approvedBy: uid(req) },
+        { new: true }
+      );
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/warehouse-intel/transfers/:id/ship', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await StockTransferOrder.findByIdAndUpdate(
-      req.params.id,
-      { status: 'in_transit', shippedDate: new Date() },
-      { new: true }
-    );
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/transfers/:id/ship',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await StockTransferOrder.findByIdAndUpdate(
+        req.params.id,
+        { status: 'in_transit', shippedDate: new Date() },
+        { new: true }
+      );
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.post('/warehouse-intel/transfers/:id/receive', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await StockTransferOrder.findByIdAndUpdate(
-      req.params.id,
-      { status: 'received', receivedDate: new Date() },
-      { new: true }
-    );
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/warehouse-intel/transfers/:id/receive',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await StockTransferOrder.findByIdAndUpdate(
+        req.params.id,
+        { status: 'received', receivedDate: new Date() },
+        { new: true }
+      );
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
-router.get('/warehouse-intel/dashboard', authenticateToken, requireBranchAccess, async (_req, res) => {
-  try {
-    const [whCount, totalStock, lowStockCount, alertCount, transferCount] = await Promise.all([
-      Warehouse.countDocuments({ isActive: true }),
-      StockLevel.aggregate([
-        {
-          $group: {
-            _id: null,
-            totalQty: { $sum: '$quantity' },
-            totalValue: { $sum: '$totalValue' },
+router.get(
+  '/warehouse-intel/dashboard',
+  authenticateToken,
+  requireBranchAccess,
+  async (_req, res) => {
+    try {
+      const [whCount, totalStock, lowStockCount, alertCount, transferCount] = await Promise.all([
+        Warehouse.countDocuments({ isActive: true }),
+        StockLevel.aggregate([
+          {
+            $group: {
+              _id: null,
+              totalQty: { $sum: '$quantity' },
+              totalValue: { $sum: '$totalValue' },
+            },
           },
-        },
-      ]),
-      StockLevel.countDocuments({ $expr: { $lte: ['$availableQty', '$reorderPoint'] } }),
-      StockAlert.countDocuments({ isResolved: false }),
-      StockTransferOrder.countDocuments({
-        status: { $in: ['pending_approval', 'approved', 'in_transit'] },
-      }),
-    ]);
-    res.json({
-      warehouseCount: whCount,
-      totalQuantity: totalStock[0]?.totalQty || 0,
-      totalValue: totalStock[0]?.totalValue || 0,
-      lowStockItems: lowStockCount,
-      activeAlerts: alertCount,
-      pendingTransfers: transferCount,
-    });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+        ]),
+        StockLevel.countDocuments({ $expr: { $lte: ['$availableQty', '$reorderPoint'] } }),
+        StockAlert.countDocuments({ isResolved: false }),
+        StockTransferOrder.countDocuments({
+          status: { $in: ['pending_approval', 'approved', 'in_transit'] },
+        }),
+      ]);
+      res.json({
+        warehouseCount: whCount,
+        totalQuantity: totalStock[0]?.totalQty || 0,
+        totalValue: totalStock[0]?.totalValue || 0,
+        lowStockItems: lowStockCount,
+        activeAlerts: alertCount,
+        pendingTransfers: transferCount,
+      });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  6. PROJECT MANAGEMENT PRO — إدارة المشاريع الاحترافية                      ║
@@ -1381,18 +1570,23 @@ router.get('/project-pro/projects', authenticateToken, requireBranchAccess, asyn
   }
 });
 
-router.get('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const p = await ProjectPro.findById(req.params.id)
-      .populate('manager', 'name email')
-      .populate('team.user', 'name email')
-      .lean();
-    if (!p) return res.status(404).json({ error: 'Not found' });
-    res.json(p);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.get(
+  '/project-pro/projects/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const p = await ProjectPro.findById(req.params.id)
+        .populate('manager', 'name email')
+        .populate('team.user', 'name email')
+        .lean();
+      if (!p) return res.status(404).json({ error: 'Not found' });
+      res.json(p);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
 
 router.post('/project-pro/projects', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -1409,60 +1603,75 @@ router.post('/project-pro/projects', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.put('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const p = await ProjectPro.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.project), {
-      new: true,
-    });
-    res.json(p);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
-  }
-});
-
-router.delete('/project-pro/projects/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await ProjectPro.findByIdAndDelete(req.params.id);
-    await ProjectTask.deleteMany({ project: req.params.id });
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
-  }
-});
-
-router.post('/project-pro/projects/:id/clone', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const src = await ProjectPro.findById(req.params.id).lean();
-    if (!src) return res.status(404).json({ error: 'Not found' });
-    delete src._id;
-    delete src.createdAt;
-    delete src.updatedAt;
-    src.name = `${src.name} (نسخة)`;
-    if (src.nameAr) src.nameAr = `${src.nameAr} (نسخة)`;
-    src.status = 'planning';
-    src.progress = 0;
-    src.createdBy = uid(req);
-    const count = await ProjectPro.countDocuments();
-    src.code = `PRJ-${String(count + 1).padStart(4, '0')}`;
-    const clone = await ProjectPro.create(src);
-    // Clone tasks too
-    const tasks = await ProjectTask.find({ project: req.params.id }).lean();
-    if (tasks.length > 0) {
-      const newTasks = tasks.map(t => {
-        delete t._id;
-        delete t.createdAt;
-        delete t.updatedAt;
-        t.project = clone._id;
-        t.status = 'todo';
-        return t;
+router.put(
+  '/project-pro/projects/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const p = await ProjectPro.findByIdAndUpdate(req.params.id, pick(req.body, FIELDS.project), {
+        new: true,
       });
-      await ProjectTask.insertMany(newTasks);
+      res.json(p);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
     }
-    res.status(201).json(clone);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
   }
-});
+);
+
+router.delete(
+  '/project-pro/projects/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await ProjectPro.findByIdAndDelete(req.params.id);
+      await ProjectTask.deleteMany({ project: req.params.id });
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
+  }
+);
+
+router.post(
+  '/project-pro/projects/:id/clone',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const src = await ProjectPro.findById(req.params.id).lean();
+      if (!src) return res.status(404).json({ error: 'Not found' });
+      delete src._id;
+      delete src.createdAt;
+      delete src.updatedAt;
+      src.name = `${src.name} (نسخة)`;
+      if (src.nameAr) src.nameAr = `${src.nameAr} (نسخة)`;
+      src.status = 'planning';
+      src.progress = 0;
+      src.createdBy = uid(req);
+      const count = await ProjectPro.countDocuments();
+      src.code = `PRJ-${String(count + 1).padStart(4, '0')}`;
+      const clone = await ProjectPro.create(src);
+      // Clone tasks too
+      const tasks = await ProjectTask.find({ project: req.params.id }).lean();
+      if (tasks.length > 0) {
+        const newTasks = tasks.map(t => {
+          delete t._id;
+          delete t.createdAt;
+          delete t.updatedAt;
+          t.project = clone._id;
+          t.status = 'todo';
+          return t;
+        });
+        await ProjectTask.insertMany(newTasks);
+      }
+      res.status(201).json(clone);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
+  }
+);
 
 // ── Tasks (Kanban) ──────────────────────────────────────────────────────────
 router.get('/project-pro/tasks', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1528,58 +1737,78 @@ router.put('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.delete('/project-pro/tasks/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await ProjectTask.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
-  }
-});
-
-router.post('/project-pro/tasks/:id/comment', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const t = await ProjectTask.findById(req.params.id).lean();
-    if (!t) return res.status(404).json({ error: 'Not found' });
-    t.comments.push({ user: uid(req), text: req.body.text });
-    await t.save();
-    res.json(t);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
-  }
-});
-
-router.put('/project-pro/tasks/reorder', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { tasks } = req.body; // [{ id, order, status }]
-    if (tasks && tasks.length) {
-      const ops = tasks.map(t => ({
-        updateOne: { filter: { _id: t.id }, update: { order: t.order, status: t.status } },
-      }));
-      await ProjectTask.bulkWrite(ops);
+router.delete(
+  '/project-pro/tasks/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await ProjectTask.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
     }
-    res.json({ success: true });
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
   }
-});
+);
 
-router.get('/project-pro/kanban/:projectId', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const tasks = await ProjectTask.find({ project: req.params.projectId })
-      .sort({ order: 1 })
-      .populate('assignee', 'name')
-      .lean();
-    const columns = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked'];
-    const board = {};
-    columns.forEach(c => {
-      board[c] = tasks.filter(t => t.status === c);
-    });
-    res.json(board);
-  } catch (e) {
-    safeError(res, e, '[EnterprisePro]');
+router.post(
+  '/project-pro/tasks/:id/comment',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const t = await ProjectTask.findById(req.params.id).lean();
+      if (!t) return res.status(404).json({ error: 'Not found' });
+      t.comments.push({ user: uid(req), text: req.body.text });
+      await t.save();
+      res.json(t);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
   }
-});
+);
+
+router.put(
+  '/project-pro/tasks/reorder',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { tasks } = req.body; // [{ id, order, status }]
+      if (tasks && tasks.length) {
+        const ops = tasks.map(t => ({
+          updateOne: { filter: { _id: t.id }, update: { order: t.order, status: t.status } },
+        }));
+        await ProjectTask.bulkWrite(ops);
+      }
+      res.json({ success: true });
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
+  }
+);
+
+router.get(
+  '/project-pro/kanban/:projectId',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const tasks = await ProjectTask.find({ project: req.params.projectId })
+        .sort({ order: 1 })
+        .populate('assignee', 'name')
+        .lean();
+      const columns = ['backlog', 'todo', 'in_progress', 'in_review', 'done', 'blocked'];
+      const board = {};
+      columns.forEach(c => {
+        board[c] = tasks.filter(t => t.status === c);
+      });
+      res.json(board);
+    } catch (e) {
+      safeError(res, e, '[EnterprisePro]');
+    }
+  }
+);
 
 // ── Time Logs ───────────────────────────────────────────────────────────────
 router.get('/project-pro/timelogs', authenticateToken, requireBranchAccess, async (req, res) => {

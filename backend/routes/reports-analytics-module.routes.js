@@ -59,9 +59,9 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');
-const safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════════════════
 //  مساعدات داخلية
@@ -268,9 +268,7 @@ router.post('/jobs', authenticate, requireBranchAccess, async (req, res) => {
         completed_at: new Date(),
         error_message: execErr.message,
       });
-      safeError(res, error, 'reports-analytics-module');
-        job_id: job._id,
-      });
+      safeError(res, execErr, 'reports-analytics-module');
     }
   } catch (err) {
     safeError(res, err);
@@ -370,7 +368,7 @@ router.get('/jobs/:id/download', authenticate, requireBranchAccess, async (req, 
     res.setHeader('Content-Disposition', `attachment; filename="report-${job.job_number}.${ext}"`);
     pipeline(fs.createReadStream(filePath), res, err => {
       if (err && !res.headersSent) {
-        safeError(res, error, 'reports-analytics-module');
+        safeError(res, err, 'reports-analytics-module');
       }
     });
   } catch (err) {
@@ -1310,74 +1308,79 @@ router.get('/built-in/beneficiary-list', authenticate, requireBranchAccess, asyn
 });
 
 // GET /built-in/beneficiary-progress — تقدم المستفيدين
-router.get('/built-in/beneficiary-progress', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { branch_id, date_from, date_to, page = 1, limit = 50 } = req.query;
-    const db = mongoose.connection.db;
+router.get(
+  '/built-in/beneficiary-progress',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { branch_id, date_from, date_to, page = 1, limit = 50 } = req.query;
+      const db = mongoose.connection.db;
 
-    const match = { deleted_at: null };
-    if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
-      match.branch_id = new mongoose.Types.ObjectId(branch_id);
+      const match = { deleted_at: null };
+      if (branch_id && mongoose.Types.ObjectId.isValid(branch_id)) {
+        match.branch_id = new mongoose.Types.ObjectId(branch_id);
+      }
+
+      const skip = (Number(page) - 1) * Number(limit);
+      const data = await db
+        .collection('beneficiaries')
+        .aggregate([
+          { $match: match },
+          {
+            $lookup: {
+              from: 'rehab_plans',
+              localField: '_id',
+              foreignField: 'beneficiary_id',
+              as: 'plans',
+            },
+          },
+          {
+            $lookup: {
+              from: 'assessments',
+              let: { bid: '$_id' },
+              pipeline: [
+                { $match: { $expr: { $eq: ['$beneficiary_id', '$$bid'] }, deleted_at: null } },
+                { $sort: { assessment_date: -1 } },
+                { $limit: 1 },
+              ],
+              as: 'latest_assessment',
+            },
+          },
+          {
+            $project: {
+              full_name_ar: 1,
+              file_number: 1,
+              disability_type: 1,
+              active_plans: {
+                $size: { $filter: { input: '$plans', cond: { $eq: ['$$this.status', 'active'] } } },
+              },
+              total_plans: { $size: '$plans' },
+              latest_assessment_date: { $arrayElemAt: ['$latest_assessment.assessment_date', 0] },
+              latest_classification: {
+                $arrayElemAt: ['$latest_assessment.overall_classification', 0],
+              },
+            },
+          },
+          { $sort: { full_name_ar: 1 } },
+          { $skip: skip },
+          { $limit: Number(limit) },
+        ])
+        .toArray();
+
+      const total = await db.collection('beneficiaries').countDocuments(match);
+
+      res.json({
+        success: true,
+        report: 'تقدم المستفيدين',
+        data,
+        pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
+      });
+    } catch (err) {
+      safeError(res, err);
     }
-
-    const skip = (Number(page) - 1) * Number(limit);
-    const data = await db
-      .collection('beneficiaries')
-      .aggregate([
-        { $match: match },
-        {
-          $lookup: {
-            from: 'rehab_plans',
-            localField: '_id',
-            foreignField: 'beneficiary_id',
-            as: 'plans',
-          },
-        },
-        {
-          $lookup: {
-            from: 'assessments',
-            let: { bid: '$_id' },
-            pipeline: [
-              { $match: { $expr: { $eq: ['$beneficiary_id', '$$bid'] }, deleted_at: null } },
-              { $sort: { assessment_date: -1 } },
-              { $limit: 1 },
-            ],
-            as: 'latest_assessment',
-          },
-        },
-        {
-          $project: {
-            full_name_ar: 1,
-            file_number: 1,
-            disability_type: 1,
-            active_plans: {
-              $size: { $filter: { input: '$plans', cond: { $eq: ['$$this.status', 'active'] } } },
-            },
-            total_plans: { $size: '$plans' },
-            latest_assessment_date: { $arrayElemAt: ['$latest_assessment.assessment_date', 0] },
-            latest_classification: {
-              $arrayElemAt: ['$latest_assessment.overall_classification', 0],
-            },
-          },
-        },
-        { $sort: { full_name_ar: 1 } },
-        { $skip: skip },
-        { $limit: Number(limit) },
-      ])
-      .toArray();
-
-    const total = await db.collection('beneficiaries').countDocuments(match);
-
-    res.json({
-      success: true,
-      report: 'تقدم المستفيدين',
-      data,
-      pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
-    });
-  } catch (err) {
-    safeError(res, err);
   }
-});
+);
 
 // GET /built-in/assessments-summary — ملخص التقييمات
 router.get('/built-in/assessments-summary', authenticate, requireBranchAccess, async (req, res) => {

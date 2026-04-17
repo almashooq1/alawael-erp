@@ -27,7 +27,7 @@ const MAX_PAGE_LIMIT = 100;
 
 // ── Service ──
 const busTracking = require('../services/busTracking.service');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -54,21 +54,29 @@ router.get('/buses', authenticate, requireBranchAccess, async (req, res) => {
 });
 
 // GET /buses/:id — Get bus details
-router.get('/buses/:id', authenticate, requireBranchAccess, [param('id').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const bus = busTracking.getBusById(req.params.id);
-    const students = busTracking.getStudentsByBus(req.params.id);
-    res.json({ success: true, data: { ...bus, students } });
-  } catch (err) {
-    res.status(404).json({ success: false, error: safeError(err) });
+router.get(
+  '/buses/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const bus = busTracking.getBusById(req.params.id);
+      const students = busTracking.getStudentsByBus(req.params.id);
+      res.json({ success: true, data: { ...bus, students } });
+    } catch (err) {
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // POST /buses — Create bus
 router.post(
   '/buses',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager']),
   [body('plateNumber').notEmpty(), body('capacity').isNumeric()],
   async (req, res) => {
@@ -85,7 +93,9 @@ router.post(
 // PUT /buses/:id — Update bus
 router.put(
   '/buses/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -102,7 +112,9 @@ router.put(
 // DELETE /buses/:id — Delete bus
 router.delete(
   '/buses/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -131,20 +143,28 @@ router.get('/routes', authenticate, requireBranchAccess, async (req, res) => {
 });
 
 // GET /routes/:id — Get route
-router.get('/routes/:id', authenticate, requireBranchAccess, [param('id').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const route = busTracking.getRouteById(req.params.id);
-    res.json({ success: true, data: route });
-  } catch (err) {
-    res.status(404).json({ success: false, error: safeError(err) });
+router.get(
+  '/routes/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const route = busTracking.getRouteById(req.params.id);
+      res.json({ success: true, data: route });
+    } catch (err) {
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // POST /routes — Create route
 router.post(
   '/routes',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager']),
   [body('name').notEmpty(), body('stops').isArray({ min: 2 })],
   async (req, res) => {
@@ -161,7 +181,9 @@ router.post(
 // PUT /routes/:id — Update route
 router.put(
   '/routes/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -178,7 +200,9 @@ router.put(
 // DELETE /routes/:id — Delete route
 router.delete(
   '/routes/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -199,7 +223,9 @@ router.delete(
 // POST /students — Register student on bus
 router.post(
   '/students',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'social_worker']),
   [body('name').notEmpty(), body('busId').isNumeric(), body('parentPhone').notEmpty()],
   async (req, res) => {
@@ -216,26 +242,38 @@ router.post(
 );
 
 // GET /students/bus/:busId — Students on a bus
-router.get('/students/bus/:busId', authenticate, requireBranchAccess, [param('busId').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const students = busTracking.getStudentsByBus(req.params.busId);
-    res.json({ success: true, data: students, total: students.length });
-  } catch (err) {
-    res.status(400).json({ success: false, error: safeError(err) });
+router.get(
+  '/students/bus/:busId',
+  authenticate,
+  requireBranchAccess,
+  [param('busId').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const students = busTracking.getStudentsByBus(req.params.busId);
+      res.json({ success: true, data: students, total: students.length });
+    } catch (err) {
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // GET /students/:id — Get student
-router.get('/students/:id', authenticate, requireBranchAccess, [param('id').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const student = busTracking.getStudentById(req.params.id);
-    res.json({ success: true, data: student });
-  } catch (err) {
-    res.status(404).json({ success: false, error: safeError(err) });
+router.get(
+  '/students/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const student = busTracking.getStudentById(req.params.id);
+      res.json({ success: true, data: student });
+    } catch (err) {
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TRIP LIFECYCLE — دورة حياة الرحلة
@@ -244,7 +282,9 @@ router.get('/students/:id', authenticate, requireBranchAccess, [param('id').isNu
 // POST /trips/start — Start a trip
 router.post(
   '/trips/start',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'driver']),
   [body('busId').isNumeric(), body('routeId').isNumeric()],
   async (req, res) => {
@@ -261,7 +301,9 @@ router.post(
 // POST /trips/:id/end — End a trip
 router.post(
   '/trips/:id/end',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'driver']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -278,7 +320,9 @@ router.post(
 // POST /trips/:id/arrive — Arrive at next stop
 router.post(
   '/trips/:id/arrive',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'driver']),
   [param('id').isNumeric()],
   async (req, res) => {
@@ -313,15 +357,21 @@ router.get('/trips/history', authenticate, requireBranchAccess, async (req, res)
 });
 
 // GET /trips/:id — Get trip details
-router.get('/trips/:id', authenticate, requireBranchAccess, [param('id').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const trip = busTracking.getTripById(req.params.id);
-    res.json({ success: true, data: trip });
-  } catch (err) {
-    res.status(404).json({ success: false, error: safeError(err) });
+router.get(
+  '/trips/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const trip = busTracking.getTripById(req.params.id);
+      res.json({ success: true, data: trip });
+    } catch (err) {
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // REAL-TIME TRACKING — التتبع بالوقت الفعلي
@@ -330,7 +380,9 @@ router.get('/trips/:id', authenticate, requireBranchAccess, [param('id').isNumer
 // POST /tracking/:busId/location — Update bus GPS location
 router.post(
   '/tracking/:busId/location',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'driver', 'system']),
   [param('busId').isNumeric(), body('lat').isFloat(), body('lng').isFloat()],
   async (req, res) => {
@@ -345,15 +397,21 @@ router.post(
 );
 
 // GET /tracking/:busId — Get bus current location
-router.get('/tracking/:busId', authenticate, requireBranchAccess, [param('busId').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const location = busTracking.getBusLocation(req.params.busId);
-    res.json({ success: true, data: location });
-  } catch (err) {
-    res.status(404).json({ success: false, error: safeError(err) });
+router.get(
+  '/tracking/:busId',
+  authenticate,
+  requireBranchAccess,
+  [param('busId').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const location = busTracking.getBusLocation(req.params.busId);
+      res.json({ success: true, data: location });
+    } catch (err) {
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // GET /tracking — All bus locations
 router.get('/tracking', authenticate, requireBranchAccess, async (req, res) => {
@@ -372,7 +430,9 @@ router.get('/tracking', authenticate, requireBranchAccess, async (req, res) => {
 // POST /boarding — Record boarding/alighting
 router.post(
   '/boarding',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager', 'driver', 'assistant']),
   [body('tripId').isNumeric(), body('studentId').isNumeric()],
   async (req, res) => {
@@ -401,20 +461,28 @@ router.get('/boarding/history', authenticate, requireBranchAccess, async (req, r
 // ══════════════════════════════════════════════════════════════════════════════
 
 // GET /parent/dashboard?phone=xxx — Parent dashboard
-router.get('/parent/dashboard', authenticate, requireBranchAccess, [query('phone').notEmpty()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const dashboard = busTracking.getParentDashboard(req.query.phone);
-    res.json({ success: true, data: dashboard });
-  } catch (err) {
-    res.status(400).json({ success: false, error: safeError(err) });
+router.get(
+  '/parent/dashboard',
+  authenticate,
+  requireBranchAccess,
+  [query('phone').notEmpty()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const dashboard = busTracking.getParentDashboard(req.query.phone);
+      res.json({ success: true, data: dashboard });
+    } catch (err) {
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // GET /parent/track/:busId?phone=xxx — Track specific bus
 router.get(
   '/parent/track/:busId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('busId').isNumeric(), query('phone').notEmpty()],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -430,7 +498,9 @@ router.get(
 // GET /parent/eta/:studentId — ETA for student stop
 router.get(
   '/parent/eta/:studentId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('studentId').isNumeric()],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -448,23 +518,31 @@ router.get(
 // ══════════════════════════════════════════════════════════════════════════════
 
 // GET /notifications?phone=xxx — Parent notifications
-router.get('/notifications', authenticate, requireBranchAccess, [query('phone').notEmpty()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const notifs = busTracking.getParentNotifications(req.query.phone, {
-      limit: Math.min(parseInt(req.query.limit) || 50, MAX_PAGE_LIMIT),
-      unreadOnly: req.query.unreadOnly === 'true',
-    });
-    res.json({ success: true, data: notifs, total: notifs.length });
-  } catch (err) {
-    safeError(res, err, 'busTracking');
+router.get(
+  '/notifications',
+  authenticate,
+  requireBranchAccess,
+  [query('phone').notEmpty()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const notifs = busTracking.getParentNotifications(req.query.phone, {
+        limit: Math.min(parseInt(req.query.limit) || 50, MAX_PAGE_LIMIT),
+        unreadOnly: req.query.unreadOnly === 'true',
+      });
+      res.json({ success: true, data: notifs, total: notifs.length });
+    } catch (err) {
+      safeError(res, err, 'busTracking');
+    }
   }
-});
+);
 
 // PATCH /notifications/:id/read — Mark notification read
 router.patch(
   '/notifications/:id/read',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').isNumeric()],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -480,7 +558,9 @@ router.patch(
 // POST /notifications/read-all — Mark all read
 router.post(
   '/notifications/read-all',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [body('phone').notEmpty()],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -508,20 +588,28 @@ router.get('/safety/alerts', authenticate, requireBranchAccess, async (req, res)
 });
 
 // POST /safety/sos/:busId — Raise SOS
-router.post('/safety/sos/:busId', authenticate, requireBranchAccess, [param('busId').isNumeric()], async (req, res) => {
-  if (handleValidation(req, res)) return;
-  try {
-    const alert = busTracking.raiseSOS(req.params.busId, req.body);
-    res.status(201).json({ success: true, data: alert, message: 'تم إرسال إشارة الطوارئ' });
-  } catch (err) {
-    res.status(400).json({ success: false, error: safeError(err) });
+router.post(
+  '/safety/sos/:busId',
+  authenticate,
+  requireBranchAccess,
+  [param('busId').isNumeric()],
+  async (req, res) => {
+    if (handleValidation(req, res)) return;
+    try {
+      const alert = busTracking.raiseSOS(req.params.busId, req.body);
+      res.status(201).json({ success: true, data: alert, message: 'تم إرسال إشارة الطوارئ' });
+    } catch (err) {
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // PATCH /safety/alerts/:id/acknowledge — Acknowledge alert
 router.patch(
   '/safety/alerts/:id/acknowledge',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'fleet_manager']),
   [param('id').isNumeric()],
   async (req, res) => {

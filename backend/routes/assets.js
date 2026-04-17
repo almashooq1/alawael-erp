@@ -25,22 +25,18 @@ router.use((_req, res, next) => {
  * @desc    Get all assets
  * @access  Private
  */
-router.get(
-  '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
-  async (req, res) => {
-    try {
-      const assets = await assetService.getAllAssets(req.query);
-      res.status(200).json({
-        success: true,
-        count: assets.length,
-        data: assets,
-      });
-    } catch (error) {
-      safeError(res, error, 'fetching assets');
-    }
+router.get('/', authenticate, requireBranchAccess, requireBranchAccess, async (req, res) => {
+  try {
+    const assets = await assetService.getAllAssets(req.query);
+    res.status(200).json({
+      success: true,
+      count: assets.length,
+      data: assets,
+    });
+  } catch (error) {
+    safeError(res, error, 'fetching assets');
   }
-);
+});
 
 /**
  * @route   POST /api/v1/assets
@@ -49,7 +45,9 @@ router.get(
  */
 router.post(
   '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -89,7 +87,9 @@ router.post(
  */
 router.get(
   '/category/:category',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const assets = await assetService.getAssetsByCategory(req.params.category);
@@ -112,7 +112,9 @@ router.get(
  */
 router.get(
   '/depreciation/report',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const report = await assetService.getDepreciationReport();
@@ -134,7 +136,9 @@ router.get(
  */
 router.get(
   '/:assetId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const asset = await assetService.getAssetById(req.params.assetId);
@@ -163,7 +167,9 @@ router.get(
  */
 router.put(
   '/:assetId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -193,7 +199,9 @@ router.put(
  */
 router.delete(
   '/:assetId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -218,6 +226,7 @@ router.delete(
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  safeError(res, error, 'Router error');
+  safeError(res, err, 'Router error');
+});
 
 module.exports = router;

@@ -3,11 +3,16 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
 const getAnalytics = () => {
-  try { return require('../models/analytics.model'); } catch { return null; }
+  try {
+    return require('../models/analytics.model');
+  } catch {
+    return null;
+  }
 };
 
 // GET /hr
@@ -25,7 +30,10 @@ router.get('/hr', async (req, res) => {
 router.get('/system', async (req, res) => {
   try {
     const os = require('os');
-    res.json({ success: true, data: { uptime: process.uptime(), memory: process.memoryUsage(), cpu: os.loadavg() } });
+    res.json({
+      success: true,
+      data: { uptime: process.uptime(), memory: process.memoryUsage(), cpu: os.loadavg() },
+    });
   } catch (err) {
     safeError(res, err, 'Analytics system error');
   }
@@ -46,9 +54,11 @@ router.get('/insights', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   try {
     const User = require('../models/User');
-const safeError = require('../utils/safeError');
     const [totalUsers] = await Promise.all([User.countDocuments()]);
-    res.json({ success: true, data: { totalUsers, activeModules: 12, recentActivity: 0, systemHealth: 'good' } });
+    res.json({
+      success: true,
+      data: { totalUsers, activeModules: 12, recentActivity: 0, systemHealth: 'good' },
+    });
   } catch (err) {
     safeError(res, err, 'Analytics dashboard error');
   }
@@ -58,7 +68,9 @@ const safeError = require('../utils/safeError');
 router.get('/trends/monthly', async (req, res) => {
   try {
     const Analytics = getAnalytics();
-    const data = Analytics ? await Analytics.find({ period: 'monthly' }).sort({ date: -1 }).limit(12).lean() : [];
+    const data = Analytics
+      ? await Analytics.find({ period: 'monthly' }).sort({ date: -1 }).limit(12).lean()
+      : [];
     res.json({ success: true, data });
   } catch (err) {
     safeError(res, err, 'Analytics trends error');
@@ -98,7 +110,10 @@ router.get('/program/:id/performance', async (req, res) => {
 router.get('/predictive/:type', async (req, res) => {
   try {
     const Prediction = require('../models/prediction.model');
-    const data = await Prediction.find({ type: req.params.type }).sort({ createdAt: -1 }).limit(10).lean();
+    const data = await Prediction.find({ type: req.params.type })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
     res.json({ success: true, data });
   } catch (err) {
     safeError(res, err, 'Predictive analytics error');

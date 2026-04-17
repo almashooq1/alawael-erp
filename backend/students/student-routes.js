@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Student Management Routes
  * مسارات إدارة الطلاب لمراكز التأهيل
@@ -7,7 +6,6 @@
 const express = require('express');
 const router = express.Router();
 const { studentService, studentConfig } = require('./student-service');
-const safeError = require('../utils/safeError');
 
 // Centralized error handler for route catch blocks
 const handleRouteError = (res, error, context = '') => {
@@ -532,6 +530,7 @@ router.get('/reports/export/:centerId', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════
 
 const { reportSchedulerService } = require('./report-scheduler-service');
+const safeError = require('../utils/safeError');
 
 // ── Create Subscription ──
 router.post('/reports/subscriptions', async (req, res) => {

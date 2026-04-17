@@ -9,8 +9,8 @@ const Program = require('../models/Program');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── GET / — list programs (filter by category, status, tags) ───────────
 router.get('/', requireAuth, requireBranchAccess, async (req, res) => {

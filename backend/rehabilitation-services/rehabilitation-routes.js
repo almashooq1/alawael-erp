@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Services Routes - Complete
  * مسارات خدمات التأهيل الشاملة
@@ -48,7 +47,6 @@ const { SmartSchedulingService } = require('./smart-scheduling-service');
 const { SatisfactionFeedbackService } = require('./satisfaction-feedback-service');
 const { AIAssessmentService } = require('./ai-assessment-service');
 const { AlertsNotificationsService } = require('./alerts-notifications-service');
-const safeError = require('../utils/safeError');
 const { TherapistDashboardService } = require('./therapist-dashboard-service');
 
 // Import remaining services — Phase 7 complete wiring
@@ -90,6 +88,7 @@ const { HomeBasedRehabService } = require('./home-based-rehab-service');
 const { EmergencyRehabService } = require('./emergency-rehab-service');
 const { VolunteerManagementService } = require('./volunteer-management-service');
 const { ResearchStudiesService } = require('./research-studies-service');
+const safeError = require('../utils/safeError');
 
 // Initialize services — Core
 const physicalTherapy = new PhysicalTherapyService();

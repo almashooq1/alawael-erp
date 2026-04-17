@@ -132,7 +132,7 @@ const handleMulterError = (err, _req, res, next) => {
   }
 
   if (err) {
-    safeError(res, error, 'medicalFiles');
+    return safeError(res, err, 'medicalFiles');
   }
 
   next();
@@ -143,7 +143,9 @@ const handleMulterError = (err, _req, res, next) => {
 // رفع ملف واحد
 router.post(
   '/single',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   upload.single('file'),
   validateUploadedFile,
   handleMulterError,
@@ -185,7 +187,7 @@ router.post(
         }
       }
 
-      safeError(res, unlinkError, 'medicalFiles');
+      safeError(res, error, 'medicalFiles');
     }
   }
 );
@@ -193,7 +195,9 @@ router.post(
 // رفع عدة ملفات
 router.post(
   '/multiple',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   upload.array('files', 10),
   validateUploadedFile,
   handleMulterError,
@@ -316,7 +320,9 @@ router.get('/download/:fileType/:fileName', authenticate, requireBranchAccess, a
 // حذف ملف
 router.delete(
   '/:fileType/:fileName',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'doctor', 'case_manager']),
   async (req, res) => {
     try {
@@ -400,59 +406,65 @@ router.get('/info/:fileType/:fileName', authenticate, requireBranchAccess, async
 });
 
 // إحصائيات المساحة المستخدمة
-router.get('/storage/statistics', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
-  try {
-    const baseDir = path.join(__dirname, '../uploads/medical-files');
-    const stats = {};
-    let totalSize = 0;
-    let totalFiles = 0;
+router.get(
+  '/storage/statistics',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const baseDir = path.join(__dirname, '../uploads/medical-files');
+      const stats = {};
+      let totalSize = 0;
+      let totalFiles = 0;
 
-    for (const [type, dir] of Object.entries(UPLOAD_DIRS)) {
-      const dirPath = path.join(baseDir, dir);
-      try {
-        const files = await fs.readdir(dirPath);
-        let dirSize = 0;
+      for (const [type, dir] of Object.entries(UPLOAD_DIRS)) {
+        const dirPath = path.join(baseDir, dir);
+        try {
+          const files = await fs.readdir(dirPath);
+          let dirSize = 0;
 
-        for (const file of files) {
-          const filePath = path.join(dirPath, file);
-          const fileStat = await fs.stat(filePath);
-          if (fileStat.isFile()) {
-            dirSize += fileStat.size;
+          for (const file of files) {
+            const filePath = path.join(dirPath, file);
+            const fileStat = await fs.stat(filePath);
+            if (fileStat.isFile()) {
+              dirSize += fileStat.size;
+            }
           }
+
+          stats[type] = {
+            filesCount: files.length,
+            size: dirSize,
+            sizeFormatted: formatBytes(dirSize),
+          };
+
+          totalSize += dirSize;
+          totalFiles += files.length;
+        } catch {
+          stats[type] = {
+            filesCount: 0,
+            size: 0,
+            sizeFormatted: '0 B',
+          };
         }
-
-        stats[type] = {
-          filesCount: files.length,
-          size: dirSize,
-          sizeFormatted: formatBytes(dirSize),
-        };
-
-        totalSize += dirSize;
-        totalFiles += files.length;
-      } catch {
-        stats[type] = {
-          filesCount: 0,
-          size: 0,
-          sizeFormatted: '0 B',
-        };
       }
-    }
 
-    res.json({
-      success: true,
-      data: {
-        byType: stats,
-        total: {
-          filesCount: totalFiles,
-          size: totalSize,
-          sizeFormatted: formatBytes(totalSize),
+      res.json({
+        success: true,
+        data: {
+          byType: stats,
+          total: {
+            filesCount: totalFiles,
+            size: totalSize,
+            sizeFormatted: formatBytes(totalSize),
+          },
         },
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'medicalFiles');
+      });
+    } catch (error) {
+      safeError(res, error, 'medicalFiles');
+    }
   }
-});
+);
 
 // دالة مساعدة لتنسيق حجم الملف
 function formatBytes(bytes, decimals = 2) {

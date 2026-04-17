@@ -49,7 +49,6 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const mongoose = require('mongoose');
-const safeError = require('../utils/safeError');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secrets');
 
@@ -77,6 +76,7 @@ function generateOtp() {
 
 // Rate limiters for parent portal OTP endpoints
 const { createCustomLimiter } = require('../middleware/rateLimiter');
+const safeError = require('../utils/safeError');
 const parentOtpSendLimiter = createCustomLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,

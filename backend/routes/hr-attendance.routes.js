@@ -20,6 +20,7 @@ const AttendanceEngine = require('../services/hr/attendanceEngine');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 // Maximum records per page — prevents DoS via unbounded queries
 const MAX_PAGE_LIMIT = 100;
 const clampLimit = (raw, fallback) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);

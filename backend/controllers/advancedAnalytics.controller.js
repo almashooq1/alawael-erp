@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * متحكم التحليلات والتقارير المتقدم
  * Advanced Analytics Controller
@@ -35,9 +34,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Log event error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to log event',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -68,9 +64,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Track metric error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to track metric',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -117,9 +110,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Generate report error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to generate report',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -154,9 +144,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Predict values error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to predict',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -185,9 +172,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Get anomalies error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to get anomalies',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -217,9 +201,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Get events error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to get events',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -264,9 +245,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Create dashboard error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to create dashboard',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -297,9 +275,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Get dashboard error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to get dashboard',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -336,9 +311,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Add widget error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to add widget',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -375,9 +347,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Comparative analysis error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to get analysis',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -412,9 +381,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Export report error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to export report',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -435,9 +401,6 @@ class AdvancedAnalyticsController {
     } catch (error) {
       Logger.error(`Get statistics error: ${error.message}`);
       safeError(res, error, 'advancedAnalytics');
-        en: 'Failed to get statistics',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 }

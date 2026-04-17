@@ -1,17 +1,16 @@
-/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Transport Routes - مسارات نقل مراكز التأهيل
  * API Endpoints for Disability Rehabilitation Center Transport
  */
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 const {
   rehabilitationTransportService,
   nationalAddressConfig,
   AIRouteOptimizer,
 } = require('./rehabilitation-transport-service');
-const safeError = require('../utils/safeError');
 
 // ============ Configuration ============
 

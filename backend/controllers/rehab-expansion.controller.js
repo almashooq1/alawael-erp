@@ -1,5 +1,5 @@
-const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 /**
  * Rehabilitation Expansion Controller — متحكمات التوسعة في خدمات تأهيل ذوي الإعاقة
  *

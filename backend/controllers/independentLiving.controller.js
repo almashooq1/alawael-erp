@@ -6,8 +6,8 @@
 
 const IndependentLivingService = require('../services/independentLiving.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
-const { safeError } = require('../utils/safeError');
 class IndependentLivingController {
   // ═══════════════════════════════════════════════════════
   //  تقييم مهارات الحياة اليومية (ADL)

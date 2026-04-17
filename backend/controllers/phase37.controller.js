@@ -23,8 +23,8 @@ const {
 } = require('../models/phase37.model');
 
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Response Helpers ────────────────────────────────────────────────────────
 const ok = (res, data, msg = 'success', code = 200) =>

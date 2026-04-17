@@ -4,12 +4,12 @@ const router = express.Router();
 const { authenticateToken } = require('../../middleware/auth');
 
 const logger = require('../../utils/logger');
+const safeError = require('../../utils/safeError');
 
 // RBAC Integration (Role-Based Access Control)
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
-const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
   logger.info('[Modules Routes] RBAC middleware loaded successfully');
 } catch (err) {

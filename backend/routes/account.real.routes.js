@@ -5,6 +5,7 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const logger = require('../utils/logger');
 const User = require('../models/User');
 const Session = require('../models/Session');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -15,7 +16,6 @@ router.get('/security', async (req, res) => {
       .select('twoFactorEnabled lastPasswordChange email')
       .lean();
     const MFA = require('../models/mfa.models');
-const safeError = require('../utils/safeError');
     let mfaSettings = null;
     try {
       mfaSettings = await MFA.MFASettings.findOne({ userId: req.user?.id }).lean();

@@ -8,8 +8,8 @@ const { Gradebook, SemesterReport } = require('../models/Gradebook');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const validateObjectId = require('../middleware/validateObjectId');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── Auth ─────────────────────────────────────────────────────
 router.use(authenticate);

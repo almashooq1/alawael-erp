@@ -9,7 +9,6 @@
  */
 
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const Beneficiary = require('../models/Beneficiary');
 const BeneficiaryProgress = require('../models/BeneficiaryProgress');
@@ -19,6 +18,7 @@ const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 // All beneficiary routes require authentication + branch scope
 router.use(authenticate);
 router.use(requireBranchAccess);

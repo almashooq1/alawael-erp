@@ -5,13 +5,13 @@ const {
   authorizeRole: roleMiddleware,
 } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 const {
   KnowledgeArticle,
   KnowledgeCategory,
   KnowledgeSearchLog,
   KnowledgeRating,
 } = require('../models/KnowledgeBase');
-const safeError = require('../utils/safeError');
 
 // ============ GET ENDPOINTS ============
 
@@ -206,7 +206,8 @@ router.get('/top-rated', async (req, res) => {
 // Create category
 router.post(
   '/categories',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -227,7 +228,8 @@ router.post(
 // Update category
 router.put(
   '/categories/:id',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -258,67 +260,79 @@ router.put(
 );
 
 // Delete category
-router.delete('/categories/:id', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
-  try {
-    // Check if category has articles
-    const articleCount = await KnowledgeArticle.countDocuments({ category: req.params.id });
-    if (articleCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: `Cannot delete category: ${articleCount} articles still reference it`,
+router.delete(
+  '/categories/:id',
+  authMiddleware,
+  requireBranchAccess,
+  roleMiddleware(['admin']),
+  async (req, res) => {
+    try {
+      // Check if category has articles
+      const articleCount = await KnowledgeArticle.countDocuments({ category: req.params.id });
+      if (articleCount > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot delete category: ${articleCount} articles still reference it`,
+        });
+      }
+
+      const category = await KnowledgeCategory.findByIdAndDelete(req.params.id);
+
+      if (!category) {
+        return res.status(404).json({ success: false, message: 'Category not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'Category deleted successfully',
       });
+    } catch (error) {
+      safeError(res, error, 'knowledge');
     }
-
-    const category = await KnowledgeCategory.findByIdAndDelete(req.params.id);
-
-    if (!category) {
-      return res.status(404).json({ success: false, message: 'Category not found' });
-    }
-
-    res.json({
-      success: true,
-      message: 'Category deleted successfully',
-    });
-  } catch (error) {
-    safeError(res, error, 'knowledge');
   }
-});
+);
 
 // Create article
-router.post('/articles', authMiddleware, requireBranchAccess, roleMiddleware(['admin', 'manager']), async (req, res) => {
-  try {
-    const { title, description, content, category, tags, sections } = req.body;
+router.post(
+  '/articles',
+  authMiddleware,
+  requireBranchAccess,
+  roleMiddleware(['admin', 'manager']),
+  async (req, res) => {
+    try {
+      const { title, description, content, category, tags, sections } = req.body;
 
-    // Generate slug
-    const slug = title
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      // Generate slug
+      const slug = title
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 
-    const article = new KnowledgeArticle({
-      title,
-      description,
-      content,
-      category,
-      tags: tags || [],
-      sections: sections || [],
-      author: req.user.id,
-      slug,
-    });
+      const article = new KnowledgeArticle({
+        title,
+        description,
+        content,
+        category,
+        tags: tags || [],
+        sections: sections || [],
+        author: req.user.id,
+        slug,
+      });
 
-    await article.save();
+      await article.save();
 
-    res.status(201).json({
-      success: true,
-      message: 'Article created successfully',
-      data: article,
-    });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+      res.status(201).json({
+        success: true,
+        message: 'Article created successfully',
+        data: article,
+      });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // Rate article
 router.post('/articles/:id/rate', authMiddleware, requireBranchAccess, async (req, res) => {
@@ -385,7 +399,8 @@ router.post('/articles/:id/rate', authMiddleware, requireBranchAccess, async (re
 // Update article
 router.put(
   '/articles/:id',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -431,7 +446,8 @@ router.put(
 // Delete article
 router.delete(
   '/articles/:id',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -460,61 +476,73 @@ router.delete(
 // ============ ANALYTICS ENDPOINTS ============
 
 // Get search analytics
-router.get('/analytics/searches', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
-  try {
-    const { days = 30 } = req.query;
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
+router.get(
+  '/analytics/searches',
+  authMiddleware,
+  requireBranchAccess,
+  roleMiddleware(['admin']),
+  async (req, res) => {
+    try {
+      const { days = 30 } = req.query;
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
 
-    const searches = await KnowledgeSearchLog.aggregate([
-      { $match: { timestamp: { $gte: startDate } } },
-      {
-        $group: {
-          _id: '$query',
-          count: { $sum: 1 },
+      const searches = await KnowledgeSearchLog.aggregate([
+        { $match: { timestamp: { $gte: startDate } } },
+        {
+          $group: {
+            _id: '$query',
+            count: { $sum: 1 },
+          },
         },
-      },
-      { $sort: { count: -1 } },
-      { $limit: 20 },
-    ]);
+        { $sort: { count: -1 } },
+        { $limit: 20 },
+      ]);
 
-    res.json({ success: true, data: searches });
-  } catch (error) {
-    safeError(res, error, 'knowledge');
+      res.json({ success: true, data: searches });
+    } catch (error) {
+      safeError(res, error, 'knowledge');
+    }
   }
-});
+);
 
 // Get article statistics
-router.get('/analytics/stats', authMiddleware, requireBranchAccess, roleMiddleware(['admin']), async (req, res) => {
-  try {
-    const stats = await KnowledgeArticle.aggregate([
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 },
-          totalViews: { $sum: '$views' },
-          avgRating: { $avg: '$ratings.average' },
+router.get(
+  '/analytics/stats',
+  authMiddleware,
+  requireBranchAccess,
+  roleMiddleware(['admin']),
+  async (req, res) => {
+    try {
+      const stats = await KnowledgeArticle.aggregate([
+        {
+          $group: {
+            _id: '$category',
+            count: { $sum: 1 },
+            totalViews: { $sum: '$views' },
+            avgRating: { $avg: '$ratings.average' },
+          },
         },
-      },
-      { $sort: { count: -1 } },
-    ]);
+        { $sort: { count: -1 } },
+      ]);
 
-    const totalArticles = await KnowledgeArticle.countDocuments();
-    const totalViews = await KnowledgeArticle.aggregate([
-      { $group: { _id: null, total: { $sum: '$views' } } },
-    ]);
+      const totalArticles = await KnowledgeArticle.countDocuments();
+      const totalViews = await KnowledgeArticle.aggregate([
+        { $group: { _id: null, total: { $sum: '$views' } } },
+      ]);
 
-    res.json({
-      success: true,
-      data: {
-        stats,
-        totalArticles,
-        totalViews: totalViews[0]?.total || 0,
-      },
-    });
-  } catch (error) {
-    safeError(res, error, 'knowledge');
+      res.json({
+        success: true,
+        data: {
+          stats,
+          totalArticles,
+          totalViews: totalViews[0]?.total || 0,
+        },
+      });
+    } catch (error) {
+      safeError(res, error, 'knowledge');
+    }
   }
-});
+);
 
 module.exports = router;

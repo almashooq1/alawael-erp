@@ -10,8 +10,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 const UserSubscription = require('../models/UserSubscription');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════════════════
 // PLANS — إدارة خطط الاشتراك

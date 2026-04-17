@@ -25,22 +25,18 @@ router.use((_req, res, next) => {
  * @desc    Get all schedules
  * @access  Private
  */
-router.get(
-  '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
-  async (req, res) => {
-    try {
-      const schedules = await scheduleService.getAllSchedules(req.query);
-      res.status(200).json({
-        success: true,
-        count: schedules.length,
-        data: schedules,
-      });
-    } catch (error) {
-      safeError(res, error, 'fetching schedules');
-    }
+router.get('/', authenticate, requireBranchAccess, requireBranchAccess, async (req, res) => {
+  try {
+    const schedules = await scheduleService.getAllSchedules(req.query);
+    res.status(200).json({
+      success: true,
+      count: schedules.length,
+      data: schedules,
+    });
+  } catch (error) {
+    safeError(res, error, 'fetching schedules');
   }
-);
+});
 
 /**
  * @route   POST /api/v1/schedules
@@ -49,7 +45,9 @@ router.get(
  */
 router.post(
   '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -89,7 +87,9 @@ router.post(
  */
 router.get(
   '/resource/:resourceId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByResource(req.params.resourceId);
@@ -112,7 +112,9 @@ router.get(
  */
 router.get(
   '/date-range/:startDate/:endDate',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const schedules = await scheduleService.getSchedulesByDateRange(
@@ -138,7 +140,9 @@ router.get(
  */
 router.get(
   '/:scheduleId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const schedule = await scheduleService.getScheduleById(req.params.scheduleId);
@@ -167,7 +171,9 @@ router.get(
  */
 router.put(
   '/:scheduleId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['manager', 'admin']),
   async (req, res) => {
     try {
@@ -197,7 +203,9 @@ router.put(
  */
 router.delete(
   '/:scheduleId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -227,7 +235,9 @@ router.delete(
  */
 router.post(
   '/:scheduleId/confirm',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const schedule = await scheduleService.confirmSchedule(req.params.scheduleId, req.user.id);
@@ -251,6 +261,7 @@ router.post(
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  safeError(res, error, 'Router error');
+  safeError(res, err, 'Router error');
+});
 
 module.exports = router;

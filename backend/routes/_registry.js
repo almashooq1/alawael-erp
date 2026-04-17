@@ -12,7 +12,6 @@
 const express = require('express');
 const logger = require('../utils/logger');
 
-const safeError = require('../utils/safeError');
 
 // ─── Safe Require — returns empty router on failure ───────────────────────────
 function safeRequire(modulePath) {
@@ -135,6 +134,7 @@ const registerPhaseRoutes = require('./registries/phases.registry');
 
 // Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js
 const registerFeatureRoutes = require('./registries/features.registry');
+const safeError = require('../utils/safeError');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

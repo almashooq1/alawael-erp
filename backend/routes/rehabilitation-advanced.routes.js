@@ -10,8 +10,8 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 const {
   BehaviorIncident,
   BehaviorPlan,

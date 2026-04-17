@@ -40,6 +40,7 @@ const express = require('express');
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { escapeRegex } = require('../utils/escapeRegex');
 const router = express.Router();
 
 // 🔒 All e-learning routes require authentication

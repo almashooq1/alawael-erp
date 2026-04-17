@@ -21,8 +21,8 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const { safeError } = require('../utils/safeError');
 const { body, param, validationResult } = require('express-validator');
+const safeError = require('../utils/safeError');
 
 /** Reusable validation-error handler */
 const validate = (req, res, next) => {
@@ -108,10 +108,14 @@ router.post(
 
 router.put('/contracts/:id', [mongoId('id'), validate], async (req, res) => {
   try {
-    const contract = await InsuranceContract.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const contract = await InsuranceContract.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!contract) return res.status(404).json({ success: false, message: 'العقد غير موجود' });
     res.json({ success: true, data: contract });
   } catch (error) {

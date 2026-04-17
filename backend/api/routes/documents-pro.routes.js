@@ -19,12 +19,12 @@ const intelligenceService = require('../../services/documents/documentIntelligen
 const workflowEngine = require('../../services/documents/documentWorkflow.engine');
 const searchEngine = require('../../services/documents/documentSearch.engine');
 const notificationService = require('../../services/documents/documentNotification.service');
+const safeError = require('../../utils/safeError');
 
 // Authentication middleware
 let authenticateToken;
 try {
   authenticateToken = require('../../middleware/auth');
-const safeError = require('../../utils/safeError');
   if (typeof authenticateToken !== 'function') {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;

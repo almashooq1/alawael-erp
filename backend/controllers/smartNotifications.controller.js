@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * متحكم الإشعارات الذكية
  * Smart Notifications Controller
@@ -57,9 +56,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Create notification error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to create notification',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -110,9 +106,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Broadcast notification error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to broadcast notification',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -151,9 +144,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Get notifications error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to get notifications',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -179,9 +169,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Update preferences error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to update preferences',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -212,9 +199,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Record interaction error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to record interaction',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -246,9 +230,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Delete notification error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to delete notification',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -273,9 +254,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Clear notifications error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to clear notifications',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -298,9 +276,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Get stats error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to get statistics',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -323,9 +298,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Get performance report error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to get report',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 
@@ -351,9 +323,6 @@ class SmartNotificationsController {
     } catch (error) {
       Logger.error(`Process queue error: ${error.message}`);
       safeError(res, error, 'smartNotifications');
-        en: 'Failed to process queue',
-        error: 'حدث خطأ داخلي',
-      });
     }
   }
 }

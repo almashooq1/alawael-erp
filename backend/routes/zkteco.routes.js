@@ -6,13 +6,13 @@
 const express = require('express');
 const router = express.Router();
 const ZKTecoService = require('../services/hr/zktecoService');
-const { safeError } = require('../utils/safeError');
 const {
   authenticateToken: authMiddleware,
   requireRole: roleMiddleware,
 } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 // جميع المسارات تتطلب تسجيل الدخول
 router.use(authMiddleware);
 router.use(requireBranchAccess);

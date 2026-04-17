@@ -25,7 +25,7 @@ const {
   ImmersiveAnalyticsDashboard,
 } = require('../utils/phase31-xr');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // Singleton instances per tenant (simplified — single tenant)
 const mrEngine = new MixedRealityEngine('default');

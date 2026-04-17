@@ -26,7 +26,6 @@ const logger = require('../utils/logger');
 function getWebhookService() {
   try {
     return require('../services/webhookService');
-const safeError = require('../utils/safeError');
   } catch {
     return null;
   }
@@ -322,6 +321,7 @@ async function getWebhookDeliveryLogs(options = {}) {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const express = require('express');
+const safeError = require('../utils/safeError');
 
 function createWebhookRouter() {
   const router = express.Router();

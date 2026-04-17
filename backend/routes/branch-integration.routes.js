@@ -61,8 +61,6 @@ router.get('/health', (_req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'branch-integration');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -95,8 +93,6 @@ router.get('/status', async (_req, res) => {
     return res.status(200).json(status);
   } catch (error) {
     safeError(res, error, 'branch-integration');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -126,8 +122,6 @@ router.post('/sync/branches', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Sync error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -156,8 +150,6 @@ router.get('/branches/:branchId/kpis', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'KPI retrieval error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -186,8 +178,6 @@ router.get('/branches/:branchId/inventory-sync', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Inventory retrieval error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -226,8 +216,6 @@ router.get('/branches/:branchId/reports/:reportType', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Report retrieval error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -257,8 +245,6 @@ router.get('/branches/:branchId/forecasts', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Forecast retrieval error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -306,8 +292,6 @@ router.get('/branches/:branchId/dashboard', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Dashboard retrieval error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -335,8 +319,6 @@ router.post('/sync/start', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Sync start error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -355,8 +337,6 @@ router.post('/sync/stop', async (req, res) => {
     });
   } catch (error) {
     safeError(res, error, 'Sync stop error');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -381,8 +361,6 @@ router.get('/sync/status', async (req, res) => {
     return res.status(200).json(status);
   } catch (error) {
     safeError(res, error, 'branch-integration');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -410,8 +388,6 @@ router.get('/validate', async (req, res) => {
     return res.status(200).json(validation);
   } catch (error) {
     safeError(res, error, 'branch-integration');
-      timestamp: new Date().toISOString(),
-    });
   }
 });
 
@@ -422,9 +398,7 @@ router.get('/validate', async (req, res) => {
 router.use((err, _req, res, _next) => {
   logger.error('Integration route error:', { message: err.message });
 
-  safeError(res, error, 'branch-integration');
-    timestamp: new Date().toISOString(),
-  });
+  safeError(res, err, 'branch-integration');
 });
 
 // =============================================

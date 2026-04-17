@@ -43,9 +43,9 @@ const {
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { safeError } = require('../utils/safeError');
 const { validateOutboundUrl } = require('../utils/validateUrl');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 
@@ -54,62 +54,67 @@ const uid = req => (req.user && (req.user.id || req.user._id)) || null;
 // ════════════════════════════════════════════════════════════════════════════════
 
 /** List comments for an instance */
-router.get('/comments/instance/:instanceId', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const { page = 1, limit = 30 } = req.query;
-    const query = { workflowInstance: req.params.instanceId, isDeleted: false, isReply: false };
+router.get(
+  '/comments/instance/:instanceId',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { page = 1, limit = 30 } = req.query;
+      const query = { workflowInstance: req.params.instanceId, isDeleted: false, isReply: false };
 
-    const [comments, total] = await Promise.all([
-      WorkflowComment.find(query)
+      const [comments, total] = await Promise.all([
+        WorkflowComment.find(query)
+          .populate('author', 'name avatar')
+          .populate('mentions', 'name')
+          .populate({
+            path: 'parentComment',
+            select: 'content author',
+            populate: { path: 'author', select: 'name' },
+          })
+          .sort({ isPinned: -1, createdAt: -1 })
+          .skip((page - 1) * limit)
+          .limit(+limit)
+          .lean(),
+        WorkflowComment.countDocuments(query),
+      ]);
+
+      // Load replies for each comment
+      const commentIds = comments.map(c => c._id);
+      const replies = await WorkflowComment.find({
+        parentComment: { $in: commentIds },
+        isDeleted: false,
+      })
         .populate('author', 'name avatar')
         .populate('mentions', 'name')
-        .populate({
-          path: 'parentComment',
-          select: 'content author',
-          populate: { path: 'author', select: 'name' },
-        })
-        .sort({ isPinned: -1, createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(+limit)
-        .lean(),
-      WorkflowComment.countDocuments(query),
-    ]);
+        .sort({ createdAt: 1 })
+        .lean();
 
-    // Load replies for each comment
-    const commentIds = comments.map(c => c._id);
-    const replies = await WorkflowComment.find({
-      parentComment: { $in: commentIds },
-      isDeleted: false,
-    })
-      .populate('author', 'name avatar')
-      .populate('mentions', 'name')
-      .sort({ createdAt: 1 })
-      .lean();
+      const replyMap = {};
+      replies.forEach(r => {
+        const pid = r.parentComment.toString();
+        if (!replyMap[pid]) replyMap[pid] = [];
+        replyMap[pid].push(r);
+      });
 
-    const replyMap = {};
-    replies.forEach(r => {
-      const pid = r.parentComment.toString();
-      if (!replyMap[pid]) replyMap[pid] = [];
-      replyMap[pid].push(r);
-    });
+      const enriched = comments.map(c => ({
+        ...c,
+        replies: replyMap[c._id.toString()] || [],
+        replyCount: (replyMap[c._id.toString()] || []).length,
+      }));
 
-    const enriched = comments.map(c => ({
-      ...c,
-      replies: replyMap[c._id.toString()] || [],
-      replyCount: (replyMap[c._id.toString()] || []).length,
-    }));
-
-    res.json({
-      success: true,
-      data: enriched,
-      pagination: { page: +page, limit: +limit, total, pages: Math.ceil(total / limit) },
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'حدث خطأ في جلب التعليقات', error: safeError(error) });
+      res.json({
+        success: true,
+        data: enriched,
+        pagination: { page: +page, limit: +limit, total, pages: Math.ceil(total / limit) },
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: 'حدث خطأ في جلب التعليقات', error: safeError(error) });
+    }
   }
-});
+);
 
 /** List comments for a task */
 router.get('/comments/task/:taskId', authMiddleware, requireBranchAccess, async (req, res) => {
@@ -313,18 +318,23 @@ router.post('/favorites/toggle', authMiddleware, requireBranchAccess, async (req
 });
 
 /** Check if favorited */
-router.get('/favorites/check/:targetType/:targetId', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const exists = await WorkflowFavorite.exists({
-      user: uid(req),
-      targetType: req.params.targetType,
-      targetId: req.params.targetId,
-    });
-    res.json({ success: true, data: { isFavorite: !!exists } });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+router.get(
+  '/favorites/check/:targetType/:targetId',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const exists = await WorkflowFavorite.exists({
+        user: uid(req),
+        targetType: req.params.targetType,
+        targetId: req.params.targetId,
+      });
+      res.json({ success: true, data: { isFavorite: !!exists } });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 /** Reorder favorites */
 router.put('/favorites/reorder', authMiddleware, requireBranchAccess, async (req, res) => {
@@ -682,7 +692,9 @@ router.put('/webhooks/:id', authMiddleware, requireBranchAccess, async (req, res
           .json({ success: false, message: `رابط غير مسموح: ${urlCheck.reason}` });
       }
     }
-    const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const wh = await WorkflowWebhook.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!wh) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: wh });
   } catch (error) {
@@ -1086,7 +1098,9 @@ router.post('/tags', authMiddleware, requireBranchAccess, async (req, res) => {
 /** Update tag */
 router.put('/tags/:id', authMiddleware, requireBranchAccess, async (req, res) => {
   try {
-    const tag = await WorkflowTag.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const tag = await WorkflowTag.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!tag) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: tag });
   } catch (error) {
@@ -1127,21 +1141,26 @@ router.post('/tags/assign/:instanceId', authMiddleware, requireBranchAccess, asy
 });
 
 /** Remove tag from instance */
-router.delete('/tags/assign/:instanceId/:tagName', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const instance = await WorkflowInstance.findById(req.params.instanceId);
-    if (!instance) return res.status(404).json({ success: false, message: 'غير موجود' });
+router.delete(
+  '/tags/assign/:instanceId/:tagName',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const instance = await WorkflowInstance.findById(req.params.instanceId);
+      if (!instance) return res.status(404).json({ success: false, message: 'غير موجود' });
 
-    instance.tags = (instance.tags || []).filter(t => t !== req.params.tagName);
-    await instance.save();
+      instance.tags = (instance.tags || []).filter(t => t !== req.params.tagName);
+      await instance.save();
 
-    await WorkflowTag.updateOne({ name: req.params.tagName }, { $inc: { usageCount: -1 } });
+      await WorkflowTag.updateOne({ name: req.params.tagName }, { $inc: { usageCount: -1 } });
 
-    res.json({ success: true, data: { tags: instance.tags } });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+      res.json({ success: true, data: { tags: instance.tags } });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 8) VERSION HISTORY — سجل الإصدارات
@@ -1161,20 +1180,25 @@ router.get('/versions/:definitionId', authMiddleware, requireBranchAccess, async
 });
 
 /** Get specific version snapshot */
-router.get('/versions/:definitionId/:version', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const ver = await WorkflowVersion.findOne({
-      workflowDefinition: req.params.definitionId,
-      version: +req.params.version,
-    })
-      .populate('createdBy', 'name')
-      .lean();
-    if (!ver) return res.status(404).json({ success: false, message: 'الإصدار غير موجود' });
-    res.json({ success: true, data: ver });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+router.get(
+  '/versions/:definitionId/:version',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const ver = await WorkflowVersion.findOne({
+        workflowDefinition: req.params.definitionId,
+        version: +req.params.version,
+      })
+        .populate('createdBy', 'name')
+        .lean();
+      if (!ver) return res.status(404).json({ success: false, message: 'الإصدار غير موجود' });
+      res.json({ success: true, data: ver });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 /** Create version snapshot manually */
 router.post('/versions/:definitionId', authMiddleware, requireBranchAccess, async (req, res) => {
@@ -1203,88 +1227,98 @@ router.post('/versions/:definitionId', authMiddleware, requireBranchAccess, asyn
 });
 
 /** Compare two versions */
-router.get('/versions/:definitionId/compare/:v1/:v2', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const [ver1, ver2] = await Promise.all([
-      WorkflowVersion.findOne({
-        workflowDefinition: req.params.definitionId,
-        version: +req.params.v1,
-      }).lean(),
-      WorkflowVersion.findOne({
-        workflowDefinition: req.params.definitionId,
-        version: +req.params.v2,
-      }).lean(),
-    ]);
+router.get(
+  '/versions/:definitionId/compare/:v1/:v2',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [ver1, ver2] = await Promise.all([
+        WorkflowVersion.findOne({
+          workflowDefinition: req.params.definitionId,
+          version: +req.params.v1,
+        }).lean(),
+        WorkflowVersion.findOne({
+          workflowDefinition: req.params.definitionId,
+          version: +req.params.v2,
+        }).lean(),
+      ]);
 
-    if (!ver1 || !ver2) {
-      return res.status(404).json({ success: false, message: 'أحد الإصدارات غير موجود' });
+      if (!ver1 || !ver2) {
+        return res.status(404).json({ success: false, message: 'أحد الإصدارات غير موجود' });
+      }
+
+      // Simple diff: compare step counts, names, types
+      const steps1 = ver1.snapshot.steps || [];
+      const steps2 = ver2.snapshot.steps || [];
+
+      const diff = {
+        version1: { version: ver1.version, stepsCount: steps1.length, createdAt: ver1.createdAt },
+        version2: { version: ver2.version, stepsCount: steps2.length, createdAt: ver2.createdAt },
+        addedSteps: steps2
+          .filter(s => !steps1.find(x => x.id === s.id))
+          .map(s => ({ id: s.id, name: s.name })),
+        removedSteps: steps1
+          .filter(s => !steps2.find(x => x.id === s.id))
+          .map(s => ({ id: s.id, name: s.name })),
+        modifiedSteps: steps2
+          .filter(s => {
+            const orig = steps1.find(x => x.id === s.id);
+            return orig && JSON.stringify(orig) !== JSON.stringify(s);
+          })
+          .map(s => ({ id: s.id, name: s.name })),
+        settingsChanged:
+          JSON.stringify(ver1.snapshot.settings) !== JSON.stringify(ver2.snapshot.settings),
+      };
+
+      res.json({ success: true, data: diff });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
     }
-
-    // Simple diff: compare step counts, names, types
-    const steps1 = ver1.snapshot.steps || [];
-    const steps2 = ver2.snapshot.steps || [];
-
-    const diff = {
-      version1: { version: ver1.version, stepsCount: steps1.length, createdAt: ver1.createdAt },
-      version2: { version: ver2.version, stepsCount: steps2.length, createdAt: ver2.createdAt },
-      addedSteps: steps2
-        .filter(s => !steps1.find(x => x.id === s.id))
-        .map(s => ({ id: s.id, name: s.name })),
-      removedSteps: steps1
-        .filter(s => !steps2.find(x => x.id === s.id))
-        .map(s => ({ id: s.id, name: s.name })),
-      modifiedSteps: steps2
-        .filter(s => {
-          const orig = steps1.find(x => x.id === s.id);
-          return orig && JSON.stringify(orig) !== JSON.stringify(s);
-        })
-        .map(s => ({ id: s.id, name: s.name })),
-      settingsChanged:
-        JSON.stringify(ver1.snapshot.settings) !== JSON.stringify(ver2.snapshot.settings),
-    };
-
-    res.json({ success: true, data: diff });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
   }
-});
+);
 
 /** Restore a version */
-router.post('/versions/:definitionId/:version/restore', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const ver = await WorkflowVersion.findOne({
-      workflowDefinition: req.params.definitionId,
-      version: +req.params.version,
-    }).lean();
-    if (!ver) return res.status(404).json({ success: false, message: 'الإصدار غير موجود' });
+router.post(
+  '/versions/:definitionId/:version/restore',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const ver = await WorkflowVersion.findOne({
+        workflowDefinition: req.params.definitionId,
+        version: +req.params.version,
+      }).lean();
+      if (!ver) return res.status(404).json({ success: false, message: 'الإصدار غير موجود' });
 
-    // Backup current version first
-    const currentDef = await WorkflowDefinition.findById(req.params.definitionId).lean();
-    const latestVer = await WorkflowVersion.findOne({ workflowDefinition: currentDef._id })
-      .sort({ version: -1 })
-      .lean();
+      // Backup current version first
+      const currentDef = await WorkflowDefinition.findById(req.params.definitionId).lean();
+      const latestVer = await WorkflowVersion.findOne({ workflowDefinition: currentDef._id })
+        .sort({ version: -1 })
+        .lean();
 
-    await WorkflowVersion.create({
-      workflowDefinition: currentDef._id,
-      version: (latestVer?.version || 0) + 1,
-      snapshot: currentDef,
-      changeLog: `نسخة احتياطية قبل الاستعادة للإصدار ${ver.version}`,
-      changeType: 'steps_modified',
-      createdBy: uid(req),
-    });
+      await WorkflowVersion.create({
+        workflowDefinition: currentDef._id,
+        version: (latestVer?.version || 0) + 1,
+        snapshot: currentDef,
+        changeLog: `نسخة احتياطية قبل الاستعادة للإصدار ${ver.version}`,
+        changeType: 'steps_modified',
+        createdBy: uid(req),
+      });
 
-    // Restore
-    const { _id, __v, _createdAt, _updatedAt, ...restoreData } = ver.snapshot;
-    await WorkflowDefinition.findByIdAndUpdate(req.params.definitionId, {
-      ...restoreData,
-      updatedBy: uid(req),
-    });
+      // Restore
+      const { _id, __v, _createdAt, _updatedAt, ...restoreData } = ver.snapshot;
+      await WorkflowDefinition.findByIdAndUpdate(req.params.definitionId, {
+        ...restoreData,
+        updatedBy: uid(req),
+      });
 
-    res.json({ success: true, message: `تم استعادة الإصدار ${ver.version}` });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+      res.json({ success: true, message: `تم استعادة الإصدار ${ver.version}` });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 9) NOTIFICATION PREFERENCES — تفضيلات الإشعارات
@@ -2672,56 +2706,66 @@ router.get('/templates/extended', authMiddleware, requireBranchAccess, async (_r
 });
 
 /** Get extended template detail */
-router.get('/templates/extended/:templateId', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
-    if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
-    res.json({ success: true, data: tmpl });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+router.get(
+  '/templates/extended/:templateId',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
+      if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
+      res.json({ success: true, data: tmpl });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 /** Deploy extended template */
-router.post('/templates/extended/:templateId/deploy', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
-    if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
+router.post(
+  '/templates/extended/:templateId/deploy',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const tmpl = EXTENDED_TEMPLATES.find(t => t.id === req.params.templateId);
+      if (!tmpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
 
-    const { name, nameAr } = req.body;
-    const code = `${tmpl.id}-${Date.now()}`;
+      const { name, nameAr } = req.body;
+      const code = `${tmpl.id}-${Date.now()}`;
 
-    const definition = new WorkflowDefinition({
-      name: name || tmpl.name,
-      nameAr: nameAr || tmpl.nameAr,
-      code,
-      description: tmpl.description,
-      category: tmpl.category,
-      status: 'draft',
-      version: 1,
-      steps: tmpl.steps,
-      trigger: { type: 'manual' },
-      settings: {
-        allowReassignment: true,
-        allowDelegation: true,
-        allowCancellation: true,
-        autoAssign: true,
-        notifyOnComplete: true,
-        notifyOnError: true,
-      },
-      createdBy: uid(req),
-    });
+      const definition = new WorkflowDefinition({
+        name: name || tmpl.name,
+        nameAr: nameAr || tmpl.nameAr,
+        code,
+        description: tmpl.description,
+        category: tmpl.category,
+        status: 'draft',
+        version: 1,
+        steps: tmpl.steps,
+        trigger: { type: 'manual' },
+        settings: {
+          allowReassignment: true,
+          allowDelegation: true,
+          allowCancellation: true,
+          autoAssign: true,
+          notifyOnComplete: true,
+          notifyOnError: true,
+        },
+        createdBy: uid(req),
+      });
 
-    await definition.save();
-    res.status(201).json({
-      success: true,
-      data: definition,
-      message: `تم نشر قالب "${tmpl.nameAr}" بنجاح`,
-    });
-  } catch (error) {
-    safeError(res, error, 'workflowEnhanced');
+      await definition.save();
+      res.status(201).json({
+        success: true,
+        data: definition,
+        message: `تم نشر قالب "${tmpl.nameAr}" بنجاح`,
+      });
+    } catch (error) {
+      safeError(res, error, 'workflowEnhanced');
+    }
   }
-});
+);
 
 // ════════════════════════════════════════════════════════════════════════════════
 // 12) ADVANCED BATCH OPERATIONS — العمليات المجمعة المتقدمة

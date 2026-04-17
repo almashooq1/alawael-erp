@@ -8,6 +8,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../../middleware/auth');
 const AdvancedReportingService = require('../../services/advancedReportingService');
+const safeError = require('../../utils/safeError');
 
 // For testing, check if service is already mocked (it will be an object with generateReport, etc)
 // For production, create an instance
@@ -42,7 +43,6 @@ router.get('/student-advanced', async (req, res, next) => {
     }
     // Lazy-require to avoid circular dep
     const { studentService } = require('../../students/student-service');
-const safeError = require('../../utils/safeError');
     const report = await studentService.getComprehensiveReport(student_id);
     res.status(200).json(report);
   } catch (error) {

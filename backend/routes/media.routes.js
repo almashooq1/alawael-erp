@@ -12,7 +12,6 @@
  */
 
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const multer = require('multer');
@@ -26,6 +25,7 @@ const { validateUploadedFile } = require('../utils/uploadValidator');
 // ─── Models ──────────────────────────────────────────────────────────────────
 const Media = require('../models/Media');
 const MediaAlbum = require('../models/MediaAlbum');
+const safeError = require('../utils/safeError');
 
 // ─── Auth middleware (optional — graceful if missing) ────────────────────────
 let authenticate;
@@ -273,7 +273,9 @@ router.get('/stats', authenticate, requireBranchAccess, async (req, res) => {
  */
 router.post(
   '/upload',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   upload.single('file'),
   validateUploadedFile,
   async (req, res) => {
@@ -349,7 +351,9 @@ router.post(
  */
 router.post(
   '/upload-bulk',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   upload.array('files', 20),
   validateUploadedFile,
   async (req, res) => {
@@ -833,7 +837,7 @@ router.get('/file/:filename', authenticate, requireBranchAccess, (req, res) => {
         const { pipeline } = require('stream');
         pipeline(fs.createReadStream(filePath, { start, end }), res, err => {
           if (err && !res.headersSent) {
-            safeError(res, error, 'media');
+            safeError(res, err, 'media');
           }
         });
         return;
@@ -847,7 +851,7 @@ router.get('/file/:filename', authenticate, requireBranchAccess, (req, res) => {
     const { pipeline: pipe2 } = require('stream');
     pipe2(fs.createReadStream(filePath), res, err => {
       if (err && !res.headersSent) {
-        safeError(res, error, 'media');
+        safeError(res, err, 'media');
       }
     });
   } catch (error) {

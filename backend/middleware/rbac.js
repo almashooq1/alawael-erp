@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Role-Based Access Control (RBAC) Middleware — Legacy API
  * نظام التحكم في الوصول بناءً على الأدوار
@@ -9,12 +8,12 @@
  */
 
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 const {
   ROLES,
   hasPermission: configHasPermission,
   getRoleLevel,
 } = require('../config/rbac.config');
-const safeError = require('../utils/safeError');
 
 /**
  * Authorize middleware - checks if user has required roles

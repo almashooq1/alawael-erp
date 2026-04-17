@@ -2,7 +2,6 @@
  * Therapist Portal Elite Routes – Batch 5
  */
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
@@ -18,6 +17,7 @@ try {
 }
 
 const svc = require('../services/therapistPortal.service');
+const safeError = require('../utils/safeError');
 
 function wrap(fn) {
   return async (req, res) => {

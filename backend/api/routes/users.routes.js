@@ -35,12 +35,12 @@ if (process.env.USE_MOCK_DB === 'true') {
 let { authenticateToken, requireAdmin } = require('../../middleware/auth');
 const { validateProfileUpdate } = require('../../middleware/validation');
 const { logSecurityEvent, getClientIP } = require('../../utils/security');
+const safeError = require('../../utils/safeError');
 
 // RBAC Integration (Role-Based Access Control)
 let createRBACMiddleware;
 try {
   const rbacModule = require('../../rbac');
-const safeError = require('../../utils/safeError');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
 } catch (err) {
   logger.warn('[Users Route] RBAC module not available, using fallback');

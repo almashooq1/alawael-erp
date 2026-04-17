@@ -17,8 +17,8 @@ const PayrollCalculationService = require('../services/payrollCalculationService
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { safeError } = require('../utils/safeError');
 const { body, param: _param, validationResult } = require('express-validator');
+const safeError = require('../utils/safeError');
 
 /** Validation error handler */
 const validate = (req, res, next) => {
@@ -89,42 +89,47 @@ router.get('/:payrollId', authenticateToken, requireBranchAccess, async (req, re
  * الحصول على رواتب الموظف السنوية
  * GET /api/payroll/employee/:employeeId/year/:year
  */
-router.get('/employee/:employeeId/year/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { employeeId, year } = req.params;
-    const payrolls = await Payroll.getEmployeePayrolls(employeeId, parseInt(year));
+router.get(
+  '/employee/:employeeId/year/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { employeeId, year } = req.params;
+      const payrolls = await Payroll.getEmployeePayrolls(employeeId, parseInt(year));
 
-    const summary = {
-      employeeId,
-      year: parseInt(year),
-      payrolls: payrolls,
-      totals: {
-        totalGross: payrolls.reduce((sum, p) => sum + (p.calculations?.totalGross || 0), 0),
-        totalNet: payrolls.reduce((sum, p) => sum + (p.calculations?.totalNet || 0), 0),
-        totalDeductions: payrolls.reduce(
-          (sum, p) => sum + (p.calculations?.totalDeductions || 0),
-          0
-        ),
-        totalIncentives: payrolls.reduce(
-          (sum, p) => sum + (p.calculations?.totalIncentives || 0),
-          0
-        ),
-      },
-    };
+      const summary = {
+        employeeId,
+        year: parseInt(year),
+        payrolls: payrolls,
+        totals: {
+          totalGross: payrolls.reduce((sum, p) => sum + (p.calculations?.totalGross || 0), 0),
+          totalNet: payrolls.reduce((sum, p) => sum + (p.calculations?.totalNet || 0), 0),
+          totalDeductions: payrolls.reduce(
+            (sum, p) => sum + (p.calculations?.totalDeductions || 0),
+            0
+          ),
+          totalIncentives: payrolls.reduce(
+            (sum, p) => sum + (p.calculations?.totalIncentives || 0),
+            0
+          ),
+        },
+      };
 
-    res.json({
-      success: true,
-      data: summary,
-    });
-  } catch (error) {
-    const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { message: error.message });
-    res.status(status).json({
-      success: false,
-      error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
-    });
+      res.json({
+        success: true,
+        data: summary,
+      });
+    } catch (error) {
+      const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
+      logger.error('Payroll error:', { message: error.message });
+      res.status(status).json({
+        success: false,
+        error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
+      });
+    }
   }
-});
+);
 
 /**
  * إنشاء أو تحديث كشف راتب
@@ -132,7 +137,9 @@ router.get('/employee/:employeeId/year/:year', authenticateToken, requireBranchA
  */
 router.post(
   '/create',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('hr', 'admin', 'payroll'),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
@@ -194,7 +201,9 @@ router.post(
  */
 router.post(
   '/process-monthly',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'payroll'),
   [
     body('month').isInt({ min: 1, max: 12 }).withMessage('الشهر يجب أن يكون بين 1-12'),
@@ -228,7 +237,9 @@ router.post(
  */
 router.put(
   '/:payrollId/submit-approval',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('hr', 'admin'),
   async (req, res) => {
     try {
@@ -265,7 +276,9 @@ router.put(
  */
 router.put(
   '/:payrollId/approve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'director'),
   async (req, res) => {
     try {
@@ -302,7 +315,9 @@ router.put(
  */
 router.put(
   '/:payrollId/process',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
@@ -339,7 +354,9 @@ router.put(
  */
 router.put(
   '/:payrollId/transfer',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
@@ -378,7 +395,9 @@ router.put(
  */
 router.put(
   '/:payrollId/confirm-payment',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
@@ -470,7 +489,9 @@ router.get('/compensation/structures', authenticateToken, requireBranchAccess, a
  */
 router.post(
   '/compensation/structures',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'hr'),
   async (req, res) => {
     try {
@@ -498,24 +519,29 @@ router.post(
  * الحصول على الحوافز الفردية المعلقة
  * GET /api/compensation/incentives/pending
  */
-router.get('/compensation/incentives/pending', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const incentives = await IndividualIncentive.getPendingIncentives();
+router.get(
+  '/compensation/incentives/pending',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const incentives = await IndividualIncentive.getPendingIncentives();
 
-    res.json({
-      success: true,
-      data: incentives,
-      count: incentives.length,
-    });
-  } catch (error) {
-    const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { message: error.message });
-    res.status(status).json({
-      success: false,
-      error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
-    });
+      res.json({
+        success: true,
+        data: incentives,
+        count: incentives.length,
+      });
+    } catch (error) {
+      const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
+      logger.error('Payroll error:', { message: error.message });
+      res.status(status).json({
+        success: false,
+        error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
+      });
+    }
   }
-});
+);
 
 /**
  * إنشاء حافز فردي
@@ -523,7 +549,9 @@ router.get('/compensation/incentives/pending', authenticateToken, requireBranchA
  */
 router.post(
   '/compensation/incentives',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('hr', 'manager', 'admin'),
   async (req, res) => {
     try {
@@ -557,7 +585,9 @@ router.post(
  */
 router.put(
   '/compensation/incentives/:incentiveId/approve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'hr'),
   async (req, res) => {
     try {
@@ -594,7 +624,9 @@ router.put(
  */
 router.put(
   '/compensation/incentives/:incentiveId/mark-paid',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'payroll'),
   async (req, res) => {
     try {
@@ -635,7 +667,9 @@ router.put(
  */
 router.post(
   '/compensation/penalties',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('manager', 'hr', 'admin'),
   async (req, res) => {
     try {
@@ -664,7 +698,9 @@ router.post(
  */
 router.put(
   '/compensation/penalties/:penaltyId/approve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole('admin', 'director'),
   async (req, res) => {
     try {
@@ -699,35 +735,40 @@ router.put(
  * تقديم استئناف على العقوبة
  * POST /api/compensation/penalties/:penaltyId/appeal
  */
-router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { reason } = req.body;
-    const penalty = await PerformancePenalty.findById(req.params.penaltyId);
+router.post(
+  '/compensation/penalties/:penaltyId/appeal',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const penalty = await PerformancePenalty.findById(req.params.penaltyId);
 
-    if (!penalty) {
-      return res.status(404).json({
+      if (!penalty) {
+        return res.status(404).json({
+          success: false,
+          error: 'العقوبة غير موجودة',
+        });
+      }
+
+      penalty.appeal(reason);
+      await penalty.save();
+
+      res.json({
+        success: true,
+        data: penalty,
+        message: 'تم تقديم الاستئناف بنجاح',
+      });
+    } catch (error) {
+      const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
+      logger.error('Payroll error:', { message: error.message });
+      res.status(status).json({
         success: false,
-        error: 'العقوبة غير موجودة',
+        error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
       });
     }
-
-    penalty.appeal(reason);
-    await penalty.save();
-
-    res.json({
-      success: true,
-      data: penalty,
-      message: 'تم تقديم الاستئناف بنجاح',
-    });
-  } catch (error) {
-    const status = error.name === 'ValidationError' || error.name === 'CastError' ? 400 : 500;
-    logger.error('Payroll error:', { message: error.message });
-    res.status(status).json({
-      success: false,
-      error: status === 400 ? 'خطأ في البيانات المدخلة' : 'خطأ في الخادم',
-    });
   }
-});
+);
 
 // ============= مسارات كشف المزايا السنوي =============
 
@@ -737,7 +778,9 @@ router.post('/compensation/penalties/:penaltyId/appeal', authenticateToken, requ
  */
 router.post(
   '/compensation/benefits-summary',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requireRole(['hr', 'admin']),
   async (req, res) => {
     try {
@@ -766,7 +809,9 @@ router.post(
  */
 router.get(
   '/compensation/benefits-summary/:employeeId/:year',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const { employeeId, year } = req.params;
@@ -803,144 +848,184 @@ router.get(
  * تقرير حماية الأجور (WPS)
  * GET /api/payroll/reports/wps/:month/:year
  */
-router.get('/reports/wps/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateWPSReport(month, year);
+router.get(
+  '/reports/wps/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateWPSReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * تقرير التأمينات الاجتماعية (GOSI)
  * GET /api/payroll/reports/gosi/:month/:year
  */
-router.get('/reports/gosi/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateGOSIReport(month, year);
+router.get(
+  '/reports/gosi/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateGOSIReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * ملف التحويل البنكي
  * GET /api/payroll/reports/bank-transfer/:month/:year
  */
-router.get('/reports/bank-transfer/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateBankTransferReport(month, year);
+router.get(
+  '/reports/bank-transfer/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateBankTransferReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * تقرير مقارنة الأقسام
  * GET /api/payroll/reports/department-comparison/:month/:year
  */
-router.get('/reports/department-comparison/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateDepartmentComparisonReport(month, year);
+router.get(
+  '/reports/department-comparison/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateDepartmentComparisonReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * التقرير السنوي للرواتب
  * GET /api/payroll/reports/annual-summary/:year
  */
-router.get('/reports/annual-summary/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { year } = req.params;
-    const report = await PayrollReportService.generateAnnualSummaryReport(year);
+router.get(
+  '/reports/annual-summary/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { year } = req.params;
+      const report = await PayrollReportService.generateAnnualSummaryReport(year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * تقرير الفروقات الشهرية
  * GET /api/payroll/reports/variance/:month/:year
  */
-router.get('/reports/variance/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateVarianceReport(month, year);
+router.get(
+  '/reports/variance/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateVarianceReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * تقرير تكلفة الموظف
  * GET /api/payroll/reports/employee-cost/:employeeId/:year
  */
-router.get('/reports/employee-cost/:employeeId/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { employeeId, year } = req.params;
-    const report = await PayrollReportService.generateEmployeeCostReport(employeeId, year);
+router.get(
+  '/reports/employee-cost/:employeeId/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { employeeId, year } = req.params;
+      const report = await PayrollReportService.generateEmployeeCostReport(employeeId, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 /**
  * تقرير الخصومات التفصيلي
  * GET /api/payroll/reports/deductions/:month/:year
  */
-router.get('/reports/deductions/:month/:year', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.params;
-    const report = await PayrollReportService.generateDeductionsReport(month, year);
+router.get(
+  '/reports/deductions/:month/:year',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.params;
+      const report = await PayrollReportService.generateDeductionsReport(month, year);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'payroll');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'payroll');
+    }
   }
-});
+);
 
 module.exports = router;

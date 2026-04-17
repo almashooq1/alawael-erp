@@ -15,6 +15,7 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /**
  * GET /api/setup/status
@@ -23,7 +24,6 @@ const logger = require('../utils/logger');
 router.get('/status', async (req, res) => {
   try {
     const mongoose = require('mongoose');
-const safeError = require('../utils/safeError');
     const dbState = mongoose.connection.readyState;
     const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
 
@@ -61,7 +61,11 @@ router.post('/init-admin', async (req, res) => {
     // ─── التحقق من المفتاح السري (إلزامي — بدون fallback) ────────────────
     const SETUP_SECRET = process.env.SETUP_SECRET_KEY;
     if (!SETUP_SECRET) {
-      safeError(res, error, '[setup] SETUP_SECRET_KEY env var is not set');
+      return safeError(
+        res,
+        new Error('SETUP_SECRET_KEY env var is not set'),
+        '[setup] SETUP_SECRET_KEY env var is not set'
+      );
     }
 
     const providedKey = req.body?.secretKey || req.headers['x-setup-key'];
@@ -76,7 +80,7 @@ router.post('/init-admin', async (req, res) => {
     // ─── التحقق من ADMIN_PASSWORD (إلزامي — بدون fallback) ────────────────
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
     if (!ADMIN_PASSWORD || ADMIN_PASSWORD.length < 8) {
-      safeError(res, error, 'setup');
+      return safeError(res, new Error('ADMIN_PASSWORD env var must be set and ≥ 8 chars'), 'setup');
     }
 
     const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'admin@alawael.com.sa').toLowerCase().trim();

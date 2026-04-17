@@ -24,7 +24,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // ── Auth: all EMR routes require authentication (PHI data) ───────────────
 router.use(authenticate);
@@ -183,7 +183,11 @@ router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Latest vitals error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب آخر العلامات الحيوية', error: safeError(error) });
+      .json({
+        success: false,
+        message: 'خطأ في جلب آخر العلامات الحيوية',
+        error: safeError(error),
+      });
   }
 });
 
@@ -223,7 +227,11 @@ router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
     logger.error('[EMR] Vitals trend error:', { message: error.message });
     res
       .status(500)
-      .json({ success: false, message: 'خطأ في جلب اتجاه العلامات الحيوية', error: safeError(error) });
+      .json({
+        success: false,
+        message: 'خطأ في جلب اتجاه العلامات الحيوية',
+        error: safeError(error),
+      });
   }
 });
 

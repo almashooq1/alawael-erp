@@ -8,6 +8,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -49,7 +50,6 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
-const safeError = require('../utils/safeError');
     const data = await Campaign.create({ ...stripUpdateMeta(req.body), createdBy: req.user?.id });
     res.status(201).json({ success: true, data, message: 'تم إنشاء الحملة بنجاح' });
   } catch (err) {
@@ -61,7 +61,9 @@ const safeError = require('../utils/safeError');
 router.put('/:id', async (req, res) => {
   try {
     const Campaign = require('../models/Campaign');
-    const data = await Campaign.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true }).lean();
+    const data = await Campaign.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    }).lean();
     if (!data) return res.status(404).json({ success: false, message: 'الحملة غير موجودة' });
     res.json({ success: true, data, message: 'تم تحديث الحملة بنجاح' });
   } catch (err) {

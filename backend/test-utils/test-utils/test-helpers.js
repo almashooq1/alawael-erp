@@ -306,7 +306,7 @@ class TimeHelper {
  */
 class PerformanceHelper {
   static createTimer() {
-    const start = Date.now();
+    let start = Date.now();
     return {
       elapsed: () => Date.now() - start,
       reset: () => (start = Date.now()),

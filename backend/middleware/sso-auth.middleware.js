@@ -7,12 +7,12 @@
 const jwt = require('jsonwebtoken');
 const SSOService = require('../services/sso.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 class SSOAuthMiddleware {
   constructor() {
     this.ssoService = new SSOService();
     const { jwtSecret } = require('../config/secrets');
-const safeError = require('../utils/safeError');
     this.JWT_SECRET = jwtSecret;
   }
 

@@ -13,6 +13,7 @@ const { stripUpdateMeta } = require('../utils/sanitize');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');
 const validateObjectId = require('../middleware/validateObjectId');
+const safeError = require('../utils/safeError');
 
 // RBAC Integration (Role-Based Access Control)
 let createRBACMiddleware;
@@ -33,7 +34,6 @@ try {
 let notificationModel;
 try {
   const modelModule = require('../models/Notification.memory');
-  const safeError = require('../utils/safeError');
   notificationModel = modelModule.Notification || modelModule;
 } catch (e) {
   notificationModel = null;
@@ -94,7 +94,7 @@ router.get(
 
     // Handle server errors for testing
     if (req.query.triggerError === 'true') {
-      safeError(res, error, 'notifications');
+      return safeError(res, new Error('triggered for testing'), 'notifications');
     }
 
     const filters = {

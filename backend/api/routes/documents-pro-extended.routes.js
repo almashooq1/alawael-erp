@@ -19,12 +19,12 @@ const versioningService = require('../../services/documents/documentVersioning.s
 const templatesEngine = require('../../services/documents/documentTemplates.engine');
 const auditService = require('../../services/documents/documentAudit.service');
 const bulkService = require('../../services/documents/documentBulk.service');
+const safeError = require('../../utils/safeError');
 
 // Authentication middleware
 let authenticateToken;
 try {
   authenticateToken = require('../../middleware/auth');
-const safeError = require('../../utils/safeError');
   if (typeof authenticateToken !== 'function') {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;
@@ -838,6 +838,7 @@ router.get(
 
 // ─── Error handler ──────────────────────────
 router.use((err, req, res, _next) => {
-  safeError(res, error, 'documents-pro-extended');
+  safeError(res, err, 'documents-pro-extended');
+});
 
 module.exports = router;

@@ -4,6 +4,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const CarePlan = require('../models/CarePlan');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -11,7 +12,6 @@ router.use(requireBranchAccess);
 router.post('/sessions', async (req, res) => {
   try {
     const TherapySession = require('../models/TherapySession');
-const safeError = require('../utils/safeError');
     const session = await TherapySession.create({ ...req.body, therapist: req.user?.id });
     res.status(201).json({ success: true, data: session, message: 'تم إنشاء الجلسة' });
   } catch (err) {

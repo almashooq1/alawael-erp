@@ -3,8 +3,9 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/inventory/inventory-enhanced.service');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
+const { escapeRegex } = require('../utils/escapeRegex');
 
 // ── تنبيهات إعادة الطلب والانتهاء ────────────────────
 router.get('/alerts/reorder', authenticate, requireBranchAccess, async (req, res) => {
@@ -52,7 +53,9 @@ router.get('/items', authenticate, requireBranchAccess, async (req, res) => {
 
 router.post(
   '/items',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -79,7 +82,9 @@ router.get('/items/:itemId', authenticate, requireBranchAccess, async (req, res)
 
 router.put(
   '/items/:itemId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -132,15 +137,21 @@ router.get('/categories', authenticate, requireBranchAccess, async (req, res) =>
   }
 });
 
-router.post('/categories', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
-  try {
-    const { ItemCategory } = require('../models/InventoryItem');
-    const cat = await ItemCategory.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: cat });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/categories',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'super_admin'),
+  async (req, res) => {
+    try {
+      const { ItemCategory } = require('../models/InventoryItem');
+      const cat = await ItemCategory.create(stripUpdateMeta(req.body));
+      res.status(201).json({ success: true, data: cat });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 // ── المستودعات ───────────────────────────────────────
 router.get('/warehouses', authenticate, requireBranchAccess, async (req, res) => {
@@ -153,15 +164,21 @@ router.get('/warehouses', authenticate, requireBranchAccess, async (req, res) =>
   }
 });
 
-router.post('/warehouses', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
-  try {
-    const Warehouse = require('../models/Warehouse');
-    const warehouse = await Warehouse.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: warehouse });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/warehouses',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'super_admin'),
+  async (req, res) => {
+    try {
+      const Warehouse = require('../models/Warehouse');
+      const warehouse = await Warehouse.create(stripUpdateMeta(req.body));
+      res.status(201).json({ success: true, data: warehouse });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 // ── الموردون ──────────────────────────────────────────
 router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => {
@@ -176,7 +193,9 @@ router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => 
 
 router.post(
   '/suppliers',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -191,7 +210,9 @@ router.post(
 
 router.put(
   '/suppliers/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -209,7 +230,9 @@ router.put(
 // ── حركات المخزون ────────────────────────────────────
 router.post(
   '/transactions/receive',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -227,7 +250,9 @@ router.post(
 
 router.post(
   '/transactions/issue',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -245,7 +270,9 @@ router.post(
 
 router.post(
   '/transactions/transfer',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -260,7 +287,9 @@ router.post(
 
 router.post(
   '/transactions/adjust',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -314,7 +343,9 @@ router.get('/purchase-orders/:poId', authenticate, requireBranchAccess, async (r
 
 router.put(
   '/purchase-orders/:poId/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'finance_manager'),
   async (req, res) => {
     try {
@@ -333,7 +364,9 @@ router.put(
 
 router.post(
   '/purchase-orders/:poId/receive',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager', 'warehouse_keeper'),
   async (req, res) => {
     try {
@@ -363,7 +396,9 @@ router.get('/assets', authenticate, requireBranchAccess, async (req, res) => {
 
 router.post(
   '/assets',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -389,7 +424,9 @@ router.get('/assets/:assetId', authenticate, requireBranchAccess, async (req, re
 
 router.put(
   '/assets/:assetId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -455,7 +492,9 @@ router.get('/stock-counts', authenticate, requireBranchAccess, async (req, res) 
 
 router.post(
   '/stock-counts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'inventory_manager'),
   async (req, res) => {
     try {
@@ -467,23 +506,30 @@ router.post(
   }
 );
 
-router.post('/stock-counts/:countId/items/:itemId/count', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const result = await svc.recordStockCount(
-      req.params.countId,
-      req.params.itemId,
-      req.body.countedQuantity,
-      req.body.notes
-    );
-    res.json({ success: true, data: result });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/stock-counts/:countId/items/:itemId/count',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const result = await svc.recordStockCount(
+        req.params.countId,
+        req.params.itemId,
+        req.body.countedQuantity,
+        req.body.notes
+      );
+      res.json({ success: true, data: result });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 router.put(
   '/stock-counts/:countId/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin'),
   async (req, res) => {
     try {

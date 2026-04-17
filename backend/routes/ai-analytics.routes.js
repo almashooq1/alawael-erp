@@ -6,7 +6,6 @@
  */
 
 const express = require('express');
-const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
@@ -18,6 +17,7 @@ const AiSuggestion = require('../models/AiSuggestion');
 const AiAlert = require('../models/AiAlert');
 const AiGeneratedReport = require('../models/AiGeneratedReport');
 const AiModelConfig = require('../models/AiModelConfig');
+const safeError = require('../utils/safeError');
 
 // Auth middleware
 router.use(authenticate);
@@ -922,5 +922,6 @@ async function buildFinancialPrediction(branchId) {
 router.use((err, req, res, _next) => {
   logger.error('AI Analytics route error', { error: err.message, stack: err.stack });
   safeError(res, err);
+});
 
 module.exports = router;

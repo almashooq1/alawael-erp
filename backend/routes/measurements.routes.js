@@ -1,6 +1,5 @@
 // Route - Measurements
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
@@ -30,6 +29,7 @@ const {
 
 const MeasurementService = require('../services/MeasurementService');
 const SmartEngine = require('../services/SmartMeasurementProgramEngine');
+const safeError = require('../utils/safeError');
 const measurementService = new MeasurementService();
 
 // All data routes require authentication

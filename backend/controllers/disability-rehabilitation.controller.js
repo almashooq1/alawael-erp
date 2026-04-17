@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Disability Rehabilitation Controller
  * متحكم نظام تأهيل ذوي الإعاقة
@@ -11,8 +10,8 @@
 
 const rehabilitationService = require('../services/disability-rehabilitation.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
-const { safeError } = require('../utils/safeError');
 class DisabilityRehabilitationController {
   /**
    * @route   POST /api/v1/disability-rehabilitation/programs
@@ -1231,13 +1230,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in updateTelehealth:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تحديث بيانات الرعاية عن بعد',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث بيانات الرعاية عن بعد',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1253,13 +1250,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in addConnectivityIssue:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تسجيل مشكلة الاتصال',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تسجيل مشكلة الاتصال',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1275,13 +1270,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in updateFinancialInfo:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تحديث البيانات المالية',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث البيانات المالية',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1315,13 +1308,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in updateInsuranceInfo:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تحديث بيانات التأمين',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث بيانات التأمين',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1435,13 +1426,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in updateTransportation:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تحديث بيانات النقل',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث بيانات النقل',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1457,13 +1446,11 @@ class DisabilityRehabilitationController {
       logger.error('Error in updateTreatmentTeam:', error);
       if (error.message?.includes('not found') || error.message?.includes('غير موجود'))
         return res.status(404).json({ success: false, message: safeError(error) });
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء تحديث فريق العلاج',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء تحديث فريق العلاج',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 
@@ -1477,13 +1464,11 @@ class DisabilityRehabilitationController {
       return res.status(200).json(result);
     } catch (error) {
       logger.error('Error in getFinancialSummary:', error);
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'حدث خطأ أثناء جلب الملخص المالي',
-          error: 'حدث خطأ داخلي',
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'حدث خطأ أثناء جلب الملخص المالي',
+        error: 'حدث خطأ داخلي',
+      });
     }
   }
 }

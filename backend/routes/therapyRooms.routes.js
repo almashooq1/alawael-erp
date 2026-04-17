@@ -9,8 +9,8 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const TherapyRoom = require('../models/TherapyRoom');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 /** GET /api/therapy-rooms — list rooms */
 router.get('/', requireAuth, requireBranchAccess, async (req, res) => {

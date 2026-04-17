@@ -11,6 +11,7 @@
 const path = require('path');
 const fs = require('fs').promises;
 const config = require('./EmailConfig');
+const logger = require('../../utils/logger');
 
 // ═══════════════════════════════════════════════════════════════
 // 🎨 BRAND CONSTANTS

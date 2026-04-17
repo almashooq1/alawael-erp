@@ -33,8 +33,8 @@ const {
 } = require('../services/telehealthService');
 
 const { v4: uuidv4 } = require('uuid');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
@@ -571,9 +571,13 @@ router.patch(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
-      const slot = await ProviderAvailabilitySlot.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-      });
+      const slot = await ProviderAvailabilitySlot.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+        }
+      );
       res.json({ success: true, data: slot });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

@@ -9,8 +9,8 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const MaintenanceIssue = require('../models/MaintenanceIssue');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 /** GET /api/maintenance-issues — list issues */
 router.get('/', requireAuth, requireBranchAccess, async (req, res) => {

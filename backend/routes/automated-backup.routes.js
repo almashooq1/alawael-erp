@@ -10,6 +10,7 @@ const express = require('express');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const AutomatedBackupService = require('../services/automated-backup.service');
+const safeError = require('../utils/safeError');
 
 /**
  * Return a safe error message for client responses.

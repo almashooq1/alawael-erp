@@ -6,9 +6,9 @@
  */
 
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const DateConverterService = require('../services/DateConverterService');
+const safeError = require('../utils/safeError');
 
 // ─── POST /gregorian-to-hijri ───────────────────────────────────────────
 router.post('/gregorian-to-hijri', (req, res) => {

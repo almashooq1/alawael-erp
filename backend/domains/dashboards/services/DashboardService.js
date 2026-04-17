@@ -315,7 +315,7 @@ class DashboardService extends BaseService {
     const DecisionAlert = mongoose.model('DecisionAlert');
     return DecisionAlert.findByIdAndUpdate(
       id,
-      { status: 'escalated', escalatedTo, escalatedAt: new Date() },
+      { status: 'escalated', escalatedTo: escalateTo, escalatedAt: new Date() },
       { new: true }
     );
   }
@@ -349,20 +349,18 @@ class DashboardService extends BaseService {
             { $match: { ...match, status: { $in: ['new', 'acknowledged', 'in_progress'] } } },
             { $group: { _id: '$severity', count: { $sum: 1 } } },
           ]),
-        mongoose
-          .model('KPISnapshot')
-          .aggregate([
-            { $sort: { 'period.startDate': -1 } },
-            {
-              $group: {
-                _id: '$kpiCode',
-                latestStatus: { $first: '$status' },
-                latestValue: { $first: '$value' },
-                trend: { $first: '$trend' },
-              },
+        mongoose.model('KPISnapshot').aggregate([
+          { $sort: { 'period.startDate': -1 } },
+          {
+            $group: {
+              _id: '$kpiCode',
+              latestStatus: { $first: '$status' },
+              latestValue: { $first: '$value' },
+              trend: { $first: '$trend' },
             },
-            { $group: { _id: '$latestStatus', count: { $sum: 1 } } },
-          ]),
+          },
+          { $group: { _id: '$latestStatus', count: { $sum: 1 } } },
+        ]),
       ]);
 
     return {

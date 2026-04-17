@@ -20,8 +20,8 @@ const {
 } = require('../models/rehab-pro.model');
 const logger = require('../utils/logger');
 
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 // ─── Helpers ────────────────────────────────────────────────────────────────────
 
 function ok(res, data, msg = 'Success') {

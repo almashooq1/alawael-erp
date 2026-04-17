@@ -29,8 +29,8 @@ const {
 } = require('../models/WorkflowPro');
 
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticateToken);
 router.use(requireBranchAccess);
@@ -98,10 +98,14 @@ router.post('/forms', async (req, res) => {
 // PUT /forms/:id — Update form template
 router.put('/forms/:id', async (req, res) => {
   try {
-    const form = await WorkflowFormTemplate.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const form = await WorkflowFormTemplate.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!form) return res.status(404).json({ success: false, message: 'النموذج غير موجود' });
     res.json({ success: true, data: form, message: 'تم تحديث النموذج بنجاح' });
   } catch (err) {
@@ -332,10 +336,14 @@ router.post('/escalations/rules', async (req, res) => {
 // PUT /escalations/rules/:id — Update escalation rule
 router.put('/escalations/rules/:id', async (req, res) => {
   try {
-    const rule = await WorkflowEscalationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const rule = await WorkflowEscalationRule.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule, message: 'تم تحديث القاعدة بنجاح' });
   } catch (err) {
@@ -622,10 +630,14 @@ router.post('/sla-policies', async (req, res) => {
 // PUT /sla-policies/:id — Update policy
 router.put('/sla-policies/:id', async (req, res) => {
   try {
-    const policy = await WorkflowSLAPolicy.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const policy = await WorkflowSLAPolicy.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!policy) return res.status(404).json({ success: false, message: 'السياسة غير موجودة' });
     res.json({ success: true, data: policy, message: 'تم تحديث السياسة بنجاح' });
   } catch (err) {
@@ -1231,10 +1243,14 @@ router.post('/approval-chains', async (req, res) => {
 // PUT /approval-chains/:id — Update chain
 router.put('/approval-chains/:id', async (req, res) => {
   try {
-    const chain = await WorkflowApprovalChain.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const chain = await WorkflowApprovalChain.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!chain) return res.status(404).json({ success: false, message: 'السلسلة غير موجودة' });
     res.json({ success: true, data: chain, message: 'تم تحديث السلسلة بنجاح' });
   } catch (err) {
@@ -1569,10 +1585,14 @@ router.post('/automations', async (req, res) => {
 // PUT /automations/:id — Update automation rule
 router.put('/automations/:id', async (req, res) => {
   try {
-    const rule = await WorkflowAutomationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const rule = await WorkflowAutomationRule.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     res.json({ success: true, data: rule, message: 'تم تحديث القاعدة بنجاح' });
   } catch (err) {

@@ -32,17 +32,34 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/community'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/community');
+} catch (e) {
+  /* load fail */
+}
 
 describe('routes/community', () => {
   test('module loads without crash', () => {
@@ -57,6 +74,7 @@ describe('routes/community', () => {
 
   test('express.Router() was called', () => {
     const express = require('express');
+    const safeError = require('../../utils/safeError');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);
@@ -101,5 +119,4 @@ describe('routes/community', () => {
       expect(true).toBe(true);
     }
   });
-
 });

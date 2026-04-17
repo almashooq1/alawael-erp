@@ -9,8 +9,8 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const GoalBank = require('../models/GoalBank');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── List / Search ────────────────────────────────────────────────
 

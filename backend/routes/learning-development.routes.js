@@ -20,7 +20,7 @@ const logger = require('../utils/logger');
 
 // ── Service ──
 const LearningDevelopmentService = require('../services/learning-development.service');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 const service = new LearningDevelopmentService();
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -81,15 +81,20 @@ router.put('/programs/:programId', authenticate, requireBranchAccess, async (req
 /**
  * PATCH /programs/:programId/archive — Archive a program
  */
-router.patch('/programs/:programId/archive', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const data = service.archiveProgram(req.params.programId);
-    res.json({ success: true, data });
-  } catch (err) {
-    logger.error('Archive program error:', err.message);
-    res.status(404).json({ success: false, error: safeError(err) });
+router.patch(
+  '/programs/:programId/archive',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const data = service.archiveProgram(req.params.programId);
+      res.json({ success: true, data });
+    } catch (err) {
+      logger.error('Archive program error:', err.message);
+      res.status(404).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ENROLLMENT — التسجيل والتتبع
@@ -111,16 +116,21 @@ router.post('/enrollments', authenticate, requireBranchAccess, async (req, res) 
 /**
  * PATCH /enrollments/:enrollmentId/status — Update enrollment status / progress
  */
-router.patch('/enrollments/:enrollmentId/status', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { status, ...additionalData } = req.body;
-    const data = service.updateEnrollmentStatus(req.params.enrollmentId, status, additionalData);
-    res.json({ success: true, data });
-  } catch (err) {
-    logger.error('Update enrollment status error:', err.message);
-    res.status(400).json({ success: false, error: safeError(err) });
+router.patch(
+  '/enrollments/:enrollmentId/status',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { status, ...additionalData } = req.body;
+      const data = service.updateEnrollmentStatus(req.params.enrollmentId, status, additionalData);
+      res.json({ success: true, data });
+    } catch (err) {
+      logger.error('Update enrollment status error:', err.message);
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 /**
  * GET /enrollments/:enrollmentId — Get enrollment details
@@ -138,14 +148,19 @@ router.get('/enrollments/:enrollmentId', authenticate, requireBranchAccess, asyn
 /**
  * GET /enrollments/mandatory/:employeeId — Track mandatory training
  */
-router.get('/enrollments/mandatory/:employeeId', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const data = service.trackMandatoryTraining(req.params.employeeId);
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'Track mandatory training error');
+router.get(
+  '/enrollments/mandatory/:employeeId',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const data = service.trackMandatoryTraining(req.params.employeeId);
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'Track mandatory training error');
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ANALYTICS — التحليلات والتقارير
@@ -231,30 +246,44 @@ router.post('/certifications', authenticate, requireBranchAccess, async (req, re
 /**
  * POST /certifications/:certificationId/exams — Track exam status
  */
-router.post('/certifications/:certificationId/exams', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { employeeId, ...examData } = req.body;
-    const data = service.trackExamStatus(employeeId, req.params.certificationId, examData);
-    res.status(201).json({ success: true, data });
-  } catch (err) {
-    logger.error('Track exam error:', err.message);
-    res.status(400).json({ success: false, error: safeError(err) });
+router.post(
+  '/certifications/:certificationId/exams',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { employeeId, ...examData } = req.body;
+      const data = service.trackExamStatus(employeeId, req.params.certificationId, examData);
+      res.status(201).json({ success: true, data });
+    } catch (err) {
+      logger.error('Track exam error:', err.message);
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 /**
  * POST /certifications/:certificationId/renewal — Manage license renewal
  */
-router.post('/certifications/:certificationId/renewal', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { employeeId, ...renewalData } = req.body;
-    const data = service.manageLicenseRenewal(employeeId, req.params.certificationId, renewalData);
-    res.status(201).json({ success: true, data });
-  } catch (err) {
-    logger.error('License renewal error:', err.message);
-    res.status(400).json({ success: false, error: safeError(err) });
+router.post(
+  '/certifications/:certificationId/renewal',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { employeeId, ...renewalData } = req.body;
+      const data = service.manageLicenseRenewal(
+        employeeId,
+        req.params.certificationId,
+        renewalData
+      );
+      res.status(201).json({ success: true, data });
+    } catch (err) {
+      logger.error('License renewal error:', err.message);
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // EXTERNAL INTEGRATION — التكامل الخارجي
@@ -276,14 +305,19 @@ router.post('/integrations', authenticate, requireBranchAccess, async (req, res)
 /**
  * POST /integrations/:integrationId/sync — Sync learning content
  */
-router.post('/integrations/:integrationId/sync', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const data = service.syncLearningContent(req.params.integrationId);
-    res.json({ success: true, data });
-  } catch (err) {
-    logger.error('Content sync error:', err.message);
-    res.status(400).json({ success: false, error: safeError(err) });
+router.post(
+  '/integrations/:integrationId/sync',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const data = service.syncLearningContent(req.params.integrationId);
+      res.json({ success: true, data });
+    } catch (err) {
+      logger.error('Content sync error:', err.message);
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 module.exports = router;

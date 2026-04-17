@@ -8,7 +8,6 @@
 
 const mongoose = require('mongoose');
 const { SmartIEP, SessionLog } = require('../models/SmartIEP');
-const safeError = require('../utils/safeError');
 
 // ══════════════════════════════════════════════════════
 // نموذج تنبيهات الإنذار المبكر
@@ -494,6 +493,7 @@ class EarlyWarningService {
 // مسارات الإنذار المبكر
 // ══════════════════════════════════════════════════════
 const express = require('express');
+const safeError = require('../utils/safeError');
 const router = express.Router();
 
 /**

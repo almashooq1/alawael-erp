@@ -32,18 +32,35 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../services/performanceService', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
-jest.mock('../../utils/apiResponse', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../services/performanceService',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
+jest.mock(
+  '../../utils/apiResponse',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/performance'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/performance');
+} catch (e) {
+  /* load fail */
+}
 
 describe('routes/performance', () => {
   test('module loads without crash', () => {
@@ -58,6 +75,7 @@ describe('routes/performance', () => {
 
   test('express.Router() was called', () => {
     const express = require('express');
+    const safeError = require('../../utils/safeError');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);
@@ -92,5 +110,4 @@ describe('routes/performance', () => {
       expect(true).toBe(true);
     }
   });
-
 });

@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 const {
   Standard,
   Accreditation,
@@ -10,7 +11,6 @@ const {
   ComplianceTracking,
   QualityIndicator,
 } = require('../models/qualityManagement');
-const safeError = require('../utils/safeError');
 
 // ============================================
 // ROOT ENDPOINT — GET /api/quality
@@ -125,7 +125,9 @@ router.get('/standards/:id', authenticate, requireBranchAccess, async (req, res)
 // Create standard
 router.post(
   '/standards',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -155,7 +157,9 @@ router.post(
 // Update standard
 router.put(
   '/standards/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -192,25 +196,31 @@ router.put(
 );
 
 // Delete standard
-router.delete('/standards/:id', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
-  try {
-    const standard = await Standard.findByIdAndDelete(req.params.id);
+router.delete(
+  '/standards/:id',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const standard = await Standard.findByIdAndDelete(req.params.id);
 
-    if (!standard) {
-      return res.status(404).json({
-        success: false,
-        message: 'Standard not found',
+      if (!standard) {
+        return res.status(404).json({
+          success: false,
+          message: 'Standard not found',
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Standard deleted successfully',
       });
+    } catch (error) {
+      safeError(res, error, 'quality');
     }
-
-    res.json({
-      success: true,
-      message: 'Standard deleted successfully',
-    });
-  } catch (error) {
-    safeError(res, error, 'quality');
   }
-});
+);
 
 // ============================================
 // ACCREDITATIONS ROUTES - الاعتمادات
@@ -276,7 +286,9 @@ router.get('/accreditations/:id', authenticate, requireBranchAccess, async (req,
 // Create accreditation
 router.post(
   '/accreditations',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -301,7 +313,9 @@ router.post(
 // Update accreditation
 router.put(
   '/accreditations/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -372,25 +386,31 @@ router.put(
 );
 
 // Delete accreditation
-router.delete('/accreditations/:id', authenticate, requireBranchAccess, authorize(['admin']), async (req, res) => {
-  try {
-    const accreditation = await Accreditation.findByIdAndDelete(req.params.id);
+router.delete(
+  '/accreditations/:id',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin']),
+  async (req, res) => {
+    try {
+      const accreditation = await Accreditation.findByIdAndDelete(req.params.id);
 
-    if (!accreditation) {
-      return res.status(404).json({
-        success: false,
-        message: 'Accreditation not found',
+      if (!accreditation) {
+        return res.status(404).json({
+          success: false,
+          message: 'Accreditation not found',
+        });
+      }
+
+      res.json({
+        success: true,
+        message: 'Accreditation deleted successfully',
       });
+    } catch (error) {
+      safeError(res, error, 'quality');
     }
-
-    res.json({
-      success: true,
-      message: 'Accreditation deleted successfully',
-    });
-  } catch (error) {
-    safeError(res, error, 'quality');
   }
-});
+);
 
 // ============================================
 // QUALITY AUDITS ROUTES - مراجعات الجودة
@@ -454,7 +474,9 @@ router.get('/audits/:id', authenticate, requireBranchAccess, async (req, res) =>
 // Create audit
 router.post(
   '/audits',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -484,7 +506,9 @@ router.post(
 // Update audit
 router.put(
   '/audits/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -553,7 +577,9 @@ router.put(
 // Delete audit
 router.delete(
   '/audits/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -579,7 +605,9 @@ router.delete(
 // Add finding to audit
 router.post(
   '/audits/:id/findings',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -611,42 +639,47 @@ router.post(
 );
 
 // Update finding status
-router.patch('/audits/:auditId/findings/:findingId/status', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { status } = req.body;
+router.patch(
+  '/audits/:auditId/findings/:findingId/status',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { status } = req.body;
 
-    const audit = await QualityAudit.findById(req.params.auditId);
-    if (!audit) {
-      return res.status(404).json({
+      const audit = await QualityAudit.findById(req.params.auditId);
+      if (!audit) {
+        return res.status(404).json({
+          success: false,
+          message: 'Audit not found',
+        });
+      }
+
+      const finding = audit.findings.id(req.params.findingId);
+      if (!finding) {
+        return res.status(404).json({
+          success: false,
+          message: 'Finding not found',
+        });
+      }
+
+      finding.status = status;
+      await audit.save();
+
+      res.json({
+        success: true,
+        message: 'Finding status updated',
+        data: finding,
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        message: 'Audit not found',
+        message: 'Error updating finding status',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    const finding = audit.findings.id(req.params.findingId);
-    if (!finding) {
-      return res.status(404).json({
-        success: false,
-        message: 'Finding not found',
-      });
-    }
-
-    finding.status = status;
-    await audit.save();
-
-    res.json({
-      success: true,
-      message: 'Finding status updated',
-      data: finding,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error updating finding status',
-      error: 'خطأ في البيانات المدخلة',
-    });
   }
-});
+);
 
 // ============================================
 // COMPLIANCE TRACKING ROUTES - تتبع الامتثال
@@ -680,7 +713,9 @@ router.get('/compliance', authenticate, requireBranchAccess, async (req, res) =>
 // Create compliance tracking
 router.post(
   '/compliance',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -734,7 +769,9 @@ router.get('/compliance/:id', authenticate, requireBranchAccess, async (req, res
 // Update compliance tracking
 router.put(
   '/compliance/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'auditor']),
   async (req, res) => {
     try {
@@ -795,7 +832,9 @@ router.put(
 // Delete compliance tracking
 router.delete(
   '/compliance/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -819,42 +858,47 @@ router.delete(
 );
 
 // Update gap status
-router.patch('/compliance/:trackingId/gaps/:gapIndex/status', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const { status } = req.body;
-    const { trackingId, gapIndex } = req.params;
+router.patch(
+  '/compliance/:trackingId/gaps/:gapIndex/status',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { status } = req.body;
+      const { trackingId, gapIndex } = req.params;
 
-    const tracking = await ComplianceTracking.findById(trackingId);
-    if (!tracking) {
-      return res.status(404).json({
+      const tracking = await ComplianceTracking.findById(trackingId);
+      if (!tracking) {
+        return res.status(404).json({
+          success: false,
+          message: 'Compliance tracking not found',
+        });
+      }
+
+      if (!tracking.gaps[gapIndex]) {
+        return res.status(404).json({
+          success: false,
+          message: 'Gap not found',
+        });
+      }
+
+      tracking.gaps[gapIndex].status = status;
+      await tracking.save();
+
+      res.json({
+        success: true,
+        message: 'Gap status updated',
+        data: tracking,
+      });
+    } catch (error) {
+      res.status(400).json({
         success: false,
-        message: 'Compliance tracking not found',
+        message: 'Error updating gap status',
+        error: 'خطأ في البيانات المدخلة',
       });
     }
-
-    if (!tracking.gaps[gapIndex]) {
-      return res.status(404).json({
-        success: false,
-        message: 'Gap not found',
-      });
-    }
-
-    tracking.gaps[gapIndex].status = status;
-    await tracking.save();
-
-    res.json({
-      success: true,
-      message: 'Gap status updated',
-      data: tracking,
-    });
-  } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: 'Error updating gap status',
-      error: 'خطأ في البيانات المدخلة',
-    });
   }
-});
+);
 
 // ============================================
 // QUALITY INDICATORS ROUTES - مؤشرات الجودة
@@ -911,7 +955,9 @@ router.get('/indicators/:id', authenticate, requireBranchAccess, async (req, res
 // Create indicator
 router.post(
   '/indicators',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -936,7 +982,9 @@ router.post(
 // Update indicator
 router.put(
   '/indicators/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -1001,7 +1049,9 @@ router.put(
 // Delete indicator
 router.delete(
   '/indicators/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager']),
   async (req, res) => {
     try {
@@ -1027,7 +1077,9 @@ router.delete(
 // Add measurement to indicator
 router.post(
   '/indicators/:id/measurements',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'quality_manager', 'data_collector']),
   async (req, res) => {
     try {
@@ -1143,41 +1195,46 @@ router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => 
 });
 
 // Compliance report by department
-router.get('/reports/compliance-by-department', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const report = await ComplianceTracking.aggregate([
-      {
-        $group: {
-          _id: {
-            department: '$department',
-            complianceLevel: '$complianceLevel',
-          },
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $group: {
-          _id: '$_id.department',
-          compliance: {
-            $push: {
-              level: '$_id.complianceLevel',
-              count: '$count',
+router.get(
+  '/reports/compliance-by-department',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const report = await ComplianceTracking.aggregate([
+        {
+          $group: {
+            _id: {
+              department: '$department',
+              complianceLevel: '$complianceLevel',
             },
+            count: { $sum: 1 },
           },
-          total: { $sum: '$count' },
         },
-      },
-      { $sort: { _id: 1 } },
-    ]);
+        {
+          $group: {
+            _id: '$_id.department',
+            compliance: {
+              $push: {
+                level: '$_id.complianceLevel',
+                count: '$count',
+              },
+            },
+            total: { $sum: '$count' },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
 
-    res.json({
-      success: true,
-      data: report,
-    });
-  } catch (error) {
-    safeError(res, error, 'quality');
+      res.json({
+        success: true,
+        data: report,
+      });
+    } catch (error) {
+      safeError(res, error, 'quality');
+    }
   }
-});
+);
 
 // Audit findings trend
 router.get('/reports/findings-trend', authenticate, requireBranchAccess, async (req, res) => {

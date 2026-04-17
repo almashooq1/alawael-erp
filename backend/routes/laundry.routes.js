@@ -14,8 +14,8 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { LaundryOrder, LaundryMachine, LaundrySchedule } = require('../models/laundry.model');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Authentication Middleware ────────────────────────────────────────
 router.use(authenticate);

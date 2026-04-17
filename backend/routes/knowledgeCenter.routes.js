@@ -19,7 +19,6 @@
  *   /seed                 — Demo data
  */
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { body, param } = require('express-validator');
 const { validate } = require('../middleware/validate');
@@ -27,6 +26,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { knowledgeCenterService } = require('../services/knowledge-center.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

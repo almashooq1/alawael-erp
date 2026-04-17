@@ -6,8 +6,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { HelpDeskTicket, HelpDeskArticle } = require('../models/HelpDesk');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 /** Max page size to prevent memory exhaustion */
 const MAX_PAGE_LIMIT = 100;
@@ -102,23 +102,33 @@ router.get('/tickets', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.post('/tickets', authenticate, requireBranchAccess, validate(schemas.helpdesk.createTicket), async (req, res) => {
-  try {
-    const ticket = new HelpDeskTicket({ ...req.body, requester: req.user._id });
-    await ticket.save();
-    res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
-  } catch (error) {
-    safeError(res, error, 'helpdesk');
+router.post(
+  '/tickets',
+  authenticate,
+  requireBranchAccess,
+  validate(schemas.helpdesk.createTicket),
+  async (req, res) => {
+    try {
+      const ticket = new HelpDeskTicket({ ...req.body, requester: req.user._id });
+      await ticket.save();
+      res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
+    } catch (error) {
+      safeError(res, error, 'helpdesk');
+    }
   }
-});
+);
 
 router.put('/tickets/:id', authenticate, requireBranchAccess, async (req, res) => {
   if (!validObjectId(req, res)) return;
   try {
-    const ticket = await HelpDeskTicket.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const ticket = await HelpDeskTicket.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket });
   } catch (error) {
@@ -126,16 +136,22 @@ router.put('/tickets/:id', authenticate, requireBranchAccess, async (req, res) =
   }
 });
 
-router.delete('/tickets/:id', authenticate, requireBranchAccess, authorize('admin'), async (req, res) => {
-  if (!validObjectId(req, res)) return;
-  try {
-    const ticket = await HelpDeskTicket.findByIdAndDelete(req.params.id);
-    if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
-    res.json({ success: true, message: 'تم حذف التذكرة بنجاح' });
-  } catch (error) {
-    safeError(res, error, 'helpdesk');
+router.delete(
+  '/tickets/:id',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin'),
+  async (req, res) => {
+    if (!validObjectId(req, res)) return;
+    try {
+      const ticket = await HelpDeskTicket.findByIdAndDelete(req.params.id);
+      if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
+      res.json({ success: true, message: 'تم حذف التذكرة بنجاح' });
+    } catch (error) {
+      safeError(res, error, 'helpdesk');
+    }
   }
-});
+);
 
 // ── Ticket comments ──────────────────────────────────────────────────
 router.post('/tickets/:id/comments', authenticate, requireBranchAccess, async (req, res) => {

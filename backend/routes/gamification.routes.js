@@ -10,8 +10,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const SmartGamificationService = require('../services/smartGamification.service');
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── Badges CRUD ──────────────────────────────────────────────────
 
@@ -26,52 +26,76 @@ router.get('/badges', requireAuth, requireBranchAccess, async (req, res) => {
 });
 
 /** POST /api/gamification/badges — create badge (admin) */
-router.post('/badges', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
-  try {
-    const badge = await Badge.create(stripUpdateMeta(req.body));
-    res.status(201).json({ success: true, data: badge });
-  } catch (err) {
-    logger.error('gamification badge create error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.post(
+  '/badges',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const badge = await Badge.create(stripUpdateMeta(req.body));
+      res.status(201).json({ success: true, data: badge });
+    } catch (err) {
+      logger.error('gamification badge create error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** PUT /api/gamification/badges/:id — update badge (admin) */
-router.put('/badges/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
-  try {
-    const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
-    if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
-    res.json({ success: true, data: badge });
-  } catch (err) {
-    logger.error('gamification badge update error:', err);
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/badges/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const badge = await Badge.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+        new: true,
+        runValidators: true,
+      });
+      if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
+      res.json({ success: true, data: badge });
+    } catch (err) {
+      logger.error('gamification badge update error:', err);
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 /** DELETE /api/gamification/badges/:id — delete badge (admin) */
-router.delete('/badges/:id', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
-  try {
-    const badge = await Badge.findByIdAndDelete(req.params.id);
-    if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
-    res.json({ success: true, message: 'Badge deleted' });
-  } catch (err) {
-    safeError(res, err, 'gamification badge delete error');
+router.delete(
+  '/badges/:id',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      const badge = await Badge.findByIdAndDelete(req.params.id);
+      if (!badge) return res.status(404).json({ success: false, message: 'Badge not found' });
+      res.json({ success: true, message: 'Badge deleted' });
+    } catch (err) {
+      safeError(res, err, 'gamification badge delete error');
+    }
   }
-});
+);
 
 /** POST /api/gamification/badges/seed — seed default badges (admin) */
-router.post('/badges/seed', requireAuth, requireBranchAccess, requireRole(['admin']), async (req, res) => {
-  try {
-    await SmartGamificationService.seedBadges();
-    const count = await Badge.countDocuments();
-    res.json({ success: true, message: 'Badges seeded', count });
-  } catch (err) {
-    safeError(res, err, 'gamification seed error');
+router.post(
+  '/badges/seed',
+  requireAuth,
+  requireBranchAccess,
+  requireRole(['admin']),
+  async (req, res) => {
+    try {
+      await SmartGamificationService.seedBadges();
+      const count = await Badge.countDocuments();
+      res.json({ success: true, message: 'Badges seeded', count });
+    } catch (err) {
+      safeError(res, err, 'gamification seed error');
+    }
   }
-});
+);
 
 // ── Wallets ──────────────────────────────────────────────────────
 

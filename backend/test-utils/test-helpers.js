@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-env jest */
 /**
  * Test Helpers and Utilities
  * Common functions used across all tests

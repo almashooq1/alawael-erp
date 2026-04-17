@@ -7,6 +7,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -37,7 +38,6 @@ router.get('/', async (req, res) => {
 router.get('/vendor/:vendorId', async (req, res) => {
   try {
     const VendorEvaluation = require('../models/VendorEvaluation');
-const safeError = require('../utils/safeError');
     const data = await VendorEvaluation.find({ vendorId: req.params.vendorId })
       .sort({ date: -1 })
       .lean();

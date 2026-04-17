@@ -19,12 +19,12 @@
  *   /:id/logs          — Visitor audit logs
  */
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { visitorAdvancedService } = require('../services/visitor-advanced.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

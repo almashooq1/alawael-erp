@@ -8,7 +8,6 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 
@@ -22,6 +21,7 @@ const KpiTarget = require('../models/KpiTarget');
 const KpiAlert = require('../models/KpiAlert');
 const KpiScorecard = require('../models/KpiScorecard');
 const kpiService = require('../services/kpiCalculation.service');
+const safeError = require('../utils/safeError');
 
 // ─── فئات KPI ────────────────────────────────────────────────────────────────
 

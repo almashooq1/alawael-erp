@@ -26,7 +26,7 @@ const _logger = require('../utils/logger');
 
 // ── Service ──
 const library = require('../services/library.service');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -84,7 +84,9 @@ router.get('/categories', authenticate, requireBranchAccess, async (req, res) =>
 
 router.get(
   '/categories/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -99,7 +101,9 @@ router.get(
 
 router.post(
   '/categories',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم الفئة مطلوب'),
@@ -118,7 +122,9 @@ router.post(
 
 router.put(
   '/categories/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
@@ -134,7 +140,9 @@ router.put(
 
 router.delete(
   '/categories/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty().withMessage('معرّف الفئة مطلوب')],
   async (req, res) => {
@@ -163,7 +171,9 @@ router.get('/resources', authenticate, requireBranchAccess, async (req, res) => 
 
 router.get(
   '/resources/search',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [query('q').notEmpty().withMessage('نص البحث مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -178,7 +188,9 @@ router.get(
 
 router.get(
   '/resources/barcode/:barcode',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('barcode').notEmpty().withMessage('الباركود مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -193,7 +205,9 @@ router.get(
 
 router.get(
   '/resources/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -208,7 +222,9 @@ router.get(
 
 router.post(
   '/resources',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم المورد مطلوب'),
@@ -228,7 +244,9 @@ router.post(
 
 router.put(
   '/resources/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
@@ -244,7 +262,9 @@ router.put(
 
 router.delete(
   '/resources/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
@@ -260,7 +280,9 @@ router.delete(
 
 router.post(
   '/resources/bulk-import',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [body('items').isArray({ min: 1, max: 200 }).withMessage('يجب تقديم قائمة موارد (بحد أقصى 200)')],
   async (req, res) => {
@@ -298,7 +320,9 @@ router.get('/loans/overdue', authenticate, requireBranchAccess, async (req, res)
 
 router.get(
   '/loans/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -313,7 +337,9 @@ router.get(
 
 router.post(
   '/loans',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),
@@ -332,7 +358,9 @@ router.post(
 
 router.post(
   '/loans/:id/return',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
@@ -348,7 +376,9 @@ router.post(
 
 router.post(
   '/loans/:id/renew',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الإعارة مطلوب')],
   async (req, res) => {
@@ -377,7 +407,9 @@ router.get('/reservations', authenticate, requireBranchAccess, async (req, res) 
 
 router.post(
   '/reservations',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),
@@ -396,7 +428,9 @@ router.post(
 
 router.post(
   '/reservations/:id/cancel',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian', 'staff']),
   [param('id').notEmpty().withMessage('معرّف الحجز مطلوب')],
   async (req, res) => {
@@ -425,7 +459,9 @@ router.get('/members', authenticate, requireBranchAccess, async (req, res) => {
 
 router.get(
   '/members/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف العضو مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -440,7 +476,9 @@ router.get(
 
 router.post(
   '/members',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('name').notEmpty().withMessage('اسم العضو مطلوب'),
@@ -459,7 +497,9 @@ router.post(
 
 router.put(
   '/members/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [param('id').notEmpty().withMessage('معرّف العضو مطلوب')],
   async (req, res) => {
@@ -479,7 +519,9 @@ router.put(
 
 router.get(
   '/resources/:id/reviews',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المورد مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -494,7 +536,9 @@ router.get(
 
 router.post(
   '/resources/:id/reviews',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المورد مطلوب'),
     body('rating').isInt({ min: 1, max: 5 }).withMessage('التقييم يجب أن يكون بين 1 و 5'),
@@ -529,7 +573,9 @@ router.get('/suppliers', authenticate, requireBranchAccess, async (req, res) => 
 
 router.post(
   '/suppliers',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [body('name').notEmpty().withMessage('اسم المورّد مطلوب')],
   async (req, res) => {
@@ -558,7 +604,9 @@ router.get('/maintenance', authenticate, requireBranchAccess, async (req, res) =
 
 router.post(
   '/maintenance',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'librarian']),
   [
     body('resourceId').notEmpty().withMessage('المورد مطلوب'),

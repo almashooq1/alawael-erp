@@ -3,6 +3,7 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // Unified email service
 let emailManager;
@@ -48,7 +49,6 @@ router.use(requireBranchAccess);
 router.get('/attendance', async (req, res) => {
   try {
     const Attendance = require('../models/HR/Attendance');
-const safeError = require('../utils/safeError');
     const { page = 1, limit = 20, date } = req.query;
     const filter = {};
     if (date) filter.date = new Date(date);

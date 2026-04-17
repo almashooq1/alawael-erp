@@ -11,7 +11,6 @@ const { v4: uuidv4 } = require('uuid');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const safeError = require('../utils/safeError');
 
 const {
   Referral,
@@ -35,6 +34,7 @@ const {
 } = require('../services/referralService');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Multer Setup ─────────────────────────────────────────────────────────────
 
@@ -163,9 +163,13 @@ router.patch(
   authorize(['admin', 'branch_admin', 'medical_director']),
   async (req, res) => {
     try {
-      const facility = await ReferringFacility.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-        new: true,
-      });
+      const facility = await ReferringFacility.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+        }
+      );
       res.json({ success: true, data: facility });
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });

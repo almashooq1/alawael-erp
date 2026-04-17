@@ -1985,23 +1985,9 @@ router.post(
       });
     }
 
-    // Send invoice email to customer if email provided (non-blocking)
-    if (emailManager && customerEmail) {
-      emailManager
-        .sendInvoice(customerEmail, {
-          customerName: clientName,
-          invoiceNumber: invoice?.invoiceNumber || `INV-${Date.now()}`,
-          date: new Date().toLocaleDateString('ar-SA'),
-          dueDate: dueDate ? new Date(dueDate).toLocaleDateString('ar-SA') : 'خلال 30 يوم',
-          items: items || [],
-          subtotal: invoice?.subtotal || 0,
-          vatAmount: invoice?.vatAmount || 0,
-          totalAmount: invoice?.totalAmount || 0,
-        })
-        .catch(err => logger.error('Failed to send invoice email:', err.message));
-    }
-
-    // Fallback
+    // Fallback when AccountingInvoice model is not available.
+    // (Prior versions tried to send an invoice email here referencing an
+    // `invoice` variable that is scoped to the if-branch above; removed.)
     res.status(201).json({
       success: true,
       data: {

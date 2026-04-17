@@ -5,8 +5,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { SafetyIncident, SafetyInspection } = require('../models/HSE');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── Dashboard ────────────────────────────────────────────────────────
 router.get('/dashboard', authenticate, requireBranchAccess, async (req, res) => {
@@ -86,15 +86,23 @@ router.get('/incidents', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.post('/incidents', authenticate, requireBranchAccess, validate(schemas.hse.reportIncident), async (req, res) => {
-  try {
-    const doc = new SafetyIncident({ ...req.body, reportedBy: req.user._id || req.user.id });
-    await doc.save();
-    res.status(201).json({ success: true, data: doc });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في إنشاء الحادثة', error: safeError(error) });
+router.post(
+  '/incidents',
+  authenticate,
+  requireBranchAccess,
+  validate(schemas.hse.reportIncident),
+  async (req, res) => {
+    try {
+      const doc = new SafetyIncident({ ...req.body, reportedBy: req.user._id || req.user.id });
+      await doc.save();
+      res.status(201).json({ success: true, data: doc });
+    } catch (error) {
+      res
+        .status(400)
+        .json({ success: false, message: 'خطأ في إنشاء الحادثة', error: safeError(error) });
+    }
   }
-});
+);
 
 router.put('/incidents/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
@@ -105,13 +113,17 @@ router.put('/incidents/:id', authenticate, requireBranchAccess, async (req, res)
     if (!doc) return res.status(404).json({ success: false, message: 'الحادثة غير موجودة' });
     res.json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في تحديث الحادثة', error: safeError(error) });
+    res
+      .status(400)
+      .json({ success: false, message: 'خطأ في تحديث الحادثة', error: safeError(error) });
   }
 });
 
 router.delete(
   '/incidents/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'hse_manager'),
   async (req, res) => {
     try {
@@ -152,7 +164,9 @@ router.post('/inspections', authenticate, requireBranchAccess, async (req, res) 
     await doc.save();
     res.status(201).json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في إنشاء التفتيش', error: safeError(error) });
+    res
+      .status(400)
+      .json({ success: false, message: 'خطأ في إنشاء التفتيش', error: safeError(error) });
   }
 });
 
@@ -165,13 +179,17 @@ router.put('/inspections/:id', authenticate, requireBranchAccess, async (req, re
     if (!doc) return res.status(404).json({ success: false, message: 'التفتيش غير موجود' });
     res.json({ success: true, data: doc });
   } catch (error) {
-    res.status(400).json({ success: false, message: 'خطأ في تحديث التفتيش', error: safeError(error) });
+    res
+      .status(400)
+      .json({ success: false, message: 'خطأ في تحديث التفتيش', error: safeError(error) });
   }
 });
 
 router.delete(
   '/inspections/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'hse_manager'),
   async (req, res) => {
     try {

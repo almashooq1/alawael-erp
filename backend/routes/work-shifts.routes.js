@@ -13,8 +13,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const WorkShift = require('../models/WorkShift');
 const OvertimeRequest = require('../models/OvertimeRequest');
 const Employee = require('../models/Employee');
-const safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
+const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 1. جداول الدوام — Work Shifts CRUD
@@ -62,14 +62,20 @@ router.get('/', authenticate, requireBranchAccess, async (req, res) => {
  * POST /
  * إنشاء جدول دوام جديد
  */
-router.post('/', authenticate, requireBranchAccess, authorize(['admin', 'hr']), async (req, res) => {
-  try {
-    const shift = await WorkShift.create({ ...req.body, createdBy: req.user._id });
-    res.status(201).json({ success: true, message: 'تم إنشاء جدول الدوام بنجاح', data: shift });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin', 'hr']),
+  async (req, res) => {
+    try {
+      const shift = await WorkShift.create({ ...req.body, createdBy: req.user._id });
+      res.status(201).json({ success: true, message: 'تم إنشاء جدول الدوام بنجاح', data: shift });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 /**
  * GET /:id
@@ -89,19 +95,25 @@ router.get('/:id', authenticate, requireBranchAccess, async (req, res) => {
  * PUT /:id
  * تحديث جدول دوام
  */
-router.put('/:id', authenticate, requireBranchAccess, authorize(['admin', 'hr']), async (req, res) => {
-  try {
-    const shift = await WorkShift.findOneAndUpdate(
-      { _id: req.params.id, deletedAt: null },
-      { ...req.body, updatedBy: req.user._id, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
-    if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
-    res.json({ success: true, message: 'تم التحديث بنجاح', data: shift });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.put(
+  '/:id',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin', 'hr']),
+  async (req, res) => {
+    try {
+      const shift = await WorkShift.findOneAndUpdate(
+        { _id: req.params.id, deletedAt: null },
+        { ...req.body, updatedBy: req.user._id, updatedAt: new Date() },
+        { new: true, runValidators: true }
+      );
+      if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
+      res.json({ success: true, message: 'تم التحديث بنجاح', data: shift });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 /**
  * DELETE /:id
@@ -129,7 +141,9 @@ router.delete('/:id', authenticate, requireBranchAccess, authorize(['admin']), a
  */
 router.get(
   '/assignments/list',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr', 'manager']),
   async (req, res) => {
     try {
@@ -164,78 +178,89 @@ router.get(
  * POST /assignments
  * تعيين دوام لموظف
  */
-router.post('/assignments', authenticate, requireBranchAccess, authorize(['admin', 'hr']), async (req, res) => {
-  try {
-    const { employeeId, shiftId, effectiveFrom, effectiveTo, reason } = req.body;
+router.post(
+  '/assignments',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin', 'hr']),
+  async (req, res) => {
+    try {
+      const { employeeId, shiftId, effectiveFrom, effectiveTo, reason } = req.body;
 
-    if (!employeeId || !shiftId || !effectiveFrom) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'employeeId و shiftId و effectiveFrom مطلوبة' });
-    }
-
-    const [employee, shift] = await Promise.all([
-      Employee.findOne({ _id: employeeId, deletedAt: null }),
-      WorkShift.findOne({ _id: shiftId, deletedAt: null }),
-    ]);
-
-    if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
-    if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
-
-    // تحديث دوام الموظف الحالي
-    await Employee.findOneAndUpdate(
-      { _id: employeeId },
-      {
-        currentShiftId: shiftId,
-        $push: {
-          shiftHistory: {
-            shiftId,
-            effectiveFrom: new Date(effectiveFrom),
-            effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
-            reason: reason || null,
-            assignedBy: req.user._id,
-            assignedAt: new Date(),
-          },
-        },
-        updatedBy: req.user._id,
-        updatedAt: new Date(),
+      if (!employeeId || !shiftId || !effectiveFrom) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'employeeId و shiftId و effectiveFrom مطلوبة' });
       }
-    );
 
-    res.status(201).json({
-      success: true,
-      message: `تم تعيين دوام "${shift.nameAr}" للموظف بنجاح`,
-      data: { employeeId, shiftId, effectiveFrom, effectiveTo },
-    });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+      const [employee, shift] = await Promise.all([
+        Employee.findOne({ _id: employeeId, deletedAt: null }),
+        WorkShift.findOne({ _id: shiftId, deletedAt: null }),
+      ]);
+
+      if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
+      if (!shift) return res.status(404).json({ success: false, message: 'جدول الدوام غير موجود' });
+
+      // تحديث دوام الموظف الحالي
+      await Employee.findOneAndUpdate(
+        { _id: employeeId },
+        {
+          currentShiftId: shiftId,
+          $push: {
+            shiftHistory: {
+              shiftId,
+              effectiveFrom: new Date(effectiveFrom),
+              effectiveTo: effectiveTo ? new Date(effectiveTo) : null,
+              reason: reason || null,
+              assignedBy: req.user._id,
+              assignedAt: new Date(),
+            },
+          },
+          updatedBy: req.user._id,
+          updatedAt: new Date(),
+        }
+      );
+
+      res.status(201).json({
+        success: true,
+        message: `تم تعيين دوام "${shift.nameAr}" للموظف بنجاح`,
+        data: { employeeId, shiftId, effectiveFrom, effectiveTo },
+      });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 /**
  * GET /assignments/:employeeId/current
  * الدوام الحالي لموظف
  */
-router.get('/assignments/:employeeId/current', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const employee = await Employee.findOne({
-      _id: req.params.employeeId,
-      deletedAt: null,
-    })
-      .select('name currentShiftId shiftHistory')
-      .populate('currentShiftId')
-      .lean();
+router.get(
+  '/assignments/:employeeId/current',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const employee = await Employee.findOne({
+        _id: req.params.employeeId,
+        deletedAt: null,
+      })
+        .select('name currentShiftId shiftHistory')
+        .populate('currentShiftId')
+        .lean();
 
-    if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
+      if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
-    res.json({
-      success: true,
-      data: { shift: employee.currentShiftId, history: employee.shiftHistory },
-    });
-  } catch (err) {
-    safeError(res, err);
+      res.json({
+        success: true,
+        data: { shift: employee.currentShiftId, history: employee.shiftHistory },
+      });
+    } catch (err) {
+      safeError(res, err);
+    }
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. طلبات الوقت الإضافي — Overtime Requests
@@ -308,7 +333,9 @@ router.post('/overtime', authenticate, requireBranchAccess, async (req, res) => 
  */
 router.post(
   '/overtime/:id/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr', 'manager']),
   async (req, res) => {
     try {
@@ -339,7 +366,9 @@ router.post(
  */
 router.post(
   '/overtime/:id/reject',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr', 'manager']),
   async (req, res) => {
     try {
@@ -369,58 +398,64 @@ router.post(
  * GET /overtime/summary
  * ملخص الوقت الإضافي الشهري
  */
-router.get('/overtime/summary', authenticate, requireBranchAccess, authorize(['admin', 'hr']), async (req, res) => {
-  try {
-    const { branchId, year, month } = req.query;
-    const y = parseInt(year) || new Date().getFullYear();
-    const m = parseInt(month) || new Date().getMonth() + 1;
+router.get(
+  '/overtime/summary',
+  authenticate,
+  requireBranchAccess,
+  authorize(['admin', 'hr']),
+  async (req, res) => {
+    try {
+      const { branchId, year, month } = req.query;
+      const y = parseInt(year) || new Date().getFullYear();
+      const m = parseInt(month) || new Date().getMonth() + 1;
 
-    const start = new Date(y, m - 1, 1);
-    const end = new Date(y, m, 0, 23, 59, 59);
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 0, 23, 59, 59);
 
-    const filter = {
-      deletedAt: null,
-      status: 'approved',
-      overtimeDate: { $gte: start, $lte: end },
-    };
-    if (branchId) filter.branchId = branchId;
+      const filter = {
+        deletedAt: null,
+        status: 'approved',
+        overtimeDate: { $gte: start, $lte: end },
+      };
+      if (branchId) filter.branchId = branchId;
 
-    const summary = await OvertimeRequest.aggregate([
-      { $match: filter },
-      {
-        $group: {
-          _id: '$employeeId',
-          totalMinutes: { $sum: '$durationMinutes' },
-          totalAmount: { $sum: '$amount' },
-          count: { $sum: 1 },
+      const summary = await OvertimeRequest.aggregate([
+        { $match: filter },
+        {
+          $group: {
+            _id: '$employeeId',
+            totalMinutes: { $sum: '$durationMinutes' },
+            totalAmount: { $sum: '$amount' },
+            count: { $sum: 1 },
+          },
         },
-      },
-      {
-        $lookup: {
-          from: 'employees',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'employee',
+        {
+          $lookup: {
+            from: 'employees',
+            localField: '_id',
+            foreignField: '_id',
+            as: 'employee',
+          },
         },
-      },
-      { $unwind: { path: '$employee', preserveNullAndEmpty: true } },
-      {
-        $project: {
-          employeeName: '$employee.name',
-          employeeNumber: '$employee.employeeNumber',
-          totalMinutes: 1,
-          totalHours: { $divide: ['$totalMinutes', 60] },
-          totalAmount: 1,
-          count: 1,
+        { $unwind: { path: '$employee', preserveNullAndEmpty: true } },
+        {
+          $project: {
+            employeeName: '$employee.name',
+            employeeNumber: '$employee.employeeNumber',
+            totalMinutes: 1,
+            totalHours: { $divide: ['$totalMinutes', 60] },
+            totalAmount: 1,
+            count: 1,
+          },
         },
-      },
-      { $sort: { totalMinutes: -1 } },
-    ]);
+        { $sort: { totalMinutes: -1 } },
+      ]);
 
-    res.json({ success: true, data: summary, period: { year: y, month: m } });
-  } catch (err) {
-    safeError(res, err);
+      res.json({ success: true, data: summary, period: { year: y, month: m } });
+    } catch (err) {
+      safeError(res, err);
+    }
   }
-});
+);
 
 module.exports = router;

@@ -6,8 +6,8 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/EnterpriseRisk`)[n];
@@ -156,7 +156,9 @@ router.post('/assessments', authenticate, requireBranchAccess, async (req, res) 
 router.put('/assessments/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Assessment = safeModel('RiskAssessment');
-    const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Assessment.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'التقييم غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {

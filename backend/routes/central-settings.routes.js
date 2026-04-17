@@ -19,6 +19,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 // نستخدم نموذج BranchSetting الموجود في النظام
 let GlobalSetting, BranchSetting;
@@ -29,7 +30,6 @@ try {
 } catch {
   // إنشاء نماذج مبسطة إذا لم تكن موجودة
   const mongoose = require('mongoose');
-const safeError = require('../utils/safeError');
 
   const globalSettingSchema = new mongoose.Schema(
     {

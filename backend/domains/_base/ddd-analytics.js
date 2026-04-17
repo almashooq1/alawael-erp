@@ -18,7 +18,6 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const safeError = require('../../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  Helper: Safe model accessor
@@ -487,6 +486,7 @@ async function executiveSummary() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 const express = require('express');
+const safeError = require('../../utils/safeError');
 
 function createAnalyticsRouter() {
   const router = express.Router();

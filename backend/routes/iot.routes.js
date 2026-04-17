@@ -26,7 +26,7 @@ const {
 const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

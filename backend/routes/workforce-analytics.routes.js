@@ -23,7 +23,7 @@ const logger = require('../utils/logger');
 
 // ── Service ──
 const WorkforceAnalyticsService = require('../services/workforce-analytics.service');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 const service = new WorkforceAnalyticsService();
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -45,14 +45,19 @@ router.get('/health-score', authenticate, requireBranchAccess, async (req, res) 
 /**
  * GET /analytics/department/:departmentId — Department analytics
  */
-router.get('/analytics/department/:departmentId', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const data = service.getDepartmentAnalytics(req.params.departmentId);
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'Department analytics error');
+router.get(
+  '/analytics/department/:departmentId',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const data = service.getDepartmentAnalytics(req.params.departmentId);
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'Department analytics error');
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // HEADCOUNT PLANNING — تخطيط القوى العاملة
@@ -63,7 +68,9 @@ router.get('/analytics/department/:departmentId', authenticate, requireBranchAcc
  */
 router.post(
   '/headcount-plans',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -92,7 +99,9 @@ router.get('/headcount-plans', authenticate, requireBranchAccess, async (_req, r
  */
 router.put(
   '/headcount-plans/:planId/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'ceo']),
   async (req, res) => {
     try {
@@ -114,7 +123,9 @@ router.put(
  */
 router.post(
   '/forecasts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager', 'analyst']),
   async (req, res) => {
     try {
@@ -141,15 +152,20 @@ router.get('/forecasts', authenticate, requireBranchAccess, async (_req, res) =>
 /**
  * PUT /forecasts/:forecastId/accuracy — Update forecast accuracy
  */
-router.put('/forecasts/:forecastId/accuracy', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const forecast = service.updateForecastAccuracy(req.params.forecastId, req.body);
-    res.json({ success: true, data: forecast });
-  } catch (err) {
-    logger.error('Update forecast accuracy error:', err.message);
-    res.status(400).json({ success: false, error: safeError(err) });
+router.put(
+  '/forecasts/:forecastId/accuracy',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const forecast = service.updateForecastAccuracy(req.params.forecastId, req.body);
+      res.json({ success: true, data: forecast });
+    } catch (err) {
+      logger.error('Update forecast accuracy error:', err.message);
+      res.status(400).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // SUCCESSION PLANNING — تخطيط التعاقب الوظيفي
@@ -160,7 +176,9 @@ router.put('/forecasts/:forecastId/accuracy', authenticate, requireBranchAccess,
  */
 router.post(
   '/succession-plans',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -189,7 +207,9 @@ router.get('/succession-plans', authenticate, requireBranchAccess, async (_req, 
  */
 router.post(
   '/succession-plans/:planId/successors',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -271,7 +291,9 @@ router.post('/attrition-risk', authenticate, requireBranchAccess, async (req, re
  */
 router.post(
   '/salary-bands',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'system_admin', 'hr_manager']),
   async (req, res) => {
     try {

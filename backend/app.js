@@ -32,7 +32,6 @@ const {
   uncaughtExceptionHandler,
   unhandledRejectionHandler,
 } = require('./errors/errorHandler');
-const safeError = require('./utils/safeError');
 
 // ─── Environment Setup ───────────────────────────────────────────────────────
 if (!process.env.MONGODB_URI && !process.env.USE_MOCK_DB) {
@@ -74,6 +73,7 @@ const { mountMessageQueueRoutes } = require('./infrastructure/messageQueue');
 const { mountMigrationRoutes } = require('./infrastructure/migrationRunner');
 require('./api/versionRouter'); // side-effects only
 const { mountAllDomains, healthCheckAll: domainHealthCheck } = require('./domains/index');
+const safeError = require('./utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. MIDDLEWARE STACK

@@ -8,7 +8,6 @@
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const safeError = require('../utils/safeError');
 const router = express.Router();
 
 // 🔒 All KPI Reports routes require authentication
@@ -17,6 +16,7 @@ router.use(requireBranchAccess);
 const KpiReport = require('../models/KpiReport');
 const KpiValue = require('../models/KpiValue');
 const KpiScorecard = require('../models/KpiScorecard');
+const safeError = require('../utils/safeError');
 
 // ─── قائمة التقارير ──────────────────────────────────────────────────────────
 

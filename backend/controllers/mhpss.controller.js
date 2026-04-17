@@ -4,6 +4,7 @@
  */
 
 const mhpssService = require('../services/mhpss.service');
+const safeError = require('../utils/safeError');
 
 class MHPSSController {
   // ─── Counseling Sessions ─────────────────────────────────────────────────
@@ -33,7 +34,6 @@ class MHPSSController {
       if (beneficiary) filters.beneficiary = beneficiary;
       if (search) {
         const { escapeRegex } = require('../utils/sanitize');
-const safeError = require('../utils/safeError');
         const safeSearch = escapeRegex(search);
         filters.$or = [
           { chiefComplaint: { $regex: safeSearch, $options: 'i' } },

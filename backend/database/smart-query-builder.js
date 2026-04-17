@@ -597,8 +597,10 @@ class SmartQueryBuilder {
     return this._model.countDocuments(this._filter);
   }
 
-  /** Check if any matching document exists */
-  async exists() {
+  /** Check if any matching document exists.
+   *  Named `existsAny` because `exists(field, shouldExist)` is also a filter
+   *  builder method on this class. */
+  async existsAny() {
     const doc = await this._model.findOne(this._filter).select('_id').lean();
     return !!doc;
   }

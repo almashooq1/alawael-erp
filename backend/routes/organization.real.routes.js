@@ -8,6 +8,7 @@ const logger = require('../utils/logger');
 const Department = require('../models/Department');
 const Position = require('../models/Position');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -21,7 +22,6 @@ router.get('/structure', async (req, res) => {
     // Try Mongoose org model first
     try {
       const Organization = require('../models/organization.model');
-const safeError = require('../utils/safeError');
       const org = await Organization.findOne().lean();
       if (org) return res.json({ success: true, data: org });
     } catch (_) {

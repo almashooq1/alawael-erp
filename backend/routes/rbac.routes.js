@@ -10,10 +10,10 @@ const rbacController = require('../controllers/rbac.controller');
 const { protect } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const safeError = require('../utils/safeError');
 let rbacManager;
 try {
   rbacManager = require('../services/rbacManager.service');
-const safeError = require('../utils/safeError');
 } catch (_e) {
   rbacManager = {};
 }

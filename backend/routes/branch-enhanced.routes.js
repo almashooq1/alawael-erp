@@ -3,8 +3,8 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const svc = require('../services/branches/branch-enhanced.service');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // مقارنة أداء الفروع
 router.get('/compare', authenticate, requireBranchAccess, async (req, res) => {
@@ -30,16 +30,22 @@ router.get('/', authenticate, requireBranchAccess, async (req, res) => {
 });
 
 // إنشاء فرع جديد
-router.post('/', authenticate, requireBranchAccess, authorize('admin', 'super_admin'), async (req, res) => {
-  try {
-    const Branch = require('../models/Branch');
-    const branch = await Branch.create(stripUpdateMeta(req.body));
-    await svc.initializeSettings(branch._id);
-    res.status(201).json({ success: true, data: branch });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/',
+  authenticate,
+  requireBranchAccess,
+  authorize('admin', 'super_admin'),
+  async (req, res) => {
+    try {
+      const Branch = require('../models/Branch');
+      const branch = await Branch.create(stripUpdateMeta(req.body));
+      await svc.initializeSettings(branch._id);
+      res.status(201).json({ success: true, data: branch });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 // تفاصيل فرع
 router.get('/:branchId', authenticate, requireBranchAccess, async (req, res) => {
@@ -56,7 +62,9 @@ router.get('/:branchId', authenticate, requireBranchAccess, async (req, res) => 
 // تحديث فرع
 router.put(
   '/:branchId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -98,7 +106,9 @@ router.get('/:branchId/settings', authenticate, requireBranchAccess, async (req,
 
 router.put(
   '/:branchId/settings',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -133,7 +143,9 @@ router.get('/:branchId/rooms', authenticate, requireBranchAccess, async (req, re
 
 router.post(
   '/:branchId/rooms',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -147,7 +159,9 @@ router.post(
 
 router.put(
   '/:branchId/rooms/:roomId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -167,7 +181,9 @@ router.put(
 
 router.delete(
   '/:branchId/rooms/:roomId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin'),
   async (req, res) => {
     try {
@@ -196,7 +212,9 @@ router.get('/:branchId/services', authenticate, requireBranchAccess, async (req,
 
 router.post(
   '/:branchId/services',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -210,7 +228,9 @@ router.post(
 
 router.put(
   '/:branchId/services/:serviceId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -262,7 +282,9 @@ router.post('/transfers', authenticate, requireBranchAccess, async (req, res) =>
 
 router.put(
   '/transfers/:transferId/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -281,7 +303,9 @@ router.put(
 
 router.put(
   '/transfers/:transferId/reject',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {
@@ -300,7 +324,9 @@ router.put(
 
 router.post(
   '/transfers/:transferId/complete',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'super_admin', 'branch_manager'),
   async (req, res) => {
     try {

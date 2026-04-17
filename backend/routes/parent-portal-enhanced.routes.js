@@ -48,7 +48,6 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const safeError = require('../utils/safeError');
 const jwt = require('jsonwebtoken');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
@@ -66,6 +65,7 @@ const {
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
 const { createCustomLimiter } = require('../middleware/rateLimiter');
+const safeError = require('../utils/safeError');
 const parentOtpSendLimiter = createCustomLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,

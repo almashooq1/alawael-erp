@@ -288,9 +288,6 @@ function createSearchRouter() {
     } catch (err) {
       console.error('[DDD-Search] Error:', err.message);
       safeError(res, err, 'ddd-search');
-        message_en: 'Search error',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-      });
     }
   });
 

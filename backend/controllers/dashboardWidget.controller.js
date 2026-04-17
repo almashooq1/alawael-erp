@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Dashboard Widget Controller
  * متحكم لوحة معلومات الويدجت
@@ -56,9 +55,6 @@ exports.createWidget = async (req, res) => {
   } catch (error) {
     Logger.error(`Error creating widget: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error creating widget',
-      error: { code: 'CREATE_ERROR' },
-    });
   }
 };
 
@@ -83,9 +79,6 @@ exports.getWidget = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting widget: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving widget',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -122,9 +115,6 @@ exports.updateWidget = async (req, res) => {
   } catch (error) {
     Logger.error(`Error updating widget: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error updating widget',
-      error: { code: 'UPDATE_ERROR' },
-    });
   }
 };
 
@@ -150,9 +140,6 @@ exports.deleteWidget = async (req, res) => {
   } catch (error) {
     Logger.error(`Error deleting widget: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error deleting widget',
-      error: { code: 'DELETE_ERROR' },
-    });
   }
 };
 
@@ -179,9 +166,6 @@ exports.getDashboardWidgets = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting dashboard widgets: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving widgets',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -218,9 +202,6 @@ exports.batchSaveWidgets = async (req, res) => {
   } catch (error) {
     Logger.error(`Error batch saving widgets: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error saving widgets',
-      error: { code: 'BATCH_ERROR' },
-    });
   }
 };
 
@@ -245,9 +226,6 @@ exports.reorderWidgets = async (req, res) => {
   } catch (error) {
     Logger.error(`Error reordering widgets: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error reordering widgets',
-      error: { code: 'REORDER_ERROR' },
-    });
   }
 };
 
@@ -269,9 +247,6 @@ exports.getWidgetTypes = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting widget types: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving types',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -302,9 +277,6 @@ exports.createDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error creating dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error creating dashboard',
-      error: { code: 'CREATE_ERROR' },
-    });
   }
 };
 
@@ -328,9 +300,6 @@ exports.getDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving dashboard',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -355,9 +324,6 @@ exports.getUserDashboards = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting user dashboards: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving dashboards',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -389,9 +355,6 @@ exports.updateDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error updating dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error updating dashboard',
-      error: { code: 'UPDATE_ERROR' },
-    });
   }
 };
 
@@ -415,9 +378,6 @@ exports.deleteDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error deleting dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error deleting dashboard',
-      error: { code: 'DELETE_ERROR' },
-    });
   }
 };
 
@@ -444,9 +404,6 @@ exports.getTemplates = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting templates: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving templates',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -478,9 +435,6 @@ exports.createTemplate = async (req, res) => {
   } catch (error) {
     Logger.error(`Error creating template: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error creating template',
-      error: { code: 'CREATE_ERROR' },
-    });
   }
 };
 
@@ -504,9 +458,6 @@ exports.applyTheme = async (req, res) => {
   } catch (error) {
     Logger.error(`Error applying theme: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error applying theme',
-      error: { code: 'APPLY_ERROR' },
-    });
   }
 };
 
@@ -528,9 +479,6 @@ exports.getThemes = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting themes: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving themes',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -555,9 +503,6 @@ exports.createSnapshot = async (req, res) => {
   } catch (error) {
     Logger.error(`Error creating snapshot: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error creating snapshot',
-      error: { code: 'CREATE_ERROR' },
-    });
   }
 };
 
@@ -581,9 +526,6 @@ exports.restoreSnapshot = async (req, res) => {
   } catch (error) {
     Logger.error(`Error restoring snapshot: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error restoring snapshot',
-      error: { code: 'RESTORE_ERROR' },
-    });
   }
 };
 
@@ -607,9 +549,6 @@ exports.exportDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error exporting dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error exporting dashboard',
-      error: { code: 'EXPORT_ERROR' },
-    });
   }
 };
 
@@ -637,9 +576,6 @@ exports.importDashboard = async (req, res) => {
   } catch (error) {
     Logger.error(`Error importing dashboard: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error importing dashboard',
-      error: { code: 'IMPORT_ERROR' },
-    });
   }
 };
 
@@ -667,9 +603,6 @@ exports.getStats = async (req, res) => {
   } catch (error) {
     Logger.error(`Error getting stats: ${error.message}`);
     safeError(res, error, 'dashboardWidget');
-      en: 'Error retrieving statistics',
-      error: { code: 'GET_ERROR' },
-    });
   }
 };
 
@@ -697,8 +630,5 @@ exports.healthCheck = async (req, res) => {
     });
   } catch (_error) {
     safeError(res, _error, 'dashboardWidget');
-      en: 'System error',
-      error: { code: 'HEALTH_ERROR' },
-    });
   }
 };

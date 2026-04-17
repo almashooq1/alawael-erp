@@ -333,16 +333,22 @@ class ApprovalChainsService {
     const stepDef = chain.steps[stepIdx];
 
     // Check delegation
-    let actualApprover = userId;
+    const actualApprover = userId;
     const delegation = await Delegation.findOne({
       toUser: userId,
       isActive: true,
-      $or: [
-        { scope: 'all' },
-        { scope: 'specific_chain', chainId: request.chainId },
-        { scope: 'specific_request', requestId: request._id },
+      $and: [
+        {
+          $or: [
+            { scope: 'all' },
+            { scope: 'specific_chain', chainId: request.chainId },
+            { scope: 'specific_request', requestId: request._id },
+          ],
+        },
+        {
+          $or: [{ endDate: null }, { endDate: { $gt: new Date() } }],
+        },
       ],
-      $or: [{ endDate: null }, { endDate: { $gt: new Date() } }],
     });
 
     // Record response

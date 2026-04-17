@@ -27,7 +27,9 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/overview',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const overview = await analyticsService.getOverview(req.query);
@@ -48,7 +50,9 @@ router.get(
  */
 router.get(
   '/dashboard',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const dashboard = await analyticsService.getDashboard(req.query);
@@ -69,7 +73,9 @@ router.get(
  */
 router.get(
   '/module/:moduleName',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const analytics = await analyticsService.getModuleAnalytics(req.params.moduleName, req.query);
@@ -91,7 +97,9 @@ router.get(
  */
 router.get(
   '/user/:userId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const analytics = await analyticsService.getUserAnalytics(req.params.userId);
@@ -120,7 +128,9 @@ router.get(
  */
 router.get(
   '/performance-trends',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const trends = await analyticsService.getPerformanceTrends(req.query);
@@ -140,22 +150,18 @@ router.get(
  * @desc    Get key performance indicators
  * @access  Private
  */
-router.get(
-  '/kpi',
-  authenticate, requireBranchAccess, requireBranchAccess,
-  async (req, res) => {
-    try {
-      const kpis = await analyticsService.getKPIs(req.query);
+router.get('/kpi', authenticate, requireBranchAccess, requireBranchAccess, async (req, res) => {
+  try {
+    const kpis = await analyticsService.getKPIs(req.query);
 
-      res.status(200).json({
-        success: true,
-        data: kpis,
-      });
-    } catch (error) {
-      safeError(res, error, 'fetching KPIs');
-    }
+    res.status(200).json({
+      success: true,
+      data: kpis,
+    });
+  } catch (error) {
+    safeError(res, error, 'fetching KPIs');
   }
-);
+});
 
 /**
  * @route   POST /api/v1/analytics/track-event
@@ -164,7 +170,9 @@ router.get(
  */
 router.post(
   '/track-event',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const { eventName, eventData, metadata } = req.body;
@@ -201,7 +209,9 @@ router.post(
  */
 router.get(
   '/health-check',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   async (req, res) => {
     try {
       const health = await analyticsService.getHealthStatus();
@@ -218,6 +228,7 @@ router.get(
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  safeError(res, error, 'Router error');
+  safeError(res, err, 'Router error');
+});
 
 module.exports = router;

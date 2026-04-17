@@ -10,7 +10,6 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const safeError = require('../utils/safeError');
 
 // 🔒 All biometric attendance routes require authentication
 router.use(authenticate);
@@ -26,6 +25,7 @@ const OvertimeRequest = require('../models/OvertimeRequest');
 const zktecoSdk = require('../services/zktecoSdk.service');
 const attendanceProcessing = require('../services/attendanceProcessing.service');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ═══════════════════════════════════════════════════════════════════════
 // أجهزة ZKTeco — ZKTeco Devices
@@ -63,7 +63,10 @@ router.get('/devices/:id', async (req, res) => {
 // POST /api/biometric-attendance/devices — إضافة جهاز جديد
 router.post('/devices', async (req, res) => {
   try {
-    const device = await ZktecoDevice.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
+    const device = await ZktecoDevice.create({
+      ...stripUpdateMeta(req.body),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: device });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -187,7 +190,10 @@ router.get('/shifts', async (req, res) => {
 // POST /api/biometric-attendance/shifts — إنشاء دوام
 router.post('/shifts', async (req, res) => {
   try {
-    const shift = await WorkShift.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
+    const shift = await WorkShift.create({
+      ...stripUpdateMeta(req.body),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: shift });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -481,7 +487,10 @@ router.get('/overtime', async (req, res) => {
 // POST /api/biometric-attendance/overtime — طلب وقت إضافي
 router.post('/overtime', async (req, res) => {
   try {
-    const overtime = await OvertimeRequest.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
+    const overtime = await OvertimeRequest.create({
+      ...stripUpdateMeta(req.body),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: overtime });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
@@ -522,7 +531,10 @@ router.get('/policies', async (req, res) => {
 // POST /api/biometric-attendance/policies — إنشاء سياسة حضور
 router.post('/policies', async (req, res) => {
   try {
-    const policy = await AttendancePolicyModel.create({ ...stripUpdateMeta(req.body), createdBy: req.user?._id });
+    const policy = await AttendancePolicyModel.create({
+      ...stripUpdateMeta(req.body),
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ success: true, data: policy });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

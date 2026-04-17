@@ -26,7 +26,7 @@ const _logger = require('../utils/logger');
 
 // ── Service ──
 const reportBuilder = require('../services/reportBuilder.service');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // ── Validation helper ──
 function handleValidation(req, res) {
@@ -64,16 +64,22 @@ router.get('/data-sources', authenticate, requireBranchAccess, async (req, res) 
   }
 });
 
-router.get('/data-sources/:id/fields', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const fields = reportBuilder.getFieldsForSource(req.params.id);
-    res.json({ success: true, data: fields });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.get(
+  '/data-sources/:id/fields',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const fields = reportBuilder.getFieldsForSource(req.params.id);
+      res.json({ success: true, data: fields });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // REPORT CRUD — إدارة التقارير
@@ -88,22 +94,30 @@ router.get('/reports', authenticate, requireBranchAccess, async (req, res) => {
   }
 });
 
-router.get('/reports/:id', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const report = reportBuilder.getReportById(req.params.id);
-    const versions = reportBuilder.getReportVersions(req.params.id);
-    const shares = reportBuilder.getReportShares(req.params.id);
-    res.json({ success: true, data: { ...report, versions, shares } });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.get(
+  '/reports/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const report = reportBuilder.getReportById(req.params.id);
+      const versions = reportBuilder.getReportVersions(req.params.id);
+      const shares = reportBuilder.getReportShares(req.params.id);
+      res.json({ success: true, data: { ...report, versions, shares } });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 router.post(
   '/reports',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     body('name').notEmpty().withMessage('اسم التقرير مطلوب'),
@@ -123,7 +137,9 @@ router.post(
 
 router.put(
   '/reports/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -143,7 +159,9 @@ router.put(
 
 router.delete(
   '/reports/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -160,7 +178,9 @@ router.delete(
 
 router.post(
   '/reports/:id/duplicate',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -182,7 +202,9 @@ router.post(
 // Add column (drag field → report)
 router.post(
   '/reports/:id/columns',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty(), body('fieldId').notEmpty().withMessage('معرف الحقل مطلوب')],
   async (req, res) => {
@@ -200,7 +222,9 @@ router.post(
 // Remove column
 router.delete(
   '/reports/:id/columns/:fieldId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   async (req, res) => {
     try {
@@ -216,7 +240,9 @@ router.delete(
 // Reorder columns (after drag-and-drop)
 router.put(
   '/reports/:id/columns/reorder',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty(), body('orderedFieldIds').isArray().withMessage('ترتيب الحقول مطلوب')],
   async (req, res) => {
@@ -234,7 +260,9 @@ router.put(
 // Add filter
 router.post(
   '/reports/:id/filters',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     param('id').notEmpty(),
@@ -254,20 +282,27 @@ router.post(
 );
 
 // Remove filter
-router.delete('/reports/:id/filters/:filterId', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const report = reportBuilder.removeFilter(req.params.id, req.params.filterId);
-    res.json({ success: true, data: report });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.delete(
+  '/reports/:id/filters/:filterId',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const report = reportBuilder.removeFilter(req.params.id, req.params.filterId);
+      res.json({ success: true, data: report });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // Update filter
 router.put(
   '/reports/:id/filters/:filterId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   async (req, res) => {
     try {
@@ -283,7 +318,9 @@ router.put(
 // Set sorting
 router.put(
   '/reports/:id/sorting',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -301,7 +338,9 @@ router.put(
 // Set grouping
 router.put(
   '/reports/:id/group-by',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -319,7 +358,9 @@ router.put(
 // Add calculated field
 router.post(
   '/reports/:id/calculated-fields',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     param('id').notEmpty(),
@@ -339,20 +380,27 @@ router.post(
 );
 
 // Remove calculated field
-router.delete('/reports/:id/calculated-fields/:fieldId', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const report = reportBuilder.removeCalculatedField(req.params.id, req.params.fieldId);
-    res.json({ success: true, data: report });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.delete(
+  '/reports/:id/calculated-fields/:fieldId',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const report = reportBuilder.removeCalculatedField(req.params.id, req.params.fieldId);
+      res.json({ success: true, data: report });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 // Set chart configuration
 router.put(
   '/reports/:id/chart',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -371,30 +419,42 @@ router.put(
 // EXECUTION — تنفيذ التقرير
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.post('/reports/:id/execute', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const result = reportBuilder.executeReport(req.params.id, {
-      ...req.query,
-      ...req.body,
-      userId: req.user?.id,
-    });
-    res.json({ success: true, data: result });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.post(
+  '/reports/:id/execute',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const result = reportBuilder.executeReport(req.params.id, {
+        ...req.query,
+        ...req.body,
+        userId: req.user?.id,
+      });
+      res.json({ success: true, data: result });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
-router.get('/reports/:id/executions', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const data = reportBuilder.getExecutionHistory(req.params.id, req.query);
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'reportBuilder');
+router.get(
+  '/reports/:id/executions',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const data = reportBuilder.getExecutionHistory(req.params.id, req.query);
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'reportBuilder');
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // TEMPLATES — القوالب
@@ -409,20 +469,28 @@ router.get('/templates', authenticate, requireBranchAccess, async (req, res) => 
   }
 });
 
-router.get('/templates/:id', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const tmpl = reportBuilder.getTemplateById(req.params.id);
-    res.json({ success: true, data: tmpl });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.get(
+  '/templates/:id',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const tmpl = reportBuilder.getTemplateById(req.params.id);
+      res.json({ success: true, data: tmpl });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 router.post(
   '/templates/:id/create-report',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -439,7 +507,9 @@ router.post(
 
 router.post(
   '/reports/:id/save-as-template',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -463,7 +533,9 @@ router.post(
 
 router.post(
   '/reports/:id/export',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty(),
     body('format').isIn(['pdf', 'excel', 'csv', 'json']).withMessage('صيغة غير مدعومة'),
@@ -495,7 +567,9 @@ router.get('/schedules', authenticate, requireBranchAccess, async (req, res) => 
 
 router.post(
   '/schedules',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [
     body('reportId').notEmpty().withMessage('معرف التقرير مطلوب'),
@@ -517,7 +591,9 @@ router.post(
 
 router.put(
   '/schedules/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager', 'report_manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -534,7 +610,9 @@ router.put(
 
 router.delete(
   '/schedules/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -555,7 +633,9 @@ router.delete(
 
 router.post(
   '/reports/:id/share',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty()],
   async (req, res) => {
@@ -573,30 +653,42 @@ router.post(
   }
 );
 
-router.get('/reports/:id/shares', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const data = reportBuilder.getReportShares(req.params.id);
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'reportBuilder');
+router.get(
+  '/reports/:id/shares',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const data = reportBuilder.getReportShares(req.params.id);
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'reportBuilder');
+    }
   }
-});
+);
 
 // ══════════════════════════════════════════════════════════════════════════════
 // FAVORITES — المفضلة
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.post('/reports/:id/favorite', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const result = reportBuilder.toggleFavorite(req.user?.id || 'u1', req.params.id);
-    res.json({ success: true, data: result });
-  } catch (err) {
-    const status = err.message.includes('غير موجود') ? 404 : 500;
-    res.status(status).json({ success: false, error: safeError(err) });
+router.post(
+  '/reports/:id/favorite',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const result = reportBuilder.toggleFavorite(req.user?.id || 'u1', req.params.id);
+      res.json({ success: true, data: result });
+    } catch (err) {
+      const status = err.message.includes('غير موجود') ? 404 : 500;
+      res.status(status).json({ success: false, error: safeError(err) });
+    }
   }
-});
+);
 
 router.get('/favorites', authenticate, requireBranchAccess, async (req, res) => {
   try {
@@ -611,14 +703,20 @@ router.get('/favorites', authenticate, requireBranchAccess, async (req, res) => 
 // VERSIONS — سجل الإصدارات
 // ══════════════════════════════════════════════════════════════════════════════
 
-router.get('/reports/:id/versions', authenticate, requireBranchAccess, [param('id').notEmpty()], async (req, res) => {
-  try {
-    if (handleValidation(req, res)) return;
-    const data = reportBuilder.getReportVersions(req.params.id);
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'reportBuilder');
+router.get(
+  '/reports/:id/versions',
+  authenticate,
+  requireBranchAccess,
+  [param('id').notEmpty()],
+  async (req, res) => {
+    try {
+      if (handleValidation(req, res)) return;
+      const data = reportBuilder.getReportVersions(req.params.id);
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'reportBuilder');
+    }
   }
-});
+);
 
 module.exports = router;

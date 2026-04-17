@@ -20,6 +20,7 @@ const { logSecurityEvent, getClientIP } = require('../../utils/security');
 const { authenticateToken } = require('../../middleware/auth');
 const tokenBlacklist = require('../../utils/tokenBlacklist');
 const { jwtSecret, jwtRefreshSecret } = require('../../config/secrets');
+const safeError = require('../../utils/safeError');
 
 // Session model for concurrent-session tracking
 let Session;
@@ -33,7 +34,6 @@ try {
 let emailManager;
 try {
   const { emailManager: em } = require('../../services/email');
-const safeError = require('../../utils/safeError');
   emailManager = em;
 } catch {
   emailManager = null;

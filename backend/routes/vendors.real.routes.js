@@ -8,6 +8,7 @@ const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -16,7 +17,6 @@ router.get('/dashboard/stats', async (req, res) => {
   try {
     const Vendor = require('../models/Vendor');
     const VendorEvaluation = require('../models/VendorEvaluation');
-const safeError = require('../utils/safeError');
 
     const [totalVendors, activeVendors, blacklisted, evaluations] = await Promise.all([
       Vendor.countDocuments({ isDeleted: { $ne: true } }),

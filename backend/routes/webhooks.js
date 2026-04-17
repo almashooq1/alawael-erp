@@ -27,7 +27,9 @@ router.use((_req, res, next) => {
  */
 router.get(
   '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -50,7 +52,9 @@ router.get(
  */
 router.post(
   '/register',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -103,7 +107,9 @@ router.post(
  */
 router.get(
   '/:webhookId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -133,7 +139,9 @@ router.get(
  */
 router.put(
   '/:webhookId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -163,7 +171,9 @@ router.put(
  */
 router.delete(
   '/:webhookId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin']),
   async (req, res) => {
     try {
@@ -193,7 +203,9 @@ router.delete(
  */
 router.post(
   '/:webhookId/trigger',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -229,7 +241,9 @@ router.post(
  */
 router.post(
   '/:webhookId/test',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -261,7 +275,9 @@ router.post(
  */
 router.get(
   '/:webhookId/deliveries',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   async (req, res) => {
     try {
@@ -287,6 +303,7 @@ router.get(
 
 // Error handling middleware
 router.use((err, _req, res, _next) => {
-  safeError(res, error, 'Router error');
+  safeError(res, err, 'Router error');
+});
 
 module.exports = router;

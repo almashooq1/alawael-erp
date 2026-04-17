@@ -40,7 +40,7 @@ const {
   SWOTAnalysis,
 } = require('../models/EnterpriseProPlus');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const { safeError } = require('../utils/safeError');
+const safeError = require('../utils/safeError');
 
 // Helper
 const _oid = id => new mongoose.Types.ObjectId(id);
@@ -123,22 +123,27 @@ router.delete('/talent/jobs/:id', authenticateToken, requireBranchAccess, async 
   }
 });
 
-router.get('/talent/jobs/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, open, filled, apps] = await Promise.all([
-      JobPosting.countDocuments(),
-      JobPosting.countDocuments({ status: 'open' }),
-      JobPosting.countDocuments({ status: 'filled' }),
-      JobApplication.countDocuments(),
-    ]);
-    res.json({
-      success: true,
-      data: { totalJobs: total, openJobs: open, filledJobs: filled, totalApplications: apps },
-    });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/talent/jobs/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, open, filled, apps] = await Promise.all([
+        JobPosting.countDocuments(),
+        JobPosting.countDocuments({ status: 'open' }),
+        JobPosting.countDocuments({ status: 'filled' }),
+        JobApplication.countDocuments(),
+      ]);
+      res.json({
+        success: true,
+        data: { totalJobs: total, openJobs: open, filledJobs: filled, totalApplications: apps },
+      });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- Candidates ---
 router.get('/talent/candidates', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -224,19 +229,24 @@ router.post('/talent/applications', authenticateToken, requireBranchAccess, asyn
   }
 });
 
-router.put('/talent/applications/:id/stage', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { stage } = req.body;
-    const doc = await JobApplication.findById(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    doc.stageHistory.push({ stage: doc.stage, changedAt: new Date(), changedBy: req.user?.id });
-    doc.stage = stage;
-    await doc.save();
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/talent/applications/:id/stage',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { stage } = req.body;
+      const doc = await JobApplication.findById(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      doc.stageHistory.push({ stage: doc.stage, changedAt: new Date(), changedBy: req.user?.id });
+      doc.stage = stage;
+      await doc.save();
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 router.get('/talent/pipeline', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -345,52 +355,62 @@ router.delete('/facilities/:id', authenticateToken, requireBranchAccess, async (
   }
 });
 
-router.get('/facilities/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, active, maintenance, bookings, leases] = await Promise.all([
-      Facility.countDocuments(),
-      Facility.countDocuments({ status: 'active' }),
-      Facility.countDocuments({ status: 'under_maintenance' }),
-      SpaceBooking.countDocuments(),
-      LeaseContract.countDocuments({ status: 'active' }),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        totalFacilities: total,
-        active,
-        underMaintenance: maintenance,
-        totalBookings: bookings,
-        activeLeases: leases,
-      },
-    });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/facilities/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, active, maintenance, bookings, leases] = await Promise.all([
+        Facility.countDocuments(),
+        Facility.countDocuments({ status: 'active' }),
+        Facility.countDocuments({ status: 'under_maintenance' }),
+        SpaceBooking.countDocuments(),
+        LeaseContract.countDocuments({ status: 'active' }),
+      ]);
+      res.json({
+        success: true,
+        data: {
+          totalFacilities: total,
+          active,
+          underMaintenance: maintenance,
+          totalBookings: bookings,
+          activeLeases: leases,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- Space Bookings ---
-router.get('/facilities/bookings/list', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { facility, status, from, to } = req.query;
-    const filter = {};
-    if (facility) filter.facility = facility;
-    if (status) filter.status = status;
-    if (from || to) {
-      filter.startTime = {};
-      if (from) filter.startTime.$gte = new Date(from);
-      if (to) filter.startTime.$lte = new Date(to);
+router.get(
+  '/facilities/bookings/list',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { facility, status, from, to } = req.query;
+      const filter = {};
+      if (facility) filter.facility = facility;
+      if (status) filter.status = status;
+      if (from || to) {
+        filter.startTime = {};
+        if (from) filter.startTime.$gte = new Date(from);
+        if (to) filter.startTime.$lte = new Date(to);
+      }
+      const data = await SpaceBooking.find(filter)
+        .sort({ startTime: 1 })
+        .populate('facility', 'name type')
+        .populate('bookedBy', 'name email')
+        .lean();
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
     }
-    const data = await SpaceBooking.find(filter)
-      .sort({ startTime: 1 })
-      .populate('facility', 'name type')
-      .populate('bookedBy', 'name email')
-      .lean();
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
   }
-});
+);
 
 router.post('/facilities/bookings', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -413,14 +433,19 @@ router.put('/facilities/bookings/:id', authenticateToken, requireBranchAccess, a
   }
 });
 
-router.delete('/facilities/bookings/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await SpaceBooking.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Deleted' });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.delete(
+  '/facilities/bookings/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await SpaceBooking.findByIdAndDelete(req.params.id);
+      res.json({ success: true, message: 'Deleted' });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- Lease Contracts ---
 router.get('/facilities/leases', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -559,29 +584,34 @@ router.delete('/vendors/:id', authenticateToken, requireBranchAccess, async (req
   }
 });
 
-router.get('/vendors/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, qualified, preferred, rfqs, pendingEvals] = await Promise.all([
-      Vendor.countDocuments(),
-      Vendor.countDocuments({ qualificationStatus: 'qualified' }),
-      Vendor.countDocuments({ preferredVendor: true }),
-      RFQ.countDocuments(),
-      VendorEvaluation.countDocuments(),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        totalVendors: total,
-        qualified,
-        preferred,
-        totalRFQs: rfqs,
-        totalEvaluations: pendingEvals,
-      },
-    });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/vendors/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, qualified, preferred, rfqs, pendingEvals] = await Promise.all([
+        Vendor.countDocuments(),
+        Vendor.countDocuments({ qualificationStatus: 'qualified' }),
+        Vendor.countDocuments({ preferredVendor: true }),
+        RFQ.countDocuments(),
+        VendorEvaluation.countDocuments(),
+      ]);
+      res.json({
+        success: true,
+        data: {
+          totalVendors: total,
+          qualified,
+          preferred,
+          totalRFQs: rfqs,
+          totalEvaluations: pendingEvals,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- RFQs ---
 router.get('/vendors/rfqs/list', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -641,18 +671,23 @@ router.put('/vendors/rfqs/:id/award', authenticateToken, requireBranchAccess, as
 });
 
 // --- Vendor Evaluations ---
-router.get('/vendors/evaluations/list', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const data = await VendorEvaluation.find()
-      .sort({ createdAt: -1 })
-      .populate('vendor', 'companyName')
-      .populate('evaluator', 'name')
-      .lean();
-    res.json({ success: true, data });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/vendors/evaluations/list',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const data = await VendorEvaluation.find()
+        .sort({ createdAt: -1 })
+        .populate('vendor', 'companyName')
+        .populate('evaluator', 'name')
+        .lean();
+      res.json({ success: true, data });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 router.post('/vendors/evaluations', authenticateToken, requireBranchAccess, async (req, res) => {
   try {
@@ -747,57 +782,75 @@ router.put('/itsm/incidents/:id', authenticateToken, requireBranchAccess, async 
   }
 });
 
-router.post('/itsm/incidents/:id/comments', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const doc = await ITIncident.findById(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    doc.comments.push({
-      author: req.user?.id,
-      text: req.body.text,
-      isInternal: req.body.isInternal || false,
-    });
-    await doc.save();
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
+router.post(
+  '/itsm/incidents/:id/comments',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await ITIncident.findById(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      doc.comments.push({
+        author: req.user?.id,
+        text: req.body.text,
+        isInternal: req.body.isInternal || false,
+      });
+      await doc.save();
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
-router.put('/itsm/incidents/:id/resolve', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const doc = await ITIncident.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: 'resolved',
-        resolution: {
-          description: req.body.resolution,
-          resolvedAt: new Date(),
-          resolvedBy: req.user?.id,
+router.put(
+  '/itsm/incidents/:id/resolve',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await ITIncident.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: 'resolved',
+          resolution: {
+            description: req.body.resolution,
+            resolvedAt: new Date(),
+            resolvedBy: req.user?.id,
+          },
         },
-      },
-      { new: true }
-    );
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
+        { new: true }
+      );
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
-router.get('/itsm/incidents/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, open, critical, breached, resolved] = await Promise.all([
-      ITIncident.countDocuments(),
-      ITIncident.countDocuments({ status: { $in: ['new', 'assigned', 'in_progress'] } }),
-      ITIncident.countDocuments({ priority: 'critical', status: { $nin: ['resolved', 'closed'] } }),
-      ITIncident.countDocuments({ 'sla.breached': true }),
-      ITIncident.countDocuments({ status: 'resolved' }),
-    ]);
-    res.json({ success: true, data: { total, open, critical, slaBreached: breached, resolved } });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/itsm/incidents/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, open, critical, breached, resolved] = await Promise.all([
+        ITIncident.countDocuments(),
+        ITIncident.countDocuments({ status: { $in: ['new', 'assigned', 'in_progress'] } }),
+        ITIncident.countDocuments({
+          priority: 'critical',
+          status: { $nin: ['resolved', 'closed'] },
+        }),
+        ITIncident.countDocuments({ 'sla.breached': true }),
+        ITIncident.countDocuments({ status: 'resolved' }),
+      ]);
+      res.json({ success: true, data: { total, open, critical, slaBreached: breached, resolved } });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- IT Assets ---
 router.get('/itsm/assets', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -931,23 +984,28 @@ router.put('/itsm/changes/:id', authenticateToken, requireBranchAccess, async (r
   }
 });
 
-router.put('/itsm/changes/:id/approve', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const doc = await ChangeRequest.findById(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    doc.approvals.push({
-      approver: req.user?.id,
-      status: 'approved',
-      date: new Date(),
-      comments: req.body.comments,
-    });
-    doc.status = 'approved';
-    await doc.save();
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/itsm/changes/:id/approve',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await ChangeRequest.findById(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      doc.approvals.push({
+        approver: req.user?.id,
+        status: 'approved',
+        date: new Date(),
+        comments: req.body.comments,
+      });
+      doc.status = 'approved';
+      await doc.save();
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  5. EHS — SAFETY & HEALTH — السلامة والصحة المهنية والبيئة                  ║
@@ -1018,27 +1076,32 @@ router.put('/ehs/incidents/:id', authenticateToken, requireBranchAccess, async (
   }
 });
 
-router.get('/ehs/incidents/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, open, critical, lostDays] = await Promise.all([
-      SafetyIncident.countDocuments(),
-      SafetyIncident.countDocuments({ status: { $in: ['reported', 'investigating'] } }),
-      SafetyIncident.countDocuments({ severity: 'critical' }),
-      SafetyIncident.aggregate([{ $group: { _id: null, total: { $sum: '$lostWorkDays' } } }]),
-    ]);
-    res.json({
-      success: true,
-      data: {
-        totalIncidents: total,
-        openIncidents: open,
-        criticalIncidents: critical,
-        totalLostWorkDays: lostDays[0]?.total || 0,
-      },
-    });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.get(
+  '/ehs/incidents/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, open, critical, lostDays] = await Promise.all([
+        SafetyIncident.countDocuments(),
+        SafetyIncident.countDocuments({ status: { $in: ['reported', 'investigating'] } }),
+        SafetyIncident.countDocuments({ severity: 'critical' }),
+        SafetyIncident.aggregate([{ $group: { _id: null, total: { $sum: '$lostWorkDays' } } }]),
+      ]);
+      res.json({
+        success: true,
+        data: {
+          totalIncidents: total,
+          openIncidents: open,
+          criticalIncidents: critical,
+          totalLostWorkDays: lostDays[0]?.total || 0,
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- Safety Inspections ---
 router.get('/ehs/inspections', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1231,77 +1294,92 @@ router.put('/strategy/objectives/:id', authenticateToken, requireBranchAccess, a
   }
 });
 
-router.delete('/strategy/objectives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await StrategicObjective.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Deleted' });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
-  }
-});
-
-router.put('/strategy/objectives/:id/key-results/:krIndex', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const doc = await StrategicObjective.findById(req.params.id);
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    const kr = doc.keyResults[Number(req.params.krIndex)];
-    if (!kr) return res.status(404).json({ success: false, message: 'Key result not found' });
-    const { currentValue, note } = req.body;
-    if (currentValue !== undefined) {
-      kr.currentValue = currentValue;
-      kr.progress = Math.min(
-        100,
-        Math.round(((currentValue - kr.startValue) / (kr.targetValue - kr.startValue)) * 100)
-      );
-      kr.updates.push({ value: currentValue, note, updatedBy: req.user?.id });
+router.delete(
+  '/strategy/objectives/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await StrategicObjective.findByIdAndDelete(req.params.id);
+      res.json({ success: true, message: 'Deleted' });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
     }
-    Object.assign(kr, stripUpdateMeta(req.body));
-    // Recalculate objective progress
-    const krCount = doc.keyResults.length;
-    if (krCount > 0) {
-      doc.progress = Math.round(
-        doc.keyResults.reduce((sum, k) => sum + (k.progress || 0), 0) / krCount
-      );
-    }
-    await doc.save();
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
   }
-});
+);
 
-router.get('/strategy/objectives/statistics/summary', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const [total, active, onTrack, atRisk, behind, completed, initiatives] = await Promise.all([
-      StrategicObjective.countDocuments(),
-      StrategicObjective.countDocuments({ status: 'active' }),
-      StrategicObjective.countDocuments({ status: 'on_track' }),
-      StrategicObjective.countDocuments({ status: 'at_risk' }),
-      StrategicObjective.countDocuments({ status: 'behind' }),
-      StrategicObjective.countDocuments({ status: 'completed' }),
-      StrategicInitiative.countDocuments(),
-    ]);
-    const avgProgress = await StrategicObjective.aggregate([
-      { $match: { status: { $in: ['active', 'on_track', 'at_risk', 'behind'] } } },
-      { $group: { _id: null, avg: { $avg: '$progress' } } },
-    ]);
-    res.json({
-      success: true,
-      data: {
-        totalObjectives: total,
-        active,
-        onTrack,
-        atRisk,
-        behind,
-        completed,
-        totalInitiatives: initiatives,
-        avgProgress: Math.round(avgProgress[0]?.avg || 0),
-      },
-    });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.put(
+  '/strategy/objectives/:id/key-results/:krIndex',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await StrategicObjective.findById(req.params.id);
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      const kr = doc.keyResults[Number(req.params.krIndex)];
+      if (!kr) return res.status(404).json({ success: false, message: 'Key result not found' });
+      const { currentValue, note } = req.body;
+      if (currentValue !== undefined) {
+        kr.currentValue = currentValue;
+        kr.progress = Math.min(
+          100,
+          Math.round(((currentValue - kr.startValue) / (kr.targetValue - kr.startValue)) * 100)
+        );
+        kr.updates.push({ value: currentValue, note, updatedBy: req.user?.id });
+      }
+      Object.assign(kr, stripUpdateMeta(req.body));
+      // Recalculate objective progress
+      const krCount = doc.keyResults.length;
+      if (krCount > 0) {
+        doc.progress = Math.round(
+          doc.keyResults.reduce((sum, k) => sum + (k.progress || 0), 0) / krCount
+        );
+      }
+      await doc.save();
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
+
+router.get(
+  '/strategy/objectives/statistics/summary',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const [total, active, onTrack, atRisk, behind, completed, initiatives] = await Promise.all([
+        StrategicObjective.countDocuments(),
+        StrategicObjective.countDocuments({ status: 'active' }),
+        StrategicObjective.countDocuments({ status: 'on_track' }),
+        StrategicObjective.countDocuments({ status: 'at_risk' }),
+        StrategicObjective.countDocuments({ status: 'behind' }),
+        StrategicObjective.countDocuments({ status: 'completed' }),
+        StrategicInitiative.countDocuments(),
+      ]);
+      const avgProgress = await StrategicObjective.aggregate([
+        { $match: { status: { $in: ['active', 'on_track', 'at_risk', 'behind'] } } },
+        { $group: { _id: null, avg: { $avg: '$progress' } } },
+      ]);
+      res.json({
+        success: true,
+        data: {
+          totalObjectives: total,
+          active,
+          onTrack,
+          atRisk,
+          behind,
+          completed,
+          totalInitiatives: initiatives,
+          avgProgress: Math.round(avgProgress[0]?.avg || 0),
+        },
+      });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
+  }
+);
 
 // --- Strategic Initiatives ---
 router.get('/strategy/initiatives', authenticateToken, requireBranchAccess, async (req, res) => {
@@ -1330,28 +1408,38 @@ router.post('/strategy/initiatives', authenticateToken, requireBranchAccess, asy
   }
 });
 
-router.put('/strategy/initiatives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const doc = await StrategicInitiative.findByIdAndUpdate(
-      req.params.id,
-      stripUpdateMeta(req.body),
-      { new: true }
-    );
-    if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
-    res.json({ success: true, data: doc });
-  } catch (err) {
-    res.status(400).json({ success: false, message: safeError(err) });
+router.put(
+  '/strategy/initiatives/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const doc = await StrategicInitiative.findByIdAndUpdate(
+        req.params.id,
+        stripUpdateMeta(req.body),
+        { new: true }
+      );
+      if (!doc) return res.status(404).json({ success: false, message: 'Not found' });
+      res.json({ success: true, data: doc });
+    } catch (err) {
+      res.status(400).json({ success: false, message: safeError(err) });
+    }
   }
-});
+);
 
-router.delete('/strategy/initiatives/:id', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    await StrategicInitiative.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: 'Deleted' });
-  } catch (err) {
-    safeError(res, err, 'enterpriseProPlus');
+router.delete(
+  '/strategy/initiatives/:id',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      await StrategicInitiative.findByIdAndDelete(req.params.id);
+      res.json({ success: true, message: 'Deleted' });
+    } catch (err) {
+      safeError(res, err, 'enterpriseProPlus');
+    }
   }
-});
+);
 
 // --- SWOT Analysis ---
 router.get('/strategy/swot', authenticateToken, requireBranchAccess, async (req, res) => {

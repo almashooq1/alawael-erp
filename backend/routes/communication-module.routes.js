@@ -12,7 +12,6 @@
  */
 
 const express = require('express');
-const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
@@ -24,6 +23,7 @@ const NotificationLog = require('../models/communication/NotificationLog');
 const ContactDirectory = require('../models/communication/ContactDirectory');
 const escapeRegex = require('../utils/escapeRegex');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 router.use(authenticate);
@@ -73,7 +73,10 @@ router.get('/announcements', async (req, res) => {
 // POST /announcements
 router.post('/announcements', async (req, res) => {
   try {
-    const announcement = await Announcement.create({ ...stripUpdateMeta(req.body), created_by: req.user._id });
+    const announcement = await Announcement.create({
+      ...stripUpdateMeta(req.body),
+      created_by: req.user._id,
+    });
     res.status(201).json({ success: true, data: announcement });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message });

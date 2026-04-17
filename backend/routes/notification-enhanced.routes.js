@@ -5,9 +5,9 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const safeError = require('../utils/safeError');
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
+const safeError = require('../utils/safeError');
 
 // ============================================================
 // قوالب الإشعارات — تستخدم النموذج مباشرةً
@@ -322,13 +322,18 @@ router.put('/escalations/:id/resolve', authenticate, requireBranchAccess, async 
   }
 });
 
-router.post('/escalations/:id/auto-escalate', authenticate, requireBranchAccess, async (req, res) => {
-  try {
-    const escalation = await notifSvc.autoEscalate(req.params.id);
-    res.json({ success: true, data: escalation });
-  } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+router.post(
+  '/escalations/:id/auto-escalate',
+  authenticate,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const escalation = await notifSvc.autoEscalate(req.params.id);
+      res.json({ success: true, data: escalation });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-});
+);
 
 module.exports = router;

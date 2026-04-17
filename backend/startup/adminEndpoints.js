@@ -10,6 +10,7 @@
 
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
 /**
  * Mount emergency admin endpoints.
@@ -29,7 +30,7 @@ function setupAdminEndpoints(app, { isProd }) {
 
     const SECRET = process.env.SETUP_SECRET_KEY;
     if (!SECRET) {
-      safeError(res, error, 'adminEndpoints');
+      return safeError(res, new Error('SETUP_SECRET_KEY env var is not set'), 'adminEndpoints');
     }
 
     const key = req.headers['x-init-key'] || req.body?.secretKey;
@@ -43,11 +44,10 @@ function setupAdminEndpoints(app, { isProd }) {
 
     try {
       const bcrypt = require('bcryptjs');
-const safeError = require('../utils/safeError');
       const email = (process.env.ADMIN_EMAIL || 'admin@alawael.com').toLowerCase().trim();
       const password = process.env.ADMIN_PASSWORD;
       if (!password) {
-        safeError(res, error, 'adminEndpoints');
+        return safeError(res, new Error('ADMIN_PASSWORD env var is not set'), 'adminEndpoints');
       }
 
       const hash = await bcrypt.hash(password, 12);
@@ -106,7 +106,7 @@ const safeError = require('../utils/safeError');
 
     const SECRET = process.env.SETUP_SECRET_KEY;
     if (!SECRET) {
-      safeError(res, error, 'adminEndpoints');
+      return safeError(res, new Error('SETUP_SECRET_KEY env var is not set'), 'adminEndpoints');
     }
 
     const key = req.headers['x-init-key'];

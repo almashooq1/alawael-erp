@@ -6,11 +6,11 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
-const { safeError } = require('../utils/safeError');
 
 const safeModel = n =>
   mongoose.models[n] ? mongoose.model(n) : require(`../models/PublicRelations`)[n];
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── Dashboard ────────────────────────────────────────────────
 router.get('/dashboard', authenticate, requireBranchAccess, async (_req, res) => {
@@ -88,7 +88,9 @@ router.post('/media', authenticate, requireBranchAccess, async (req, res) => {
 router.put('/media/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Media = safeModel('MediaCoverage');
-    const doc = await Media.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Media.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -141,7 +143,9 @@ router.post('/campaigns', authenticate, requireBranchAccess, async (req, res) =>
 router.put('/campaigns/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Camp = safeModel('Campaign');
-    const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Camp.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {
@@ -173,7 +177,9 @@ router.post('/partnerships', authenticate, requireBranchAccess, async (req, res)
 router.put('/partnerships/:id', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const Part = safeModel('Partnership');
-    const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const doc = await Part.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
+      new: true,
+    });
     if (!doc) return res.status(404).json({ success: false, message: 'غير موجود' });
     res.json({ success: true, data: doc });
   } catch (err) {

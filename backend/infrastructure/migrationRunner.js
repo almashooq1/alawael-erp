@@ -25,12 +25,12 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const safeError = require('../utils/safeError');
 
 // ─── Logger Fallback ─────────────────────────────────────────────────────────
 let logger;
 try {
   logger = require('../utils/logger');
-const safeError = require('../utils/safeError');
 } catch {
   logger = {
     info: (...a) => console.log('[Migration]', ...a),

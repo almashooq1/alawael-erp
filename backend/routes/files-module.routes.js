@@ -11,13 +11,13 @@
  */
 
 const express = require('express');
-const safeError = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const FileRecord = require('../models/documents/FileRecord');
 const FileFolder = require('../models/documents/FileFolder');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

@@ -32,11 +32,21 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
-jest.mock('../../services/DateConverterService', () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
+jest.mock(
+  '../../services/DateConverterService',
+  () => new Proxy({}, { get: () => jest.fn().mockResolvedValue({}) })
+);
 
 let routeModule;
-try { routeModule = require('../../routes/dateConverterRoutes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/dateConverterRoutes');
+} catch (e) {
+  /* load fail */
+}
 
 describe('routes/dateConverterRoutes', () => {
   test('module loads without crash', () => {
@@ -51,6 +61,7 @@ describe('routes/dateConverterRoutes', () => {
 
   test('express.Router() was called', () => {
     const express = require('express');
+    const safeError = require('../../utils/safeError');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);
@@ -75,5 +86,4 @@ describe('routes/dateConverterRoutes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

@@ -10,8 +10,8 @@ const { requireBranchAccess, branchFilter } = require('../middleware/branchScope
 const SmartIRPService = require('../services/smartIRP.service');
 const SmartIRP = require('../models/SmartIRP');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── IRP CRUD ─────────────────────────────────────────────────────
 

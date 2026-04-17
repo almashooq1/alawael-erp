@@ -9,8 +9,8 @@ const Activity = require('../models/Activity');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── GET / — list activities (filter by program, type, status, date range) ──
 router.get('/', requireAuth, requireBranchAccess, async (req, res) => {

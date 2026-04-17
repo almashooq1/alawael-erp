@@ -10,6 +10,7 @@ const notificationHandler = require('./notificationHandler');
 const chatHandler = require('./chatHandler');
 const dddHandler = require('./dddHandler');
 const logger = require('../../utils/logger');
+const safeError = require('../../utils/safeError');
 
 // Active subscriptions tracking
 const activeSubscriptions = new Map();

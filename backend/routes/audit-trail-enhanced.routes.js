@@ -20,6 +20,8 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
+const { escapeRegex } = require('../utils/escapeRegex');
 
 // Model — نستخدم AuditLog الموجود في النظام
 let AuditLog;
@@ -34,7 +36,6 @@ try {
     // إنشاء نموذج مبسط إذا لم يكن موجوداً
     const mongoose = require('mongoose');
     const escapeRegex = require('../utils/escapeRegex');
-const safeError = require('../utils/safeError');
     const auditSchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

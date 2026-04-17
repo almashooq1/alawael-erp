@@ -26,8 +26,8 @@ const LeaveBalance = require('../models/LeaveBalance');
 const EmploymentContract = require('../models/EmploymentContract');
 const ChartOfAccounts = require('../models/ChartOfAccounts');
 const AssessmentComparison = require('../models/AssessmentComparison');
-const safeError = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ─── Helper: standard response ───────────────────────────────────────────────
 const ok = (res, data, meta = {}) => res.json({ success: true, ...meta, data });

@@ -4,6 +4,7 @@ const { authenticate, _authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const os = require('os');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);
@@ -33,7 +34,6 @@ router.get('/dashboard', async (req, res) => {
 router.get('/cache', async (req, res) => {
   try {
     const AnalyticsCache = require('../models/AnalyticsCache');
-const safeError = require('../utils/safeError');
     const entries = await AnalyticsCache.find().sort({ updatedAt: -1 }).limit(20).lean();
     res.json({ success: true, data: { entries, totalKeys: entries.length } });
   } catch (err) {

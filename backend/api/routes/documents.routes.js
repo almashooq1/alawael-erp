@@ -14,7 +14,6 @@
  */
 
 const express = require('express');
-const safeError = require('../../utils/safeError');
 const router = express.Router();
 const fs = require('fs');
 const path = require('path');
@@ -30,6 +29,7 @@ const getDocument = () => {
 
 // Upload middleware (disk storage, 50MB)
 const { upload, handleUploadError, fileFilter } = require('../../middleware/uploadMiddleware');
+const safeError = require('../../utils/safeError');
 
 // Uploads directory
 const uploadsDir = path.join(__dirname, '../../uploads');
@@ -194,11 +194,7 @@ router.get('/dashboard', async (req, res) => {
     const scopeFilter = isAdmin
       ? {}
       : {
-          $or: [
-            { uploadedBy: userId },
-            { 'sharedWith.userId': userId },
-            { isPublic: true },
-          ],
+          $or: [{ uploadedBy: userId }, { 'sharedWith.userId': userId }, { isPublic: true }],
         };
 
     const baseFilter = { status: { $ne: 'محذوف' }, ...scopeFilter };
@@ -218,10 +214,7 @@ router.get('/dashboard', async (req, res) => {
         { $match: baseFilter },
         { $group: { _id: null, total: { $sum: '$fileSize' } } },
       ]),
-      Doc.aggregate([
-        { $match: baseFilter },
-        { $group: { _id: '$category', count: { $sum: 1 } } },
-      ]),
+      Doc.aggregate([{ $match: baseFilter }, { $group: { _id: '$category', count: { $sum: 1 } } }]),
       Doc.find(baseFilter)
         .sort({ createdAt: -1 })
         .limit(10)
@@ -231,9 +224,7 @@ router.get('/dashboard', async (req, res) => {
         { $match: baseFilter },
         { $unwind: { path: '$activityLog', preserveNullAndEmptyArrays: false } },
         // For non-admins: only show activities they performed
-        ...(isAdmin
-          ? []
-          : [{ $match: { 'activityLog.performedBy': userId } }]),
+        ...(isAdmin ? [] : [{ $match: { 'activityLog.performedBy': userId } }]),
         { $sort: { 'activityLog.performedAt': -1 } },
         { $limit: 10 },
         {

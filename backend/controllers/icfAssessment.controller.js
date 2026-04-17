@@ -7,8 +7,8 @@
 const ICFAssessmentService = require('../services/icfAssessment.service');
 const ICFReportService = require('../services/icfReport.service');
 const logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
 
-const { safeError } = require('../utils/safeError');
 class ICFAssessmentController {
   /* ═══════════════════════════════════════════════════════════════════════ *
    *  CRUD — العمليات الأساسية

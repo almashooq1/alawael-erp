@@ -8,7 +8,6 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 
 const {
@@ -22,6 +21,7 @@ const {
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 const engine = new IntelligentWorkflowEngine();
 
@@ -814,30 +814,35 @@ router.get('/templates', authMiddleware, requireBranchAccess, async (_req, res) 
 });
 
 // Deploy template as new definition — looks up template server-side
-router.post('/templates/:templateId/deploy', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    // Use the same template list from GET /templates (extracted as helper)
-    const templates = getBuiltInTemplates();
-    const tpl = templates.find(t => t.id === req.params.templateId);
-    if (!tpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
+router.post(
+  '/templates/:templateId/deploy',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      // Use the same template list from GET /templates (extracted as helper)
+      const templates = getBuiltInTemplates();
+      const tpl = templates.find(t => t.id === req.params.templateId);
+      if (!tpl) return res.status(404).json({ success: false, message: 'القالب غير موجود' });
 
-    const def = new WorkflowDefinition({
-      name: tpl.name,
-      nameAr: tpl.nameAr,
-      code: `${tpl.id}_${Date.now()}`,
-      category: tpl.category || 'general',
-      description: tpl.description,
-      steps: tpl.steps || [],
-      status: 'draft',
-      version: 1,
-      createdBy: uid(req),
-    });
-    await def.save();
-    res.status(201).json({ success: true, data: def, message: 'تم نشر القالب كسير عمل جديد' });
-  } catch (error) {
-    res.status(400).json({ success: false, message: 'حدث خطأ في النشر' });
+      const def = new WorkflowDefinition({
+        name: tpl.name,
+        nameAr: tpl.nameAr,
+        code: `${tpl.id}_${Date.now()}`,
+        category: tpl.category || 'general',
+        description: tpl.description,
+        steps: tpl.steps || [],
+        status: 'draft',
+        version: 1,
+        createdBy: uid(req),
+      });
+      await def.save();
+      res.status(201).json({ success: true, data: def, message: 'تم نشر القالب كسير عمل جديد' });
+    } catch (error) {
+      res.status(400).json({ success: false, message: 'حدث خطأ في النشر' });
+    }
   }
-});
+);
 
 // ============================================================================
 // INSTANCES  ─  Start / list / detail / cancel / suspend / resume

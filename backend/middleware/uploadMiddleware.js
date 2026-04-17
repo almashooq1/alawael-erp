@@ -1,4 +1,3 @@
- 
 /**
  * File Upload Middleware
  * معالج تحميل الملفات مع التحقق من الأمان والنوع والحجم
@@ -8,8 +7,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-
 const safeError = require('../utils/safeError');
+
 // ── Magic-byte signatures for common file types ──────────────────────────────
 const MAGIC_BYTES = {
   'application/pdf': [Buffer.from([0x25, 0x50, 0x44, 0x46])], // %PDF
@@ -234,7 +233,9 @@ const upload = multer({
 const handleUploadError = (err, _req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return res.status(400).json({ message: `حجم الملف كبير جداً. الحد الأقصى ${FILE_SIZE_LIMIT_MB} MB` });
+      return res
+        .status(400)
+        .json({ message: `حجم الملف كبير جداً. الحد الأقصى ${FILE_SIZE_LIMIT_MB} MB` });
     }
     return res.status(400).json({ message: `خطأ في تحميل الملف: ${err.message}` });
   } else if (err) {

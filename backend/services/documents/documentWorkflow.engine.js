@@ -598,7 +598,7 @@ class DocumentWorkflowEngine extends EventEmitter {
       this.emit('workflow:escalated', {
         workflowId: workflow._id,
         documentId: workflow.documentId,
-        escalatedTo,
+        escalatedTo: escalateTo,
       });
 
       return { success: true, workflow: this._formatWorkflow(workflow) };

@@ -10,8 +10,8 @@ const PortalNotification = require('../models/PortalNotification');
 const { requireAuth, _requireRole } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 
 // ── Helpers ────────────────────────────────────────────────────────────
 const toId = v => {

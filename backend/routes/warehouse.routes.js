@@ -6,7 +6,6 @@
  */
 
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const router = express.Router();
 
@@ -27,6 +26,7 @@ function safeModel(name) {
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
+const safeError = require('../utils/safeError');
 router.use(authenticate);
 router.use(requireBranchAccess);
 // ═══════════════════════════════════════════════════════════════════
@@ -114,7 +114,6 @@ router.get('/:id', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const WH = safeModel('Warehouse');
-    safeError(res, error, 'warehouse');
     const data = await WH.create(stripUpdateMeta(req.body));
     res.status(201).json({ success: true, data });
   } catch (err) {

@@ -10,7 +10,6 @@
  */
 
 const express = require('express');
-const { safeError } = require('../utils/safeError');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
@@ -20,6 +19,7 @@ const LeaveRequest = require('../models/LeaveRequest');
 const Payroll = require('../models/payroll.model');
 const Document = require('../models/Document');
 const EmployeeRequest = require('../models/EmployeeRequest');
+const safeError = require('../utils/safeError');
 
 router.use(authenticate);
 router.use(requireBranchAccess);

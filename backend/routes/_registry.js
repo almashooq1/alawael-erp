@@ -57,7 +57,6 @@ const assetRoutes = safeRequire('../routes/assets');
 const scheduleRoutes = safeRequire('../routes/schedules');
 
 // Existing route files
-const dashboardRoutes = safeRequire('../routes/dashboard');
 const searchRoutes = safeRequire('../routes/search');
 const validateRoutes = safeRequire('../routes/validate');
 const elearningRoutes = safeRequire('../routes/elearning');
@@ -198,7 +197,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'integrations', integrationRoutes);
 
   // ── Dashboard (multiple sub-routers merged) ─────────────────────────────
-  dualMount(app, 'dashboard', dashboardRoutes);
   dualMount(app, 'dashboard', require('../routes/dashboard.stats'));
   dualMount(app, 'dashboard', dashboardExtrasRouter);
 

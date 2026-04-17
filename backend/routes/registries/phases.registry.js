@@ -278,10 +278,10 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
     '../routes/aiNotifications'
   );
   // safeMount(app, ['/api/ml', '/api/v1/ml'], '../routes/ml.routes'); // Skipped: requires @tensorflow/tfjs (~400MB)
-  safeMount(app, ['/api/smart-gps', '/api/v1/smart-gps'], '../routes/smartGpsTracking.routes');
-  // NOTE: smartNotifications.routes archived (broken controller chain).
+  // NOTE: smart-gps (smartGpsTracking.routes) and smart-notifications-engine
+  // (smartNotifications.routes) were archived — broken dependency chains.
   logger.info(
-    'Phase 10-B mounted (5 modules: advanced-analytics, ai-recommendations, ai-notifications, ml, smart-gps)'
+    'Phase 10-B mounted (4 modules: advanced-analytics, ai-recommendations, ai-notifications, ml)'
   );
 
   // Sessions, profiles, collaboration
@@ -358,8 +358,8 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   safeMount(app, ['/api/gamification', '/api/v1/gamification'], '../routes/gamification.routes');
   safeMount(app, ['/api/subscriptions', '/api/v1/subscriptions'], '../routes/subscription.routes');
   safeMount(app, ['/api/api-keys', '/api/v1/api-keys'], '../routes/apiKey.routes');
-  safeMount(app, ['/api/smart-irp', '/api/v1/smart-irp'], '../routes/smartIRP.routes');
-  logger.info('Phase 11 mounted (4 modules: gamification, subscriptions, api-keys, smart-irp)');
+  // NOTE: smart-irp (smartIRP.routes) archived — broken dependency chain.
+  logger.info('Phase 11 mounted (3 modules: gamification, subscriptions, api-keys)');
 
   // ── Phase 12: Telehealth — الطب عن بُعد ───
   // ⚠️ REMOVED: duplicate telehealth mount — same file mounted again by prompt_26 below

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Models Index - Central Export Point
  * تصدير جميع نماذج Mongoose من قاعدة البيانات
@@ -32,7 +31,6 @@ const ICFAssessment = require('./ICFAssessment');
 // ── Disability & Rehabilitation ──────────────────────────────────────────────
 const DisabilityProgram = require('./DisabilityProgram');
 const DisabilitySession = require('./DisabilitySession');
-const DisabilityCard = require('./DisabilityCard');
 const EarlyIntervention = require('./EarlyIntervention');
 const IndependentLivingPlan = require('./IndependentLivingPlan');
 const MentalHealth = require('./MentalHealth');
@@ -69,7 +67,6 @@ const EInvoice = require('./EInvoice');
 
 // ── HR & Employee ────────────────────────────────────────────────────────────
 const Employee = require('./Employee');
-const EmployeeProfile = require('./EmployeeProfile');
 const Department = require('./Department');
 const Position = require('./Position');
 const Leave = require('./Leave');
@@ -146,7 +143,6 @@ module.exports = {
   // Disability & Rehabilitation
   DisabilityProgram,
   DisabilitySession,
-  DisabilityCard,
   EarlyIntervention,
   IndependentLivingPlan,
   MentalHealth,
@@ -183,7 +179,6 @@ module.exports = {
 
   // HR & Employee
   Employee,
-  EmployeeProfile,
   Department,
   Position,
   Leave,

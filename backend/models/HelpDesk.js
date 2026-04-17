@@ -1,6 +1,7 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
-const { safeModel } = require('../utils/safeModel');
+
+const safeModel = (name, schema) =>
+  mongoose.models[name] ? mongoose.models[name] : mongoose.model(name, schema);
 
 // ── نموذج التذكرة — Support Ticket ──────────────────────────────────
 const ticketSchema = new mongoose.Schema(

@@ -15,9 +15,9 @@ const ExecutiveDashboard = lazy(() => import('../pages/executive-dashboard/Execu
 const BeneficiaryListPage = lazy(() => import('../pages/beneficiary-list/BeneficiaryListPage'));
 const Beneficiary360Page = lazy(() => import('../pages/beneficiary-360/Beneficiary360Page'));
 const EpisodesPage = lazy(() => import('../pages/episodes/EpisodesPage'));
-const SessionsPage = lazy(() => import('../pages/sessions/SessionsPage'));
+const SessionsPage = lazy(() => import('../pages/Sessions/SessionsPage'));
 const WorkflowPage = lazy(() => import('../pages/workflow/WorkflowPage'));
-const QualityPage = lazy(() => import('../pages/quality/QualityPage'));
+const QualityPage = lazy(() => import('../pages/Quality/QualityPage'));
 const ReportsPage = lazy(() => import('../pages/Reports/ReportsPage'));
 
 /* Domain pages from factory */

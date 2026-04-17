@@ -322,6 +322,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'chat-v2', require('../routes/chat-v2.routes'));
   dualMount(app, 'admin/clinical-docs', require('../routes/clinical-docs.routes'));
   dualMount(app, 'telehealth-v2', require('../routes/telehealth-v2.routes'));
+  dualMount(app, 'auth/nafath', require('../routes/nafath.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));
   dualMount(app, 'notification-templates', require('../routes/notificationTemplates.routes'));
   dualMount(app, 'approval-requests', require('../routes/approvalRequests.routes'));

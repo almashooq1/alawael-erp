@@ -16,6 +16,7 @@ import logger from './utils/logger';
 // Public pages — lazy loaded with Tailwind design
 const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
 const LoginPage = React.lazy(() => import('./pages/Landing/LoginPage'));
+const NafathLogin = React.lazy(() => import('./pages/Auth/NafathLogin'));
 const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
 const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
 const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
@@ -94,6 +95,18 @@ function AppRoutes() {
           !currentUser ? (
             <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
               <LoginPage />
+            </Suspense>
+          ) : (
+            <Navigate to="/dashboard" replace />
+          )
+        }
+      />
+      <Route
+        path="/login/nafath"
+        element={
+          !currentUser ? (
+            <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+              <NafathLogin />
             </Suspense>
           ) : (
             <Navigate to="/dashboard" replace />

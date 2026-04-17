@@ -136,6 +136,7 @@ const AdminCarePlans = lazyWithRetry(() => import('./pages/Admin/AdminCarePlans'
 const AdminBIAnalytics = lazyWithRetry(() => import('./pages/Admin/AdminBIAnalytics'));
 const AdminInvoices = lazyWithRetry(() => import('./pages/Admin/AdminInvoices'));
 const AdminClinicalDocs = lazyWithRetry(() => import('./pages/Admin/AdminClinicalDocs'));
+const AdminHRCompliance = lazyWithRetry(() => import('./pages/Admin/AdminHRCompliance'));
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
@@ -255,6 +256,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/analytics" element={<AdminBIAnalytics />} />
                   <Route path="admin/invoices" element={<AdminInvoices />} />
                   <Route path="admin/clinical-docs" element={<AdminClinicalDocs />} />
+                  <Route path="admin/hr/compliance" element={<AdminHRCompliance />} />
                   <Route path="admin/notifications" element={<AdminNotifications />} />
                   <Route path="my-children" element={<MyChildrenPortal />} />
                   <Route path="workbench" element={<TherapistWorkbench />} />

@@ -110,6 +110,29 @@ const employeeSchema = new Schema(
     visa_type: String,
     visa_expiry: Date,
 
+    // ── Compliance verification (cached from GOSI/SCFHS) ─────────────
+    gosi_verification: {
+      verified: { type: Boolean, default: false },
+      lastVerifiedAt: Date,
+      mode: { type: String, enum: ['mock', 'live'] },
+      status: { type: String, enum: ['active', 'inactive', 'not_found', 'unknown'] },
+      employerName: String,
+      monthlyWage: Number,
+      registrationDate: Date,
+      message: String,
+    },
+    scfhs_verification: {
+      verified: { type: Boolean, default: false },
+      lastVerifiedAt: Date,
+      mode: { type: String, enum: ['mock', 'live'] },
+      status: { type: String, enum: ['active', 'expired', 'suspended', 'not_found', 'unknown'] },
+      classification: String,
+      specialty: String,
+      licenseNumber: String,
+      expiryDate: Date,
+      message: String,
+    },
+
     // التعليم والخبرة
     is_saudi: { type: Boolean, default: true },
     education_level: {

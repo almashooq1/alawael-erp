@@ -1319,6 +1319,13 @@ const getNavigationItems = () => [
         badge: 'DOCS',
         badgeColor: 'info',
       },
+      {
+        id: 'admin-hr-compliance',
+        label: 'الامتثال (GOSI + SCFHS)',
+        path: '/admin/hr/compliance',
+        badge: 'COMPLY',
+        badgeColor: 'warning',
+      },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },

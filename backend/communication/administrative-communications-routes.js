@@ -23,7 +23,7 @@ const {
   SenderType,
 } = require('./administrative-communications-service');
 
-const { authenticate, authorize } = require('../middleware/advancedAuth');
+const { authenticate, authorize } = require('../middleware/auth');
 const safeError = require('../utils/safeError');
 
 // ==================== Multer Configuration ====================

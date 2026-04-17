@@ -26,7 +26,7 @@ const whatsappLimiter =
 const otpLimiter = rateLimiter.otpLimiter || rateLimiter.apiLimiter || rateLimiter.generalLimiter;
 const bulkLimiter = rateLimiter.bulkLimiter || rateLimiter.apiLimiter || rateLimiter.generalLimiter;
 
-const { authenticate, authorize } = require('../middleware/advancedAuth');
+const { authenticate, authorize } = require('../middleware/auth');
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 const {

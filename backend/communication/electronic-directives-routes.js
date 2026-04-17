@@ -9,7 +9,7 @@ const {
   directivesService,
   ElectronicDirectivesService,
 } = require('./electronic-directives-service');
-const authMiddleware = require('../middleware/advancedAuth');
+const authMiddleware = require('../middleware/auth');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 

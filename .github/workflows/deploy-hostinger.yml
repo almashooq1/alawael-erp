@@ -151,14 +151,23 @@ jobs:
       - name: Build
         working-directory: frontend
         run: |
-          set -o pipefail
-          npm run build 2>&1 | tee build.log
+          set +e
+          npm run build > build.log 2>&1
           EXIT=$?
           if [ $EXIT -ne 0 ]; then
-            echo "## ❌ Frontend build failed — last 120 lines" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -120 build.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+            # Surface each failing line as a GitHub Actions annotation (visible without logs).
+            grep -E "(not defined|Cannot find|Module not found|Failed to compile|Syntax Error|Line [0-9]+:)" build.log | head -40 | while IFS= read -r line; do
+              CLEAN=$(echo "$line" | tr -d '\r' | sed 's/`/\x27/g')
+              echo "::error ::${CLEAN}"
+            done
+            echo "::error ::Frontend build failed — see annotations above (exit $EXIT)"
+            # Also echo to step summary (accessible via HTML).
+            {
+              echo "## ❌ Frontend build failed"
+              echo '```'
+              tail -150 build.log
+              echo '```'
+            } >> $GITHUB_STEP_SUMMARY
           fi
           exit $EXIT
         env:

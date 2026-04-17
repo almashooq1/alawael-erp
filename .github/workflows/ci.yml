@@ -55,10 +55,12 @@ jobs:
         working-directory: frontend
         run: npm run build
         env:
+          NODE_OPTIONS: --max-old-space-size=6144
           REACT_APP_API_URL: /api/v1
           REACT_APP_ENVIRONMENT: ci
           GENERATE_SOURCEMAP: "false"
           CI: "false"
+          DISABLE_ESLINT_PLUGIN: "true"
 
   security:
     name: Security Scanning

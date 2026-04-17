@@ -130,6 +130,7 @@ const AdminBookings = lazyWithRetry(() => import('./pages/Admin/AdminBookings'))
 const AdminApplications = lazyWithRetry(() => import('./pages/Admin/AdminApplications'));
 const AdminBranches = lazyWithRetry(() => import('./pages/Admin/AdminBranches'));
 const AdminBeneficiaries = lazyWithRetry(() => import('./pages/Admin/AdminBeneficiaries'));
+const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
 const ExportImportManager = lazyWithRetry(() => import('./components/ExportImportManager'));
@@ -237,6 +238,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/applications" element={<AdminApplications />} />
                   <Route path="admin/branches" element={<AdminBranches />} />
                   <Route path="admin/beneficiaries" element={<AdminBeneficiaries />} />
+                  <Route path="admin/notifications" element={<AdminNotifications />} />
 
                   {/* Domain Route Modules */}
                   {safeRoutes(FinanceRoutes, 'Finance')}

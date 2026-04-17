@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -16,8 +15,9 @@ import {
   Chip,
   Button,
   CircularProgress,
-  LinearProgress,} from '@mui/material';
-import {  PlayArrow } from '@mui/icons-material';
+  LinearProgress,
+} from '@mui/material';
+import { PlayArrow } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';

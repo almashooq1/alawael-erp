@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -56,7 +55,8 @@ const FinancialSettings = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchPreview = async () => {
@@ -71,7 +71,6 @@ const FinancialSettings = () => {
 
   useEffect(() => {
     fetchSettings();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchSettings]);
 
   const handleSave = async () => {

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -16,9 +15,11 @@ import {
   CircularProgress,
   TextField,
   Button,
-  Chip,} from '@mui/material';
+  Chip,
+} from '@mui/material';
 import {
-  TrendingUp,  Assessment,
+  TrendingUp,
+  Assessment,
   CalendarMonth,
   ArrowUpward,
   ArrowDownward,
@@ -57,12 +58,12 @@ const ProfitLoss = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const fc = v =>

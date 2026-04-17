@@ -20,7 +20,9 @@ import {
   FormControl,
   InputLabel,
   Tooltip,
-  Paper,  CardActions,} from '@mui/material';
+  Paper,
+  CardActions,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -32,7 +34,7 @@ import {
   FileCopy as TemplateIcon,
   PlayArrow as UseIcon,
   Visibility as ViewIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -71,7 +73,7 @@ const TherapistDocTemplates = () => {
 
   useEffect(() => {
     loadTemplates();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadTemplates = async () => {
     try {

@@ -18,7 +18,10 @@ import {
   Select,
   MenuItem,
   FormControl,
-  InputLabel,  Paper,  CardActions,} from '@mui/material';
+  InputLabel,
+  Paper,
+  CardActions,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -31,7 +34,7 @@ import {
   Article as ArticleIcon,
   Science as ScienceIcon,
   MenuBook as GuideIcon,
-  } from '@mui/icons-material';
+} from '@mui/icons-material';
 import { therapistService } from 'services/therapistService';
 import logger from 'utils/logger';
 import { useAuth } from 'contexts/AuthContext';
@@ -82,7 +85,7 @@ const TherapistClinicalLibrary = () => {
 
   useEffect(() => {
     loadItems();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadItems = async () => {
     try {

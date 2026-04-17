@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -15,7 +14,9 @@ import {
   TableRow,
   Chip,
   Button,
-  CircularProgress,  Tooltip,  TextField,
+  CircularProgress,
+  Tooltip,
+  TextField,
   MenuItem,
 } from '@mui/material';
 import { CalendarMonth, Lock, LockOpen, CheckCircle } from '@mui/icons-material';
@@ -31,7 +32,8 @@ const FiscalPeriods = () => {
 
   useEffect(() => {
     fetchPeriods();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYear]);
 
   const fetchPeriods = async () => {

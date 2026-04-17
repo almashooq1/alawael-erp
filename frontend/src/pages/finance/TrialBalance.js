@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -19,12 +18,9 @@ import {
   IconButton,
   Tooltip,
   CircularProgress,
-  Alert,} from '@mui/material';
-import {
-  CheckCircle,
-  Error as ErrorIcon,
-  FileDownload,
-  Print,} from '@mui/icons-material';
+  Alert,
+} from '@mui/material';
+import { CheckCircle, Error as ErrorIcon, FileDownload, Print } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -37,7 +33,8 @@ const TrialBalance = () => {
 
   useEffect(() => {
     fetchTrialBalance();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fiscalYear]);
 
   const fetchTrialBalance = async () => {

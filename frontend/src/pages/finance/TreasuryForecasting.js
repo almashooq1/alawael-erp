@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -35,7 +34,8 @@ import {
   TrendingUp,
   TrendingDown,
   SwapHoriz,
-  ShowChart,} from '@mui/icons-material';
+  ShowChart,
+} from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
 const API = process.env.REACT_APP_API_URL || '/api';
@@ -106,12 +106,12 @@ const TreasuryForecasting = () => {
       console.error(e);
     }
     setLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleCreateForecast = async () => {

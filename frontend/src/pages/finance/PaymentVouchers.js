@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -25,7 +24,8 @@ import {
   IconButton,
   Tooltip,
   Tabs,
-  Tab,  Divider,
+  Tab,
+  Divider,
 } from '@mui/material';
 import {
   Add,
@@ -97,12 +97,12 @@ const PaymentVouchers = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleCreate = async () => {

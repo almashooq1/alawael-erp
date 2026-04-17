@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -20,7 +19,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,  IconButton,
+  TextField,
+  IconButton,
   Tooltip,
   Grid,
   Tabs,
@@ -95,12 +95,12 @@ const RevenueRecognition = () => {
       console.error(e);
     }
     setLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleCreate = async () => {

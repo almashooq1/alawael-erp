@@ -22,7 +22,8 @@ import {
   Select,
   MenuItem,
   Divider,
-  List,  InputAdornment,
+  List,
+  InputAdornment,
 } from '@mui/material';
 import {
   Forum as ConsultIcon,
@@ -108,7 +109,6 @@ const TherapistConsultations = () => {
 
   useEffect(() => {
     loadConsultations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   const loadConsultations = async () => {

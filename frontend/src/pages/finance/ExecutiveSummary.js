@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -7,7 +6,8 @@ import {
   Card,
   CardContent,
   Typography,
-  CircularProgress,  Divider,
+  CircularProgress,
+  Divider,
   Chip,
   LinearProgress,
   List,
@@ -17,7 +17,8 @@ import {
 } from '@mui/material';
 import {
   Dashboard,
-  TrendingUp,  AccountBalance,
+  TrendingUp,
+  AccountBalance,
   Warning,
   CheckCircle,
   Info,

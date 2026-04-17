@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -31,7 +30,8 @@ import {
 } from '@mui/material';
 import {
   NotificationsActive,
-  Refresh,  Send,
+  Refresh,
+  Send,
   Warning,
   Schedule,
   PhoneCallback,
@@ -78,7 +78,11 @@ const DunningManagement = () => {
   const [_promiseDialog, setPromiseDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [sendForm, setSendForm] = useState({ level: 1, channel: 'email' });
-  const [promiseForm, _setPromiseForm] = useState({ promiseDate: '', promiseAmount: '', notes: '' });
+  const [promiseForm, _setPromiseForm] = useState({
+    promiseDate: '',
+    promiseAmount: '',
+    notes: '',
+  });
 
   const token = getToken();
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
@@ -104,12 +108,12 @@ const DunningManagement = () => {
       console.error(e);
     }
     setLoading(false);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchData]);
 
   const handleSendReminder = async () => {

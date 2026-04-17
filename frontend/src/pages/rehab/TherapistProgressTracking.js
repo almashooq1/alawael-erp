@@ -25,7 +25,8 @@ import {
   Tabs,
   Tab,
   Avatar,
-  Divider,} from '@mui/material';
+  Divider,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -79,7 +80,7 @@ const TherapistProgressTracking = () => {
 
   useEffect(() => {
     loadRecords();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadRecords = async () => {
     try {

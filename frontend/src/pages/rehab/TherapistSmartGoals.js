@@ -22,7 +22,9 @@ import {
   Tooltip,
   Paper,
   Avatar,
-  LinearProgress,  Divider,} from '@mui/material';
+  LinearProgress,
+  Divider,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -90,7 +92,7 @@ const TherapistSmartGoals = () => {
 
   useEffect(() => {
     loadGoals();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadGoals = async () => {
     try {

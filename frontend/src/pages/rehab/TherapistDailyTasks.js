@@ -20,7 +20,8 @@ import {
   FormControl,
   InputLabel,
   Tooltip,
-  Paper,} from '@mui/material';
+  Paper,
+} from '@mui/material';
 import {
   Add as AddIcon,
   Search as SearchIcon,
@@ -78,7 +79,7 @@ const TherapistDailyTasks = () => {
 
   useEffect(() => {
     loadTasks();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadTasks = async () => {
     try {

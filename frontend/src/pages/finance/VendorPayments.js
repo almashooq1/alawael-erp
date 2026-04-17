@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useState, useEffect, useCallback } from 'react';
 import { getToken } from '../../utils/tokenStorage';
 import {
@@ -18,7 +17,8 @@ import {
   Chip,
   Tooltip,
   Tab,
-  Tabs,} from '@mui/material';
+  Tabs,
+} from '@mui/material';
 import { LocalShipping, Warning, Refresh, TrendingDown, CalendarMonth } from '@mui/icons-material';
 import { surfaceColors, neutralColors, brandColors } from 'theme/palette';
 
@@ -53,12 +53,12 @@ const VendorPayments = () => {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [overdueOnly]);
 
   useEffect(() => {
     fetchAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchAll]);
 
   const fc = v =>

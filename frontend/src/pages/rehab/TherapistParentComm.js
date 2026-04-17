@@ -24,7 +24,8 @@ import {
   Avatar,
   Tabs,
   Tab,
-  Badge,} from '@mui/material';
+  Badge,
+} from '@mui/material';
 import {
   Search as SearchIcon,
   People as PeopleIcon,
@@ -74,7 +75,7 @@ const TherapistParentComm = () => {
 
   useEffect(() => {
     loadMessages();
-  }, []); // eslint-disable-line
+  }, []);
 
   const loadMessages = async () => {
     try {

@@ -150,7 +150,17 @@ jobs:
 
       - name: Build
         working-directory: frontend
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee build.log
+          EXIT=$?
+          if [ $EXIT -ne 0 ]; then
+            echo "## ❌ Frontend build failed — last 120 lines" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -120 build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          exit $EXIT
         env:
           NODE_OPTIONS: --max-old-space-size=6144
           REACT_APP_API_URL: /api/v1

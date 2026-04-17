@@ -45,7 +45,68 @@ import {
   Refresh as RefreshIcon,
   Add as AddIcon,
   Visibility as ViewIcon,
+  Assignment as AssessIcon,
+  ListAlt as PlanIcon,
+  TrackChanges as GoalIcon,
+  Groups as GroupIcon,
+  Videocam as VideoIcon,
+  Vrpano as VrIcon,
+  Psychology as BehaviorIcon,
+  FamilyRestroom as FamilyIcon,
+  School as ProgramIcon,
+  AutoAwesome as AIIcon,
+  Biotech as ResearchIcon,
+  ModelTraining as TrainingIcon,
+  CheckCircle as CheckIcon,
+  Warning as WarnIcon,
 } from '@mui/icons-material';
+
+import {
+  assessmentsAPI,
+  carePlansAPI,
+  goalsAPI,
+  groupTherapyAPI,
+  teleRehabAPI,
+  arVrAPI,
+  behaviorAPI,
+  familyAPI,
+  programsAPI,
+  aiRecommendationsAPI,
+  researchAPI,
+  fieldTrainingAPI,
+  workforceAnalyticsAPI,
+  credentialManagerAPI,
+  mentorshipProgramAPI,
+  careerPathwayAPI,
+  accreditationManagerAPI,
+  inspectionTrackerAPI,
+  standardsComplianceAPI,
+  licensureManagerAPI,
+  patientPortalAPI,
+  healthEducationAPI,
+  remoteMonitoringAPI,
+  patientCommunityAPI,
+  fhirIntegrationAPI,
+  hl7MessagingAPI,
+  dataExchangeAPI,
+  interoperabilityHubAPI,
+  backupManagerAPI,
+  businessContinuityAPI,
+  systemFailoverAPI,
+  incidentResponseAPI,
+  equipmentLifecycleAPI,
+  environmentalMonitoringAPI,
+  spaceManagementAPI,
+  assetTrackingAPI,
+  clinicalResearchAPI,
+  clinicalTrialsAPI,
+  outcomeResearchAPI,
+  publicationManagerAPI,
+  volunteerManagementAPI,
+  communityOutreachAPI,
+  donorRelationsAPI,
+  advocacyProgramAPI,
+} from '../../services/ddd';
 
 /* ── Generic Domain Page Factory ── */
 function createDomainPage({ title, titleEn, icon, apiModule, columns, detailFields, statsConfig }) {
@@ -283,79 +344,8 @@ function createDomainPage({ title, titleEn, icon, apiModule, columns, detailFiel
 
 /* ══════════════════════════════════════════════════════════════
    Exported Domain Pages
+   (imports hoisted to top of file — ESLint/import-first compliant)
    ══════════════════════════════════════════════════════════════ */
-
-import {
-  assessmentsAPI,
-  carePlansAPI,
-  goalsAPI,
-  groupTherapyAPI,
-  teleRehabAPI,
-  arVrAPI,
-  behaviorAPI,
-  familyAPI,
-  programsAPI,
-  aiRecommendationsAPI,
-  researchAPI,
-  fieldTrainingAPI,
-  // Phase 29 – Workforce Development
-  workforceAnalyticsAPI,
-  credentialManagerAPI,
-  mentorshipProgramAPI,
-  careerPathwayAPI,
-  // Phase 30 – Accreditation & Compliance
-  accreditationManagerAPI,
-  inspectionTrackerAPI,
-  standardsComplianceAPI,
-  licensureManagerAPI,
-  // Phase 31 – Patient Engagement
-  patientPortalAPI,
-  healthEducationAPI,
-  remoteMonitoringAPI,
-  patientCommunityAPI,
-  // Phase 32 – Interoperability
-  fhirIntegrationAPI,
-  hl7MessagingAPI,
-  dataExchangeAPI,
-  interoperabilityHubAPI,
-  // Phase 33 – Disaster Recovery
-  backupManagerAPI,
-  businessContinuityAPI,
-  systemFailoverAPI,
-  incidentResponseAPI,
-  // Phase 34 – Facility & Asset
-  equipmentLifecycleAPI,
-  environmentalMonitoringAPI,
-  spaceManagementAPI,
-  assetTrackingAPI,
-  // Phase 35 – Clinical Research
-  clinicalResearchAPI,
-  clinicalTrialsAPI,
-  outcomeResearchAPI,
-  publicationManagerAPI,
-  // Phase 36 – Community Engagement
-  volunteerManagementAPI,
-  communityOutreachAPI,
-  donorRelationsAPI,
-  advocacyProgramAPI,
-} from '../../services/ddd';
-
-import {
-  Assignment as AssessIcon,
-  ListAlt as PlanIcon,
-  TrackChanges as GoalIcon,
-  Groups as GroupIcon,
-  Videocam as VideoIcon,
-  Vrpano as VrIcon,
-  Psychology as BehaviorIcon,
-  FamilyRestroom as FamilyIcon,
-  School as ProgramIcon,
-  AutoAwesome as AIIcon,
-  Biotech as ResearchIcon,
-  ModelTraining as TrainingIcon,
-  CheckCircle as CheckIcon,
-  Warning as WarnIcon,
-} from '@mui/icons-material';
 
 const fmtDate = d => (d ? new Date(d).toLocaleDateString('ar-SA') : '-');
 

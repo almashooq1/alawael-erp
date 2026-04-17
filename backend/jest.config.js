@@ -109,19 +109,10 @@ module.exports = {
     // (supply-chain, sso-e2e*, e2e-phase*, e2e-api, measurement-integration,
     //  advanced-measurements, driver-*, comprehensive-advanced, civilDefense,
     //  executiveDashboard (Mocha/Chai), comprehensive (placeholder))
-
-    // Live-server test (needs running server, circular JSON errors)
-    'tests/tests/measurement-system\\.test',
-    // Mocha/Chai tests → archived to _archived/dead-tests/
-    // Integration tests with missing route files or service mismatches (need rewrite)
-    'tests/tests/advanced-features\\.integration\\.test',
-    'tests/tests/integration/vehicles\\.integration\\.test',
-    'tests/tests/integration/trips\\.integration\\.test',
-    'tests/tests/integration/routes\\.integration\\.test',
-    'tests/tests/integration\\.test',
-    'tests/tests/database\\.integration\\.test',
-    'tests/tests/communityAwareness\\.test',
-    'tests/tests/sso\\.comprehensive\\.test',
+    //
+    // NOTE: the `tests/tests/*` ignores listed here previously were moved
+    // wholesale to _archived/legacy-test-harness/. The _archived prefix
+    // already ignores them so per-file patterns are no longer needed.
   ],
   watchPathIgnorePatterns: ['/node_modules/', '/coverage/', '/dist/'],
 

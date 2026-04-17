@@ -2066,6 +2066,487 @@ function SeoJsonLd() {
   return null;
 }
 
+/* ══════════════════════ Awards Strip ══════════════════════ */
+function Awards() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  const a = content.awards;
+  return (
+    <section
+      id="awards"
+      ref={ref}
+      className="py-20 bg-white relative overflow-hidden border-y border-gray-100"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{a.title}</h2>
+          <p className="text-gray-500 text-sm">{a.subtitle}</p>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {a.items.map((it, i) => (
+            <div
+              key={it.name}
+              className={`group flex flex-col items-center justify-center p-5 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg hover:-translate-y-0.5 ring-1 ring-gray-100 hover:ring-primary-200 transition-all duration-500 text-center ${visible ? 'opacity-100' : 'opacity-0'}`}
+              style={{ transitionDelay: `${i * 60}ms` }}
+            >
+              <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">
+                {it.icon}
+              </div>
+              <div className="text-sm font-bold text-gray-900 leading-tight">{it.name}</div>
+              <div className="text-[11px] text-gray-500 mt-1 leading-snug">{it.detail}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Quiz (Self-Assessment Wizard) ══════════════════════ */
+function Quiz() {
+  const booking = useBooking();
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.12);
+  const q = content.quiz;
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [started, setStarted] = useState(false);
+
+  const totalSteps = q.questions.length;
+  const progress =
+    started && step < totalSteps ? ((step + 1) / totalSteps) * 100 : started ? 100 : 0;
+
+  const recommendation = useMemo(() => {
+    if (step < totalSteps) return null;
+    const scores = {};
+    q.questions.forEach(qq => {
+      const picked = qq.options.find(o => o.value === answers[qq.id]);
+      if (!picked?.score) return;
+      for (const [svc, pts] of Object.entries(picked.score)) {
+        scores[svc] = (scores[svc] || 0) + pts;
+      }
+    });
+    let best = null;
+    let bestScore = -1;
+    for (const [svc, pts] of Object.entries(scores)) {
+      if (pts > bestScore) {
+        best = svc;
+        bestScore = pts;
+      }
+    }
+    return best && q.recommendations[best]
+      ? { id: best, ...q.recommendations[best] }
+      : { id: 'fallback', ...q.fallback };
+  }, [step, answers, q, totalSteps]);
+
+  const answer = (qid, value) => {
+    setAnswers(prev => ({ ...prev, [qid]: value }));
+    // Auto-advance after choosing for better mobile UX.
+    setTimeout(() => setStep(s => Math.min(s + 1, totalSteps)), 180);
+  };
+
+  const restart = () => {
+    setStep(0);
+    setStarted(false);
+    setAnswers({});
+  };
+
+  return (
+    <section
+      id="quiz"
+      ref={ref}
+      className="py-28 bg-gradient-to-br from-primary-50 via-white to-emerald-50 relative overflow-hidden"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_0%,rgba(16,185,129,0.08),transparent)]" />
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-4 ring-1 ring-primary-100">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse" />
+            تقييم مجاني · دقيقتان
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">{q.title}</h2>
+          <p className="text-lg text-gray-600 leading-relaxed">{q.subtitle}</p>
+        </div>
+
+        <div
+          className={`relative bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-500 ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+        >
+          <div className="h-1.5 bg-gray-100">
+            <div
+              className="h-full bg-gradient-to-l from-primary-500 to-emerald-500 transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <div className="p-8 sm:p-10">
+            {!started && (
+              <div className="text-center py-6">
+                <div className="w-20 h-20 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center text-4xl shadow-lg shadow-primary-500/25">
+                  🔎
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">تقييم سريع بدون تسجيل</h3>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto">
+                  ستحصل فوراً على توصية ببرنامج مناسب + إمكانية حجز زيارة تقييم تفصيلية.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setStarted(true)}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/25 hover:-translate-y-0.5 transition-all"
+                >
+                  {q.ctaStart}
+                  <svg
+                    className="w-5 h-5 rotate-180"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {started &&
+              step < totalSteps &&
+              (() => {
+                const qq = q.questions[step];
+                return (
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span className="font-semibold">
+                        سؤال {step + 1} من {totalSteps}
+                      </span>
+                      {step > 0 && (
+                        <button
+                          onClick={() => setStep(s => s - 1)}
+                          className="hover:text-primary-600 transition-colors"
+                        >
+                          ← {q.ctaBack}
+                        </button>
+                      )}
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">{qq.label}</h3>
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {qq.options.map(opt => {
+                        const active = answers[qq.id] === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => answer(qq.id, opt.value)}
+                            className={`text-right p-4 rounded-2xl border-2 transition-all duration-300 ${
+                              active
+                                ? 'border-primary-500 bg-primary-50 ring-4 ring-primary-100'
+                                : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/30'
+                            }`}
+                          >
+                            <span className="font-semibold text-gray-900">{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
+
+            {started && step >= totalSteps && recommendation && (
+              <div className="text-center py-4">
+                <div
+                  className={`w-24 h-24 mx-auto mb-5 rounded-3xl bg-gradient-to-br ${recommendation.color} flex items-center justify-center text-5xl shadow-xl`}
+                >
+                  {recommendation.icon}
+                </div>
+                <div className="text-sm font-semibold text-primary-700 mb-2">توصيتنا لطفلك</div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
+                  {recommendation.title}
+                </h3>
+                <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
+                  {recommendation.why}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    type="button"
+                    onClick={booking.open}
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-2xl shadow-lg shadow-primary-600/25 hover:-translate-y-0.5 transition-all"
+                  >
+                    {q.ctaBook}
+                    <svg
+                      className="w-4 h-4 rotate-180"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2.2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={restart}
+                    className="inline-flex items-center justify-center gap-2 px-7 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-2xl transition-colors"
+                  >
+                    {q.ctaRetake}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-6 max-w-md mx-auto">
+                  هذه التوصية استرشادية — الخطة النهائية تُبنى بعد تقييم وجاهي مع فريق متعدد
+                  التخصصات.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Gallery ══════════════════════ */
+function Gallery() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  const g = content.gallery;
+  const [filter, setFilter] = useState('all');
+  const [lightbox, setLightbox] = useState(null);
+
+  const filtered = filter === 'all' ? g.items : g.items.filter(i => i.category === filter);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = e => {
+      if (e.key === 'Escape') setLightbox(null);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        const idx = filtered.findIndex(i => i.id === lightbox.id);
+        const delta = e.key === 'ArrowLeft' ? 1 : -1; // RTL-friendly
+        const next = filtered[(idx + delta + filtered.length) % filtered.length];
+        if (next) setLightbox(next);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [lightbox, filtered]);
+
+  return (
+    <section id="gallery" ref={ref} className="py-28 bg-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`text-center mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-4">
+            معرض الصور
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{g.title}</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{g.subtitle}</p>
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-primary-500 to-emerald-500 mt-5" />
+        </div>
+
+        <div className="flex flex-wrap justify-center gap-2 mb-10">
+          {g.categories.map(c => (
+            <button
+              key={c.id}
+              onClick={() => setFilter(c.id)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                filter === c.id
+                  ? 'bg-primary-600 text-white shadow-md shadow-primary-600/25'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {filtered.map((item, i) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setLightbox(item)}
+              className={`group relative aspect-[4/3] rounded-2xl overflow-hidden bg-gradient-to-br ${item.gradient} shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 cursor-pointer ${visible ? 'opacity-100' : 'opacity-0'}`}
+              style={{ transitionDelay: `${i * 50}ms` }}
+              aria-label={item.caption}
+            >
+              <div
+                className="absolute inset-0 opacity-20"
+                style={{
+                  backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                  backgroundSize: '24px 24px',
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center text-7xl drop-shadow-lg">
+                {item.icon}
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-right">
+                <div className="text-sm font-bold">{item.caption}</div>
+              </div>
+              <div className="absolute top-3 left-3 w-9 h-9 rounded-full bg-white/90 text-gray-900 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 3h6v6M14 10l7-7M9 21H3v-6M10 14l-7 7"
+                  />
+                </svg>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+            onClick={() => setLightbox(null)}
+          />
+          <div
+            className={`relative w-full max-w-4xl aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${lightbox.gradient} shadow-2xl`}
+          >
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                backgroundSize: '32px 32px',
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center text-[20rem] drop-shadow-2xl">
+              {lightbox.icon}
+            </div>
+            <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white text-right">
+              <div className="text-2xl font-bold">{lightbox.caption}</div>
+            </div>
+          </div>
+          <button
+            onClick={() => setLightbox(null)}
+            aria-label="إغلاق"
+            className="absolute top-6 left-6 w-11 h-11 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ══════════════════════ Success Stories ══════════════════════ */
+function Stories() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.12);
+  const s = content.stories;
+  return (
+    <section
+      id="stories"
+      ref={ref}
+      className="py-28 bg-gradient-to-bl from-amber-50/50 via-white to-emerald-50/30 relative overflow-hidden"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`text-center mb-14 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-bold tracking-wider uppercase mb-4">
+            قصص نجاح
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{s.title}</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{s.subtitle}</p>
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-amber-500 to-primary-500 mt-5" />
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {s.items.map((story, i) => (
+            <article
+              key={story.name}
+              className={`relative rounded-3xl overflow-hidden bg-white ring-1 ring-gray-100 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={{ transitionDelay: `${i * 120}ms` }}
+            >
+              <div className={`h-2 bg-gradient-to-l ${story.color}`} />
+              <div className="p-7">
+                <div className="flex items-center justify-between mb-5">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xl font-bold text-gray-900">{story.name}</span>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {story.age} سنوات
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">{story.condition}</div>
+                  </div>
+                  <div
+                    className={`flex-shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br ${story.color} text-white flex items-center justify-center font-bold text-xl shadow-md`}
+                  >
+                    {story.name.charAt(0)}
+                  </div>
+                </div>
+
+                <div className="space-y-4 mb-5">
+                  <div className="p-3 rounded-xl bg-rose-50 border-r-4 border-rose-400">
+                    <div className="text-xs font-bold text-rose-700 mb-1">قبل 🕰️</div>
+                    <p className="text-sm text-gray-700 leading-relaxed">{story.before}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-emerald-50 border-r-4 border-emerald-500">
+                    <div className="text-xs font-bold text-emerald-700 mb-1">بعد ✨</div>
+                    <p className="text-sm text-gray-700 leading-relaxed">{story.after}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div>
+                    <div
+                      className={`text-2xl font-bold bg-gradient-to-l ${story.color} bg-clip-text text-transparent`}
+                    >
+                      {story.metric.isText ? story.metric.value : `+${story.metric.value}`}
+                    </div>
+                    <div className="text-[11px] text-gray-500">{story.metric.label}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold text-gray-700">{story.duration}</div>
+                    <div className="text-[11px] text-gray-400">{story.program}</div>
+                  </div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ About ══════════════════════ */
 function About() {
   const ref = useRef(null);
@@ -2869,14 +3350,18 @@ export default function LandingPage() {
         <Navbar />
         <Hero />
         <TrustedBy />
+        <Awards />
         <About />
         <Services />
         <Programs />
+        <Quiz />
         <Branches />
+        <Gallery />
         <PlatformFeatures />
         <HowItWorks />
         <WhyUs />
         <Team />
+        <Stories />
         <Stats />
         <Testimonials />
         <FAQ />

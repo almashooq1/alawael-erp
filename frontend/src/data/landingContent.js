@@ -278,6 +278,327 @@ const landingContent = {
     timeSlots: ['صباحي (7:30 ص - 12:30 م)', 'مسائي (3:00 م - 8:00 م)', 'أي وقت يناسب'],
   },
 
+  /* ── Self-assessment quiz ── */
+  quiz: {
+    title: 'ما البرنامج الأنسب لطفلك؟',
+    subtitle:
+      'أجب عن 6 أسئلة سريعة وسنرشّح لك البرنامج التأهيلي الأكثر ملاءمة — مجاناً وخلال دقيقتين',
+    ctaStart: 'ابدأ التقييم',
+    ctaRetake: 'أعد التقييم',
+    ctaBook: 'احجز زيارة تقييم',
+    ctaContinue: 'التالي',
+    ctaBack: 'رجوع',
+    questions: [
+      {
+        id: 'age',
+        label: 'كم عمر طفلك الآن؟',
+        options: [
+          { value: '0-2', label: 'أقل من سنتين', score: { 'early-intervention': 5 } },
+          {
+            value: '2-6',
+            label: '2 - 6 سنوات',
+            score: { 'early-intervention': 5, 'autism-rehab': 3, 'speech-lang': 3 },
+          },
+          {
+            value: '6-12',
+            label: '6 - 12 سنة',
+            score: { 'autism-rehab': 4, 'speech-lang': 3, occupational: 3, psychological: 3 },
+          },
+          { value: '12+', label: 'أكبر من 12 سنة', score: { psychological: 4, occupational: 3 } },
+        ],
+      },
+      {
+        id: 'primaryConcern',
+        label: 'ما أهم ما يقلقك في تطور طفلك؟',
+        options: [
+          { value: 'speech', label: 'تأخّر في النطق واللغة', score: { 'speech-lang': 6 } },
+          {
+            value: 'social',
+            label: 'ضعف التواصل الاجتماعي',
+            score: { 'autism-rehab': 5, psychological: 2 },
+          },
+          {
+            value: 'behavior',
+            label: 'سلوكيات صعبة أو متكرّرة',
+            score: { 'autism-rehab': 3, psychological: 5 },
+          },
+          {
+            value: 'motor',
+            label: 'تأخّر في المهارات الحركية',
+            score: { occupational: 6, 'early-intervention': 2 },
+          },
+          {
+            value: 'learning',
+            label: 'صعوبات في التعلّم والفهم',
+            score: { 'autism-rehab': 2, 'early-intervention': 3, occupational: 2 },
+          },
+          {
+            value: 'multiple',
+            label: 'أكثر من جانب — أحتاج تقييماً شاملاً',
+            score: { 'early-intervention': 3, 'autism-rehab': 3, psychological: 2 },
+          },
+        ],
+      },
+      {
+        id: 'diagnosis',
+        label: 'هل حصل طفلك على تشخيص رسمي؟',
+        options: [
+          { value: 'autism', label: 'نعم — اضطراب طيف التوحد', score: { 'autism-rehab': 6 } },
+          {
+            value: 'intellectual',
+            label: 'نعم — إعاقة ذهنية',
+            score: { 'early-intervention': 4, psychological: 3 },
+          },
+          {
+            value: 'down',
+            label: 'نعم — متلازمة داون',
+            score: { 'early-intervention': 4, 'speech-lang': 3, occupational: 3 },
+          },
+          {
+            value: 'adhd',
+            label: 'نعم — فرط حركة وتشتّت انتباه',
+            score: { psychological: 5, occupational: 2 },
+          },
+          {
+            value: 'none',
+            label: 'لا — لم يُشخَّص بعد',
+            score: { 'early-intervention': 3, psychological: 2 },
+          },
+        ],
+      },
+      {
+        id: 'communication',
+        label: 'كيف يتواصل طفلك مع من حوله؟',
+        options: [
+          {
+            value: 'none',
+            label: 'لا يتكلّم أو يستخدم كلمات محدودة جداً',
+            score: { 'speech-lang': 5, 'autism-rehab': 3, 'early-intervention': 3 },
+          },
+          {
+            value: 'limited',
+            label: 'كلمات مفردة — لا يركّب جملاً',
+            score: { 'speech-lang': 5, 'autism-rehab': 2 },
+          },
+          {
+            value: 'sentences',
+            label: 'جمل قصيرة — لكن يصعب فهمه أحياناً',
+            score: { 'speech-lang': 3, psychological: 2 },
+          },
+          {
+            value: 'full',
+            label: 'يتكلّم جيداً — المشكلة ليست في اللغة',
+            score: { psychological: 3, occupational: 3 },
+          },
+        ],
+      },
+      {
+        id: 'selfCare',
+        label: 'كيف هو استقلالية طفلك في الأنشطة اليومية؟',
+        options: [
+          {
+            value: 'needs-help',
+            label: 'يحتاج مساعدة في كل شيء (أكل/لبس/حمّام)',
+            score: { occupational: 5, 'early-intervention': 3 },
+          },
+          { value: 'some', label: 'يعتمد على نفسه في بعض الأمور', score: { occupational: 3 } },
+          { value: 'most', label: 'مستقل في أغلب المهارات اليومية', score: { psychological: 2 } },
+        ],
+      },
+      {
+        id: 'preferredAudience',
+        label: 'جنس طفلك؟',
+        options: [
+          { value: 'female', label: 'بنت' },
+          { value: 'male', label: 'ولد' },
+        ],
+      },
+    ],
+    // Human-readable recommendation per service id (from content.services).
+    recommendations: {
+      'early-intervention': {
+        title: 'برنامج التدخّل المبكر',
+        why: 'نوصي بهذا البرنامج لأنّ سن طفلك وظروفه تجعل التدخّل المبكر الأكثر تأثيراً في تسريع النمو قبل دخول البيئة المدرسية.',
+        color: 'from-emerald-500 to-green-600',
+        icon: '🌱',
+      },
+      'autism-rehab': {
+        title: 'برنامج تأهيل اضطراب التوحد',
+        why: 'ملامح إجاباتك تتوافق مع برامج ABA / PECS / TEACCH التي نقدّمها بفريق أخصائيين معتمدين.',
+        color: 'from-blue-500 to-indigo-600',
+        icon: '🧩',
+      },
+      psychological: {
+        title: 'برنامج العلاج النفسي والسلوكي',
+        why: 'يبدو أن الاحتياج الأكبر هو في الجانب السلوكي والعاطفي — جلسات تعديل السلوك والعلاج المعرفي ستكون أنسب نقطة بداية.',
+        color: 'from-purple-500 to-violet-600',
+        icon: '💙',
+      },
+      'speech-lang': {
+        title: 'برنامج تأهيل النطق واللغة',
+        why: 'إشارات إجاباتك تدل على أن محور التدخّل يجب أن يكون اللغة والتواصل — نوفّر أخصائيات نطق معتمدات ASHA.',
+        color: 'from-teal-500 to-cyan-600',
+        icon: '🗣️',
+      },
+      occupational: {
+        title: 'برنامج العلاج الوظيفي والحسّي',
+        why: 'الجانب الحركي والاستقلالية في الأنشطة اليومية هو محور الخطة التأهيلية المقترَحة.',
+        color: 'from-rose-500 to-pink-600',
+        icon: '🖐️',
+      },
+      recreational: {
+        title: 'البرامج الترفيهية والاجتماعية',
+        why: 'طفلك يمكن أن يستفيد من البرامج الاجتماعية والترفيهية المدروسة لبناء الثقة وتعزيز التفاعل.',
+        color: 'from-amber-500 to-orange-600',
+        icon: '🎨',
+      },
+    },
+    // Fallback recommendation shown when no service score dominates.
+    fallback: {
+      title: 'تقييم شامل متعدّد التخصصات',
+      why: 'بناءً على إجاباتك، نوصي بزيارة تقييم أولية مع فريق متعدد التخصصات لبناء خطة فردية دقيقة.',
+      color: 'from-slate-600 to-slate-800',
+      icon: '🔎',
+    },
+  },
+
+  /* ── Photo gallery ── */
+  gallery: {
+    title: 'جولة داخل المركز',
+    subtitle: 'بيئات مُصمّمة خصيصاً لراحة المستفيدين وتوفير تجربة تأهيلية فعّالة',
+    categories: [
+      { id: 'all', label: 'الكل' },
+      { id: 'therapy', label: 'غرف العلاج' },
+      { id: 'sensory', label: 'التكامل الحسّي' },
+      { id: 'play', label: 'مناطق اللعب' },
+      { id: 'outdoor', label: 'الأنشطة الخارجية' },
+    ],
+    // Each item uses a generated SVG placeholder so the gallery renders
+    // before real photos arrive. When real photos land, swap `src` to
+    // point at /images/gallery/<filename>.webp — no component changes needed.
+    items: [
+      {
+        id: 1,
+        category: 'therapy',
+        caption: 'غرفة الجلسات الفردية',
+        gradient: 'from-emerald-400 to-teal-600',
+        icon: '🪑',
+      },
+      {
+        id: 2,
+        category: 'sensory',
+        caption: 'غرفة التكامل الحسّي',
+        gradient: 'from-purple-400 to-pink-500',
+        icon: '🌟',
+      },
+      {
+        id: 3,
+        category: 'therapy',
+        caption: 'قاعة النطق واللغة',
+        gradient: 'from-blue-400 to-indigo-600',
+        icon: '🗣️',
+      },
+      {
+        id: 4,
+        category: 'play',
+        caption: 'منطقة اللعب الداخلية',
+        gradient: 'from-amber-400 to-orange-500',
+        icon: '🎈',
+      },
+      {
+        id: 5,
+        category: 'therapy',
+        caption: 'قاعة العلاج الوظيفي',
+        gradient: 'from-rose-400 to-pink-600',
+        icon: '🖐️',
+      },
+      {
+        id: 6,
+        category: 'sensory',
+        caption: 'غرفة الاستشعار المتعدّد',
+        gradient: 'from-cyan-400 to-blue-500',
+        icon: '✨',
+      },
+      {
+        id: 7,
+        category: 'outdoor',
+        caption: 'الفناء الخارجي الآمن',
+        gradient: 'from-green-400 to-emerald-600',
+        icon: '🌳',
+      },
+      {
+        id: 8,
+        category: 'play',
+        caption: 'مكتبة الأطفال التفاعلية',
+        gradient: 'from-violet-400 to-purple-600',
+        icon: '📚',
+      },
+      {
+        id: 9,
+        category: 'outdoor',
+        caption: 'ملعب الألعاب الحركية',
+        gradient: 'from-yellow-400 to-amber-500',
+        icon: '⚽',
+      },
+    ],
+  },
+
+  /* ── Success stories ── */
+  stories: {
+    title: 'قصص نجاح حقيقية',
+    subtitle:
+      'قصص أطفال تحوّلت حياتهم بفضل خطط تأهيل فردية وفريق مختص — أسماء مُستعارة بطلب من ذويهم',
+    items: [
+      {
+        name: 'مشاعل',
+        age: 4,
+        condition: 'اضطراب طيف التوحد',
+        before: 'لم تكن تنطق أي كلمة، تتجنّب النظر، وتنعزل عن الأطفال.',
+        after: 'تنطق +50 كلمة، تطلب احتياجاتها، وتشارك في اللعب الجماعي.',
+        duration: '8 أشهر',
+        program: 'ABA + تأهيل نطق',
+        metric: { label: 'مفردات جديدة', value: 52 },
+        color: 'from-pink-500 to-rose-500',
+      },
+      {
+        name: 'عبدالرحمن',
+        age: 7,
+        condition: 'تأخّر حركي + ضعف تركيز',
+        before: 'لا يستطيع ربط حذائه أو الإمساك بالقلم، تشتّت شديد في المدرسة.',
+        after: 'يكتب الحروف، يربط حذاءه، ويلتزم بمهامه 25 دقيقة.',
+        duration: '12 شهراً',
+        program: 'علاج وظيفي + تعديل سلوك',
+        metric: { label: 'مدة التركيز', value: '25د', isText: true },
+        color: 'from-blue-500 to-indigo-500',
+      },
+      {
+        name: 'ليلى',
+        age: 3,
+        condition: 'متلازمة داون',
+        before: 'لا تمشي بثبات، تحتاج مساعدة في الأكل، لا تتواصل بصرياً.',
+        after: 'تمشي وتجري، تأكل باستقلالية، وتقول جملاً من كلمتين.',
+        duration: '10 أشهر',
+        program: 'تدخّل مبكر شامل',
+        metric: { label: 'مهارة جديدة', value: 18 },
+        color: 'from-emerald-500 to-teal-500',
+      },
+    ],
+  },
+
+  /* ── Awards / certifications ── */
+  awards: {
+    title: 'اعتمادات وشراكات',
+    subtitle: 'نفتخر بالتزامنا بأعلى معايير الجودة المحلية والعالمية',
+    items: [
+      { name: 'وزارة الموارد البشرية', detail: 'رخصة مركز تأهيل معتمد', icon: '🏛️' },
+      { name: 'هيئة رعاية ذوي الإعاقة', detail: 'عضو مسجّل', icon: '💙' },
+      { name: 'هيئة التخصصات الصحية (SCFHS)', detail: 'أخصائيون مرخّصون', icon: '⚕️' },
+      { name: 'ASHA', detail: 'أخصائيات نطق معتمدات دولياً', icon: '🎓' },
+      { name: 'BACB', detail: 'محلّلو سلوك تطبيقي (BCBA)', icon: '📜' },
+      { name: 'CARF', detail: 'توافق معايير الجودة', icon: '🌍' },
+    ],
+  },
+
   /* ── SEO ── */
   seo: {
     description:

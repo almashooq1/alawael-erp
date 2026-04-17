@@ -461,6 +461,7 @@ function Navbar() {
 
 /* ══════════════════════ Hero ══════════════════════ */
 function Hero() {
+  const booking = useBooking();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 100);
@@ -585,11 +586,12 @@ function Hero() {
             <div
               className={`flex flex-wrap gap-4 transition-all duration-1000 delay-600 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
             >
-              <Link
-                to={content.hero.primaryCta.to}
+              <button
+                type="button"
+                onClick={booking.open}
                 className="group relative inline-flex items-center gap-3 px-8 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-2xl shadow-black/15 hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
               >
-                <span className="relative z-10">{content.hero.primaryCta.label}</span>
+                <span className="relative z-10">احجز زيارة تقييم</span>
                 <svg
                   className="relative z-10 w-5 h-5 rotate-180 group-hover:-translate-x-1.5 transition-transform duration-300"
                   fill="none"
@@ -603,7 +605,7 @@ function Hero() {
                     d="M17 8l4 4m0 0l-4 4m4-4H3"
                   />
                 </svg>
-              </Link>
+              </button>
               <a
                 href={content.hero.secondaryCta.anchor}
                 onClick={e => {
@@ -1461,6 +1463,489 @@ function FAQ() {
   );
 }
 
+/* ══════════════════════ Platform Features ══════════════════════ */
+function PlatformFeatures() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  const pf = content.platformFeatures;
+  return (
+    <section
+      id="platform"
+      ref={ref}
+      className="py-28 bg-gradient-to-br from-slate-900 via-primary-900 to-slate-900 relative overflow-hidden"
+    >
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
+        }}
+      />
+      <div className="absolute top-20 -right-20 w-96 h-96 bg-accent-400/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-20 -left-20 w-96 h-96 bg-emerald-400/10 rounded-full blur-[120px]" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-400/15 text-accent-300 text-xs font-bold tracking-wider uppercase mb-4 ring-1 ring-accent-400/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-400 animate-pulse" />
+            منصّة رقمية
+          </span>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4">{pf.title}</h2>
+          <p className="text-lg text-white/70 max-w-3xl mx-auto leading-relaxed">{pf.subtitle}</p>
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-accent-400 to-emerald-400 mt-5" />
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {pf.items.map((f, i) => (
+            <div
+              key={f.title}
+              className={`group relative p-6 rounded-2xl bg-white/[0.04] backdrop-blur-sm border border-white/10 hover:border-accent-400/40 hover:bg-white/[0.07] hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={{ transitionDelay: `${i * 60}ms` }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="text-4xl">{f.icon}</div>
+                <span className="text-[10px] px-2 py-1 rounded-full bg-accent-400/15 text-accent-300 font-semibold tracking-wider">
+                  {f.badge}
+                </span>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2 group-hover:text-accent-300 transition-colors">
+                {f.title}
+              </h3>
+              <p className="text-sm text-white/65 leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Team ══════════════════════ */
+function Team() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.1);
+  const t = content.team;
+  return (
+    <section id="team" ref={ref} className="py-28 bg-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_30%_at_50%_0%,rgba(245,158,11,0.04),transparent)]" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-accent-50 text-accent-700 text-xs font-bold tracking-wider uppercase mb-4">
+            فريقنا
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">{t.title}</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t.subtitle}</p>
+          <div className="h-1 w-20 mx-auto rounded-full bg-gradient-to-l from-accent-500 to-primary-500 mt-5" />
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {t.items.map((member, i) => (
+            <article
+              key={member.name}
+              className={`group relative p-7 rounded-3xl bg-gradient-to-br from-white to-gray-50 ring-1 ring-gray-100 hover:ring-primary-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+              style={{ transitionDelay: `${i * 80}ms` }}
+            >
+              <div
+                className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${member.color} text-white flex items-center justify-center text-4xl mb-4 shadow-lg group-hover:scale-105 transition-transform`}
+              >
+                {member.icon}
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-1">{member.name}</h3>
+              <p className="text-sm text-primary-700 font-semibold mb-1">{member.role}</p>
+              <p className="text-xs text-gray-500 mb-3" dir="ltr">
+                {member.specialty}
+              </p>
+              <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-semibold">
+                {member.badge}
+              </span>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════ Booking Modal ══════════════════════ */
+function BookingModal({ open, onClose }) {
+  const ap = content.appointment;
+  const branches = content.branches.items;
+  const [form, setForm] = useState({
+    parentName: '',
+    parentPhone: '',
+    childName: '',
+    childAge: '',
+    conditionType: '',
+    branchPreference: '',
+    preferredTime: '',
+    notes: '',
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = e => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    const lines = [
+      `اسم ولي الأمر: ${form.parentName}`,
+      `رقم الجوال: ${form.parentPhone}`,
+      `اسم الطفل: ${form.childName}`,
+      `عمر الطفل: ${form.childAge} سنوات`,
+      `نوع الحالة: ${form.conditionType}`,
+      `الفرع المفضّل: ${form.branchPreference}`,
+      `الفترة المفضّلة: ${form.preferredTime}`,
+      form.notes ? `ملاحظات: ${form.notes}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+    const msg = `${ap.whatsappTemplate}\n\n${lines}`;
+    window.open(
+      `https://wa.me/${ap.whatsappNumber}?text=${encodeURIComponent(msg)}`,
+      '_blank',
+      'noopener'
+    );
+    setSubmitted(true);
+    try {
+      localStorage.setItem(
+        'alawael:lastBooking',
+        JSON.stringify({ ...form, at: new Date().toISOString() })
+      );
+    } catch {
+      /* storage may be blocked */
+    }
+  };
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="booking-title"
+    >
+      <div className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+        <div className="relative bg-gradient-to-br from-primary-600 to-emerald-600 p-6 text-white flex-shrink-0">
+          <button
+            onClick={onClose}
+            aria-label="إغلاق"
+            className="absolute top-4 left-4 w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h2 id="booking-title" className="text-2xl font-bold mb-1">
+            {ap.title}
+          </h2>
+          <p className="text-white/85 text-sm">{ap.subtitle}</p>
+        </div>
+
+        {submitted ? (
+          <div className="p-10 text-center flex-1 flex flex-col justify-center items-center">
+            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-5">
+              <svg
+                className="w-10 h-10 text-emerald-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">تم إرسال طلبك بنجاح</h3>
+            <p className="text-gray-600 mb-6">
+              فتحنا لك محادثة واتساب مع فريق الحجز. سيرد عليك أخصائي الاستقبال خلال 24 ساعة.
+            </p>
+            <button
+              onClick={() => {
+                setSubmitted(false);
+                onClose();
+                setForm({
+                  parentName: '',
+                  parentPhone: '',
+                  childName: '',
+                  childAge: '',
+                  conditionType: '',
+                  branchPreference: '',
+                  preferredTime: '',
+                  notes: '',
+                });
+              }}
+              className="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors"
+            >
+              إغلاق
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1">
+            <div className="grid sm:grid-cols-2 gap-4 mb-4">
+              <Field
+                label={ap.formFields.parentName}
+                required
+                value={form.parentName}
+                onChange={v => update('parentName', v)}
+              />
+              <Field
+                label={ap.formFields.parentPhone}
+                required
+                type="tel"
+                dir="ltr"
+                placeholder="05xxxxxxxx"
+                value={form.parentPhone}
+                onChange={v => update('parentPhone', v)}
+              />
+              <Field
+                label={ap.formFields.childName}
+                required
+                value={form.childName}
+                onChange={v => update('childName', v)}
+              />
+              <Field
+                label={ap.formFields.childAge}
+                required
+                type="number"
+                min={1}
+                max={30}
+                value={form.childAge}
+                onChange={v => update('childAge', v)}
+              />
+              <Select
+                label={ap.formFields.conditionType}
+                required
+                options={ap.conditions}
+                value={form.conditionType}
+                onChange={v => update('conditionType', v)}
+              />
+              <Select
+                label={ap.formFields.branchPreference}
+                required
+                options={branches.map(b => `${b.name} (${b.audience})`)}
+                value={form.branchPreference}
+                onChange={v => update('branchPreference', v)}
+              />
+              <Select
+                label={ap.formFields.preferredTime}
+                required
+                options={ap.timeSlots}
+                value={form.preferredTime}
+                onChange={v => update('preferredTime', v)}
+              />
+            </div>
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+                {ap.formFields.notes}
+              </label>
+              <textarea
+                rows={3}
+                value={form.notes}
+                onChange={e => update('notes', e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all resize-none text-sm"
+                placeholder="أي تفاصيل تساعدنا في تجهيز الزيارة..."
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#25D366] hover:bg-[#1ebe5a] text-white font-bold rounded-2xl shadow-lg shadow-[#25D366]/25 transition-all hover:-translate-y-0.5"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+                أرسل عبر واتساب
+              </button>
+              <a
+                href={`tel:${content.contact.mainPhone}`}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold rounded-2xl transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"
+                  />
+                </svg>
+                اتصل الآن
+              </a>
+            </div>
+            <p className="text-xs text-gray-500 text-center mt-4">
+              يتم إرسال بياناتك عبر واتساب إلى فريق الحجز. لا تُحفظ على خوادمنا إلا بعد موافقتك.
+            </p>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, required, type = 'text', dir, placeholder, value, onChange, min, max }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-semibold text-gray-700 mb-1.5">
+        {label} {required && <span className="text-rose-500">*</span>}
+      </span>
+      <input
+        type={type}
+        required={required}
+        dir={dir}
+        placeholder={placeholder}
+        value={value}
+        min={min}
+        max={max}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all text-sm"
+      />
+    </label>
+  );
+}
+
+function Select({ label, required, options, value, onChange }) {
+  return (
+    <label className="block">
+      <span className="block text-sm font-semibold text-gray-700 mb-1.5">
+        {label} {required && <span className="text-rose-500">*</span>}
+      </span>
+      <select
+        required={required}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-4 focus:ring-primary-100 outline-none transition-all text-sm bg-white"
+      >
+        <option value="" disabled>
+          اختر...
+        </option>
+        {options.map(o => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+/* ══════════════════════ WhatsApp FAB ══════════════════════ */
+function WhatsAppFab() {
+  const ap = content.appointment;
+  const url = `https://wa.me/${ap.whatsappNumber}?text=${encodeURIComponent(ap.whatsappTemplate)}`;
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="تواصل واتساب"
+      className="fixed bottom-6 left-6 z-40 group flex items-center gap-3 bg-[#25D366] hover:bg-[#1ebe5a] text-white px-4 py-3 rounded-full shadow-2xl shadow-[#25D366]/40 hover:-translate-y-1 transition-all duration-300"
+    >
+      <span className="relative flex w-11 h-11 items-center justify-center">
+        <span className="absolute inset-0 rounded-full bg-white/20 animate-ping" />
+        <svg className="w-6 h-6 relative" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+      </span>
+      <span className="hidden sm:inline-block font-semibold text-sm pl-1">راسلنا على واتساب</span>
+    </a>
+  );
+}
+
+/* ══════════════════════ SEO JSON-LD ══════════════════════ */
+function SeoJsonLd() {
+  const jsonLd = useMemo(() => {
+    const org = {
+      '@context': 'https://schema.org',
+      '@type': content.seo.organizationType,
+      name: content.brand.nameArFull,
+      alternateName: content.brand.nameEnFull,
+      url: content.contact.website || 'https://awael.sa',
+      logo:
+        typeof window !== 'undefined'
+          ? new URL(content.brand.logoSrc, window.location.origin).toString()
+          : content.brand.logoSrc,
+      description: content.seo.description,
+      foundingDate: `${content.brand.foundedGregorian}`,
+      telephone: content.contact.mainPhone,
+      email: content.contact.email,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: content.contact.mainAddress,
+        addressLocality: 'الرياض',
+        addressCountry: 'SA',
+      },
+      sameAs: content.contact.social.map(s => s.url),
+    };
+    const branches = content.branches.items.map(b => ({
+      '@context': 'https://schema.org',
+      '@type': 'LocalBusiness',
+      name: `${content.brand.nameArFull} — ${b.name}`,
+      telephone: b.phone,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: b.address,
+        addressLocality: 'الرياض',
+        addressCountry: 'SA',
+      },
+      parentOrganization: { '@type': content.seo.organizationType, name: content.brand.nameArFull },
+    }));
+    const faq = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: content.faq.map(f => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a },
+      })),
+    };
+    return [org, ...branches, faq];
+  }, []);
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify(jsonLd);
+    script.setAttribute('data-landing-seo', '1');
+    document.head.appendChild(script);
+    return () => {
+      try {
+        document.head.removeChild(script);
+      } catch {
+        /* already removed */
+      }
+    };
+  }, [jsonLd]);
+
+  return null;
+}
+
 /* ══════════════════════ About ══════════════════════ */
 function About() {
   const ref = useRef(null);
@@ -1832,6 +2317,7 @@ function Contact() {
 
 /* ══════════════════════ CTA ══════════════════════ */
 function CTA() {
+  const booking = useBooking();
   const ref = useRef(null);
   const visible = useOnScreen(ref);
   const c = content.cta;
@@ -1874,8 +2360,9 @@ function CTA() {
               {c.subtitle}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                to={c.primary.to}
+              <button
+                type="button"
+                onClick={booking.open}
                 className="group relative inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
               >
                 <span className="relative z-10">{c.primary.label}</span>
@@ -1892,7 +2379,7 @@ function CTA() {
                     d="M17 8l4 4m0 0l-4 4m4-4H3"
                   />
                 </svg>
-              </Link>
+              </button>
               <a
                 href={`tel:${c.secondary.tel}`}
                 className="inline-flex items-center gap-3 px-10 py-4 border-2 border-white/25 text-white rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white/40 transition-all duration-300 backdrop-blur-sm"
@@ -2130,38 +2617,70 @@ function Footer() {
 }
 
 /* ══════════════════════ Main Page ══════════════════════ */
+// Lightweight booking-modal context so any descendant can open the appointment dialog.
+const BookingContext = React.createContext({ open: () => {} });
+export const useBooking = () => React.useContext(BookingContext);
+
 export default function LandingPage() {
+  const [bookingOpen, setBookingOpen] = useState(false);
+
   useEffect(() => {
     document.title = `${content.brand.nameArFull} — ${content.brand.tagline}`;
     document.documentElement.style.scrollBehavior = 'smooth';
+    // Inject <meta name="description"> and keywords so raw crawlers see the
+    // rehab-center copy regardless of what index.html carries.
+    const ensureMeta = (name, value) => {
+      let tag = document.head.querySelector(`meta[name="${name}"]`);
+      if (!tag) {
+        tag = document.createElement('meta');
+        tag.setAttribute('name', name);
+        tag.setAttribute('data-landing-meta', '1');
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute('content', value);
+      return tag;
+    };
+    const m1 = ensureMeta('description', content.seo.description);
+    const m2 = ensureMeta('keywords', content.seo.keywords.join(', '));
     return () => {
       document.documentElement.style.scrollBehavior = '';
+      if (m1.getAttribute('data-landing-meta')) m1.remove();
+      if (m2.getAttribute('data-landing-meta')) m2.remove();
     };
   }, []);
 
+  const bookingApi = useMemo(() => ({ open: () => setBookingOpen(true) }), []);
+
   return (
-    <div
-      id="tailwind-scope"
-      dir="rtl"
-      className="font-cairo antialiased text-gray-900 overflow-x-hidden"
-    >
-      <ScrollProgress />
-      <Navbar />
-      <Hero />
-      <TrustedBy />
-      <About />
-      <Services />
-      <Programs />
-      <Branches />
-      <HowItWorks />
-      <WhyUs />
-      <Stats />
-      <Testimonials />
-      <FAQ />
-      <Contact />
-      <CTA />
-      <Footer />
-      <BackToTop />
-    </div>
+    <BookingContext.Provider value={bookingApi}>
+      <div
+        id="tailwind-scope"
+        dir="rtl"
+        className="font-cairo antialiased text-gray-900 overflow-x-hidden"
+      >
+        <SeoJsonLd />
+        <ScrollProgress />
+        <Navbar />
+        <Hero />
+        <TrustedBy />
+        <About />
+        <Services />
+        <Programs />
+        <Branches />
+        <PlatformFeatures />
+        <HowItWorks />
+        <WhyUs />
+        <Team />
+        <Stats />
+        <Testimonials />
+        <FAQ />
+        <Contact />
+        <CTA />
+        <Footer />
+        <BackToTop />
+        <WhatsAppFab />
+        <BookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      </div>
+    </BookingContext.Provider>
   );
 }

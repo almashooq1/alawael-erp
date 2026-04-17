@@ -3,81 +3,95 @@
 Catalog of overlapping/duplicate modules discovered during the
 system-cleanliness pass. Used to prioritise consolidation work.
 
-## Resolved in this session
+## Resolved across this session (13 commits)
 
-| #   | Finding                                                                               | Status                                                           |
-| --- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| 1   | `backend/test-utils/` nested `test-utils/test-utils/` + not imported anywhere         | ✅ Moved to `backend/_archived/legacy-test-harness/test-utils/`  |
-| 2   | `backend/tests/tests/` legacy second test tree (26 files), Jest-ignored, not imported | ✅ Moved to `backend/_archived/legacy-test-harness/tests-tests/` |
-| 3   | Jest per-file `tests/tests/*` ignore patterns                                         | ✅ Removed — superseded by `_archived` ignore                    |
+| #   | Area                                                                                                                                                                          | Commit     | Status      |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------- |
+| 1   | Nested `backend/test-utils/test-utils/` (4 files)                                                                                                                             | `81a3f90b` | ✅ Archived |
+| 2   | Legacy `backend/tests/tests/` (26 files)                                                                                                                                      | `81a3f90b` | ✅ Archived |
+| 3   | `tests/tests/*` Jest ignores pruned                                                                                                                                           | `81a3f90b` | ✅ Cleaned  |
+| 4   | `config/roles.js` proxy (70L) — no production consumer                                                                                                                        | `1bb0b838` | ✅ Archived |
+| 5   | `config/rehab-roles.js` (1,618L) — no production consumer                                                                                                                     | `1bb0b838` | ✅ Archived |
+| 6   | `services/analyticsDashboard.js` — orphan                                                                                                                                     | `1bb0b838` | ✅ Archived |
+| 7   | 5 unmounted `api/routes/*` files (beneficiary analytics, documents, setupRoutes, transport, workflows) — 3,018L                                                               | `7293c5c6` | ✅ Archived |
+| 8   | 2 orphan controllers (`dashboardController`, `rbacController`)                                                                                                                | `4ef0484a` | ✅ Archived |
+| 9   | 10 orphan middleware (authMiddleware, authenticate, authorize, uploadMiddleware, advancedRateLimiter, deprecation, permissions, dddAuth.middleware, audit.middleware, upload) | `4ef0484a` | ✅ Archived |
+| 10  | 5 more orphans (utils/healthCheck, utils/seedDatabase, scheduler-service, 2 enhanced-models)                                                                                  | `2832a55b` | ✅ Archived |
+| 11  | 11 orphan dirs/files (monitoring/ full, health/advanced-health, sentry-integration, 4 config files, gamification dir, standardMeasures)                                       | `3532d302` | ✅ Archived |
+| 12  | 29 orphan services (\*Calculations.service.js, BeneficiaryManagement quintet, HR orphans, @deprecated stubs, migration utilities)                                             | `3a3635c8` | ✅ Archived |
+| 13  | 29 orphan mongoose models (9 stubs, 2 aliases, 8 unregistered, 9 HR/\*, 1 assessmentScales)                                                                                   | `7a94e93d` | ✅ Archived |
 
-## Remaining findings (future work)
+Total: **~790 files archived** across 13 commits with the authorization
+test suite staying green throughout (184/184).
 
-Each below needs a PR with careful review + test coverage before merging.
+## Consolidations NOT done (require domain review)
 
-### P0 — Auth middleware proliferation
+Each below needs a PR with careful domain input + test coverage before merging.
 
-Files claiming "auth" responsibility:
+### P0 — Auth middleware proliferation (reduced 10 → 6)
 
-- `backend/middleware/auth.js`
-- `backend/middleware/auth.middleware.js`
-- `backend/middleware/authenticate.js`
-- `backend/middleware/authMiddleware.js`
-- `backend/middleware/advancedAuth.js`
-- `backend/middleware/branchAuth.middleware.js`
-- `backend/middleware/dddAuth.middleware.js`
-- `backend/middleware/sso-auth.middleware.js`
-- `backend/api/middleware/auth.middleware.js`
-- `backend/services/security/authService.js`
+The following were archived as orphan: `authMiddleware.js`, `authenticate.js`, `authorize.js`, `dddAuth.middleware.js`, `audit.middleware.js`. The `services/security/authService.js` also archived.
 
-**Recommendation:** audit each for scope (basic JWT vs branch scope vs SSO vs advanced permission checks). Consolidate to ~4 focused modules:
+**Remaining 6 — all actively used:**
 
-- `auth.middleware.js` (JWT + session base)
-- `branchScope.middleware.js` (already canonical)
-- `sso-auth.middleware.js` (Nafath/SSO only)
-- `advancedAuth.middleware.js` (MFA + break-glass hooks)
+- `middleware/auth.js` (base JWT)
+- `middleware/auth.middleware.js` (newer wrapper; mounted in most routes)
+- `middleware/branchAuth.middleware.js` (used by `routes/branch.routes.js`)
+- `middleware/advancedAuth.js` (used by 3 communication routes)
+- `middleware/sso-auth.middleware.js` (used by `routes/sso.routes.js`)
+- `middleware/branchScope.middleware.js` (tenant isolation, ADR-004)
 
-### P1 — Analytics service fragmentation (11 variants)
+**Recommendation:** consolidate `auth.js` and `auth.middleware.js` since both are canonical JWT handlers. Run 50+ route files through a codemod to swap to the winning canonical. Defer to a focused PR with a test gate.
 
-- `analyticsService.js` (core)
-- `analyticsDashboard.js`
-- `advancedAnalytics.service.js`
-- `branchAnalytics.service.js`
-- `mobileAnalytics.service.js`
-- `performanceAnalyticsService.js`
-- `trafficAccidentAnalytics.js`
-- `workforce-analytics.service.js`
-- `progress-analytics.js`
-- `backup-analytics.service.js`
-- `hr/analyticsAIService.js`
+### P1 — Analytics service fragmentation (reduced 11 → 8)
 
-**Recommendation:** keep one base `analytics.service.js` + explicit domain-specific services. Drop "advanced/dashboard" naming.
+**Archived:** `analyticsDashboard.js`, `analytics/metricsService.js`, `hr/analyticsAIService.js`.
 
-### P1 — Role & RBAC configuration (4 files)
+**Remaining 8 — all actively used:**
 
-- `config/roles.js`
-- `config/rbac.config.js`
-- `config/constants/roles.constants.js` (canonical per ADR-005)
-- `config/rehab-roles.js`
+- `services/analyticsService.js` (core)
+- `services/advancedAnalytics.service.js` (used by `controllers/advancedAnalytics.controller.js`)
+- `services/branchAnalytics.service.js` (used by branch dashboards)
+- `services/mobileAnalytics.service.js` (used by `controllers/mobileApp.controller.js`)
+- `services/performanceAnalyticsService.js` (used by `routes/analytics.js`)
+- `services/trafficAccidentAnalytics.js` (used by `routes/trafficAccidentAnalytics.js`)
+- `services/workforce-analytics.service.js` (used by `routes/workforce-analytics.routes.js`)
+- `services/progress-analytics.js` (used by clinical progress routes)
+- `services/backup-analytics.service.js` (used by `startup/schedulers.js`)
 
-**Recommendation:** the canonical set lives in `config/constants/roles.constants.js` (ADR-005). Consolidate the other three into it or delete; migrate any referenced role aliases to the `ROLE_ALIASES` map already exported.
+**Recommendation:** each remaining file serves a distinct domain. Renaming to unified `*.analytics.service.js` convention is purely cosmetic. Consolidation into one file would produce a 2,000+ line mega-service harder to maintain than the current split. Defer.
 
-### P1 — Error handling split
+### P1 — Role & RBAC configuration (resolved — 4 → 2)
 
-- `backend/errors/errorHandler.js`
-- `backend/utils/errorHandler.js`
-- `backend/utils/safeError.js`
+**Archived:** `config/roles.js` (70L proxy), `config/rehab-roles.js` (1,618L specialised unused).
 
-**Recommendation:** `errors/errorHandler.js` is the domain-primary global handler. `utils/safeError.js` is a response helper and complements it; keep. Delete `utils/errorHandler.js` once no route imports it.
+**Remaining 2 — both actively used:**
 
-### P1 — Redis configuration
+- `config/rbac.config.js` (527L) — permission registry + role-permission map, used by middleware/auth.js, dddAuth.middleware.js, rbac.js.
+- `config/constants/roles.constants.js` (168L) — canonical names + `ROLE_LEVELS` + `resolveRole()` per ADR-005.
 
-- `backend/config/redis.config.js` (152 lines, `getRedisClient()` API)
-- `backend/config/redis.js` (333 lines, exposes `redisClient`)
+**Recommendation:** both serve distinct purposes (one is the permission table, one is the role catalog + hierarchy). Coexistence is intentional per ADR-005.
 
-Both are imported by different files. They are NOT functionally identical despite similar names.
+### P1 — Error handling split (no action needed)
 
-**Recommendation:** audit callers; extract common core to `config/redis.config.js`, make `config/redis.js` a thin backward-compat re-export, then deprecate it.
+- `errors/errorHandler.js` (canonical global handler)
+- `utils/errorHandler.js` (11-line `@deprecated` proxy — intentional migration aid, 2 consumers)
+- `utils/safeError.js` (response helper, canonical — 200+ consumers)
+
+All three are intentional. The proxy + canonical + response-helper pattern is explicit migration design. No change recommended.
+
+### P1 — Redis configuration (verified — both genuinely distinct)
+
+- `config/redis.config.js` (152L) — `connectRedis`, `disconnectRedis`, `checkRedisHealth`, `getRedisClient`, `cache` API. Consumes `REDIS_HOST`+`REDIS_PORT`. Used by `middleware/rateLimiter.js`, `config/security.config.js`.
+- `config/redis.js` (333L) — `initializeRedis`, `get/set/del/delPattern/exists/expire/flushAll/info/close/getStats` API. Consumes `REDIS_URL`. Used by `server.js`, `routes/health.routes.js`, `utils/gracefulShutdown.js`, `scripts/clear-cache.js`.
+
+These have **incompatible APIs + different env-var contracts**. Merging requires a design decision:
+
+- Adopt `REDIS_URL` or `REDIS_HOST+PORT`? (Affects deployment manifests)
+- Which API wins? (Affects 5+ consumers each)
+- Should JSON serialization be in the config or the caller?
+
+**Not mechanically consolidatable.** Defer to a platform PR.
 
 ### P1 — Employee model proxy
 

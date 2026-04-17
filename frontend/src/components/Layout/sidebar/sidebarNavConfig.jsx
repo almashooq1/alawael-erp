@@ -958,9 +958,16 @@ const getNavigationItems = () => [
     label: 'بوابة المعالج',
     icon: <TherapistIcon />,
     path: '/therapist-portal',
-    roles: ['therapist', 'admin', 'super_admin'],
+    roles: ['therapist', 'specialist', 'clinical_supervisor', 'admin', 'super_admin'],
     children: [
       { id: 'therapist-dashboard', label: 'لوحة التحكم', path: '/therapist-portal' },
+      {
+        id: 'therapist-workbench',
+        label: 'منصّة العمل (جديدة)',
+        path: '/workbench',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
       { id: 'therapist-patients', label: 'المرضى', path: '/therapist-portal/patients' },
       { id: 'therapist-schedule', label: 'الجدول', path: '/therapist-portal/schedule' },
       { id: 'therapist-sessions', label: 'الجلسات', path: '/therapist-portal/sessions' },

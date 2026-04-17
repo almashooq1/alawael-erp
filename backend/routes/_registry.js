@@ -316,6 +316,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/assessments', require('../routes/assessments-admin.routes'));
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
+  dualMount(app, 'therapist-workbench', require('../routes/therapist-workbench.routes'));
   dualMount(app, 'notify', require('../routes/notify.routes'));
   dualMount(app, 'notification-templates', require('../routes/notificationTemplates.routes'));
   dualMount(app, 'approval-requests', require('../routes/approvalRequests.routes'));

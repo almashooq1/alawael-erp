@@ -55,38 +55,14 @@ module.exports = function registerClinicalTherapyRoutes(
   // ══════════════════════════════════════════════════════════════════════════
   safeMount(
     app,
-    ['/api/disability-rehabilitation', '/api/v1/disability-rehabilitation'],
-    '../routes/disability-rehabilitation.routes'
-  );
-  safeMount(
-    app,
     ['/api/disability-rehab', '/api/v1/disability-rehab'],
     '../rehabilitation-services/rehabilitation-routes'
   );
-  logger.info('Disability Rehabilitation routes mounted (unified + Phase 5-9 services)');
+  logger.info('Disability Rehabilitation routes mounted (Phase 5-9 services)');
 
-  // ══════════════════════════════════════════════════════════════════════════
-  // ── Rehab Systems — التراخيص والتوسعة والأنظمة الاحترافية ──────────────
-  // ══════════════════════════════════════════════════════════════════════════
-
-  // Rehab Center Licenses (نظام تراخيص مراكز ذوي الإعاقة)
-  const rehabCenterLicensesRoutes = safeRequire('../routes/rehabCenterLicenses.routes');
-  dualMount(app, 'rehab-licenses', rehabCenterLicensesRoutes);
-  logger.info('Rehab Center Licenses routes mounted (60+ endpoints)');
-
-  // Rehabilitation Expansion (توسعة خدمات تأهيل ذوي الإعاقة — 10 أنظمة جديدة)
-  const rehabExpansionRoutes = safeRequire('../routes/rehab-expansion.routes');
-  dualMount(app, 'rehab-expansion', rehabExpansionRoutes);
-  logger.info(
-    'Rehab Expansion routes mounted (120+ endpoints — 10 new systems: assistive devices, vocational rehab, disability rights, integrative healthcare, community integration, caregiver support, accessibility audit, early detection, outcome measurement, adaptive housing)'
-  );
-
-  // Rehabilitation Professional Systems (الأنظمة الاحترافية لتأهيل ذوي الإعاقة — 12 نظام جديد)
-  const rehabProRoutes = safeRequire('../routes/rehab-pro.routes');
-  dualMount(app, 'rehab-pro', rehabProRoutes);
-  logger.info(
-    'Rehab Pro routes mounted (150+ endpoints — 12 new systems: cardiac-pulmonary rehab, stroke rehab, spinal cord rehab, post-surgical rehab, geriatric rehab, advanced mental health, genetic counseling, therapy gamification, medical device IoT, inter-center collaboration, post-discharge tracking, AR therapy)'
-  );
+  // NOTE: disability-rehabilitation.routes, rehab-expansion.routes, rehab-pro.routes,
+  // and rehabCenterLicenses.routes were archived (broken controller/service/model
+  // chains after earlier cleanups). See _archived/dead-broken-chains/.
 
   // ══════════════════════════════════════════════════════════════════════════
   // ── Phase 26: Therapy & Rehabilitation Additions — إضافات العلاج والتأهيل

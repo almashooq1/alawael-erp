@@ -279,13 +279,9 @@ module.exports = function registerPhaseRoutes(app, { safeRequire, dualMount, saf
   );
   // safeMount(app, ['/api/ml', '/api/v1/ml'], '../routes/ml.routes'); // Skipped: requires @tensorflow/tfjs (~400MB)
   safeMount(app, ['/api/smart-gps', '/api/v1/smart-gps'], '../routes/smartGpsTracking.routes');
-  safeMount(
-    app,
-    ['/api/smart-notifications-engine', '/api/v1/smart-notifications-engine'],
-    '../routes/smartNotifications.routes'
-  );
+  // NOTE: smartNotifications.routes archived (broken controller chain).
   logger.info(
-    'Phase 10-B mounted (6 modules: advanced-analytics, ai-recommendations, ai-notifications, ml, smart-gps, smart-notifications-engine)'
+    'Phase 10-B mounted (5 modules: advanced-analytics, ai-recommendations, ai-notifications, ml, smart-gps)'
   );
 
   // Sessions, profiles, collaboration

@@ -58,10 +58,8 @@ const {
   SenderType,
 } = require('./administrative-communications-service');
 
-// Routes
-const smsRoutes = require('./sms-routes');
+// Routes — only the ones that exist and are actively used
 const emailRoutes = require('./email-routes');
-const whatsappRoutes = require('./whatsapp-routes');
 const adminCommRoutes = require('./administrative-communications-routes');
 const electronicDirectivesRoutes = require('./electronic-directives-routes');
 
@@ -289,9 +287,7 @@ module.exports = {
   sendWhatsAppDocument,
 
   // Routes
-  smsRoutes,
   emailRoutes,
-  whatsappRoutes,
   adminCommRoutes,
   electronicDirectivesRoutes,
 

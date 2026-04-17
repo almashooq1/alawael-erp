@@ -43,8 +43,6 @@ module.exports = function registerFeatureRoutes(
   const centralSettingsRoutes = safeRequire('../routes/central-settings.routes');
   const telehealthRoutes = safeRequire('../routes/telehealth.routes');
   const referralPortalRoutes = safeRequire('../routes/referral.routes');
-  const iotWearablesRoutes = safeRequire('../routes/iot-wearables.routes');
-  const gamificationEnhancedRoutes = safeRequire('../routes/gamification-enhanced.routes');
   const crmEnhancedRoutes = safeRequire('../routes/crm-enhanced.routes');
   const complaintsEnhancedRoutes = safeRequire('../routes/complaints-enhanced.routes');
   const cdssRoutes = safeRequire('../routes/cdss.routes');
@@ -127,17 +125,8 @@ module.exports = function registerFeatureRoutes(
     '✅ prompt_27 Medical Referral Portal mounted: facilities (CRUD), referrals (CRUD + review/accept/reject + status-transition + auto-assign + recalculate-priority), communications (outbound email/SMS), documents (upload/download/delete), assessments (upsert), FHIR import (ServiceRequest R4) + integration logs, analytics (by-status/specialty/avg-processing/acceptance-rate) — HL7 FHIR R4 + MOH integration (60+ endpoints)'
   );
 
-  // ─── prompt_28: نظام IoT والأجهزة القابلة للارتداء — IoT & Wearables System ──
-  dualMount(app, 'iot-wearables', iotWearablesRoutes);
-  logger.info(
-    '✅ prompt_28 IoT & Wearables System mounted: device-types (CRUD), devices (CRUD + assign/return + online status), readings (ingest-single/batch + beneficiary vitals), alerts (list/acknowledge/resolve), alert-rules (CRUD + default thresholds), maintenance (schedule/complete/calibration), vital-baselines (CRUD), beneficiary-devices/vitals, dashboard stats, aggregates — MQTT broker + TimeSeries + anomaly detection (50+ endpoints)'
-  );
-
-  // ─── prompt_29: نظام التأهيل بالألعاب المحسّن — Gamification Enhanced System ──
-  dualMount(app, 'gamification-v2', gamificationEnhancedRoutes);
-  logger.info(
-    '✅ prompt_29 Gamification Enhanced System mounted: profiles (list/get/update), XP/points award, transactions log, badges (CRUD + award + beneficiary-badges + mark-seen), levels (CRUD + seed defaults), challenges (CRUD + join + update-progress + beneficiary-challenges), rehab-games (CRUD + record-session + sessions-by-beneficiary), rewards (CRUD + redeem + redemptions + approve/deliver), leaderboard (get + update), stats, form-options — 10 levels + 16 metric types + daily XP cap + streak tracking (60+ endpoints)'
-  );
+  // NOTE: iot-wearables.routes (prompt_28) and gamification-enhanced.routes
+  // (prompt_29) archived — both had broken service dependencies.
 
   // ─── prompt_30: CRM وإدارة علاقات العملاء — CRM Enhanced ─────────────────────
   dualMount(app, 'crm-enhanced', crmEnhancedRoutes);

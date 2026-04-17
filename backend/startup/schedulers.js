@@ -52,10 +52,8 @@ function setupSchedulers({ isTestEnv }) {
   // ── Shutdown hooks for timer-based services ──────────────────────────────
   const shutdownServices = [
     ['HealthCheck', () => require('../services/HealthCheck').shutdown()],
-    ['AlertService', () => require('../services/AlertService').shutdown()],
     ['CachingService', () => require('../services/cachingService').shutdown()],
     ['RealtimeDashboard', () => require('../services/realtimeDashboardService').shutdown()],
-    ['NotificationAnalytics', () => require('../services/notificationAnalyticsSystem').shutdown()],
     ['BackupAnalytics', () => require('../services/backup-analytics.service').shutdown()],
     ['BackupPerformance', () => require('../services/backup-performance.service').shutdown()],
     ['BackupSync', () => require('../services/backup-sync.service').shutdown()],

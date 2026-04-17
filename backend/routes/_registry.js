@@ -44,8 +44,6 @@ const routeHealth = {
 const authRoutes = safeRequire('../api/routes/auth.routes');
 const usersRoutes = safeRequire('../api/routes/users.routes');
 const modulesRoutes = safeRequire('../api/routes/modules.routes');
-const crmRoutes = safeRequire('../api/routes/crm.routes.advanced');
-const reportingRoutes = safeRequire('../api/routes/reporting.routes');
 const notificationsRoutes = safeRequire('../routes/notifications.routes');
 const messagingRoutes = safeRequire('../routes/messaging.routes');
 // Finance — delegated to registries/finance.registry.js (16 modules)
@@ -190,7 +188,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'auth', authRoutes);
   dualMount(app, 'users', usersRoutes);
   dualMount(app, 'modules', modulesRoutes);
-  dualMount(app, 'crm', crmRoutes);
   dualMount(app, 'payroll', require('../routes/payroll.routes'));
   dualMount(app, 'notifications', notificationsRoutes);
   dualMount(app, 'messages', messagingRoutes);
@@ -198,7 +195,6 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'conversations', require('../routes/conversations.routes'));
   // ── Finance (delegated to registries/finance.registry.js) ─────────────
   registerFinanceRoutes(app, { safeRequire, dualMount, safeMount, logger });
-  dualMount(app, 'reports', reportingRoutes);
   dualMount(app, 'integrations', integrationRoutes);
 
   // ── Dashboard (multiple sub-routers merged) ─────────────────────────────

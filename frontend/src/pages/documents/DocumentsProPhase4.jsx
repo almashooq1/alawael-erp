@@ -59,7 +59,8 @@ import {
   People as PeopleIcon,
   Gavel as GavelIcon,
   Verified as VerifiedIcon,
-  Stamp as StampIcon,
+  // Stamp icon is not exported by @mui/icons-material; use ApprovalRounded as a visual stand-in.
+  ApprovalRounded as StampIcon,
   MenuBook as CoverIcon,
   FormatListNumbered as NumberIcon,
   Compress as CompressIcon,
@@ -95,9 +96,17 @@ function StatCard({ icon, title, value, color = 'primary.main', sub }) {
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="start">
           <Box>
-            <Typography variant="caption" color="text.secondary">{title}</Typography>
-            <Typography variant="h4" fontWeight={700}>{value ?? '—'}</Typography>
-            {sub && <Typography variant="caption" color="text.secondary">{sub}</Typography>}
+            <Typography variant="caption" color="text.secondary">
+              {title}
+            </Typography>
+            <Typography variant="h4" fontWeight={700}>
+              {value ?? '—'}
+            </Typography>
+            {sub && (
+              <Typography variant="caption" color="text.secondary">
+                {sub}
+              </Typography>
+            )}
           </Box>
           <Avatar sx={{ bgcolor: color, width: 44, height: 44 }}>{icon}</Avatar>
         </Stack>
@@ -209,7 +218,9 @@ export default function DocumentsProPhase4() {
     }
   }, []);
 
-  useEffect(() => { loadDashboard(); }, [loadDashboard]);
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   useEffect(() => {
     if (tab === 1) loadTags();
@@ -241,17 +252,37 @@ export default function DocumentsProPhase4() {
             الربط • الوسوم • الصلاحيات • PDF • التعاون الفوري
           </Typography>
         </Box>
-        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={refreshTab}>تحديث</Button>
+        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={refreshTab}>
+          تحديث
+        </Button>
       </Stack>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       {loading && <LinearProgress sx={{ mb: 2 }} />}
 
       <Paper sx={{ mb: 3 }}>
         <Tabs value={tab} onChange={(_, v) => setTab(v)} variant="scrollable" scrollButtons="auto">
           <Tab icon={<DashboardIcon />} label="نظرة عامة" />
-          <Tab icon={<Badge badgeContent={tags.length} color="secondary"><TagIcon /></Badge>} label="الوسوم" />
-          <Tab icon={<Badge badgeContent={accessRequests.length} color="error"><SecurityIcon /></Badge>} label="الصلاحيات" />
+          <Tab
+            icon={
+              <Badge badgeContent={tags.length} color="secondary">
+                <TagIcon />
+              </Badge>
+            }
+            label="الوسوم"
+          />
+          <Tab
+            icon={
+              <Badge badgeContent={accessRequests.length} color="error">
+                <SecurityIcon />
+              </Badge>
+            }
+            label="الصلاحيات"
+          />
           <Tab icon={<PdfIcon />} label="أدوات PDF" />
           <Tab icon={<CollabIcon />} label="التعاون الفوري" />
         </Tabs>
@@ -262,43 +293,103 @@ export default function DocumentsProPhase4() {
         {dashboard && (
           <Grid container spacing={3}>
             <Grid item xs={12} sm={6} md={2.4}>
-              <StatCard icon={<LinkIcon />} title="الروابط" value={dashboard.links?.totalLinks ?? 0} color="primary.main" />
+              <StatCard
+                icon={<LinkIcon />}
+                title="الروابط"
+                value={dashboard.links?.totalLinks ?? 0}
+                color="primary.main"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={2.4}>
-              <StatCard icon={<TagIcon />} title="الوسوم" value={dashboard.tags?.totalTags ?? 0} color="secondary.main" />
+              <StatCard
+                icon={<TagIcon />}
+                title="الوسوم"
+                value={dashboard.tags?.totalTags ?? 0}
+                color="secondary.main"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={2.4}>
-              <StatCard icon={<SecurityIcon />} title="صلاحيات نشطة" value={dashboard.acl?.activeACLs ?? 0} color="warning.main" />
+              <StatCard
+                icon={<SecurityIcon />}
+                title="صلاحيات نشطة"
+                value={dashboard.acl?.activeACLs ?? 0}
+                color="warning.main"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={2.4}>
-              <StatCard icon={<PdfIcon />} title="مهام PDF" value={dashboard.pdf?.totalJobs ?? 0} color="error.main" />
+              <StatCard
+                icon={<PdfIcon />}
+                title="مهام PDF"
+                value={dashboard.pdf?.totalJobs ?? 0}
+                color="error.main"
+              />
             </Grid>
             <Grid item xs={12} sm={6} md={2.4}>
-              <StatCard icon={<CollabIcon />} title="جلسات تعاون" value={dashboard.collaboration?.activeSessions ?? 0} color="info.main" />
+              <StatCard
+                icon={<CollabIcon />}
+                title="جلسات تعاون"
+                value={dashboard.collaboration?.activeSessions ?? 0}
+                color="info.main"
+              />
             </Grid>
 
             {/* Quick Actions */}
             <Grid item xs={12}>
               <Card>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>⚡ إجراءات سريعة</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    ⚡ إجراءات سريعة
+                  </Typography>
                   <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-                    <Button variant="outlined" startIcon={<TagIcon />} onClick={() => { setTab(1); }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<TagIcon />}
+                      onClick={() => {
+                        setTab(1);
+                      }}
+                    >
                       إدارة الوسوم
                     </Button>
-                    <Button variant="outlined" startIcon={<ShieldIcon />} onClick={async () => {
-                      try { await aclApi.initialize(); refreshTab(); } catch (e) { logger.error(e); }
-                    }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<ShieldIcon />}
+                      onClick={async () => {
+                        try {
+                          await aclApi.initialize();
+                          refreshTab();
+                        } catch (e) {
+                          logger.error(e);
+                        }
+                      }}
+                    >
                       تهيئة قوالب الصلاحيات
                     </Button>
-                    <Button variant="outlined" startIcon={<TagIcon />} onClick={async () => {
-                      try { await tagsApi.initialize(); refreshTab(); } catch (e) { logger.error(e); }
-                    }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<TagIcon />}
+                      onClick={async () => {
+                        try {
+                          await tagsApi.initialize();
+                          refreshTab();
+                        } catch (e) {
+                          logger.error(e);
+                        }
+                      }}
+                    >
                       تهيئة الوسوم الافتراضية
                     </Button>
-                    <Button variant="outlined" startIcon={<CollabIcon />} onClick={async () => {
-                      try { await collabApi.cleanup(); refreshTab(); } catch (e) { logger.error(e); }
-                    }}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CollabIcon />}
+                      onClick={async () => {
+                        try {
+                          await collabApi.cleanup();
+                          refreshTab();
+                        } catch (e) {
+                          logger.error(e);
+                        }
+                      }}
+                    >
                       تنظيف الجلسات الخاملة
                     </Button>
                   </Stack>
@@ -307,9 +398,7 @@ export default function DocumentsProPhase4() {
             </Grid>
           </Grid>
         )}
-        {!dashboard && !loading && (
-          <Alert severity="info">اضغط تحديث لتحميل البيانات</Alert>
-        )}
+        {!dashboard && !loading && <Alert severity="info">اضغط تحديث لتحميل البيانات</Alert>}
       </TabPanel>
 
       {/* ── Tab 1: Tags ── */}
@@ -319,16 +408,37 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>☁️ سحابة الوسوم</Typography>
+                <Typography variant="h6" gutterBottom>
+                  ☁️ سحابة الوسوم
+                </Typography>
                 {tagCloud.length === 0 ? (
-                  <Alert severity="info" action={
-                    <Button size="small" onClick={async () => { await tagsApi.initialize(); loadTags(); }}>تهيئة</Button>
-                  }>
+                  <Alert
+                    severity="info"
+                    action={
+                      <Button
+                        size="small"
+                        onClick={async () => {
+                          await tagsApi.initialize();
+                          loadTags();
+                        }}
+                      >
+                        تهيئة
+                      </Button>
+                    }
+                  >
                     لا توجد وسوم. اضغط "تهيئة" لإضافة وسوم افتراضية.
                   </Alert>
                 ) : (
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', py: 2 }}>
-                    {tagCloud.map((tag) => (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: 1,
+                      justifyContent: 'center',
+                      py: 2,
+                    }}
+                  >
+                    {tagCloud.map(tag => (
                       <Chip
                         key={tag._id}
                         label={`${tag.nameAr || tag.name} (${tag.usageCount})`}
@@ -352,9 +462,11 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12} md={4}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                <Typography variant="h6" gutterBottom>📁 فئات الوسوم</Typography>
+                <Typography variant="h6" gutterBottom>
+                  📁 فئات الوسوم
+                </Typography>
                 <List dense>
-                  {categories.map((cat) => (
+                  {categories.map(cat => (
                     <ListItem key={cat._id}>
                       <ListItemAvatar>
                         <Avatar sx={{ bgcolor: cat.color, width: 36, height: 36, fontSize: 18 }}>
@@ -383,7 +495,7 @@ export default function DocumentsProPhase4() {
                   </Button>
                 </Stack>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {tags.map((tag) => (
+                  {tags.map(tag => (
                     <Chip
                       key={tag._id}
                       label={tag.nameAr || tag.name}
@@ -398,7 +510,15 @@ export default function DocumentsProPhase4() {
             </Card>
           </Grid>
         </Grid>
-        <CreateTagDialog open={tagDialog} onClose={() => setTagDialog(false)} onCreated={() => { setTagDialog(false); loadTags(); }} categories={categories} />
+        <CreateTagDialog
+          open={tagDialog}
+          onClose={() => setTagDialog(false)}
+          onCreated={() => {
+            setTagDialog(false);
+            loadTags();
+          }}
+          categories={categories}
+        />
       </TabPanel>
 
       {/* ── Tab 2: ACL ── */}
@@ -407,13 +527,28 @@ export default function DocumentsProPhase4() {
           {aclStats && (
             <>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<SecurityIcon />} title="صلاحيات نشطة" value={aclStats.activeACLs ?? 0} color="primary.main" />
+                <StatCard
+                  icon={<SecurityIcon />}
+                  title="صلاحيات نشطة"
+                  value={aclStats.activeACLs ?? 0}
+                  color="primary.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<GavelIcon />} title="طلبات معلقة" value={aclStats.pendingRequests ?? 0} color="warning.main" />
+                <StatCard
+                  icon={<GavelIcon />}
+                  title="طلبات معلقة"
+                  value={aclStats.pendingRequests ?? 0}
+                  color="warning.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<ShieldIcon />} title="إجمالي السجلات" value={aclStats.totalACLs ?? 0} color="info.main" />
+                <StatCard
+                  icon={<ShieldIcon />}
+                  title="إجمالي السجلات"
+                  value={aclStats.totalACLs ?? 0}
+                  color="info.main"
+                />
               </Grid>
             </>
           )}
@@ -424,7 +559,13 @@ export default function DocumentsProPhase4() {
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" mb={2}>
                   <Typography variant="h6">📋 قوالب الصلاحيات</Typography>
-                  <Button size="small" onClick={async () => { await aclApi.initialize(); loadACL(); }}>
+                  <Button
+                    size="small"
+                    onClick={async () => {
+                      await aclApi.initialize();
+                      loadACL();
+                    }}
+                  >
                     تهيئة
                   </Button>
                 </Stack>
@@ -432,7 +573,7 @@ export default function DocumentsProPhase4() {
                   <Typography color="text.secondary">اضغط تهيئة لإنشاء القوالب</Typography>
                 ) : (
                   <List dense>
-                    {aclTemplates.map((tpl) => (
+                    {aclTemplates.map(tpl => (
                       <ListItem key={tpl._id}>
                         <ListItemAvatar>
                           <Avatar sx={{ bgcolor: 'primary.main', width: 36, height: 36 }}>
@@ -455,7 +596,9 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12} md={7}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>📨 طلبات الوصول المعلقة</Typography>
+                <Typography variant="h6" gutterBottom>
+                  📨 طلبات الوصول المعلقة
+                </Typography>
                 {accessRequests.length === 0 ? (
                   <Typography color="text.secondary">لا توجد طلبات معلقة</Typography>
                 ) : (
@@ -470,25 +613,41 @@ export default function DocumentsProPhase4() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {accessRequests.map((req) => (
+                        {accessRequests.map(req => (
                           <TableRow key={req._id}>
-                            <TableCell align="right">{req.requesterName || req.requester?.name || '—'}</TableCell>
+                            <TableCell align="right">
+                              {req.requesterName || req.requester?.name || '—'}
+                            </TableCell>
                             <TableCell align="right">{req.document?.title || '—'}</TableCell>
                             <TableCell align="right">
-                              {(req.requestedPermissions || []).map((p) => (
+                              {(req.requestedPermissions || []).map(p => (
                                 <Chip key={p} label={p} size="small" sx={{ mr: 0.5 }} />
                               ))}
                             </TableCell>
                             <TableCell align="right">
                               <Stack direction="row" spacing={0.5}>
-                                <Button size="small" color="success" variant="contained" onClick={async () => {
-                                  await aclApi.reviewRequest(req._id, 'approved', '');
-                                  loadACL();
-                                }}>قبول</Button>
-                                <Button size="small" color="error" variant="outlined" onClick={async () => {
-                                  await aclApi.reviewRequest(req._id, 'rejected', '');
-                                  loadACL();
-                                }}>رفض</Button>
+                                <Button
+                                  size="small"
+                                  color="success"
+                                  variant="contained"
+                                  onClick={async () => {
+                                    await aclApi.reviewRequest(req._id, 'approved', '');
+                                    loadACL();
+                                  }}
+                                >
+                                  قبول
+                                </Button>
+                                <Button
+                                  size="small"
+                                  color="error"
+                                  variant="outlined"
+                                  onClick={async () => {
+                                    await aclApi.reviewRequest(req._id, 'rejected', '');
+                                    loadACL();
+                                  }}
+                                >
+                                  رفض
+                                </Button>
                               </Stack>
                             </TableCell>
                           </TableRow>
@@ -509,13 +668,28 @@ export default function DocumentsProPhase4() {
           {pdfStats && (
             <>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<PdfIcon />} title="إجمالي المهام" value={pdfStats.totalJobs ?? 0} color="error.main" />
+                <StatCard
+                  icon={<PdfIcon />}
+                  title="إجمالي المهام"
+                  value={pdfStats.totalJobs ?? 0}
+                  color="error.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<MergeIcon />} title="عمليات الدمج" value={pdfStats.byType?.merge ?? 0} color="primary.main" />
+                <StatCard
+                  icon={<MergeIcon />}
+                  title="عمليات الدمج"
+                  value={pdfStats.byType?.merge ?? 0}
+                  color="primary.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<StampIcon />} title="الختم والحماية" value={(pdfStats.byType?.stamp ?? 0) + (pdfStats.byType?.protect ?? 0)} color="warning.main" />
+                <StatCard
+                  icon={<StampIcon />}
+                  title="الختم والحماية"
+                  value={(pdfStats.byType?.stamp ?? 0) + (pdfStats.byType?.protect ?? 0)}
+                  color="warning.main"
+                />
               </Grid>
             </>
           )}
@@ -524,7 +698,9 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>🛠️ أدوات PDF</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🛠️ أدوات PDF
+                </Typography>
                 <Grid container spacing={2}>
                   {[
                     { label: 'تحويل إلى PDF', icon: <PdfIcon />, color: '#ef4444' },
@@ -535,17 +711,21 @@ export default function DocumentsProPhase4() {
                     { label: 'ترقيم الصفحات', icon: <NumberIcon />, color: '#14b8a6' },
                     { label: 'ختم المستند', icon: <StampIcon />, color: '#ec4899' },
                     { label: 'تحويل بالجملة', icon: <CompressIcon />, color: '#64748b' },
-                  ].map((tool) => (
+                  ].map(tool => (
                     <Grid item xs={6} sm={3} key={tool.label}>
                       <Card
                         variant="outlined"
                         sx={{
-                          textAlign: 'center', p: 2, cursor: 'pointer',
+                          textAlign: 'center',
+                          p: 2,
+                          cursor: 'pointer',
                           '&:hover': { borderColor: tool.color, bgcolor: tool.color + '08' },
                           transition: 'all 0.2s',
                         }}
                       >
-                        <Avatar sx={{ bgcolor: tool.color, mx: 'auto', mb: 1, width: 48, height: 48 }}>
+                        <Avatar
+                          sx={{ bgcolor: tool.color, mx: 'auto', mb: 1, width: 48, height: 48 }}
+                        >
                           {tool.icon}
                         </Avatar>
                         <Typography variant="subtitle2">{tool.label}</Typography>
@@ -561,7 +741,9 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>📝 المهام الأخيرة</Typography>
+                <Typography variant="h6" gutterBottom>
+                  📝 المهام الأخيرة
+                </Typography>
                 {pdfJobs.length === 0 ? (
                   <Typography color="text.secondary">لا توجد مهام بعد</Typography>
                 ) : (
@@ -576,20 +758,50 @@ export default function DocumentsProPhase4() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {pdfJobs.slice(0, 10).map((job) => (
+                        {pdfJobs.slice(0, 10).map(job => (
                           <TableRow key={job._id}>
                             <TableCell align="right">
-                              <Chip size="small" label={{
-                                convert: 'تحويل', merge: 'دمج', split: 'تقسيم', protect: 'حماية',
-                                stamp: 'ختم', cover: 'غلاف', number: 'ترقيم', watermark: 'علامة مائية',
-                              }[job.type] || job.type} />
+                              <Chip
+                                size="small"
+                                label={
+                                  {
+                                    convert: 'تحويل',
+                                    merge: 'دمج',
+                                    split: 'تقسيم',
+                                    protect: 'حماية',
+                                    stamp: 'ختم',
+                                    cover: 'غلاف',
+                                    number: 'ترقيم',
+                                    watermark: 'علامة مائية',
+                                  }[job.type] || job.type
+                                }
+                              />
                             </TableCell>
                             <TableCell align="right">
-                              <Chip size="small" label={job.status === 'completed' ? 'مكتمل' : job.status === 'failed' ? 'فشل' : 'جاري'}
-                                color={job.status === 'completed' ? 'success' : job.status === 'failed' ? 'error' : 'warning'} />
+                              <Chip
+                                size="small"
+                                label={
+                                  job.status === 'completed'
+                                    ? 'مكتمل'
+                                    : job.status === 'failed'
+                                      ? 'فشل'
+                                      : 'جاري'
+                                }
+                                color={
+                                  job.status === 'completed'
+                                    ? 'success'
+                                    : job.status === 'failed'
+                                      ? 'error'
+                                      : 'warning'
+                                }
+                              />
                             </TableCell>
-                            <TableCell align="right">{job.result?.processingTime ? `${job.result.processingTime}ms` : '—'}</TableCell>
-                            <TableCell align="right">{new Date(job.createdAt).toLocaleString('ar-SA')}</TableCell>
+                            <TableCell align="right">
+                              {job.result?.processingTime ? `${job.result.processingTime}ms` : '—'}
+                            </TableCell>
+                            <TableCell align="right">
+                              {new Date(job.createdAt).toLocaleString('ar-SA')}
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -608,13 +820,28 @@ export default function DocumentsProPhase4() {
           {collabStats && (
             <>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<CollabIcon />} title="جلسات نشطة" value={collabStats.activeSessions ?? 0} color="success.main" />
+                <StatCard
+                  icon={<CollabIcon />}
+                  title="جلسات نشطة"
+                  value={collabStats.activeSessions ?? 0}
+                  color="success.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<PeopleIcon />} title="مشاركون الآن" value={collabStats.activeParticipants ?? 0} color="primary.main" />
+                <StatCard
+                  icon={<PeopleIcon />}
+                  title="مشاركون الآن"
+                  value={collabStats.activeParticipants ?? 0}
+                  color="primary.main"
+                />
               </Grid>
               <Grid item xs={12} sm={4}>
-                <StatCard icon={<BroadcastIcon />} title="إجمالي الجلسات" value={collabStats.totalSessions ?? 0} color="info.main" />
+                <StatCard
+                  icon={<BroadcastIcon />}
+                  title="إجمالي الجلسات"
+                  value={collabStats.totalSessions ?? 0}
+                  color="info.main"
+                />
               </Grid>
             </>
           )}
@@ -622,20 +849,28 @@ export default function DocumentsProPhase4() {
           <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6" gutterBottom>🤝 التعاون الفوري على المستندات</Typography>
+                <Typography variant="h6" gutterBottom>
+                  🤝 التعاون الفوري على المستندات
+                </Typography>
                 <Alert severity="info" sx={{ mb: 2 }}>
-                  يدعم النظام التعاون المتزامن مع: تتبع المؤشرات، قفل الأقسام، البث المباشر، كشف التعارضات
+                  يدعم النظام التعاون المتزامن مع: تتبع المؤشرات، قفل الأقسام، البث المباشر، كشف
+                  التعارضات
                 </Alert>
                 <Stack spacing={2}>
                   <Paper variant="outlined" sx={{ p: 2 }}>
-                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>الميزات المتاحة:</Typography>
+                    <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                      الميزات المتاحة:
+                    </Typography>
                     <Grid container spacing={1}>
                       {[
                         { icon: <PeopleIcon />, text: 'حضور فوري — رؤية المتعاونين ونشاطهم' },
                         { icon: <EditIcon />, text: 'تتبع المؤشرات — ألوان مميزة لكل مشارك' },
                         { icon: <LockIcon />, text: 'قفل الأقسام — منع التعديل المتزامن' },
                         { icon: <BroadcastIcon />, text: 'بث الأحداث — إشعارات فورية' },
-                        { icon: <CircleIcon sx={{ color: '#22c55e' }} />, text: 'نبضة القلب — كشف الاتصال المفقود' },
+                        {
+                          icon: <CircleIcon sx={{ color: '#22c55e' }} />,
+                          text: 'نبضة القلب — كشف الاتصال المفقود',
+                        },
                       ].map((item, i) => (
                         <Grid item xs={12} sm={6} key={i}>
                           <Stack direction="row" spacing={1} alignItems="center">
@@ -646,9 +881,19 @@ export default function DocumentsProPhase4() {
                       ))}
                     </Grid>
                   </Paper>
-                  <Button variant="outlined" startIcon={<RefreshIcon />} onClick={async () => {
-                    try { const res = await collabApi.cleanup(); logger.info('Cleanup result', res.data); loadCollab(); } catch (e) { logger.error(e); }
-                  }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<RefreshIcon />}
+                    onClick={async () => {
+                      try {
+                        const res = await collabApi.cleanup();
+                        logger.info('Cleanup result', res.data);
+                        loadCollab();
+                      } catch (e) {
+                        logger.error(e);
+                      }
+                    }}
+                  >
                     تنظيف الجلسات الخاملة
                   </Button>
                 </Stack>
@@ -675,8 +920,16 @@ function CreateTagDialog({ open, onClose, onCreated, categories = [] }) {
     if (!nameAr.trim()) return;
     setSaving(true);
     try {
-      await tagsApi.create({ name: name || nameAr, nameAr, color, category: categoryId || undefined });
-      setName(''); setNameAr(''); setColor('#3b82f6'); setCategoryId('');
+      await tagsApi.create({
+        name: name || nameAr,
+        nameAr,
+        color,
+        category: categoryId || undefined,
+      });
+      setName('');
+      setNameAr('');
+      setColor('#3b82f6');
+      setCategoryId('');
       onCreated();
     } catch (e) {
       logger.error('Create tag error', e);
@@ -690,16 +943,40 @@ function CreateTagDialog({ open, onClose, onCreated, categories = [] }) {
       <DialogTitle>🏷️ إنشاء وسم جديد</DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 1 }}>
-          <TextField fullWidth label="الاسم بالعربية" value={nameAr} onChange={(e) => setNameAr(e.target.value)} />
-          <TextField fullWidth label="الاسم بالإنجليزية (اختياري)" value={name} onChange={(e) => setName(e.target.value)} />
-          <TextField fullWidth label="اللون" type="color" value={color} onChange={(e) => setColor(e.target.value)}
-            InputProps={{ sx: { height: 50 } }} />
+          <TextField
+            fullWidth
+            label="الاسم بالعربية"
+            value={nameAr}
+            onChange={e => setNameAr(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="الاسم بالإنجليزية (اختياري)"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="اللون"
+            type="color"
+            value={color}
+            onChange={e => setColor(e.target.value)}
+            InputProps={{ sx: { height: 50 } }}
+          />
           {categories.length > 0 && (
             <FormControl fullWidth>
               <InputLabel>الفئة</InputLabel>
-              <Select value={categoryId} label="الفئة" onChange={(e) => setCategoryId(e.target.value)}>
+              <Select
+                value={categoryId}
+                label="الفئة"
+                onChange={e => setCategoryId(e.target.value)}
+              >
                 <MenuItem value="">بدون فئة</MenuItem>
-                {categories.map((c) => <MenuItem key={c._id} value={c._id}>{c.nameAr || c.name}</MenuItem>)}
+                {categories.map(c => (
+                  <MenuItem key={c._id} value={c._id}>
+                    {c.nameAr || c.name}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           )}

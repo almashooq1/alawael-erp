@@ -5,6 +5,13 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  TrendingUp as TrendingUpIcon,
+  Assessment as AssessmentIcon,
+  Psychology as PsychologyIcon,
+  CheckCircle as CheckCircleIcon,
+  WarningAmber as WarningAmberIcon,
+} from '@mui/icons-material';
 import { triggerBlobDownload } from 'utils/downloadHelper';
 
 import studentPortalService from 'services/studentPortalService';

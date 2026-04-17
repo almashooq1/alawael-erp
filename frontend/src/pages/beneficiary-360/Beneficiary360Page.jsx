@@ -17,13 +17,45 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Box, Grid, Card, CardContent, CardHeader, Typography, Avatar, Chip,
-  Tabs, Tab, Divider, IconButton, Button, LinearProgress, Alert,
-  List, ListItem, ListItemText, ListItemIcon, ListItemAvatar,
-  Timeline as MuiTimeline, TimelineItem, TimelineSeparator,
-  TimelineConnector, TimelineDot, TimelineContent, TimelineOppositeContent,
-  Paper, Stack, Badge, Tooltip, Skeleton, Accordion, AccordionSummary,
-  AccordionDetails, Rating, Dialog, DialogTitle, DialogContent,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  Avatar,
+  Chip,
+  Tabs,
+  Tab,
+  Divider,
+  IconButton,
+  Button,
+  LinearProgress,
+  Alert,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  ListItemAvatar,
+  Timeline as MuiTimeline,
+  TimelineItem,
+  TimelineSeparator,
+  TimelineConnector,
+  TimelineDot,
+  TimelineContent,
+  TimelineOppositeContent,
+  Paper,
+  Stack,
+  Badge,
+  Tooltip,
+  Skeleton,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Rating,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -47,7 +79,17 @@ import {
   CalendarMonth as CalendarIcon,
 } from '@mui/icons-material';
 
-import { coreAPI, episodesAPI, timelineAPI, assessmentsAPI, carePlansAPI, sessionsAPI, goalsAPI, aiRecommendationsAPI, familyAPI } from '../../services/ddd';
+import {
+  coreAPI,
+  episodesAPI,
+  timelineAPI,
+  assessmentsAPI,
+  carePlansAPI,
+  sessionsAPI,
+  goalsAPI,
+  aiRecommendationsAPI,
+  familyAPI,
+} from '../../services/ddd';
 
 /* ── Tab Panel ── */
 function TabPanel({ children, value, index, ...props }) {
@@ -146,7 +188,9 @@ export default function Beneficiary360Page() {
     }
   }, [id]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   /* ── Loading state ── */
   if (loading) {
@@ -168,7 +212,9 @@ export default function Beneficiary360Page() {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error" action={<Button onClick={loadData}>إعادة المحاولة</Button>}>{error}</Alert>
+        <Alert severity="error" action={<Button onClick={loadData}>إعادة المحاولة</Button>}>
+          {error}
+        </Alert>
       </Box>
     );
   }
@@ -177,12 +223,16 @@ export default function Beneficiary360Page() {
     return (
       <Box sx={{ p: 3 }}>
         <Alert severity="warning">لم يتم العثور على المستفيد</Alert>
-        <Button startIcon={<BackIcon />} onClick={() => navigate(-1)} sx={{ mt: 2 }}>العودة</Button>
+        <Button startIcon={<BackIcon />} onClick={() => navigate(-1)} sx={{ mt: 2 }}>
+          العودة
+        </Button>
       </Box>
     );
   }
 
-  const activeEpisode = episodes.find(e => e.status === 'active' || e.currentPhase === 'active_treatment');
+  const activeEpisode = episodes.find(
+    e => e.status === 'active' || e.currentPhase === 'active_treatment'
+  );
   const age = beneficiary.dateOfBirth
     ? Math.floor((Date.now() - new Date(beneficiary.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))
     : null;
@@ -197,16 +247,19 @@ export default function Beneficiary360Page() {
 
   return (
     <Box sx={{ p: 3, direction: 'rtl' }}>
-
       {/* ── Header ── */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <IconButton onClick={() => navigate(-1)}><BackIcon /></IconButton>
+        <IconButton onClick={() => navigate(-1)}>
+          <BackIcon />
+        </IconButton>
         <Avatar sx={{ width: 64, height: 64, bgcolor: 'primary.main', fontSize: 24 }}>
           {(beneficiary.name?.first || beneficiary.fullName || '?')[0]}
         </Avatar>
         <Box sx={{ flex: 1 }}>
           <Typography variant="h5" fontWeight="bold">
-            {beneficiary.name?.full || beneficiary.fullName || `${beneficiary.name?.first || ''} ${beneficiary.name?.last || ''}`}
+            {beneficiary.name?.full ||
+              beneficiary.fullName ||
+              `${beneficiary.name?.first || ''} ${beneficiary.name?.last || ''}`}
           </Typography>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 0.5 }}>
             <Chip
@@ -216,24 +269,48 @@ export default function Beneficiary360Page() {
             />
             {age && <Chip size="small" variant="outlined" label={`${age} سنة`} />}
             {beneficiary.fileNumber && (
-              <Chip size="small" variant="outlined" label={`رقم الملف: ${beneficiary.fileNumber}`} />
+              <Chip
+                size="small"
+                variant="outlined"
+                label={`رقم الملف: ${beneficiary.fileNumber}`}
+              />
             )}
             {beneficiary.primaryDiagnosis && (
-              <Chip size="small" variant="outlined" color="info" label={beneficiary.primaryDiagnosis} />
+              <Chip
+                size="small"
+                variant="outlined"
+                color="info"
+                label={beneficiary.primaryDiagnosis}
+              />
             )}
             {activeEpisode && (
               <Chip
                 size="small"
-                sx={{ bgcolor: PHASE_COLORS[activeEpisode.currentPhase] || '#4caf50', color: '#fff' }}
+                sx={{
+                  bgcolor: PHASE_COLORS[activeEpisode.currentPhase] || '#4caf50',
+                  color: '#fff',
+                }}
                 label={`المرحلة: ${activeEpisode.currentPhase || 'علاج نشط'}`}
               />
             )}
           </Stack>
         </Box>
         <Stack direction="row" spacing={1}>
-          <Tooltip title="تعديل"><IconButton><EditIcon /></IconButton></Tooltip>
-          <Tooltip title="طباعة"><IconButton><PrintIcon /></IconButton></Tooltip>
-          <Tooltip title="مشاركة"><IconButton><ShareIcon /></IconButton></Tooltip>
+          <Tooltip title="تعديل">
+            <IconButton>
+              <EditIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="طباعة">
+            <IconButton>
+              <PrintIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="مشاركة">
+            <IconButton>
+              <ShareIcon />
+            </IconButton>
+          </Tooltip>
         </Stack>
       </Box>
 
@@ -242,11 +319,25 @@ export default function Beneficiary360Page() {
         {stats.map((s, i) => (
           <Grid item xs={6} md={3} key={i}>
             <Card sx={{ borderRight: `4px solid ${s.color}` }}>
-              <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2, py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                <Avatar sx={{ bgcolor: `${s.color}20`, color: s.color, width: 40, height: 40 }}>{s.icon}</Avatar>
+              <CardContent
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  py: 1.5,
+                  '&:last-child': { pb: 1.5 },
+                }}
+              >
+                <Avatar sx={{ bgcolor: `${s.color}20`, color: s.color, width: 40, height: 40 }}>
+                  {s.icon}
+                </Avatar>
                 <Box>
-                  <Typography variant="h5" fontWeight="bold" color={s.color}>{s.value}</Typography>
-                  <Typography variant="caption" color="text.secondary">{s.label}</Typography>
+                  <Typography variant="h5" fontWeight="bold" color={s.color}>
+                    {s.value}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {s.label}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>
@@ -257,11 +348,11 @@ export default function Beneficiary360Page() {
       {/* ── AI Recommendations Alert ── */}
       {recommendations.length > 0 && (
         <Alert severity="info" icon={<AIIcon />} sx={{ mb: 3 }}>
-          <Typography variant="subtitle2">
-            {recommendations.length} توصية ذكية متاحة
-          </Typography>
+          <Typography variant="subtitle2">{recommendations.length} توصية ذكية متاحة</Typography>
           {recommendations.slice(0, 2).map((r, i) => (
-            <Typography key={i} variant="body2" sx={{ mt: 0.5 }}>• {r.title || r.text || r.description}</Typography>
+            <Typography key={i} variant="body2" sx={{ mt: 0.5 }}>
+              • {r.title || r.text || r.description}
+            </Typography>
           ))}
         </Alert>
       )}
@@ -276,12 +367,28 @@ export default function Beneficiary360Page() {
           sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}
         >
           <Tab icon={<PersonIcon />} iconPosition="start" label="النظرة العامة" />
-          <Tab icon={<EventIcon />} iconPosition="start" label={`حلقات الرعاية (${episodes.length})`} />
-          <Tab icon={<ScheduleIcon />} iconPosition="start" label={`الجلسات (${sessions.length})`} />
-          <Tab icon={<AssessmentIcon />} iconPosition="start" label={`التقييمات (${assessments.length})`} />
+          <Tab
+            icon={<EventIcon />}
+            iconPosition="start"
+            label={`حلقات الرعاية (${episodes.length})`}
+          />
+          <Tab
+            icon={<ScheduleIcon />}
+            iconPosition="start"
+            label={`الجلسات (${sessions.length})`}
+          />
+          <Tab
+            icon={<AssessmentIcon />}
+            iconPosition="start"
+            label={`التقييمات (${assessments.length})`}
+          />
           <Tab icon={<GoalIcon />} iconPosition="start" label={`الأهداف (${goals.length})`} />
           <Tab icon={<HospitalIcon />} iconPosition="start" label={`الخطط (${carePlans.length})`} />
-          <Tab icon={<FamilyIcon />} iconPosition="start" label={`الأسرة (${familyMembers.length})`} />
+          <Tab
+            icon={<FamilyIcon />}
+            iconPosition="start"
+            label={`الأسرة (${familyMembers.length})`}
+          />
           <Tab icon={<CalendarIcon />} iconPosition="start" label="الخط الزمني" />
         </Tabs>
 
@@ -292,20 +399,41 @@ export default function Beneficiary360Page() {
               {/* Personal Info */}
               <Grid item xs={12} md={6}>
                 <Card variant="outlined">
-                  <CardHeader title="البيانات الشخصية" titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }} />
+                  <CardHeader
+                    title="البيانات الشخصية"
+                    titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                  />
                   <CardContent>
                     <Grid container spacing={1}>
                       {[
                         ['الاسم الكامل', beneficiary.name?.full || beneficiary.fullName || '-'],
-                        ['تاريخ الميلاد', beneficiary.dateOfBirth ? new Date(beneficiary.dateOfBirth).toLocaleDateString('ar-SA') : '-'],
-                        ['الجنس', beneficiary.gender === 'male' ? 'ذكر' : beneficiary.gender === 'female' ? 'أنثى' : '-'],
+                        [
+                          'تاريخ الميلاد',
+                          beneficiary.dateOfBirth
+                            ? new Date(beneficiary.dateOfBirth).toLocaleDateString('ar-SA')
+                            : '-',
+                        ],
+                        [
+                          'الجنس',
+                          beneficiary.gender === 'male'
+                            ? 'ذكر'
+                            : beneficiary.gender === 'female'
+                              ? 'أنثى'
+                              : '-',
+                        ],
                         ['رقم الهوية', beneficiary.nationalId || beneficiary.identityNumber || '-'],
                         ['رقم الملف', beneficiary.fileNumber || '-'],
                         ['الفرع', beneficiary.branch || '-'],
                       ].map(([label, value], i) => (
                         <React.Fragment key={i}>
-                          <Grid item xs={4}><Typography variant="body2" color="text.secondary">{label}</Typography></Grid>
-                          <Grid item xs={8}><Typography variant="body2">{value}</Typography></Grid>
+                          <Grid item xs={4}>
+                            <Typography variant="body2" color="text.secondary">
+                              {label}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={8}>
+                            <Typography variant="body2">{value}</Typography>
+                          </Grid>
                         </React.Fragment>
                       ))}
                     </Grid>
@@ -316,7 +444,10 @@ export default function Beneficiary360Page() {
               {/* Clinical Summary */}
               <Grid item xs={12} md={6}>
                 <Card variant="outlined">
-                  <CardHeader title="الملخص السريري" titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }} />
+                  <CardHeader
+                    title="الملخص السريري"
+                    titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
+                  />
                   <CardContent>
                     <Grid container spacing={1}>
                       {[
@@ -324,12 +455,28 @@ export default function Beneficiary360Page() {
                         ['نوع الإعاقة', beneficiary.disabilityType || '-'],
                         ['درجة الإعاقة', beneficiary.disabilitySeverity || '-'],
                         ['الحالة', beneficiary.status || 'نشط'],
-                        ['تاريخ التسجيل', beneficiary.createdAt ? new Date(beneficiary.createdAt).toLocaleDateString('ar-SA') : '-'],
-                        ['آخر تحديث', beneficiary.updatedAt ? new Date(beneficiary.updatedAt).toLocaleDateString('ar-SA') : '-'],
+                        [
+                          'تاريخ التسجيل',
+                          beneficiary.createdAt
+                            ? new Date(beneficiary.createdAt).toLocaleDateString('ar-SA')
+                            : '-',
+                        ],
+                        [
+                          'آخر تحديث',
+                          beneficiary.updatedAt
+                            ? new Date(beneficiary.updatedAt).toLocaleDateString('ar-SA')
+                            : '-',
+                        ],
                       ].map(([label, value], i) => (
                         <React.Fragment key={i}>
-                          <Grid item xs={4}><Typography variant="body2" color="text.secondary">{label}</Typography></Grid>
-                          <Grid item xs={8}><Typography variant="body2">{value}</Typography></Grid>
+                          <Grid item xs={4}>
+                            <Typography variant="body2" color="text.secondary">
+                              {label}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={8}>
+                            <Typography variant="body2">{value}</Typography>
+                          </Grid>
                         </React.Fragment>
                       ))}
                     </Grid>
@@ -344,35 +491,61 @@ export default function Beneficiary360Page() {
                     <CardHeader
                       title="حلقة الرعاية النشطة"
                       titleTypographyProps={{ variant: 'subtitle1', fontWeight: 'bold' }}
-                      avatar={<Avatar sx={{ bgcolor: 'success.main' }}><EventIcon /></Avatar>}
+                      avatar={
+                        <Avatar sx={{ bgcolor: 'success.main' }}>
+                          <EventIcon />
+                        </Avatar>
+                      }
                     />
                     <CardContent>
                       <Grid container spacing={2}>
                         <Grid item xs={12} md={3}>
-                          <Typography variant="caption" color="text.secondary">المرحلة الحالية</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            المرحلة الحالية
+                          </Typography>
                           <Chip
                             size="small"
-                            sx={{ mt: 0.5, bgcolor: PHASE_COLORS[activeEpisode.currentPhase], color: '#fff' }}
+                            sx={{
+                              mt: 0.5,
+                              bgcolor: PHASE_COLORS[activeEpisode.currentPhase],
+                              color: '#fff',
+                            }}
                             label={activeEpisode.currentPhase}
                           />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                          <Typography variant="caption" color="text.secondary">تاريخ البدء</Typography>
-                          <Typography variant="body2">{activeEpisode.startDate ? new Date(activeEpisode.startDate).toLocaleDateString('ar-SA') : '-'}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            تاريخ البدء
+                          </Typography>
+                          <Typography variant="body2">
+                            {activeEpisode.startDate
+                              ? new Date(activeEpisode.startDate).toLocaleDateString('ar-SA')
+                              : '-'}
+                          </Typography>
                         </Grid>
                         <Grid item xs={12} md={3}>
-                          <Typography variant="caption" color="text.secondary">الأخصائي المسؤول</Typography>
-                          <Typography variant="body2">{activeEpisode.primaryTherapist?.name || activeEpisode.leadTherapist || '-'}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            الأخصائي المسؤول
+                          </Typography>
+                          <Typography variant="body2">
+                            {activeEpisode.primaryTherapist?.name ||
+                              activeEpisode.leadTherapist ||
+                              '-'}
+                          </Typography>
                         </Grid>
                         <Grid item xs={12} md={3}>
-                          <Typography variant="caption" color="text.secondary">التقدم</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            التقدم
+                          </Typography>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <LinearProgress
                               variant="determinate"
                               value={activeEpisode.progressPercent || 0}
                               sx={{ flex: 1, height: 8, borderRadius: 4 }}
                             />
-                            <Typography variant="body2">{activeEpisode.progressPercent || 0}%</Typography>
+                            <Typography variant="body2">
+                              {activeEpisode.progressPercent || 0}%
+                            </Typography>
                           </Box>
                         </Grid>
                       </Grid>
@@ -393,9 +566,12 @@ export default function Beneficiary360Page() {
               <Grid container spacing={2}>
                 {episodes.map((ep, i) => (
                   <Grid item xs={12} md={6} key={ep._id || i}>
-                    <Card variant="outlined" sx={{
-                      borderRight: `4px solid ${PHASE_COLORS[ep.currentPhase] || '#999'}`,
-                    }}>
+                    <Card
+                      variant="outlined"
+                      sx={{
+                        borderRight: `4px solid ${PHASE_COLORS[ep.currentPhase] || '#999'}`,
+                      }}
+                    >
                       <CardContent>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                           <Typography variant="subtitle2" fontWeight="bold">
@@ -409,11 +585,17 @@ export default function Beneficiary360Page() {
                         </Box>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
                           {ep.startDate ? new Date(ep.startDate).toLocaleDateString('ar-SA') : ''}
-                          {ep.endDate ? ` — ${new Date(ep.endDate).toLocaleDateString('ar-SA')}` : ' — مستمرة'}
+                          {ep.endDate
+                            ? ` — ${new Date(ep.endDate).toLocaleDateString('ar-SA')}`
+                            : ' — مستمرة'}
                         </Typography>
                         {ep.progressPercent != null && (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <LinearProgress variant="determinate" value={ep.progressPercent} sx={{ flex: 1, height: 6, borderRadius: 3 }} />
+                            <LinearProgress
+                              variant="determinate"
+                              value={ep.progressPercent}
+                              sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                            />
                             <Typography variant="caption">{ep.progressPercent}%</Typography>
                           </Box>
                         )}
@@ -436,7 +618,14 @@ export default function Beneficiary360Page() {
                 {sessions.slice(0, 30).map((s, i) => (
                   <ListItem key={s._id || i} divider>
                     <ListItemIcon>
-                      <Avatar sx={{ bgcolor: STATUS_COLORS[s.status] === 'success' ? 'success.main' : 'grey.400', width: 36, height: 36 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor:
+                            STATUS_COLORS[s.status] === 'success' ? 'success.main' : 'grey.400',
+                          width: 36,
+                          height: 36,
+                        }}
+                      >
                         <ScheduleIcon fontSize="small" />
                       </Avatar>
                     </ListItemIcon>
@@ -446,7 +635,11 @@ export default function Beneficiary360Page() {
                           <Typography variant="body2" fontWeight="bold">
                             {s.sessionType || s.type || 'جلسة علاجية'}
                           </Typography>
-                          <Chip size="small" label={s.status || 'مكتمل'} color={STATUS_COLORS[s.status] || 'default'} />
+                          <Chip
+                            size="small"
+                            label={s.status || 'مكتمل'}
+                            color={STATUS_COLORS[s.status] || 'default'}
+                          />
                         </Box>
                       }
                       secondary={
@@ -475,14 +668,39 @@ export default function Beneficiary360Page() {
                   <Grid item xs={12} md={6} key={a._id || i}>
                     <Card variant="outlined">
                       <CardContent>
-                        <Typography variant="subtitle2" fontWeight="bold">{a.type || a.assessmentType || 'تقييم سريري'}</Typography>
-                        <Typography variant="body2" color="text.secondary">{a.instrument || a.tool || ''}</Typography>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          {a.type || a.assessmentType || 'تقييم سريري'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {a.instrument || a.tool || ''}
+                        </Typography>
                         <Divider sx={{ my: 1 }} />
                         <Grid container spacing={1}>
-                          <Grid item xs={6}><Typography variant="caption" color="text.secondary">التاريخ</Typography><Typography variant="body2">{a.date ? new Date(a.date).toLocaleDateString('ar-SA') : '-'}</Typography></Grid>
-                          <Grid item xs={6}><Typography variant="caption" color="text.secondary">النتيجة</Typography><Typography variant="body2" fontWeight="bold" color="primary">{a.totalScore ?? a.score ?? '-'}</Typography></Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">
+                              التاريخ
+                            </Typography>
+                            <Typography variant="body2">
+                              {a.date ? new Date(a.date).toLocaleDateString('ar-SA') : '-'}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography variant="caption" color="text.secondary">
+                              النتيجة
+                            </Typography>
+                            <Typography variant="body2" fontWeight="bold" color="primary">
+                              {a.totalScore ?? a.score ?? '-'}
+                            </Typography>
+                          </Grid>
                         </Grid>
-                        {a.status && <Chip size="small" label={a.status} color={STATUS_COLORS[a.status] || 'default'} sx={{ mt: 1 }} />}
+                        {a.status && (
+                          <Chip
+                            size="small"
+                            label={a.status}
+                            color={STATUS_COLORS[a.status] || 'default'}
+                            sx={{ mt: 1 }}
+                          />
+                        )}
                       </CardContent>
                     </Card>
                   </Grid>
@@ -502,21 +720,46 @@ export default function Beneficiary360Page() {
                 {goals.map((g, i) => (
                   <ListItem key={g._id || i} divider>
                     <ListItemIcon>
-                      <GoalIcon color={g.status === 'achieved' ? 'success' : g.status === 'in_progress' ? 'primary' : 'action'} />
+                      <GoalIcon
+                        color={
+                          g.status === 'achieved'
+                            ? 'success'
+                            : g.status === 'in_progress'
+                              ? 'primary'
+                              : 'action'
+                        }
+                      />
                     </ListItemIcon>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2" fontWeight="bold">{g.title || g.description}</Typography>
-                          <Chip size="small" label={g.status || 'نشط'} color={g.status === 'achieved' ? 'success' : 'default'} />
+                          <Typography variant="body2" fontWeight="bold">
+                            {g.title || g.description}
+                          </Typography>
+                          <Chip
+                            size="small"
+                            label={g.status || 'نشط'}
+                            color={g.status === 'achieved' ? 'success' : 'default'}
+                          />
                         </Box>
                       }
                       secondary={
                         <Box sx={{ mt: 0.5 }}>
-                          {g.domain && <Chip size="small" variant="outlined" label={g.domain} sx={{ mr: 0.5 }} />}
+                          {g.domain && (
+                            <Chip
+                              size="small"
+                              variant="outlined"
+                              label={g.domain}
+                              sx={{ mr: 0.5 }}
+                            />
+                          )}
                           {g.progressPercent != null && (
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
-                              <LinearProgress variant="determinate" value={g.progressPercent} sx={{ flex: 1, height: 6, borderRadius: 3 }} />
+                              <LinearProgress
+                                variant="determinate"
+                                value={g.progressPercent}
+                                sx={{ flex: 1, height: 6, borderRadius: 3 }}
+                              />
                               <Typography variant="caption">{g.progressPercent}%</Typography>
                             </Box>
                           )}
@@ -542,15 +785,43 @@ export default function Beneficiary360Page() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
                       <HospitalIcon color="primary" />
                       <Typography fontWeight="bold">{cp.title || `خطة رعاية #${i + 1}`}</Typography>
-                      <Chip size="small" label={cp.status || 'نشط'} color={STATUS_COLORS[cp.status] || 'default'} sx={{ ml: 'auto', mr: 2 }} />
+                      <Chip
+                        size="small"
+                        label={cp.status || 'نشط'}
+                        color={STATUS_COLORS[cp.status] || 'default'}
+                        sx={{ ml: 'auto', mr: 2 }}
+                      />
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{cp.description || cp.notes || ''}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                      {cp.description || cp.notes || ''}
+                    </Typography>
                     <Grid container spacing={1}>
-                      <Grid item xs={4}><Typography variant="caption" color="text.secondary">تاريخ البدء</Typography><Typography variant="body2">{cp.startDate ? new Date(cp.startDate).toLocaleDateString('ar-SA') : '-'}</Typography></Grid>
-                      <Grid item xs={4}><Typography variant="caption" color="text.secondary">تاريخ المراجعة</Typography><Typography variant="body2">{cp.reviewDate ? new Date(cp.reviewDate).toLocaleDateString('ar-SA') : '-'}</Typography></Grid>
-                      <Grid item xs={4}><Typography variant="caption" color="text.secondary">الأخصائي</Typography><Typography variant="body2">{cp.author?.name || '-'}</Typography></Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="caption" color="text.secondary">
+                          تاريخ البدء
+                        </Typography>
+                        <Typography variant="body2">
+                          {cp.startDate ? new Date(cp.startDate).toLocaleDateString('ar-SA') : '-'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="caption" color="text.secondary">
+                          تاريخ المراجعة
+                        </Typography>
+                        <Typography variant="body2">
+                          {cp.reviewDate
+                            ? new Date(cp.reviewDate).toLocaleDateString('ar-SA')
+                            : '-'}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <Typography variant="caption" color="text.secondary">
+                          الأخصائي
+                        </Typography>
+                        <Typography variant="body2">{cp.author?.name || '-'}</Typography>
+                      </Grid>
                     </Grid>
                   </AccordionDetails>
                 </Accordion>
@@ -570,12 +841,25 @@ export default function Beneficiary360Page() {
                   <Grid item xs={12} md={6} key={fm._id || i}>
                     <Card variant="outlined">
                       <CardContent sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                        <Avatar sx={{ bgcolor: 'secondary.main' }}><FamilyIcon /></Avatar>
+                        <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                          <FamilyIcon />
+                        </Avatar>
                         <Box>
-                          <Typography variant="subtitle2" fontWeight="bold">{fm.name || fm.fullName || '-'}</Typography>
-                          <Typography variant="body2" color="text.secondary">{fm.relationship || fm.role || '-'}</Typography>
+                          <Typography variant="subtitle2" fontWeight="bold">
+                            {fm.name || fm.fullName || '-'}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {fm.relationship || fm.role || '-'}
+                          </Typography>
                           {fm.phone && <Typography variant="body2">{fm.phone}</Typography>}
-                          {fm.isPrimaryContact && <Chip size="small" label="جهة اتصال رئيسية" color="primary" sx={{ mt: 0.5 }} />}
+                          {fm.isPrimaryContact && (
+                            <Chip
+                              size="small"
+                              label="جهة اتصال رئيسية"
+                              color="primary"
+                              sx={{ mt: 0.5 }}
+                            />
+                          )}
                         </Box>
                       </CardContent>
                     </Card>
@@ -601,7 +885,9 @@ export default function Beneficiary360Page() {
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Typography variant="body2" fontWeight="bold">{ev.eventType || ev.type || 'حدث'}</Typography>
+                          <Typography variant="body2" fontWeight="bold">
+                            {ev.eventType || ev.type || 'حدث'}
+                          </Typography>
                           {ev.domain && <Chip size="small" variant="outlined" label={ev.domain} />}
                         </Box>
                       }

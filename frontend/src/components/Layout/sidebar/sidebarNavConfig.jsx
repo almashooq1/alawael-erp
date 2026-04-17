@@ -1312,6 +1312,13 @@ const getNavigationItems = () => [
         badge: 'ZATCA',
         badgeColor: 'success',
       },
+      {
+        id: 'admin-clinical-docs',
+        label: 'المستندات الإكلينيكية',
+        path: '/admin/clinical-docs',
+        badge: 'DOCS',
+        badgeColor: 'info',
+      },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },

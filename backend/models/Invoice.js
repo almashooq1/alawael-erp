@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const invoiceSchema = new mongoose.Schema(
@@ -46,6 +45,32 @@ const invoiceSchema = new mongoose.Schema(
     },
 
     notes: String,
+
+    // ─── ZATCA Phase-2 e-invoicing envelope ─────────────────────────────
+    zatca: {
+      uuid: String, // v4 UUID per invoice
+      icv: Number, // Invoice Counter Value (monotonic)
+      pih: String, // Previous Invoice Hash (base64 SHA-256)
+      invoiceHash: String, // canonical hash of this invoice
+      qrCode: String, // base64 TLV QR payload
+      invoiceType: {
+        type: String,
+        enum: ['STANDARD', 'SIMPLIFIED'],
+        default: 'SIMPLIFIED',
+      },
+      sellerName: String,
+      sellerVatNumber: String,
+      buyerName: String,
+      buyerVatNumber: String,
+      submittedToZatcaAt: Date,
+      zatcaStatus: {
+        type: String,
+        enum: ['NOT_SUBMITTED', 'SUBMITTED', 'ACCEPTED', 'REJECTED'],
+        default: 'NOT_SUBMITTED',
+      },
+      zatcaReference: String,
+      zatcaErrors: [String],
+    },
   },
   { timestamps: true }
 );

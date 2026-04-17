@@ -1067,6 +1067,13 @@ const getNavigationItems = () => [
     children: [
       { id: 'parent-dashboard', label: 'لوحة التحكم', path: '/parent-portal' },
       {
+        id: 'parent-my-children',
+        label: 'أطفالي (بوابة جديدة)',
+        path: '/my-children',
+        badge: 'جديد',
+        badgeColor: 'success',
+      },
+      {
         id: 'parent-children-progress',
         label: 'تقدم الأبناء',
         path: '/parent-portal/children-progress',

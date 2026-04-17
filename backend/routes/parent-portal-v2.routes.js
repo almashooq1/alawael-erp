@@ -1,0 +1,321 @@
+/**
+ * parent-portal-v2.routes.js — fresh parent portal wired to the
+ * modules shipped today (Beneficiaries, TherapySessions, CarePlans,
+ * ClinicalAssessments). Intentionally standalone — does not touch the
+ * legacy parentPortal.routes.js which is kept for back-compat.
+ *
+ * Access model:
+ *   authenticated user → Guardian (userId link) → Beneficiary.guardians[]
+ *
+ * Mount at /api/parent-v2. Guardians only (role === 'parent' | 'guardian').
+ *
+ * Endpoints:
+ *   GET /me                           — my guardian profile
+ *   GET /children                     — my children (beneficiaries)
+ *   GET /children/:id/overview        — child profile + summary counts
+ *   GET /children/:id/sessions        — upcoming + past sessions
+ *   GET /children/:id/care-plan       — latest active plan + goals
+ *   GET /children/:id/assessments     — recent assessments + trend
+ *   GET /children/:id/attendance      — attendance stats (last 90d)
+ */
+
+'use strict';
+
+const express = require('express');
+const router = express.Router();
+const mongoose = require('mongoose');
+const { authenticateToken } = require('../middleware/auth');
+const safeError = require('../utils/safeError');
+
+const Guardian = require('../models/Guardian');
+const Beneficiary = require('../models/Beneficiary');
+const TherapySession = require('../models/TherapySession');
+const CarePlan = require('../models/CarePlan');
+const ClinicalAssessment = require('../models/ClinicalAssessment');
+
+router.use(authenticateToken);
+
+const ALLOWED_ROLES = ['parent', 'guardian', 'admin', 'superadmin', 'super_admin'];
+
+// ── helpers ──────────────────────────────────────────────────────────────
+async function getMyGuardian(req) {
+  if (!req.user?.id) return null;
+  return Guardian.findOne({ userId: req.user.id }).lean();
+}
+
+async function assertChildAccess(req, childId) {
+  if (!mongoose.isValidObjectId(childId)) return { ok: false, status: 400, msg: 'معرّف غير صالح' };
+  // Admin / HQ bypass
+  if (['admin', 'superadmin', 'super_admin'].includes(req.user?.role)) {
+    const child = await Beneficiary.findById(childId).lean();
+    return child ? { ok: true, child } : { ok: false, status: 404, msg: 'الطفل غير موجود' };
+  }
+  const guardian = await getMyGuardian(req);
+  if (!guardian) return { ok: false, status: 403, msg: 'لا يوجد سجل ولي أمر مرتبط بحسابك' };
+  const child = await Beneficiary.findOne({
+    _id: childId,
+    guardians: guardian._id,
+  }).lean();
+  if (!child) return { ok: false, status: 403, msg: 'لا تملك صلاحية الوصول لهذا الطفل' };
+  return { ok: true, child, guardian };
+}
+
+function gate(req, res, next) {
+  const role = req.user?.role || '';
+  if (!ALLOWED_ROLES.includes(role))
+    return res.status(403).json({ success: false, message: 'الوصول مقتصر على أولياء الأمور' });
+  next();
+}
+
+router.use(gate);
+
+// ── GET /me ──────────────────────────────────────────────────────────────
+router.get('/me', async (req, res) => {
+  try {
+    const guardian = await getMyGuardian(req);
+    if (!guardian)
+      return res
+        .status(404)
+        .json({ success: false, message: 'لا يوجد سجل ولي أمر مرتبط — تواصل مع الإدارة' });
+    res.json({ success: true, data: guardian });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.me');
+  }
+});
+
+// ── GET /children ────────────────────────────────────────────────────────
+router.get('/children', async (req, res) => {
+  try {
+    let filter;
+    if (['admin', 'superadmin', 'super_admin'].includes(req.user?.role)) {
+      filter = {};
+    } else {
+      const guardian = await getMyGuardian(req);
+      if (!guardian)
+        return res
+          .status(404)
+          .json({ success: false, message: 'لا يوجد سجل ولي أمر مرتبط بحسابك' });
+      filter = { guardians: guardian._id };
+    }
+    const children = await Beneficiary.find(filter)
+      .select(
+        'firstName lastName firstName_ar lastName_ar beneficiaryNumber dateOfBirth gender status disability.primaryType contact.primaryPhone enrollmentDate profilePhoto'
+      )
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ success: true, items: children });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.children');
+  }
+});
+
+// ── GET /children/:id/overview ───────────────────────────────────────────
+router.get('/children/:id/overview', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    const now = new Date();
+    const weekAhead = new Date(now);
+    weekAhead.setDate(weekAhead.getDate() + 7);
+
+    const [sessionsTotal, sessionsUpcoming, plansActive, assessmentsTotal, lastAssessment] =
+      await Promise.all([
+        TherapySession.countDocuments({ beneficiary: req.params.id }),
+        TherapySession.countDocuments({
+          beneficiary: req.params.id,
+          date: { $gte: now, $lte: weekAhead },
+          status: { $in: ['SCHEDULED', 'CONFIRMED'] },
+        }),
+        CarePlan.countDocuments({ beneficiary: req.params.id, status: 'ACTIVE' }),
+        ClinicalAssessment.countDocuments({ beneficiary: req.params.id }),
+        ClinicalAssessment.findOne({ beneficiary: req.params.id })
+          .sort({ assessmentDate: -1 })
+          .select('tool score assessmentDate interpretation')
+          .lean(),
+      ]);
+
+    res.json({
+      success: true,
+      child: check.child,
+      summary: {
+        sessionsTotal,
+        sessionsUpcomingWeek: sessionsUpcoming,
+        activeCarePlans: plansActive,
+        totalAssessments: assessmentsTotal,
+        lastAssessment,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.overview');
+  }
+});
+
+// ── GET /children/:id/sessions ───────────────────────────────────────────
+router.get('/children/:id/sessions', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    const { scope = 'all', limit = 50 } = req.query;
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const filter = { beneficiary: req.params.id };
+    if (scope === 'upcoming') {
+      filter.date = { $gte: now };
+      filter.status = { $in: ['SCHEDULED', 'CONFIRMED', 'IN_PROGRESS'] };
+    } else if (scope === 'past') {
+      filter.date = { $lt: now };
+    }
+
+    const items = await TherapySession.find(filter)
+      .populate('therapist', 'firstName lastName fullName')
+      .populate('room', 'name')
+      .sort({ date: scope === 'upcoming' ? 1 : -1 })
+      .limit(Math.min(200, Math.max(1, parseInt(limit, 10) || 50)))
+      .select(
+        'title sessionType date startTime endTime status therapist room attendance notes.assessment'
+      )
+      .lean();
+    res.json({ success: true, items });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.sessions');
+  }
+});
+
+// ── GET /children/:id/care-plan ──────────────────────────────────────────
+router.get('/children/:id/care-plan', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    const plan =
+      (await CarePlan.findOne({ beneficiary: req.params.id, status: 'ACTIVE' })
+        .sort({ startDate: -1 })
+        .lean()) ||
+      (await CarePlan.findOne({ beneficiary: req.params.id }).sort({ createdAt: -1 }).lean());
+
+    if (!plan) return res.json({ success: true, data: null });
+
+    // Collect all goals for a compact summary
+    const collect = [];
+    for (const section of ['educational', 'therapeutic', 'lifeSkills']) {
+      const sec = plan[section];
+      if (!sec?.enabled || !sec.domains) continue;
+      for (const [domKey, dom] of Object.entries(sec.domains)) {
+        if (!dom?.goals?.length) continue;
+        for (const g of dom.goals) {
+          collect.push({
+            section,
+            domain: domKey,
+            title: g.title,
+            type: g.type,
+            status: g.status,
+            progress: g.progress || 0,
+            target: g.target,
+            criteria: g.criteria,
+            targetDate: g.targetDate,
+          });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        planNumber: plan.planNumber,
+        startDate: plan.startDate,
+        reviewDate: plan.reviewDate,
+        status: plan.status,
+        sections: {
+          educational: plan.educational?.enabled || false,
+          therapeutic: plan.therapeutic?.enabled || false,
+          lifeSkills: plan.lifeSkills?.enabled || false,
+        },
+        goals: collect,
+        totalGoals: collect.length,
+        achievedGoals: collect.filter(g => g.status === 'ACHIEVED').length,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.carePlan');
+  }
+});
+
+// ── GET /children/:id/assessments ────────────────────────────────────────
+router.get('/children/:id/assessments', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    const items = await ClinicalAssessment.find({
+      beneficiary: req.params.id,
+      status: { $ne: 'archived' },
+    })
+      .sort({ assessmentDate: -1 })
+      .limit(30)
+      .select(
+        'tool toolVersion category assessmentDate score rawScore maxRawScore interpretation scoreChange improvement observations strengths concerns recommendations'
+      )
+      .lean();
+
+    // Trend per tool (oldest → newest)
+    const byTool = {};
+    const chronological = [...items].reverse();
+    for (const a of chronological) {
+      (byTool[a.tool] ||= []).push({
+        date: a.assessmentDate,
+        score: a.score,
+        interpretation: a.interpretation,
+      });
+    }
+
+    res.json({ success: true, items, byTool });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.assessments');
+  }
+});
+
+// ── GET /children/:id/attendance ─────────────────────────────────────────
+router.get('/children/:id/attendance', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+
+    const since = new Date();
+    since.setDate(since.getDate() - 90);
+
+    const sessions = await TherapySession.find({
+      beneficiary: req.params.id,
+      date: { $gte: since },
+    })
+      .select('date status attendance')
+      .lean();
+
+    const total = sessions.length;
+    const completed = sessions.filter(s => s.status === 'COMPLETED').length;
+    const noShow = sessions.filter(s => s.status === 'NO_SHOW').length;
+    const cancelled = sessions.filter(s =>
+      ['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER'].includes(s.status)
+    ).length;
+    const late = sessions.filter(s => (s.attendance?.lateMinutes || 0) > 0).length;
+    const attendanceRate = total > 0 ? Math.round((completed / total) * 100) : null;
+
+    res.json({
+      success: true,
+      windowDays: 90,
+      stats: {
+        total,
+        completed,
+        noShow,
+        cancelled,
+        late,
+        attendanceRate,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.attendance');
+  }
+});
+
+module.exports = router;

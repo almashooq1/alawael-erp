@@ -82,7 +82,7 @@ const getActiveBranches = async () => {
  */
 const getActiveEmployees = async branchId => {
   try {
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     return await Employee.find({ branchId, employmentStatus: 'active' }).lean();
   } catch {
     return [];
@@ -249,7 +249,7 @@ const syncZktecoDevices = async () => {
 
       for (const record of logs) {
         try {
-          const Employee = require('../models/Employee');
+          const Employee = require('../models/HR/Employee');
           const employee = await Employee.findOne({
             branchId: device.branchId,
             zktecoUserId: record.userId,

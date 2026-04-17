@@ -1,13 +1,12 @@
-/* eslint-disable no-undef, no-unused-vars */
 const AnalyticsServiceClass = require('../services/analyticsService');
 const analyticsService = new AnalyticsServiceClass();
 const AnalyticsCache = require('../models/AnalyticsCache');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const Integration = require('../models/Integration');
 
 // Mock Mongoose Models
 jest.mock('../models/AnalyticsCache');
-jest.mock('../models/Employee');
+jest.mock('../models/HR/Employee');
 jest.mock('../models/Integration');
 jest.mock('../models/Document');
 

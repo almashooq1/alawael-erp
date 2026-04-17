@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const AnalyticsCache = require('../models/AnalyticsCache');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const Integration = require('../models/Integration');
 const Document = require('../models/Document');
 const crypto = require('crypto');

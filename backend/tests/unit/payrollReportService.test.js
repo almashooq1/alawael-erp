@@ -12,7 +12,7 @@ jest.mock('../../models/payroll.model', () => ({
   find: (...a) => mockPayrollFind(...a),
 }));
 
-jest.mock('../../models/Employee', () => ({
+jest.mock('../../models/HR/Employee', () => ({
   findById: (...a) => mockEmployeeFindById(...a),
 }));
 

@@ -23,7 +23,7 @@ jest.mock('../../models/AnalyticsCache', () => ({
   findOne: mockFindOne,
   findOneAndUpdate: mockFindOneAndUpdate,
 }));
-jest.mock('../../models/Employee', () => ({ countDocuments: mockCountDocuments }));
+jest.mock('../../models/HR/Employee', () => ({ countDocuments: mockCountDocuments }));
 jest.mock('../../models/Integration', () => ({ countDocuments: mockCountDocuments }));
 jest.mock('../../models/Document', () => ({}));
 

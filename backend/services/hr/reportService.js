@@ -5,7 +5,7 @@
  */
 
 const Report = require('../../models/Report');
-const Employee = require('../../models/Employee');
+const Employee = require('../../models/HR/Employee');
 const Payroll = require('../../models/payroll.model');
 const Performance = require('../../models/performance.model');
 const Training = require('../../models/training.model');

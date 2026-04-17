@@ -84,7 +84,7 @@ async function markDailyAttendancesAsLeave(request) {
  * تقديم طلب إجازة
  */
 async function submitRequest(data) {
-  const Employee = require('../models/Employee');
+  const Employee = require('../models/HR/Employee');
   const employee = await Employee.findById(data.employeeId);
   if (!employee) throw new Error('الموظف غير موجود');
 
@@ -267,7 +267,7 @@ async function getStats(branchId) {
  * تهيئة أرصدة الإجازات السنوية للموظفين
  */
 async function initializeYearlyBalances(branchId, year) {
-  const Employee = require('../models/Employee');
+  const Employee = require('../models/HR/Employee');
   const employees = await Employee.find({ branchId, employmentStatus: 'active' });
 
   for (const emp of employees) {

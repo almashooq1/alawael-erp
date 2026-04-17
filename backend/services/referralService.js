@@ -146,7 +146,7 @@ async function attemptAutoAssignment(referral) {
   // Import Employee model dynamically to avoid circular deps
   let Employee;
   try {
-    Employee = require('../models/Employee');
+    Employee = require('../models/HR/Employee');
   } catch {
     return false;
   }

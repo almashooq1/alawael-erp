@@ -6,7 +6,7 @@
 
 const mongoose = require('mongoose');
 const Payroll = require('../models/payroll.model');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const Attendance = require('../models/attendance.model');
 const Leave = require('../models/leave.model');
 const logger = require('../utils/logger');

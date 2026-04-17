@@ -357,7 +357,7 @@ class BranchEnhancedService {
 
   async _getStaffStats(branchId) {
     try {
-      const Employee = require('../../models/Employee');
+      const Employee = require('../../models/HR/Employee');
       const [total, saudi] = await Promise.all([
         Employee.countDocuments({ branchId, status: 'active' }),
         Employee.countDocuments({ branchId, status: 'active', isSaudi: true }),

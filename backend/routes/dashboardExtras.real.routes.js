@@ -11,7 +11,7 @@ router.use(requireBranchAccess);
 router.get('/summary-systems', async (req, res) => {
   try {
     const User = require('../models/User');
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const [users, employees] = await Promise.all([
       User.countDocuments(),
       Employee.countDocuments(),

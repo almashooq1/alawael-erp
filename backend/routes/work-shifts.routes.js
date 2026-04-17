@@ -12,7 +12,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const WorkShift = require('../models/WorkShift');
 const OvertimeRequest = require('../models/OvertimeRequest');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const escapeRegex = require('../utils/escapeRegex');
 const safeError = require('../utils/safeError');
 

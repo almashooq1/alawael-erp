@@ -1,11 +1,10 @@
-/* eslint-disable no-unused-vars */
 /**
  * Payroll Report Service - خدمة تقارير الرواتب المتقدمة
  * توليد تقارير WPS، GOSI، التحويلات البنكية، وتحليلات الرواتب
  */
 
 const Payroll = require('../models/payroll.model');
-const Employee = require('../models/Employee');
+const Employee = require('../models/HR/Employee');
 const logger = require('../utils/logger');
 
 class PayrollReportService {

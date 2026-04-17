@@ -322,7 +322,7 @@ async function checkVacantSlots(branchId) {
 async function checkCaseloadLimits(branchId) {
   let created = 0;
   try {
-    const User = require('../../models/Employee') || require('../../models/User');
+    const User = require('../../models/HR/Employee') || require('../../models/User');
     const Beneficiary = require('../../models/Beneficiary');
 
     const query = { role: { $in: ['specialist', 'therapist'] }, status: 'active' };

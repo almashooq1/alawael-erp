@@ -18,7 +18,7 @@ const getAnalytics = () => {
 // GET /hr
 router.get('/hr', async (req, res) => {
   try {
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const total = await Employee.countDocuments();
     res.json({ success: true, data: { totalEmployees: total, attendance: 0, turnover: 0 } });
   } catch (err) {

@@ -150,7 +150,7 @@ async function determineStatus(daily, shift, employeeId) {
  * معالجة سجل بصمة واحد وتحديث الملخص اليومي
  */
 async function processLog(log) {
-  const Employee = require('../models/Employee');
+  const Employee = require('../models/HR/Employee');
   const employee = await Employee.findById(log.employeeId);
   if (!employee) return null;
 
@@ -257,7 +257,7 @@ async function processBatch(logs) {
  * توليد تقرير حضور شهري
  */
 async function generateMonthlyReport(branchId, year, month) {
-  const Employee = require('../models/Employee');
+  const Employee = require('../models/HR/Employee');
 
   const dateFrom = new Date(year, month - 1, 1);
   const dateTo = new Date(year, month, 0, 23, 59, 59);

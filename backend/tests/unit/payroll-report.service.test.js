@@ -2,7 +2,7 @@
 
 /* ── Mocks ── */
 jest.mock('../../models/payroll.model', () => ({ find: jest.fn() }));
-jest.mock('../../models/Employee', () => ({ findById: jest.fn() }));
+jest.mock('../../models/HR/Employee', () => ({ findById: jest.fn() }));
 jest.mock('../../utils/logger', () => ({
   error: jest.fn(),
   info: jest.fn(),
@@ -11,7 +11,7 @@ jest.mock('../../utils/logger', () => ({
 }));
 
 const Payroll = require('../../models/payroll.model');
-const Employee = require('../../models/Employee');
+const Employee = require('../../models/HR/Employee');
 const Svc = require('../../services/payrollReportService');
 
 /* ── Helpers ── */

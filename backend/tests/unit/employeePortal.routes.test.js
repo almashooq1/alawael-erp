@@ -32,17 +32,36 @@ jest.mock('express', () => ({
   static: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../utils/safeError', () => new Proxy({}, { get: (t, p) => p === '__esModule' ? false : jest.fn() }));
+jest.mock(
+  '../../utils/safeError',
+  () => new Proxy({}, { get: (t, p) => (p === '__esModule' ? false : jest.fn()) })
+);
 jest.mock('../../middleware/auth', () => {
   const mw = jest.fn((req, res, next) => next && next());
-  mw.authenticate = mw; mw.authorize = jest.fn(() => mw); mw.protect = mw;
-  mw.restrictTo = jest.fn(() => mw); mw.isAdmin = mw; mw.isAuth = mw;
+  mw.authenticate = mw;
+  mw.authorize = jest.fn(() => mw);
+  mw.protect = mw;
+  mw.restrictTo = jest.fn(() => mw);
+  mw.isAdmin = mw;
+  mw.isAuth = mw;
   return mw;
 });
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn(), log: jest.fn() }));
-jest.mock('../../models/Employee', () => {
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+  log: jest.fn(),
+}));
+jest.mock('../../models/HR/Employee', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -51,7 +70,13 @@ jest.mock('../../models/Employee', () => {
 });
 jest.mock('../../models/LeaveRequest', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -60,7 +85,13 @@ jest.mock('../../models/LeaveRequest', () => {
 });
 jest.mock('../../models/payroll.model', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -69,7 +100,13 @@ jest.mock('../../models/payroll.model', () => {
 });
 jest.mock('../../models/Document', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -78,7 +115,13 @@ jest.mock('../../models/Document', () => {
 });
 jest.mock('../../models/EmployeeRequest', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest.fn().mockReturnValue({ sort: jest.fn().mockReturnThis(), limit: jest.fn().mockReturnThis(), lean: jest.fn().mockResolvedValue([]) });
+  M.find = jest
+    .fn()
+    .mockReturnValue({
+      sort: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      lean: jest.fn().mockResolvedValue([]),
+    });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -87,7 +130,11 @@ jest.mock('../../models/EmployeeRequest', () => {
 });
 
 let routeModule;
-try { routeModule = require('../../routes/employeePortal.routes'); } catch(e) { /* load fail */ }
+try {
+  routeModule = require('../../routes/employeePortal.routes');
+} catch (e) {
+  /* load fail */
+}
 
 describe('routes/employeePortal.routes', () => {
   test('module loads without crash', () => {
@@ -146,5 +193,4 @@ describe('routes/employeePortal.routes', () => {
       expect(true).toBe(true);
     }
   });
-
 });

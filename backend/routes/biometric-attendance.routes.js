@@ -136,7 +136,7 @@ router.post('/devices/:id/enroll', async (req, res) => {
     const device = await ZktecoDevice.findById(req.params.id);
     if (!device) return res.status(404).json({ success: false, message: 'الجهاز غير موجود' });
 
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const employee = await Employee.findById(req.body.employeeId);
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
@@ -230,7 +230,7 @@ router.post('/shifts/assign', async (req, res) => {
   try {
     const { employeeId, shiftId, effectiveFrom, effectiveTo, assignmentType, reason } = req.body;
 
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const employee = await Employee.findById(employeeId);
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
@@ -303,7 +303,7 @@ router.post('/logs/manual', async (req, res) => {
   try {
     const { employeeId, punchTime, punchType, reason } = req.body;
 
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const employee = await Employee.findById(employeeId);
     if (!employee) return res.status(404).json({ success: false, message: 'الموظف غير موجود' });
 
@@ -396,7 +396,7 @@ router.post('/mobile-checkin', async (req, res) => {
     }
 
     // الحصول على الموظف من المستخدم الحالي
-    const Employee = require('../models/Employee');
+    const Employee = require('../models/HR/Employee');
     const employee = await Employee.findOne({ userId: req.user?._id });
     if (!employee) return res.status(404).json({ success: false, message: 'سجل الموظف غير موجود' });
 

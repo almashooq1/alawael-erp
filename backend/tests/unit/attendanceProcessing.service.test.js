@@ -44,7 +44,7 @@ jest.mock('../../models/AttendancePolicyModel', () => ({
   findOne: (...a) => mockPolicyFindOne(...a),
 }));
 
-jest.mock('../../models/Employee', () => ({
+jest.mock('../../models/HR/Employee', () => ({
   find: (...a) => mockEmployeeFind(...a),
   findById: (...a) => mockEmployeeFindById(...a),
 }));

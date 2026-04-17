@@ -192,7 +192,7 @@ async function determinePunchType(employeeId, punchTime) {
  * معالجة سجل حضور واحد من ZKTeco
  */
 async function processAttendanceRecord(device, record) {
-  const Employee = require('../models/Employee');
+  const Employee = require('../models/HR/Employee');
 
   const employee = await Employee.findOne({
     branchId: device.branchId,

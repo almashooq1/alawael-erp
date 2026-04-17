@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import content from '../../data/landingContent';
+import articles, { CATEGORIES as ARTICLE_CATEGORIES } from '../../data/articlesContent';
 
 /* ══════════════════════ helpers ══════════════════════ */
 function useOnScreen(ref, threshold = 0.15) {
@@ -2066,6 +2067,109 @@ function SeoJsonLd() {
   return null;
 }
 
+/* ══════════════════════ Articles teaser ══════════════════════ */
+function ArticlesTeaser() {
+  const ref = useRef(null);
+  const visible = useOnScreen(ref, 0.12);
+  const latest = useMemo(
+    () => [...articles].sort((a, b) => (a.date > b.date ? -1 : 1)).slice(0, 3),
+    []
+  );
+  return (
+    <section id="articles" ref={ref} className="py-28 bg-gray-50 relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div
+          className={`flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+        >
+          <div>
+            <span className="inline-block px-4 py-1.5 rounded-full bg-primary-50 text-primary-700 text-xs font-bold tracking-wider uppercase mb-3">
+              مقالات وتوعية
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">مكتبة المعرفة</h2>
+            <p className="text-gray-600 max-w-2xl">
+              مقالات من فريق الأوائل — معلومات علمية وتجارب ملهمة تدعمك في رحلة التأهيل.
+            </p>
+          </div>
+          <Link
+            to="/articles"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white hover:bg-primary-50 text-primary-700 font-semibold text-sm ring-1 ring-primary-200 hover:ring-primary-300 transition-all"
+          >
+            عرض كل المقالات
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {latest.map((a, i) => {
+            const cat = ARTICLE_CATEGORIES.find(c => c.id === a.category);
+            return (
+              <Link
+                key={a.slug}
+                to={`/articles/${a.slug}`}
+                className={`group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 ring-1 ring-gray-100 transition-all duration-500 block ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+                style={{ transitionDelay: `${i * 100}ms` }}
+              >
+                <div
+                  className={`h-44 bg-gradient-to-br ${a.gradient} relative flex items-center justify-center overflow-hidden`}
+                >
+                  <div
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+                      backgroundSize: '24px 24px',
+                    }}
+                  />
+                  <div className="text-7xl drop-shadow-lg">{a.icon}</div>
+                  {cat && (
+                    <span className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-white/90 text-xs font-bold text-gray-800 backdrop-blur-sm">
+                      {cat.label}
+                    </span>
+                  )}
+                </div>
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 leading-snug group-hover:text-primary-700 transition-colors line-clamp-2">
+                    {a.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-2">
+                    {a.excerpt}
+                  </p>
+                  <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
+                    <span>{a.author.name}</span>
+                    <span className="flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={1.8}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      {a.readMinutes} دقائق
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ══════════════════════ Awards Strip ══════════════════════ */
 function Awards() {
   const ref = useRef(null);
@@ -3608,6 +3712,7 @@ export default function LandingPage() {
         <Stats />
         <Testimonials />
         <FAQ />
+        <ArticlesTeaser />
         <Newsletter />
         <Contact />
         <CTA />

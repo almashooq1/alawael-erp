@@ -17,6 +17,8 @@ import logger from './utils/logger';
 const LandingPage = React.lazy(() => import('./pages/Landing/LandingPage'));
 const LoginPage = React.lazy(() => import('./pages/Landing/LoginPage'));
 const RegisterPage = React.lazy(() => import('./pages/Landing/RegisterPage'));
+const ArticleList = React.lazy(() => import('./pages/Articles/ArticleList'));
+const ArticleDetail = React.lazy(() => import('./pages/Articles/ArticleDetail'));
 
 // Authenticated shell — heavy providers + all routes (lazy loaded ONCE after login)
 const AuthenticatedShell = React.lazy(() =>
@@ -107,6 +109,23 @@ function AppRoutes() {
           ) : (
             <Navigate to="/dashboard" replace />
           )
+        }
+      />
+      {/* Articles — public */}
+      <Route
+        path="/articles"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <ArticleList />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/articles/:slug"
+        element={
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <ArticleDetail />
+          </Suspense>
         }
       />
       {/* All other routes — heavy shell only for authenticated users */}

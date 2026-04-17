@@ -239,12 +239,20 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
-          # Test connection (no verbose output to avoid leaking info)
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=10 "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" "echo '✅ SSH test connection successful'" || {
-            echo "❌ SSH connection failed. Check VPS_HOST, VPS_USER, and VPS_SSH_KEY secrets."
-            exit 1
-          }
-          echo "✅ SSH configured"
+
+          # Retry SSH connection up to 5 times (transient VPS issues are
+          # the #1 cause of otherwise-green deploys failing).
+          SSH_CMD='ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o BatchMode=yes -o ConnectTimeout=15 '"${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}"
+          for attempt in 1 2 3 4 5; do
+            if $SSH_CMD "echo '✅ SSH test attempt $attempt ok'"; then
+              echo "✅ SSH configured (attempt $attempt)"
+              exit 0
+            fi
+            echo "⚠️  SSH attempt $attempt failed — retrying in $((attempt * 10))s"
+            sleep $((attempt * 10))
+          done
+          echo "❌ SSH connection failed after 5 attempts. Check VPS_HOST/VPS_USER/VPS_SSH_KEY and that the VPS is reachable."
+          exit 1
 
       - name: Deploy backend
         if: needs.preflight.outputs.deploy_backend == 'true'

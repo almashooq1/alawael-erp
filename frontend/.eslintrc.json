@@ -37,7 +37,7 @@
         "argsIgnorePattern": "^_"
       }
     ],
-    "eqeqeq": ["error", "always"],
+    "eqeqeq": ["error", "always", { "null": "ignore" }],
     "no-eval": "error",
     "no-implied-eval": "error",
     "no-new-func": "error",

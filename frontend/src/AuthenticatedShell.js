@@ -131,6 +131,7 @@ const AdminApplications = lazyWithRetry(() => import('./pages/Admin/AdminApplica
 const AdminBranches = lazyWithRetry(() => import('./pages/Admin/AdminBranches'));
 const AdminBeneficiaries = lazyWithRetry(() => import('./pages/Admin/AdminBeneficiaries'));
 const AdminTherapySessions = lazyWithRetry(() => import('./pages/Admin/AdminTherapySessions'));
+const AdminAssessments = lazyWithRetry(() => import('./pages/Admin/AdminAssessments'));
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
@@ -240,6 +241,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/branches" element={<AdminBranches />} />
                   <Route path="admin/beneficiaries" element={<AdminBeneficiaries />} />
                   <Route path="admin/therapy-sessions" element={<AdminTherapySessions />} />
+                  <Route path="admin/assessments" element={<AdminAssessments />} />
                   <Route path="admin/notifications" element={<AdminNotifications />} />
 
                   {/* Domain Route Modules */}

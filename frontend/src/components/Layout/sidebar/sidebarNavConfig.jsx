@@ -1327,6 +1327,13 @@ const getNavigationItems = () => [
         badgeColor: 'warning',
       },
       {
+        id: 'admin-integrations-ops',
+        label: 'لوحة عمليات التكاملات',
+        path: '/admin/integrations-ops',
+        badge: 'OPS',
+        badgeColor: 'primary',
+      },
+      {
         id: 'admin-gov-integrations',
         label: 'التكاملات الحكومية',
         path: '/admin/gov-integrations',

@@ -5,6 +5,49 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.2] — 2026-04-18 — Integrations Ops dashboard + PDPL audit UI
+
+Glue layer over the 4.0 + 4.0.1 groundwork: operators now get one
+morning-check dashboard that tells them whether anything needs
+attention, plus a dedicated PDPL audit viewer for compliance queries.
+
+### Added
+
+- `frontend/pages/Admin/AdminIntegrationsOps.jsx` — unified ops page
+  at `/admin/integrations-ops`. Fan-outs to `/health/integrations`,
+  `/admin/gov-integrations/rate-limits`, and `/admin/adapter-audit/stats`,
+  then renders a single traffic-light banner, 4 KPI cards, and a
+  10-row provider matrix (mode · configured · circuit · util bar ·
+  actors · 30-day volume · success rate · avg latency). 20s poll.
+- `frontend/pages/Admin/AdminRateLimits.jsx` — live per-provider
+  token-bucket cards with one-click reset.
+- `frontend/pages/Admin/AdminAdapterAudit.jsx` — 2-tab PDPL viewer
+  (30-day rollup + filterable paginated log). Rate-limited rows
+  flagged, SHA-256 hashes tooltipped as "PDPL-safe".
+- Mobile: `ApiService.ts` auto-retries 429 once using server's
+  `retryAfterMs`, then shows Arabic toast naming the provider.
+
+### Changed
+
+- `utils/safeError.js` — pass through 4xx errors with their own
+  `statusCode`/`code`/`retryAfterMs` instead of flattening to 500.
+- `frontend/AuthenticatedShell.js` — fixed Chat/Telehealth case-
+  mismatch imports that would 404 on Linux CI.
+
+### Fixed
+
+- 3 untracked sprint pages (ChatV2, TelehealthList, TelehealthRoom)
+  committed — lazy-loaded routes now actually resolve.
+
+### Tests
+
+- `__tests__/adapter-rate-limiter.test.js` — 13 unit tests.
+- `new-admin-routes.api.test.js` — 10 new smoke tests for rate-limits
+  - adapter-audit endpoints. Sprint suite is now **145/145 passing**
+    (was 122).
+
+---
+
 ## [4.0.1] — 2026-04-17 — Per-adapter rate limiter (cost protection)
 
 Adds a token-bucket rate limiter in front of every `audit.wrap()` call

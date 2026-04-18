@@ -70,6 +70,8 @@ on:
       - 'backend/__tests__/safe-error.test.js'
       - 'backend/__tests__/arabic-search.test.js'
       - 'backend/__tests__/rate-limit-to-429.test.js'
+      - 'backend/__tests__/request-id-contract.test.js'
+      - 'backend/middleware/requestId.middleware.js'
       - 'backend/utils/arabicSearch.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'

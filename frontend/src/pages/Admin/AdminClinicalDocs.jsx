@@ -36,7 +36,6 @@ import {
   CircularProgress,
   Paper,
   Alert,
-  Autocomplete,
   Divider,
   LinearProgress,
 } from '@mui/material';
@@ -51,6 +50,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import StorageIcon from '@mui/icons-material/Storage';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const CATEGORIES = ['تقارير', 'عقود', 'سياسات', 'تدريب', 'مالي', 'شهادات', 'مراسلات', 'أخرى'];
 
@@ -110,27 +110,12 @@ export default function AdminClinicalDocs() {
   const [signDialog, setSignDialog] = useState({ open: false, doc: null, saving: false });
   const [detailDoc, setDetailDoc] = useState(null);
 
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
-  const [guardianOpts, setGuardianOpts] = useState([]);
+  // Both beneficiary pickers (upload + share) now use BeneficiaryTypeahead.
+  // The old code had a subtle bug: loadOptions fetched /admin/beneficiaries
+  // twice (once for beneficiaryOpts, once for guardianOpts) — same endpoint,
+  // and guardianOpts was never read. Dropped both.
 
-  const loadOptions = useCallback(async () => {
-    try {
-      const [b, g] = await Promise.all([
-        api.get('/admin/beneficiaries?limit=200').catch(() => ({ data: { items: [] } })),
-        api.get('/admin/beneficiaries?limit=200').catch(() => ({ data: { items: [] } })),
-      ]);
-      setBeneficiaryOpts(
-        (b.data?.items || []).map(x => ({
-          id: x._id,
-          label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-          guardians: x.guardians || [],
-        }))
-      );
-      setGuardianOpts(g.data?.items || []);
-    } catch {
-      setBeneficiaryOpts([]);
-    }
-  }, []);
+  // No eager load needed — BeneficiaryTypeahead fetches on-demand.
 
   const loadStats = useCallback(async () => {
     try {
@@ -161,9 +146,8 @@ export default function AdminClinicalDocs() {
   }, [q, category, pagination.page, pagination.limit]);
 
   useEffect(() => {
-    loadOptions();
     loadStats();
-  }, [loadOptions, loadStats]);
+  }, [loadStats]);
 
   useEffect(() => {
     loadList();
@@ -597,13 +581,24 @@ export default function AdminClinicalDocs() {
                 ))}
               </Select>
             </FormControl>
-            <Autocomplete
-              options={beneficiaryOpts}
-              value={uploadForm.beneficiary}
-              onChange={(_, v) => setUploadForm(f => ({ ...f, beneficiary: v }))}
-              getOptionLabel={o => o?.label || ''}
-              isOptionEqualToValue={(a, b) => a?.id === b?.id}
-              renderInput={p => <TextField {...p} label="المستفيد (اختياري)" />}
+            <BeneficiaryTypeahead
+              label="المستفيد (اختياري)"
+              value={
+                uploadForm.beneficiary
+                  ? { _id: uploadForm.beneficiary.id, name_ar: uploadForm.beneficiary.label }
+                  : null
+              }
+              onChange={v =>
+                setUploadForm(f => ({
+                  ...f,
+                  beneficiary: v
+                    ? {
+                        id: v._id,
+                        label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                      }
+                    : null,
+                }))
+              }
             />
             <TextField
               fullWidth
@@ -653,13 +648,24 @@ export default function AdminClinicalDocs() {
           )}
           <Stack spacing={2}>
             <Alert severity="info">{shareDialog.doc?.title}</Alert>
-            <Autocomplete
-              options={beneficiaryOpts}
-              value={shareDialog.guardian}
-              onChange={(_, v) => setShareDialog(d => ({ ...d, guardian: v }))}
-              getOptionLabel={o => o?.label || ''}
-              isOptionEqualToValue={(a, b) => a?.id === b?.id}
-              renderInput={p => <TextField {...p} label="اختر المستفيد (لمشاركتها مع وليّه)" />}
+            <BeneficiaryTypeahead
+              label="اختر المستفيد (لمشاركتها مع وليّه)"
+              value={
+                shareDialog.guardian
+                  ? { _id: shareDialog.guardian.id, name_ar: shareDialog.guardian.label }
+                  : null
+              }
+              onChange={v =>
+                setShareDialog(d => ({
+                  ...d,
+                  guardian: v
+                    ? {
+                        id: v._id,
+                        label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                      }
+                    : null,
+                }))
+              }
             />
             <FormControl fullWidth>
               <InputLabel>الصلاحية</InputLabel>

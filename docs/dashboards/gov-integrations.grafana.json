@@ -193,6 +193,80 @@
         }
       ],
       "options": { "orientation": "horizontal", "displayMode": "gradient" }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Request rate (req/s) — per provider, per status",
+      "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (provider, status) (rate(gov_adapter_calls_total{provider=~\"$provider\"}[5m]))",
+          "legendFormat": "{{provider}} · {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": { "drawStyle": "line", "stacking": { "mode": "normal" } }
+        }
+      }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Success rate (5m) — per provider",
+      "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (provider) (rate(gov_adapter_calls_total{status=\"success\",provider=~\"$provider\"}[5m])) / sum by (provider) (rate(gov_adapter_calls_total{provider=~\"$provider\"}[5m])) * 100",
+          "legendFormat": "{{provider}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 80 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 8 }
+        }
+      }
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "p50 / p95 / p99 latency (ms) — per provider",
+      "gridPos": { "x": 0, "y": 36, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.50, sum by (le, provider) (rate(gov_adapter_call_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "legendFormat": "{{provider}} p50"
+        },
+        {
+          "refId": "B",
+          "expr": "histogram_quantile(0.95, sum by (le, provider) (rate(gov_adapter_call_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "legendFormat": "{{provider}} p95"
+        },
+        {
+          "refId": "C",
+          "expr": "histogram_quantile(0.99, sum by (le, provider) (rate(gov_adapter_call_latency_ms_bucket{provider=~\"$provider\"}[5m])))",
+          "legendFormat": "{{provider}} p99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms", "custom": { "drawStyle": "line" } }
+      }
     }
   ]
 }

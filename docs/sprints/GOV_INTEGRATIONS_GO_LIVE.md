@@ -261,15 +261,73 @@ Operational incident during live calls:
 
 Internal incident — on-call engineer:
 
-- Check `logs/app.log` for `[WARN] Some routes failed to mount`
-- Check `/admin/gov-integrations` — any `configured: false` with
-  missing env vars
-- Toggle adapter to mock via env + restart to stop error cascade
+- **First**: open `/admin/integrations-ops` — this is the glance-and-go
+  page. Red banner → at least one provider is in trouble.
+- If circuit open: follow `docs/runbooks/gov-adapter-circuit.md`.
+- If `configured: false`: check env vars, redeploy, watch the ops
+  dashboard refresh.
+- Check `logs/app.log` for `[WARN] Some routes failed to mount`.
+- Toggle adapter to mock via env + restart to stop error cascade.
+
+---
+
+## Observability
+
+Three surfaces, pick the one that fits the question:
+
+| Question                          | Surface                                                          |
+| --------------------------------- | ---------------------------------------------------------------- |
+| Is anything broken _right now_?   | `/admin/integrations-ops` (20s poll)                             |
+| Is cost/quota under control?      | `/admin/rate-limits` (10s poll, per-provider cards)              |
+| Who accessed which record + when? | `/admin/adapter-audit` (PDPL tab + CSV export)                   |
+| Trends over hours/days?           | Grafana import → `docs/dashboards/gov-integrations.grafana.json` |
+| Wake me up at 3am if X happens    | Alertmanager import → `docs/alerts/gov-integrations.yml`         |
+
+### Prometheus scrape
+
+```yaml
+scrape_configs:
+  - job_name: alawael-gov-integrations
+    metrics_path: /api/health/metrics/integrations
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['alawael-api.internal:3000']
+```
+
+### Key metric families (all tagged `provider="{gosi|absher|…}"`)
+
+| Family                                              | Type      | Semantic                        |
+| --------------------------------------------------- | --------- | ------------------------------- |
+| `gov_adapter_calls_total{status}`                   | counter   | success / failed / rate_limited |
+| `gov_adapter_call_latency_ms` (buckets + sum/count) | histogram | le=50/200/1000/5000/+Inf ms     |
+| `gov_adapter_rate_limit_utilization_percent`        | gauge     | 0–100                           |
+| `gov_adapter_rate_limit_active_actors`              | gauge     | distinct actors, last 60s       |
+| `gov_adapter_circuit_open`                          | gauge     | 0/1                             |
+| `gov_adapter_circuit_cooldown_ms`                   | gauge     | ms remaining on open circuit    |
+| `gov_adapter_configured`                            | gauge     | 0/1                             |
+| `gov_adapter_mode{mode}`                            | gauge     | mock=0, live=1                  |
+
+### SLI examples (PromQL)
+
+- Success rate (5m): `sum by (provider) (rate(gov_adapter_calls_total{status="success"}[5m])) / sum by (provider) (rate(gov_adapter_calls_total[5m]))`
+- p95 latency: `histogram_quantile(0.95, sum by (le, provider) (rate(gov_adapter_call_latency_ms_bucket[5m])))`
+- Rate-limit pressure: `max_over_time(gov_adapter_rate_limit_utilization_percent[1h])`
+
+### Force-close a circuit (operator escape hatch)
+
+```bash
+curl -X POST $BASE/api/admin/gov-integrations/circuits/gosi/reset \
+     -H "Authorization: Bearer $ADMIN_JWT"
+```
+
+UI equivalent: click the ↻ icon in the circuit column of
+`/admin/integrations-ops`.
 
 ---
 
 ## Document history
 
-| Date       | Change                            |
-| ---------- | --------------------------------- |
-| 2026-04-18 | Initial version after sprint ship |
+| Date       | Change                                                       |
+| ---------- | ------------------------------------------------------------ |
+| 2026-04-18 | Initial version after sprint ship                            |
+| 2026-04-18 | 4.0.1–4.0.3 rollup: rate limiter, circuits, Prometheus, SLIs |

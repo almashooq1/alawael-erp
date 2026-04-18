@@ -99,3 +99,44 @@ groups:
             Someone set {{ $labels.provider | upper }}_MODE=live. Verify this
             was intentional — live calls are billed per-request for paid
             providers (Absher, NPHIES, Fatoora).
+
+  - name: gov-adapter-sli
+    interval: 1m
+    rules:
+      - alert: GovAdapterSuccessRateLow
+        # 5-minute success rate < 95% sustained over 10 minutes
+        expr: |
+          (
+            sum by (provider) (rate(gov_adapter_calls_total{status="success"}[5m]))
+            /
+            sum by (provider) (rate(gov_adapter_calls_total[5m]))
+          ) < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          subsystem: gov-integrations
+          sli: success_rate
+        annotations:
+          summary: '{{ $labels.provider }} success rate below 95%'
+          description: |
+            {{ $labels.provider }} 5-minute success rate is {{ $value | humanizePercentage }}
+            and has been below 95% for 10+ minutes. Check the adapter-audit
+            log for the failure mode.
+
+      - alert: GovAdapterLatencyP95High
+        # p95 latency > 3s sustained 5 minutes
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le, provider) (rate(gov_adapter_call_latency_ms_bucket[5m]))
+          ) > 3000
+        for: 5m
+        labels:
+          severity: warning
+          subsystem: gov-integrations
+          sli: latency_p95
+        annotations:
+          summary: '{{ $labels.provider }} p95 latency > 3s'
+          description: |
+            {{ $labels.provider }} 5-minute p95 latency is {{ $value }}ms,
+            above the 3000ms SLI target. Upstream slowdown or network issue.

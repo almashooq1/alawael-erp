@@ -80,3 +80,34 @@ describe('Admin route files wire authenticateToken before any handler', () => {
     });
   });
 });
+
+describe('Admin route handlers are role-restricted (not just authenticated)', () => {
+  const files = adminRouteFiles();
+
+  files.forEach(fname => {
+    it(`${fname} — every router.method() handler includes requireRole`, () => {
+      const raw = fs.readFileSync(path.join(ROUTES_DIR, fname), 'utf8');
+      const src = normalize(raw);
+
+      // Capture each router.METHOD(...) block across line breaks. We count
+      // total handlers and how many pass a role-restricting middleware.
+      const handlerRe = /router\.(get|post|patch|put|delete)\s*\(([\s\S]*?)\);/g;
+
+      let m;
+      let handlers = 0;
+      let matched = 0;
+      while ((m = handlerRe.exec(src)) !== null) {
+        handlers++;
+        if (/requireRole|authorizeRoles|requireAdmin|adminOnly/.test(m[2])) {
+          matched++;
+        }
+      }
+      expect(handlers).toBeGreaterThan(0);
+      // Every handler in an admin file must be role-gated. An authenticated
+      // non-admin user (e.g., a parent with a valid JWT) should not be able
+      // to list beneficiaries, create CPE records, etc. `authenticateToken`
+      // alone is insufficient — it only proves *who* the caller is.
+      expect(matched).toBe(handlers);
+    });
+  });
+});

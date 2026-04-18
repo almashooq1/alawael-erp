@@ -39,14 +39,27 @@ production incident that kept nagging at the runbooks — someone flips
 
 ### Tests
 
-Sprint suite grows from 182 → **201 passing**:
+Sprint suite grows from 182 → **208 passing**:
 • +3 correlation routing/lookup tests
 • +9 Grafana JSON + Alertmanager YAML structural validation
 • +7 preflight exit-code contract tests
+• +7 DSAR hash-helper contract tests (CLI ↔ library parity)
 
 `ops-artifacts.test.js` cross-checks every metric family referenced
 by the dashboard/alerts exists in the Node source and vice-versa —
 drift now fails the PR instead of failing at Grafana reload time.
+
+### PDPL DSAR (added late in 4.0.5)
+
+- `docs/runbooks/dsar-adapter-audit.md` — 4-step compliance workflow
+  for Saudi Personal Data Protection Law Data Subject Access Requests.
+  Includes the 30-day legal clock, 4 edge cases (no rows / hash
+  mismatch after secret rotation / large cascade / erasure vs access).
+- `backend/scripts/dsar-hash.js` — CLI helper that reproduces the
+  `adapterAuditLogger.hashString()` output so compliance can query
+  `/admin/adapter-audit?targetHash=...` without the raw ID ever
+  reaching the server. Exposed via `npm run dsar:hash -- <id>` at
+  root, `make dsar-hash ID=...` on Linux/macOS.
 
 ---
 

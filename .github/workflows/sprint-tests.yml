@@ -30,6 +30,10 @@ on:
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
       - 'backend/__tests__/adapter-metrics-registry.test.js'
+      - 'backend/__tests__/ops-artifacts.test.js'
+      - 'docs/dashboards/**'
+      - 'docs/alerts/**'
+      - 'docs/runbooks/**'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -47,6 +51,10 @@ on:
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
       - 'backend/__tests__/adapter-metrics-registry.test.js'
+      - 'backend/__tests__/ops-artifacts.test.js'
+      - 'docs/dashboards/**'
+      - 'docs/alerts/**'
+      - 'docs/runbooks/**'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:
@@ -131,7 +139,7 @@ jobs:
           CSRF_DISABLE: 'true'
 
   ops-subsystems-tests:
-    name: "🛡️ Ops Subsystems (36 tests — rate/circuit/metrics)"
+    name: "🛡️ Ops Subsystems (51 tests — rate/circuit/metrics/artifacts)"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

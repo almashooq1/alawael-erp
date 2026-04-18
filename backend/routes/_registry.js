@@ -83,7 +83,11 @@ const qiwaRoutes = safeRequire('../routes/qiwa.routes');
 const gosiRoutes = safeRequire('../routes/gosi.routes');
 const govIntegrationRoutes = safeRequire('../routes/governmentIntegration.routes');
 const ecommerceRoutes = safeRequire('../routes/ecommerce.routes');
-const { router: purchasingRoutes } = safeRequire('../routes/purchasing.routes.unified');
+// Guard against module missing — safeRequire returns an empty Router (no .router)
+// so destructure defensively to avoid a silent undefined downstream.
+const purchasingRoutes =
+  (safeRequire('../routes/purchasing.routes.unified') || {}).router ||
+  require('express').Router();
 // Fleet & Transport — delegated to registries/fleet.registry.js (34 modules)
 const registerFleetRoutes = require('./registries/fleet.registry');
 const cmsRoutes = safeRequire('../routes/cms');
@@ -104,7 +108,10 @@ const communityIntegrationRoutes = safeRequire('../routes/communityIntegration.r
 
 // Wave 2: Fixed Route Files (16 additional CRUD routes)
 const civilDefenseRoutes = safeRequire('../routes/civilDefense.routes');
-const { router: inventoryUnifiedRoutes } = safeRequire('../routes/inventory.routes.unified');
+// Guard against missing module (same defensive pattern as purchasingRoutes)
+const inventoryUnifiedRoutes =
+  (safeRequire('../routes/inventory.routes.unified') || {}).router ||
+  require('express').Router();
 const supplyChainRoutes = safeRequire('../routes/supplyChain.routes');
 const trafficAccidentRoutes = safeRequire('../routes/trafficAccidents');
 const mfaRoutes = safeRequire('../routes/mfa');

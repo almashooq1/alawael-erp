@@ -36,7 +36,6 @@ import {
   CircularProgress,
   Paper,
   Alert,
-  Autocomplete,
   Divider,
   LinearProgress,
   Accordion,
@@ -59,6 +58,7 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const STATUS_OPTIONS = [
   { value: 'DRAFT', label: 'مسودّة', color: 'default' },
@@ -180,22 +180,20 @@ export default function AdminCarePlans() {
     err: '',
   });
 
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
+  // beneficiaryMap — populated eagerly for listing-table display only.
+  // The form picker uses BeneficiaryTypeahead (on-demand search), so a
+  // care plan for a kid beyond the first 200 rows is still creatable;
+  // TODO: populate beneficiary names server-side on GET /care-plans
+  // to make the display robust too.
   const [beneficiaryMap, setBeneficiaryMap] = useState({});
 
   const loadOptions = useCallback(async () => {
     try {
       const { data } = await api.get('/admin/beneficiaries?limit=200');
       const list = data?.items || [];
-      setBeneficiaryOpts(
-        list.map(x => ({
-          id: x._id,
-          label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-        }))
-      );
       setBeneficiaryMap(Object.fromEntries(list.map(x => [x._id, fullName(x)])));
     } catch {
-      setBeneficiaryOpts([]);
+      setBeneficiaryMap({});
     }
   }, []);
 
@@ -633,13 +631,25 @@ export default function AdminCarePlans() {
             </Alert>
           )}
           <Stack spacing={2}>
-            <Autocomplete
-              options={beneficiaryOpts}
-              value={form.beneficiary}
-              onChange={(_, v) => setForm(f => ({ ...f, beneficiary: v }))}
-              getOptionLabel={o => o?.label || ''}
-              isOptionEqualToValue={(a, b) => a?.id === b?.id}
-              renderInput={p => <TextField {...p} label="المستفيد *" />}
+            <BeneficiaryTypeahead
+              label="المستفيد *"
+              required
+              value={
+                form.beneficiary
+                  ? { _id: form.beneficiary.id, name_ar: form.beneficiary.label }
+                  : null
+              }
+              onChange={v =>
+                setForm(f => ({
+                  ...f,
+                  beneficiary: v
+                    ? {
+                        id: v._id,
+                        label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                      }
+                    : null,
+                }))
+              }
             />
             <TextField
               fullWidth

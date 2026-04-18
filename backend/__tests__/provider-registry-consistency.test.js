@@ -109,4 +109,25 @@ describe('10-provider registry consistency', () => {
     const declared = (match[1].match(/'[a-z]+'/g) || []).map(s => s.slice(1, -1));
     expect(declared.sort()).toEqual([...EXPECTED].sort());
   });
+
+  it('AdapterAudit.provider enum covers every expected provider + zatca-signer', () => {
+    // Mongoose enum validation rejects any insert whose provider isn't
+    // in this list. If someone renames an adapter without updating the
+    // model, audit writes silently fail (warn-logged inside the catch
+    // block of adapterAuditLogger.record()) and PDPL coverage breaks.
+    //
+    // Read the source file rather than instantiating the model — the
+    // latter needs a mongoose connection in some test setups.
+    const src = fs.readFileSync(path.join(__dirname, '..', 'models', 'AdapterAudit.js'), 'utf8');
+    const enumMatch = src.match(/provider:\s*\{[\s\S]+?enum:\s*\[([\s\S]+?)\]/);
+    expect(enumMatch).toBeTruthy();
+    const enumVals = (enumMatch[1].match(/'([a-z-]+)'/g) || []).map(s => s.slice(1, -1));
+    for (const name of EXPECTED) {
+      expect(enumVals).toContain(name);
+    }
+    // zatca-signer is an internal audit-only kind (no adapter file), so
+    // we expect it on top of the 10 — the count should be exactly 11.
+    expect(enumVals).toContain('zatca-signer');
+    expect(enumVals.length).toBe(EXPECTED.length + 1);
+  });
 });

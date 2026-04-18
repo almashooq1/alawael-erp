@@ -44,6 +44,10 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
+import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import VerifiedIcon from '@mui/icons-material/Verified';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import api from '../../services/api.client';
 
 const STATUS_OPTIONS = [
@@ -92,6 +96,8 @@ const EMPTY_FORM = {
   location: { city_ar: '', address_ar: '', region: 'riyadh' },
   capacity: { total_rooms: 0, therapy_rooms: 0, max_daily_sessions: 0, max_patients: 0 },
   settings: { allow_online_booking: true, has_transport: true },
+  balady_license_number: '',
+  wasel_short_code: '',
 };
 
 export default function AdminBranches() {
@@ -166,6 +172,21 @@ export default function AdminBranches() {
       setError(err?.response?.data?.message || 'تعذّر الحفظ');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const [verifyingBranch, setVerifyingBranch] = useState({});
+  const verifyBranch = async (branch, kind) => {
+    const key = `${branch._id}:${kind}`;
+    setVerifyingBranch(v => ({ ...v, [key]: true }));
+    try {
+      const path = kind === 'balady' ? 'verify-balady' : 'verify-wasel';
+      await api.post(`/admin/branch-compliance/${branch._id}/${path}`, {});
+      await fetchAll();
+    } catch (err) {
+      setError(err?.response?.data?.message || 'فشل التحقق');
+    } finally {
+      setVerifyingBranch(v => ({ ...v, [key]: false }));
     }
   };
 
@@ -297,20 +318,21 @@ export default function AdminBranches() {
                 <TableCell>المنطقة</TableCell>
                 <TableCell>السعة</TableCell>
                 <TableCell>الموظفون</TableCell>
+                <TableCell>الامتثال</TableCell>
                 <TableCell align="center">إجراءات</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               )}
               {!loading && items.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={9} align="center" sx={{ py: 6 }}>
                     <Typography color="text.secondary">
                       لا توجد فروع مطابقة.{' '}
                       <Button size="small" onClick={openCreate}>
@@ -364,7 +386,112 @@ export default function AdminBranches() {
                     </Typography>
                   </TableCell>
                   <TableCell>{row.staff_count || 0}</TableCell>
+                  <TableCell>
+                    <Stack direction="column" spacing={0.3}>
+                      {row.balady_verification?.verified ? (
+                        <Chip
+                          size="small"
+                          icon={
+                            row.balady_verification.status === 'active' ? (
+                              <VerifiedIcon fontSize="small" />
+                            ) : (
+                              <WarningAmberIcon fontSize="small" />
+                            )
+                          }
+                          label={`بلدي: ${
+                            {
+                              active: 'نشط',
+                              expired: 'منتهٍ',
+                              suspended: 'موقوف',
+                              not_found: 'غير موجود',
+                              unknown: '—',
+                            }[row.balady_verification.status] || row.balady_verification.status
+                          }`}
+                          color={
+                            row.balady_verification.status === 'active'
+                              ? 'success'
+                              : row.balady_verification.status === 'expired' ||
+                                  row.balady_verification.status === 'suspended'
+                                ? 'error'
+                                : 'default'
+                          }
+                          sx={{ fontSize: 10 }}
+                        />
+                      ) : row.balady_license_number ? (
+                        <Chip
+                          size="small"
+                          label="بلدي: لم يُفحَص"
+                          variant="outlined"
+                          sx={{ fontSize: 10 }}
+                        />
+                      ) : null}
+                      {row.wasel_verification?.verified ? (
+                        <Chip
+                          size="small"
+                          icon={<VerifiedIcon fontSize="small" />}
+                          label={`واصل: ${
+                            {
+                              match: 'مُتطابق',
+                              not_found: 'غير موجود',
+                              invalid_format: 'تنسيق',
+                              unknown: '—',
+                            }[row.wasel_verification.status] || row.wasel_verification.status
+                          }`}
+                          color={row.wasel_verification.status === 'match' ? 'success' : 'default'}
+                          sx={{ fontSize: 10 }}
+                        />
+                      ) : row.wasel_short_code ? (
+                        <Chip
+                          size="small"
+                          label="واصل: لم يُفحَص"
+                          variant="outlined"
+                          sx={{ fontSize: 10 }}
+                        />
+                      ) : null}
+                      {!row.balady_license_number && !row.wasel_short_code && (
+                        <Typography variant="caption" color="text.secondary">
+                          —
+                        </Typography>
+                      )}
+                    </Stack>
+                  </TableCell>
                   <TableCell align="center">
+                    {row.balady_license_number && (
+                      <Tooltip title="تحقق من الترخيص البلدي">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => verifyBranch(row, 'balady')}
+                            disabled={verifyingBranch[`${row._id}:balady`]}
+                          >
+                            {verifyingBranch[`${row._id}:balady`] ? (
+                              <CircularProgress size={14} />
+                            ) : (
+                              <StoreMallDirectoryIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
+                    {row.wasel_short_code && (
+                      <Tooltip title="تحقق من العنوان الوطني">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="warning"
+                            onClick={() => verifyBranch(row, 'wasel')}
+                            disabled={verifyingBranch[`${row._id}:wasel`]}
+                          >
+                            {verifyingBranch[`${row._id}:wasel`] ? (
+                              <CircularProgress size={14} />
+                            ) : (
+                              <LocalShippingIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
                     <Tooltip title="تعديل">
                       <IconButton size="small" onClick={() => openEdit(row)}>
                         <EditIcon fontSize="small" />
@@ -515,6 +642,29 @@ export default function AdminBranches() {
                 onChange={e =>
                   setForm({ ...form, location: { ...form.location, address_ar: e.target.value } })
                 }
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="رقم الترخيص البلدي (Balady)"
+                value={form.balady_license_number || ''}
+                onChange={e => setForm({ ...form, balady_license_number: e.target.value })}
+                helperText="للتحقق التلقائي من الرخصة البلدية"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                size="small"
+                label="الرمز القصير (Wasel)"
+                value={form.wasel_short_code || ''}
+                onChange={e => setForm({ ...form, wasel_short_code: e.target.value.toUpperCase() })}
+                inputProps={{ dir: 'ltr', style: { textTransform: 'uppercase' } }}
+                placeholder="RFYA1234"
+                helperText="4 أحرف + 4 أرقام من العنوان الوطني"
               />
             </Grid>
 

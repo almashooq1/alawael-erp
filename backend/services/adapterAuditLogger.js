@@ -33,6 +33,7 @@
 const crypto = require('crypto');
 const logger = require('../utils/logger');
 const rateLimiter = require('./adapterRateLimiter');
+const metricsRegistry = require('./adapterMetricsRegistry');
 
 class RateLimitError extends Error {
   constructor(details) {
@@ -56,6 +57,16 @@ function hashIp(ip) {
 }
 
 async function record(entry) {
+  // In-memory counters first — these are what Prometheus scrapes. Even
+  // if the Mongo write below fails, Grafana still sees the attempt.
+  const success = entry.success !== false && !['error', 'unknown'].includes(entry.status);
+  metricsRegistry.recordCall({
+    provider: entry.provider,
+    status: entry.status,
+    success,
+    latencyMs: entry.latencyMs,
+  });
+
   try {
     const AdapterAudit = require('../models/AdapterAudit');
     const row = {
@@ -69,7 +80,7 @@ async function record(entry) {
       targetKind: entry.targetKind,
       status: entry.status || 'unknown',
       latencyMs: entry.latencyMs,
-      success: entry.success !== false && !['error', 'unknown'].includes(entry.status),
+      success,
       errorMessage: entry.errorMessage,
       ipHash: entry.ipHash,
       userAgent: entry.userAgent ? String(entry.userAgent).slice(0, 200) : undefined,

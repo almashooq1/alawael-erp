@@ -35,6 +35,7 @@ const router = express.Router();
 
 const rateLimiter = require('../services/adapterRateLimiter');
 const circuitBreaker = require('../services/adapterCircuitBreaker');
+const metricsRegistry = require('../services/adapterMetricsRegistry');
 
 // Adapters we know exist. Pulling in getConfig lets us report mode +
 // configured without every adapter needing to re-implement.
@@ -176,6 +177,44 @@ router.get('/', (req, res) => {
       value: x.cfg?.mode === 'live' ? 1 : x.cfg?.mode === 'mock' ? 0 : -1,
     }))
   );
+
+  // Call counters (monotonic) + latency histogram — these power the
+  // SLI/SLO panels in the Grafana dashboard (rate() + histogram_quantile()).
+  const counterSnap = metricsRegistry.snapshotCounters();
+  const latencySnap = metricsRegistry.snapshotLatency();
+
+  const callSamples = [];
+  for (const p of ADAPTERS) {
+    const c = counterSnap[p] || { success: 0, failed: 0, rate_limited: 0 };
+    callSamples.push(
+      { labels: { provider: p, status: 'success' }, value: c.success },
+      { labels: { provider: p, status: 'failed' }, value: c.failed },
+      { labels: { provider: p, status: 'rate_limited' }, value: c.rate_limited }
+    );
+  }
+  metric(
+    lines,
+    'gov_adapter_calls_total',
+    'Total calls per provider since process start, split by status.',
+    'counter',
+    callSamples
+  );
+
+  // Histogram — Prometheus expects cumulative bucket counts + _sum + _count.
+  for (const p of ADAPTERS) {
+    const l = latencySnap[p];
+    if (!l) continue;
+    lines.push(`# HELP gov_adapter_call_latency_ms Latency histogram per provider (ms).`);
+    lines.push(`# TYPE gov_adapter_call_latency_ms histogram`);
+    let cum = 0;
+    for (const b of l.buckets) {
+      cum += b.count;
+      const leLabel = b.le === Infinity ? '+Inf' : String(b.le);
+      lines.push(`gov_adapter_call_latency_ms_bucket{provider="${p}",le="${leLabel}"} ${cum}`);
+    }
+    lines.push(`gov_adapter_call_latency_ms_sum{provider="${p}"} ${l.sum}`);
+    lines.push(`gov_adapter_call_latency_ms_count{provider="${p}"} ${l.count}`);
+  }
 
   res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
   res.send(lines.join('\n') + '\n');

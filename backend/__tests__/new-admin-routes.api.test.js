@@ -218,6 +218,25 @@ describe('/api/health/metrics/integrations (Prometheus scrape)', () => {
     expect(body).toMatch(/gov_adapter_configured\{provider="gosi"\} 1/);
   });
 
+  it('calls_total counter is emitted with status label for each provider', async () => {
+    // Seed a call so the counter is non-zero
+    const audit = require('../services/adapterAuditLogger');
+    await audit.record({
+      provider: 'gosi',
+      operation: 'verify',
+      status: 'active',
+      latencyMs: 120,
+    });
+    const res = await request(app).get('/api/health/metrics/integrations');
+    expect(res.text).toMatch(/^# TYPE gov_adapter_calls_total counter/m);
+    expect(res.text).toMatch(/gov_adapter_calls_total\{provider="gosi",status="success"\} [1-9]/);
+    // Histogram with cumulative buckets + _sum + _count
+    expect(res.text).toMatch(/^# TYPE gov_adapter_call_latency_ms histogram/m);
+    expect(res.text).toMatch(/gov_adapter_call_latency_ms_bucket\{provider="gosi",le="/);
+    expect(res.text).toMatch(/gov_adapter_call_latency_ms_sum\{provider="gosi"\} \d+/);
+    expect(res.text).toMatch(/gov_adapter_call_latency_ms_count\{provider="gosi"\} [1-9]/);
+  });
+
   it('each metric family has a HELP + TYPE line', async () => {
     const res = await request(app).get('/api/health/metrics/integrations');
     const text = res.text;

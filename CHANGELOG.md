@@ -5,6 +5,44 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.10] — 2026-04-18 — SCFHS CPE credit tracking
+
+Closes a known gap in the HR-compliance surface. Previously GOSI +
+SCFHS license status was tracked; the CPE credit hours (100 per
+5-year cycle split 50/30/20 across three SCFHS categories) were not.
+
+### Added
+
+- `backend/models/CpeRecord.js` — credit record schema with verified/
+  verifiedBy/verifiedAt audit fields and compound indexes for the
+  per-employee lookups the summary + overview routes use.
+- `backend/services/cpeService.js` — pure summary math (5-year window,
+  verified-only toward renewal, per-category deficit, compliant verdict).
+  Env-tunable minimums (`SCFHS_CPE_MIN_CAT1/2/3/TOTAL`).
+- `backend/routes/cpe-admin.routes.js` — 8 admin endpoints mounted at
+  `/api/admin/hr/cpe`: list/filter, by-employee, per-employee summary,
+  create, patch, verify, delete, overview (dashboard counters +
+  soon-expiring watchlist).
+- `frontend/src/pages/Admin/AdminCpeCredits.jsx` — dashboard at
+  `/admin/hr/cpe`: stat cards, watchlist, filterable records table,
+  per-therapist summary dialog (required/earned/deficit per category).
+- `backend/scripts/cpe-attention.js` — cron-friendly CLI with the
+  same exit-code contract as `gov-status.js` (0=clean, 1=needs
+  attention, 2=error). `--json` and `--quiet` for ops pipelines.
+
+### Tests
+
+Sprint suite: **492 passing** (was 484 at 4.0.9).
+• 13 unit tests for `cpeService.summarize` / `daysUntilDeadline` /
+`needsAttention` (5-year window filter, env overrides, verified-vs-
+unverified split, per-category deficit math, attention threshold)
+• 3 CPE route smoke tests (list, overview, summary-by-invalid-id)
+• 2 mount checks (`/api/admin/hr/cpe` + `/overview`)
+• 5 exit-code contract tests for the CLI (DB-unreachable path,
+`--json`/`--quiet` behavior, shebang + header documentation)
+
+---
+
 ## [4.0.9] — 2026-04-18 — Invariant / drift-detection tests
 
 Round of tests that catch real cross-component bugs (not unit-level

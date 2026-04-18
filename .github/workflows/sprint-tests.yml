@@ -73,6 +73,9 @@ on:
       - 'backend/__tests__/request-id-contract.test.js'
       - 'backend/__tests__/provider-registry-consistency.test.js'
       - 'backend/__tests__/doc-test-count-consistency.test.js'
+      - 'backend/__tests__/cpe-service.test.js'
+      - 'backend/__tests__/cpe-attention-script.test.js'
+      - 'backend/scripts/cpe-attention.js'
       - 'backend/middleware/requestId.middleware.js'
       - 'backend/utils/arabicSearch.js'
       - 'backend/scripts/preflight.js'
@@ -240,4 +243,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 484 sprint tests green."
+          echo "All 492 sprint tests green."

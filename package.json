@@ -60,6 +60,7 @@
     "seed:demo:reset": "cd backend && npm run seed:demo:reset",
     "setup": "cd backend && npm run setup",
     "setup:force": "cd backend && npm run setup -- --force",
+    "ship-check": "npm run preflight && npm run test:ops-subsystems",
     "start": "cd backend && npm start",
     "start:backend": "cd backend && npm start",
     "start:frontend": "cd frontend && npm start",

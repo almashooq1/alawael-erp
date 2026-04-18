@@ -16,7 +16,8 @@ SHELL := /bin/bash
 
 # ── Phony declarations — targets that don't produce files ─────────────
 .PHONY: help ops-check ops-check-json preflight preflight-prod \
-        dsar-hash sprint-tests ops-subsystems-tests demo-seed demo-seed-dry \
+        dsar-hash sprint-tests ops-subsystems-tests ship-check \
+        demo-seed demo-seed-dry \
         install backend-install frontend-install mobile-install \
         backend-dev frontend-dev lint audit
 
@@ -53,6 +54,16 @@ sprint-tests: ## Run the 201-test sprint CI gate
 
 ops-subsystems-tests: ## Run rate-limit / circuit / metrics / preflight tests only
 	@cd backend && npm run test:ops-subsystems
+
+ship-check: ## Opt-in pre-push gate — preflight + ops-subsystems-tests (~90s)
+	@echo ""
+	@echo "  [1/2] Preflight — live-adapter config check"
+	@cd backend && npm run preflight --silent
+	@echo ""
+	@echo "  [2/2] Ops subsystems — rate/circuit/metrics/audit/preflight/dsar"
+	@cd backend && npm run test:ops-subsystems --silent
+	@echo ""
+	@echo "  ✓ ship-check pass — safe to push"
 
 # ─── Demo data ─────────────────────────────────────────────────────────
 demo-seed: ## Seed demo data (destructive — wipes existing demo records)

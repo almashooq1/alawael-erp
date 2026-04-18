@@ -123,6 +123,22 @@ UI equivalents in `/admin/integrations-ops` and `/admin/rate-limits`.
 
 ---
 
+## Pre-push opt-in gate
+
+Not enforced in husky (would slow routine docs/test edits). But
+before pushing anything that touches `backend/services/*`,
+`backend/routes/*-integrations*`, or `docs/alerts|dashboards|runbooks/*`,
+run:
+
+```bash
+make ship-check          # or: npm run ship-check
+```
+
+~90 seconds. Runs `preflight` + `test:ops-subsystems`. Exits non-zero
+if either fails — that's your signal to fix before pushing.
+
+---
+
 ## Related docs
 
 - [CHANGELOG.md](../CHANGELOG.md) — release history (4.0.x covers all ops work)

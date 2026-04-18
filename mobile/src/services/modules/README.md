@@ -87,6 +87,32 @@ await chat.send(conv._id, 'مرحباً');
 await chat.markRead(conv._id);
 ```
 
+## Screens shipped this sprint
+
+Six production-ready screens consume these clients:
+
+| Screen                                       | Client             | Purpose                   |
+| -------------------------------------------- | ------------------ | ------------------------- |
+| `screens/auth/NafathLoginScreen`             | nafath             | National ID SSO login     |
+| `screens/parent/MyChildrenScreen`            | parentPortal       | Parent dashboard          |
+| `screens/therapist/TherapistWorkbenchScreen` | therapistWorkbench | Today/week/caseload       |
+| `screens/telehealth/TelehealthScreen`        | telehealth         | Upcoming video sessions   |
+| `screens/chat/ChatListScreen`                | chat               | Conversations list        |
+| `screens/chat/ChatThreadScreen`              | chat               | Message thread + composer |
+
+Wire them via `src/navigation/SprintAppNavigator.tsx` — a role-aware
+native-stack + bottom-tabs tree that shows the right tabs based on
+the user's role (parent → MyChildren/Telehealth/Chat; therapist →
+Workbench/Telehealth/Chat). Handles auth state via SecureStore.
+
+```tsx
+import SprintAppNavigator from './navigation/SprintAppNavigator';
+
+export default function App() {
+  return <SprintAppNavigator />;
+}
+```
+
 ## Environment
 
 The base URL is controlled by `EXPO_PUBLIC_API_URL` (see `ApiService.ts`).

@@ -50,6 +50,7 @@ import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import AddIcon from '@mui/icons-material/Add';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import EditIcon from '@mui/icons-material/EditOutlined';
 import api from '../../services/api.client';
 
 const CATEGORY_LABELS = {
@@ -89,6 +90,8 @@ export default function AdminCpeCredits() {
     activityDate: new Date().toISOString().slice(0, 10),
   });
   const [employees, setEmployees] = useState([]);
+  const [editTarget, setEditTarget] = useState(null); // { _id, ...fields } | null
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     // Only loaded when the create dialog opens for the first time.
@@ -215,6 +218,47 @@ export default function AdminCpeCredits() {
       setErrMsg(err?.response?.data?.message || 'فشل حفظ السجل');
     } finally {
       setCreateSaving(false);
+    }
+  };
+
+  const openEdit = row => {
+    setEditTarget({
+      _id: row._id,
+      activityName: row.activityName || '',
+      activityNameAr: row.activityNameAr || '',
+      provider: row.provider || '',
+      category: row.category || '1',
+      creditHours: String(row.creditHours ?? ''),
+      activityDate: row.activityDate
+        ? new Date(row.activityDate).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10),
+    });
+  };
+
+  const saveEdit = async () => {
+    if (!editTarget) return;
+    if (!editTarget.activityName?.trim()) {
+      setErrMsg('اسم النشاط مطلوب');
+      return;
+    }
+    if (!(Number(editTarget.creditHours) > 0)) {
+      setErrMsg('عدد الساعات يجب أن يكون أكبر من صفر');
+      return;
+    }
+    setEditSaving(true);
+    try {
+      const { _id, ...body } = editTarget;
+      await api.patch(`/admin/hr/cpe/${_id}`, {
+        ...body,
+        creditHours: Number(body.creditHours),
+      });
+      setEditTarget(null);
+      loadRecords(pagination.page);
+      loadOverview();
+    } catch (err) {
+      setErrMsg(err?.response?.data?.message || 'فشل حفظ التعديلات');
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -444,6 +488,11 @@ export default function AdminCpeCredits() {
                       <SummarizeIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
+                  <Tooltip title="تعديل">
+                    <IconButton size="small" onClick={() => openEdit(r)}>
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                   {!r.verified && (
                     <Tooltip title="توثيق">
                       <IconButton size="small" color="success" onClick={() => verifyRecord(r._id)}>
@@ -668,6 +717,81 @@ export default function AdminCpeCredits() {
           </Button>
           <Button variant="contained" onClick={createRecord} disabled={createSaving}>
             {createSaving ? <CircularProgress size={20} /> : 'حفظ'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={!!editTarget}
+        onClose={() => (editSaving ? null : setEditTarget(null))}
+        maxWidth="sm"
+        fullWidth
+        dir="rtl"
+      >
+        <DialogTitle>تعديل سجل CPE</DialogTitle>
+        <DialogContent dividers>
+          {editTarget && (
+            <Stack spacing={2} mt={1}>
+              <TextField
+                label="اسم النشاط (عربي)"
+                value={editTarget.activityNameAr}
+                onChange={e => setEditTarget(t => ({ ...t, activityNameAr: e.target.value }))}
+              />
+              <TextField
+                label="اسم النشاط (للأنظمة الخارجية)"
+                value={editTarget.activityName}
+                onChange={e => setEditTarget(t => ({ ...t, activityName: e.target.value }))}
+                required
+              />
+              <TextField
+                label="الجهة المنظِّمة"
+                value={editTarget.provider}
+                onChange={e => setEditTarget(t => ({ ...t, provider: e.target.value }))}
+              />
+              <Stack direction="row" spacing={2}>
+                <TextField
+                  select
+                  label="الفئة"
+                  value={editTarget.category}
+                  onChange={e => setEditTarget(t => ({ ...t, category: e.target.value }))}
+                  sx={{ flex: 1 }}
+                  required
+                >
+                  <MenuItem value="1">الفئة 1 — مؤتمرات ودورات معتمدة</MenuItem>
+                  <MenuItem value="2">الفئة 2 — نشاطات ذاتية</MenuItem>
+                  <MenuItem value="3">الفئة 3 — تعليم ومشاركات</MenuItem>
+                </TextField>
+                <TextField
+                  type="number"
+                  label="الساعات"
+                  value={editTarget.creditHours}
+                  onChange={e => setEditTarget(t => ({ ...t, creditHours: e.target.value }))}
+                  inputProps={{ min: 0.5, step: 0.5 }}
+                  required
+                  sx={{ width: 140 }}
+                />
+              </Stack>
+              <TextField
+                type="date"
+                label="تاريخ النشاط"
+                value={editTarget.activityDate}
+                onChange={e => setEditTarget(t => ({ ...t, activityDate: e.target.value }))}
+                InputLabelProps={{ shrink: true }}
+                required
+              />
+              <Typography variant="caption" color="text.secondary">
+                ملاحظة: لتوثيق/إلغاء توثيق السجل، استخدم زر التوثيق في الجدول — هذا النموذج لتعديل
+                بيانات النشاط فقط.
+              </Typography>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditTarget(null)} disabled={editSaving}>
+            إلغاء
+          </Button>
+          <Button variant="contained" onClick={saveEdit} disabled={editSaving}>
+            {editSaving ? <CircularProgress size={20} /> : 'حفظ التعديلات'}
           </Button>
         </DialogActions>
       </Dialog>

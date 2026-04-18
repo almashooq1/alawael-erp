@@ -157,7 +157,7 @@ jobs:
           CSRF_DISABLE: 'true'
 
   ops-subsystems-tests:
-    name: "🛡️ Ops Subsystems (82 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo)"
+    name: "🛡️ Ops Subsystems (95 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo/envelope)"
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -220,7 +220,7 @@ jobs:
           echo "  • ZATCA XAdES signer (17 tests):       ${{ needs.signer-tests.result }}"
           echo "  • Gov adapters (10 × state machines):  ${{ needs.adapter-tests.result }}"
           echo "  • Admin API smoke (49 tests):          ${{ needs.api-tests.result }}"
-          echo "  • Ops subsystems (82 tests):           ${{ needs.ops-subsystems-tests.result }}"
+          echo "  • Ops subsystems (95 tests):           ${{ needs.ops-subsystems-tests.result }}"
           echo "  • Demo seed loads:                     ${{ needs.demo-seed-dryrun.result }}"
           echo "═══════════════════════════════════════════════════"
           if [[ "${{ needs.signer-tests.result }}"       != "success" ]] || \

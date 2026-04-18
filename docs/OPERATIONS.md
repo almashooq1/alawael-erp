@@ -135,8 +135,8 @@ run:
 make ship-check          # or: npm run ship-check
 ```
 
-~90 seconds. Runs `preflight` + `test:ops-subsystems`. Exits non-zero
-if either fails — that's your signal to fix before pushing.
+~90–120 seconds. Runs `preflight` + `test:ops-subsystems` (95 tests).
+Exits non-zero if either fails — that's your signal to fix before pushing.
 
 ---
 

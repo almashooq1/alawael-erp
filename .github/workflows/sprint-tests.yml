@@ -26,6 +26,8 @@ on:
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
+      - 'backend/__tests__/zatca-envelope.test.js'
+      - 'backend/services/zatcaEnvelope.js'
       - 'backend/__tests__/adapter-rate-limiter.test.js'
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
@@ -54,6 +56,8 @@ on:
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
+      - 'backend/__tests__/zatca-envelope.test.js'
+      - 'backend/services/zatcaEnvelope.js'
       - 'backend/__tests__/adapter-rate-limiter.test.js'
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
@@ -227,4 +231,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 227 sprint tests green."
+          echo "All 240 sprint tests green."

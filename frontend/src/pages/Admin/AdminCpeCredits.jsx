@@ -48,6 +48,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import PeopleIcon from '@mui/icons-material/People';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import SummarizeIcon from '@mui/icons-material/Summarize';
+import AddIcon from '@mui/icons-material/Add';
 import api from '../../services/api.client';
 
 const CATEGORY_LABELS = {
@@ -75,6 +76,44 @@ export default function AdminCpeCredits() {
   const [errMsg, setErrMsg] = useState('');
   const [summary, setSummary] = useState(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createSaving, setCreateSaving] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    employeeId: '',
+    activityName: '',
+    activityNameAr: '',
+    provider: '',
+    category: '1',
+    creditHours: '',
+    activityDate: new Date().toISOString().slice(0, 10),
+  });
+  const [employees, setEmployees] = useState([]);
+
+  useEffect(() => {
+    // Only loaded when the create dialog opens for the first time.
+    if (!createOpen || employees.length > 0) return;
+    (async () => {
+      try {
+        const { data } = await api.get('/employees?limit=200');
+        const list = data?.items || data?.data || [];
+        setEmployees(
+          list
+            .filter(e => e.scfhs_number)
+            .map(e => ({
+              _id: e._id,
+              name:
+                [e.firstName_ar, e.lastName_ar].filter(Boolean).join(' ') ||
+                e.fullName ||
+                e.email ||
+                '—',
+              scfhs: e.scfhs_number,
+            }))
+        );
+      } catch {
+        // Fallback: leave employee list empty; user can paste an ID.
+      }
+    })();
+  }, [createOpen, employees.length]);
 
   const loadOverview = useCallback(async () => {
     setOverviewLoading(true);
@@ -139,6 +178,45 @@ export default function AdminCpeCredits() {
     }
   };
 
+  const createRecord = async () => {
+    const f = createForm;
+    if (!f.employeeId) {
+      setErrMsg('اختَر الموظف');
+      return;
+    }
+    if (!f.activityName?.trim()) {
+      setErrMsg('اسم النشاط مطلوب');
+      return;
+    }
+    if (!(Number(f.creditHours) > 0)) {
+      setErrMsg('عدد الساعات يجب أن يكون أكبر من صفر');
+      return;
+    }
+    setCreateSaving(true);
+    try {
+      await api.post('/admin/hr/cpe', {
+        ...f,
+        creditHours: Number(f.creditHours),
+      });
+      setCreateOpen(false);
+      setCreateForm({
+        employeeId: '',
+        activityName: '',
+        activityNameAr: '',
+        provider: '',
+        category: '1',
+        creditHours: '',
+        activityDate: new Date().toISOString().slice(0, 10),
+      });
+      loadRecords(1);
+      loadOverview();
+    } catch (err) {
+      setErrMsg(err?.response?.data?.message || 'فشل حفظ السجل');
+    } finally {
+      setCreateSaving(false);
+    }
+  };
+
   const deleteRecord = async id => {
     if (!window.confirm('حذف السجل نهائياً؟')) return;
     try {
@@ -192,14 +270,19 @@ export default function AdminCpeCredits() {
             30 فئة 2 + 20 فئة 3).
           </Typography>
         </Box>
-        <IconButton
-          onClick={() => {
-            loadOverview();
-            loadRecords(pagination.page);
-          }}
-        >
-          <RefreshIcon />
-        </IconButton>
+        <Stack direction="row" spacing={1}>
+          <IconButton
+            onClick={() => {
+              loadOverview();
+              loadRecords(pagination.page);
+            }}
+          >
+            <RefreshIcon />
+          </IconButton>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
+            إضافة سجل
+          </Button>
+        </Stack>
       </Stack>
 
       {errMsg && (
@@ -482,6 +565,93 @@ export default function AdminCpeCredits() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSummary(null)}>إغلاق</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={createOpen}
+        onClose={() => (createSaving ? null : setCreateOpen(false))}
+        maxWidth="sm"
+        fullWidth
+        dir="rtl"
+      >
+        <DialogTitle>إضافة سجل CPE</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2} mt={1}>
+            <TextField
+              select
+              label="الموظف"
+              value={createForm.employeeId}
+              onChange={e => setCreateForm(f => ({ ...f, employeeId: e.target.value }))}
+              required
+              helperText={
+                employees.length === 0
+                  ? 'لم يتم العثور على معالجين مرخَّصين — تحقَّق من بيانات الموظفين.'
+                  : `${employees.length} معالج مرخَّص`
+              }
+            >
+              {employees.map(e => (
+                <MenuItem key={e._id} value={e._id}>
+                  {e.name} — SCFHS {e.scfhs}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="اسم النشاط (عربي)"
+              value={createForm.activityNameAr}
+              onChange={e => setCreateForm(f => ({ ...f, activityNameAr: e.target.value }))}
+            />
+            <TextField
+              label="اسم النشاط (للأنظمة الخارجية)"
+              value={createForm.activityName}
+              onChange={e => setCreateForm(f => ({ ...f, activityName: e.target.value }))}
+              required
+            />
+            <TextField
+              label="الجهة المنظِّمة"
+              value={createForm.provider}
+              onChange={e => setCreateForm(f => ({ ...f, provider: e.target.value }))}
+            />
+            <Stack direction="row" spacing={2}>
+              <TextField
+                select
+                label="الفئة"
+                value={createForm.category}
+                onChange={e => setCreateForm(f => ({ ...f, category: e.target.value }))}
+                sx={{ flex: 1 }}
+                required
+              >
+                <MenuItem value="1">الفئة 1 — مؤتمرات ودورات معتمدة</MenuItem>
+                <MenuItem value="2">الفئة 2 — نشاطات ذاتية</MenuItem>
+                <MenuItem value="3">الفئة 3 — تعليم ومشاركات</MenuItem>
+              </TextField>
+              <TextField
+                type="number"
+                label="الساعات"
+                value={createForm.creditHours}
+                onChange={e => setCreateForm(f => ({ ...f, creditHours: e.target.value }))}
+                inputProps={{ min: 0.5, step: 0.5 }}
+                required
+                sx={{ width: 140 }}
+              />
+            </Stack>
+            <TextField
+              type="date"
+              label="تاريخ النشاط"
+              value={createForm.activityDate}
+              onChange={e => setCreateForm(f => ({ ...f, activityDate: e.target.value }))}
+              InputLabelProps={{ shrink: true }}
+              required
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateOpen(false)} disabled={createSaving}>
+            إلغاء
+          </Button>
+          <Button variant="contained" onClick={createRecord} disabled={createSaving}>
+            {createSaving ? <CircularProgress size={20} /> : 'حفظ'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Container>

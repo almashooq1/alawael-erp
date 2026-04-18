@@ -182,6 +182,63 @@ describe('/api/admin/gov-integrations', () => {
 // ═══════════════════════════════════════════════════════════════════════
 // Rate limits + adapter audit (ops/PDPL surface)
 // ═══════════════════════════════════════════════════════════════════════
+describe('/api/health/metrics/integrations (Prometheus scrape)', () => {
+  it('returns text/plain Prometheus v0.0.4 format without auth', async () => {
+    // Intentionally no Authorization header — scrapers don't carry one
+    const res = await request(app).get('/api/health/metrics/integrations');
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/plain/);
+    expect(res.headers['content-type']).toMatch(/version=0\.0\.4/);
+    const body = res.text;
+    // Must have # HELP + # TYPE lines
+    expect(body).toMatch(/^# HELP gov_adapter_rate_limit_capacity /m);
+    expect(body).toMatch(/^# TYPE gov_adapter_rate_limit_capacity gauge/m);
+    // Must carry all 10 providers as labels for capacity gauge
+    [
+      'gosi',
+      'scfhs',
+      'absher',
+      'qiwa',
+      'nafath',
+      'fatoora',
+      'muqeem',
+      'nphies',
+      'wasel',
+      'balady',
+    ].forEach(p => {
+      expect(body).toMatch(new RegExp(`gov_adapter_rate_limit_capacity\\{provider="${p}"\\} \\d+`));
+    });
+    // Circuit breaker metrics present for 4 paid adapters
+    ['gosi', 'absher', 'nphies', 'fatoora'].forEach(p => {
+      expect(body).toMatch(new RegExp(`gov_adapter_circuit_open\\{provider="${p}"\\} 0`));
+    });
+    // Mode gauge carries mode="mock" label in test env
+    expect(body).toMatch(/gov_adapter_mode\{provider="gosi",mode="mock"\} 0/);
+    // Configured gauge should be 1 in mock mode
+    expect(body).toMatch(/gov_adapter_configured\{provider="gosi"\} 1/);
+  });
+
+  it('each metric family has a HELP + TYPE line', async () => {
+    const res = await request(app).get('/api/health/metrics/integrations');
+    const text = res.text;
+    const metrics = [
+      'gov_adapter_rate_limit_capacity',
+      'gov_adapter_rate_limit_available',
+      'gov_adapter_rate_limit_utilization_percent',
+      'gov_adapter_rate_limit_active_actors',
+      'gov_adapter_circuit_open',
+      'gov_adapter_circuit_failures',
+      'gov_adapter_circuit_cooldown_ms',
+      'gov_adapter_configured',
+      'gov_adapter_mode',
+    ];
+    for (const m of metrics) {
+      expect(text).toMatch(new RegExp(`^# HELP ${m} `, 'm'));
+      expect(text).toMatch(new RegExp(`^# TYPE ${m} gauge$`, 'm'));
+    }
+  });
+});
+
 describe('/api/admin/gov-integrations/circuits', () => {
   it('returns all registered breakers in one snapshot', async () => {
     const res = await request(app).get('/api/admin/gov-integrations/circuits').set(bearerAdmin());

@@ -107,6 +107,14 @@ function setupHealthProbes(app, { isTestEnv, isProd }) {
     // Logger is available via app.locals if setup earlier; best-effort
     console.warn('[HealthProbes] integrations aggregator skipped:', err?.message);
   }
+
+  // Prometheus text-format metrics for gov adapters — scraper-friendly.
+  try {
+    const integrationsMetrics = require('../routes/integrations-metrics.routes');
+    app.use('/api/health/metrics/integrations', integrationsMetrics);
+  } catch (err) {
+    console.warn('[HealthProbes] integrations metrics skipped:', err?.message);
+  }
 }
 
 module.exports = { setupHealthProbes };

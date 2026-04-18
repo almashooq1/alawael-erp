@@ -5,6 +5,51 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.5] — 2026-04-18 — PDPL correlation + deploy gate + DX polish
+
+Final polish on the 4.0.x arc. Focus: close the remaining compliance
+gap (correlation of cascaded calls) and prevent the one class of
+production incident that kept nagging at the runbooks — someone flips
+`*_MODE=live` without the secrets.
+
+### Added
+
+- **Correlation IDs across the audit trail.** `AdapterAudit.correlationId`
+  now carries `req.id` (set by the existing X-Request-Id middleware),
+  so the 4 adapter calls from a single HR onboarding POST all share
+  one ID. New `GET /admin/adapter-audit/by-correlation/:id` surfaces
+  them in chronological order. `AdminAdapterAudit.jsx` grows a Hub
+  icon column + dialog showing the full cascade on click. DPO DSAR
+  becomes a 2-click flow.
+
+- **Deploy gate**: `backend/scripts/preflight.js` + `preflight-script.test.js`
+  (7 tests). Exits 1 with a per-provider missing-vars list if any
+  `*_MODE=live` adapter is misconfigured. Three modes: TTY (colored),
+  `--json` (machine), `CI_PREFLIGHT=1` (compact stderr-only). Wire
+  as k8s initContainer / Dockerfile RUN / CI pre-promote gate.
+
+- **Operator ergonomics**:
+  - `scripts/gov-status.js` — colorized CLI snapshot of all 10
+    adapters (exit 0/1/2 for cron consumption)
+  - `OPERATIONS.md` — one-page front door: health hierarchy,
+    6 incident-path one-liners, flip-to-live checklist, SLI PromQL
+    recipes, emergency-reset curl
+  - Root `Makefile` wrapping 14 npm targets with a `make help`
+    menu auto-generated from `##` docstrings
+
+### Tests
+
+Sprint suite grows from 182 → **201 passing**:
+• +3 correlation routing/lookup tests
+• +9 Grafana JSON + Alertmanager YAML structural validation
+• +7 preflight exit-code contract tests
+
+`ops-artifacts.test.js` cross-checks every metric family referenced
+by the dashboard/alerts exists in the Node source and vice-versa —
+drift now fails the PR instead of failing at Grafana reload time.
+
+---
+
 ## [4.0.4] — 2026-04-18 — Docs, runbooks, CI widening
 
 Closes the 4.0.x arc by packaging everything into a shape ops/on-call

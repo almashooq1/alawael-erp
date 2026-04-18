@@ -12,6 +12,12 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | `GovAdapterSuccessRateLow`     | warning  | [gov-adapter-circuit.md](gov-adapter-circuit.md) (same diagnostic path)                      |
 | `GovAdapterLatencyP95High`     | warning  | [gov-adapter-circuit.md](gov-adapter-circuit.md) (upstream slowdown usually precedes a trip) |
 
+### Compliance workflows (not triggered by alerts)
+
+| Workflow                                | Runbook                                        |
+| --------------------------------------- | ---------------------------------------------- |
+| PDPL Data Subject Access Request (DSAR) | [dsar-adapter-audit.md](dsar-adapter-audit.md) |
+
 ## How to use
 
 1. PagerDuty / Slack → you see an alert firing.

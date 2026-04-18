@@ -21,6 +21,8 @@
     "clean": "rimraf node_modules backend/node_modules frontend/node_modules",
     "cleanup": "cd backend && npm run cleanup",
     "cleanup:run": "cd backend && npm run cleanup:run",
+    "cpe:attention": "cd backend && npm run cpe:attention",
+    "cpe:attention:json": "cd backend && npm run cpe:attention:json",
     "db:reset": "cd backend && npm run db:reset",
     "db:seed": "cd backend && npm run db:seed",
     "db:seed:rehab": "cd backend && npm run db:seed:rehab",

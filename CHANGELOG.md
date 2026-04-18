@@ -5,6 +5,40 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.6] — 2026-04-18 — Runtime build identity + ship-check
+
+Small additions on top of 4.0.5 that close the 'which commit is
+actually serving this?' gap and give operators an opt-in pre-push
+guardrail for ops-sensitive changes.
+
+### Added
+
+- `GET /api/build-info` — unauth endpoint returning commit SHA
+  (full + 8-char), buildTime, startedAt, uptime, node version,
+  platform, pid, env. Resolution order: `GIT_SHA` env → `git rev-parse
+HEAD` → `"unknown"`. All fields cached at module-load; restart is
+  the correct way to refresh.
+- `frontend/components/BuildInfoChip.jsx` — small footer chip showing
+  the 8-char SHA in the admin shell header. Tooltip carries the full
+  commit + startedAt + uptime + node/pid/env. Silently hides if the
+  endpoint 404s (backward-compat with older deploys).
+- `docker-compose.professional.yml` + both Dockerfiles accept
+  `GIT_SHA` + `BUILD_TIME` as build args, promoted to env so the
+  build-info endpoint reports real values in production. Root
+  `npm run docker:build` auto-resolves them via `git rev-parse HEAD`
+  - UTC timestamp.
+- `npm run ship-check` / `make ship-check` — opt-in pre-push gate
+  running `preflight` + `test:ops-subsystems` (~90s, 65 tests).
+  OPERATIONS.md gains a section naming the file-touch triggers where
+  running this is recommended.
+
+### Tests
+
+Sprint suite: **210 passing** (was 208).
+• +2 build-info smoke tests (shape + SHA/short agreement)
+
+---
+
 ## [4.0.5] — 2026-04-18 — PDPL correlation + deploy gate + DX polish
 
 Final polish on the 4.0.x arc. Focus: close the remaining compliance

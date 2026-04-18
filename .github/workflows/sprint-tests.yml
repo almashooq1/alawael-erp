@@ -76,6 +76,7 @@ on:
       - 'backend/__tests__/cpe-service.test.js'
       - 'backend/__tests__/cpe-attention-script.test.js'
       - 'backend/__tests__/cpe-minimums-consistency.test.js'
+      - 'backend/__tests__/admin-routes-auth-wiring.test.js'
       - 'backend/scripts/cpe-attention.js'
       - 'backend/middleware/requestId.middleware.js'
       - 'backend/utils/arabicSearch.js'
@@ -244,4 +245,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 503 sprint tests green."
+          echo "All 513 sprint tests green."

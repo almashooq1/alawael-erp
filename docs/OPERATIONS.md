@@ -19,6 +19,7 @@ Pick the level that fits what you're asking:
 | "Is anything drifting?" (human view)  | `/admin/integrations-ops` (web UI)     | admin |
 | "Full state including PDPL trail"     | `/admin/adapter-audit`                 | admin |
 | "CLI snapshot for cron/SSH"           | `npm run gov:status` (exit 0/1/2)      | shell |
+| "Which commit is serving this?"       | `GET /api/build-info`                  | no    |
 
 ---
 

@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { adminService } from 'services/adminService';
 import IntegrationsHealthBadge from '../../components/IntegrationsHealthBadge';
+import BuildInfoChip from '../../components/BuildInfoChip';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
@@ -112,9 +113,14 @@ const AdminDashboard = () => {
               <Typography variant="body2">نظرة عامة على صحة النظام والعمليات</Typography>
             </Box>
           </Box>
-          <IntegrationsHealthBadge
-            sx={{ bgcolor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)' }}
-          />
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IntegrationsHealthBadge
+              sx={{ bgcolor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)' }}
+            />
+            <BuildInfoChip
+              sx={{ bgcolor: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(4px)' }}
+            />
+          </Box>
         </Box>
       </Box>
 

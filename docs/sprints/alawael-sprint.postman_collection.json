@@ -43,6 +43,15 @@
             "auth": { "type": "noauth" },
             "description": "Prometheus text/plain v0.0.4 — scrape every 30s."
           }
+        },
+        {
+          "name": "GET /build-info (runtime identity)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/build-info",
+            "auth": { "type": "noauth" },
+            "description": "Git SHA + uptime + node version. Useful during blue/green rollouts and incident triage."
+          }
         }
       ]
     },

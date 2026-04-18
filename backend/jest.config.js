@@ -91,7 +91,11 @@ module.exports = {
     // Run separately with: npm run test:perf
     'stress-load-testing\\.test',
     'performance-load-tests\\.test',
-    'load\\.test',
+    // Require a path separator before "load.test" so the pattern
+    // matches __tests__/load.test.js but NOT files that happen to
+    // contain "load.test" as a substring (e.g. no-eager-load.test.js
+    // was silently skipped by the old unanchored version).
+    '[\\\\/]load\\.test',
     'performance-tuning\\.test',
     'performanceRoutes\\.comprehensive\\.test',
     'advanced-performance-tests\\.test',

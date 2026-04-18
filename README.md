@@ -36,8 +36,9 @@
 
 | Document                                                                                  | Description                                                                         |
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [4.0.x-DELIVERY.md](docs/4.0.x-DELIVERY.md)                                               | 📋 **4.0.x delivery summary** — before/after scorecard + patch-release timeline     |
 | [OPERATIONS.md](docs/OPERATIONS.md)                                                       | 🚨 **One-page operator index** — health hierarchy, incident paths, SLI recipes      |
-| [sprints/SPRINT_2026_04_17-18.md](docs/sprints/SPRINT_2026_04_17-18.md)                   | 2-day sprint + 4.0.1–4.0.4 follow-ups (rate limits / circuits / metrics / runbooks) |
+| [sprints/SPRINT_2026_04_17-18.md](docs/sprints/SPRINT_2026_04_17-18.md)                   | 2-day sprint + 4.0.1–4.0.6 follow-ups (rate limits / circuits / metrics / runbooks) |
 | [sprints/GOV_INTEGRATIONS_GO_LIVE.md](docs/sprints/GOV_INTEGRATIONS_GO_LIVE.md)           | Flip-to-live checklist per Saudi gov provider + Prometheus + SLI PromQL recipes     |
 | [runbooks/](docs/runbooks/README.md)                                                      | On-call playbooks — one per alert (circuit / rate-limit / misconfigured)            |
 | [dashboards/gov-integrations.grafana.json](docs/dashboards/gov-integrations.grafana.json) | Grafana 10.x dashboard — 12 panels, import directly                                 |

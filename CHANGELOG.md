@@ -45,9 +45,9 @@ writing a real end-to-end test exposed the flaw.
 
 ### Tests
 
-Sprint suite: **291 passing** (was 274 at 4.0.8).
+Sprint suite: **297 passing** (was 274 at 4.0.8).
 • +3 rate-limit e2e + 4 request-id contract + 7 provider-registry
-consistency + 3 variant-match assertions
+consistency + 6 doc-count consistency + 3 variant-match assertions
 
 ---
 

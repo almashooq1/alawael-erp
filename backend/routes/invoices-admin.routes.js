@@ -23,6 +23,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const Invoice = require('../models/Invoice');
 const { buildEnvelope } = require('../services/zatcaEnvelope');
+const fatoora = require('../services/fatooraAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -308,6 +309,78 @@ router.post('/:id/cancel', requireRole(WRITE_ROLES), async (req, res) => {
     res.json({ success: true, data: doc, message: 'تم الإلغاء' });
   } catch (err) {
     return safeError(res, err, 'invoices.cancel');
+  }
+});
+
+// ── POST /:id/submit-to-zatca — send to Fatoora ──────────────────────────
+router.post('/:id/submit-to-zatca', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const invoice = await Invoice.findById(req.params.id);
+    if (!invoice) return res.status(404).json({ success: false, message: 'غير موجود' });
+    if (!invoice.zatca?.uuid || !invoice.zatca?.invoiceHash) {
+      return res.status(400).json({
+        success: false,
+        message: 'يجب إصدار الفاتورة (POST /issue) قبل الإرسال إلى ZATCA',
+      });
+    }
+    if (invoice.zatca.zatcaStatus === 'ACCEPTED' || invoice.zatca.zatcaStatus === 'REPORTED') {
+      return res.status(400).json({
+        success: false,
+        message: 'الفاتورة مُرسَلة مسبقاً',
+        data: invoice.toObject(),
+      });
+    }
+
+    const result = await fatoora.submit({
+      invoice: invoice.toObject(),
+      uuid: invoice.zatca.uuid,
+      invoiceHash: invoice.zatca.invoiceHash,
+      invoiceXmlB64: req.body?.invoiceXmlB64, // optional, required only in live mode
+    });
+
+    invoice.zatca.zatcaStatus =
+      result.status === 'ACCEPTED' || result.status === 'REPORTED'
+        ? result.status === 'ACCEPTED'
+          ? 'ACCEPTED'
+          : 'SUBMITTED'
+        : result.status === 'REJECTED'
+          ? 'REJECTED'
+          : 'NOT_SUBMITTED';
+    invoice.zatca.submittedToZatcaAt = new Date();
+    if (result.zatcaReference) invoice.zatca.zatcaReference = result.zatcaReference;
+    if (result.errors?.length) {
+      invoice.zatca.zatcaErrors = result.errors.map(
+        e => `[${e.code || 'ERR'}] ${e.message || 'unknown'}`
+      );
+    } else {
+      invoice.zatca.zatcaErrors = [];
+    }
+    await invoice.save();
+
+    logger.info('[invoices] submitted to ZATCA', {
+      id: invoice._id.toString(),
+      status: result.status,
+      mode: result.mode,
+      by: req.user?.id,
+    });
+
+    res.json({
+      success: result.status !== 'ERROR' && result.status !== 'REJECTED',
+      data: invoice.toObject(),
+      result,
+      message:
+        result.status === 'ACCEPTED'
+          ? 'تم قبول الفاتورة من ZATCA (Clearance)'
+          : result.status === 'REPORTED'
+            ? 'تم إبلاغ ZATCA (Reporting)'
+            : result.status === 'REJECTED'
+              ? 'رُفضت الفاتورة — راجع الأخطاء'
+              : 'فشل الإرسال',
+    });
+  } catch (err) {
+    return safeError(res, err, 'invoices.submitZatca');
   }
 });
 

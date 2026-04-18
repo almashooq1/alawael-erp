@@ -43,6 +43,7 @@ import MedicalServicesIcon from '@mui/icons-material/MedicalServices';
 import BadgeIcon from '@mui/icons-material/Badge';
 import WorkIcon from '@mui/icons-material/Work';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import api from '../../services/api.client';
 
@@ -97,6 +98,14 @@ const PROVIDERS = [
     desc: 'تسجيل الدخول الموحد للمواطنين والمقيمين',
     icon: <FingerprintIcon />,
     color: '#d32f2f',
+    sampleInput: null,
+  },
+  {
+    key: 'fatoora',
+    name: 'Fatoora (ZATCA) — الفوترة الإلكترونية',
+    desc: 'إرسال الفواتير لهيئة الزكاة — Reporting / Clearance',
+    icon: <ReceiptLongIcon />,
+    color: '#6d28d9',
     sampleInput: null,
   },
 ];
@@ -433,6 +442,21 @@ NAFATH_BASE_URL=https://api.nafath.sa
 NAFATH_APP_ID=...
 NAFATH_SERVICE_ID=...
 NAFATH_PRIVATE_KEY=<PEM>`}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" fontWeight={600}>
+                Fatoora (ZATCA)
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre' }}
+              >
+                {`FATOORA_MODE=live
+FATOORA_BASE_URL=https://gw-fatoora.zatca.gov.sa/e-invoicing/core
+FATOORA_BINARY_TOKEN=<base64 CSID>
+FATOORA_MODE_TYPE=reporting   # or clearance
+FATOORA_TIMEOUT_MS=12000`}
               </Typography>
             </Box>
           </Stack>

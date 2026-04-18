@@ -48,6 +48,7 @@ import ReceiptIcon from '@mui/icons-material/Receipt';
 import PaidIcon from '@mui/icons-material/Paid';
 import CancelIcon from '@mui/icons-material/Cancel';
 import QrCodeIcon from '@mui/icons-material/QrCode';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -302,6 +303,30 @@ export default function AdminInvoices() {
     }
   };
 
+  const [submitting, setSubmitting] = useState({});
+  const [lastSubmitResult, setLastSubmitResult] = useState({});
+
+  const submitToZatca = async inv => {
+    setSubmitting(s => ({ ...s, [inv._id]: true }));
+    setLastSubmitResult(r => ({ ...r, [inv._id]: null }));
+    try {
+      const { data } = await api.post(`/admin/invoices/${inv._id}/submit-to-zatca`, {});
+      setLastSubmitResult(r => ({ ...r, [inv._id]: data.result }));
+      loadList();
+    } catch (err) {
+      setErrMsg(err?.response?.data?.message || 'فشل الإرسال إلى ZATCA');
+      setLastSubmitResult(r => ({
+        ...r,
+        [inv._id]: {
+          status: 'ERROR',
+          errors: [{ message: err?.response?.data?.message || err?.message }],
+        },
+      }));
+    } finally {
+      setSubmitting(s => ({ ...s, [inv._id]: false }));
+    }
+  };
+
   const addItem = () => setForm(f => ({ ...f, items: [...f.items, EMPTY_ITEM] }));
   const removeItem = i => setForm(f => ({ ...f, items: f.items.filter((_, idx) => idx !== i) }));
   const updateItem = (i, key, val) =>
@@ -371,6 +396,32 @@ export default function AdminInvoices() {
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setErrMsg('')}>
           {errMsg}
         </Alert>
+      )}
+
+      {Object.entries(lastSubmitResult).map(([invId, r]) =>
+        r ? (
+          <Alert
+            key={invId}
+            severity={
+              r.status === 'ACCEPTED' || r.status === 'REPORTED'
+                ? 'success'
+                : r.status === 'REJECTED'
+                  ? 'error'
+                  : 'warning'
+            }
+            sx={{ mb: 1 }}
+            onClose={() => setLastSubmitResult(x => ({ ...x, [invId]: null }))}
+          >
+            <strong>إرسال ZATCA:</strong>{' '}
+            {r.status === 'ACCEPTED'
+              ? `قُبلت (Clearance) · وضع ${r.mode}${r.latencyMs ? ` · ${r.latencyMs}ms` : ''}${r.zatcaReference ? ` · ref ${r.zatcaReference}` : ''}`
+              : r.status === 'REPORTED'
+                ? `تم الإبلاغ (Reporting) · وضع ${r.mode}${r.latencyMs ? ` · ${r.latencyMs}ms` : ''}`
+                : r.status === 'REJECTED'
+                  ? `رُفضت — ${(r.errors || []).map(e => `[${e.code || 'ERR'}] ${e.message}`).join(' | ')}`
+                  : `خطأ — ${(r.errors || []).map(e => e.message).join(' | ')}`}
+          </Alert>
+        ) : null
       )}
 
       <Grid container spacing={2} mb={3}>
@@ -470,12 +521,38 @@ export default function AdminInvoices() {
                 </TableCell>
                 <TableCell>
                   {inv.zatca?.uuid ? (
-                    <Chip
-                      size="small"
-                      icon={<QrCodeIcon fontSize="small" />}
-                      label={`ICV ${inv.zatca.icv}`}
-                      color="info"
-                    />
+                    <Stack spacing={0.3}>
+                      <Chip
+                        size="small"
+                        icon={<QrCodeIcon fontSize="small" />}
+                        label={`ICV ${inv.zatca.icv}`}
+                        color="info"
+                      />
+                      {inv.zatca.zatcaStatus && inv.zatca.zatcaStatus !== 'NOT_SUBMITTED' && (
+                        <Chip
+                          size="small"
+                          label={
+                            inv.zatca.zatcaStatus === 'ACCEPTED'
+                              ? '✓ مقبولة ZATCA'
+                              : inv.zatca.zatcaStatus === 'SUBMITTED'
+                                ? 'مُرسَلة ZATCA'
+                                : inv.zatca.zatcaStatus === 'REJECTED'
+                                  ? '✗ مرفوضة'
+                                  : inv.zatca.zatcaStatus
+                          }
+                          color={
+                            inv.zatca.zatcaStatus === 'ACCEPTED'
+                              ? 'success'
+                              : inv.zatca.zatcaStatus === 'SUBMITTED'
+                                ? 'primary'
+                                : inv.zatca.zatcaStatus === 'REJECTED'
+                                  ? 'error'
+                                  : 'default'
+                          }
+                          sx={{ fontSize: 10 }}
+                        />
+                      )}
+                    </Stack>
                   ) : (
                     <Chip size="small" label="لم يُصدر" variant="outlined" />
                   )}
@@ -522,6 +599,26 @@ export default function AdminInvoices() {
                       </IconButton>
                     </Tooltip>
                   )}
+                  {inv.zatca?.uuid &&
+                    (!inv.zatca.zatcaStatus ||
+                      ['NOT_SUBMITTED', 'REJECTED'].includes(inv.zatca.zatcaStatus)) && (
+                      <Tooltip title="إرسال إلى ZATCA (Fatoora)">
+                        <span>
+                          <IconButton
+                            size="small"
+                            color="info"
+                            disabled={submitting[inv._id]}
+                            onClick={() => submitToZatca(inv)}
+                          >
+                            {submitting[inv._id] ? (
+                              <CircularProgress size={16} />
+                            ) : (
+                              <CloudUploadIcon fontSize="small" />
+                            )}
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    )}
                   {inv.status !== 'CANCELLED' && inv.status !== 'PAID' && (
                     <Tooltip title="إلغاء">
                       <IconButton size="small" color="error" onClick={() => doCancel(inv)}>

@@ -24,6 +24,7 @@ const scfhs = require('../services/scfhsAdapter');
 const absher = require('../services/absherAdapter');
 const qiwa = require('../services/qiwaAdapter');
 const nafathAdapter = require('../services/nafathAdapter');
+const fatoora = require('../services/fatooraAdapter');
 
 router.use(authenticateToken);
 
@@ -106,6 +107,7 @@ const ADAPTERS = {
   absher,
   qiwa,
   nafath: nafathWrapped,
+  fatoora,
 };
 
 // ── GET /status ──────────────────────────────────────────────────────────

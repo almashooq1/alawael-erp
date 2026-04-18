@@ -34,10 +34,13 @@ HEAD` → `"unknown"`. All fields cached at module-load; restart is
 
 ### Tests
 
-Sprint suite: **227 passing** (was 208).
+Sprint suite: **240 passing** (was 208).
 • +2 build-info smoke tests (shape + SHA/short agreement)
 • +17 build-info internals unit tests (4 resolveX helpers + 8-case
 humanizeUptime table)
+• +13 zatcaEnvelope unit tests (TLV round-trip, UUID v4 format,
+canonical hash determinism, SIMPLIFIED/STANDARD split, UTF-8
+Arabic in seller-name QR tag)
 
 ---
 

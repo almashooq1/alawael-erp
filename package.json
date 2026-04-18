@@ -39,6 +39,8 @@
     "docker:logs": "docker compose logs -f",
     "docker:up": "docker compose up -d",
     "generate:secrets": "cd backend && npm run generate:secrets",
+    "gov:status": "cd backend && npm run gov:status",
+    "gov:status:json": "cd backend && npm run gov:status:json",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "lint": "cd backend && npm run lint",
     "lint:all": "npm run lint:backend && npm run lint:frontend",
@@ -47,10 +49,14 @@
     "logs": "cd backend && npm run logs:view",
     "logs:errors": "cd backend && npm run logs:errors",
     "predeploy": "node scripts/prepare-deploy.js",
+    "preflight": "cd backend && npm run preflight",
+    "preflight:prod": "cd backend && npm run preflight:prod",
     "prepare": "husky",
     "quality": "cd backend && npm run quality:ci",
     "quality:quick": "cd backend && npm run quality:quick",
     "routes": "cd backend && npm run routes:list",
+    "seed:demo:dry": "cd backend && npm run seed:demo:dry",
+    "seed:demo:reset": "cd backend && npm run seed:demo:reset",
     "setup": "cd backend && npm run setup",
     "setup:force": "cd backend && npm run setup -- --force",
     "start": "cd backend && npm start",
@@ -60,7 +66,9 @@
     "stats": "cd backend && npm run stats",
     "test": "cd backend && npm test",
     "test:backend": "cd backend && npm test",
-    "test:frontend": "cd frontend && npm test -- --watchAll=false"
+    "test:frontend": "cd frontend && npm test -- --watchAll=false",
+    "test:ops-subsystems": "cd backend && npm run test:ops-subsystems",
+    "test:sprint": "cd backend && npm run test:sprint"
   },
   "lint-staged": {
     "backend/**/*.js": [

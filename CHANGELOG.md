@@ -5,6 +5,55 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.3] — 2026-04-18 — Reliability + observability hardening
+
+Every cost-critical adapter now has a circuit breaker, every subsystem
+emits Prometheus metrics, and compliance can export the audit trail to
+CSV. Grafana + Alertmanager artifacts ship in the repo so a real
+monitoring stack is one import away.
+
+### Added
+
+- `backend/services/adapterCircuitBreaker.js` — shared factory with
+  named registry. Wired into GOSI (refactored, byte-identical), Absher,
+  NPHIES (both eligibility + claim paths), and Fatoora. 4xx answers
+  count as successes (the provider responded; our input was wrong);
+  only 5xx / timeout / network errors trip the breaker.
+- `GET /api/admin/gov-integrations/circuits` — per-provider snapshot.
+- `POST /api/admin/gov-integrations/circuits/:provider/reset` — force-
+  close a circuit the operator knows is transient (UI button added).
+- `GET /api/health/metrics/integrations` — unauth Prometheus text-
+  format endpoint. 9 metric families × 10 providers: rate-limit
+  (capacity/available/utilization/active-actors), circuit (open/
+  failures/cooldown), configured, mode. Resilient: `safeGetConfig()`
+  shields the metrics path from a broken adapter.
+- `GET /api/admin/adapter-audit/export.csv` — UTF-8 BOM so Excel
+  renders Arabic correctly. 10k-row cap with narrow-the-filter hint.
+- `docs/alerts/gov-integrations.yml` — 5 Alertmanager rules (circuit-
+  open → page, rate-limit >85/100 → warn/page, misconfigured → warn,
+  flipped-to-live → info).
+- `docs/dashboards/gov-integrations.grafana.json` — 9-panel dashboard
+  with provider-variable filtering.
+- `docs/runbooks/gov-adapter-circuit.md` — on-call playbook covering
+  upstream-down / network-blip / misconfig / 401-storm paths.
+
+### Changed
+
+- GOSI: migrated its inline circuit to the shared factory. No behavior
+  delta (74 e2e tests confirm).
+
+### Tests
+
+- `adapter-circuit-breaker.test.js` — 16 tests (defaults, env overrides,
+  rolling window, cooldown auto-close, reset, isolation, snapshot
+  contract + 4 adapter integration checks).
+- `new-admin-routes.api.test.js` — +7 (circuits snapshot/reset/404,
+  Prometheus metrics format/help-type, CSV content-type+BOM+header).
+
+Sprint suite: **168/168 passing** (was 145 at 4.0.2 start).
+
+---
+
 ## [4.0.2] — 2026-04-18 — Integrations Ops dashboard + PDPL audit UI
 
 Glue layer over the 4.0 + 4.0.1 groundwork: operators now get one

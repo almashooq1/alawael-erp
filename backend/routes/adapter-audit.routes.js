@@ -175,4 +175,93 @@ router.get('/by-entity', requireRole(READ_ROLES), async (req, res) => {
   }
 });
 
+// ── GET /export.csv — compliance export ──────────────────────────────────
+// CSV with the same filters as GET /. Capped at 10k rows to avoid OOM;
+// if you need more, narrow the date range or export a month at a time.
+router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    const { provider, actorEmail, success, status, from, to, entityKind } = req.query;
+    const filter = {};
+    if (provider) filter.provider = provider;
+    if (actorEmail) {
+      const rx = new RegExp(
+        String(actorEmail)
+          .trim()
+          .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+        'i'
+      );
+      filter.actorEmail = rx;
+    }
+    if (success != null) filter.success = success === 'true' || success === true;
+    if (status) filter.status = status;
+    if (entityKind) filter['entityRef.kind'] = entityKind;
+    if (from || to) {
+      filter.createdAt = {};
+      if (from) filter.createdAt.$gte = new Date(from);
+      if (to) {
+        const d = new Date(to);
+        d.setHours(23, 59, 59, 999);
+        filter.createdAt.$lte = d;
+      }
+    }
+
+    const items = await AdapterAudit.find(filter).sort({ createdAt: -1 }).limit(10_000).lean();
+
+    const csvEscape = v => {
+      if (v == null) return '';
+      const s = String(v);
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const header = [
+      'createdAt',
+      'provider',
+      'operation',
+      'mode',
+      'status',
+      'success',
+      'latencyMs',
+      'actorEmail',
+      'actorRole',
+      'targetKind',
+      'targetHash',
+      'entityKind',
+      'entityId',
+      'ipHash',
+      'errorMessage',
+    ];
+    const rows = items.map(r =>
+      [
+        r.createdAt?.toISOString(),
+        r.provider,
+        r.operation,
+        r.mode,
+        r.status,
+        r.success,
+        r.latencyMs,
+        r.actorEmail,
+        r.actorRole,
+        r.targetKind,
+        r.targetHash,
+        r.entityRef?.kind,
+        r.entityRef?.id,
+        r.ipHash,
+        r.errorMessage,
+      ]
+        .map(csvEscape)
+        .join(',')
+    );
+
+    // UTF-8 BOM so Excel on Windows renders Arabic correctly
+    const body = '\uFEFF' + header.join(',') + '\n' + rows.join('\n') + '\n';
+    const filename = `adapter-audit-${new Date().toISOString().slice(0, 10)}.csv`;
+    res.set('Content-Type', 'text/csv; charset=utf-8');
+    res.set('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(body);
+  } catch (err) {
+    return safeError(res, err, 'adapter-audit.export');
+  }
+});
+
 module.exports = router;

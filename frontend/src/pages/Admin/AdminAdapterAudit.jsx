@@ -46,6 +46,7 @@ import {
   Tooltip,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import DownloadIcon from '@mui/icons-material/Download';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import BlockIcon from '@mui/icons-material/Block';
@@ -514,13 +515,32 @@ export default function AdminAdapterAudit() {
             الخام مطلقًا. مدة الحفظ: 730 يومًا.
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => (tab === 0 ? loadStats() : loadRows())}
-        >
-          تحديث
-        </Button>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            component="a"
+            href={(() => {
+              const params = new URLSearchParams();
+              Object.entries(filters).forEach(([k, v]) => {
+                if (v) params.set(k, v);
+              });
+              const qs = params.toString();
+              return `/api/admin/adapter-audit/export.csv${qs ? `?${qs}` : ''}`;
+            })()}
+            target="_blank"
+            rel="noopener"
+          >
+            تصدير CSV
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={() => (tab === 0 ? loadStats() : loadRows())}
+          >
+            تحديث
+          </Button>
+        </Stack>
       </Stack>
 
       {error && (

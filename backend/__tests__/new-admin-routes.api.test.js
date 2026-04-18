@@ -357,6 +357,19 @@ describe('/api/admin/adapter-audit', () => {
     expect(res.status).toBe(200);
     res.body.items.forEach(r => expect(r.provider).toBe('gosi'));
   });
+
+  it('export.csv returns text/csv with BOM + header row', async () => {
+    const res = await request(app).get('/api/admin/adapter-audit/export.csv').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/csv/);
+    expect(res.headers['content-disposition']).toMatch(/attachment; filename="adapter-audit-/);
+    // UTF-8 BOM
+    expect(res.text.charCodeAt(0)).toBe(0xfeff);
+    // Header row
+    expect(res.text).toMatch(
+      /createdAt,provider,operation,mode,status,success,latencyMs,actorEmail/
+    );
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════════════

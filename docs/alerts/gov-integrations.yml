@@ -1,0 +1,101 @@
+# Prometheus alert rules for the Saudi gov-adapter subsystem.
+#
+# Scrape target: /api/health/metrics/integrations  (text/plain v0.0.4)
+# Mount location: docs/alerts/gov-integrations.yml
+#
+# How to wire up:
+#   1. In your prometheus.yml scrape_configs, add:
+#
+#        - job_name: 'alawael-gov-integrations'
+#          metrics_path: /api/health/metrics/integrations
+#          scrape_interval: 30s
+#          static_configs:
+#            - targets: ['alawael-api.internal:3000']
+#
+#   2. Reference this rule file from prometheus.yml:
+#
+#        rule_files:
+#          - /etc/prometheus/rules/gov-integrations.yml
+#
+#   3. In Alertmanager, route `severity=critical` to PagerDuty / on-call,
+#      and `severity=warning` to the #ops Slack channel.
+
+groups:
+  - name: gov-adapter-circuit
+    interval: 30s
+    rules:
+      - alert: GovAdapterCircuitOpen
+        expr: gov_adapter_circuit_open == 1
+        for: 1m
+        labels:
+          severity: critical
+          subsystem: gov-integrations
+        annotations:
+          summary: 'Gov adapter {{ $labels.provider }} circuit breaker is OPEN'
+          description: |
+            The {{ $labels.provider }} adapter has tripped its circuit breaker.
+            Verification requests to this provider will return 'unknown' until
+            the cooldown elapses or an operator resets it from
+            /admin/integrations-ops. Check upstream status and the
+            adapter-audit log for the failure pattern.
+          runbook_url: 'https://docs.alawael.internal/runbooks/gov-adapter-circuit.md'
+
+  - name: gov-adapter-rate-limit
+    interval: 30s
+    rules:
+      - alert: GovAdapterRateLimitHigh
+        expr: gov_adapter_rate_limit_utilization_percent > 85
+        for: 5m
+        labels:
+          severity: warning
+          subsystem: gov-integrations
+        annotations:
+          summary: 'Gov adapter {{ $labels.provider }} rate limit >85% utilized'
+          description: |
+            {{ $labels.provider }} is at {{ $value }}% of its token-bucket
+            capacity and has been for 5+ minutes. Investigate whether a cron
+            loop or a spike in user activity is behind it. If legitimate,
+            raise {{ $labels.provider | upper }}_RL_CAPACITY and redeploy.
+
+      - alert: GovAdapterRateLimitExhausted
+        expr: gov_adapter_rate_limit_utilization_percent >= 100
+        for: 2m
+        labels:
+          severity: critical
+          subsystem: gov-integrations
+        annotations:
+          summary: 'Gov adapter {{ $labels.provider }} rate limit EXHAUSTED'
+          description: |
+            {{ $labels.provider }} has no tokens available — calls are being
+            rejected with HTTP 429. This is either a runaway loop or a
+            capacity misconfiguration. Check /admin/rate-limits for the
+            actor breakdown.
+
+  - name: gov-adapter-config
+    interval: 5m
+    rules:
+      - alert: GovAdapterMisconfigured
+        expr: gov_adapter_configured == 0
+        for: 10m
+        labels:
+          severity: warning
+          subsystem: gov-integrations
+        annotations:
+          summary: 'Gov adapter {{ $labels.provider }} is not configured'
+          description: |
+            {{ $labels.provider }} is missing required env vars in
+            {{ $labels.mode }} mode. All verify calls will return 'unknown'.
+            Check /admin/gov-integrations for the list of missing variables.
+
+      - alert: GovAdapterFlippedToLive
+        expr: changes(gov_adapter_mode[5m]) > 0 and gov_adapter_mode == 1
+        for: 0m
+        labels:
+          severity: info
+          subsystem: gov-integrations
+        annotations:
+          summary: 'Gov adapter {{ $labels.provider }} switched to LIVE mode'
+          description: |
+            Someone set {{ $labels.provider | upper }}_MODE=live. Verify this
+            was intentional — live calls are billed per-request for paid
+            providers (Absher, NPHIES, Fatoora).

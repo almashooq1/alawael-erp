@@ -40,6 +40,8 @@ describe('test-file completeness', () => {
     // tests. Quick-and-cheap — not a full JS parse.
     const stripped = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
     expect(/\bdescribe\s*\(/.test(stripped)).toBe(true);
-    expect(/\b(it|test)\s*\(/.test(stripped)).toBe(true);
+    // Allow it(), test(), it.each()(), test.each()() — .each is common
+    // for table-driven assertions and should count as "has tests".
+    expect(/\b(it|test)(\.each)?\s*\(/.test(stripped)).toBe(true);
   });
 });

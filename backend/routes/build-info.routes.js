@@ -23,12 +23,17 @@ const { execSync } = require('child_process');
 const router = express.Router();
 
 function resolveGitSha() {
-  // Production containers usually inject this at build time.
-  if (process.env.GIT_SHA) return process.env.GIT_SHA;
+  // Production containers usually inject this at build time. Treat empty
+  // string the same as missing — some deploy scripts set GIT_SHA="" when
+  // they can't resolve the real SHA.
+  if (process.env.GIT_SHA && process.env.GIT_SHA.trim()) {
+    return process.env.GIT_SHA.trim();
+  }
   try {
     return execSync('git rev-parse HEAD', {
       stdio: ['ignore', 'pipe', 'ignore'],
       cwd: __dirname,
+      timeout: 2000, // don't block startup on a hung git process
     })
       .toString()
       .trim();
@@ -43,7 +48,8 @@ function resolveGitShaShort() {
 }
 
 function resolveBuildTime() {
-  return process.env.BUILD_TIME || 'unknown';
+  const v = process.env.BUILD_TIME;
+  return v && v.trim() ? v.trim() : 'unknown';
 }
 
 // Resolve once at load, not per-request. A prod restart flushes.

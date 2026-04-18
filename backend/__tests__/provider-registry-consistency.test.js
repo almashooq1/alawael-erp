@@ -2,7 +2,7 @@
  * provider-registry-consistency.test.js — drift detection across the
  * 10-provider surface.
  *
- * Eight places name the providers:
+ * Nine places name the providers:
  *   1. backend/services/adapterRateLimiter.js DEFAULTS map
  *   2. backend/services/{NAME}Adapter.js (file exists + exports MODE)
  *   3. backend/routes/gov-integrations.routes.js ADAPTERS map
@@ -11,12 +11,13 @@
  *   6. backend/scripts/preflight.js PROVIDERS array
  *   7. backend/models/AdapterAudit.js provider enum
  *   8. backend/.env.example {NAME}_MODE block
+ *   9. backend/.env.production.example {NAME}_MODE block
  *
  * If someone adds an 11th provider and forgets any of these wirings,
  * production silently skips that provider in metrics / admin UI /
  * rate limiting / health / audit / ops docs — worst failure mode.
  *
- * This file asserts all eight lists agree on the same 10 names.
+ * This file asserts all nine lists agree on the same 10 names.
  */
 
 'use strict';
@@ -122,6 +123,18 @@ describe('10-provider registry consistency', () => {
     for (const name of EXPECTED) {
       // Accept commented-out examples too: "# GOSI_MODE=mock" or "GOSI_MODE=mock"
       const re = new RegExp(`^\\s*#?\\s*${name.toUpperCase()}_MODE=`, 'm');
+      expect(re.test(src)).toBe(true);
+    }
+  });
+
+  it('.env.production.example has an explicit {NAME}_MODE=mock for every provider', () => {
+    // Prod template's posture: every provider MUST appear with an
+    // explicit default so a deployer flipping one to live is a
+    // deliberate one-line change, not a "did I forget any?" audit.
+    const src = fs.readFileSync(path.join(__dirname, '..', '.env.production.example'), 'utf8');
+    for (const name of EXPECTED) {
+      // Uncommented only — prod template must be decisive.
+      const re = new RegExp(`^${name.toUpperCase()}_MODE=(mock|live)`, 'm');
       expect(re.test(src)).toBe(true);
     }
   });

@@ -16,7 +16,7 @@ SHELL := /bin/bash
 
 # ── Phony declarations — targets that don't produce files ─────────────
 .PHONY: help ops-check ops-check-json preflight preflight-prod \
-        sprint-tests ops-subsystems-tests demo-seed demo-seed-dry \
+        dsar-hash sprint-tests ops-subsystems-tests demo-seed demo-seed-dry \
         install backend-install frontend-install mobile-install \
         backend-dev frontend-dev lint audit
 
@@ -43,6 +43,9 @@ preflight: ## Deploy gate — exits 1 if any live adapter is misconfigured
 
 preflight-prod: ## CI mode — compact stderr only (wire into k8s initContainer)
 	@cd backend && npm run preflight:prod --silent
+
+dsar-hash: ## Compute SHA-256 targetHash for DSAR queries (pass ID=...)
+	@cd backend && node scripts/dsar-hash.js $(ID)
 
 # ─── Tests ─────────────────────────────────────────────────────────────
 sprint-tests: ## Run the 201-test sprint CI gate

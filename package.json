@@ -38,6 +38,7 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "docker:up": "docker compose up -d",
+    "dsar:hash": "cd backend && npm run dsar:hash --silent --",
     "generate:secrets": "cd backend && npm run generate:secrets",
     "gov:status": "cd backend && npm run gov:status",
     "gov:status:json": "cd backend && npm run gov:status:json",

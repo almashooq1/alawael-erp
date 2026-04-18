@@ -44,6 +44,10 @@ import {
   TextField,
   MenuItem,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -54,6 +58,7 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import ClearIcon from '@mui/icons-material/Clear';
 import SecurityIcon from '@mui/icons-material/Security';
+import HubIcon from '@mui/icons-material/Hub';
 import api from '../../services/api.client';
 
 const PROVIDERS = [
@@ -265,7 +270,28 @@ function OverviewTab({ stats, loading }) {
 
 function LogTab({ rows, total, page, limit, filters, loading, onPage, onLimit, onFilters }) {
   const [local, setLocal] = useState(filters);
+  const [cascadeCid, setCascadeCid] = useState(null);
+  const [cascadeRows, setCascadeRows] = useState([]);
+  const [cascadeLoading, setCascadeLoading] = useState(false);
   useEffect(() => setLocal(filters), [filters]);
+
+  const openCascade = useCallback(async cid => {
+    setCascadeCid(cid);
+    setCascadeLoading(true);
+    try {
+      const resp = await api.get(`/admin/adapter-audit/by-correlation/${encodeURIComponent(cid)}`);
+      setCascadeRows(resp.data.items || []);
+    } catch {
+      setCascadeRows([]);
+    } finally {
+      setCascadeLoading(false);
+    }
+  }, []);
+
+  const closeCascade = () => {
+    setCascadeCid(null);
+    setCascadeRows([]);
+  };
 
   const applyFilters = () => onFilters(local);
   const clearFilters = () => {
@@ -364,6 +390,13 @@ function LogTab({ rows, total, page, limit, filters, loading, onPage, onLimit, o
                     </Box>
                   </Tooltip>
                 </TableCell>
+                <TableCell align="center">
+                  <Tooltip title="الطلب المرتبط — يعرض جميع استدعاءات نفس الطلب">
+                    <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center' }}>
+                      <HubIcon fontSize="small" />
+                    </Box>
+                  </Tooltip>
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -413,11 +446,24 @@ function LogTab({ rows, total, page, limit, filters, loading, onPage, onLimit, o
                       {r.targetHash ? `${r.targetHash.slice(0, 10)}…` : '—'}
                     </Typography>
                   </TableCell>
+                  <TableCell align="center">
+                    {r.correlationId ? (
+                      <Tooltip title={`عرض كل استدعاءات الطلب (${r.correlationId.slice(0, 10)}…)`}>
+                        <IconButton size="small" onClick={() => openCascade(r.correlationId)}>
+                          <HubIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">
+                        —
+                      </Typography>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
               {!loading && rows.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} align="center">
+                  <TableCell colSpan={9} align="center">
                     <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
                       لا توجد سجلات مطابقة.
                     </Typography>
@@ -439,6 +485,69 @@ function LogTab({ rows, total, page, limit, filters, loading, onPage, onLimit, o
           labelDisplayedRows={({ from, to, count }) => `${from}–${to} من ${count}`}
         />
       </Card>
+
+      <Dialog open={Boolean(cascadeCid)} onClose={closeCascade} maxWidth="md" fullWidth>
+        <DialogTitle>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <HubIcon color="primary" />
+            <Box>
+              <Typography variant="subtitle1" fontWeight={700}>
+                استدعاءات الطلب الواحد
+              </Typography>
+              <Typography variant="caption" sx={{ fontFamily: 'monospace' }} color="text.secondary">
+                {cascadeCid}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          {cascadeLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : cascadeRows.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              لا توجد سجلات مرتبطة.
+            </Typography>
+          ) : (
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>الوقت</TableCell>
+                  <TableCell>المزوّد</TableCell>
+                  <TableCell>العملية</TableCell>
+                  <TableCell>الحالة</TableCell>
+                  <TableCell align="center">الزمن (ms)</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {cascadeRows.map(r => (
+                  <TableRow key={r._id}>
+                    <TableCell>
+                      <Typography variant="caption">
+                        {new Date(r.createdAt).toLocaleTimeString('ar-SA')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip size="small" label={r.provider?.toUpperCase()} variant="outlined" />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption">{r.operation}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <StatusChip row={r} />
+                    </TableCell>
+                    <TableCell align="center">{r.latencyMs ?? '—'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeCascade}>إغلاق</Button>
+        </DialogActions>
+      </Dialog>
     </Stack>
   );
 }

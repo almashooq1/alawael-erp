@@ -144,5 +144,6 @@ if either fails — that's your signal to fix before pushing.
 
 - [CHANGELOG.md](../CHANGELOG.md) — release history (4.0.x covers all ops work)
 - [DEPLOYMENT_RUNBOOK.md](DEPLOYMENT_RUNBOOK.md) — general deploy sequence
+- [deploy/BUILD_INFO_WIRING.md](deploy/BUILD_INFO_WIRING.md) — CI/CD recipes for `/api/build-info`
 - [sprints/GOV_INTEGRATIONS_GO_LIVE.md](sprints/GOV_INTEGRATIONS_GO_LIVE.md) — per-provider checklist
 - [runbooks/README.md](runbooks/README.md) — full runbook index

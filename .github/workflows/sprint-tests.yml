@@ -27,6 +27,7 @@ on:
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
       - 'backend/__tests__/zatca-envelope.test.js'
+      - 'backend/__tests__/safe-error.test.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/__tests__/adapter-rate-limiter.test.js'
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
@@ -66,6 +67,7 @@ on:
       - 'backend/__tests__/preflight-script.test.js'
       - 'backend/__tests__/dsar-hash-script.test.js'
       - 'backend/__tests__/build-info-internals.test.js'
+      - 'backend/__tests__/safe-error.test.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
@@ -157,7 +159,7 @@ jobs:
           CSRF_DISABLE: 'true'
 
   ops-subsystems-tests:
-    name: "🛡️ Ops Subsystems (95 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo/envelope)"
+    name: "🛡️ Ops Subsystems (102 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo/envelope/safeerror)"
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -220,7 +222,7 @@ jobs:
           echo "  • ZATCA XAdES signer (17 tests):       ${{ needs.signer-tests.result }}"
           echo "  • Gov adapters (10 × state machines):  ${{ needs.adapter-tests.result }}"
           echo "  • Admin API smoke (49 tests):          ${{ needs.api-tests.result }}"
-          echo "  • Ops subsystems (95 tests):           ${{ needs.ops-subsystems-tests.result }}"
+          echo "  • Ops subsystems (102 tests):          ${{ needs.ops-subsystems-tests.result }}"
           echo "  • Demo seed loads:                     ${{ needs.demo-seed-dryrun.result }}"
           echo "═══════════════════════════════════════════════════"
           if [[ "${{ needs.signer-tests.result }}"       != "success" ]] || \
@@ -231,4 +233,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 240 sprint tests green."
+          echo "All 247 sprint tests green."

@@ -35,6 +35,15 @@ function safeError(res, err, context) {
     if (err.retryAfterMs) body.retryAfterMs = err.retryAfterMs;
     if (err.scope) body.scope = err.scope;
     if (err.provider) body.provider = err.provider;
+
+    // Standards-compliant Retry-After header on 429 — HTTP spec says
+    // integer seconds. Proxies, SDKs, and browsers honour this before
+    // looking at the JSON body, so we set it whenever retryAfterMs is
+    // available (primarily on RateLimitError).
+    if (err.statusCode === 429 && err.retryAfterMs) {
+      res.set('Retry-After', String(Math.ceil(err.retryAfterMs / 1000)));
+    }
+
     return res.status(err.statusCode).json(body);
   }
 

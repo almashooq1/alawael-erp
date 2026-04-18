@@ -741,6 +741,85 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     bump('nphiesClaims');
   }
 
+  // ── Seed AdapterAudit rows ────────────────────────────────────────────
+  // So /admin/adapter-audit and the Grafana dashboards have real-looking
+  // data on first demo load instead of empty state. Spread over the past
+  // 7 days; realistic success/failure/rate-limited mix (95/3/2%).
+  if (!dryRun) {
+    const AdapterAudit = require('../models/AdapterAudit');
+    const crypto = require('crypto');
+    const hash = (s, salt = process.env.JWT_SECRET || 'alawael-pdpl-salt') =>
+      crypto.createHash('sha256').update(`${s}:${salt}`).digest('hex').slice(0, 32);
+
+    // Remove older demo-seeded audit rows so reruns don't stack up
+    if (reset) {
+      await AdapterAudit.deleteMany({ actorEmail: /@demo\.alawael\.com$/ });
+    }
+
+    const now = Date.now();
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    // Provider weights roughly match expected real-world ratio
+    const providerWeights = [
+      { provider: 'gosi', op: 'verify', kind: 'nationalId', weight: 25 },
+      { provider: 'scfhs', op: 'verify', kind: 'licenseNumber', weight: 15 },
+      { provider: 'qiwa', op: 'verify', kind: 'nationalId', weight: 15 },
+      { provider: 'muqeem', op: 'verify', kind: 'iqama', weight: 10 },
+      { provider: 'absher', op: 'verify', kind: 'nationalId', weight: 8 },
+      { provider: 'wasel', op: 'verifyShortCode', kind: 'shortCode', weight: 8 },
+      { provider: 'balady', op: 'verify', kind: 'licenseNumber', weight: 6 },
+      { provider: 'nafath', op: 'initiate', kind: 'nationalId', weight: 6 },
+      { provider: 'nphies', op: 'eligibility', kind: 'memberId', weight: 5 },
+      { provider: 'fatoora', op: 'submit', kind: 'uuid', weight: 2 },
+    ];
+    const pool = [];
+    providerWeights.forEach(p => {
+      for (let i = 0; i < p.weight; i += 1) pool.push(p);
+    });
+    const actors = [...guardianSpecs.slice(0, 3), ...employeeSpecs.slice(0, 2)];
+
+    const rows = [];
+    for (let i = 0; i < 200; i += 1) {
+      const p = pool[Math.floor(Math.random() * pool.length)];
+      const actor = actors[Math.floor(Math.random() * actors.length)];
+      const createdAt = new Date(now - Math.random() * SEVEN_DAYS);
+      const roll = Math.random();
+      let status;
+      let success;
+      if (roll < 0.03) {
+        status = 'error';
+        success = false;
+      } else if (roll < 0.05) {
+        status = 'rate_limited';
+        success = false;
+      } else {
+        status = 'active';
+        success = true;
+      }
+      // Realistic latency: log-normal, mostly 50-800ms, occasional outlier
+      const latencyMs =
+        Math.random() < 0.02
+          ? Math.round(2000 + Math.random() * 2000)
+          : Math.round(50 + Math.pow(Math.random(), 2) * 750);
+      rows.push({
+        actorEmail: actor.email,
+        actorRole: actor.role || 'demo',
+        provider: p.provider,
+        operation: p.op,
+        mode: 'mock',
+        targetHash: hash(`demo-${i}-${p.provider}`),
+        targetKind: p.kind,
+        status,
+        latencyMs,
+        success,
+        errorMessage: status === 'error' ? 'HTTP 503 — upstream unavailable' : undefined,
+        ipHash: hash(`10.0.0.${i % 255}`),
+        createdAt,
+      });
+    }
+    await AdapterAudit.insertMany(rows);
+    bump('adapterAuditRows', rows.length);
+  }
+
   return {
     success: true,
     summary: report.created,

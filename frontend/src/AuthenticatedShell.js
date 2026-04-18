@@ -142,9 +142,9 @@ const AdminNphiesClaims = lazyWithRetry(() => import('./pages/Admin/AdminNphiesC
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
-const ChatV2 = lazyWithRetry(() => import('./pages/Chat/ChatV2'));
-const TelehealthList = lazyWithRetry(() => import('./pages/Telehealth/TelehealthList'));
-const TelehealthRoom = lazyWithRetry(() => import('./pages/Telehealth/TelehealthRoom'));
+const ChatV2 = lazyWithRetry(() => import('./pages/chat/ChatV2'));
+const TelehealthList = lazyWithRetry(() => import('./pages/telehealth/TelehealthList'));
+const TelehealthRoom = lazyWithRetry(() => import('./pages/telehealth/TelehealthRoom'));
 const AnalyticsDashboard = lazyWithRetry(() => import('./components/analytics/AnalyticsDashboard'));
 const AdvancedReports = lazyWithRetry(() => import('./components/reports/AdvancedReports'));
 const ExportImportManager = lazyWithRetry(() => import('./components/ExportImportManager'));

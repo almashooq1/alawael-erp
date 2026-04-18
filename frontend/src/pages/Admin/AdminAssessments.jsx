@@ -51,6 +51,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import EventIcon from '@mui/icons-material/Event';
 import ScoreIcon from '@mui/icons-material/Score';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const CATEGORIES = [
   { value: '', label: 'كل الفئات' },
@@ -160,8 +161,7 @@ export default function AdminAssessments() {
   const [detailItem, setDetailItem] = useState(null);
   const [trendDialog, setTrendDialog] = useState({ open: false, loading: false, data: null });
 
-  // Options
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
+  // Options — beneficiary uses BeneficiaryTypeahead (on-demand search)
   const [therapistOpts, setTherapistOpts] = useState([]);
   const [toolOpts, setToolOpts] = useState(COMMON_TOOLS);
 
@@ -175,11 +175,7 @@ export default function AdminAssessments() {
         return [];
       }
     };
-    const [b, t, tools] = await Promise.all([
-      tryGet('/admin/beneficiaries?limit=100', x => ({
-        id: x._id,
-        label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-      })),
+    const [t, tools] = await Promise.all([
       tryGet('/employees?limit=100', x => ({
         id: x._id,
         label: `${fullName(x)} (${x.role || '—'})`,
@@ -193,7 +189,6 @@ export default function AdminAssessments() {
         }
       })(),
     ]);
-    setBeneficiaryOpts(b);
     setTherapistOpts(t);
     setToolOpts(Array.from(new Set([...COMMON_TOOLS, ...tools])));
   }, []);
@@ -695,13 +690,25 @@ export default function AdminAssessments() {
           )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={beneficiaryOpts}
-                value={form.beneficiary}
-                onChange={(_, v) => setForm(f => ({ ...f, beneficiary: v }))}
-                getOptionLabel={o => o?.label || ''}
-                isOptionEqualToValue={(a, b) => a?.id === b?.id}
-                renderInput={p => <TextField {...p} label="المستفيد *" />}
+              <BeneficiaryTypeahead
+                label="المستفيد *"
+                required
+                value={
+                  form.beneficiary
+                    ? { _id: form.beneficiary.id, name_ar: form.beneficiary.label }
+                    : null
+                }
+                onChange={v =>
+                  setForm(f => ({
+                    ...f,
+                    beneficiary: v
+                      ? {
+                          id: v._id,
+                          label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                        }
+                      : null,
+                  }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>

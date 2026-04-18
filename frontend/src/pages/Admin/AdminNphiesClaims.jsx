@@ -35,7 +35,6 @@ import {
   CircularProgress,
   Paper,
   Alert,
-  Autocomplete,
   Divider,
   LinearProgress,
 } from '@mui/material';
@@ -51,6 +50,7 @@ import PaidIcon from '@mui/icons-material/Paid';
 import MoneyOffIcon from '@mui/icons-material/MoneyOff';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const CLAIM_STATUS = [
   { value: 'DRAFT', label: 'مسودّة', color: 'default' },
@@ -141,21 +141,7 @@ export default function AdminNphiesClaims() {
     result: null,
   });
   const [running, setRunning] = useState({});
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
-
-  const loadOptions = useCallback(async () => {
-    try {
-      const { data } = await api.get('/admin/beneficiaries?limit=200');
-      setBeneficiaryOpts(
-        (data?.items || []).map(x => ({
-          id: x._id,
-          label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-        }))
-      );
-    } catch {
-      setBeneficiaryOpts([]);
-    }
-  }, []);
+  // Beneficiary picker uses BeneficiaryTypeahead (on-demand server search)
 
   const loadStats = useCallback(async () => {
     try {
@@ -187,9 +173,8 @@ export default function AdminNphiesClaims() {
   }, [q, status, submission, pagination.page, pagination.limit]);
 
   useEffect(() => {
-    loadOptions();
     loadStats();
-  }, [loadOptions, loadStats]);
+  }, [loadStats]);
 
   useEffect(() => {
     loadList();
@@ -633,13 +618,25 @@ export default function AdminNphiesClaims() {
           )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={beneficiaryOpts}
-                value={form.beneficiary}
-                onChange={(_, v) => setForm(f => ({ ...f, beneficiary: v }))}
-                getOptionLabel={o => o?.label || ''}
-                isOptionEqualToValue={(a, b) => a?.id === b?.id}
-                renderInput={p => <TextField {...p} label="المستفيد *" />}
+              <BeneficiaryTypeahead
+                label="المستفيد *"
+                required
+                value={
+                  form.beneficiary
+                    ? { _id: form.beneficiary.id, name_ar: form.beneficiary.label }
+                    : null
+                }
+                onChange={v =>
+                  setForm(f => ({
+                    ...f,
+                    beneficiary: v
+                      ? {
+                          id: v._id,
+                          label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                        }
+                      : null,
+                  }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>

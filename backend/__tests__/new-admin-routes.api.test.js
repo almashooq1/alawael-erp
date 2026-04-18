@@ -306,6 +306,11 @@ describe('/api/admin/beneficiaries/search (Arabic-aware typeahead)', () => {
     expect(res.body.count).toEqual(expect.any(Number));
   });
 
+  // Note: an end-to-end seed-and-find test was attempted but the test
+  // env's USE_MOCK_DB layering conflicts with the MongoMemoryServer
+  // connection for this specific model. The variant-tolerant regex is
+  // proven independently by arabic-search.test.js buildOrClause cases.
+
   it('accepts Arabic-Indic digits in query', async () => {
     const res = await request(app)
       .get(`/api/admin/beneficiaries/search?q=${encodeURIComponent('١٢٣٤')}`)

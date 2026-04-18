@@ -111,28 +111,25 @@ router.get('/search', requireRole(STAFF_ROLES), async (req, res) => {
     const filter = applyBranchScope(req, {});
     const normalized = normalize(q);
 
-    // Exact ID matches (beneficiary number, national ID) get priority —
-    // receptionist types the whole ID, not a prefix.
-    const exactId = {
-      $or: [{ beneficiaryNumber: normalized.toUpperCase() }, { nationalId: normalized }],
-    };
+    // Flat $or — nested $or clauses aren't uniformly handled across
+    // Mongo versions, so build a single-level list of leaf predicates.
+    const orClauses = [
+      // Exact ID matches (receptionist types the whole ID, not a prefix)
+      { beneficiaryNumber: normalized.toUpperCase() },
+      { nationalId: normalized },
+      // Arabic/English name prefix across 5 canonical fields — variant-
+      // tolerant so "احمد" matches stored "أحمد" (see arabicSearch.js).
+      ...(buildOrClause(q, ['firstName_ar', 'lastName_ar', 'firstName', 'lastName', 'name']) || []),
+    ];
 
-    // Arabic/English name prefix across 4 canonical fields
-    const nameOr = buildOrClause(q, [
-      'firstName_ar',
-      'lastName_ar',
-      'firstName',
-      'lastName',
-      'name',
-    ]);
-    // Numeric digits → also try substring match on phone (guardians call in)
+    // Numeric-only query: also substring-match on the phone field
+    // (guardians commonly call and read out the number).
     const digitsOnly = normalized.replace(/\D/g, '');
-    const phoneOr =
-      digitsOnly.length >= 3 ? [{ 'contact.primaryPhone': new RegExp(digitsOnly, 'i') }] : [];
+    if (digitsOnly.length >= 3) {
+      orClauses.push({ 'contact.primaryPhone': new RegExp(digitsOnly, 'i') });
+    }
 
-    const combined = {
-      $and: [filter, { $or: [exactId, ...(nameOr || []), ...phoneOr].flat() }],
-    };
+    const combined = { $and: [filter, { $or: orClauses }] };
 
     const items = await Beneficiary.find(combined)
       .limit(20)

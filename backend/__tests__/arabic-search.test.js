@@ -112,4 +112,32 @@ describe('buildOrClause', () => {
     expect('a.b(c)d').toMatch(clause[0].x);
     expect('aXbYc').not.toMatch(clause[0].x);
   });
+
+  it('query "احمد" matches stored "أحمد" (hamza vs plain alef)', () => {
+    // The DB often has "أحمد" because forms save whatever the user typed,
+    // but receptionists type "احمد" (plain alef). The regex must span both.
+    const clause = buildOrClause('احمد', ['firstName_ar']);
+    const rx = clause[0].firstName_ar;
+    expect('أحمد').toMatch(rx);
+    expect('احمد').toMatch(rx);
+    expect('إحمد').toMatch(rx);
+    expect('آحمد').toMatch(rx);
+    // Does not match unrelated words
+    expect('علي').not.toMatch(rx);
+  });
+
+  it('query "فاطمه" matches stored "فاطمة" (ha vs ta marbuta)', () => {
+    // Substring mode for last-name partial
+    const clause = buildOrClause('فاطمه', ['lastName_ar'], { mode: 'substring' });
+    expect('فاطمة').toMatch(clause[0].lastName_ar);
+    expect('فاطمه').toMatch(clause[0].lastName_ar);
+  });
+
+  it('query "1234" matches stored Arabic-Indic "١٢٣٤"', () => {
+    const clause = buildOrClause('1234', ['beneficiaryNumber']);
+    const rx = clause[0].beneficiaryNumber;
+    expect('1234').toMatch(rx);
+    expect('١٢٣٤').toMatch(rx);
+    expect('1234 extra').toMatch(rx);
+  });
 });

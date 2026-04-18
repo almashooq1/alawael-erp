@@ -80,16 +80,48 @@ function escapeRegex(s) {
   return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// Reverse of LETTER_MAP + DIGIT_MAP: for each canonical char, list all
+// variant chars that normalize to it. Used at regex-build time so the
+// query matches un-normalized stored values (the common case — users
+// type "احمد" but the DB has "أحمد").
+const REVERSE_VARIANTS = {
+  ا: '[اأإآٱ]',
+  و: '[وؤ]',
+  ي: '[يىئ]',
+  ه: '[هة]',
+  0: '[0٠]',
+  1: '[1١]',
+  2: '[2٢]',
+  3: '[3٣]',
+  4: '[4٤]',
+  5: '[5٥]',
+  6: '[6٦]',
+  7: '[7٧]',
+  8: '[8٨]',
+  9: '[9٩]',
+};
+
+// For a normalized query char, return the regex fragment that matches
+// any stored variant. Non-Arabic/digit chars pass through (regex-escaped).
+function variantClass(ch) {
+  return REVERSE_VARIANTS[ch] || escapeRegex(ch);
+}
+
 /**
  * Build a Mongo $or clause that prefix-matches the normalized query
- * against a list of candidate field names. Falls back to substring
- * match (.*q.*) if `mode: 'substring'` is passed.
+ * against a list of candidate field names. The stored data may NOT be
+ * normalized (real-world case), so each character in the query
+ * expands into a class matching any of its variant forms.
+ *
+ * `mode: 'substring'` drops the `^` anchor.
  */
 function buildOrClause(query, fields, { mode = 'prefix' } = {}) {
   const q = normalize(query);
   if (!q) return null;
-  const escaped = escapeRegex(q);
-  const pattern = mode === 'substring' ? escaped : `^${escaped}`;
+  // Build variant-tolerant pattern: 'احمد' → '[اأإآٱ]حمد'
+  let pattern = '';
+  for (const ch of q) pattern += variantClass(ch);
+  if (mode !== 'substring') pattern = '^' + pattern;
   const rx = new RegExp(pattern, 'i');
   return fields.map(f => ({ [f]: rx }));
 }

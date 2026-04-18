@@ -43,7 +43,7 @@
 | [dashboards/gov-integrations.grafana.json](docs/dashboards/gov-integrations.grafana.json) | Grafana 10.x dashboard — 12 panels, import directly                                 |
 | [alerts/gov-integrations.yml](docs/alerts/gov-integrations.yml)                           | Alertmanager rule groups — circuit / rate-limit / SLI / config                      |
 
-Ops quick commands: `npm run gov:status` (CLI snapshot, exit 0/1/2 for cron) · `GET /api/health/integrations/summary` (unauth liveness) · `GET /api/health/metrics/integrations` (unauth Prometheus scrape).
+Ops quick commands: `npm run gov:status` (CLI snapshot, exit 0/1/2 for cron) · `npm run preflight` (deploy gate — non-zero if any live adapter is misconfigured) · `npm run dsar:hash -- <nationalId>` (PDPL subject-hash for compliance queries) · `GET /api/health/integrations/summary` (unauth liveness) · `GET /api/health/metrics/integrations` (unauth Prometheus scrape).
 
 ---
 

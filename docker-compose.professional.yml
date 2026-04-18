@@ -125,6 +125,12 @@ services:
       dockerfile: Dockerfile
       args:
         NODE_ENV: ${NODE_ENV:-development}
+        # Surfaced at runtime via /api/build-info. Pass from CI:
+        #   docker compose build --build-arg GIT_SHA=$(git rev-parse HEAD) ...
+        # Compose also interpolates from env, so `GIT_SHA=... docker compose up`
+        # works without editing this file.
+        GIT_SHA: ${GIT_SHA:-unknown}
+        BUILD_TIME: ${BUILD_TIME:-unknown}
     container_name: alawael-backend
     <<: *restart-policy
     environment:

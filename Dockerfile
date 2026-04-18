@@ -41,6 +41,13 @@ RUN addgroup -g 1001 -S nodejs && \
 
 WORKDIR /app
 
+# Build-time identity — passed via `docker build --build-arg GIT_SHA=...
+# --build-arg BUILD_TIME=...`. Surfaced at runtime via /api/build-info
+# so operators can tell which commit is serving a given request without
+# needing to exec into the container.
+ARG GIT_SHA=unknown
+ARG BUILD_TIME=unknown
+
 # Copy dependencies from previous stage
 COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
 
@@ -57,7 +64,9 @@ ENV NODE_ENV=production \
     LOG_DIR=/app/logs \
     NODE_OPTIONS="--max-old-space-size=1024 --enable-source-maps" \
     SHUTDOWN_TIMEOUT=15000 \
-    NPM_CONFIG_LOGLEVEL=warn
+    NPM_CONFIG_LOGLEVEL=warn \
+    GIT_SHA=${GIT_SHA} \
+    BUILD_TIME=${BUILD_TIME}
 
 # Expose port
 EXPOSE 3001

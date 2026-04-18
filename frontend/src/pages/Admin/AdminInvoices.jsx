@@ -36,7 +36,6 @@ import {
   CircularProgress,
   Paper,
   Alert,
-  Autocomplete,
   Divider,
   LinearProgress,
 } from '@mui/material';
@@ -53,6 +52,7 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import WarningIcon from '@mui/icons-material/Warning';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -123,23 +123,9 @@ export default function AdminInvoices() {
   const [issueDialog, setIssueDialog] = useState({ open: false, invoice: null, buyerVat: '' });
   const [payDialog, setPayDialog] = useState({ open: false, invoice: null, method: 'CASH' });
 
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
-
-  const loadOptions = useCallback(async () => {
-    try {
-      const { data } = await api.get('/admin/beneficiaries?limit=200');
-      const list = data?.items || [];
-      setBeneficiaryOpts(
-        list.map(x => ({
-          id: x._id,
-          label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-          raw: x,
-        }))
-      );
-    } catch {
-      setBeneficiaryOpts([]);
-    }
-  }, []);
+  // Beneficiary options are now fetched on-demand by BeneficiaryTypeahead
+  // (debounced server-side search). Removed the eager load of up to 200
+  // records which broke silently at branches with >200 kids.
 
   const loadStats = useCallback(async () => {
     try {
@@ -172,9 +158,8 @@ export default function AdminInvoices() {
   }, [q, status, from, to, pagination.page, pagination.limit]);
 
   useEffect(() => {
-    loadOptions();
     loadStats();
-  }, [loadOptions, loadStats]);
+  }, [loadStats]);
 
   useEffect(() => {
     loadList();
@@ -678,13 +663,30 @@ export default function AdminInvoices() {
           )}
           <Grid container spacing={2}>
             <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={beneficiaryOpts}
-                value={form.beneficiary}
-                onChange={(_, v) => setForm(f => ({ ...f, beneficiary: v }))}
-                getOptionLabel={o => o?.label || ''}
-                isOptionEqualToValue={(a, b) => a?.id === b?.id}
-                renderInput={p => <TextField {...p} label="المستفيد *" />}
+              <BeneficiaryTypeahead
+                label="المستفيد *"
+                required
+                value={
+                  form.beneficiary
+                    ? {
+                        _id: form.beneficiary.id,
+                        name_ar: form.beneficiary.label,
+                        beneficiaryNumber: form.beneficiary.beneficiaryNumber,
+                      }
+                    : null
+                }
+                onChange={v =>
+                  setForm(f => ({
+                    ...f,
+                    beneficiary: v
+                      ? {
+                          id: v._id,
+                          label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                          beneficiaryNumber: v.beneficiaryNumber,
+                        }
+                      : null,
+                  }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>

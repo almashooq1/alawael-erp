@@ -32,6 +32,18 @@
 | [CONTRIBUTING.md](CONTRIBUTING.md)                      | Contribution guidelines and PR process                                                                                                |
 | [CHANGELOG.md](CHANGELOG.md)                            | Full release history                                                                                                                  |
 
+### Ops & Saudi gov integrations (4.0.x)
+
+| Document                                                                                  | Description                                                                         |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| [sprints/SPRINT_2026_04_17-18.md](docs/sprints/SPRINT_2026_04_17-18.md)                   | 2-day sprint + 4.0.1–4.0.4 follow-ups (rate limits / circuits / metrics / runbooks) |
+| [sprints/GOV_INTEGRATIONS_GO_LIVE.md](docs/sprints/GOV_INTEGRATIONS_GO_LIVE.md)           | Flip-to-live checklist per Saudi gov provider + Prometheus + SLI PromQL recipes     |
+| [runbooks/](docs/runbooks/README.md)                                                      | On-call playbooks — one per alert (circuit / rate-limit / misconfigured)            |
+| [dashboards/gov-integrations.grafana.json](docs/dashboards/gov-integrations.grafana.json) | Grafana 10.x dashboard — 12 panels, import directly                                 |
+| [alerts/gov-integrations.yml](docs/alerts/gov-integrations.yml)                           | Alertmanager rule groups — circuit / rate-limit / SLI / config                      |
+
+Ops quick commands: `npm run gov:status` (CLI snapshot, exit 0/1/2 for cron) · `GET /api/health/integrations/summary` (unauth liveness) · `GET /api/health/metrics/integrations` (unauth Prometheus scrape).
+
 ---
 
 ## Overview

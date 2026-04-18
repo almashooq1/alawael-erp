@@ -32,7 +32,7 @@ SCFHS license status was tracked; the CPE credit hours (100 per
 
 ### Tests
 
-Sprint suite: **493 passing** (was 484 at 4.0.9).
+Sprint suite: **495 passing** (was 484 at 4.0.9).
 • 13 unit tests for `cpeService.summarize` / `daysUntilDeadline` /
 `needsAttention` (5-year window filter, env overrides, verified-vs-
 unverified split, per-category deficit math, attention threshold)

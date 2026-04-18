@@ -12,6 +12,7 @@
  *   DELETE /:id                   — remove record
  *   POST /:id/verify              — HR marks record verified
  *   GET  /overview                — dashboard counters (compliant / attention / non-compliant)
+ *   GET  /export.csv              — CSV download with employee hydrated (SCFHS audit sheet)
  *
  * All routes authenticated; read roles include clinical_supervisor
  * for peer review; write + verify are HR-only.
@@ -273,6 +274,84 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'cpe.overview');
+  }
+});
+
+// ── GET /export.csv — CSV download (SCFHS audit / HR archive) ───────────
+router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    const { employeeId, category, verified, from, to } = req.query;
+    const filter = {};
+    if (employeeId && mongoose.isValidObjectId(employeeId)) filter.employeeId = employeeId;
+    if (category) filter.category = String(category);
+    if (verified != null) filter.verified = verified === 'true' || verified === true;
+    if (from || to) {
+      filter.activityDate = {};
+      if (from) filter.activityDate.$gte = new Date(from);
+      if (to) {
+        const d = new Date(to);
+        d.setHours(23, 59, 59, 999);
+        filter.activityDate.$lte = d;
+      }
+    }
+
+    const items = await CpeRecord.find(filter).sort({ activityDate: -1 }).limit(10_000).lean();
+    // Hydrate minimal employee display data so the sheet is readable
+    // on its own — SCFHS inspectors may open this without DB access.
+    const empIds = [...new Set(items.map(r => String(r.employeeId)).filter(Boolean))];
+    const emps = empIds.length
+      ? await Employee.find({ _id: { $in: empIds } })
+          .select('firstName_ar lastName_ar scfhs_number')
+          .lean()
+      : [];
+    const empMap = new Map(emps.map(e => [String(e._id), e]));
+
+    const csvEscape = v => {
+      if (v == null) return '';
+      const s = String(v);
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    };
+
+    const header = [
+      'activityDate',
+      'employeeName',
+      'scfhsNumber',
+      'category',
+      'creditHours',
+      'activityNameAr',
+      'activityName',
+      'provider',
+      'accreditationNumber',
+      'verified',
+      'verifiedAt',
+    ];
+    const rows = items.map(r => {
+      const e = empMap.get(String(r.employeeId));
+      return [
+        r.activityDate?.toISOString()?.slice(0, 10),
+        e ? [e.firstName_ar, e.lastName_ar].filter(Boolean).join(' ') : '',
+        e?.scfhs_number || '',
+        r.category,
+        r.creditHours,
+        r.activityNameAr,
+        r.activityName,
+        r.provider,
+        r.accreditationNumber,
+        r.verified,
+        r.verifiedAt?.toISOString(),
+      ]
+        .map(csvEscape)
+        .join(',');
+    });
+
+    const body = '\uFEFF' + header.join(',') + '\n' + rows.join('\n') + '\n';
+    const filename = `cpe-records-${new Date().toISOString().slice(0, 10)}.csv`;
+    res.set('Content-Type', 'text/csv; charset=utf-8');
+    res.set('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(body);
+  } catch (err) {
+    return safeError(res, err, 'cpe.export');
   }
 });
 

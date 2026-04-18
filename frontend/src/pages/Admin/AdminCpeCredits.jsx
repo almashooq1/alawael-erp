@@ -49,6 +49,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import DeleteIcon from '@mui/icons-material/DeleteOutline';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import AddIcon from '@mui/icons-material/Add';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import api from '../../services/api.client';
 
 const CATEGORY_LABELS = {
@@ -279,6 +280,22 @@ export default function AdminCpeCredits() {
           >
             <RefreshIcon />
           </IconButton>
+          <Button
+            variant="outlined"
+            startIcon={<FileDownloadIcon />}
+            component="a"
+            href={(() => {
+              const p = new URLSearchParams();
+              if (filters.category) p.set('category', filters.category);
+              if (filters.verified !== '') p.set('verified', filters.verified);
+              const qs = p.toString();
+              return `/api/admin/hr/cpe/export.csv${qs ? `?${qs}` : ''}`;
+            })()}
+            target="_blank"
+            rel="noopener"
+          >
+            تصدير CSV
+          </Button>
           <Button variant="contained" startIcon={<AddIcon />} onClick={() => setCreateOpen(true)}>
             إضافة سجل
           </Button>

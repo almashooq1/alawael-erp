@@ -99,6 +99,7 @@ describe('Route mounting — new sprint routes are registered', () => {
     '/api/admin/hr/compliance/overview',
     '/api/admin/hr/cpe',
     '/api/admin/hr/cpe/overview',
+    '/api/admin/hr/cpe/export.csv',
     '/api/admin/gov-integrations/status',
     '/api/admin/gov-integrations/rate-limits',
     '/api/admin/gov-integrations/circuits',
@@ -330,6 +331,22 @@ describe('/api/admin/hr/cpe (SCFHS CPE tracking)', () => {
   // to the handler's own validation). Business logic is proven by
   // cpe-service.test.js (13 unit tests). The 4 GET/overview tests
   // above confirm the route mounts + responds.
+
+  it('GET /export.csv returns UTF-8-BOM CSV with the expected header', async () => {
+    const res = await request(app).get('/api/admin/hr/cpe/export.csv').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/csv/);
+    expect(res.headers['content-disposition']).toMatch(
+      /attachment; filename="cpe-records-\d{4}-\d{2}-\d{2}\.csv"/
+    );
+    const body = res.text;
+    // BOM first, then the header row as the first CSV line.
+    expect(body.charCodeAt(0)).toBe(0xfeff);
+    const firstLine = body.slice(1).split('\n')[0];
+    expect(firstLine).toBe(
+      'activityDate,employeeName,scfhsNumber,category,creditHours,activityNameAr,activityName,provider,accreditationNumber,verified,verifiedAt'
+    );
+  });
 });
 
 describe('/api/admin/beneficiaries/search (Arabic-aware typeahead)', () => {

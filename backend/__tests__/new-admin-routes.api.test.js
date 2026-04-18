@@ -90,6 +90,7 @@ const bearer = r => ({ Authorization: `Bearer ${token(r)}` });
 describe('Route mounting — new sprint routes are registered', () => {
   const GET_ROUTES = [
     '/api/admin/beneficiaries',
+    '/api/admin/beneficiaries/search?q=ahm',
     '/api/admin/therapy-sessions',
     '/api/admin/assessments',
     '/api/admin/care-plans',
@@ -284,6 +285,33 @@ describe('/api/health/metrics/integrations (Prometheus scrape)', () => {
       expect(text).toMatch(new RegExp(`^# HELP ${m} `, 'm'));
       expect(text).toMatch(new RegExp(`^# TYPE ${m} gauge$`, 'm'));
     }
+  });
+});
+
+describe('/api/admin/beneficiaries/search (Arabic-aware typeahead)', () => {
+  it('rejects queries shorter than 2 chars with empty items', async () => {
+    const res = await request(app).get('/api/admin/beneficiaries/search?q=a').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.items).toEqual([]);
+    expect(res.body.note).toMatch(/min 2/);
+  });
+
+  it('returns empty set on empty DB + 200', async () => {
+    const res = await request(app)
+      .get(`/api/admin/beneficiaries/search?q=${encodeURIComponent('احمد')}`)
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.count).toEqual(expect.any(Number));
+  });
+
+  it('accepts Arabic-Indic digits in query', async () => {
+    const res = await request(app)
+      .get(`/api/admin/beneficiaries/search?q=${encodeURIComponent('١٢٣٤')}`)
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
   });
 });
 

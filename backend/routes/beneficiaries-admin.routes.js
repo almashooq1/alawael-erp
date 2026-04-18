@@ -15,6 +15,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Beneficiary = require('../models/Beneficiary');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const { normalize, buildOrClause } = require('../utils/arabicSearch');
 
 router.use(authenticateToken);
 
@@ -92,6 +93,69 @@ router.get('/', requireRole(STAFF_ROLES), async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'beneficiaries.list');
+  }
+});
+
+// ── GET /search — Arabic-aware typeahead (names + IDs) ──────────────────
+// Tuned for receptionist-at-front-desk: they often type ~3 chars and
+// expect the match to survive alef variants (أحمد/احمد), ta-marbuta
+// (فاطمة/فاطمه), and Arabic-Indic digits (١٢٣٤ vs 1234). Returns a
+// compact projection (id + name + dob + phone + status), capped at 20.
+router.get('/search', requireRole(STAFF_ROLES), async (req, res) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    if (q.length < 2) {
+      return res.json({ success: true, items: [], note: 'min 2 chars' });
+    }
+
+    const filter = applyBranchScope(req, {});
+    const normalized = normalize(q);
+
+    // Exact ID matches (beneficiary number, national ID) get priority —
+    // receptionist types the whole ID, not a prefix.
+    const exactId = {
+      $or: [{ beneficiaryNumber: normalized.toUpperCase() }, { nationalId: normalized }],
+    };
+
+    // Arabic/English name prefix across 4 canonical fields
+    const nameOr = buildOrClause(q, [
+      'firstName_ar',
+      'lastName_ar',
+      'firstName',
+      'lastName',
+      'name',
+    ]);
+    // Numeric digits → also try substring match on phone (guardians call in)
+    const digitsOnly = normalized.replace(/\D/g, '');
+    const phoneOr =
+      digitsOnly.length >= 3 ? [{ 'contact.primaryPhone': new RegExp(digitsOnly, 'i') }] : [];
+
+    const combined = {
+      $and: [filter, { $or: [exactId, ...(nameOr || []), ...phoneOr].flat() }],
+    };
+
+    const items = await Beneficiary.find(combined)
+      .limit(20)
+      .select(
+        'firstName firstName_ar lastName lastName_ar beneficiaryNumber dateOfBirth status contact.primaryPhone'
+      )
+      .lean();
+
+    res.json({
+      success: true,
+      items: items.map(b => ({
+        _id: b._id,
+        beneficiaryNumber: b.beneficiaryNumber,
+        name_ar: [b.firstName_ar, b.lastName_ar].filter(Boolean).join(' ') || null,
+        name_en: [b.firstName, b.lastName].filter(Boolean).join(' ') || null,
+        dateOfBirth: b.dateOfBirth,
+        status: b.status,
+        phone: b.contact?.primaryPhone,
+      })),
+      count: items.length,
+    });
+  } catch (err) {
+    return safeError(res, err, 'beneficiaries-admin.search');
   }
 });
 

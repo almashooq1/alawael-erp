@@ -68,6 +68,8 @@ on:
       - 'backend/__tests__/dsar-hash-script.test.js'
       - 'backend/__tests__/build-info-internals.test.js'
       - 'backend/__tests__/safe-error.test.js'
+      - 'backend/__tests__/arabic-search.test.js'
+      - 'backend/utils/arabicSearch.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'

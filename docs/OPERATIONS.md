@@ -44,12 +44,17 @@ Going mock → live for any of the 10 Saudi providers:
    § _Pre-requisites_).
 2. Set the env vars (see `backend/.env.example` — every `{PROVIDER}_*`
    block is documented inline with sensible defaults).
-3. `POST /api/admin/gov-integrations/:provider/test-connection` before
+3. **Run preflight**: `cd backend && npm run preflight`. Exits 0 if
+   every `*_MODE=live` adapter has its full env var set; exits 1 with
+   a per-provider missing-vars list otherwise. Wire this into k8s
+   initContainer / Dockerfile / CI deploy gate so the app never
+   boots half-configured.
+4. `POST /api/admin/gov-integrations/:provider/test-connection` before
    flipping traffic. Must return `ok: true`.
-4. Set `{PROVIDER}_MODE=live` and redeploy.
-5. Watch `/admin/integrations-ops` for the first 5 minutes — the card
+5. Set `{PROVIDER}_MODE=live` and redeploy.
+6. Watch `/admin/integrations-ops` for the first 5 minutes — the card
    should show `mode: live` and `configured: true`.
-6. If anything looks wrong, flip back: `{PROVIDER}_MODE=mock` and redeploy.
+7. If anything looks wrong, flip back: `{PROVIDER}_MODE=mock` and redeploy.
    Mock mode takes over immediately.
 
 ---

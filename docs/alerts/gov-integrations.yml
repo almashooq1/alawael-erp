@@ -56,6 +56,7 @@ groups:
             capacity and has been for 5+ minutes. Investigate whether a cron
             loop or a spike in user activity is behind it. If legitimate,
             raise {{ $labels.provider | upper }}_RL_CAPACITY and redeploy.
+          runbook_url: 'https://docs.alawael.internal/runbooks/gov-adapter-rate-limit.md'
 
       - alert: GovAdapterRateLimitExhausted
         expr: gov_adapter_rate_limit_utilization_percent >= 100
@@ -70,6 +71,7 @@ groups:
             rejected with HTTP 429. This is either a runaway loop or a
             capacity misconfiguration. Check /admin/rate-limits for the
             actor breakdown.
+          runbook_url: 'https://docs.alawael.internal/runbooks/gov-adapter-rate-limit.md'
 
   - name: gov-adapter-config
     interval: 5m
@@ -86,6 +88,7 @@ groups:
             {{ $labels.provider }} is missing required env vars in
             {{ $labels.mode }} mode. All verify calls will return 'unknown'.
             Check /admin/gov-integrations for the list of missing variables.
+          runbook_url: 'https://docs.alawael.internal/runbooks/gov-adapter-misconfigured.md'
 
       - alert: GovAdapterFlippedToLive
         expr: changes(gov_adapter_mode[5m]) > 0 and gov_adapter_mode == 1

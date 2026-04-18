@@ -47,8 +47,10 @@ const CpeRecordSchema = new mongoose.Schema(
       index: true,
     },
 
-    // Credit math
-    creditHours: { type: Number, required: true, min: 0 },
+    // Credit math. Route POST rejects anything <= 0, so mirror the rule
+    // at the model boundary — other write paths (migrations, imports)
+    // shouldn't be able to slip a zero-hour record past validation.
+    creditHours: { type: Number, required: true, min: 0.5 },
 
     // When the activity happened (credits count toward the 5-year window
     // that contains this date)

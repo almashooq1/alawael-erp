@@ -5,6 +5,66 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.8] — 2026-04-18 — Arabic-aware beneficiary search (end-to-end)
+
+A real user-visible fix, not more ops polish. Previously a receptionist
+searching "احمد" would miss every record stored as "أحمد" (hamza form),
+and the picker was a fixed `limit=100/200` eager load that silently
+truncated at medium-sized branches.
+
+### Added
+
+- **Backend**: `backend/utils/arabicSearch.js` — deterministic
+  normalizer that folds alef variants (أ إ آ ٱ → ا), ta marbuta
+  (ة → ه), alef maksura (ى → ي), hamza-on-waw/ya (ؤ ئ → و ي),
+  Arabic-Indic digits (٠-٩ → 0-9), strips tashkeel + tatweel,
+  collapses whitespace. Plus `escapeRegex` + `buildOrClause` helpers.
+  23 unit tests.
+- **Backend**: `GET /api/admin/beneficiaries/search?q=<>` — branch-
+  scoped, min-2-chars, prefix match across 5 name fields, exact
+  match priority for beneficiaryNumber + nationalId, phone-substring
+  match for call-ins. Capped at 20 rows. 4 API smoke tests.
+- **Frontend**: `BeneficiaryTypeahead.jsx` — debounced MUI Autocomplete
+  (250 ms), status chip per row, graceful "min 2 chars" empty state,
+  keeps pre-populated value reachable when editing.
+
+### Changed — wired through every create/edit path
+
+All 6 admin pages that picked a beneficiary migrated off the eager
+load:
+
+| Page                 | Before                          | After                        |
+| -------------------- | ------------------------------- | ---------------------------- |
+| AdminInvoices        | `limit=200` eager load          | BeneficiaryTypeahead         |
+| AdminTherapySessions | `limit=100` eager load          | BeneficiaryTypeahead         |
+| AdminCarePlans       | `limit=200` (kept for name map) | BeneficiaryTypeahead in form |
+| AdminAssessments     | `limit=100` eager load          | BeneficiaryTypeahead         |
+| AdminNphiesClaims    | `limit=200` eager load          | BeneficiaryTypeahead         |
+| AdminClinicalDocs    | `limit=200` × 2 (duplicate bug) | BeneficiaryTypeahead × 2     |
+
+Also dropped a dead-code duplicate `/admin/beneficiaries?limit=200`
+call in AdminClinicalDocs — assigned to an unused `guardianOpts`
+state.
+
+### Tests
+
+Sprint suite: **274 passing** (was 247 at 4.0.7):
+• +23 arabic-search unit tests
+• +4 beneficiary-search API smoke tests
+
+---
+
+## [4.0.7] — 2026-04-18 — Retry-After header + safeError tests
+
+- `utils/safeError.js` sets standard HTTP `Retry-After` (integer
+  seconds, per RFC 9110 §10.2.3) on 429 responses. Axios / Retrofit /
+  browsers auto-backoff without parsing JSON.
+- 7 unit tests for `safeError` covering pass-through, Retry-After
+  set/not-set, 500 fallback, 500-boundary.
+- Sprint suite: **247 passing** (was 240).
+
+---
+
 ## [4.0.6] — 2026-04-18 — Runtime build identity + ship-check
 
 Small additions on top of 4.0.5 that close the 'which commit is

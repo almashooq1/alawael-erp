@@ -20,8 +20,11 @@
 
 'use strict';
 
+const CircuitBreaker = require('./adapterCircuitBreaker');
+
 const MODE = (process.env.ABSHER_MODE || 'mock').toLowerCase();
 const TIMEOUT_MS = parseInt(process.env.ABSHER_TIMEOUT_MS, 10) || 8000;
+const breaker = CircuitBreaker.create({ name: 'absher', maxFailures: 5, cooldownMs: 120_000 });
 
 function validateNationalId(id) {
   return /^[12]\d{9}$/.test(String(id || '').trim());
@@ -107,6 +110,9 @@ async function liveVerify({ nationalId, dateOfBirthHijri, firstName_ar }) {
   if (!validateNationalId(nationalId)) {
     return { status: 'unknown', message: 'رقم هوية غير صالح', mode: 'live' };
   }
+  if (breaker.isOpen()) {
+    return { status: 'unknown', mode: 'live', message: breaker.openMessage, circuitOpen: true };
+  }
   const start = Date.now();
   try {
     const token = await getToken();
@@ -117,10 +123,16 @@ async function liveVerify({ nationalId, dateOfBirthHijri, firstName_ar }) {
       headers: { Authorization: `Bearer ${token}` },
     });
     const latencyMs = Date.now() - start;
-    if (resp.status === 404) return { status: 'not_found', mode: 'live', latencyMs };
-    if (!resp.ok)
+    if (resp.status === 404) {
+      breaker.recordSuccess(); // 404 is a valid answer, not a provider failure
+      return { status: 'not_found', mode: 'live', latencyMs };
+    }
+    if (!resp.ok) {
+      breaker.recordFailure();
       return { status: 'unknown', mode: 'live', message: `HTTP ${resp.status}`, latencyMs };
+    }
     const data = await resp.json();
+    breaker.recordSuccess();
     const nameMatch =
       !firstName_ar || String(data.firstName_ar || '').trim() === String(firstName_ar).trim();
     return {
@@ -133,7 +145,13 @@ async function liveVerify({ nationalId, dateOfBirthHijri, firstName_ar }) {
     if (err.code === 'NOT_CONFIGURED') {
       return { status: 'unknown', mode: 'live', message: err.message };
     }
-    return { status: 'unknown', mode: 'live', message: err?.message || 'فشل الاتصال بـ Absher' };
+    breaker.recordFailure();
+    return {
+      status: 'unknown',
+      mode: 'live',
+      message: err?.message || 'فشل الاتصال بـ Absher',
+      circuitOpen: breaker.isOpen(),
+    };
   }
 }
 
@@ -166,6 +184,7 @@ function getConfig() {
     configured: MODE === 'mock' ? true : missing.length === 0,
     missing: missing.length ? missing : undefined,
     timeoutMs: TIMEOUT_MS,
+    circuit: breaker.snapshot(),
   };
 }
 

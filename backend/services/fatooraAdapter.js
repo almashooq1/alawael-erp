@@ -39,9 +39,12 @@
 
 'use strict';
 
+const CircuitBreaker = require('./adapterCircuitBreaker');
+
 const MODE = (process.env.FATOORA_MODE || 'mock').toLowerCase();
 const TIMEOUT_MS = parseInt(process.env.FATOORA_TIMEOUT_MS, 10) || 12_000;
 const SUBMISSION_TYPE = (process.env.FATOORA_MODE_TYPE || 'reporting').toLowerCase();
+const breaker = CircuitBreaker.create({ name: 'fatoora', maxFailures: 5, cooldownMs: 120_000 });
 
 // ── Mock ────────────────────────────────────────────────────────────────
 async function mockSubmit({ invoice, uuid, invoiceHash }) {
@@ -103,6 +106,14 @@ async function liveSubmit({ invoiceXmlB64, invoiceHash, uuid }) {
   } catch (err) {
     return { status: 'ERROR', mode: 'live', errors: [{ message: err.message }] };
   }
+  if (breaker.isOpen()) {
+    return {
+      status: 'ERROR',
+      mode: 'live',
+      errors: [{ message: breaker.openMessage }],
+      circuitOpen: true,
+    };
+  }
   const base = process.env.FATOORA_BASE_URL;
   const token = process.env.FATOORA_BINARY_TOKEN;
   const endpoint =
@@ -132,6 +143,7 @@ async function liveSubmit({ invoiceXmlB64, invoiceHash, uuid }) {
     // ZATCA returns 200 for ACCEPTED, 202 for ACCEPTED_WITH_WARNINGS,
     // 400 for REJECTED with validationResults
     if (resp.status === 200 || resp.status === 202) {
+      breaker.recordSuccess();
       return {
         status: SUBMISSION_TYPE === 'clearance' ? 'ACCEPTED' : 'REPORTED',
         zatcaReference: data.reportingStatus || data.clearanceStatus || `ZATCA-${uuid.slice(0, 8)}`,
@@ -143,6 +155,7 @@ async function liveSubmit({ invoiceXmlB64, invoiceHash, uuid }) {
       };
     }
     if (resp.status === 400) {
+      breaker.recordSuccess(); // 400 means ZATCA answered — our invoice was wrong, not them
       return {
         status: 'REJECTED',
         errors: data.validationResults?.errorMessages?.map(e => ({
@@ -153,17 +166,21 @@ async function liveSubmit({ invoiceXmlB64, invoiceHash, uuid }) {
         latencyMs,
       };
     }
+    breaker.recordFailure();
     return {
       status: 'ERROR',
       errors: [{ message: `HTTP ${resp.status} — ${data.message || 'unknown'}` }],
       mode: 'live',
       latencyMs,
+      circuitOpen: breaker.isOpen(),
     };
   } catch (err) {
+    breaker.recordFailure();
     return {
       status: 'ERROR',
       errors: [{ message: err?.message || 'فشل الاتصال بـ Fatoora' }],
       mode: 'live',
+      circuitOpen: breaker.isOpen(),
     };
   }
 }
@@ -246,6 +263,7 @@ function getConfig() {
     configured: MODE === 'mock' ? true : missing.length === 0,
     missing: missing.length ? missing : undefined,
     timeoutMs: TIMEOUT_MS,
+    circuit: breaker.snapshot(),
   };
 }
 

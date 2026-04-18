@@ -33,10 +33,15 @@
 
 'use strict';
 
+const CircuitBreaker = require('./adapterCircuitBreaker');
+
 const MODE = (process.env.GOSI_MODE || 'mock').toLowerCase();
 const TIMEOUT_MS = parseInt(process.env.GOSI_TIMEOUT_MS, 10) || 8000;
-const MAX_FAILURES = parseInt(process.env.GOSI_MAX_FAILURES, 10) || 5;
-const COOLDOWN_MS = parseInt(process.env.GOSI_COOLDOWN_MS, 10) || 120_000;
+const breaker = CircuitBreaker.create({
+  name: 'gosi',
+  maxFailures: 5,
+  cooldownMs: 120_000,
+});
 
 function validateNationalId(id) {
   return /^[12]\d{9}$/.test(String(id || '').trim());
@@ -73,36 +78,6 @@ function mockVerify({ nationalId }) {
 // ── Live (production-hardened) ──────────────────────────────────────────
 let cachedToken = null;
 let cachedTokenExpiry = 0;
-
-// Circuit breaker state
-const circuit = {
-  failures: 0,
-  firstFailureAt: 0,
-  openUntil: 0,
-};
-
-function circuitOpen() {
-  return circuit.openUntil > Date.now();
-}
-
-function recordFailure() {
-  const now = Date.now();
-  if (circuit.failures === 0 || now - circuit.firstFailureAt > 60_000) {
-    circuit.firstFailureAt = now;
-    circuit.failures = 1;
-  } else {
-    circuit.failures += 1;
-  }
-  if (circuit.failures >= MAX_FAILURES) {
-    circuit.openUntil = now + COOLDOWN_MS;
-  }
-}
-
-function recordSuccess() {
-  circuit.failures = 0;
-  circuit.firstFailureAt = 0;
-  circuit.openUntil = 0;
-}
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = TIMEOUT_MS) {
   const ctrl = new AbortController();
@@ -218,21 +193,20 @@ async function liveVerifyInner({ nationalId }) {
 }
 
 async function liveVerify(params) {
-  // Circuit breaker check
-  if (circuitOpen()) {
+  if (breaker.isOpen()) {
     return {
       status: 'unknown',
       mode: 'live',
-      message: 'مؤقت: خدمة GOSI غير متاحة (circuit breaker)',
+      message: breaker.openMessage,
       circuitOpen: true,
     };
   }
   try {
     const result = await liveVerifyInner(params);
-    recordSuccess();
+    breaker.recordSuccess();
     return result;
   } catch (err) {
-    recordFailure();
+    breaker.recordFailure();
     if (err.code === 'NOT_CONFIGURED') {
       return { status: 'unknown', mode: 'live', message: err.message };
     }
@@ -240,7 +214,7 @@ async function liveVerify(params) {
       status: 'unknown',
       mode: 'live',
       message: err?.message || 'فشل الاتصال بـ GOSI',
-      circuitOpen: circuitOpen(),
+      circuitOpen: breaker.isOpen(),
     };
   }
 }
@@ -289,11 +263,7 @@ function getConfig() {
     configured: MODE === 'mock' ? true : missing.length === 0,
     missing: missing.length ? missing : undefined,
     timeoutMs: TIMEOUT_MS,
-    circuit: {
-      open: circuitOpen(),
-      failures: circuit.failures,
-      cooldownRemainingMs: Math.max(0, circuit.openUntil - Date.now()),
-    },
+    circuit: breaker.snapshot(),
   };
 }
 

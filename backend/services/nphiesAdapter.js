@@ -26,8 +26,11 @@
 
 'use strict';
 
+const CircuitBreaker = require('./adapterCircuitBreaker');
+
 const MODE = (process.env.NPHIES_MODE || 'mock').toLowerCase();
 const TIMEOUT_MS = parseInt(process.env.NPHIES_TIMEOUT_MS, 10) || 12_000;
+const breaker = CircuitBreaker.create({ name: 'nphies', maxFailures: 5, cooldownMs: 120_000 });
 
 function validateMemberId(id) {
   // CCHI member IDs are 6–20 chars alphanumeric; we accept 3+ so mock
@@ -154,6 +157,9 @@ async function liveEligibility({ memberId, insurerId, serviceDate }) {
   if (!validateMemberId(memberId)) {
     return { status: 'unknown', mode: 'live', message: 'رقم العضوية غير صالح' };
   }
+  if (breaker.isOpen()) {
+    return { status: 'unknown', mode: 'live', message: breaker.openMessage, circuitOpen: true };
+  }
   const start = Date.now();
   try {
     const token = await getToken();
@@ -175,9 +181,15 @@ async function liveEligibility({ memberId, insurerId, serviceDate }) {
     });
     const latencyMs = Date.now() - start;
     const data = await resp.json().catch(() => ({}));
-    if (resp.status === 404) return { status: 'not_covered', mode: 'live', latencyMs };
-    if (!resp.ok)
+    if (resp.status === 404) {
+      breaker.recordSuccess();
+      return { status: 'not_covered', mode: 'live', latencyMs };
+    }
+    if (!resp.ok) {
+      breaker.recordFailure();
       return { status: 'unknown', mode: 'live', message: `HTTP ${resp.status}`, latencyMs };
+    }
+    breaker.recordSuccess();
     const outcomeMap = {
       COVERED: 'eligible',
       NOT_COVERED: 'not_covered',
@@ -198,11 +210,25 @@ async function liveEligibility({ memberId, insurerId, serviceDate }) {
     if (err.code === 'NOT_CONFIGURED') {
       return { status: 'unknown', mode: 'live', message: err.message };
     }
-    return { status: 'unknown', mode: 'live', message: err?.message || 'فشل الاتصال بـ NPHIES' };
+    breaker.recordFailure();
+    return {
+      status: 'unknown',
+      mode: 'live',
+      message: err?.message || 'فشل الاتصال بـ NPHIES',
+      circuitOpen: breaker.isOpen(),
+    };
   }
 }
 
 async function liveSubmitClaim({ memberId, insurerId, services, totalAmount, diagnosis }) {
+  if (breaker.isOpen()) {
+    return {
+      status: 'ERROR',
+      mode: 'live',
+      reason: breaker.openMessage,
+      circuitOpen: true,
+    };
+  }
   const start = Date.now();
   try {
     const token = await getToken();
@@ -226,13 +252,17 @@ async function liveSubmitClaim({ memberId, insurerId, services, totalAmount, dia
     });
     const latencyMs = Date.now() - start;
     const data = await resp.json().catch(() => ({}));
-    if (!resp.ok)
+    if (!resp.ok) {
+      breaker.recordFailure();
       return {
         status: 'ERROR',
         mode: 'live',
         latencyMs,
         reason: data.message || `HTTP ${resp.status}`,
+        circuitOpen: breaker.isOpen(),
       };
+    }
+    breaker.recordSuccess();
     const statusMap = {
       APPROVED: 'APPROVED',
       REJECTED: 'REJECTED',
@@ -253,7 +283,13 @@ async function liveSubmitClaim({ memberId, insurerId, services, totalAmount, dia
     if (err.code === 'NOT_CONFIGURED') {
       return { status: 'ERROR', mode: 'live', reason: err.message };
     }
-    return { status: 'ERROR', mode: 'live', reason: err?.message || 'فشل الإرسال' };
+    breaker.recordFailure();
+    return {
+      status: 'ERROR',
+      mode: 'live',
+      reason: err?.message || 'فشل الإرسال',
+      circuitOpen: breaker.isOpen(),
+    };
   }
 }
 
@@ -291,6 +327,7 @@ function getConfig() {
     configured: MODE === 'mock' ? true : missing.length === 0,
     missing: missing.length ? missing : undefined,
     timeoutMs: TIMEOUT_MS,
+    circuit: breaker.snapshot(),
   };
 }
 

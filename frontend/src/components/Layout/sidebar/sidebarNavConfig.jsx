@@ -1327,6 +1327,13 @@ const getNavigationItems = () => [
         badgeColor: 'warning',
       },
       {
+        id: 'admin-hr-cpe',
+        label: 'ساعات CPE',
+        path: '/admin/hr/cpe',
+        badge: 'CPE',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

@@ -66,6 +66,22 @@ class ApiService {
           }
         }
 
+        // Handle 429 - Rate limited by gov adapter. Body carries
+        // { code: 'RATE_LIMITED', retryAfterMs, scope, provider }.
+        // Auto-retry once after the server-suggested delay, capped at 5s
+        // so we don't block the UI — if still 429, surface a friendly toast.
+        if (error.response?.status === 429 && !originalRequest._rateLimitRetry) {
+          originalRequest._rateLimitRetry = true;
+          const body = (error.response.data || {}) as {
+            retryAfterMs?: number;
+            provider?: string;
+            scope?: string;
+          };
+          const waitMs = Math.min(Math.max(body.retryAfterMs || 1000, 500), 5000);
+          await new Promise(r => setTimeout(r, waitMs));
+          return this.api(originalRequest);
+        }
+
         // Offline support - Queue requests
         if (!this.isOnline && originalRequest.method !== 'get') {
           this.offlineQueue.push({ config: originalRequest, resolve: null, reject: null });
@@ -226,6 +242,19 @@ class ApiService {
   private handleError(error: AxiosError): void {
     if (error.response?.status === 401) {
       this.handleAuthError();
+    } else if (error.response?.status === 429) {
+      // Rate limit toast — the interceptor already auto-retried once.
+      const body = (error.response.data || {}) as {
+        retryAfterMs?: number;
+        provider?: string;
+      };
+      const seconds = body.retryAfterMs ? Math.ceil(body.retryAfterMs / 1000) : 60;
+      showMessage({
+        message: 'تم تجاوز الحد المسموح',
+        description: `المزوّد ${body.provider || 'الحكومي'} يطلب الانتظار ~${seconds} ثانية قبل المحاولة مجددًا.`,
+        type: 'warning',
+        duration: 4000,
+      });
     } else if (!error.response) {
       // Network error
       this.isOnline = false;
@@ -235,7 +264,7 @@ class ApiService {
         type: 'warning',
       });
     } else {
-      const message = error.response?.data?.message || 'An error occurred';
+      const message = (error.response?.data as { message?: string })?.message || 'An error occurred';
       showMessage({
         message: 'Error',
         description: message,

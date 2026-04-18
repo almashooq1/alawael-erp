@@ -1334,6 +1334,13 @@ const getNavigationItems = () => [
         badgeColor: 'error',
       },
       {
+        id: 'admin-rate-limits',
+        label: 'حدود الاستخدام',
+        path: '/admin/rate-limits',
+        badge: 'LIMIT',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-nphies-claims',
         label: 'المطالبات التأمينية (NPHIES)',
         path: '/admin/nphies-claims',

@@ -54,6 +54,7 @@ import TodayIcon from '@mui/icons-material/Today';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import api from '../../services/api.client';
+import BeneficiaryTypeahead from '../../components/BeneficiaryTypeahead';
 
 const STATUS_OPTIONS = [
   { value: '', label: 'كل الحالات' },
@@ -144,8 +145,8 @@ export default function AdminTherapySessions() {
     reason: '',
   });
 
-  // Option sources
-  const [beneficiaryOpts, setBeneficiaryOpts] = useState([]);
+  // Option sources — beneficiary now uses BeneficiaryTypeahead (on-demand
+  // server-side search). Therapist + room still eager-load (smaller sets).
   const [therapistOpts, setTherapistOpts] = useState([]);
   const [roomOpts, setRoomOpts] = useState([]);
 
@@ -159,11 +160,7 @@ export default function AdminTherapySessions() {
         return [];
       }
     };
-    const [b, t, r] = await Promise.all([
-      tryGet('/admin/beneficiaries?limit=100', x => ({
-        id: x._id,
-        label: `${fullName(x)} (${x.beneficiaryNumber || '—'})`,
-      })),
+    const [t, r] = await Promise.all([
       tryGet('/employees?limit=100', x => ({
         id: x._id,
         label: `${fullName(x)} (${x.employeeNumber || x.role || '—'})`,
@@ -173,7 +170,6 @@ export default function AdminTherapySessions() {
         label: x.name || x.code || x._id,
       })),
     ]);
-    setBeneficiaryOpts(b);
     setTherapistOpts(t);
     setRoomOpts(r);
   }, []);
@@ -751,13 +747,28 @@ export default function AdminTherapySessions() {
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <Autocomplete
-                options={beneficiaryOpts}
-                value={form.beneficiary}
-                onChange={(_, v) => setForm(f => ({ ...f, beneficiary: v }))}
-                getOptionLabel={o => o?.label || ''}
-                isOptionEqualToValue={(a, b) => a?.id === b?.id}
-                renderInput={p => <TextField {...p} label="المستفيد *" />}
+              <BeneficiaryTypeahead
+                label="المستفيد *"
+                required
+                value={
+                  form.beneficiary
+                    ? {
+                        _id: form.beneficiary.id,
+                        name_ar: form.beneficiary.label,
+                      }
+                    : null
+                }
+                onChange={v =>
+                  setForm(f => ({
+                    ...f,
+                    beneficiary: v
+                      ? {
+                          id: v._id,
+                          label: v.name_ar || v.name_en || v.beneficiaryNumber || '—',
+                        }
+                      : null,
+                  }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={6}>

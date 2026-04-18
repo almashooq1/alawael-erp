@@ -83,3 +83,5 @@ function humanizeUptime(s) {
 }
 
 module.exports = router;
+// Exposed for tests; not part of the public HTTP surface.
+module.exports._internal = { resolveGitSha, resolveGitShaShort, resolveBuildTime, humanizeUptime };

@@ -33,9 +33,11 @@ on:
       - 'backend/__tests__/ops-artifacts.test.js'
       - 'backend/__tests__/preflight-script.test.js'
       - 'backend/__tests__/dsar-hash-script.test.js'
+      - 'backend/__tests__/build-info-internals.test.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
+      - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
       - 'docs/alerts/**'
       - 'docs/runbooks/**'
@@ -59,9 +61,11 @@ on:
       - 'backend/__tests__/ops-artifacts.test.js'
       - 'backend/__tests__/preflight-script.test.js'
       - 'backend/__tests__/dsar-hash-script.test.js'
+      - 'backend/__tests__/build-info-internals.test.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
+      - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
       - 'docs/alerts/**'
       - 'docs/runbooks/**'
@@ -149,7 +153,7 @@ jobs:
           CSRF_DISABLE: 'true'
 
   ops-subsystems-tests:
-    name: "🛡️ Ops Subsystems (65 tests — rate/circuit/metrics/artifacts/preflight/dsar)"
+    name: "🛡️ Ops Subsystems (82 tests — rate/circuit/metrics/artifacts/preflight/dsar/buildinfo)"
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -212,7 +216,7 @@ jobs:
           echo "  • ZATCA XAdES signer (17 tests):       ${{ needs.signer-tests.result }}"
           echo "  • Gov adapters (10 × state machines):  ${{ needs.adapter-tests.result }}"
           echo "  • Admin API smoke (49 tests):          ${{ needs.api-tests.result }}"
-          echo "  • Ops subsystems (65 tests):           ${{ needs.ops-subsystems-tests.result }}"
+          echo "  • Ops subsystems (82 tests):           ${{ needs.ops-subsystems-tests.result }}"
           echo "  • Demo seed loads:                     ${{ needs.demo-seed-dryrun.result }}"
           echo "═══════════════════════════════════════════════════"
           if [[ "${{ needs.signer-tests.result }}"       != "success" ]] || \
@@ -223,4 +227,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 208 sprint tests green."
+          echo "All 227 sprint tests green."

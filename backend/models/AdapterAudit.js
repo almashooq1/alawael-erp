@@ -67,6 +67,11 @@ const AdapterAuditSchema = new mongoose.Schema(
     // Context
     ipHash: String,
     userAgent: String,
+    // Correlation ID — ties multiple adapter calls made in the same
+    // HTTP request together (e.g. HR onboarding triggers GOSI + SCFHS +
+    // Qiwa + Muqeem in one POST). Populated from req.id (set by
+    // middleware/requestId.middleware.js from X-Request-Id header).
+    correlationId: { type: String, index: true },
     entityRef: {
       // Optional: link to local entity (e.g. employee being verified)
       kind: { type: String, enum: ['Employee', 'Beneficiary', 'Branch', 'Invoice', 'Claim'] },

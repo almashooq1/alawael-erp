@@ -155,6 +155,23 @@ router.get('/stats', requireRole(READ_ROLES), async (req, res) => {
   }
 });
 
+// ── GET /by-correlation/:id — all adapter calls within one HTTP request ─
+// Example: HR onboarding POST fires GOSI + SCFHS + Qiwa + Muqeem in one
+// request. Querying by correlationId surfaces all four rows together —
+// useful for PDPL DSAR, debugging cascade failures, or replaying flows.
+router.get('/by-correlation/:id', requireRole(READ_ROLES), async (req, res) => {
+  try {
+    const id = String(req.params.id).slice(0, 128);
+    const items = await AdapterAudit.find({ correlationId: id })
+      .sort({ createdAt: 1 }) // chronological — order of calls matters
+      .limit(200)
+      .lean();
+    res.json({ success: true, correlationId: id, items, count: items.length });
+  } catch (err) {
+    return safeError(res, err, 'adapter-audit.byCorrelation');
+  }
+});
+
 // ── GET /by-entity — trail for a specific local record ──────────────────
 router.get('/by-entity', requireRole(READ_ROLES), async (req, res) => {
   try {

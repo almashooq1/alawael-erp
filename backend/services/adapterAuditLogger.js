@@ -84,6 +84,7 @@ async function record(entry) {
       errorMessage: entry.errorMessage,
       ipHash: entry.ipHash,
       userAgent: entry.userAgent ? String(entry.userAgent).slice(0, 200) : undefined,
+      correlationId: entry.correlationId,
       entityRef: entry.entityRef,
     };
     // Non-blocking write
@@ -129,6 +130,7 @@ async function wrap(context, fn) {
         errorMessage: rl.reason,
         ipHash: context.req ? hashIp(context.req.ip) : undefined,
         userAgent: context.req?.get?.('user-agent'),
+        correlationId: context.correlationId || context.req?.id,
         entityRef: context.entityRef,
       }).catch(() => {
         /* ignore */

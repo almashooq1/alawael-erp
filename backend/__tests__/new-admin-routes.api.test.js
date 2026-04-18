@@ -101,6 +101,7 @@ describe('Route mounting — new sprint routes are registered', () => {
     '/api/admin/gov-integrations/circuits',
     '/api/admin/adapter-audit',
     '/api/admin/adapter-audit/stats',
+    '/api/admin/adapter-audit/by-correlation/none',
     '/api/admin/nphies-claims',
     '/api/admin/branch-compliance/overview',
     '/api/admin/bi/overview',
@@ -361,6 +362,37 @@ describe('/api/admin/adapter-audit', () => {
     expect(Array.isArray(res.body.topActors)).toBe(true);
     expect(res.body).toHaveProperty('total');
     expect(res.body).toHaveProperty('last30days');
+  });
+
+  it('by-correlation returns empty set for unknown id + valid shape', async () => {
+    const res = await request(app)
+      .get('/api/admin/adapter-audit/by-correlation/unknown-id-xyz')
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.correlationId).toBe('unknown-id-xyz');
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.items.length).toBe(0);
+  });
+
+  it('records written with correlationId surface via /by-correlation', async () => {
+    const audit = require('../services/adapterAuditLogger');
+    const CID = 'test-cid-' + Date.now();
+    await audit.record({
+      provider: 'gosi',
+      operation: 'verify',
+      status: 'active',
+      latencyMs: 99,
+      correlationId: CID,
+    });
+    // Wait briefly since record() is fire-and-forget to Mongo
+    await new Promise(r => setTimeout(r, 100));
+    const res = await request(app)
+      .get(`/api/admin/adapter-audit/by-correlation/${CID}`)
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.items.length).toBeGreaterThanOrEqual(1);
+    expect(res.body.items[0].correlationId).toBe(CID);
   });
 
   it('by-entity requires entityKind + entityId', async () => {

@@ -17,6 +17,7 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | Workflow                                | Runbook                                        |
 | --------------------------------------- | ---------------------------------------------- |
 | PDPL Data Subject Access Request (DSAR) | [dsar-adapter-audit.md](dsar-adapter-audit.md) |
+| SCFHS CPE credit attention (HR)         | [cpe-attention.md](cpe-attention.md)           |
 
 ## How to use
 

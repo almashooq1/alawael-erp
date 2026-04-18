@@ -36,6 +36,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
   const CarePlan = require('../models/CarePlan');
   const Invoice = require('../models/Invoice');
   const NphiesClaim = require('../models/NphiesClaim');
+  const CpeRecord = require('../models/CpeRecord');
 
   const gosi = require('../services/gosiAdapter');
   const scfhs = require('../services/scfhsAdapter');
@@ -316,6 +317,139 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     }
     await emp.save();
     employees.push(emp);
+  }
+
+  // ── CPE records — spread three compliance verdicts across the roster ─
+  //   emp-1 Ahmed (scfhs 12345): compliant (all mins met + total 105)
+  //   emp-2 Noura (scfhs 23456): needs-attention (cat-2 short by 10, 4 months left)
+  //   emp-3 Khaled (scfhs 34560): non-compliant + overdue (empty)
+  //   emp-4 Mona   (scfhs 45679): empty (suspended license — out of scope)
+  //   emp-5 Anjali (scfhs 56789): partial — only cat-1 met
+  // Unverified records on emp-1 exercise the "verified-only counts" rule.
+  const cpeSpecs = [
+    // Ahmed — compliant: 60/30/20 verified + 15 unverified (ignored)
+    {
+      empIdx: 0,
+      cat: '1',
+      hours: 30,
+      daysAgo: 120,
+      verified: true,
+      name: 'مؤتمر العلاج الطبيعي السعودي 2025',
+      provider: 'SPTA',
+    },
+    {
+      empIdx: 0,
+      cat: '1',
+      hours: 30,
+      daysAgo: 400,
+      verified: true,
+      name: 'دورة التأهيل الحركي المتقدّم',
+      provider: 'SCFHS',
+    },
+    {
+      empIdx: 0,
+      cat: '2',
+      hours: 30,
+      daysAgo: 60,
+      verified: true,
+      name: 'قراءات ذاتية موثّقة',
+      provider: 'Self',
+    },
+    {
+      empIdx: 0,
+      cat: '3',
+      hours: 20,
+      daysAgo: 200,
+      verified: true,
+      name: 'إشراف على طلاب الامتياز',
+      provider: 'KSU',
+    },
+    {
+      empIdx: 0,
+      cat: '2',
+      hours: 15,
+      daysAgo: 10,
+      verified: false,
+      name: 'ورشة ذاتية بانتظار الاعتماد',
+      provider: 'Self',
+    },
+    // Noura — needs attention: cat-2 short by 10h, scfhs_expiry ~4 months out
+    {
+      empIdx: 1,
+      cat: '1',
+      hours: 55,
+      daysAgo: 90,
+      verified: true,
+      name: 'مؤتمر الأطفال ذوي الاحتياجات',
+      provider: 'KSA-OT',
+    },
+    {
+      empIdx: 1,
+      cat: '2',
+      hours: 20,
+      daysAgo: 45,
+      verified: true,
+      name: 'نشاط ذاتي',
+      provider: 'Self',
+    },
+    {
+      empIdx: 1,
+      cat: '3',
+      hours: 22,
+      daysAgo: 30,
+      verified: true,
+      name: 'تدريب في الموقع',
+      provider: 'Al-Awael',
+    },
+    // Anjali — partial: cat-1 met, others short
+    {
+      empIdx: 4,
+      cat: '1',
+      hours: 55,
+      daysAgo: 180,
+      verified: true,
+      name: 'International Pediatric Therapy Summit',
+      provider: 'IPTS',
+    },
+    {
+      empIdx: 4,
+      cat: '2',
+      hours: 10,
+      daysAgo: 90,
+      verified: true,
+      name: 'Online evidence-based practice module',
+      provider: 'Coursera',
+    },
+  ];
+
+  // Put Noura's cycle end 4 months out so needsAttention() fires.
+  if (employees[1]) {
+    employees[1].scfhs_expiry = new Date(Date.now() + 120 * 24 * 60 * 60 * 1000);
+    await employees[1].save();
+  }
+
+  for (const spec of cpeSpecs) {
+    const target = employees[spec.empIdx];
+    if (!target) continue;
+    const existing = await CpeRecord.findOne({
+      employeeId: target._id,
+      activityName: spec.name,
+    });
+    if (existing) continue;
+    await CpeRecord.create({
+      employeeId: target._id,
+      activityName: spec.name,
+      activityNameAr: spec.name,
+      provider: spec.provider,
+      category: spec.cat,
+      creditHours: spec.hours,
+      activityDate: new Date(Date.now() - spec.daysAgo * 24 * 60 * 60 * 1000),
+      verified: spec.verified,
+      verifiedAt: spec.verified
+        ? new Date(Date.now() - spec.daysAgo * 24 * 60 * 60 * 1000)
+        : undefined,
+    });
+    bump('cpeRecords');
   }
 
   // ── Guardian users + Guardian records ─────────────────────────────────

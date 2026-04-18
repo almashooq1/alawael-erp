@@ -16,7 +16,8 @@ SHELL := /bin/bash
 
 # ── Phony declarations — targets that don't produce files ─────────────
 .PHONY: help ops-check ops-check-json preflight preflight-prod \
-        dsar-hash sprint-tests ops-subsystems-tests ship-check \
+        dsar-hash cpe-attention cpe-attention-json \
+        sprint-tests ops-subsystems-tests ship-check \
         demo-seed demo-seed-dry \
         install backend-install frontend-install mobile-install \
         backend-dev frontend-dev lint audit
@@ -47,6 +48,12 @@ preflight-prod: ## CI mode — compact stderr only (wire into k8s initContainer)
 
 dsar-hash: ## Compute SHA-256 targetHash for DSAR queries (pass ID=...)
 	@cd backend && node scripts/dsar-hash.js $(ID)
+
+cpe-attention: ## SCFHS CPE compliance digest — exits 1 if HR needs to act
+	@cd backend && npm run cpe:attention --silent
+
+cpe-attention-json: ## Same, machine-readable JSON (pipe into #hr-compliance)
+	@cd backend && npm run cpe:attention:json --silent
 
 # ─── Tests ─────────────────────────────────────────────────────────────
 sprint-tests: ## Run the 201-test sprint CI gate

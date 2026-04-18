@@ -19,6 +19,7 @@ Pick the level that fits what you're asking:
 | "Is anything drifting?" (human view)  | `/admin/integrations-ops` (web UI)     | admin |
 | "Full state including PDPL trail"     | `/admin/adapter-audit`                 | admin |
 | "CLI snapshot for cron/SSH"           | `npm run gov:status` (exit 0/1/2)      | shell |
+| "Which therapists are missing CPE?"   | `npm run cpe:attention` (exit 0/1/2)   | shell |
 | "Which commit is serving this?"       | `GET /api/build-info`                  | no    |
 
 ---
@@ -30,6 +31,7 @@ Pick the level that fits what you're asking:
 | Alert: `GovAdapterCircuitOpen`             | [gov-adapter-circuit.md](runbooks/gov-adapter-circuit.md)             |
 | Alert: `GovAdapterRateLimit*`              | [gov-adapter-rate-limit.md](runbooks/gov-adapter-rate-limit.md)       |
 | Alert: `GovAdapterMisconfigured`           | [gov-adapter-misconfigured.md](runbooks/gov-adapter-misconfigured.md) |
+| `cpe:attention` cron digest non-empty      | [cpe-attention.md](runbooks/cpe-attention.md) (HR workflow)           |
 | Parent complaining "app says busy/429"     | Check `/admin/rate-limits` — likely a runaway cron                    |
 | DPO asks "what did user X access?"         | `/admin/adapter-audit?actorEmail=X` → CSV export                      |
 | "Compliance wants full trace of request Y" | `/admin/adapter-audit/by-correlation/Y`                               |

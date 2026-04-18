@@ -139,6 +139,25 @@ describe('10-provider registry consistency', () => {
     }
   });
 
+  it('no orphan {something}Adapter.js files outside the EXPECTED list', () => {
+    // Catches typos (gsiAdapter.js) + half-renamed files left behind
+    // (oldGosiAdapter.js). If a real NEW provider is added, add it to
+    // EXPECTED and the other eight touchpoints — don't grandfather it
+    // in by relaxing this test.
+    const servicesDir = path.join(__dirname, '..', 'services');
+    const files = fs.readdirSync(servicesDir).filter(f => /Adapter\.js$/.test(f));
+    const allowed = new Set([
+      ...EXPECTED.map(n => `${n}Adapter.js`),
+      // Non-gov-adapter files that happen to end in 'Adapter.js':
+      'adapterAuditLogger.js',
+      'adapterRateLimiter.js',
+      'adapterCircuitBreaker.js',
+      'adapterMetricsRegistry.js',
+    ]);
+    const orphans = files.filter(f => !allowed.has(f));
+    expect(orphans).toEqual([]);
+  });
+
   it('AdapterAudit.provider enum covers every expected provider + zatca-signer', () => {
     // Mongoose enum validation rejects any insert whose provider isn't
     // in this list. If someone renames an adapter without updating the

@@ -1,0 +1,384 @@
+{
+  "info": {
+    "name": "Al-Awael Sprint 2026-04 — Rehab Core + Gov Integrations",
+    "description": "Covers the 20 backend modules shipped in the 2026-04-17/18 sprint: admin CRUD for beneficiaries/sessions/assessments/care-plans/invoices/claims/docs, the 10 Saudi government adapters, the public health aggregator, Nafath SSO, and the parent/therapist portals.\n\nAll requests assume:\n- `{{baseUrl}}` = http://localhost:3001/api (dev) or https://api.yourdomain.com/api (prod)\n- `{{token}}` = a valid JWT (get one via Nafath SSO or the password login endpoint)\n\nSeed the demo data first: `cd backend && npm run seed:demo:reset`. Then login as `parent.mohammed@demo.alawael.com` / `Demo@2026` (parent) or `therapist.ahmed@demo.alawael.com` / `Demo@2026` (therapist).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api" },
+    { "key": "token", "value": "" },
+    { "key": "invoiceId", "value": "" },
+    { "key": "claimId", "value": "" },
+    { "key": "sessionId", "value": "" },
+    { "key": "childId", "value": "" },
+    { "key": "employeeId", "value": "" },
+    { "key": "branchId", "value": "" },
+    { "key": "conversationId", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Health (public, unauth)",
+      "item": [
+        {
+          "name": "GET /health/integrations (full)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health/integrations", "auth": { "type": "noauth" } }
+        },
+        {
+          "name": "GET /health/integrations/summary",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health/integrations/summary", "auth": { "type": "noauth" } }
+        },
+        {
+          "name": "GET /health/integrations/:provider",
+          "request": { "method": "GET", "url": "{{baseUrl}}/health/integrations/gosi", "auth": { "type": "noauth" } }
+        }
+      ]
+    },
+    {
+      "name": "Auth — Nafath SSO",
+      "item": [
+        {
+          "name": "POST /auth/nafath/initiate",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/nafath/initiate",
+            "auth": { "type": "noauth" },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nationalId\": \"1234567890\",\n  \"purpose\": \"login\"\n}" },
+            "description": "Returns requestId + 2-digit randomNumber. Suffix 99 → rejected, 88 → expired, else approved (mock mode)."
+          }
+        },
+        {
+          "name": "GET /auth/nafath/status/:requestId",
+          "request": { "method": "GET", "url": "{{baseUrl}}/auth/nafath/status/<requestId>", "auth": { "type": "noauth" } }
+        },
+        {
+          "name": "POST /auth/nafath/cancel/:requestId",
+          "request": { "method": "POST", "url": "{{baseUrl}}/auth/nafath/cancel/<requestId>", "auth": { "type": "noauth" } }
+        }
+      ]
+    },
+    {
+      "name": "Gov Integrations Control Panel",
+      "item": [
+        {
+          "name": "GET /admin/gov-integrations/status",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/gov-integrations/status" }
+        },
+        {
+          "name": "POST /:provider/test-connection",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/gov-integrations/gosi/test-connection",
+            "description": "Replace `gosi` with any of: scfhs, absher, qiwa, nafath, fatoora, muqeem, nphies, wasel, balady"
+          }
+        },
+        {
+          "name": "POST /:provider/verify-sample",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/gov-integrations/scfhs/verify-sample",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"licenseNumber\": \"12345\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Branches + Compliance",
+      "item": [
+        { "name": "GET /branches", "request": { "method": "GET", "url": "{{baseUrl}}/branches?limit=50" } },
+        {
+          "name": "GET /admin/branch-compliance/overview",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/branch-compliance/overview" }
+        },
+        {
+          "name": "POST /:branchId/verify-balady",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/branch-compliance/{{branchId}}/verify-balady" }
+        },
+        {
+          "name": "POST /:branchId/verify-wasel",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/branch-compliance/{{branchId}}/verify-wasel" }
+        },
+        {
+          "name": "POST /verify-batch (admin only)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/branch-compliance/verify-batch",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"scope\": \"both\" }" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "HR Compliance",
+      "item": [
+        { "name": "GET /admin/hr/compliance/overview", "request": { "method": "GET", "url": "{{baseUrl}}/admin/hr/compliance/overview" } },
+        {
+          "name": "GET /:employeeId/status",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/hr/compliance/{{employeeId}}/status" }
+        },
+        {
+          "name": "POST /:id/verify-gosi",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/hr/compliance/{{employeeId}}/verify-gosi" }
+        },
+        {
+          "name": "POST /:id/verify-scfhs",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/hr/compliance/{{employeeId}}/verify-scfhs" }
+        },
+        {
+          "name": "POST /:id/verify-qiwa",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/hr/compliance/{{employeeId}}/verify-qiwa" }
+        },
+        {
+          "name": "POST /:id/verify-muqeem",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/hr/compliance/{{employeeId}}/verify-muqeem" }
+        }
+      ]
+    },
+    {
+      "name": "Beneficiaries",
+      "item": [
+        { "name": "GET /admin/beneficiaries", "request": { "method": "GET", "url": "{{baseUrl}}/admin/beneficiaries?limit=50" } },
+        { "name": "GET /admin/beneficiaries/stats", "request": { "method": "GET", "url": "{{baseUrl}}/admin/beneficiaries/stats" } },
+        { "name": "GET /admin/beneficiaries/:id", "request": { "method": "GET", "url": "{{baseUrl}}/admin/beneficiaries/{{childId}}" } }
+      ]
+    },
+    {
+      "name": "Therapy Sessions",
+      "item": [
+        { "name": "GET /admin/therapy-sessions", "request": { "method": "GET", "url": "{{baseUrl}}/admin/therapy-sessions?limit=50" } },
+        { "name": "GET /admin/therapy-sessions/stats", "request": { "method": "GET", "url": "{{baseUrl}}/admin/therapy-sessions/stats" } },
+        {
+          "name": "GET /admin/therapy-sessions/calendar",
+          "request": { "method": "GET", "url": "{{baseUrl}}/admin/therapy-sessions/calendar" }
+        },
+        {
+          "name": "POST /admin/therapy-sessions/conflicts (pre-check)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/therapy-sessions/conflicts",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"therapist\": \"<employeeId>\",\n  \"date\": \"2026-04-20\",\n  \"startTime\": \"10:00\",\n  \"endTime\": \"11:00\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices + ZATCA",
+      "item": [
+        { "name": "GET /admin/invoices", "request": { "method": "GET", "url": "{{baseUrl}}/admin/invoices?limit=50" } },
+        {
+          "name": "POST /admin/invoices (create draft)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/invoices",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"beneficiary\": \"<beneficiaryId>\",\n  \"items\": [\n    { \"description\": \"جلسة علاج طبيعي\", \"quantity\": 5, \"unitPrice\": 300 }\n  ],\n  \"taxRate\": 0.15\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /:id/issue (build ZATCA envelope)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/invoices/{{invoiceId}}/issue" }
+        },
+        {
+          "name": "POST /:id/submit-to-zatca (Fatoora)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/invoices/{{invoiceId}}/submit-to-zatca" }
+        },
+        {
+          "name": "POST /:id/pay",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/invoices/{{invoiceId}}/pay",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"paymentMethod\": \"CASH\" }" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "NPHIES Claims",
+      "item": [
+        { "name": "GET /admin/nphies-claims", "request": { "method": "GET", "url": "{{baseUrl}}/admin/nphies-claims?limit=50" } },
+        {
+          "name": "POST /admin/nphies-claims/eligibility (quick check)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/nphies-claims/eligibility",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"memberId\": \"BUPA001\" }" }
+          }
+        },
+        {
+          "name": "POST /admin/nphies-claims (create)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/nphies-claims",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"beneficiary\": \"<beneficiaryId>\",\n  \"memberId\": \"BUPA001\",\n  \"insurerName\": \"بوبا العربية\",\n  \"serviceDate\": \"2026-04-18\",\n  \"diagnosis\": [{ \"code\": \"F84.0\", \"description\": \"ASD\" }],\n  \"services\": [{ \"code\": \"ST001\", \"description\": \"جلسة\", \"quantity\": 1, \"unitPrice\": 500 }]\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /:id/check-eligibility",
+          "request": { "method": "POST", "url": "{{baseUrl}}/admin/nphies-claims/{{claimId}}/check-eligibility" }
+        },
+        { "name": "POST /:id/submit", "request": { "method": "POST", "url": "{{baseUrl}}/admin/nphies-claims/{{claimId}}/submit" } }
+      ]
+    },
+    {
+      "name": "BI Analytics",
+      "item": [
+        { "name": "GET /admin/bi/overview", "request": { "method": "GET", "url": "{{baseUrl}}/admin/bi/overview" } },
+        { "name": "GET /admin/bi/sessions?days=30", "request": { "method": "GET", "url": "{{baseUrl}}/admin/bi/sessions?days=30" } },
+        { "name": "GET /admin/bi/beneficiaries", "request": { "method": "GET", "url": "{{baseUrl}}/admin/bi/beneficiaries" } },
+        { "name": "GET /admin/bi/goals", "request": { "method": "GET", "url": "{{baseUrl}}/admin/bi/goals" } },
+        { "name": "GET /admin/bi/branches", "request": { "method": "GET", "url": "{{baseUrl}}/admin/bi/branches" } }
+      ]
+    },
+    {
+      "name": "Parent Portal v2 (parent token required)",
+      "item": [
+        { "name": "GET /parent-v2/me", "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/me" } },
+        { "name": "GET /parent-v2/children", "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children" } },
+        {
+          "name": "GET /parent-v2/children/:id/overview",
+          "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children/{{childId}}/overview" }
+        },
+        {
+          "name": "GET /parent-v2/children/:id/sessions",
+          "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children/{{childId}}/sessions?scope=upcoming" }
+        },
+        {
+          "name": "GET /parent-v2/children/:id/care-plan",
+          "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children/{{childId}}/care-plan" }
+        },
+        {
+          "name": "GET /parent-v2/children/:id/assessments",
+          "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children/{{childId}}/assessments" }
+        },
+        {
+          "name": "GET /parent-v2/children/:id/attendance",
+          "request": { "method": "GET", "url": "{{baseUrl}}/parent-v2/children/{{childId}}/attendance" }
+        }
+      ]
+    },
+    {
+      "name": "Therapist Workbench (therapist token required)",
+      "item": [
+        { "name": "GET /therapist-workbench/me", "request": { "method": "GET", "url": "{{baseUrl}}/therapist-workbench/me" } },
+        { "name": "GET /therapist-workbench/today", "request": { "method": "GET", "url": "{{baseUrl}}/therapist-workbench/today" } },
+        { "name": "GET /therapist-workbench/week", "request": { "method": "GET", "url": "{{baseUrl}}/therapist-workbench/week" } },
+        { "name": "GET /therapist-workbench/caseload", "request": { "method": "GET", "url": "{{baseUrl}}/therapist-workbench/caseload" } },
+        {
+          "name": "POST /session/:id/check-in",
+          "request": { "method": "POST", "url": "{{baseUrl}}/therapist-workbench/session/{{sessionId}}/check-in" }
+        },
+        {
+          "name": "PATCH /session/:id/notes (SOAP)",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/therapist-workbench/session/{{sessionId}}/notes",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": {\n    \"subjective\": \"الطفل متعاون\",\n    \"objective\": \"تحسُّن في المهارات الحركية الدقيقة\",\n    \"assessment\": \"تقدُّم جيد\",\n    \"plan\": \"استمرار + زيادة التحدي\"\n  },\n  \"rating\": 4\n}"
+            }
+          }
+        },
+        {
+          "name": "POST /session/:id/complete",
+          "request": { "method": "POST", "url": "{{baseUrl}}/therapist-workbench/session/{{sessionId}}/complete" }
+        }
+      ]
+    },
+    {
+      "name": "Chat v2",
+      "item": [
+        { "name": "GET /chat-v2/conversations", "request": { "method": "GET", "url": "{{baseUrl}}/chat-v2/conversations" } },
+        { "name": "GET /chat-v2/contacts", "request": { "method": "GET", "url": "{{baseUrl}}/chat-v2/contacts" } },
+        {
+          "name": "POST /chat-v2/conversations (find-or-create)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chat-v2/conversations",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"withUserId\": \"<userId>\" }" }
+          }
+        },
+        {
+          "name": "GET /:id/messages",
+          "request": { "method": "GET", "url": "{{baseUrl}}/chat-v2/conversations/{{conversationId}}/messages" }
+        },
+        {
+          "name": "POST /:id/messages (send)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/chat-v2/conversations/{{conversationId}}/messages",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"text\": \"مرحباً\" }" }
+          }
+        },
+        {
+          "name": "POST /:id/read (mark read)",
+          "request": { "method": "POST", "url": "{{baseUrl}}/chat-v2/conversations/{{conversationId}}/read" }
+        }
+      ]
+    },
+    {
+      "name": "Telehealth v2",
+      "item": [
+        { "name": "GET /telehealth-v2/my/upcoming", "request": { "method": "GET", "url": "{{baseUrl}}/telehealth-v2/my/upcoming" } },
+        {
+          "name": "GET /telehealth-v2/sessions/:id",
+          "request": { "method": "GET", "url": "{{baseUrl}}/telehealth-v2/sessions/{{sessionId}}" }
+        },
+        {
+          "name": "POST /sessions/:id/create-room",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/telehealth-v2/sessions/{{sessionId}}/create-room",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{ \"provider\": \"jitsi\" }" }
+          }
+        },
+        {
+          "name": "POST /sessions/:id/join",
+          "request": { "method": "POST", "url": "{{baseUrl}}/telehealth-v2/sessions/{{sessionId}}/join" }
+        },
+        { "name": "POST /sessions/:id/end", "request": { "method": "POST", "url": "{{baseUrl}}/telehealth-v2/sessions/{{sessionId}}/end" } }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "POST /notify (single)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/notify",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+966501234567\",\n  \"channels\": [\"auto\"],\n  \"body\": \"مرحباً من مراكز الأوائل\"\n}"
+            }
+          }
+        },
+        { "name": "GET /notify/logs", "request": { "method": "GET", "url": "{{baseUrl}}/notify/logs?limit=50" } },
+        { "name": "GET /notify/stats", "request": { "method": "GET", "url": "{{baseUrl}}/notify/stats" } }
+      ]
+    }
+  ]
+}

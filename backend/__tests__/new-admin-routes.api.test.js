@@ -278,3 +278,66 @@ describe('/api/chat-v2', () => {
 // (see backend/startup/middleware.js), which short-circuits token
 // verification — that makes negative role tests impossible to write
 // here without disabling a test-mode bypass that other suites rely on.
+
+// ═══════════════════════════════════════════════════════════════════════
+// Public health aggregator (unauth)
+// ═══════════════════════════════════════════════════════════════════════
+describe('/api/health/integrations — public health aggregator', () => {
+  it('GET /summary returns overall ok in mock mode (no auth)', async () => {
+    const res = await request(app).get('/api/health/integrations/summary');
+    expect(res.status).toBe(200);
+    expect(res.body.overall).toBe('ok');
+    expect(res.body.total).toBeGreaterThanOrEqual(10);
+    expect(res.body.ok).toBe(res.body.total);
+    expect(res.body.mock).toBe(res.body.total);
+    expect(res.body.live).toBe(0);
+    expect(Array.isArray(res.body.misconfigured)).toBe(true);
+    expect(res.body.misconfigured).toHaveLength(0);
+    expect(Array.isArray(res.body.circuitOpen)).toBe(true);
+  });
+
+  it('GET / returns all adapter entries', async () => {
+    const res = await request(app).get('/api/health/integrations');
+    expect(res.status).toBe(200);
+    expect(res.body.overall).toBe('ok');
+    const providers = res.body.providers || {};
+    [
+      'gosi',
+      'scfhs',
+      'absher',
+      'qiwa',
+      'nafath',
+      'fatoora',
+      'muqeem',
+      'nphies',
+      'wasel',
+      'balady',
+      'zatca-signer',
+    ].forEach(key => {
+      expect(providers[key]).toBeDefined();
+      expect(providers[key].mode).toBe('mock');
+      expect(providers[key].configured).toBe(true);
+    });
+  });
+
+  it('GET /:provider returns single adapter health', async () => {
+    const res = await request(app).get('/api/health/integrations/gosi');
+    expect(res.status).toBe(200);
+    expect(res.body.provider).toBe('gosi');
+    expect(res.body.mode).toBe('mock');
+    expect(res.body.configured).toBe(true);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.circuit).toBeDefined();
+  });
+
+  it('GET /:provider for unknown provider returns 404', async () => {
+    const res = await request(app).get('/api/health/integrations/not-a-real-provider');
+    expect(res.status).toBe(404);
+  });
+
+  it('health endpoints require no auth', async () => {
+    // No Authorization header — should still succeed
+    const res = await request(app).get('/api/health/integrations/summary');
+    expect(res.status).toBe(200);
+  });
+});

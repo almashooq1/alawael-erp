@@ -97,6 +97,16 @@ function setupHealthProbes(app, { isTestEnv, isProd }) {
       endpoints: { health: '/health', readiness: '/readiness', api: '/api', docs: '/api-docs' },
     });
   });
+
+  // Gov integrations health aggregator — public, before any auth.
+  // Endpoints: /api/health/integrations, /summary, /:provider
+  try {
+    const integrationsHealth = require('../routes/integrations-health.routes');
+    app.use('/api/health/integrations', integrationsHealth);
+  } catch (err) {
+    // Logger is available via app.locals if setup earlier; best-effort
+    console.warn('[HealthProbes] integrations aggregator skipped:', err?.message);
+  }
 }
 
 module.exports = { setupHealthProbes };

@@ -5,6 +5,51 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.4] — 2026-04-18 — Docs, runbooks, CI widening
+
+Closes the 4.0.x arc by packaging everything into a shape ops/on-call
+can actually consume, and widens the CI gate to cover the new
+subsystems.
+
+### Added
+
+- `frontend/components/IntegrationsHealthBadge.jsx` — 60s-poll status
+  chip embedded in `/admin` landing page header. Green/amber/red with
+  tooltip naming misbehaving providers, click-through to
+  `/admin/integrations-ops`.
+- `docs/runbooks/README.md` — alert→runbook mapping table.
+- `docs/runbooks/gov-adapter-rate-limit.md` — 4 diagnosis cases for
+  rate-limit saturation (runaway cron / legitimate spike / noisy
+  actor / capacity misconfig).
+- `docs/runbooks/gov-adapter-misconfigured.md` — 4 cases for missing
+  env vars (rotated secret / config drift / manual unset / fresh env).
+- 3 new SLI panels in `gov-integrations.grafana.json`: stacked request
+  rate by status, 5m success rate with color bands, p50/p95/p99 latency
+  overlay.
+- 2 new SLI alert rules (`GovAdapterSuccessRateLow`,
+  `GovAdapterLatencyP95High`).
+- Observability section in `GOV_INTEGRATIONS_GO_LIVE.md` with scrape
+  config, metric catalog, and PromQL recipes.
+- 8 new Postman requests in "Ops — Integrations" folder (rate limits
+  snapshot/reset, circuits snapshot/reset, audit list/stats/by-entity/
+  CSV export) + Prometheus endpoint in Health folder.
+
+### Changed
+
+- `sprint-tests.yml`: new `ops-subsystems-tests` job runs the 4 new
+  suites (rate limiter / circuit breaker / live-path / metrics registry)
+  as a hard CI gate. Path triggers widened to include the new test
+  files + `utils/safeError.js`. Summary now reports 182 tests across
+  5 jobs.
+- `backend/package.json`: `test:sprint` covers all 7 sprint suites;
+  new `test:ops-subsystems` script for the 4 ops-layer suites.
+- `runbook_url` annotations added to rate-limit + misconfigured
+  alert rules (circuit already had one).
+
+Sprint suite: **182/182 passing** — all gated in CI.
+
+---
+
 ## [4.0.3] — 2026-04-18 — Reliability + observability hardening
 
 Every cost-critical adapter now has a circuit breaker, every subsystem

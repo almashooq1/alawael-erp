@@ -1,9 +1,12 @@
 # ════════════════════════════════════════════════════════════════════
 #  Sprint tests — hard gate for the 2026-04-17/18 module suite.
 #
-#  Runs the 100 deterministic tests (74 gov-adapter unit + 26 API
-#  smoke) that lock in the state machines for the 10 Saudi government
-#  integrations and the 15 new admin routes.
+#  Runs the 182 deterministic tests across 7 suites that lock in:
+#    • 10 Saudi gov-adapter state machines + ZATCA XAdES signer
+#    • 15 admin routes (mount + auth + happy-path + CSV + Prometheus)
+#    • 4.0.1–4.0.3 ops subsystems (rate limits, circuit breakers,
+#      metrics registry) including a live-path integration test that
+#      proves the breaker trips correctly in Absher/NPHIES/Fatoora.
 #
 #  Unlike ci.yml, this workflow FAILS the build on regression — no
 #  `|| echo warning` escape. A broken state machine or a route that
@@ -18,10 +21,15 @@ on:
       - 'backend/services/**'
       - 'backend/routes/**'
       - 'backend/models/**'
+      - 'backend/utils/safeError.js'
       - 'backend/middleware/auth.js'
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
+      - 'backend/__tests__/adapter-rate-limiter.test.js'
+      - 'backend/__tests__/adapter-circuit-breaker.test.js'
+      - 'backend/__tests__/adapter-circuit-live-path.test.js'
+      - 'backend/__tests__/adapter-metrics-registry.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   pull_request:
@@ -30,10 +38,15 @@ on:
       - 'backend/services/**'
       - 'backend/routes/**'
       - 'backend/models/**'
+      - 'backend/utils/safeError.js'
       - 'backend/middleware/auth.js'
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
+      - 'backend/__tests__/adapter-rate-limiter.test.js'
+      - 'backend/__tests__/adapter-circuit-breaker.test.js'
+      - 'backend/__tests__/adapter-circuit-live-path.test.js'
+      - 'backend/__tests__/adapter-metrics-registry.test.js'
       - 'backend/package.json'
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:
@@ -117,6 +130,31 @@ jobs:
           JWT_SECRET: ci-secret-at-least-sixteen-chars-long-for-validator
           CSRF_DISABLE: 'true'
 
+  ops-subsystems-tests:
+    name: "🛡️ Ops Subsystems (36 tests — rate/circuit/metrics)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: npm ci --legacy-peer-deps
+
+      - name: Run ops-subsystem tests (rate limiter, circuit breaker, metrics registry)
+        working-directory: backend
+        run: npm run test:ops-subsystems
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ci-secret-at-least-sixteen-chars-long-for-validator
+
   demo-seed-dryrun:
     name: "🌱 Demo seed loads"
     runs-on: ubuntu-latest
@@ -145,7 +183,7 @@ jobs:
   summary:
     name: "✅ Sprint coverage"
     runs-on: ubuntu-latest
-    needs: [signer-tests, adapter-tests, api-tests, demo-seed-dryrun]
+    needs: [signer-tests, adapter-tests, api-tests, ops-subsystems-tests, demo-seed-dryrun]
     if: always()
     steps:
       - name: Report
@@ -155,14 +193,16 @@ jobs:
           echo "═══════════════════════════════════════════════════"
           echo "  • ZATCA XAdES signer (17 tests):       ${{ needs.signer-tests.result }}"
           echo "  • Gov adapters (10 × state machines):  ${{ needs.adapter-tests.result }}"
-          echo "  • Admin API smoke (15 routes):         ${{ needs.api-tests.result }}"
+          echo "  • Admin API smoke (49 tests):          ${{ needs.api-tests.result }}"
+          echo "  • Ops subsystems (42 tests):           ${{ needs.ops-subsystems-tests.result }}"
           echo "  • Demo seed loads:                     ${{ needs.demo-seed-dryrun.result }}"
           echo "═══════════════════════════════════════════════════"
-          if [[ "${{ needs.signer-tests.result }}"  != "success" ]] || \
-             [[ "${{ needs.adapter-tests.result }}" != "success" ]] || \
-             [[ "${{ needs.api-tests.result }}"     != "success" ]] || \
-             [[ "${{ needs.demo-seed-dryrun.result }}" != "success" ]]; then
+          if [[ "${{ needs.signer-tests.result }}"       != "success" ]] || \
+             [[ "${{ needs.adapter-tests.result }}"      != "success" ]] || \
+             [[ "${{ needs.api-tests.result }}"          != "success" ]] || \
+             [[ "${{ needs.ops-subsystems-tests.result }}" != "success" ]] || \
+             [[ "${{ needs.demo-seed-dryrun.result }}"   != "success" ]]; then
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 122 sprint tests green."
+          echo "All 182 sprint tests green."

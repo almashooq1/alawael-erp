@@ -5,6 +5,98 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.0] — 2026-04-17 / 2026-04-18 — Rehab Core + Saudi Gov Integrations
+
+Two-day sprint shipping 20 backend modules, 10 Saudi government adapters,
+6 mobile screens, and 122 deterministic tests — all protected by a CI
+hard-gate. Everything defaults to mock mode so dev runs without any
+credentials; production is an env-var flip away.
+
+### Added — Backend modules (20)
+
+- `branches-admin` · `beneficiaries-admin` · `therapy-sessions-admin`
+- `assessments-admin` (CARS/VB-MAPP/Vineland/Denver) · `care-plans-admin` (IEP 3-tier)
+- `unified notifications` (WhatsApp+SMS+Email+Push fallback chain)
+- `parent-portal-v2` · `therapist-workbench` · `bi-analytics` (11 KPIs)
+- `invoices-admin` (ZATCA envelope) · `chat-v2` (role-aware directory)
+- `clinical-docs` (multer + SHA-256 e-sign) · `telehealth-v2` (Jitsi)
+- `auth/nafath` (SSO with 2-digit random number)
+- `hr-compliance` · `gov-integrations` control panel · `nphies-claims`
+- `branch-compliance` · `adapter-audit` (PDPL trail, 730-day TTL)
+- `integrations-health` (public aggregator for K8s/Grafana)
+
+### Added — 10 Saudi government adapters (uniform interface)
+
+GOSI · SCFHS · Absher/Yakeen · Qiwa · Nafath · Fatoora (ZATCA) · Muqeem
+· NPHIES (CCHI) · Wasel (SPL) · Balady. All expose `verify` /
+`testConnection` / `getConfig`. Mock mode is deterministic (keyed off
+ID suffixes); live flipped via `{PROVIDER}_MODE=live` + creds.
+
+GOSI ships with production-grade hardening: token caching, 5-failure
+circuit breaker with 120s cooldown, AbortController timeout, auto-retry
+on 401/network errors.
+
+### Added — ZATCA Phase-2 XAdES-BES signer
+
+`backend/services/zatcaXmlSigner.js` — pure-Node UBL 2.1 XML generation,
+C14N 1.1 canonicalization, SHA-256 digest, RSA-SHA256 signing over
+canonical SignedInfo, XAdES `ds:Signature` block injection. Live mode
+requires `ZATCA_PRIVATE_KEY` (PEM RSA-2048) + `ZATCA_CSID_CERT`
+(base64 DER). In-test RSA signature verification proves the pipeline
+cryptographically without real ZATCA creds.
+
+### Added — Frontend admin (15+ pages) + portals
+
+Dedicated pages for every backend module with branch-scoped RBAC.
+Parent portal at `/my-children` · therapist workbench at `/workbench`
+· Nafath SSO at `/login/nafath` with CTA on main login.
+
+### Added — Mobile (React Native + Expo)
+
+- 6 typed TypeScript API clients in `mobile/src/services/modules/`
+- 6 production screens: NafathLogin · MyChildren · TherapistWorkbench
+  (3 tabs + SOAP bottom sheet) · Telehealth (Jitsi one-tap) · ChatList
+  (unread badges) · ChatThread (bubbles + 5s polling)
+- Role-aware `SprintAppNavigator` with SecureStore auth guard and
+  role-based tab routing
+
+### Added — Testing (122 tests, CI-gated)
+
+- `gov-adapters.e2e.test.js` — 74 state-machine tests (no DB/network)
+- `new-admin-routes.api.test.js` — 31 supertest + mongodb-memory-server
+  tests for route mounting, auth, lifecycle, health endpoints
+- `zatca-xml-signer.e2e.test.js` — 17 tests including real RSA-SHA256
+  signature verification
+- `.github/workflows/sprint-tests.yml` — hard gate on PR (~10s total)
+
+### Added — Demo + ops
+
+- `demo-showcase.seed.js` — one-command ~60-record seed hitting every
+  mock state (`npm run seed:demo:reset`)
+- Postman collection with 70 requests across 15 folders
+- `/api/health/integrations/*` — public aggregator with 60s cache,
+  K8s-ready readiness probe (503 on misconfigured)
+
+### Added — PDPL audit trail
+
+`AdapterAudit` model + `adapterAuditLogger.wrap()` records every gov
+adapter call with SHA-256 hashed PII targets (never raw IDs), actor,
+operation, latency, IP hash. 730-day TTL matches PDPL retention rules.
+Admin/compliance/dpo query at `/api/admin/adapter-audit`.
+
+### Fixed
+
+- `routes/_registry.js` — 2 silent mount bugs (destructured `{ router }`
+  from `safeRequire`'s fallback → undefined handler → 15 admin routes
+  silently never mounted in prod). Caught by API smoke tests.
+
+### Docs
+
+- `docs/sprints/SPRINT_2026_04_17-18.md` · `GOV_INTEGRATIONS_GO_LIVE.md`
+- `mobile/src/services/modules/README.md`
+
+---
+
 ## [3.1.0] — 2026-03-29
 
 ### Added — نظام خطط التأهيل الفردية (Rehabilitation Plans System)

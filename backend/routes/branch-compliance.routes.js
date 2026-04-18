@@ -22,6 +22,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Branch = require('../models/Branch');
 const balady = require('../services/baladyAdapter');
 const wasel = require('../services/waselAdapter');
+const audit = require('../services/adapterAuditLogger');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -135,7 +136,17 @@ router.post('/:branchId/verify-balady', requireRole(WRITE_ROLES), async (req, re
         message: 'رقم الترخيص البلدي غير مُدخَل للفرع',
       });
 
-    const result = await balady.verify({ licenseNumber: b.balady_license_number });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'balady',
+        operation: 'verify',
+        target: b.balady_license_number,
+        targetKind: 'licenseNumber',
+        entityRef: { kind: 'Branch', id: b._id },
+      },
+      () => balady.verify({ licenseNumber: b.balady_license_number })
+    );
     b.balady_verification = {
       verified: result.status !== 'unknown',
       lastVerifiedAt: new Date(),
@@ -177,7 +188,17 @@ router.post('/:branchId/verify-wasel', requireRole(WRITE_ROLES), async (req, res
         message: 'الرمز البريدي (Short code) غير مُدخَل للفرع',
       });
 
-    const result = await wasel.verifyShortCode({ shortCode: b.wasel_short_code });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'wasel',
+        operation: 'verifyShortCode',
+        target: b.wasel_short_code,
+        targetKind: 'shortCode',
+        entityRef: { kind: 'Branch', id: b._id },
+      },
+      () => wasel.verifyShortCode({ shortCode: b.wasel_short_code })
+    );
     b.wasel_verification = {
       verified: result.status === 'match',
       lastVerifiedAt: new Date(),

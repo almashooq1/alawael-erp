@@ -23,6 +23,7 @@ const gosi = require('../services/gosiAdapter');
 const scfhs = require('../services/scfhsAdapter');
 const qiwa = require('../services/qiwaAdapter');
 const muqeem = require('../services/muqeemAdapter');
+const audit = require('../services/adapterAuditLogger');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -135,10 +136,17 @@ router.post('/:employeeId/verify-gosi', requireRole(WRITE_ROLES), async (req, re
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
 
-    const result = await gosi.verify({
-      nationalId: e.national_id,
-      gosiNumber: e.gosi_number,
-    });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'gosi',
+        operation: 'verify',
+        target: e.national_id,
+        targetKind: 'nationalId',
+        entityRef: { kind: 'Employee', id: e._id },
+      },
+      () => gosi.verify({ nationalId: e.national_id, gosiNumber: e.gosi_number })
+    );
     e.gosi_verification = {
       verified: result.status !== 'unknown',
       lastVerifiedAt: new Date(),
@@ -182,10 +190,17 @@ router.post('/:employeeId/verify-scfhs', requireRole(WRITE_ROLES), async (req, r
         message: 'رقم الترخيص غير مُدخَل في ملف الموظف',
       });
 
-    const result = await scfhs.verify({
-      licenseNumber: e.scfhs_number,
-      nationalId: e.national_id,
-    });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'scfhs',
+        operation: 'verify',
+        target: e.scfhs_number,
+        targetKind: 'licenseNumber',
+        entityRef: { kind: 'Employee', id: e._id },
+      },
+      () => scfhs.verify({ licenseNumber: e.scfhs_number, nationalId: e.national_id })
+    );
     e.scfhs_verification = {
       verified: result.status !== 'unknown',
       lastVerifiedAt: new Date(),
@@ -222,10 +237,17 @@ router.post('/:employeeId/verify-qiwa', requireRole(WRITE_ROLES), async (req, re
     const e = await Employee.findById(req.params.employeeId);
     if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
 
-    const result = await qiwa.verify({
-      nationalId: e.national_id,
-      iqamaNumber: e.iqama_number,
-    });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'qiwa',
+        operation: 'verify',
+        target: e.national_id,
+        targetKind: 'nationalId',
+        entityRef: { kind: 'Employee', id: e._id },
+      },
+      () => qiwa.verify({ nationalId: e.national_id, iqamaNumber: e.iqama_number })
+    );
     e.qiwa_verification = {
       verified: result.status !== 'unknown',
       lastVerifiedAt: new Date(),
@@ -264,7 +286,17 @@ router.post('/:employeeId/verify-muqeem', requireRole(WRITE_ROLES), async (req, 
         message: 'رقم الإقامة غير مُدخَل في ملف الموظف',
       });
 
-    const result = await muqeem.verify({ iqamaNumber: e.iqama_number });
+    const result = await audit.wrap(
+      {
+        req,
+        provider: 'muqeem',
+        operation: 'verify',
+        target: e.iqama_number,
+        targetKind: 'iqama',
+        entityRef: { kind: 'Employee', id: e._id },
+      },
+      () => muqeem.verify({ iqamaNumber: e.iqama_number })
+    );
     e.muqeem_verification = {
       verified: result.status !== 'unknown',
       lastVerifiedAt: new Date(),

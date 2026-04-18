@@ -240,4 +240,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 463 sprint tests green."
+          echo "All 479 sprint tests green."

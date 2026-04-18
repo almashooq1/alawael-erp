@@ -21,6 +21,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 const Employee = require('../models/HR/Employee');
 const gosi = require('../services/gosiAdapter');
 const scfhs = require('../services/scfhsAdapter');
+const qiwa = require('../services/qiwaAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -209,6 +210,43 @@ router.post('/:employeeId/verify-scfhs', requireRole(WRITE_ROLES), async (req, r
     res.json({ success: true, data: e.scfhs_verification, message: 'تم التحقق من SCFHS' });
   } catch (err) {
     return safeError(res, err, 'compliance.scfhs');
+  }
+});
+
+// ── POST /:employeeId/verify-qiwa ────────────────────────────────────────
+router.post('/:employeeId/verify-qiwa', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.employeeId))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const e = await Employee.findById(req.params.employeeId);
+    if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
+
+    const result = await qiwa.verify({
+      nationalId: e.national_id,
+      iqamaNumber: e.iqama_number,
+    });
+    e.qiwa_verification = {
+      verified: result.status !== 'unknown',
+      lastVerifiedAt: new Date(),
+      mode: result.mode,
+      status: result.status,
+      contractType: result.contractType,
+      contractStartDate: result.contractStartDate,
+      contractEndDate: result.contractEndDate,
+      wpsCompliant: result.wpsCompliant,
+      message: result.message,
+    };
+    await e.save();
+
+    logger.info('[compliance] qiwa verified', {
+      employeeId: String(e._id),
+      status: result.status,
+      mode: result.mode,
+      by: req.user?.id,
+    });
+    res.json({ success: true, data: e.qiwa_verification, message: 'تم التحقق من قوى' });
+  } catch (err) {
+    return safeError(res, err, 'compliance.qiwa');
   }
 });
 

@@ -1326,6 +1326,13 @@ const getNavigationItems = () => [
         badge: 'COMPLY',
         badgeColor: 'warning',
       },
+      {
+        id: 'admin-gov-integrations',
+        label: 'التكاملات الحكومية',
+        path: '/admin/gov-integrations',
+        badge: 'GOV',
+        badgeColor: 'error',
+      },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },

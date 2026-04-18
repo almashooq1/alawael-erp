@@ -132,6 +132,20 @@ const employeeSchema = new Schema(
       expiryDate: Date,
       message: String,
     },
+    qiwa_verification: {
+      verified: { type: Boolean, default: false },
+      lastVerifiedAt: Date,
+      mode: { type: String, enum: ['mock', 'live'] },
+      status: {
+        type: String,
+        enum: ['compliant', 'wps_violation', 'no_contract', 'unknown'],
+      },
+      contractType: String,
+      contractStartDate: Date,
+      contractEndDate: Date,
+      wpsCompliant: Boolean,
+      message: String,
+    },
 
     // التعليم والخبرة
     is_saudi: { type: Boolean, default: true },

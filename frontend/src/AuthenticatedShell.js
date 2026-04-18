@@ -139,6 +139,7 @@ const AdminClinicalDocs = lazyWithRetry(() => import('./pages/Admin/AdminClinica
 const AdminHRCompliance = lazyWithRetry(() => import('./pages/Admin/AdminHRCompliance'));
 const AdminGovIntegrations = lazyWithRetry(() => import('./pages/Admin/AdminGovIntegrations'));
 const AdminRateLimits = lazyWithRetry(() => import('./pages/Admin/AdminRateLimits'));
+const AdminAdapterAudit = lazyWithRetry(() => import('./pages/Admin/AdminAdapterAudit'));
 const AdminNphiesClaims = lazyWithRetry(() => import('./pages/Admin/AdminNphiesClaims'));
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
@@ -262,6 +263,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/hr/compliance" element={<AdminHRCompliance />} />
                   <Route path="admin/gov-integrations" element={<AdminGovIntegrations />} />
                   <Route path="admin/rate-limits" element={<AdminRateLimits />} />
+                  <Route path="admin/adapter-audit" element={<AdminAdapterAudit />} />
                   <Route path="admin/nphies-claims" element={<AdminNphiesClaims />} />
                   <Route path="admin/notifications" element={<AdminNotifications />} />
                   <Route path="my-children" element={<MyChildrenPortal />} />

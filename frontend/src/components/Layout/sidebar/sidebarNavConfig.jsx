@@ -1341,6 +1341,13 @@ const getNavigationItems = () => [
         badgeColor: 'info',
       },
       {
+        id: 'admin-adapter-audit',
+        label: 'سجل تدقيق التكاملات (PDPL)',
+        path: '/admin/adapter-audit',
+        badge: 'PDPL',
+        badgeColor: 'secondary',
+      },
+      {
         id: 'admin-nphies-claims',
         label: 'المطالبات التأمينية (NPHIES)',
         path: '/admin/nphies-claims',

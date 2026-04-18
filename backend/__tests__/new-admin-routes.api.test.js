@@ -97,6 +97,9 @@ describe('Route mounting — new sprint routes are registered', () => {
     '/api/admin/clinical-docs',
     '/api/admin/hr/compliance/overview',
     '/api/admin/gov-integrations/status',
+    '/api/admin/gov-integrations/rate-limits',
+    '/api/admin/adapter-audit',
+    '/api/admin/adapter-audit/stats',
     '/api/admin/nphies-claims',
     '/api/admin/branch-compliance/overview',
     '/api/admin/bi/overview',
@@ -172,6 +175,89 @@ describe('/api/admin/gov-integrations', () => {
       if (res.status !== 200) continue; // route may wrap differently
       expect(res.body.result?.status).toBe(c.expect);
     }
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// Rate limits + adapter audit (ops/PDPL surface)
+// ═══════════════════════════════════════════════════════════════════════
+describe('/api/admin/gov-integrations/rate-limits', () => {
+  it('returns snapshot shape for all 10 providers', async () => {
+    const res = await request(app)
+      .get('/api/admin/gov-integrations/rate-limits')
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.overall).toMatchObject({
+      totalCapacity: expect.any(Number),
+      totalAvailable: expect.any(Number),
+      utilization: expect.any(Number),
+    });
+    expect(Array.isArray(res.body.providers)).toBe(true);
+    expect(res.body.providers.length).toBeGreaterThanOrEqual(10);
+    const sample = res.body.providers[0];
+    expect(sample).toMatchObject({
+      provider: expect.any(String),
+      capacity: expect.any(Number),
+      refillPerMinute: expect.any(Number),
+      actorCap: expect.any(Number),
+      available: expect.any(Number),
+      utilization: expect.any(Number),
+    });
+  });
+
+  it('reset endpoint accepts known provider', async () => {
+    const res = await request(app)
+      .post('/api/admin/gov-integrations/rate-limits/gosi/reset')
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+  });
+
+  it('reset endpoint 404s on unknown provider', async () => {
+    const res = await request(app)
+      .post('/api/admin/gov-integrations/rate-limits/zzz/reset')
+      .set(bearerAdmin());
+    expect(res.status).toBe(404);
+  });
+});
+
+describe('/api/admin/adapter-audit', () => {
+  it('list returns paginated empty set on fresh DB', async () => {
+    const res = await request(app).get('/api/admin/adapter-audit').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.items)).toBe(true);
+    expect(res.body.pagination).toMatchObject({
+      page: 1,
+      limit: expect.any(Number),
+      total: expect.any(Number),
+      pages: expect.any(Number),
+    });
+  });
+
+  it('stats returns rollup with byProvider array', async () => {
+    const res = await request(app).get('/api/admin/adapter-audit/stats').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(Array.isArray(res.body.byProvider)).toBe(true);
+    expect(Array.isArray(res.body.topActors)).toBe(true);
+    expect(res.body).toHaveProperty('total');
+    expect(res.body).toHaveProperty('last30days');
+  });
+
+  it('by-entity requires entityKind + entityId', async () => {
+    const res = await request(app).get('/api/admin/adapter-audit/by-entity').set(bearerAdmin());
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+  });
+
+  it('filters propagate — provider=gosi returns only gosi rows', async () => {
+    const res = await request(app)
+      .get('/api/admin/adapter-audit?provider=gosi&limit=10')
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    res.body.items.forEach(r => expect(r.provider).toBe('gosi'));
   });
 });
 

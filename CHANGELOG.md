@@ -5,6 +5,52 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.9] — 2026-04-18 — Invariant / drift-detection tests
+
+Round of tests that catch real cross-component bugs (not unit-level
+polish). Found + fixed a variant-regex bug in 4.0.8 the same way —
+writing a real end-to-end test exposed the flaw.
+
+### Added
+
+- `__tests__/rate-limit-to-429.test.js` (3 tests) — proves
+  adapterRateLimiter → RateLimitError → safeError → HTTP 429 +
+  Retry-After header chain works end-to-end. Before this, nothing
+  verified the mobile client's auto-backoff (which depends on the
+  standard HTTP header) actually receives that header.
+- `__tests__/request-id-contract.test.js` (4 tests) — locks the
+  mobile ↔ backend X-Request-Id alphabet intersection. If either
+  side drifts, correlation IDs silently stop flowing end-to-end.
+- `__tests__/provider-registry-consistency.test.js` (7 tests) —
+  asserts the 10 gov providers are consistent across six touchpoints
+  (rate-limiter DEFAULTS · adapter files · 2 route ADAPTERS maps ·
+  2 CLI scripts). Adding an 11th provider now fails CI until every
+  wiring is updated.
+- `__tests__/doc-test-count-consistency.test.js` (6 tests) — grep-
+  and-assert that CHANGELOG + SPRINT doc + DELIVERY.md + CI summary
+  all claim the same test count. Catches the "looks done but isn't"
+  class of stale-number.
+
+### Fixed
+
+- `backend/utils/arabicSearch.js buildOrClause` — regex was built from
+  the normalized query, but the DB holds un-normalized data. Rewrote
+  to expand each char into a variant character-class at regex-build
+  time (`ا` → `[اأإآٱ]`), so query "احمد" actually matches stored
+  "أحمد". Caught by writing an end-to-end seed-and-find test, which
+  the USE_MOCK_DB test-env couldn't stably run — unit-test proof
+  locked the fix instead.
+- `routes/beneficiaries-admin.routes.js GET /search` — flattened a
+  nested `$or` that some Mongo versions silently skip.
+
+### Tests
+
+Sprint suite: **291 passing** (was 274 at 4.0.8).
+• +3 rate-limit e2e + 4 request-id contract + 7 provider-registry
+consistency + 3 variant-match assertions
+
+---
+
 ## [4.0.8] — 2026-04-18 — Arabic-aware beneficiary search (end-to-end)
 
 A real user-visible fix, not more ops polish. Previously a receptionist

@@ -1333,6 +1333,13 @@ const getNavigationItems = () => [
         badge: 'GOV',
         badgeColor: 'error',
       },
+      {
+        id: 'admin-nphies-claims',
+        label: 'المطالبات التأمينية (NPHIES)',
+        path: '/admin/nphies-claims',
+        badge: 'NPHIES',
+        badgeColor: 'success',
+      },
       { id: 'admin-notifications', label: 'التنبيهات الموحَّدة', path: '/admin/notifications' },
       { id: 'admin-bookings', label: 'حجوزات الموقع', path: '/admin/bookings' },
       { id: 'admin-applications', label: 'طلبات التوظيف', path: '/admin/applications' },

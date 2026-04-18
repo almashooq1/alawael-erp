@@ -22,6 +22,7 @@ const Employee = require('../models/HR/Employee');
 const gosi = require('../services/gosiAdapter');
 const scfhs = require('../services/scfhsAdapter');
 const qiwa = require('../services/qiwaAdapter');
+const muqeem = require('../services/muqeemAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
 
@@ -247,6 +248,47 @@ router.post('/:employeeId/verify-qiwa', requireRole(WRITE_ROLES), async (req, re
     res.json({ success: true, data: e.qiwa_verification, message: 'تم التحقق من قوى' });
   } catch (err) {
     return safeError(res, err, 'compliance.qiwa');
+  }
+});
+
+// ── POST /:employeeId/verify-muqeem ──────────────────────────────────────
+router.post('/:employeeId/verify-muqeem', requireRole(WRITE_ROLES), async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.employeeId))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const e = await Employee.findById(req.params.employeeId);
+    if (!e) return res.status(404).json({ success: false, message: 'غير موجود' });
+    if (!e.iqama_number)
+      return res.status(400).json({
+        success: false,
+        message: 'رقم الإقامة غير مُدخَل في ملف الموظف',
+      });
+
+    const result = await muqeem.verify({ iqamaNumber: e.iqama_number });
+    e.muqeem_verification = {
+      verified: result.status !== 'unknown',
+      lastVerifiedAt: new Date(),
+      mode: result.mode,
+      status: result.status,
+      sponsor: result.sponsor,
+      profession: result.profession,
+      nationality: result.nationality,
+      expiryDate: result.expiryDate,
+      remainingDays: result.remainingDays,
+      message: result.message,
+    };
+    if (result.expiryDate) e.iqama_expiry = result.expiryDate;
+    await e.save();
+
+    logger.info('[compliance] muqeem verified', {
+      employeeId: String(e._id),
+      status: result.status,
+      mode: result.mode,
+      by: req.user?.id,
+    });
+    res.json({ success: true, data: e.muqeem_verification, message: 'تم التحقق من مقيم' });
+  } catch (err) {
+    return safeError(res, err, 'compliance.muqeem');
   }
 });
 

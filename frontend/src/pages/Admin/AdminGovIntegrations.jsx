@@ -44,6 +44,8 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import WorkIcon from '@mui/icons-material/Work';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
+import HealingIcon from '@mui/icons-material/Healing';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import api from '../../services/api.client';
 
@@ -106,6 +108,26 @@ const PROVIDERS = [
     desc: 'إرسال الفواتير لهيئة الزكاة — Reporting / Clearance',
     icon: <ReceiptLongIcon />,
     color: '#6d28d9',
+    sampleInput: null,
+  },
+  {
+    key: 'muqeem',
+    name: 'Muqeem — مقيم',
+    desc: 'التحقق من حالة إقامة الموظفين غير السعوديين',
+    icon: <HomeWorkIcon />,
+    color: '#0891b2',
+    sampleInput: {
+      kind: 'iqamaNumber',
+      label: 'رقم إقامة',
+      hint: 'ينتهي بـ 00 = غير موجود، 11 = مُلغاة، 22 = منتهية',
+    },
+  },
+  {
+    key: 'nphies',
+    name: 'NPHIES — الضمان الصحي التعاوني',
+    desc: 'فحص الأهلية وإرسال مطالبات التأمين عبر CCHI',
+    icon: <HealingIcon />,
+    color: '#059669',
     sampleInput: null,
   },
 ];
@@ -457,6 +479,36 @@ FATOORA_BASE_URL=https://gw-fatoora.zatca.gov.sa/e-invoicing/core
 FATOORA_BINARY_TOKEN=<base64 CSID>
 FATOORA_MODE_TYPE=reporting   # or clearance
 FATOORA_TIMEOUT_MS=12000`}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" fontWeight={600}>
+                Muqeem
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre' }}
+              >
+                {`MUQEEM_MODE=live
+MUQEEM_BASE_URL=https://api.muqeem.sa
+MUQEEM_CLIENT_ID=...
+MUQEEM_CLIENT_SECRET=...
+MUQEEM_ESTABLISHMENT_ID=...`}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" fontWeight={600}>
+                NPHIES (CCHI)
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre' }}
+              >
+                {`NPHIES_MODE=live
+NPHIES_BASE_URL=https://api.nphies.sa
+NPHIES_CLIENT_ID=...
+NPHIES_CLIENT_SECRET=...
+NPHIES_PROVIDER_ID=<HPO license>`}
               </Typography>
             </Box>
           </Stack>

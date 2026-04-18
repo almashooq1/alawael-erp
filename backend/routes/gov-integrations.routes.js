@@ -25,6 +25,8 @@ const absher = require('../services/absherAdapter');
 const qiwa = require('../services/qiwaAdapter');
 const nafathAdapter = require('../services/nafathAdapter');
 const fatoora = require('../services/fatooraAdapter');
+const muqeem = require('../services/muqeemAdapter');
+const nphies = require('../services/nphiesAdapter');
 
 router.use(authenticateToken);
 
@@ -101,6 +103,13 @@ const nafathWrapped = {
   },
 };
 
+// Nphies has different API shape — wrap to match.
+const nphiesWrapped = {
+  MODE: nphies.MODE,
+  getConfig: () => nphies.getConfig(),
+  testConnection: () => nphies.testConnection(),
+};
+
 const ADAPTERS = {
   gosi,
   scfhs: scfhsWrapped,
@@ -108,6 +117,8 @@ const ADAPTERS = {
   qiwa,
   nafath: nafathWrapped,
   fatoora,
+  muqeem,
+  nphies: nphiesWrapped,
 };
 
 // ── GET /status ──────────────────────────────────────────────────────────
@@ -158,6 +169,17 @@ router.post('/:provider/verify-sample', requireRole(ADMIN), async (req, res) => 
         break;
       case 'qiwa':
         result = await qiwa.verify({ nationalId });
+        break;
+      case 'muqeem':
+        result = await muqeem.verify({
+          iqamaNumber: req.body?.iqamaNumber || nationalId,
+        });
+        break;
+      case 'nphies':
+        result = await nphies.checkEligibility({
+          memberId: req.body?.memberId || nationalId,
+          insurerId: req.body?.insurerId,
+        });
         break;
       default:
         return res

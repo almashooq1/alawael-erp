@@ -146,6 +146,21 @@ const employeeSchema = new Schema(
       wpsCompliant: Boolean,
       message: String,
     },
+    muqeem_verification: {
+      verified: { type: Boolean, default: false },
+      lastVerifiedAt: Date,
+      mode: { type: String, enum: ['mock', 'live'] },
+      status: {
+        type: String,
+        enum: ['active', 'expired', 'cancelled', 'not_found', 'unknown'],
+      },
+      sponsor: String,
+      profession: String,
+      nationality: String,
+      expiryDate: Date,
+      remainingDays: Number,
+      message: String,
+    },
 
     // التعليم والخبرة
     is_saudi: { type: Boolean, default: true },

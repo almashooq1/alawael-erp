@@ -138,6 +138,7 @@ const AdminInvoices = lazyWithRetry(() => import('./pages/Admin/AdminInvoices'))
 const AdminClinicalDocs = lazyWithRetry(() => import('./pages/Admin/AdminClinicalDocs'));
 const AdminHRCompliance = lazyWithRetry(() => import('./pages/Admin/AdminHRCompliance'));
 const AdminGovIntegrations = lazyWithRetry(() => import('./pages/Admin/AdminGovIntegrations'));
+const AdminNphiesClaims = lazyWithRetry(() => import('./pages/Admin/AdminNphiesClaims'));
 const AdminNotifications = lazyWithRetry(() => import('./pages/Admin/AdminNotifications'));
 const MyChildrenPortal = lazyWithRetry(() => import('./pages/ParentPortal/MyChildrenPortal'));
 const TherapistWorkbench = lazyWithRetry(() => import('./pages/Therapist/TherapistWorkbench'));
@@ -259,6 +260,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/clinical-docs" element={<AdminClinicalDocs />} />
                   <Route path="admin/hr/compliance" element={<AdminHRCompliance />} />
                   <Route path="admin/gov-integrations" element={<AdminGovIntegrations />} />
+                  <Route path="admin/nphies-claims" element={<AdminNphiesClaims />} />
                   <Route path="admin/notifications" element={<AdminNotifications />} />
                   <Route path="my-children" element={<MyChildrenPortal />} />
                   <Route path="workbench" element={<TherapistWorkbench />} />

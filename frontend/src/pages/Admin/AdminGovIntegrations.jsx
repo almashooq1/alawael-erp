@@ -46,6 +46,8 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import HealingIcon from '@mui/icons-material/Healing';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import StoreMallDirectoryIcon from '@mui/icons-material/StoreMallDirectory';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import api from '../../services/api.client';
 
@@ -129,6 +131,30 @@ const PROVIDERS = [
     icon: <HealingIcon />,
     color: '#059669',
     sampleInput: null,
+  },
+  {
+    key: 'wasel',
+    name: 'Wasel — العنوان الوطني (SPL)',
+    desc: 'التحقق من العنوان الوطني عبر البريد السعودي',
+    icon: <LocalShippingIcon />,
+    color: '#f59e0b',
+    sampleInput: {
+      kind: 'licenseNumber',
+      label: 'الرمز القصير (4 أحرف + 4 أرقام)',
+      hint: 'مثال: RFYA1234 — ينتهي بـ 00 = غير موجود، 99 = غير صالح',
+    },
+  },
+  {
+    key: 'balady',
+    name: 'Balady — الرخصة البلدية',
+    desc: 'التحقق من الترخيص البلدي لمنشآت الرعاية الصحية',
+    icon: <StoreMallDirectoryIcon />,
+    color: '#dc2626',
+    sampleInput: {
+      kind: 'licenseNumber',
+      label: 'رقم الترخيص البلدي',
+      hint: '12345678 — ينتهي بـ 0 = منتهٍ، 9 = موقوف، 999 = غير موجود',
+    },
   },
 ];
 
@@ -509,6 +535,34 @@ NPHIES_BASE_URL=https://api.nphies.sa
 NPHIES_CLIENT_ID=...
 NPHIES_CLIENT_SECRET=...
 NPHIES_PROVIDER_ID=<HPO license>`}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" fontWeight={600}>
+                Wasel (العنوان الوطني)
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre' }}
+              >
+                {`WASEL_MODE=live
+WASEL_BASE_URL=https://api.address.gov.sa
+WASEL_API_KEY=...
+WASEL_TEST_CODE=RFYA1234`}
+              </Typography>
+            </Box>
+            <Box>
+              <Typography variant="caption" fontWeight={600}>
+                Balady (الرخصة البلدية)
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{ fontFamily: 'monospace', fontSize: 12, whiteSpace: 'pre' }}
+              >
+                {`BALADY_MODE=live
+BALADY_BASE_URL=https://api.balady.gov.sa
+BALADY_CLIENT_ID=...
+BALADY_CLIENT_SECRET=...`}
               </Typography>
             </Box>
           </Stack>

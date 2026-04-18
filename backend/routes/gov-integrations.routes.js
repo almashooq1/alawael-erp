@@ -27,6 +27,8 @@ const nafathAdapter = require('../services/nafathAdapter');
 const fatoora = require('../services/fatooraAdapter');
 const muqeem = require('../services/muqeemAdapter');
 const nphies = require('../services/nphiesAdapter');
+const wasel = require('../services/waselAdapter');
+const balady = require('../services/baladyAdapter');
 
 router.use(authenticateToken);
 
@@ -119,6 +121,8 @@ const ADAPTERS = {
   fatoora,
   muqeem,
   nphies: nphiesWrapped,
+  wasel,
+  balady,
 };
 
 // ── GET /status ──────────────────────────────────────────────────────────
@@ -180,6 +184,15 @@ router.post('/:provider/verify-sample', requireRole(ADMIN), async (req, res) => 
           memberId: req.body?.memberId || nationalId,
           insurerId: req.body?.insurerId,
         });
+        break;
+      case 'wasel':
+        result = await wasel.verifyShortCode({
+          shortCode: req.body?.shortCode || licenseNumber,
+          nationalId,
+        });
+        break;
+      case 'balady':
+        result = await balady.verify({ licenseNumber });
         break;
       default:
         return res

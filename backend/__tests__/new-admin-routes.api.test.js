@@ -183,6 +183,34 @@ describe('/api/admin/gov-integrations', () => {
 // ═══════════════════════════════════════════════════════════════════════
 // Rate limits + adapter audit (ops/PDPL surface)
 // ═══════════════════════════════════════════════════════════════════════
+describe('/api/build-info (runtime identity)', () => {
+  it('returns git SHA + uptime + node version without auth', async () => {
+    const res = await request(app).get('/api/build-info');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      success: true,
+      commit: expect.any(String),
+      commitShort: expect.any(String),
+      startedAt: expect.any(String),
+      uptimeSec: expect.any(Number),
+      uptimeHuman: expect.any(String),
+      node: expect.stringMatching(/^v\d+/),
+      platform: expect.any(String),
+      pid: expect.any(Number),
+      env: expect.any(String),
+    });
+    // commitShort is 8 chars (or 'unknown')
+    expect(res.body.commitShort).toMatch(/^([0-9a-f]{8}|unknown)$/);
+  });
+
+  it('commit and commitShort agree when resolvable', async () => {
+    const res = await request(app).get('/api/build-info');
+    if (res.body.commit !== 'unknown') {
+      expect(res.body.commit.startsWith(res.body.commitShort)).toBe(true);
+    }
+  });
+});
+
 describe('/api/health/metrics/integrations (Prometheus scrape)', () => {
   it('returns text/plain Prometheus v0.0.4 format without auth', async () => {
     // Intentionally no Authorization header — scrapers don't carry one

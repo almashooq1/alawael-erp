@@ -115,6 +115,16 @@ function setupHealthProbes(app, { isTestEnv, isProd }) {
   } catch (err) {
     console.warn('[HealthProbes] integrations metrics skipped:', err?.message);
   }
+
+  // Runtime build identity — git SHA, uptime, node version, pid.
+  // Public by design: carries no secrets, used by blue/green rollouts
+  // and incident correlation.
+  try {
+    const buildInfo = require('../routes/build-info.routes');
+    app.use('/api/build-info', buildInfo);
+  } catch (err) {
+    console.warn('[HealthProbes] build-info skipped:', err?.message);
+  }
 }
 
 module.exports = { setupHealthProbes };

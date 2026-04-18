@@ -34,8 +34,10 @@ HEAD` → `"unknown"`. All fields cached at module-load; restart is
 
 ### Tests
 
-Sprint suite: **210 passing** (was 208).
+Sprint suite: **227 passing** (was 208).
 • +2 build-info smoke tests (shape + SHA/short agreement)
+• +17 build-info internals unit tests (4 resolveX helpers + 8-case
+humanizeUptime table)
 
 ---
 

@@ -10,6 +10,20 @@ import { showMessage } from 'react-native-flash-message';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://api.alawael.com/api/v1';
 
+// 22-char base64url-ish id — matches what the backend middleware
+// accepts (^[a-zA-Z0-9_\-.=+/]{1,128}$) so the server preserves it
+// rather than generating a fresh one. Good enough for correlation;
+// not cryptographic.
+const REQUEST_ID_ALPHABET =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+function makeRequestId(): string {
+  let out = '';
+  for (let i = 0; i < 22; i += 1) {
+    out += REQUEST_ID_ALPHABET[Math.floor(Math.random() * REQUEST_ID_ALPHABET.length)];
+  }
+  return out;
+}
+
 interface ApiConfig {
   timeout?: number;
   retryAttempts?: number;
@@ -35,12 +49,19 @@ class ApiService {
       },
     });
 
-    // Request interceptor - Add auth token
+    // Request interceptor - Add auth token + client-side X-Request-Id
+    // so the backend adapter-audit correlationId ties our mobile call
+    // to every gov-adapter fan-out it triggers. The backend's
+    // requestId middleware preserves a client-supplied valid id; we
+    // generate one per request here.
     this.api.interceptors.request.use(
       async (config) => {
         const token = await SecureStore.getItemAsync('authToken');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        }
+        if (!config.headers['X-Request-Id']) {
+          config.headers['X-Request-Id'] = makeRequestId();
         }
         return config;
       },

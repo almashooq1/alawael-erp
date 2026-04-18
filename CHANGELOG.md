@@ -56,7 +56,9 @@ production incident that kept nagging at the runbooks — someone flips
   one ID. New `GET /admin/adapter-audit/by-correlation/:id` surfaces
   them in chronological order. `AdminAdapterAudit.jsx` grows a Hub
   icon column + dialog showing the full cascade on click. DPO DSAR
-  becomes a 2-click flow.
+  becomes a 2-click flow. The mobile client (`ApiService.ts`) generates
+  its own 22-char X-Request-Id per request so mobile-originated
+  cascades are traceable end-to-end through the backend fan-out.
 
 - **Deploy gate**: `backend/scripts/preflight.js` + `preflight-script.test.js`
   (7 tests). Exits 1 with a per-provider missing-vars list if any

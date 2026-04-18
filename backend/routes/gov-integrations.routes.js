@@ -30,6 +30,7 @@ const nphies = require('../services/nphiesAdapter');
 const wasel = require('../services/waselAdapter');
 const balady = require('../services/baladyAdapter');
 const rateLimiter = require('../services/adapterRateLimiter');
+const circuitBreaker = require('../services/adapterCircuitBreaker');
 
 router.use(authenticateToken);
 
@@ -228,6 +229,48 @@ router.get('/rate-limits', requireRole(READ), async (_req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'gov-integrations.rateLimits');
+  }
+});
+
+// ── GET /circuits ────────────────────────────────────────────────────────
+// Snapshot of every provider's circuit state in one call. Convenient
+// for the ops dashboard — saves calling /health/integrations for each.
+router.get('/circuits', requireRole(READ), async (_req, res) => {
+  try {
+    const snapshots = circuitBreaker.snapshotAll();
+    const open = Object.entries(snapshots)
+      .filter(([, s]) => s.open)
+      .map(([name]) => name);
+    res.json({
+      success: true,
+      providers: snapshots,
+      overall: { total: Object.keys(snapshots).length, open: open.length, openProviders: open },
+    });
+  } catch (err) {
+    return safeError(res, err, 'gov-integrations.circuits');
+  }
+});
+
+// ── POST /circuits/:provider/reset ───────────────────────────────────────
+// Force-close a provider's circuit. Use when you know the upstream
+// outage is over and you don't want to wait for the cooldown window.
+router.post('/circuits/:provider/reset', requireRole(ADMIN), async (req, res) => {
+  try {
+    const key = String(req.params.provider).toLowerCase();
+    const ok = circuitBreaker.resetByName(key);
+    if (!ok) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'مزوّد غير معروف أو لا يمتلك دائرة حماية' });
+    }
+    res.json({
+      success: true,
+      provider: key,
+      circuit: circuitBreaker.get(key).snapshot(),
+      message: 'تم إعادة ضبط دائرة الحماية',
+    });
+  } catch (err) {
+    return safeError(res, err, 'gov-integrations.circuits.reset');
   }
 });
 

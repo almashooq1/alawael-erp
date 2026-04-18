@@ -48,6 +48,10 @@ function envInt(name, fallback) {
   return Number.isFinite(v) && v > 0 ? v : fallback;
 }
 
+// Registry so admin routes can look up a breaker by provider name
+// without every adapter needing to export its own reset function.
+const _registry = new Map();
+
 function create({ name, maxFailures, cooldownMs, windowMs } = {}) {
   if (!name) throw new Error('adapterCircuitBreaker.create: name is required');
 
@@ -103,7 +107,7 @@ function create({ name, maxFailures, cooldownMs, windowMs } = {}) {
     state.openUntil = 0;
   }
 
-  return {
+  const instance = {
     name,
     cfg,
     isOpen,
@@ -113,6 +117,33 @@ function create({ name, maxFailures, cooldownMs, windowMs } = {}) {
     reset,
     openMessage: `مؤقت: خدمة ${name} غير متاحة (circuit breaker)`,
   };
+  _registry.set(name, instance);
+  return instance;
 }
 
-module.exports = { create };
+function get(name) {
+  return _registry.get(name);
+}
+
+function list() {
+  return Array.from(_registry.keys());
+}
+
+function resetByName(name) {
+  const b = _registry.get(name);
+  if (!b) return false;
+  b.reset();
+  return true;
+}
+
+function snapshotAll() {
+  const out = {};
+  for (const [name, b] of _registry) out[name] = b.snapshot();
+  return out;
+}
+
+function _resetRegistry() {
+  _registry.clear();
+}
+
+module.exports = { create, get, list, resetByName, snapshotAll, _resetRegistry };

@@ -46,6 +46,7 @@ import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 import SpeedIcon from '@mui/icons-material/Speed';
 import SecurityIcon from '@mui/icons-material/Security';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import RestoreIcon from '@mui/icons-material/Restore';
 import api from '../../services/api.client';
 import { Link as RouterLink } from 'react-router-dom';
 
@@ -216,6 +217,18 @@ export default function AdminIntegrationsOps() {
       setLoading(false);
     }
   }, []);
+
+  const resetCircuit = useCallback(
+    async provider => {
+      try {
+        await api.post(`/admin/gov-integrations/circuits/${provider}/reset`);
+        load();
+      } catch (e) {
+        setError(e?.response?.data?.message || e.message || 'فشل إعادة الضبط');
+      }
+    },
+    [load]
+  );
 
   useEffect(() => {
     load();
@@ -390,12 +403,23 @@ export default function AdminIntegrationsOps() {
                           </TableCell>
                           <TableCell>
                             {r.circuitOpen ? (
-                              <Chip
-                                size="small"
-                                icon={<ErrorIcon />}
-                                label={`مفتوحة · ${Math.ceil(r.cooldownMs / 1000)}s`}
-                                color="error"
-                              />
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <Chip
+                                  size="small"
+                                  icon={<ErrorIcon />}
+                                  label={`مفتوحة · ${Math.ceil(r.cooldownMs / 1000)}s`}
+                                  color="error"
+                                />
+                                <Tooltip title="إعادة ضبط دائرة الحماية">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => resetCircuit(r.provider)}
+                                    aria-label={`reset-circuit-${r.provider}`}
+                                  >
+                                    <RestoreIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
                             ) : (
                               <Chip size="small" label="سليمة" color="success" variant="outlined" />
                             )}

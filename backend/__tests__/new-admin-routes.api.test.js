@@ -98,6 +98,7 @@ describe('Route mounting — new sprint routes are registered', () => {
     '/api/admin/hr/compliance/overview',
     '/api/admin/gov-integrations/status',
     '/api/admin/gov-integrations/rate-limits',
+    '/api/admin/gov-integrations/circuits',
     '/api/admin/adapter-audit',
     '/api/admin/adapter-audit/stats',
     '/api/admin/nphies-claims',
@@ -181,6 +182,46 @@ describe('/api/admin/gov-integrations', () => {
 // ═══════════════════════════════════════════════════════════════════════
 // Rate limits + adapter audit (ops/PDPL surface)
 // ═══════════════════════════════════════════════════════════════════════
+describe('/api/admin/gov-integrations/circuits', () => {
+  it('returns all registered breakers in one snapshot', async () => {
+    const res = await request(app).get('/api/admin/gov-integrations/circuits').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    // GOSI + Absher + NPHIES + Fatoora all register themselves on require
+    ['gosi', 'absher', 'nphies', 'fatoora'].forEach(p => {
+      expect(res.body.providers[p]).toMatchObject({
+        open: expect.any(Boolean),
+        failures: expect.any(Number),
+        cooldownRemainingMs: expect.any(Number),
+      });
+    });
+    expect(res.body.overall).toMatchObject({
+      total: expect.any(Number),
+      open: expect.any(Number),
+      openProviders: expect.any(Array),
+    });
+  });
+
+  it('reset endpoint accepts a registered provider', async () => {
+    const res = await request(app)
+      .post('/api/admin/gov-integrations/circuits/gosi/reset')
+      .set(bearerAdmin());
+    expect(res.status).toBe(200);
+    expect(res.body.circuit).toMatchObject({
+      open: false,
+      failures: 0,
+      cooldownRemainingMs: 0,
+    });
+  });
+
+  it('reset endpoint 404s on unknown provider', async () => {
+    const res = await request(app)
+      .post('/api/admin/gov-integrations/circuits/doesnotexist/reset')
+      .set(bearerAdmin());
+    expect(res.status).toBe(404);
+  });
+});
+
 describe('/api/admin/gov-integrations/rate-limits', () => {
   it('returns snapshot shape for all 10 providers', async () => {
     const res = await request(app)

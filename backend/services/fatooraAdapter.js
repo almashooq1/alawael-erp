@@ -170,10 +170,11 @@ async function liveSubmit({ invoiceXmlB64, invoiceHash, uuid }) {
 
 /**
  * submit — public entry point. Takes the invoice document + envelope
- * data. In live mode, `invoiceXmlB64` is required and must be the
- * signed canonical XML produced by a separate signing step.
+ * data. In live mode, if `invoiceXmlB64` is not provided, the adapter
+ * auto-signs the invoice via zatcaXmlSigner.signInvoice() — which uses
+ * ZATCA_PRIVATE_KEY + ZATCA_CSID_CERT env vars.
  */
-async function submit({ invoice, uuid, invoiceHash, invoiceXmlB64 }) {
+async function submit({ invoice, uuid, invoiceHash, invoiceXmlB64, signOptions = {} }) {
   if (!uuid || !invoiceHash) {
     return {
       status: 'ERROR',
@@ -181,9 +182,33 @@ async function submit({ invoice, uuid, invoiceHash, invoiceXmlB64 }) {
       errors: [{ message: 'uuid و invoiceHash مطلوبان (أصدر الفاتورة أولاً)' }],
     };
   }
-  return MODE === 'live'
-    ? liveSubmit({ invoiceXmlB64, invoiceHash, uuid })
-    : mockSubmit({ invoice, uuid, invoiceHash });
+  if (MODE !== 'live') {
+    return mockSubmit({ invoice, uuid, invoiceHash });
+  }
+
+  // Live — auto-sign if no XML supplied
+  let signedXmlB64 = invoiceXmlB64;
+  let signerResult = null;
+  if (!signedXmlB64) {
+    try {
+      const signer = require('./zatcaXmlSigner');
+      signerResult = signer.signInvoice(
+        invoice,
+        { uuid, invoiceHash, icv: invoice?.zatca?.icv || 1, pih: invoice?.zatca?.pih || '0' },
+        signOptions
+      );
+      signedXmlB64 = signerResult.xmlB64;
+    } catch (err) {
+      return {
+        status: 'ERROR',
+        mode: 'live',
+        errors: [{ message: `Signing failed: ${err.message}`, missing: err.missing }],
+      };
+    }
+  }
+  const result = await liveSubmit({ invoiceXmlB64: signedXmlB64, invoiceHash, uuid });
+  if (signerResult) result.signerMode = signerResult.mode;
+  return result;
 }
 
 async function testConnection() {

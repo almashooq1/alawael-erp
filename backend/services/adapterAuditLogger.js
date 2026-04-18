@@ -32,6 +32,19 @@
 
 const crypto = require('crypto');
 const logger = require('../utils/logger');
+const rateLimiter = require('./adapterRateLimiter');
+
+class RateLimitError extends Error {
+  constructor(details) {
+    super(details.reason || `rate limit exceeded for ${details.provider}`);
+    this.name = 'RateLimitError';
+    this.code = 'RATE_LIMITED';
+    this.retryAfterMs = details.retryAfterMs;
+    this.scope = details.scope;
+    this.provider = details.provider;
+    this.statusCode = 429;
+  }
+}
 
 function hashString(s, salt = process.env.JWT_SECRET || 'alawael-pdpl-salt') {
   if (!s) return '';
@@ -84,6 +97,34 @@ async function record(entry) {
  */
 async function wrap(context, fn) {
   const start = Date.now();
+  // Rate-limit check BEFORE the network call — protects cost & quota.
+  // Skip only if explicitly opted out (e.g. for test-connection pings).
+  if (context.provider && !context.skipRateLimit) {
+    const rl = rateLimiter.take(context.provider, {
+      actorId: context.req?.user?.id,
+      actorEmail: context.req?.user?.email,
+      ipHash: context.req ? hashIp(context.req.ip) : undefined,
+    });
+    if (!rl.allowed) {
+      // Audit the rejection so ops sees cost attempts
+      record({
+        actor: context.req?.user,
+        provider: context.provider,
+        operation: context.operation,
+        target: context.target,
+        targetKind: context.targetKind,
+        status: 'rate_limited',
+        success: false,
+        errorMessage: rl.reason,
+        ipHash: context.req ? hashIp(context.req.ip) : undefined,
+        userAgent: context.req?.get?.('user-agent'),
+        entityRef: context.entityRef,
+      }).catch(() => {
+        /* ignore */
+      });
+      throw new RateLimitError({ ...rl, provider: context.provider });
+    }
+  }
   try {
     const result = await fn();
     // Fire-and-forget — don't await the audit write
@@ -126,4 +167,4 @@ async function wrap(context, fn) {
   }
 }
 
-module.exports = { record, wrap, hashString, hashIp };
+module.exports = { record, wrap, hashString, hashIp, RateLimitError };

@@ -29,6 +29,7 @@ const muqeem = require('../services/muqeemAdapter');
 const nphies = require('../services/nphiesAdapter');
 const wasel = require('../services/waselAdapter');
 const balady = require('../services/baladyAdapter');
+const rateLimiter = require('../services/adapterRateLimiter');
 
 router.use(authenticateToken);
 
@@ -202,6 +203,44 @@ router.post('/:provider/verify-sample', requireRole(ADMIN), async (req, res) => 
     res.json({ success: true, provider: key, result });
   } catch (err) {
     return safeError(res, err, 'gov-integrations.verifySample');
+  }
+});
+
+// ── GET /rate-limits ─────────────────────────────────────────────────────
+// Snapshot of per-provider token-bucket state. Useful for ops dashboards
+// and for the admin to spot an actor burning through quota.
+router.get('/rate-limits', requireRole(READ), async (_req, res) => {
+  try {
+    const providers = Object.keys(ADAPTERS);
+    const snapshots = providers.map(p => rateLimiter.status(p));
+    const totalCapacity = snapshots.reduce((s, x) => s + x.capacity, 0);
+    const totalAvailable = snapshots.reduce((s, x) => s + x.available, 0);
+    res.json({
+      success: true,
+      overall: {
+        totalCapacity,
+        totalAvailable,
+        utilization: totalCapacity
+          ? Math.round(((totalCapacity - totalAvailable) / totalCapacity) * 100)
+          : 0,
+      },
+      providers: snapshots,
+    });
+  } catch (err) {
+    return safeError(res, err, 'gov-integrations.rateLimits');
+  }
+});
+
+// ── POST /rate-limits/:provider/reset ────────────────────────────────────
+// Operator escape hatch — clears the bucket for a specific provider.
+router.post('/rate-limits/:provider/reset', requireRole(ADMIN), async (req, res) => {
+  try {
+    const key = String(req.params.provider).toLowerCase();
+    if (!ADAPTERS[key]) return res.status(404).json({ success: false, message: 'مزود غير معروف' });
+    rateLimiter.reset(key);
+    res.json({ success: true, provider: key, message: 'تم إعادة تعبئة الحد' });
+  } catch (err) {
+    return safeError(res, err, 'gov-integrations.rateLimits.reset');
   }
 });
 

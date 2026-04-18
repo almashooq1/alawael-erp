@@ -5,6 +5,46 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.1] — 2026-04-17 — Per-adapter rate limiter (cost protection)
+
+Adds a token-bucket rate limiter in front of every `audit.wrap()` call
+to the 10 Saudi government adapters. The motivation is cost control:
+Absher/NPHIES/Fatoora are billed per call, and a misconfigured cron or
+runaway loop could burn thousands of SAR in an afternoon.
+
+### Added
+
+- `backend/services/adapterRateLimiter.js` — per-provider token bucket
+  with per-actor sub-cap. Defaults tuned to real vendor tiers
+  (GOSI 60/30/20, Absher 30/10/5, NPHIES 120/60/30, Fatoora 600/600/200).
+  Override via `{PROVIDER}_RL_CAPACITY` / `_RL_REFILL_PER_MIN` /
+  `_RL_ACTOR_CAP` env vars.
+- `RateLimitError` (code `RATE_LIMITED`, statusCode 429) now thrown
+  transparently from `adapterAuditLogger.wrap()` on quota breach.
+- Admin endpoints: `GET /api/admin/gov-integrations/rate-limits`
+  (snapshot of all 10 providers) and `POST
+/api/admin/gov-integrations/rate-limits/:provider/reset` (operator
+  escape hatch).
+- 13 unit tests (`adapter-rate-limiter.test.js`) covering pool
+  exhaustion, per-actor cap precedence, refill over time, env overrides,
+  and the audit-wrap integration path.
+
+### Changed
+
+- `backend/utils/safeError.js` — passes through errors with a 4xx
+  `statusCode` (e.g. `RateLimitError=429`) instead of flattening to 500. Response body carries `code`, `retryAfterMs`, `scope`, and
+  `provider` so clients can implement intelligent backoff.
+
+### Notes
+
+- Pure in-memory bucket — fine for single-instance deployments.
+  Multi-instance production should back this with Redis (swap the
+  `Map` for a redis-backed store).
+- Rejection path is audited as a `status: 'rate_limited'` row so ops
+  can see cost attempts on the admin dashboard.
+
+---
+
 ## [4.0.0] — 2026-04-17 / 2026-04-18 — Rehab Core + Saudi Gov Integrations
 
 Two-day sprint shipping 20 backend modules, 10 Saudi government adapters,

@@ -2,17 +2,21 @@
  * provider-registry-consistency.test.js — drift detection across the
  * 10-provider surface.
  *
- * Four places name the providers:
- *   1. backend/services/adapterRateLimiter.js — DEFAULTS map
- *   2. backend/services/{NAME}Adapter.js      — file must exist + export MODE
- *   3. backend/routes/gov-integrations.routes.js — ADAPTERS map
- *   4. backend/routes/integrations-metrics.routes.js — ADAPTERS array
+ * Eight places name the providers:
+ *   1. backend/services/adapterRateLimiter.js DEFAULTS map
+ *   2. backend/services/{NAME}Adapter.js (file exists + exports MODE)
+ *   3. backend/routes/gov-integrations.routes.js ADAPTERS map
+ *   4. backend/routes/integrations-metrics.routes.js ADAPTERS array
+ *   5. backend/scripts/gov-status.js PROVIDERS array
+ *   6. backend/scripts/preflight.js PROVIDERS array
+ *   7. backend/models/AdapterAudit.js provider enum
+ *   8. backend/.env.example {NAME}_MODE block
  *
  * If someone adds an 11th provider and forgets any of these wirings,
  * production silently skips that provider in metrics / admin UI /
- * rate limiting / health — bad mode.
+ * rate limiting / health / audit / ops docs — worst failure mode.
  *
- * This file asserts all four lists agree on the same 10 names.
+ * This file asserts all eight lists agree on the same 10 names.
  */
 
 'use strict';
@@ -108,6 +112,18 @@ describe('10-provider registry consistency', () => {
     expect(match).toBeTruthy();
     const declared = (match[1].match(/'[a-z]+'/g) || []).map(s => s.slice(1, -1));
     expect(declared.sort()).toEqual([...EXPECTED].sort());
+  });
+
+  it('.env.example documents {NAME}_MODE for every expected provider', () => {
+    // Operators read .env.example to find what knobs exist. If we ship
+    // an 11th adapter and the env file doesn't document it, deployers
+    // flipping live will hunt through source code for the var name.
+    const src = fs.readFileSync(path.join(__dirname, '..', '.env.example'), 'utf8');
+    for (const name of EXPECTED) {
+      // Accept commented-out examples too: "# GOSI_MODE=mock" or "GOSI_MODE=mock"
+      const re = new RegExp(`^\\s*#?\\s*${name.toUpperCase()}_MODE=`, 'm');
+      expect(re.test(src)).toBe(true);
+    }
   });
 
   it('AdapterAudit.provider enum covers every expected provider + zatca-signer', () => {

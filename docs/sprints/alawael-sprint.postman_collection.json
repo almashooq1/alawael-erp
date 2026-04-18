@@ -34,6 +34,85 @@
         {
           "name": "GET /health/integrations/:provider",
           "request": { "method": "GET", "url": "{{baseUrl}}/health/integrations/gosi", "auth": { "type": "noauth" } }
+        },
+        {
+          "name": "GET /health/metrics/integrations (Prometheus)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/health/metrics/integrations",
+            "auth": { "type": "noauth" },
+            "description": "Prometheus text/plain v0.0.4 — scrape every 30s."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ops — Integrations (rate limits / circuits / audit)",
+      "description": "Endpoints shipped in 4.0.1–4.0.3 for ops visibility and control. All require admin/superadmin/compliance_officer/dpo tokens as noted.",
+      "item": [
+        {
+          "name": "GET /admin/gov-integrations/rate-limits",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/gov-integrations/rate-limits",
+            "description": "Snapshot of every provider's token-bucket state."
+          }
+        },
+        {
+          "name": "POST /admin/gov-integrations/rate-limits/:provider/reset",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/gov-integrations/rate-limits/gosi/reset",
+            "description": "Force-refill a provider's bucket. admin-only."
+          }
+        },
+        {
+          "name": "GET /admin/gov-integrations/circuits",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/gov-integrations/circuits",
+            "description": "Circuit breaker state for every registered adapter (GOSI/Absher/NPHIES/Fatoora)."
+          }
+        },
+        {
+          "name": "POST /admin/gov-integrations/circuits/:provider/reset",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/admin/gov-integrations/circuits/gosi/reset",
+            "description": "Force-close a circuit the operator knows is transient. admin-only."
+          }
+        },
+        {
+          "name": "GET /admin/adapter-audit?provider=gosi&page=1",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/adapter-audit?provider=gosi&page=1&limit=50",
+            "description": "Paginated PDPL trail. Filters: provider, actorEmail, success, from, to, entityKind, entityId."
+          }
+        },
+        {
+          "name": "GET /admin/adapter-audit/stats",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/adapter-audit/stats",
+            "description": "30-day rollup: per-provider counts, success rate, avg latency, top-10 actors."
+          }
+        },
+        {
+          "name": "GET /admin/adapter-audit/export.csv",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/adapter-audit/export.csv?provider=gosi",
+            "description": "UTF-8 BOM, capped at 10k rows. Same filters as the list endpoint."
+          }
+        },
+        {
+          "name": "GET /admin/adapter-audit/by-entity",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/admin/adapter-audit/by-entity?entityKind=Employee&entityId={{employeeId}}",
+            "description": "All adapter calls touching a specific local record — useful for PDPL subject-access requests."
+          }
         }
       ]
     },

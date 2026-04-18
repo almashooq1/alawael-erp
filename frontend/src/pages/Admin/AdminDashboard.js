@@ -33,6 +33,7 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { adminService } from 'services/adminService';
+import IntegrationsHealthBadge from '../../components/IntegrationsHealthBadge';
 import logger from 'utils/logger';
 import { gradients, statusColors, surfaceColors, neutralColors, brandColors } from 'theme/palette';
 import { useAuth } from 'contexts/AuthContext';
@@ -101,14 +102,19 @@ const AdminDashboard = () => {
           boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <DashboardIcon sx={{ fontSize: 40, mr: 2 }} />
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-              لوحة تحكم الإدارة
-            </Typography>
-            <Typography variant="body2">نظرة عامة على صحة النظام والعمليات</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <DashboardIcon sx={{ fontSize: 40, mr: 2 }} />
+            <Box>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                لوحة تحكم الإدارة
+              </Typography>
+              <Typography variant="body2">نظرة عامة على صحة النظام والعمليات</Typography>
+            </Box>
           </Box>
+          <IntegrationsHealthBadge
+            sx={{ bgcolor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(4px)' }}
+          />
         </Box>
       </Box>
 

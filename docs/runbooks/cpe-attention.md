@@ -55,6 +55,8 @@ If `scfhs_expiry` on the Employee record is stale, the attention CLI fires on a 
 
 ## Related
 
+- [HR_COMPLIANCE_GUIDE.md](../HR_COMPLIANCE_GUIDE.md) — the HR manager's
+  daily/weekly/monthly workflow (this runbook is the reactive cousin).
 - Service: `backend/services/cpeService.js`
 - Routes: `backend/routes/cpe-admin.routes.js`
 - UI: `frontend/src/pages/Admin/AdminCpeCredits.jsx`

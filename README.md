@@ -38,13 +38,14 @@
 | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | [4.0.x-DELIVERY.md](docs/4.0.x-DELIVERY.md)                                               | 📋 **4.0.x delivery summary** — before/after scorecard + patch-release timeline     |
 | [OPERATIONS.md](docs/OPERATIONS.md)                                                       | 🚨 **One-page operator index** — health hierarchy, incident paths, SLI recipes      |
+| [HR_COMPLIANCE_GUIDE.md](docs/HR_COMPLIANCE_GUIDE.md)                                     | 🩺 **HR daily/weekly/monthly playbook** — GOSI + SCFHS license + CPE credits        |
 | [sprints/SPRINT_2026_04_17-18.md](docs/sprints/SPRINT_2026_04_17-18.md)                   | 2-day sprint + 4.0.1–4.0.6 follow-ups (rate limits / circuits / metrics / runbooks) |
 | [sprints/GOV_INTEGRATIONS_GO_LIVE.md](docs/sprints/GOV_INTEGRATIONS_GO_LIVE.md)           | Flip-to-live checklist per Saudi gov provider + Prometheus + SLI PromQL recipes     |
 | [runbooks/](docs/runbooks/README.md)                                                      | On-call playbooks — one per alert (circuit / rate-limit / misconfigured)            |
 | [dashboards/gov-integrations.grafana.json](docs/dashboards/gov-integrations.grafana.json) | Grafana 10.x dashboard — 12 panels, import directly                                 |
 | [alerts/gov-integrations.yml](docs/alerts/gov-integrations.yml)                           | Alertmanager rule groups — circuit / rate-limit / SLI / config                      |
 
-Ops quick commands: `npm run gov:status` (CLI snapshot, exit 0/1/2 for cron) · `npm run preflight` (deploy gate — non-zero if any live adapter is misconfigured) · `npm run dsar:hash -- <nationalId>` (PDPL subject-hash for compliance queries) · `GET /api/health/integrations/summary` (unauth liveness) · `GET /api/health/metrics/integrations` (unauth Prometheus scrape).
+Ops quick commands: `npm run gov:status` (CLI snapshot, exit 0/1/2 for cron) · `npm run cpe:attention` (SCFHS CPE compliance digest, exit 0/1/2 for cron) · `npm run preflight` (deploy gate — non-zero if any live adapter is misconfigured) · `npm run dsar:hash -- <nationalId>` (PDPL subject-hash for compliance queries) · `GET /api/health/integrations/summary` (unauth liveness) · `GET /api/health/metrics/integrations` (unauth Prometheus scrape).
 
 ---
 

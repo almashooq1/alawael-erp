@@ -6,3 +6,6 @@ contact_links:
   - name: "💬 النقاشات | Discussions"
     url: https://github.com/almashooq1/alawael-erp/discussions
     about: "للأسئلة العامة والنقاشات، استخدم Discussions"
+  - name: "🔒 ثغرة أمنية | Security vulnerability"
+    url: https://github.com/almashooq1/alawael-erp/blob/main/SECURITY.md
+    about: "لا تفتح Issue عام للثغرات — راجع SECURITY.md للقنوات الخاصة (private disclosure)"

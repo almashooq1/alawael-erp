@@ -17,7 +17,7 @@ SHELL := /bin/bash
 # ── Phony declarations — targets that don't produce files ─────────────
 .PHONY: help ops-check ops-check-json preflight preflight-prod \
         dsar-hash cpe-attention cpe-attention-json \
-        sprint-tests ops-subsystems-tests ship-check \
+        drift-tests sprint-tests ops-subsystems-tests ship-check \
         demo-seed demo-seed-dry \
         install backend-install frontend-install mobile-install \
         backend-dev frontend-dev lint audit
@@ -56,6 +56,9 @@ cpe-attention-json: ## Same, machine-readable JSON (pipe into #hr-compliance)
 	@cd backend && npm run cpe:attention:json --silent
 
 # ─── Tests ─────────────────────────────────────────────────────────────
+drift-tests: ## Fast static drift checks (~15s) — pre-push sanity tier
+	@cd backend && npm run test:drift
+
 sprint-tests: ## Run the 523-test sprint CI gate
 	@cd backend && npm run test:sprint
 

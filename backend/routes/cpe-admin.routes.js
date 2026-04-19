@@ -236,6 +236,21 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
       .select('firstName_ar lastName_ar scfhs_number scfhs_expiry')
       .lean();
 
+    // One $in query instead of N per-employee lookups. Group records by
+    // employeeId in memory — the dashboard hits this endpoint on every
+    // page load, and at 50+ therapists the old 1+N pattern noticeably
+    // lagged behind the stat cards rendering.
+    const empIds = employees.map(e => e._id);
+    const allRecords = empIds.length
+      ? await CpeRecord.find({ employeeId: { $in: empIds } }).lean()
+      : [];
+    const recordsByEmp = new Map();
+    for (const r of allRecords) {
+      const key = String(r.employeeId);
+      if (!recordsByEmp.has(key)) recordsByEmp.set(key, []);
+      recordsByEmp.get(key).push(r);
+    }
+
     let compliant = 0;
     let attention = 0;
     let nonCompliant = 0;
@@ -243,7 +258,7 @@ router.get('/overview', requireRole(READ_ROLES), async (req, res) => {
 
     for (const e of employees) {
       const cycleEnd = resolveCycleEnd(e);
-      const records = await CpeRecord.find({ employeeId: e._id }).lean();
+      const records = recordsByEmp.get(String(e._id)) || [];
       const summary = cpe.summarize(records, cycleEnd);
       const days = cpe.daysUntilDeadline(cycleEnd);
 

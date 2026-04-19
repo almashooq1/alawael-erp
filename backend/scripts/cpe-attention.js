@@ -67,10 +67,24 @@ async function main() {
     .select('firstName_ar lastName_ar scfhs_number scfhs_expiry')
     .lean();
 
+  // One $in query instead of N per-employee lookups. On a typical site
+  // with 50+ therapists this drops the CLI runtime from seconds to
+  // sub-second, which matters when cron runs it every 5 minutes.
+  const empIds = employees.map(e => e._id);
+  const allRecords = empIds.length
+    ? await CpeRecord.find({ employeeId: { $in: empIds } }).lean()
+    : [];
+  const recordsByEmp = new Map();
+  for (const r of allRecords) {
+    const key = String(r.employeeId);
+    if (!recordsByEmp.has(key)) recordsByEmp.set(key, []);
+    recordsByEmp.get(key).push(r);
+  }
+
   const rows = [];
   for (const e of employees) {
     const cycleEnd = resolveCycleEnd(e);
-    const records = await CpeRecord.find({ employeeId: e._id }).lean();
+    const records = recordsByEmp.get(String(e._id)) || [];
     const summary = cpe.summarize(records, cycleEnd);
     const days = cpe.daysUntilDeadline(cycleEnd);
     const needsAttention = cpe.needsAttention(summary, cycleEnd);

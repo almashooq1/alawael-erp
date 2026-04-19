@@ -65,12 +65,15 @@ sprint-tests: ## Run the 523-test sprint CI gate
 ops-subsystems-tests: ## Run rate-limit / circuit / metrics / preflight tests only
 	@cd backend && npm run test:ops-subsystems
 
-ship-check: ## Opt-in pre-push gate — preflight + ops-subsystems-tests (~2m, 95 tests)
+ship-check: ## Opt-in pre-push gate — drift + preflight + ops-subsystems (~2m, 300+ tests)
 	@echo ""
-	@echo "  [1/2] Preflight — live-adapter config check"
+	@echo "  [1/3] Drift — static invariant checks"
+	@cd backend && npm run test:drift --silent
+	@echo ""
+	@echo "  [2/3] Preflight — live-adapter config check"
 	@cd backend && npm run preflight --silent
 	@echo ""
-	@echo "  [2/2] Ops subsystems — rate/circuit/metrics/audit/preflight/dsar"
+	@echo "  [3/3] Ops subsystems — rate/circuit/metrics/audit/preflight/dsar"
 	@cd backend && npm run test:ops-subsystems --silent
 	@echo ""
 	@echo "  ✓ ship-check pass — safe to push"

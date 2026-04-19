@@ -52,6 +52,7 @@ on:
       - 'backend/__tests__/cpe-minimums-consistency.test.js'
       - 'backend/__tests__/admin-routes-auth-wiring.test.js'
       - 'backend/__tests__/attendance-service.test.js'
+      - 'backend/__tests__/attendance-digest-script.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -72,6 +73,7 @@ on:
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
       - 'backend/scripts/cpe-attention.js'
+      - 'backend/scripts/attendance-digest.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -112,6 +114,7 @@ on:
       - 'backend/__tests__/cpe-minimums-consistency.test.js'
       - 'backend/__tests__/admin-routes-auth-wiring.test.js'
       - 'backend/__tests__/attendance-service.test.js'
+      - 'backend/__tests__/attendance-digest-script.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -132,6 +135,7 @@ on:
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
       - 'backend/scripts/cpe-attention.js'
+      - 'backend/scripts/attendance-digest.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -302,4 +306,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 548 sprint tests green."
+          echo "All 557 sprint tests green."

@@ -18,6 +18,7 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | --------------------------------------- | ---------------------------------------------- |
 | PDPL Data Subject Access Request (DSAR) | [dsar-adapter-audit.md](dsar-adapter-audit.md) |
 | SCFHS CPE credit attention (HR)         | [cpe-attention.md](cpe-attention.md)           |
+| Session attendance risk (front-desk)    | [attendance-digest.md](attendance-digest.md)   |
 
 ## How to use
 

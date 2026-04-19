@@ -42,6 +42,32 @@ const PROVIDERS = [
   'balady',
 ];
 
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+  process.stdout.write(
+    [
+      'preflight — live gov-adapter config deploy gate',
+      '',
+      'Checks every adapter with `*_MODE=live` has its full env-var set.',
+      'Use as a pre-deploy gate: fail fast before the app boots with a',
+      'half-configured live integration.',
+      '',
+      'Exit codes:',
+      '  0  every live adapter is configured OR all adapters are mock',
+      '  1  at least one live adapter is missing required env vars',
+      '',
+      'Usage:',
+      '  node scripts/preflight.js           colorized TTY output',
+      '  node scripts/preflight.js --json    machine-readable JSON',
+      '  CI_PREFLIGHT=1 node scripts/preflight.js   compact stderr (CI/k8s initContainer)',
+      '  node scripts/preflight.js --help    this message',
+      '',
+      'Operator docs: docs/OPERATIONS.md § "Deploying a gov-integration flip"',
+      '',
+    ].join('\n')
+  );
+  process.exit(0);
+}
+
 const JSON_MODE = process.argv.includes('--json');
 const CI_MODE = process.env.CI_PREFLIGHT === '1';
 const useColor = !JSON_MODE && !CI_MODE && process.stdout.isTTY;

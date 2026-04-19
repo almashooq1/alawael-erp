@@ -108,7 +108,16 @@ the other two are green.
 
 ## Related docs
 
+**Operational (this guide's neighborhood):**
+
 - [cpe-attention.md](runbooks/cpe-attention.md) — operator runbook for the CPE cron
 - [dsar-adapter-audit.md](runbooks/dsar-adapter-audit.md) — handling PDPL access requests
 - [gov-adapter-misconfigured.md](runbooks/gov-adapter-misconfigured.md) — when an adapter silently stops working
 - [OPERATIONS.md](OPERATIONS.md) — the platform-wide operator front door
+
+**Architecture (for the engineering view of the same surface):**
+
+- [blueprint/03-modules-map.md](blueprint/03-modules-map.md) — M-12.14 SCFHS Adapter + CPE Tracking (module inventory)
+- [blueprint/04-data-domains.md](blueprint/04-data-domains.md) — E-16b CpeRecord (schema + index strategy)
+- [blueprint/05-role-matrix.md](blueprint/05-role-matrix.md) — Resource: CPE Record (RBAC across 6 levels)
+- [blueprint/07-integrations.md](blueprint/07-integrations.md) — §2.12.1 SCFHS integration flow

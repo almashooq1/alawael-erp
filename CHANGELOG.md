@@ -71,7 +71,7 @@ drift tests that lock the admin route security surface statically.
   attached to the latest commit (not a stale in-flight run).
 - `sprint-tests.yml` paths trigger updated to include the new CPE
   service / script / drift tests so CPE-touching commits still run
-  the full 519-test gate.
+  the full 522-test gate.
 
 ### Tests
 

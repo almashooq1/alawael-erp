@@ -207,12 +207,22 @@ npm run dev:all
 ### Testing
 
 ```bash
-# Run all backend tests
+# Run the sprint gate — 522 tests that CI enforces on every PR
+npm run test:sprint
+
+# Run the full backend suite (includes many legacy suites with stale
+# import paths — the sprint gate above is the CI-authoritative number)
 npm test
 
 # Run frontend tests
 npm run test:frontend
 ```
+
+Run `npm run test:sprint` before pushing anything that touches
+`backend/` or `.github/workflows/` — it's the same suite
+`sprint-tests.yml` enforces, so a green local run matches CI. See
+[CONTRIBUTING.md](CONTRIBUTING.md) § Code Quality for the full pre-push
+checklist.
 
 ### Production Build
 

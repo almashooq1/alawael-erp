@@ -46,7 +46,7 @@
     "socket.io-client": "^4.8.3",
     "stylis": "^4.3.6",
     "stylis-plugin-rtl": "^2.1.1",
-    "web-vitals": "^5.1.0",
+    "web-vitals": "^5.2.0",
     "yup": "^1.7.1"
   },
   "devDependencies": {

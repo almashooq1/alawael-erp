@@ -82,4 +82,13 @@ describe('docs test-count consistency', () => {
     expect(parseInt(m[1], 10)).toBe(ciCount);
     expect(parseInt(m[2], 10)).toBe(ciCount);
   });
+
+  it('README sprint-gate badge matches CI count', () => {
+    const readme = read('README.md');
+    // Badge URL pattern: shields.io badge labelled "sprint gate" or "tests"
+    // followed by the count and "passing".
+    const m = readme.match(/badge\/(?:sprint%20gate|tests)-(\d+)%20passing/);
+    expect(m).toBeTruthy();
+    expect(parseInt(m[1], 10)).toBe(ciCount);
+  });
 });

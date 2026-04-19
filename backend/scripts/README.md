@@ -15,6 +15,16 @@ Scripts that follow the exit-code contract (0 = clean, 1 = actionable, 2 = error
 
 All three `:json` variants output machine-readable JSON for downstream tools (Slack bots, alerting stacks, jq pipelines).
 
+**Getting usage:** `--help` / `-h` is implemented on every ops script and exits 0 without touching the network or DB. Invoke the script directly so npm doesn't intercept the flag:
+
+```bash
+node backend/scripts/cpe-attention.js --help    # ✓ prints script usage
+node backend/scripts/gov-status.js --help       # ✓
+node backend/scripts/preflight.js --help        # ✓
+node backend/scripts/dsar-hash.js --help        # ✓
+# npm run cpe:attention -- --help               # ✗ npm eats --help as its own flag
+```
+
 ## Deployment / setup
 
 | Script                | What it does                                                         |

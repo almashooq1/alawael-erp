@@ -7,7 +7,7 @@
 #   make help             — list all targets
 #   make ops-check        — gov-integrations health snapshot
 #   make preflight        — deploy gate (exits non-zero on misconfig)
-#   make sprint-tests     — run the 522-test gate
+#   make sprint-tests     — run the 523-test gate
 #
 # Discoverability: `make` alone prints the help menu.
 
@@ -56,7 +56,7 @@ cpe-attention-json: ## Same, machine-readable JSON (pipe into #hr-compliance)
 	@cd backend && npm run cpe:attention:json --silent
 
 # ─── Tests ─────────────────────────────────────────────────────────────
-sprint-tests: ## Run the 522-test sprint CI gate
+sprint-tests: ## Run the 523-test sprint CI gate
 	@cd backend && npm run test:sprint
 
 ops-subsystems-tests: ## Run rate-limit / circuit / metrics / preflight tests only

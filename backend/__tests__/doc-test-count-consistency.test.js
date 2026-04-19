@@ -91,4 +91,30 @@ describe('docs test-count consistency', () => {
     expect(m).toBeTruthy();
     expect(parseInt(m[1], 10)).toBe(ciCount);
   });
+
+  it('Makefile + CONTRIBUTING prose claims match CI count', () => {
+    // Catches current-state count references in unstructured prose — the
+    // places the strict per-structure matchers above can't see. We scope
+    // only to files where a count is always current (Makefile top-comment,
+    // CONTRIBUTING pre-push section) — NOT CHANGELOG, which legitimately
+    // contains historical claims ("was 274 at 4.0.8", etc.).
+    const makefile = read('Makefile');
+    const contributing = read('CONTRIBUTING.md');
+    const joined = makefile + '\n' + contributing;
+
+    // Match "N tests" / "N-test gate" / "N-test sprint" / "N/N green"
+    // patterns, but exclude anything inside a `was N` historical clause.
+    const pattern = /\b(\d{3,4})[- ](?:test(?:s)?|sprint|-test\s+(?:gate|sprint))/gi;
+    const mismatches = [];
+    let m;
+    while ((m = pattern.exec(joined)) !== null) {
+      const num = parseInt(m[1], 10);
+      if (num !== ciCount) {
+        mismatches.push(`line mentions ${num} but CI says ${ciCount}: "${m[0]}"`);
+      }
+    }
+    if (mismatches.length) {
+      throw new Error('Stale test-count prose:\n  ' + mismatches.join('\n  '));
+    }
+  });
 });

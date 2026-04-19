@@ -57,4 +57,16 @@ describe('sprint test-script file existence', () => {
     const extra = ops.filter(f => !sprint.has(f));
     expect(extra).toEqual([]);
   });
+
+  it('test:drift — every listed __tests__/*.test.js exists', () => {
+    assertAllExist('test:drift');
+  });
+
+  it('test:drift is a strict subset of test:sprint', () => {
+    const s = scripts();
+    const sprint = new Set(extractTestFiles(s['test:sprint']));
+    const drift = extractTestFiles(s['test:drift']);
+    const extra = drift.filter(f => !sprint.has(f));
+    expect(extra).toEqual([]);
+  });
 });

@@ -526,6 +526,38 @@ Appointment {
 }
 ```
 
+#### E-16b: CpeRecord (SCFHS continuing-education credit)
+
+```
+CpeRecord {
+  id: UUID
+  employeeId: UUID (FK Employee)          # licensed therapist only
+  activityName: String (required)         # external key — CSV export uses this
+  activityNameAr: String                  # UI-preferred label
+  provider: String                        # accrediting body / institution
+  accreditationNumber: String             # SCFHS accreditation code (if present)
+  category: Enum('1', '2', '3') (required)  # SCFHS 2021 framework
+  creditHours: Number (required, min 0.5) # 0.5 = SCFHS's smallest unit
+  activityDate: Date (required)           # counts toward 5-yr window containing this
+  proofUrl: String                        # certificate / receipt pointer
+  verified: Boolean (default false)       # HR approval gates renewal counting
+  verifiedBy: UUID (FK User)              # set ONLY by POST /:id/verify
+  verifiedAt: Date                        # set ONLY by POST /:id/verify
+  notes: String
+  audit: AuditFields
+}
+```
+
+- **Not branch-scoped** at the record level — the license is with
+  SCFHS, not the branch, and therapists move between branches. The
+  branch filter is applied transitively via Employee.branch_id when
+  relevant.
+- `verified*` fields are immutable via PATCH — only `POST /:id/verify`
+  can set them, matching the audit-trail invariant documented in §5
+  (Immutable Fields).
+- Indexes: `{employeeId, activityDate desc}` (5-yr window lookup),
+  `{employeeId, category, verified}` (category rollup).
+
 #### E-17: Attendance (Employee)
 
 ```

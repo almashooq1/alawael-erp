@@ -49,4 +49,42 @@ describe('sprint-tests.yml paths: triggers exist', () => {
       );
     }
   });
+
+  it('push and pull_request paths are identical (no asymmetry)', () => {
+    // GitHub Actions runs different events through different `paths:`
+    // filters. If push has fewer entries than pull_request, a direct
+    // push to main can land code that PRs would have CI-gated. This
+    // had drifted before — push was a strict subset of pull_request,
+    // so test files added during the CPE work didn't trigger sprint
+    // CI on direct merges.
+    function extractPathsForEvent(eventName) {
+      // Match the `eventName:` block and capture lines until the next
+      // top-level `<word>:` (push:, pull_request:, workflow_dispatch:).
+      const re = new RegExp(
+        `\\n  ${eventName}:[\\s\\S]*?\\n    paths:[\\s\\S]*?(?=\\n  [a-z_]+:|\\nenv:|$)`
+      );
+      const block = yml.match(re);
+      if (!block) return [];
+      return block[0]
+        .split('\n')
+        .filter(line => /^ {6}-\s+'[^']+'$/.test(line))
+        .map(line => line.match(/'([^']+)'/)[1]);
+    }
+
+    const pushPaths = new Set(extractPathsForEvent('push'));
+    const prPaths = new Set(extractPathsForEvent('pull_request'));
+
+    const inPushNotPr = [...pushPaths].filter(p => !prPaths.has(p));
+    const inPrNotPush = [...prPaths].filter(p => !pushPaths.has(p));
+
+    if (inPushNotPr.length || inPrNotPush.length) {
+      throw new Error(
+        'sprint-tests.yml push/pull_request paths are out of sync:\n' +
+          (inPushNotPr.length ? '  Only in push:\n    ' + inPushNotPr.join('\n    ') + '\n' : '') +
+          (inPrNotPush.length ? '  Only in pull_request:\n    ' + inPrNotPush.join('\n    ') : '')
+      );
+    }
+    // Sanity: not both empty.
+    expect(pushPaths.size).toBeGreaterThan(10);
+  });
 });

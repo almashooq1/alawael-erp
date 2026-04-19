@@ -15,20 +15,26 @@
 name: "🧪 Sprint Tests"
 
 on:
+  # NOTE: GitHub Actions doesn't expand YAML anchors inside `paths:` lists,
+  # so push and pull_request keep identical literal lists. If you add a
+  # path to one, add it to the other — the ci-path-triggers-exist drift
+  # test catches stale entries but won't catch this asymmetry.
   push:
     branches: [main, develop]
-    paths:
+    paths: &sprint_paths
       - 'backend/services/**'
       - 'backend/routes/**'
       - 'backend/models/**'
       - 'backend/utils/safeError.js'
+      - 'backend/utils/arabicSearch.js'
       - 'backend/middleware/auth.js'
+      - 'backend/middleware/requestId.middleware.js'
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
       - 'backend/__tests__/zatca-envelope.test.js'
       - 'backend/__tests__/safe-error.test.js'
-      - 'backend/services/zatcaEnvelope.js'
+      - 'backend/__tests__/arabic-search.test.js'
       - 'backend/__tests__/adapter-rate-limiter.test.js'
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
@@ -37,9 +43,19 @@ on:
       - 'backend/__tests__/preflight-script.test.js'
       - 'backend/__tests__/dsar-hash-script.test.js'
       - 'backend/__tests__/build-info-internals.test.js'
+      - 'backend/__tests__/rate-limit-to-429.test.js'
+      - 'backend/__tests__/request-id-contract.test.js'
+      - 'backend/__tests__/provider-registry-consistency.test.js'
+      - 'backend/__tests__/doc-test-count-consistency.test.js'
+      - 'backend/__tests__/cpe-service.test.js'
+      - 'backend/__tests__/cpe-attention-script.test.js'
+      - 'backend/__tests__/cpe-minimums-consistency.test.js'
+      - 'backend/__tests__/admin-routes-auth-wiring.test.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
+      - 'backend/scripts/cpe-attention.js'
+      - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
       - 'docs/alerts/**'
@@ -53,12 +69,15 @@ on:
       - 'backend/routes/**'
       - 'backend/models/**'
       - 'backend/utils/safeError.js'
+      - 'backend/utils/arabicSearch.js'
       - 'backend/middleware/auth.js'
+      - 'backend/middleware/requestId.middleware.js'
       - 'backend/__tests__/gov-adapters.e2e.test.js'
       - 'backend/__tests__/new-admin-routes.api.test.js'
       - 'backend/__tests__/zatca-xml-signer.e2e.test.js'
       - 'backend/__tests__/zatca-envelope.test.js'
-      - 'backend/services/zatcaEnvelope.js'
+      - 'backend/__tests__/safe-error.test.js'
+      - 'backend/__tests__/arabic-search.test.js'
       - 'backend/__tests__/adapter-rate-limiter.test.js'
       - 'backend/__tests__/adapter-circuit-breaker.test.js'
       - 'backend/__tests__/adapter-circuit-live-path.test.js'
@@ -67,8 +86,6 @@ on:
       - 'backend/__tests__/preflight-script.test.js'
       - 'backend/__tests__/dsar-hash-script.test.js'
       - 'backend/__tests__/build-info-internals.test.js'
-      - 'backend/__tests__/safe-error.test.js'
-      - 'backend/__tests__/arabic-search.test.js'
       - 'backend/__tests__/rate-limit-to-429.test.js'
       - 'backend/__tests__/request-id-contract.test.js'
       - 'backend/__tests__/provider-registry-consistency.test.js'
@@ -77,12 +94,11 @@ on:
       - 'backend/__tests__/cpe-attention-script.test.js'
       - 'backend/__tests__/cpe-minimums-consistency.test.js'
       - 'backend/__tests__/admin-routes-auth-wiring.test.js'
-      - 'backend/scripts/cpe-attention.js'
-      - 'backend/middleware/requestId.middleware.js'
-      - 'backend/utils/arabicSearch.js'
       - 'backend/scripts/preflight.js'
       - 'backend/scripts/gov-status.js'
       - 'backend/scripts/dsar-hash.js'
+      - 'backend/scripts/cpe-attention.js'
+      - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
       - 'docs/alerts/**'
@@ -252,4 +268,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 520 sprint tests green."
+          echo "All 521 sprint tests green."

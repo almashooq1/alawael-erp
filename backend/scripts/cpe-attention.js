@@ -189,6 +189,9 @@ main()
   .catch(err => {
     if (!JSON_MODE) {
       console.error(`${c.red}cpe-attention failed:${c.reset} ${err.message}`);
+      if (!QUIET) {
+        console.error(`${c.dim}Run with --help for usage + expected env vars.${c.reset}`);
+      }
     } else {
       process.stdout.write(
         JSON.stringify({ error: err.message, checkedAt: new Date().toISOString() }) + '\n'

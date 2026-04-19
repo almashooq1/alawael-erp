@@ -354,6 +354,16 @@ export default function AdminCpeCredits() {
 
       {overviewLoading && <LinearProgress sx={{ mb: 2 }} />}
 
+      {overview && overview.total === 0 && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          لا يوجد معالجون مرخَّصون من SCFHS بعد. أضف رقم الترخيص في{' '}
+          <a href="/admin/hr/compliance" style={{ color: 'inherit', textDecoration: 'underline' }}>
+            الامتثال (HR)
+          </a>{' '}
+          ثم عُد إلى هذه الصفحة.
+        </Alert>
+      )}
+
       <Grid container spacing={2} mb={3}>
         {statCards.map((s, i) => (
           <Grid item xs={6} md={3} key={i}>

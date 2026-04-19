@@ -30,6 +30,7 @@
 | [architecture/decisions/](docs/architecture/decisions/) | Architecture Decision Records (ADRs 001–009)                                                                                          |
 | [DEVELOPMENT.md](docs/DEVELOPMENT.md)                   | Developer setup guide, code standards, git workflow                                                                                   |
 | [CONTRIBUTING.md](CONTRIBUTING.md)                      | Contribution guidelines and PR process                                                                                                |
+| [SECURITY.md](SECURITY.md)                              | Vulnerability disclosure policy + PDPL compliance posture + scope                                                                     |
 | [CHANGELOG.md](CHANGELOG.md)                            | Full release history                                                                                                                  |
 
 ### Ops & Saudi gov integrations (4.0.x)

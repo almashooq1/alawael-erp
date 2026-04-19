@@ -134,11 +134,15 @@ before pushing anything that touches `backend/services/*`,
 run:
 
 ```bash
-make ship-check          # or: npm run ship-check
+make drift-tests         # ~15s — static invariants only (cheap sanity)
+make ship-check          # ~2 min — drift + preflight + ops-subsystems
 ```
 
-~90–120 seconds. Runs `preflight` + `test:ops-subsystems` (95 tests).
-Exits non-zero if either fails — that's your signal to fix before pushing.
+`drift-tests` is the cheapest tier — catches stale counts, broken doc
+links, missing runbook refs, auth-wiring regressions. Run it on every
+docs-only PR. `ship-check` is the full pre-push gate for changes to
+`backend/services/*`, `backend/routes/*-integrations*`, or
+`docs/alerts|dashboards|runbooks/*`.
 
 ---
 

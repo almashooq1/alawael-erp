@@ -37,6 +37,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
   const Invoice = require('../models/Invoice');
   const NphiesClaim = require('../models/NphiesClaim');
   const CpeRecord = require('../models/CpeRecord');
+  const SessionAttendance = require('../models/SessionAttendance');
 
   const gosi = require('../services/gosiAdapter');
   const scfhs = require('../services/scfhsAdapter');
@@ -601,6 +602,78 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
     });
     sessions.push(session);
     bump('sessions');
+  }
+
+  // ── Session attendance — 3 risk profiles across beneficiaries ──────────
+  //   Benef-0: clean attendance (18× present)
+  //   Benef-1: occasional late (14 present, 3 late, 1 absent)
+  //   Benef-2: ATTENTION bucket — 3 no_show in 30d (+ 10 present)
+  //   Benef-3: CRITICAL bucket — 5 no_show in 30d (+ 3 present)
+  //   Rest: sparse coverage
+  // Attendance records are keyed to actual sessions so the model's
+  // unique-sessionId constraint is honored and the dashboard can
+  // cross-reference.
+  const attendancePlan = {
+    // beneficiaryIdx → array of {status, daysAgo, billable?, reason?}
+    0: Array.from({ length: 18 }, (_, i) => ({ status: 'present', daysAgo: i + 1 })),
+    1: [
+      ...Array.from({ length: 14 }, (_, i) => ({ status: 'present', daysAgo: i + 1 })),
+      { status: 'late', daysAgo: 5 },
+      { status: 'late', daysAgo: 10 },
+      { status: 'late', daysAgo: 15 },
+      { status: 'absent', daysAgo: 20, reason: 'مرض' },
+    ],
+    2: [
+      ...Array.from({ length: 10 }, (_, i) => ({ status: 'present', daysAgo: i + 1 })),
+      { status: 'no_show', daysAgo: 3, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 12, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 22, billable: true, reason: 'لم يحضر دون إشعار' },
+    ],
+    3: [
+      ...Array.from({ length: 3 }, (_, i) => ({ status: 'present', daysAgo: i + 1 })),
+      { status: 'no_show', daysAgo: 2, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 8, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 14, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 20, billable: true, reason: 'لم يحضر دون إشعار' },
+      { status: 'no_show', daysAgo: 26, billable: true, reason: 'لم يحضر دون إشعار' },
+    ],
+  };
+
+  // Pool of available sessions per beneficiary for linking.
+  const sessionsByBenef = new Map();
+  for (const s of sessions) {
+    const key = String(s.beneficiary || '');
+    if (!sessionsByBenef.has(key)) sessionsByBenef.set(key, []);
+    sessionsByBenef.get(key).push(s);
+  }
+
+  for (const [idxStr, plan] of Object.entries(attendancePlan)) {
+    const benef = beneficiaries[Number(idxStr)];
+    if (!benef) continue;
+    const pool = sessionsByBenef.get(String(benef._id)) || [];
+    // If the beneficiary has fewer actual sessions than planned entries,
+    // synthesize additional sessionIds — the attendance row's unique
+    // constraint is per-sessionId only, so any valid ObjectId works
+    // for the demo (real production would reuse real sessions).
+    for (let i = 0; i < plan.length; i++) {
+      const p = plan[i];
+      const session = pool[i];
+      const sessionId = session?._id || new (require('mongoose').Types.ObjectId)();
+      const existing = await SessionAttendance.findOne({ sessionId });
+      if (existing) continue;
+      await SessionAttendance.create({
+        sessionId,
+        beneficiaryId: benef._id,
+        therapistId: session?.therapist,
+        branchId: session?.branch || branches[0]?._id,
+        scheduledDate: new Date(Date.now() - p.daysAgo * 24 * 60 * 60 * 1000),
+        status: p.status,
+        billable: !!p.billable,
+        reason: p.reason,
+        markedAt: new Date(),
+      });
+      bump('attendanceRecords');
+    }
   }
 
   // ── Clinical assessments (8) ──────────────────────────────────────────

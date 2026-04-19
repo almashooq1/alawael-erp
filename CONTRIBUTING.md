@@ -48,7 +48,7 @@ npm run ship-check            # ~2 min — preflight + ops-subsystems
 ```
 
 The sprint gate is the **hard gate** — `.github/workflows/sprint-tests.yml`
-runs the same 520 tests on every push and PR; any drop fails the merge.
+runs the same 522 tests on every push and PR; any drop fails the merge.
 Run it locally before pushing to avoid the "fails in CI, passes on my
 machine" cycle.
 

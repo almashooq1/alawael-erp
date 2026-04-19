@@ -5,30 +5,73 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [4.0.10] — 2026-04-18 — SCFHS CPE credit tracking
+## [4.0.10] — 2026-04-19 — SCFHS CPE credit tracking + CI/auth hardening
 
 Closes a known gap in the HR-compliance surface. Previously GOSI +
 SCFHS license status was tracked; the CPE credit hours (100 per
 5-year cycle split 50/30/20 across three SCFHS categories) were not.
+Bundled together with this feature: an HR ops playbook, a CI
+concurrency fix that was costing minutes, and two new auth-wiring
+drift tests that lock the admin route security surface statically.
 
-### Added
+### Added — CPE feature (end-to-end)
 
 - `backend/models/CpeRecord.js` — credit record schema with verified/
   verifiedBy/verifiedAt audit fields and compound indexes for the
-  per-employee lookups the summary + overview routes use.
+  per-employee lookups the summary + overview routes use. Schema-level
+  `min: 0.5` on creditHours so non-HTTP writers (migrations, seeders,
+  imports) can't slip a 0-hour record past the 0.5-hour SCFHS floor.
 - `backend/services/cpeService.js` — pure summary math (5-year window,
   verified-only toward renewal, per-category deficit, compliant verdict).
   Env-tunable minimums (`SCFHS_CPE_MIN_CAT1/2/3/TOTAL`).
-- `backend/routes/cpe-admin.routes.js` — 8 admin endpoints mounted at
+- `backend/routes/cpe-admin.routes.js` — 9 admin endpoints mounted at
   `/api/admin/hr/cpe`: list/filter, by-employee, per-employee summary,
   create, patch, verify, delete, overview (dashboard counters +
-  soon-expiring watchlist).
+  soon-expiring watchlist), and `export.csv` (UTF-8-BOM CSV with
+  hydrated employee names for SCFHS audit sheets).
 - `frontend/src/pages/Admin/AdminCpeCredits.jsx` — dashboard at
   `/admin/hr/cpe`: stat cards, watchlist, filterable records table,
+  add/edit dialogs (closes the create + patch UI gaps the routes have
+  always had), CSV download button respecting current filters,
   per-therapist summary dialog (required/earned/deficit per category).
 - `backend/scripts/cpe-attention.js` — cron-friendly CLI with the
   same exit-code contract as `gov-status.js` (0=clean, 1=needs
   attention, 2=error). `--json` and `--quiet` for ops pipelines.
+- `backend/seeds/demo-showcase.seed.js` — CPE records spread across the
+  three compliance verdicts (compliant / attention / non-compliant /
+  partial / empty) so the dashboard shows realistic state on a fresh
+  clone instead of empty counters.
+- `docs/runbooks/cpe-attention.md` — HR-facing runbook for the CPE
+  cron digest (immediate actions · diagnosis A/B/C · prevention).
+- `docs/HR_COMPLIANCE_GUIDE.md` — daily/weekly/monthly playbook tying
+  GOSI + SCFHS license + CPE credits into one HR workflow.
+- `Makefile` + root `package.json` — `make cpe-attention[-json]` and
+  root `npm run cpe:attention[:json]` proxies match the existing
+  ops-command surface (gov:status, preflight, dsar:hash).
+
+### Added — auth wiring drift tests
+
+- `backend/__tests__/admin-routes-auth-wiring.test.js` (13 tests) —
+  static check that every `routes/*-admin.routes.js` (a) wires
+  `authenticateToken` before any handler and (b) every individual
+  `router.METHOD()` includes a role-restricting middleware
+  (`requireRole`/`authorizeRoles`/`requireAdmin`/`adminOnly`). Catches
+  the copy-paste regression where a new endpoint slips out without a
+  role gate and an authenticated parent can hit admin data.
+- `backend/__tests__/cpe-minimums-consistency.test.js` (5 tests) —
+  pulls canonical 50/30/20 + 100 from `cpeService.MIN_PER_CYCLE` and
+  asserts every other touchpoint (test assertions, UI subtitle, HR
+  guide, runbook) mentions the same numbers in its native language.
+
+### CI
+
+- `concurrency:` blocks added to `ci.yml`, `sprint-tests.yml`,
+  `pr-checks.yml` so superseded runs on the same ref are cancelled.
+  Saves CI minutes on rapid push cycles and keeps the status check
+  attached to the latest commit (not a stale in-flight run).
+- `sprint-tests.yml` paths trigger updated to include the new CPE
+  service / script / drift tests so CPE-touching commits still run
+  the full 519-test gate.
 
 ### Tests
 
@@ -36,10 +79,13 @@ Sprint suite: **519 passing** (was 484 at 4.0.9).
 • 13 unit tests for `cpeService.summarize` / `daysUntilDeadline` /
 `needsAttention` (5-year window filter, env overrides, verified-vs-
 unverified split, per-category deficit math, attention threshold)
-• 3 CPE route smoke tests (list, overview, summary-by-invalid-id)
-• 2 mount checks (`/api/admin/hr/cpe` + `/overview`)
-• 5 exit-code contract tests for the CLI (DB-unreachable path,
-`--json`/`--quiet` behavior, shebang + header documentation)
+• 4 CPE route smoke tests (list, overview, summary-by-invalid-id,
+CSV header contract)
+• 3 mount checks (`/api/admin/hr/cpe` + `/overview` + `/export.csv`)
+• 5 exit-code contract tests for the cpe-attention CLI (DB-unreachable
+path, `--json`/`--quiet` behavior, shebang + header documentation)
+• 5 minimums-consistency drift checks (50/30/20+100 across 5 files)
+• 13 admin-routes-auth-wiring static checks (auth + role-gate per file)
 
 ---
 

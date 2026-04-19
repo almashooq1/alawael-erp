@@ -138,6 +138,7 @@ const AdminInvoices = lazyWithRetry(() => import('./pages/Admin/AdminInvoices'))
 const AdminClinicalDocs = lazyWithRetry(() => import('./pages/Admin/AdminClinicalDocs'));
 const AdminHRCompliance = lazyWithRetry(() => import('./pages/Admin/AdminHRCompliance'));
 const AdminCpeCredits = lazyWithRetry(() => import('./pages/Admin/AdminCpeCredits'));
+const AdminAttendance = lazyWithRetry(() => import('./pages/Admin/AdminAttendance'));
 const AdminGovIntegrations = lazyWithRetry(() => import('./pages/Admin/AdminGovIntegrations'));
 const AdminIntegrationsOps = lazyWithRetry(() => import('./pages/Admin/AdminIntegrationsOps'));
 const AdminRateLimits = lazyWithRetry(() => import('./pages/Admin/AdminRateLimits'));
@@ -264,6 +265,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/clinical-docs" element={<AdminClinicalDocs />} />
                   <Route path="admin/hr/compliance" element={<AdminHRCompliance />} />
                   <Route path="admin/hr/cpe" element={<AdminCpeCredits />} />
+                  <Route path="admin/attendance" element={<AdminAttendance />} />
                   <Route path="admin/gov-integrations" element={<AdminGovIntegrations />} />
                   <Route path="admin/integrations-ops" element={<AdminIntegrationsOps />} />
                   <Route path="admin/rate-limits" element={<AdminRateLimits />} />

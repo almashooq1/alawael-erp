@@ -1334,6 +1334,13 @@ const getNavigationItems = () => [
         badgeColor: 'info',
       },
       {
+        id: 'admin-attendance',
+        label: 'حضور الجلسات',
+        path: '/admin/attendance',
+        badge: 'ATT',
+        badgeColor: 'success',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

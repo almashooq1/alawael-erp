@@ -91,6 +91,13 @@ on:
       - '.github/workflows/sprint-tests.yml'
   workflow_dispatch:
 
+# Cancel in-progress runs on the same ref when a newer commit arrives.
+# Saves CI minutes on rapid pushes + keeps the status check tracking
+# the latest commit (not a stale in-flight run).
+concurrency:
+  group: sprint-tests-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: '20'
 

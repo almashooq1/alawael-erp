@@ -13,6 +13,12 @@ permissions:
   contents: read
   pull-requests: write
 
+# Cancel in-progress PR-checks runs on the same PR so only the latest
+# pushed commit has a pending check.
+concurrency:
+  group: pr-checks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pr-quality:
     name: "📏 PR Quality"

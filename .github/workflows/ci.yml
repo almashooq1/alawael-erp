@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main, develop]
 
+# Cancel superseded runs on the same ref so PRs/branches track only the
+# latest commit and we stop burning CI minutes on stale pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   NODE_VERSION: '20'
 

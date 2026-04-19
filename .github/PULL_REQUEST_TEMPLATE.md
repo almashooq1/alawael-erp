@@ -51,6 +51,12 @@ Closes #(issue number)
       | أضفت اختبارات تثبت فعالية الإصلاح أو عمل الميزة
 - [ ] New and existing unit tests pass locally with my changes | تمر الاختبارات
       الجديدة والموجودة بنجاح محليًا
+- [ ] **Sprint gate is green:** `npm run test:sprint` from the repo root (or
+      `cd backend && npm run test:sprint`) passes all 519 tests | بوابة
+      السبرنت ناجحة
+- [ ] **Ship-check is green** (if touching ops/gov-integration code):
+      `npm run ship-check` runs preflight + ops-subsystems in ~2 min | فحص
+      الجاهزية ناجح
 - [ ] I have tested this on multiple browsers/devices (if applicable) | اختبرت
       على متصفحات/أجهزة متعددة (إن أمكن)
 

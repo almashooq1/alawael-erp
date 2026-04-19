@@ -1341,6 +1341,13 @@ const getNavigationItems = () => [
         badgeColor: 'success',
       },
       {
+        id: 'admin-outcomes',
+        label: 'النتائج السريرية',
+        path: '/admin/outcomes',
+        badge: 'OUT',
+        badgeColor: 'primary',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

@@ -22,26 +22,40 @@ cd ../frontend && npm start
 
 ## Branch Naming
 
-| Type     | Pattern              | Example                        |
-|----------|----------------------|--------------------------------|
-| Feature  | `feature/<topic>`    | `feature/invoice-pdf-export`   |
-| Bug fix  | `fix/<issue>`        | `fix/login-redirect`           |
-| Chore    | `chore/<topic>`      | `chore/upgrade-mongoose`       |
-| Release  | `release/<version>`  | `release/1.1.0`                |
+| Type    | Pattern             | Example                      |
+| ------- | ------------------- | ---------------------------- |
+| Feature | `feature/<topic>`   | `feature/invoice-pdf-export` |
+| Bug fix | `fix/<issue>`       | `fix/login-redirect`         |
+| Chore   | `chore/<topic>`     | `chore/upgrade-mongoose`     |
+| Release | `release/<version>` | `release/1.1.0`              |
 
 ## Code Quality
 
-Before pushing, run the full quality gate:
+Before pushing, run the sprint gate (the same suite CI enforces):
 
 ```bash
-cd backend
-npm run quality:push          # mock-guard + phase-2 tests
-npm run quality:ci            # mock-guard + full test suite
-npm run lint                  # ESLint
+npm run test:sprint           # ~3 min — 520 tests across 38 suites,
+                              # blocks the PR if anything fails
+npm run lint                  # ESLint (warnings tolerated, errors not)
 npm run format:check          # Prettier
 ```
 
-All 288 test suites / 8 930 tests **must** pass. The CI pipeline will reject pushes that drop below the threshold.
+If you're touching ops / gov-integration / rate-limit / circuit-breaker
+code, also run:
+
+```bash
+npm run ship-check            # ~2 min — preflight + ops-subsystems
+```
+
+The sprint gate is the **hard gate** — `.github/workflows/sprint-tests.yml`
+runs the same 520 tests on every push and PR; any drop fails the merge.
+Run it locally before pushing to avoid the "fails in CI, passes on my
+machine" cycle.
+
+The wider repo has thousands of additional tests (most as `npm test`)
+but they're not CI-gated because the codebase has known stale-import-path
+suites that fail without indicating real regressions. Don't panic if the
+broader suite count looks off — focus on the sprint gate.
 
 ## Commit Messages
 
@@ -56,16 +70,24 @@ docs(readme): update deployment guide
 
 ## Pull Request Checklist
 
-- [ ] Tests pass locally (`npm run quality:ci`)
-- [ ] Lint passes (`npm run lint -- --max-warnings 0`)
-- [ ] New routes have `authenticate` middleware
-- [ ] New models use mass-assignment whitelist (`pickFields`)
+- [ ] Sprint gate passes locally (`npm run test:sprint`)
+- [ ] Lint passes (`npm run lint`) — 0 errors required, warnings tolerated
+- [ ] New admin routes wire `authenticateToken` AND `requireRole` (the
+      `admin-routes-auth-wiring` drift test catches both, but check first)
+- [ ] New PII-touching writes go through the model's mass-assignment
+      whitelist (`pickFields`) — never spread `req.body` directly
 - [ ] No `console.log` — use `logger.info/warn/error` instead
-- [ ] Arabic UI strings are added to `src/locales/ar.json`
+- [ ] Arabic UI strings live in the component or `src/locales/ar.json`,
+      never English-only labels for user-visible text
+- [ ] If you add a new sprint test, bump the count in **all 6 surfaces**:
+      sprint-tests.yml summary, CHANGELOG entry, SPRINT doc, DELIVERY
+      scorecard + local-run line, README badge. The
+      `doc-test-count-consistency` test will catch the ones you miss.
 
 ## Reporting Bugs
 
 Open an issue and include:
+
 1. Steps to reproduce
 2. Expected vs actual behaviour
 3. Browser / Node version

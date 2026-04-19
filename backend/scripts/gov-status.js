@@ -35,6 +35,34 @@ const PROVIDERS = [
 ];
 
 const args = new Set(process.argv.slice(2));
+
+if (args.has('--help') || args.has('-h')) {
+  process.stdout.write(
+    [
+      'gov-status — Saudi gov-integrations health snapshot',
+      '',
+      'Inspects every adapter under services/*Adapter.js and reports',
+      'its configured/live/circuit state. No network calls — purely',
+      'local config introspection.',
+      '',
+      'Exit codes:',
+      '  0  all adapters configured + no circuits open',
+      '  1  at least one adapter misconfigured OR circuit open',
+      '  2  internal error (unreadable adapter module, etc.)',
+      '',
+      'Usage:',
+      '  node scripts/gov-status.js           colorized table',
+      '  node scripts/gov-status.js --json    machine-readable JSON',
+      '  node scripts/gov-status.js --quiet   exit-code only, no stdout',
+      '  node scripts/gov-status.js --help    this message',
+      '',
+      'Operator docs: docs/OPERATIONS.md · docs/runbooks/',
+      '',
+    ].join('\n')
+  );
+  process.exit(0);
+}
+
 const JSON_MODE = args.has('--json');
 const QUIET = args.has('--quiet');
 

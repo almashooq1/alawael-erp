@@ -26,6 +26,35 @@
 'use strict';
 
 const args = new Set(process.argv.slice(2));
+
+if (args.has('--help') || args.has('-h')) {
+  process.stdout.write(
+    [
+      'cpe-attention — SCFHS CPE compliance digest',
+      '',
+      'Walks every licensed therapist and reports the compliance verdict.',
+      'Exits with a status code suitable for cron + alerting:',
+      '  0  nothing to do — no therapist in the attention window',
+      '  1  at least one therapist needs HR action (6-month window)',
+      '  2  internal error (DB unreachable, bad data)',
+      '',
+      'Usage:',
+      '  node scripts/cpe-attention.js           colorized table',
+      '  node scripts/cpe-attention.js --json    machine-readable JSON',
+      '  node scripts/cpe-attention.js --quiet   exit-code only, no stdout',
+      '  node scripts/cpe-attention.js --help    this message',
+      '',
+      'Env:',
+      '  MONGODB_URI                       (default mongodb://localhost:27017/alawael-erp)',
+      '  SCFHS_CPE_MIN_CAT1/2/3/TOTAL      per-category minimums (defaults 50/30/20/100)',
+      '',
+      'Operator docs: docs/runbooks/cpe-attention.md',
+      '',
+    ].join('\n')
+  );
+  process.exit(0);
+}
+
 const JSON_MODE = args.has('--json');
 const QUIET = args.has('--quiet');
 

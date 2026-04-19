@@ -220,6 +220,28 @@
 | Edit salary     | ❌  | ✅        | 📝              | ❌            | 📝          | ❌                    |
 | View own record | —   | —         | —               | —             | —           | ✅ (via self-service) |
 
+### Resource: CPE Record (SCFHS credit hours)
+
+| Action                   | L1  | L2 (CHRO) | L3          | L4 (clinical sup.) | L5 (HR) | L6  |
+| ------------------------ | --- | --------- | ----------- | ------------------ | ------- | --- |
+| List / filter            | ✅  | ✅        | ✅ (branch) | 👁 (peer review)   | ✅      | ❌  |
+| View own summary         | —   | —         | —           | ✅ (own)           | ✅      | ❌  |
+| Create                   | ✅  | ✅        | ❌          | ❌                 | ✅      | ❌  |
+| Patch (fix typos)        | ✅  | ✅        | ❌          | ❌                 | ✅      | ❌  |
+| Verify (flip `verified`) | ✅  | ✅        | ❌          | ❌                 | ✅      | ❌  |
+| Delete                   | ✅  | ✅        | ❌          | ❌                 | ✅      | ❌  |
+| Overview + soon-expiring | ✅  | ✅        | ✅ (branch) | 👁 (own team)      | ✅      | ❌  |
+| CSV export for audit     | ✅  | ✅        | 📝          | 📝                 | ✅      | ❌  |
+
+- Verify is intentionally HR-only — credits only count toward
+  SCFHS renewal once HR has reviewed the proof. Clinical supervisors
+  can see what's pending but cannot self-certify credits for staff they
+  supervise (conflict of interest).
+- PATCH strips `verified` / `verifiedBy` / `verifiedAt` server-side so
+  the audit trail on verification stays honest even with write access.
+- L4 peer-review access is read-only (`👁`) — used for case reviews
+  where supervisors reference the therapist's CPE history.
+
 ### Resource: Attendance (Employee self)
 
 | Action       | L5       | L6                     |

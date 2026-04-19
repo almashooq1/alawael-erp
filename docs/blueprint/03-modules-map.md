@@ -505,6 +505,22 @@
 
 ### M-12.13 — MoH/Disability Authority Adapter _(exists partial)_
 
+### M-12.14 — SCFHS Adapter + CPE Tracking _(exists — shipped 4.0.10)_
+
+Healthcare-practitioner licensing + continuing education. Two
+connected surfaces:
+
+- **License verification** — `scfhsAdapter.js` returns status /
+  classification / specialty / expiryDate → Employee.scfhs_verification.
+- **CPE credits** — `CpeRecord` model + `cpeService.js` pure-math
+  summary + `cpe-admin.routes.js` 9 endpoints mounted at
+  `/api/admin/hr/cpe`. 5-year rolling cycle, 50/30/20 per-category
+  minimums + 100 total, env-tunable via `SCFHS_CPE_MIN_*`.
+
+Cron: `npm run cpe:attention` (exit 0/1/2 contract) for daily HR
+digest. CSV export for SCFHS audit requests. Cross-reference:
+[HR_COMPLIANCE_GUIDE.md](../HR_COMPLIANCE_GUIDE.md).
+
 **Common Pattern لكل adapter:**
 
 - Config (endpoint, credentials, certs)

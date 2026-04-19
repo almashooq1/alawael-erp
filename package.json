@@ -70,6 +70,7 @@
     "stats": "cd backend && npm run stats",
     "test": "cd backend && npm test",
     "test:backend": "cd backend && npm test",
+    "test:drift": "cd backend && npm run test:drift",
     "test:frontend": "cd frontend && npm test -- --watchAll=false",
     "test:ops-subsystems": "cd backend && npm run test:ops-subsystems",
     "test:sprint": "cd backend && npm run test:sprint"

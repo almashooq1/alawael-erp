@@ -347,6 +347,18 @@ describe('/api/admin/hr/cpe (SCFHS CPE tracking)', () => {
       'activityDate,employeeName,scfhsNumber,category,creditHours,activityNameAr,activityName,provider,accreditationNumber,verified,verifiedAt'
     );
   });
+
+  it('GET /export.csv exposes X-Total-Count header (no silent truncation)', async () => {
+    const res = await request(app).get('/api/admin/hr/cpe/export.csv').set(bearerAdmin());
+    expect(res.status).toBe(200);
+    // Always emitted — consumers can compare to row count to detect
+    // a 10k-row truncation that would otherwise be silent.
+    expect(res.headers['x-total-count']).toBeDefined();
+    expect(parseInt(res.headers['x-total-count'], 10)).toBeGreaterThanOrEqual(0);
+    // Without the trailing X-Truncated header on a fresh DB the count
+    // is well under the 10k guardrail.
+    expect(res.headers['x-truncated']).toBeUndefined();
+  });
 });
 
 describe('/api/admin/beneficiaries/search (Arabic-aware typeahead)', () => {

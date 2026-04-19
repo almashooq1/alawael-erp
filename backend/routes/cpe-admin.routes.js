@@ -310,7 +310,21 @@ router.get('/export.csv', requireRole(READ_ROLES), async (req, res) => {
       }
     }
 
-    const items = await CpeRecord.find(filter).sort({ activityDate: -1 }).limit(10_000).lean();
+    const EXPORT_LIMIT = 10_000;
+    // Count first so the response can flag truncation. The 10k guard
+    // is a DoS sanity bound, not a business rule — a consumer that
+    // hits it needs to refine date range or filter, not silently
+    // accept an incomplete sheet for an SCFHS audit.
+    const totalMatching = await CpeRecord.countDocuments(filter);
+    const items = await CpeRecord.find(filter)
+      .sort({ activityDate: -1 })
+      .limit(EXPORT_LIMIT)
+      .lean();
+    res.set('X-Total-Count', String(totalMatching));
+    if (totalMatching > EXPORT_LIMIT) {
+      res.set('X-Truncated', 'true');
+      res.set('X-Truncated-At', String(EXPORT_LIMIT));
+    }
     // Hydrate minimal employee display data so the sheet is readable
     // on its own — SCFHS inspectors may open this without DB access.
     const empIds = [...new Set(items.map(r => String(r.employeeId)).filter(Boolean))];

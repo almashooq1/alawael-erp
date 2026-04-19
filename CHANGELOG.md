@@ -75,7 +75,7 @@ drift tests that lock the admin route security surface statically.
 
 ### Tests
 
-Sprint suite: **521 passing** (was 484 at 4.0.9).
+Sprint suite: **522 passing** (was 484 at 4.0.9).
 • 13 unit tests for `cpeService.summarize` / `daysUntilDeadline` /
 `needsAttention` (5-year window filter, env overrides, verified-vs-
 unverified split, per-category deficit math, attention threshold)

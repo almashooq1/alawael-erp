@@ -34,7 +34,7 @@ cd ../frontend && npm start
 Before pushing, run the sprint gate (the same suite CI enforces):
 
 ```bash
-npm run test:sprint           # ~3 min — 521 tests across 38 suites,
+npm run test:sprint           # ~3 min — 522 tests across 38 suites,
                               # blocks the PR if anything fails
 npm run lint                  # ESLint (warnings tolerated, errors not)
 npm run format:check          # Prettier

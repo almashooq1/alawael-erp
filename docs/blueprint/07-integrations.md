@@ -255,6 +255,31 @@ Beneficiary arrives → Check insurance coverage
 
 ---
 
+### 2.12.1 SCFHS — الهيئة السعودية للتخصصات الصحية
+
+**الغرض:** ترخيص الممارسين الصحيين + تتبع ساعات التعليم الطبي المستمر (CPE)
+
+**الوضع:** ✅ موجود (`scfhsAdapter.js` للتحقق من الترخيص + `cpeService.js` + `cpe-admin.routes.js` لساعات التعليم)
+
+**Interactions:**
+
+| Action               | Flow                                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------------- |
+| License verification | Employee form → SCFHS adapter → `scfhs_verification` subdoc on Employee (status / classification / expiry) |
+| CPE credit tracking  | HR enters activity → `CpeRecord` → service rolls up per category (50/30/20 + 100 total per 5-yr cycle)     |
+| Compliance digest    | Cron → `npm run cpe:attention` → exit 0/1/2 → HR Slack channel for therapists in 6-month window            |
+| SCFHS audit export   | `/api/admin/hr/cpe/export.csv` → UTF-8-BOM CSV with hydrated employee names                                |
+
+**Critical compliance points:**
+
+- **Renewal blocker:** Below-minimum CPE = license cannot renew = therapist legally cannot see patients = revenue hit. The cron-driven attention digest exists to catch the 6-month-out window before it becomes a crisis.
+- **Audit-on-demand:** SCFHS can request the credit sheet at any time. The CSV export hydrates employee name + license number per row so the sheet stands alone — auditor doesn't need DB access.
+- **PDPL note:** CPE records are linked to employeeId, not nationalId, so the standard adapter-audit hashing isn't needed; the data is already pseudonymized at the model level.
+
+**Cross-reference:** [HR_COMPLIANCE_GUIDE.md](../HR_COMPLIANCE_GUIDE.md) — daily/weekly/monthly playbook tying GOSI + SCFHS license + CPE into one HR workflow.
+
+---
+
 ### 2.13 Authority of Persons with Disabilities — هيئة رعاية الأشخاص ذوي الإعاقة
 
 **الغرض:** التسجيل في سجل ذوي الإعاقة + الدعم الحكومي

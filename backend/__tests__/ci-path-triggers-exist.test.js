@@ -87,4 +87,26 @@ describe('sprint-tests.yml paths: triggers exist', () => {
     // Sanity: not both empty.
     expect(pushPaths.size).toBeGreaterThan(10);
   });
+
+  it('every test:sprint test file appears in the paths trigger', () => {
+    // Prevents the drift class I just cleaned up: 18 drift tests were
+    // in the script but not in paths:, so editing a drift rule didn't
+    // trigger the gate that would validate it.
+    const pkg = require(path.join(REPO_ROOT, 'backend/package.json'));
+    const sprintCmd = pkg.scripts['test:sprint'] || '';
+    const sprintTests = sprintCmd.match(/__tests__\/[A-Za-z0-9._-]+\.test\.js/g) || [];
+    const pathsBlock = yml.match(
+      /\n {2}push:[\s\S]*?\n {4}paths:[\s\S]*?(?=\n {2}[a-z_]+:|\nenv:|$)/
+    );
+    const pathsContent = pathsBlock ? pathsBlock[0] : '';
+    const missing = Array.from(new Set(sprintTests)).filter(
+      t => !pathsContent.includes(`backend/${t}`)
+    );
+    if (missing.length) {
+      throw new Error(
+        'test:sprint references files missing from sprint-tests.yml paths:\n  ' +
+          missing.join('\n  ')
+      );
+    }
+  });
 });

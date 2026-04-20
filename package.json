@@ -42,6 +42,8 @@
     "dev": "cd backend && npm run dev",
     "dev:all": "concurrently \"npm run dev:backend\" \"npm run start:frontend\"",
     "dev:backend": "cd backend && npm run dev",
+    "doc-expiry:digest": "cd backend && npm run doc-expiry:digest",
+    "doc-expiry:digest:json": "cd backend && npm run doc-expiry:digest:json",
     "docker:build": "GIT_SHA=$(git rev-parse HEAD) BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) docker compose build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",

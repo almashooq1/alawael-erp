@@ -44,6 +44,8 @@
     "docker:up": "docker compose up -d",
     "dsar:hash": "cd backend && npm run dsar:hash --silent --",
     "generate:secrets": "cd backend && npm run generate:secrets",
+    "goal-progress:digest": "cd backend && npm run goal-progress:digest",
+    "goal-progress:digest:json": "cd backend && npm run goal-progress:digest:json",
     "gov:status": "cd backend && npm run gov:status",
     "gov:status:json": "cd backend && npm run gov:status:json",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",

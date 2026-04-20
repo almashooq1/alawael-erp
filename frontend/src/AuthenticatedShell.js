@@ -145,6 +145,7 @@ const AdminGoalProgress = lazyWithRetry(() => import('./pages/Admin/AdminGoalPro
 const AdminUtilization = lazyWithRetry(() => import('./pages/Admin/AdminUtilization'));
 const AdminWaitlist = lazyWithRetry(() => import('./pages/Admin/AdminWaitlist'));
 const AdminReferrals = lazyWithRetry(() => import('./pages/Admin/AdminReferrals'));
+const AdminRevenue = lazyWithRetry(() => import('./pages/Admin/AdminRevenue'));
 const AdminGovIntegrations = lazyWithRetry(() => import('./pages/Admin/AdminGovIntegrations'));
 const AdminIntegrationsOps = lazyWithRetry(() => import('./pages/Admin/AdminIntegrationsOps'));
 const AdminRateLimits = lazyWithRetry(() => import('./pages/Admin/AdminRateLimits'));
@@ -278,6 +279,7 @@ export default function AuthenticatedShell() {
                   <Route path="admin/utilization" element={<AdminUtilization />} />
                   <Route path="admin/waitlist" element={<AdminWaitlist />} />
                   <Route path="admin/referrals" element={<AdminReferrals />} />
+                  <Route path="admin/revenue" element={<AdminRevenue />} />
                   <Route path="admin/gov-integrations" element={<AdminGovIntegrations />} />
                   <Route path="admin/integrations-ops" element={<AdminIntegrationsOps />} />
                   <Route path="admin/rate-limits" element={<AdminRateLimits />} />

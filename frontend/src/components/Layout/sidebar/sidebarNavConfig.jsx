@@ -1383,6 +1383,13 @@ const getNavigationItems = () => [
         badgeColor: 'info',
       },
       {
+        id: 'admin-revenue',
+        label: 'الإيرادات والذمم',
+        path: '/admin/revenue',
+        badge: 'AR',
+        badgeColor: 'success',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

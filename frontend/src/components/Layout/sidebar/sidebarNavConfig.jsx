@@ -1390,6 +1390,13 @@ const getNavigationItems = () => [
         badgeColor: 'success',
       },
       {
+        id: 'admin-claims-analytics',
+        label: 'تحليلات مطالبات NPHIES',
+        path: '/admin/claims-analytics',
+        badge: 'CLM',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

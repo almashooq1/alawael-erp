@@ -62,6 +62,7 @@ on:
       - 'backend/__tests__/revenue-service.test.js'
       - 'backend/__tests__/claims-analytics-service.test.js'
       - 'backend/__tests__/revenue-forecast-service.test.js'
+      - 'backend/__tests__/retention-service.test.js'
       - 'backend/__tests__/outcomes-digest-script.test.js'
       - 'backend/__tests__/goal-progress-digest-script.test.js'
       - 'backend/__tests__/utilization-digest-script.test.js'
@@ -149,6 +150,7 @@ on:
       - 'backend/__tests__/revenue-service.test.js'
       - 'backend/__tests__/claims-analytics-service.test.js'
       - 'backend/__tests__/revenue-forecast-service.test.js'
+      - 'backend/__tests__/retention-service.test.js'
       - 'backend/__tests__/outcomes-digest-script.test.js'
       - 'backend/__tests__/goal-progress-digest-script.test.js'
       - 'backend/__tests__/utilization-digest-script.test.js'
@@ -356,4 +358,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 830 sprint tests green."
+          echo "All 847 sprint tests green."

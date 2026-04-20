@@ -1362,6 +1362,13 @@ const getNavigationItems = () => [
         badgeColor: 'primary',
       },
       {
+        id: 'admin-utilization',
+        label: 'إنتاجية المعالجين',
+        path: '/admin/utilization',
+        badge: 'UTIL',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

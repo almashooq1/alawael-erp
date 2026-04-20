@@ -69,6 +69,8 @@
     "quality:quick": "cd backend && npm run quality:quick",
     "referrals:digest": "cd backend && npm run referrals:digest",
     "referrals:digest:json": "cd backend && npm run referrals:digest:json",
+    "retention:digest": "cd backend && npm run retention:digest",
+    "retention:digest:json": "cd backend && npm run retention:digest:json",
     "revenue:digest": "cd backend && npm run revenue:digest",
     "revenue:digest:json": "cd backend && npm run revenue:digest:json",
     "routes": "cd backend && npm run routes:list",

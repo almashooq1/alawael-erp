@@ -57,6 +57,7 @@ on:
       - 'backend/__tests__/nps-service.test.js'
       - 'backend/__tests__/goal-progress-service.test.js'
       - 'backend/__tests__/therapist-utilization-service.test.js'
+      - 'backend/__tests__/waiting-list-service.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -123,6 +124,7 @@ on:
       - 'backend/__tests__/nps-service.test.js'
       - 'backend/__tests__/goal-progress-service.test.js'
       - 'backend/__tests__/therapist-utilization-service.test.js'
+      - 'backend/__tests__/waiting-list-service.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -314,4 +316,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 641 sprint tests green."
+          echo "All 658 sprint tests green."

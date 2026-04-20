@@ -45,6 +45,8 @@
     "docker:logs": "docker compose logs -f",
     "docker:up": "docker compose up -d",
     "dsar:hash": "cd backend && npm run dsar:hash --silent --",
+    "forecast:digest": "cd backend && npm run forecast:digest",
+    "forecast:digest:json": "cd backend && npm run forecast:digest:json",
     "generate:secrets": "cd backend && npm run generate:secrets",
     "goal-progress:digest": "cd backend && npm run goal-progress:digest",
     "goal-progress:digest:json": "cd backend && npm run goal-progress:digest:json",

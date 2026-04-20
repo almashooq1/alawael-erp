@@ -69,6 +69,7 @@ on:
       - 'backend/__tests__/referrals-digest-script.test.js'
       - 'backend/__tests__/revenue-digest-script.test.js'
       - 'backend/__tests__/claims-digest-script.test.js'
+      - 'backend/__tests__/forecast-digest-script.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -97,6 +98,7 @@ on:
       - 'backend/scripts/referrals-digest.js'
       - 'backend/scripts/revenue-digest.js'
       - 'backend/scripts/claims-digest.js'
+      - 'backend/scripts/forecast-digest.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -154,6 +156,7 @@ on:
       - 'backend/__tests__/referrals-digest-script.test.js'
       - 'backend/__tests__/revenue-digest-script.test.js'
       - 'backend/__tests__/claims-digest-script.test.js'
+      - 'backend/__tests__/forecast-digest-script.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -182,6 +185,7 @@ on:
       - 'backend/scripts/referrals-digest.js'
       - 'backend/scripts/revenue-digest.js'
       - 'backend/scripts/claims-digest.js'
+      - 'backend/scripts/forecast-digest.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -352,4 +356,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 823 sprint tests green."
+          echo "All 830 sprint tests green."

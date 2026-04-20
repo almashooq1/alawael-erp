@@ -38,7 +38,7 @@ npm run test:drift            # ~15s — static drift checks only (auth
                               # wiring, count consistency, link existence,
                               # etc.). Catches ~half of sprint-gate
                               # regressions at 1/12th the runtime.
-npm run test:sprint           # ~3 min — full 823 tests across 56 suites,
+npm run test:sprint           # ~3 min — full 830 tests across 57 suites,
                               # blocks the PR if anything fails
 npm run lint                  # ESLint (warnings tolerated, errors not)
 npm run format:check          # Prettier
@@ -52,7 +52,7 @@ npm run ship-check            # ~2 min — preflight + ops-subsystems
 ```
 
 The sprint gate is the **hard gate** — `.github/workflows/sprint-tests.yml`
-runs the same 823 tests on every push and PR; any drop fails the merge.
+runs the same 830 tests on every push and PR; any drop fails the merge.
 Run it locally before pushing to avoid the "fails in CI, passes on my
 machine" cycle.
 

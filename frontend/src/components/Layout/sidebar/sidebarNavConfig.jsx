@@ -1355,6 +1355,13 @@ const getNavigationItems = () => [
         badgeColor: 'secondary',
       },
       {
+        id: 'admin-goal-progress',
+        label: 'تقدُّم الأهداف',
+        path: '/admin/goal-progress',
+        badge: 'GOAL',
+        badgeColor: 'primary',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

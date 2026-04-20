@@ -1411,6 +1411,13 @@ const getNavigationItems = () => [
         badgeColor: 'warning',
       },
       {
+        id: 'admin-complaints-analytics',
+        label: 'تحليلات الشكاوى',
+        path: '/admin/complaints-analytics',
+        badge: 'CMP',
+        badgeColor: 'error',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

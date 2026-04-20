@@ -63,6 +63,8 @@
     "prepare": "husky",
     "quality": "cd backend && npm run quality:ci",
     "quality:quick": "cd backend && npm run quality:quick",
+    "referrals:digest": "cd backend && npm run referrals:digest",
+    "referrals:digest:json": "cd backend && npm run referrals:digest:json",
     "routes": "cd backend && npm run routes:list",
     "seed:demo:dry": "cd backend && npm run seed:demo:dry",
     "seed:demo:reset": "cd backend && npm run seed:demo:reset",

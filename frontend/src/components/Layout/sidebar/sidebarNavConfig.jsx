@@ -1369,6 +1369,13 @@ const getNavigationItems = () => [
         badgeColor: 'info',
       },
       {
+        id: 'admin-waitlist',
+        label: 'قائمة الانتظار',
+        path: '/admin/waitlist',
+        badge: 'WAIT',
+        badgeColor: 'warning',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

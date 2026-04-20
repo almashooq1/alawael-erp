@@ -81,7 +81,9 @@
     "test:ops-subsystems": "cd backend && npm run test:ops-subsystems",
     "test:sprint": "cd backend && npm run test:sprint",
     "utilization:digest": "cd backend && npm run utilization:digest",
-    "utilization:digest:json": "cd backend && npm run utilization:digest:json"
+    "utilization:digest:json": "cd backend && npm run utilization:digest:json",
+    "waitlist:digest": "cd backend && npm run waitlist:digest",
+    "waitlist:digest:json": "cd backend && npm run waitlist:digest:json"
   },
   "lint-staged": {
     "backend/**/*.js": [

@@ -1404,6 +1404,13 @@ const getNavigationItems = () => [
         badgeColor: 'primary',
       },
       {
+        id: 'admin-retention',
+        label: 'الاحتفاظ والتسرّب',
+        path: '/admin/retention',
+        badge: 'RET',
+        badgeColor: 'warning',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

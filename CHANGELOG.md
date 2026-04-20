@@ -71,11 +71,11 @@ drift tests that lock the admin route security surface statically.
   attached to the latest commit (not a stale in-flight run).
 - `sprint-tests.yml` paths trigger updated to include the new CPE
   service / script / drift tests so CPE-touching commits still run
-  the full 674-test gate.
+  the full 681-test gate.
 
 ### Tests
 
-Sprint suite: **674 passing** (was 484 at 4.0.9).
+Sprint suite: **681 passing** (was 484 at 4.0.9).
 • 13 unit tests for `cpeService.summarize` / `daysUntilDeadline` /
 `needsAttention` (5-year window filter, env overrides, verified-vs-
 unverified split, per-category deficit math, attention threshold)

@@ -53,6 +53,8 @@
     "lint:frontend": "cd frontend && npm run lint",
     "logs": "cd backend && npm run logs:view",
     "logs:errors": "cd backend && npm run logs:errors",
+    "outcomes:digest": "cd backend && npm run outcomes:digest",
+    "outcomes:digest:json": "cd backend && npm run outcomes:digest:json",
     "predeploy": "node scripts/prepare-deploy.js",
     "preflight": "cd backend && npm run preflight",
     "preflight:prod": "cd backend && npm run preflight:prod",

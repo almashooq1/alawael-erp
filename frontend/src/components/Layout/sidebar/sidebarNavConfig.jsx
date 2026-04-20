@@ -1376,6 +1376,13 @@ const getNavigationItems = () => [
         badgeColor: 'warning',
       },
       {
+        id: 'admin-referrals',
+        label: 'الإحالات — تحليل الشبكة',
+        path: '/admin/referrals',
+        badge: 'REF',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

@@ -1397,6 +1397,13 @@ const getNavigationItems = () => [
         badgeColor: 'info',
       },
       {
+        id: 'admin-revenue-forecast',
+        label: 'تنبؤ الإيرادات',
+        path: '/admin/revenue-forecast',
+        badge: 'FCST',
+        badgeColor: 'primary',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

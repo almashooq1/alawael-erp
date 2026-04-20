@@ -1418,6 +1418,13 @@ const getNavigationItems = () => [
         badgeColor: 'error',
       },
       {
+        id: 'admin-document-expiry',
+        label: 'رادار انتهاء الوثائق',
+        path: '/admin/document-expiry',
+        badge: 'EXP',
+        badgeColor: 'error',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

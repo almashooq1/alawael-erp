@@ -1348,6 +1348,13 @@ const getNavigationItems = () => [
         badgeColor: 'primary',
       },
       {
+        id: 'admin-nps',
+        label: 'رضى العائلات',
+        path: '/admin/nps',
+        badge: 'NPS',
+        badgeColor: 'secondary',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

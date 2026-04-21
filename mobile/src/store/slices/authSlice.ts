@@ -2,7 +2,7 @@
  * Auth Redux Slice
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as SecureStore from 'expo-secure-store';
 import ApiService from '../../services/ApiService';
 

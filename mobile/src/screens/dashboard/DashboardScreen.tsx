@@ -3,20 +3,11 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-  Dimensions,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchMetrics } from '../../store/slices/analyticsSlice';
 import { fetchOrders } from '../../store/slices/ordersSlice';
 import { fetchNotifications } from '../../store/slices/notificationsSlice';
-
-const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const dispatch = useAppDispatch();

@@ -5,7 +5,6 @@
 import React, { useEffect } from 'react';
 import {
   View,
-  FlatList,
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,

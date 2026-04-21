@@ -18,7 +18,6 @@ import {
   ActivityIndicator,
   SafeAreaView,
   StatusBar,
-  Alert,
 } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { nafath, type NafathStatus } from '../../services/modules';
@@ -37,7 +36,7 @@ export default function NafathLoginScreen({
   const [finalMessage, setFinalMessage] = useState('');
   const [requestId, setRequestId] = useState<string | null>(null);
   const [randomNumber, setRandomNumber] = useState<string | null>(null);
-  const [expiresAt, setExpiresAt] = useState<Date | null>(null);
+  const [, setExpiresAt] = useState<Date | null>(null);
   const [remainingSec, setRemainingSec] = useState(0);
   const [mode, setMode] = useState<'mock' | 'live' | null>(null);
 

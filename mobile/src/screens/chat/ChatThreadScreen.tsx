@@ -95,7 +95,7 @@ export default function ChatThreadScreen({
       if (!silent) setError('');
       try {
         const { items } = await chat.messages(conversationId, undefined, 100);
-        setMessages(prev => {
+        setMessages(_prev => {
           // Preserve scroll position if last-id hasn't changed
           const newLast = items[items.length - 1]?._id || '';
           if (newLast !== lastMessageIdRef.current) {

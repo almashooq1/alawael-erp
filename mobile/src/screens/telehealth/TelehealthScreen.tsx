@@ -41,7 +41,6 @@ function formatDateTime(s?: string): string {
 }
 
 function timeStatus(session: TelehealthSession): { label: string; color: string } {
-  const now = new Date();
   const date = new Date(session.date);
   date.setHours(0, 0, 0, 0);
   const today = new Date();

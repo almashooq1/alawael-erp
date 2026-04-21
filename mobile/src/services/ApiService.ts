@@ -4,7 +4,6 @@
  */
 
 import axios, { AxiosInstance, AxiosError } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { showMessage } from 'react-native-flash-message';
 

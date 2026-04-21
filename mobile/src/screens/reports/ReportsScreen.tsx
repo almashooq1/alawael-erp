@@ -3,20 +3,13 @@
  */
 
 import React, { useEffect } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  ActivityIndicator,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
 import { Text } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchReports, generateReport } from '../../store/slices/reportsSlice';
 
-export default function ReportsScreen({ navigation }: any) {
+export default function ReportsScreen({ navigation: _navigation }: any) {
   const dispatch = useAppDispatch();
   const { items: reports, isGenerating, isLoading } = useAppSelector((state) => state.reports);
   const { templates } = useAppSelector((state) => state.reports);

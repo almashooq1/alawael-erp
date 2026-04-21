@@ -5,7 +5,7 @@
  * Tabs: Today · Week · Caseload.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,

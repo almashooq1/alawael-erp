@@ -1425,6 +1425,13 @@ const getNavigationItems = () => [
         badgeColor: 'error',
       },
       {
+        id: 'admin-incidents-analytics',
+        label: 'تحليلات الحوادث والسلامة',
+        path: '/admin/incidents-analytics',
+        badge: 'INC',
+        badgeColor: 'error',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

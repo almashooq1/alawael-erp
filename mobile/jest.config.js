@@ -1,6 +1,19 @@
+/**
+ * jest.config.js — extends the jest-expo preset which already
+ * defines testEnvironment, transformIgnorePatterns, setupFiles, and
+ * moduleFileExtensions for an Expo 49 + React Native project.
+ *
+ * We only override what's project-specific:
+ *   • moduleNameMapper — @/* → src/*
+ *   • testMatch — scope to src/ (root __tests__/MobileApp.test.js
+ *     was deleted in Phase 3)
+ *   • collectCoverageFrom — src/ only
+ *   • coverageThreshold — 70% per category
+ *   • setupFilesAfterEnv — our Expo/AsyncStorage/etc. mocks
+ */
+
 module.exports = {
   preset: 'jest-expo',
-  testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
@@ -14,7 +27,7 @@ module.exports = {
     '!src/**/index.{ts,tsx}',
     '!src/navigation/**',
   ],
-  coverageThresholds: {
+  coverageThreshold: {
     global: {
       branches: 70,
       functions: 70,
@@ -23,7 +36,4 @@ module.exports = {
     },
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  transformIgnorePatterns: [
-    'node_modules/(?!(expo|@expo|@react-native|react-native|react-native-gesture-handler|@react-navigation|react-native-paper|react-native-vector-icons|@react-native-async-storage|react-native-flash-message)/)',
-  ],
 };

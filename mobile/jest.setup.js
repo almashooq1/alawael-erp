@@ -1,4 +1,7 @@
-import '@testing-library/jest-native/extend-expect';
+// @testing-library/jest-native/extend-expect would add RN-specific
+// matchers (toBeVisible, toHaveTextContent, etc.) but the package
+// isn't installed. If we later add component-level tests that need
+// those matchers, install @testing-library/jest-native + re-enable.
 
 // Mock Expo modules
 jest.mock('expo-secure-store', () => ({

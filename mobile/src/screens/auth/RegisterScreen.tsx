@@ -14,12 +14,12 @@ import {
   ScrollView,
 } from 'react-native';
 import { Text } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../store';
-import { register } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { register } from '../../store/slices/authSlice';
 
 export default function RegisterScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { isLoading, error } = useAppSelector((state: any) => state.auth);
   const [formData, setFormData] = useState({
     name: '',
     email: '',

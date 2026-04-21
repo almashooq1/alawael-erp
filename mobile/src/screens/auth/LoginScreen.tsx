@@ -14,12 +14,12 @@ import {
   ScrollView,
 } from 'react-native';
 import { Text } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../store';
-import { login } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store';
+import { login } from '../../store/slices/authSlice';
 
 export default function LoginScreen({ navigation }: any) {
   const dispatch = useAppDispatch();
-  const { isLoading, error } = useAppSelector((state) => state.auth);
+  const { isLoading, error } = useAppSelector((state: any) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 

@@ -23,12 +23,12 @@ export async function setupPushNotifications() {
     }
 
     // Request notification permissions
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
+    const existingResp: any = await Notifications.getPermissionsAsync();
+    let finalStatus: string = existingResp.status;
 
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    if (existingResp.status !== 'granted') {
+      const resp: any = await Notifications.requestPermissionsAsync();
+      finalStatus = resp.status;
     }
 
     if (finalStatus !== 'granted') {
@@ -66,7 +66,7 @@ async function registerPushToken(token: string) {
     await ApiService.post('/notifications/register-device', {
       token,
       platform: Device.osName,
-      deviceId: Device.deviceId,
+      deviceId: Device.modelName || Constants.sessionId || 'unknown',
     });
   } catch (error) {
     console.error('Error registering push token:', error);

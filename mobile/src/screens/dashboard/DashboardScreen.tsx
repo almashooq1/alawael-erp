@@ -5,6 +5,7 @@
 import React, { useEffect } from 'react';
 import {
   View,
+  Text,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
@@ -26,7 +27,7 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     // Load dashboard data
-    dispatch(fetchMetrics());
+    dispatch(fetchMetrics({}));
     dispatch(fetchOrders({ limit: 10 }));
     dispatch(fetchNotifications({ limit: 5 }));
   }, [dispatch]);

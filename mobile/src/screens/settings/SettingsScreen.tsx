@@ -188,7 +188,7 @@ function SettingToggle({
 }) {
   return (
     <View style={styles.settingItem}>
-      <MaterialCommunityIcons name={icon} size={20} color="#1673e6" />
+      <MaterialCommunityIcons name={icon as any} size={20} color="#1673e6" />
       <View style={styles.settingContent}>
         <Text style={styles.settingLabel}>{label}</Text>
       </View>

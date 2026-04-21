@@ -14,8 +14,7 @@ export default function AuthNavigator() {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: 'white' },
-        animationEnabled: true,
+        contentStyle: { backgroundColor: 'white' },
       }}
     >
       <Stack.Screen
@@ -30,7 +29,7 @@ export default function AuthNavigator() {
         component={RegisterScreen}
         options={{
           title: 'Create Account',
-          cardStyle: { backgroundColor: 'white' },
+          contentStyle: { backgroundColor: 'white' },
         }}
       />
     </Stack.Navigator>

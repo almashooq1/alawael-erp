@@ -85,7 +85,7 @@ const MainTabNavigator = () => {
           }
 
           return (
-            <MaterialCommunityIcons name={iconName} size={size} color={color} />
+            <MaterialCommunityIcons name={iconName as any} size={size} color={color} />
           );
         },
         tabBarActiveTintColor: '#1673e6',
@@ -168,14 +168,14 @@ export default function App() {
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <StatusBar barStyle="dark-content" />
+        <StatusBar style="dark" />
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {isSignedIn ? (
             <>
               <Stack.Screen
                 name="MainApp"
                 component={MainTabNavigator}
-                options={{ animationEnabled: false }}
+                options={{ animation: 'none' }}
               />
               <Stack.Group screenOptions={{ presentation: 'modal' }}>
                 <Stack.Screen
@@ -204,7 +204,7 @@ export default function App() {
             <Stack.Screen
               name="Auth"
               component={AuthNavigator}
-              options={{ animationEnabled: false }}
+              options={{ animation: 'none' }}
             />
           )}
         </Stack.Navigator>

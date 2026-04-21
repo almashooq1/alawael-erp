@@ -22,7 +22,7 @@ export default function AnalyticsScreen({ navigation }: any) {
 
   useEffect(() => {
     dispatch(fetchDashboards());
-    dispatch(fetchMetrics());
+    dispatch(fetchMetrics({}));
   }, [dispatch]);
 
   const handleDashboardPress = (dashboardId: string) => {

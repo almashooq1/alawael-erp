@@ -46,7 +46,18 @@ import SchoolIcon from '@mui/icons-material/School';
 import HealingIcon from '@mui/icons-material/Healing';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DownloadIcon from '@mui/icons-material/Download';
+import {
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  ListItemAvatar,
+  ListItemText,
+} from '@mui/material';
 import api from '../../services/api.client';
+
+const ACTIVE_CHILD_KEY = 'parent-portal.activeChildId';
 
 const SESSION_STATUS = {
   SCHEDULED: { label: 'مجدولة', color: 'info' },
@@ -101,8 +112,27 @@ export default function MyChildrenPortal() {
   const [errMsg, setErrMsg] = useState('');
   const [children, setChildren] = useState([]);
   const [me, setMe] = useState(null);
-  const [activeChildId, setActiveChildId] = useState(null);
+  const [activeChildId, setActiveChildIdRaw] = useState(() => {
+    try {
+      return typeof window !== 'undefined' ? window.localStorage.getItem(ACTIVE_CHILD_KEY) : null;
+    } catch {
+      return null;
+    }
+  });
   const [tab, setTab] = useState(0);
+
+  // Persist across page reloads — parent doesn't lose context.
+  const setActiveChildId = useCallback(id => {
+    setActiveChildIdRaw(id);
+    try {
+      if (typeof window !== 'undefined') {
+        if (id) window.localStorage.setItem(ACTIVE_CHILD_KEY, id);
+        else window.localStorage.removeItem(ACTIVE_CHILD_KEY);
+      }
+    } catch {
+      /* storage unavailable — silently fall back to in-memory */
+    }
+  }, []);
 
   // Per-child cached data
   const [childData, setChildData] = useState({});
@@ -124,7 +154,12 @@ export default function MyChildrenPortal() {
       const { data } = await api.get('/parent-v2/children');
       const list = data?.items || [];
       setChildren(list);
-      if (list.length > 0 && !activeChildId) setActiveChildId(list[0]._id);
+      // Restore active child from localStorage if it's still in the list;
+      // otherwise default to the first child.
+      if (list.length > 0) {
+        const stillThere = activeChildId && list.some(c => c._id === activeChildId);
+        if (!stillThere) setActiveChildId(list[0]._id);
+      }
     } catch (err) {
       setErrMsg(
         err?.response?.data?.message || 'فشل تحميل قائمة الأطفال — تأكد من تسجيل الدخول كولي أمر'
@@ -196,9 +231,39 @@ export default function MyChildrenPortal() {
     loadChildTab(activeChildId, tab);
   };
 
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const downloadReport = useCallback(async () => {
+    if (!activeChildId) return;
+    setDownloadingReport(true);
+    try {
+      const resp = await api.get(`/parent-v2/children/${activeChildId}/report/download`, {
+        responseType: 'blob',
+      });
+      const blob = new Blob([resp.data], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `progress-report-${activeChildId}-${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      setErrMsg(err?.response?.data?.message || 'فشل تنزيل التقرير');
+    } finally {
+      setDownloadingReport(false);
+    }
+  }, [activeChildId]);
+
   return (
     <Container maxWidth="xl" sx={{ py: 4 }} dir="rtl">
-      <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        justifyContent="space-between"
+        alignItems={{ xs: 'stretch', md: 'center' }}
+        gap={2}
+        mb={3}
+      >
         <Box>
           <Typography variant="h4" fontWeight="bold">
             بوابة ولي الأمر
@@ -209,14 +274,65 @@ export default function MyChildrenPortal() {
               : 'متابعة أطفالك: الجلسات، الخطط العلاجية، التقييمات الإكلينيكية.'}
           </Typography>
         </Box>
-        <IconButton
-          onClick={() => {
-            loadChildren();
-            if (activeChildId) refreshActive();
-          }}
-        >
-          <RefreshIcon />
-        </IconButton>
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          {children.length > 1 && (
+            <FormControl size="small" sx={{ minWidth: 240 }}>
+              <InputLabel id="active-child-label">الطفل النشط</InputLabel>
+              <Select
+                labelId="active-child-label"
+                value={activeChildId || ''}
+                label="الطفل النشط"
+                onChange={e => setActiveChildId(e.target.value)}
+                renderValue={selectedId => {
+                  const c = children.find(ch => ch._id === selectedId);
+                  if (!c) return '—';
+                  return (
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.main' }}>
+                        <PersonIcon sx={{ fontSize: 14 }} />
+                      </Avatar>
+                      <Typography variant="body2">{fullName(c) || '—'}</Typography>
+                    </Stack>
+                  );
+                }}
+              >
+                {children.map(c => (
+                  <MenuItem key={c._id} value={c._id}>
+                    <ListItemAvatar>
+                      <Avatar sx={{ width: 32, height: 32 }}>
+                        <PersonIcon fontSize="small" />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primary={fullName(c) || '—'}
+                      secondary={c.beneficiaryNumber || ''}
+                    />
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+          {activeChildId && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={downloadingReport ? <CircularProgress size={14} /> : <DownloadIcon />}
+              onClick={downloadReport}
+              disabled={downloadingReport}
+            >
+              تنزيل تقرير التقدّم (PDF)
+            </Button>
+          )}
+          <IconButton
+            onClick={() => {
+              loadChildren();
+              if (activeChildId) refreshActive();
+            }}
+            title="تحديث"
+          >
+            <RefreshIcon />
+          </IconButton>
+        </Stack>
       </Stack>
 
       {errMsg && (

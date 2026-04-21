@@ -32,6 +32,7 @@ const Beneficiary = require('../models/Beneficiary');
 const TherapySession = require('../models/TherapySession');
 const CarePlan = require('../models/CarePlan');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
+const parentReportService = require('../services/parentReportService');
 
 router.use(authenticateToken);
 
@@ -315,6 +316,109 @@ router.get('/children/:id/attendance', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.attendance');
+  }
+});
+
+// ── GET /children/:id/report/download ────────────────────────────────────
+// Streams a monthly-progress PDF. Re-uses the same fetch shape as the
+// other parent-v2 endpoints — no duplication of access logic.
+router.get('/children/:id/report/download', async (req, res) => {
+  try {
+    const check = await assertChildAccess(req, req.params.id);
+    if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+    const childId = req.params.id;
+
+    const now = new Date();
+    const weekAhead = new Date(now);
+    weekAhead.setDate(weekAhead.getDate() + 7);
+    const since = new Date();
+    since.setDate(since.getDate() - 90);
+
+    const [
+      sessionsTotal,
+      sessionsUpcoming,
+      plansActive,
+      assessmentsTotal,
+      plan,
+      assessments,
+      attSessions,
+    ] = await Promise.all([
+      TherapySession.countDocuments({ beneficiary: childId }),
+      TherapySession.countDocuments({
+        beneficiary: childId,
+        date: { $gte: now, $lte: weekAhead },
+        status: { $in: ['SCHEDULED', 'CONFIRMED'] },
+      }),
+      CarePlan.countDocuments({ beneficiary: childId, status: 'ACTIVE' }),
+      ClinicalAssessment.countDocuments({ beneficiary: childId }),
+      CarePlan.findOne({ beneficiary: childId, status: 'ACTIVE' }).sort({ startDate: -1 }).lean(),
+      ClinicalAssessment.find({ beneficiary: childId, status: { $ne: 'archived' } })
+        .sort({ assessmentDate: -1 })
+        .limit(10)
+        .select('tool assessmentDate score interpretation')
+        .lean(),
+      TherapySession.find({ beneficiary: childId, date: { $gte: since } })
+        .select('date status attendance')
+        .lean(),
+    ]);
+
+    // Flatten plan goals for the service's goalProgress helper.
+    const flatGoals = [];
+    if (plan) {
+      for (const section of ['educational', 'therapeutic', 'lifeSkills']) {
+        const sec = plan[section];
+        if (!sec?.enabled || !sec.domains) continue;
+        for (const dom of Object.values(sec.domains)) {
+          if (!dom?.goals?.length) continue;
+          for (const g of dom.goals) flatGoals.push({ status: g.status });
+        }
+      }
+    }
+
+    const attendanceSummary = {
+      completed: attSessions.filter(s => s.status === 'COMPLETED').length,
+      noShow: attSessions.filter(s => s.status === 'NO_SHOW').length,
+      cancelled: attSessions.filter(s =>
+        ['CANCELLED_BY_PATIENT', 'CANCELLED_BY_CENTER'].includes(s.status)
+      ).length,
+      lateArrival: attSessions.filter(s => (s.attendance?.lateMinutes || 0) > 0).length,
+    };
+
+    const tree = parentReportService.assembleReport({
+      child: check.child,
+      overview: {
+        sessionCount: sessionsTotal,
+        upcomingCount: sessionsUpcoming,
+        activeCarePlansCount: plansActive,
+        assessmentsCount: assessmentsTotal,
+      },
+      attendance: attendanceSummary,
+      carePlan: plan
+        ? {
+            title: plan.planNumber || null,
+            status: plan.status,
+            startDate: plan.startDate,
+            goals: flatGoals,
+          }
+        : null,
+      assessments: {
+        items: assessments.map(a => ({
+          tool: a.tool,
+          date: a.assessmentDate,
+          score: a.score,
+          interpretation: a.interpretation,
+        })),
+      },
+    });
+
+    const buf = await parentReportService.renderPdf(tree);
+    const filename = `progress-report-${childId}-${new Date().toISOString().slice(0, 10)}.pdf`;
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.setHeader('Content-Length', buf.length);
+    res.send(buf);
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.report.download');
   }
 });
 

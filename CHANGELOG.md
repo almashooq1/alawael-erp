@@ -5,6 +5,45 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-21 — Parent portal: multi-child + PDF progress report
+
+Parent-facing vertical. Parents can now switch between their children
+from the portal header (selection survives refresh via localStorage),
+and download a monthly progress PDF that bundles attendance, care-plan
+goal progress, and latest assessments into one shareable archive. The
+same PDF is produced server-side and can be emailed to guardians in
+bulk via a new cron-friendly digest CLI.
+
+### Added
+
+- `backend/services/parentReportService.js` — pure `assembleReport`
+  tree-builder + pdfkit `renderPdf` (falls back to Helvetica if the
+  NotoSansArabic font isn't present, so stock installs don't fail).
+- `backend/routes/parent-portal-v2.routes.js` — `GET
+/children/:id/report/download` streams the PDF, re-using the same
+  access-assertion path as the other parent-v2 endpoints.
+- `frontend/src/pages/ParentPortal/MyChildrenPortal.jsx` — header
+  `<Select>` dropdown (appears only when `children.length > 1`), a
+  "تنزيل تقرير التقدّم (PDF)" button that fetches as a Blob (so the
+  Bearer token travels with it, unlike `window.open`), and
+  localStorage persistence under the `parent-portal.activeChildId` key.
+- `backend/scripts/parent-report-digest.js` — cron-friendly monthly
+  digest. Default dry-run; `--execute --confirm=SEND-MONTHLY-REPORTS`
+  required to actually send. Exit codes 0 / 1 / 2 match the other
+  digests.
+- `frontend/src/theme/palette.js` — `chartColors.category` alias
+  (fixes a `DEMO_BY_TYPE` TDZ crash on SessionsDashboard).
+
+### Tests
+
+Sprint suite: **1066 passing** (was 1043 at 4.0.10).
+• 16 unit tests for `parentReportService` (`attendanceRate`,
+`goalProgress`, `latestAssessments`, `displayName`, `assembleReport`)
+• 7 unit tests for the digest planner's `buildPlan` (empty paths,
+missing guardians, email-less guardians, limit clamp, fallback names)
+
+---
+
 ## [4.0.10] — 2026-04-19 — SCFHS CPE credit tracking + CI/auth hardening
 
 Closes a known gap in the HR-compliance surface. Previously GOSI +

@@ -1,357 +1,169 @@
+/**
+ * OfflineStorageService.test.ts — behavior tests against the
+ * expo-sqlite v11 API (openDatabase + execAsync([{sql, args}], readOnly)).
+ *
+ * The previous copy of this file mocked the v13+ async API and
+ * didn't match the service's current wire shape. Rewrote to mock
+ * the v11 surface actually in use, and to focus on JSON
+ * serialization / parsing behavior where real bugs hide — not on
+ * asserting that execAsync was called (tautological with mocks).
+ */
+
 import * as SQLite from 'expo-sqlite';
-import OfflineStorageService from '../../services/OfflineStorageService';
+import {
+  initializeOfflineStorage,
+  saveOrderLocal,
+  getLocalOrders,
+  saveNotificationLocal,
+  getLocalNotifications,
+  queueForSync,
+  getSyncQueue,
+  removefromSyncQueue,
+  updateSyncRetry,
+  getDatabaseStats,
+} from '../OfflineStorageService';
 
 jest.mock('expo-sqlite');
 
-describe('OfflineStorageService', () => {
-  let mockDB: any;
+type ExecCall = { sql: string; args: any[] };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+describe('OfflineStorageService (v11 execAsync)', () => {
+  let calls: ExecCall[] = [];
+  let rowsForNextRead: any[] = [];
 
-    // Mock SQLite database
-    mockDB = {
-      transaction: jest.fn((callback) => {
-        callback({
-          executeSql: jest.fn(),
-        });
+  beforeEach(async () => {
+    calls = [];
+    rowsForNextRead = [];
+
+    const mockDb = {
+      execAsync: jest.fn(async (queries: ExecCall[], _readOnly: boolean) => {
+        for (const q of queries) calls.push(q);
+        // Return a single ResultSet shape the service reads from.
+        return [{ rows: rowsForNextRead, insertId: 1, rowsAffected: 1 }];
       }),
-      exec: jest.fn(),
     };
 
-    (SQLite.openDatabase as jest.Mock).mockReturnValue(mockDB);
+    (SQLite.openDatabase as jest.Mock).mockReturnValue(mockDb);
+    await initializeOfflineStorage();
+    // Discard the CREATE TABLE queries from the setup.
+    calls.length = 0;
   });
 
-  describe('initializeOfflineStorage', () => {
-    it('should initialize database with all tables', async () => {
-      const transactionCallback = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        transactionCallback();
-        callback({
-          executeSql: jest.fn(),
-        });
-      });
-
-      await OfflineStorageService.initializeOfflineStorage();
-
+  describe('initialize', () => {
+    it('opens the db with the right filename', () => {
       expect(SQLite.openDatabase).toHaveBeenCalledWith('alawael_erp.db');
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(transactionCallback).toHaveBeenCalled();
     });
   });
 
-  describe('Order operations', () => {
-    it('should save order locally', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const order = {
-        id: '1',
+  describe('saveOrderLocal', () => {
+    it('serializes items to JSON and parameterizes the row', async () => {
+      await saveOrderLocal({
+        id: 'o1',
         orderNumber: 'ORD-001',
-        customerId: 'cust-1',
-        totalAmount: 1000,
+        customerId: 'c1',
+        totalAmount: 99.5,
         status: 'pending',
-        items: [],
-      };
+        items: [{ sku: 'x' }],
+        createdAt: '2026-04-21',
+        updatedAt: '2026-04-21',
+      });
 
-      await OfflineStorageService.saveOrderLocal(order);
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
+      expect(calls).toHaveLength(1);
+      expect(calls[0].sql).toMatch(/INSERT OR REPLACE INTO orders/);
+      // items must be stringified JSON, not the array itself
+      expect(calls[0].args).toContain('[{"sku":"x"}]');
+      expect(calls[0].args).toContain('ORD-001');
     });
+  });
 
-    it('should retrieve local orders', async () => {
-      const mockOrders = [
+  describe('getLocalOrders', () => {
+    it('parses the items JSON on read', async () => {
+      rowsForNextRead = [
         {
-          id: '1',
+          id: 'o1',
           orderNumber: 'ORD-001',
-          customerId: 'cust-1',
-          totalAmount: 1000,
-          status: 'pending',
-          items: '[]',
-          createdAt: new Date().toISOString(),
-          synced: 0,
+          items: '[{"sku":"x"}]',
         },
       ];
-
-      const mockExecuteSql = jest.fn((sql, values, callback) => {
-        callback(null, { rows: { _array: mockOrders } });
-      });
-
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const orders = await OfflineStorageService.getLocalOrders();
-
-      expect(mockDB.transaction).toHaveBeenCalled();
+      const orders = await getLocalOrders();
+      expect(orders).toHaveLength(1);
+      expect(orders[0].items).toEqual([{ sku: 'x' }]);
     });
   });
 
-  describe('Notification operations', () => {
-    it('should save notification locally', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const notification = {
-        id: '1',
-        title: 'Order Update',
-        message: 'Your order has been processed',
+  describe('saveNotificationLocal', () => {
+    it('coerces boolean read to 0/1 and stringifies data', async () => {
+      await saveNotificationLocal({
+        id: 'n1',
+        title: 't',
+        message: 'm',
         type: 'order',
-        read: false,
-        data: { orderId: '123' },
-      };
-
-      await OfflineStorageService.saveNotificationLocal(notification);
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
-    });
-
-    it('should retrieve local notifications with limit', async () => {
-      const mockNotifications = [
-        {
-          id: '1',
-          title: 'Test',
-          message: 'Test message',
-          type: 'order',
-          read: 0,
-          createdAt: new Date().toISOString(),
-          data: '{}',
-        },
-      ];
-
-      const mockExecuteSql = jest.fn((sql, values, callback) => {
-        callback(null, { rows: { _array: mockNotifications } });
+        read: true,
+        createdAt: '2026-04-21',
+        data: { ref: 'orderId:1' },
       });
-
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const notifications = await OfflineStorageService.getLocalNotifications(10);
-
-      expect(mockDB.transaction).toHaveBeenCalled();
+      expect(calls[0].args).toContain(1); // read coerced
+      expect(calls[0].args).toContain('{"ref":"orderId:1"}');
     });
   });
 
-  describe('Sync queue operations', () => {
-    it('should queue action for sync', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const action = {
-        type: 'order',
-        action: 'create',
-        payload: { orderNumber: 'ORD-001' },
-      };
-
-      await OfflineStorageService.queueForSync(action);
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
-    });
-
-    it('should retrieve sync queue', async () => {
-      const mockQueue = [
+  describe('getLocalNotifications', () => {
+    it('coerces read back to boolean and parses data', async () => {
+      rowsForNextRead = [
         {
-          id: '1',
-          type: 'order',
-          action: 'create',
-          payload: '{"orderNumber":"ORD-001"}',
-          timestamp: new Date().toISOString(),
-          retries: 0,
+          id: 'n1',
+          title: 't',
+          read: 1,
+          data: '{"ref":"orderId:1"}',
+          createdAt: '2026-04-21',
         },
       ];
-
-      const mockExecuteSql = jest.fn((sql, values, callback) => {
-        callback(null, { rows: { _array: mockQueue } });
-      });
-
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const queue = await OfflineStorageService.getSyncQueue();
-
-      expect(mockDB.transaction).toHaveBeenCalled();
+      const out = await getLocalNotifications(10);
+      expect(out[0].read).toBe(true);
+      expect(out[0].data).toEqual({ ref: 'orderId:1' });
     });
 
-    it('should remove synced item from queue', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      await OfflineStorageService.removeFromSyncQueue('sync-item-1');
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
-    });
-
-    it('should update sync retry count', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      await OfflineStorageService.updateSyncRetry('sync-item-1');
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
+    it('applies the limit to the prepared SQL', async () => {
+      await getLocalNotifications(5);
+      expect(calls[0].sql).toMatch(/LIMIT \?/);
+      expect(calls[0].args).toContain(5);
     });
   });
 
-  describe('Data management', () => {
-    it('should clear old data', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      await OfflineStorageService.clearOldData(30);
-
-      expect(mockDB.transaction).toHaveBeenCalled();
-      expect(mockExecuteSql).toHaveBeenCalled();
+  describe('sync queue', () => {
+    it('queueForSync stringifies payload and stamps an id+timestamp', async () => {
+      await queueForSync('order', 'create', { orderNumber: 'ORD-001' });
+      expect(calls[0].sql).toMatch(/INSERT INTO sync_queue/);
+      expect(calls[0].args).toContain('{"orderNumber":"ORD-001"}');
+      // id uses `${type}-${action}-${timestamp}`
+      const id = calls[0].args.find(a => typeof a === 'string' && /^order-create-\d+$/.test(a));
+      expect(id).toBeDefined();
     });
 
-    it('should get database statistics', async () => {
-      const mockStats = [
-        {
-          table: 'orders',
-          count: 5,
-        },
-        {
-          table: 'notifications',
-          count: 10,
-        },
-      ];
+    it('getSyncQueue returns rows as-is', async () => {
+      rowsForNextRead = [{ id: 'q1', type: 'order', retries: 0 }];
+      const out = await getSyncQueue();
+      expect(out).toEqual(rowsForNextRead);
+    });
 
-      const mockExecuteSql = jest.fn();
+    it('removefromSyncQueue deletes by id', async () => {
+      await removefromSyncQueue('q1');
+      expect(calls[0].sql).toMatch(/DELETE FROM sync_queue/);
+      expect(calls[0].args).toEqual(['q1']);
+    });
 
-      mockDB.transaction.mockImplementation((callback) => {
-        const tx = {
-          executeSql: jest.fn((sql, values, callback) => {
-            if (sql.includes('COUNT')) {
-              callback(null, { rows: { _array: [mockStats[0]] } });
-            }
-          }),
-        };
-        callback(tx);
-      });
-
-      const stats = await OfflineStorageService.getDatabaseStats();
-
-      expect(mockDB.transaction).toHaveBeenCalled();
+    it('updateSyncRetry updates retries by id', async () => {
+      await updateSyncRetry('q1', 3);
+      expect(calls[0].sql).toMatch(/UPDATE sync_queue SET retries/);
+      expect(calls[0].args).toEqual([3, 'q1']);
     });
   });
 
-  describe('Error handling', () => {
-    it('should handle database errors gracefully', async () => {
-      const dbError = new Error('Database locked');
-      const mockExecuteSql = jest.fn((sql, values, callback) => {
-        callback(dbError, null);
-      });
-
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      // Should not throw, but handle error internally
-      try {
-        await OfflineStorageService.saveOrderLocal({
-          id: '1',
-          orderNumber: 'ORD-001',
-          customerId: 'cust-1',
-          totalAmount: 1000,
-          status: 'pending',
-          items: [],
-        });
-      } catch (error) {
-        // Expected to handle or throw
-      }
-    });
-
-    it('should handle corrupted JSON in stored data', async () => {
-      const mockCorruptedData = [
-        {
-          id: '1',
-          items: 'invalid json {', // Corrupted JSON
-        },
-      ];
-
-      const mockExecuteSql = jest.fn((sql, values, callback) => {
-        if (sql.includes('SELECT')) {
-          callback(null, { rows: { _array: mockCorruptedData } });
-        }
-      });
-
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      // Should handle parsing errors gracefully
-      try {
-        await OfflineStorageService.getLocalOrders();
-      } catch (error) {
-        // Expected to handle
-      }
-    });
-  });
-
-  describe('Performance', () => {
-    it('should batch insert operations for efficiency', async () => {
-      const mockExecuteSql = jest.fn();
-      mockDB.transaction.mockImplementation((callback) => {
-        callback({
-          executeSql: mockExecuteSql,
-        });
-      });
-
-      const orders = Array.from({ length: 50 }, (_, i) => ({
-        id: String(i),
-        orderNumber: `ORD-${i}`,
-        customerId: 'cust-1',
-        totalAmount: 1000,
-        status: 'pending',
-        items: [],
-      }));
-
-      // Save multiple orders
-      for (const order of orders) {
-        await OfflineStorageService.saveOrderLocal(order);
-      }
-
-      // Should execute multiple inserts
-      expect(mockDB.transaction).toHaveBeenCalled();
+  describe('getDatabaseStats', () => {
+    it('returns zero counts when COUNT rows are empty', async () => {
+      rowsForNextRead = [{ count: 0 }];
+      const s = await getDatabaseStats();
+      expect(s).toEqual({ orders: 0, notifications: 0, syncQueue: 0 });
     });
   });
 });

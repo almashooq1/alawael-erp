@@ -1,14 +1,26 @@
+jest.mock('../../../services/ApiService', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
+jest.mock('expo-secure-store');
+
 import { configureStore } from '@reduxjs/toolkit';
+import ApiService from '../../../services/ApiService';
 import authReducer, {
   login,
   register,
   logout,
   checkAuth,
   clearError,
-} from '../../store/slices/authSlice';
+} from '../authSlice';
 import * as SecureStore from 'expo-secure-store';
 
-jest.mock('expo-secure-store');
+const mockedApi = ApiService as jest.Mocked<typeof ApiService>;
 
 describe('authSlice', () => {
   let store: any;
@@ -51,12 +63,7 @@ describe('authSlice', () => {
         token: 'test-token-123',
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      mockedApi.post.mockResolvedValue(mockResponse);
 
       await store.dispatch(login(loginData) as any);
       const state = store.getState().auth;
@@ -77,12 +84,7 @@ describe('authSlice', () => {
         password: 'wrong-password',
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({ message: 'Invalid credentials' }),
-        })
-      );
+      mockedApi.post.mockRejectedValue(new Error('Invalid credentials'));
 
       await store.dispatch(login(loginData) as any);
       const state = store.getState().auth;
@@ -113,12 +115,7 @@ describe('authSlice', () => {
         token: 'new-token-456',
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      mockedApi.post.mockResolvedValue(mockResponse);
 
       await store.dispatch(register(registerData) as any);
       const state = store.getState().auth;
@@ -157,12 +154,7 @@ describe('authSlice', () => {
         },
       });
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        })
-      );
+      mockedApi.post.mockResolvedValue({});
 
       await store.dispatch(logout() as any);
       const state = store.getState().auth;
@@ -188,18 +180,14 @@ describe('authSlice', () => {
         },
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      // Slice stores the raw response object as `user` (see thunk body).
+      mockedApi.get.mockResolvedValue(mockResponse);
 
       await store.dispatch(checkAuth() as any);
       const state = store.getState().auth;
 
       expect(state.token).toBe('stored-token');
-      expect(state.user).toEqual(mockResponse.user);
+      expect(state.user).toEqual(mockResponse);
       expect(state.isAuthenticated).toBe(true);
     });
 

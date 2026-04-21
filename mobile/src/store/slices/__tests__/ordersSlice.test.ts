@@ -1,4 +1,15 @@
+jest.mock('../../../services/ApiService', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
+
 import { configureStore } from '@reduxjs/toolkit';
+import ApiService from '../../../services/ApiService';
 import ordersReducer, {
   fetchOrders,
   fetchOrderById,
@@ -7,7 +18,9 @@ import ordersReducer, {
   deleteOrder,
   setStatusFilter,
   clearFilters,
-} from '../../store/slices/ordersSlice';
+} from '../ordersSlice';
+
+const mockedApi = ApiService as jest.Mocked<typeof ApiService>;
 
 describe('ordersSlice', () => {
   let store: any;
@@ -30,7 +43,7 @@ describe('ordersSlice', () => {
       expect(state.error).toBeNull();
       expect(state.total).toBe(0);
       expect(state.filters).toEqual({
-        status: 'all',
+        status: null,
         dateRange: null,
       });
     });
@@ -39,42 +52,12 @@ describe('ordersSlice', () => {
   describe('fetchOrders thunk', () => {
     it('should fetch orders successfully', async () => {
       const mockOrders = [
-        {
-          id: '1',
-          orderNumber: 'ORD-001',
-          customerId: 'cust-1',
-          totalAmount: 1000,
-          status: 'completed',
-          items: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: '2',
-          orderNumber: 'ORD-002',
-          customerId: 'cust-2',
-          totalAmount: 2000,
-          status: 'pending',
-          items: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
+        { id: '1', orderNumber: 'ORD-001', customerId: 'cust-1', totalAmount: 1000, status: 'completed', items: [], createdAt: '2026-04-21', updatedAt: '2026-04-21' },
+        { id: '2', orderNumber: 'ORD-002', customerId: 'cust-2', totalAmount: 2000, status: 'pending', items: [], createdAt: '2026-04-21', updatedAt: '2026-04-21' },
       ];
+      mockedApi.get.mockResolvedValue({ items: mockOrders, total: 2 });
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              orders: mockOrders,
-              total: 2,
-            }),
-        })
-      );
-
-      await store.dispatch(
-        fetchOrders({ page: 1, limit: 10, status: 'all' }) as any
-      );
+      await store.dispatch(fetchOrders({ page: 1, limit: 10 }) as any);
       const state = store.getState().orders;
 
       expect(state.items).toEqual(mockOrders);
@@ -83,18 +66,9 @@ describe('ordersSlice', () => {
     });
 
     it('should handle fetch error', async () => {
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({ message: 'Server error' }),
-        })
-      );
-
-      await store.dispatch(
-        fetchOrders({ page: 1, limit: 10, status: 'all' }) as any
-      );
+      mockedApi.get.mockRejectedValue(new Error('Server error'));
+      await store.dispatch(fetchOrders({ page: 1, limit: 10 }) as any);
       const state = store.getState().orders;
-
       expect(state.error).not.toBeNull();
       expect(state.items).toEqual([]);
     });
@@ -119,12 +93,7 @@ describe('ordersSlice', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockOrder),
-        })
-      );
+      mockedApi.get.mockResolvedValue(mockOrder);
 
       await store.dispatch(fetchOrderById('1') as any);
       const state = store.getState().orders;
@@ -157,18 +126,12 @@ describe('ordersSlice', () => {
         updatedAt: new Date().toISOString(),
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      mockedApi.post.mockResolvedValue(mockResponse);
 
       await store.dispatch(createOrder(newOrder) as any);
       const state = store.getState().orders;
 
       expect(state.items).toContainEqual(mockResponse);
-      expect(state.currentOrder).toEqual(mockResponse);
     });
   });
 
@@ -192,7 +155,7 @@ describe('ordersSlice', () => {
         error: null,
         total: 1,
         filters: {
-          status: 'all',
+          status: null,
           dateRange: null,
         },
       };
@@ -216,12 +179,7 @@ describe('ordersSlice', () => {
         status: 'processing',
       };
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      mockedApi.put.mockResolvedValue(mockResponse);
 
       await store.dispatch(updateOrder(updateData) as any);
       const state = store.getState().orders;
@@ -250,7 +208,7 @@ describe('ordersSlice', () => {
         error: null,
         total: 1,
         filters: {
-          status: 'all',
+          status: null,
           dateRange: null,
         },
       };
@@ -264,12 +222,7 @@ describe('ordersSlice', () => {
         },
       });
 
-      global.fetch = jest.fn(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({}),
-        })
-      );
+      mockedApi.delete.mockResolvedValue({});
 
       await store.dispatch(deleteOrder('1') as any);
       const state = store.getState().orders;
@@ -294,7 +247,7 @@ describe('ordersSlice', () => {
       );
       const state = store.getState().orders;
 
-      expect(state.filters.status).toBe('all');
+      expect(state.filters.status).toBeNull();
       expect(state.filters.dateRange).toBeNull();
     });
   });

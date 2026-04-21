@@ -56,6 +56,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import api from '../../services/api.client';
+import ParentComplaintsPanel from './ParentComplaintsPanel';
 
 const ACTIVE_CHILD_KEY = 'parent-portal.activeChildId';
 
@@ -428,6 +429,8 @@ export default function MyChildrenPortal() {
           </Box>
         </Paper>
       )}
+
+      <ParentComplaintsPanel activeChild={active} />
     </Container>
   );
 }

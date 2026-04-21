@@ -32,6 +32,7 @@ const Beneficiary = require('../models/Beneficiary');
 const TherapySession = require('../models/TherapySession');
 const CarePlan = require('../models/CarePlan');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
+const Complaint = require('../models/Complaint');
 const parentReportService = require('../services/parentReportService');
 
 router.use(authenticateToken);
@@ -419,6 +420,103 @@ router.get('/children/:id/report/download', async (req, res) => {
     res.send(buf);
   } catch (err) {
     return safeError(res, err, 'parent-v2.report.download');
+  }
+});
+
+// ── GET /complaints ──────────────────────────────────────────────────────
+// List complaints/feedback the current guardian has submitted.
+router.get('/complaints', async (req, res) => {
+  try {
+    if (!req.user?.id) return res.status(401).json({ success: false, message: 'غير مصرّح' });
+    const items = await Complaint.find({
+      submittedBy: req.user.id,
+      source: 'parent',
+    })
+      .sort({ createdAt: -1 })
+      .limit(100)
+      .select(
+        'complaintId type category subject description priority status responses resolution resolvedAt rating createdAt updatedAt'
+      )
+      .lean();
+    res.json({ success: true, items });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.complaints.list');
+  }
+});
+
+// ── POST /complaints ─────────────────────────────────────────────────────
+// Submit a complaint / suggestion / feedback from the parent portal.
+// Auto-fills submitter details from the guardian profile; if childId is
+// passed, gates it through assertChildAccess so a parent can't attach a
+// complaint to a child they don't own.
+router.post('/complaints', async (req, res) => {
+  try {
+    const {
+      type = 'complaint',
+      category = 'service',
+      subject,
+      description,
+      priority = 'medium',
+      childId,
+    } = req.body || {};
+
+    if (!subject || typeof subject !== 'string' || subject.trim().length < 3) {
+      return res.status(400).json({ success: false, message: 'الموضوع مطلوب (3 أحرف على الأقل)' });
+    }
+    if (!description || typeof description !== 'string' || description.trim().length < 5) {
+      return res.status(400).json({ success: false, message: 'الوصف مطلوب (5 أحرف على الأقل)' });
+    }
+    if (!['complaint', 'suggestion', 'feedback', 'grievance'].includes(type)) {
+      return res.status(400).json({ success: false, message: 'نوع غير صالح' });
+    }
+    if (!['low', 'medium', 'high', 'critical'].includes(priority)) {
+      return res.status(400).json({ success: false, message: 'أولوية غير صالحة' });
+    }
+
+    // If childId provided, verify access before accepting.
+    let childLabel = null;
+    if (childId) {
+      const check = await assertChildAccess(req, childId);
+      if (!check.ok) return res.status(check.status).json({ success: false, message: check.msg });
+      childLabel =
+        check.child?.firstName_ar ||
+        `${check.child?.firstName || ''} ${check.child?.lastName || ''}`.trim() ||
+        null;
+    }
+
+    const guardian = await getMyGuardian(req);
+
+    const decoratedDescription = childLabel
+      ? `[يخص الطفل: ${childLabel}]\n\n${description.trim()}`
+      : description.trim();
+
+    const complaint = await Complaint.create({
+      type,
+      source: 'parent',
+      category,
+      subject: subject.trim(),
+      description: decoratedDescription,
+      priority,
+      status: 'new',
+      submittedBy: req.user?.id,
+      submitterName: guardian
+        ? `${guardian.firstName_ar || guardian.firstName_en || ''} ${guardian.lastName_ar || guardian.lastName_en || ''}`.trim()
+        : undefined,
+      submitterEmail: guardian?.email,
+      submitterPhone: guardian?.phone,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        id: complaint._id,
+        complaintId: complaint.complaintId,
+        status: complaint.status,
+        createdAt: complaint.createdAt,
+      },
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.complaints.create');
   }
 });
 

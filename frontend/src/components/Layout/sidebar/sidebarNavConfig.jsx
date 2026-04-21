@@ -1432,6 +1432,13 @@ const getNavigationItems = () => [
         badgeColor: 'error',
       },
       {
+        id: 'admin-saudization',
+        label: 'نطاقات — التوطين المباشر',
+        path: '/admin/saudization',
+        badge: 'SAU',
+        badgeColor: 'success',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

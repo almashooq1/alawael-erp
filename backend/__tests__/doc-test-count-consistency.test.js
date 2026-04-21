@@ -41,7 +41,7 @@ describe('docs test-count consistency', () => {
 
   it('sprint-tests.yml summary has a plausible test count', () => {
     expect(ciCount).toBeGreaterThan(200);
-    expect(ciCount).toBeLessThan(1000); // sanity bound
+    expect(ciCount).toBeLessThan(2000); // sanity bound (crossed 1000 on 2026-04-21)
   });
 
   it('CHANGELOG.md latest "Sprint suite: **N passing**" matches the CI count', () => {

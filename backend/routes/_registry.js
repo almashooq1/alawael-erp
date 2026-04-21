@@ -348,6 +348,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/document-expiry', require('../routes/document-expiry-admin.routes'));
   dualMount(app, 'admin/incidents-analytics', require('../routes/incidents-analytics-admin.routes'));
   dualMount(app, 'admin/saudization', require('../routes/saudization-admin.routes'));
+  dualMount(app, 'admin/onboarding', require('../routes/onboarding-admin.routes'));
   dualMount(app, 'admin/gov-integrations', require('../routes/gov-integrations.routes'));
   dualMount(app, 'admin/nphies-claims', require('../routes/nphies-claims.routes'));
   dualMount(app, 'admin/branch-compliance', require('../routes/branch-compliance.routes'));

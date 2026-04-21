@@ -36,7 +36,10 @@ bulk via a new cron-friendly digest CLI.
 
 ### Tests
 
-Sprint suite: **1066 passing** (was 1043 at 4.0.10).
+Sprint suite: **1072 passing** (was 1043 at 4.0.10 headline; net
++29 reflects both the parent-portal additions and drift-test counts
+that weren't in the prior headline because they were added late in
+the 4.0.10 cycle but not re-counted).
 • 16 unit tests for `parentReportService` (`attendanceRate`,
 `goalProgress`, `latestAssessments`, `displayName`, `assembleReport`)
 • 7 unit tests for the digest planner's `buildPlan` (empty paths,

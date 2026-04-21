@@ -18,5 +18,5 @@
     }
   },
   "include": ["src/**/*", "App.tsx"],
-  "exclude": ["node_modules", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx", "src/src", "src/src/**/*", "App.jsx", "screens/**"]
+  "exclude": ["node_modules", "**/__tests__/**", "**/*.test.ts", "**/*.test.tsx", "App.jsx", "screens/**"]
 }

@@ -18,8 +18,6 @@ module.exports = [
   {
     ignores: [
       'node_modules/**',
-      'src/src/**',
-      '__tests__/gen/**',
       'App.jsx',
       'screens/**',
     ],

@@ -145,13 +145,13 @@ No migration needed — Mongoose's `mongoose.models.X || mongoose.model('X', sch
 pattern + the proxy chain ensures both require paths land on the same
 model instance and collection.
 
-### The 3 GENUINE splits (need real migration)
+### The GENUINE splits (resolved 2/3, 1 remaining)
 
-| File                                        |                                                                 Mongoose registers? |     Lines | Notes                                                                                                                                                          |
-| ------------------------------------------- | ----------------------------------------------------------------------------------: | --------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Project.js` + `project.model.js`           | `Project.js` = plain JS class (NOT Mongoose) · `project.model.js` = Mongoose schema |   63 / 45 | Likely `Project.js` was a POC class; actual persisted model is `project.model.js`. Legacy class is probably dead code — grep consumers to confirm then delete. |
-| `Training.js` + `training.model.js`         |                                                      Both register Mongoose schemas | 120 / 122 | Schemas diverge on field names. Needs natural-key merge (likely `courseCode` vs `title`).                                                                      |
-| `ZktecoDevice.js` + `zktecoDevice.model.js` |                                                      Both register Mongoose schemas |  53 / 308 | Different registered names (`ZktecoDevice` vs `ZKTecoDevice`). Different collections, same physical devices.                                                   |
+| File                                        |                                    Mongoose registers? |    Lines | Status (2026-04-21)                                                                                                                                          |
+| ------------------------------------------- | -----------------------------------------------------: | -------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ~~`Project.js` + `project.model.js`~~       | Resolved — `Project.js` now proxies `project.model.js` |  17 / 45 | ✅ Shipped as a proxy conversion (zero production consumers of the legacy class). Drift test unblocked.                                                      |
+| ~~`Training.js` + `training.model.js`~~     |    Resolved — `training.model.js` removed as dead code |    — / — | ✅ Orphan cleanup: `training.model.js` had one consumer (`services/hr/reportService.js`) which itself was never required anywhere. Deleted both + auto-test. |
+| `ZktecoDevice.js` + `zktecoDevice.model.js` |                         Both register Mongoose schemas | 53 / 308 | 🟡 Merge script shipped (`scripts/migrations/zkteco-device-merge.js`, dry-run by default). Last step: operator runs --execute in prod.                       |
 
 ### ZKTeco pair (initial case study)
 
@@ -195,10 +195,13 @@ Schemas diverge:
    `kpi-attendance.scheduler` switch to the canonical model; write
    a collection-merge script keyed on `serialNumber`; delete the
    legacy.
-3. **Training** — both Mongoose schemas, both presumably have
-   historical data. Needs the most careful migration: schema-map
-   the divergent fields, merge by natural key (`courseCode` or
-   `title+year`), then rewire consumers.
+3. **Training** — RESOLVED (2026-04-21). Turned out not to be a live
+   split at all: `training.model.js` was consumed exclusively by
+   `services/hr/reportService.js`, which itself was never required
+   anywhere in the codebase (428 orphan lines). Both deleted together
+   as coordinated dead-code removal. The 3-tier `Training.js`
+   (`TrainingCourse` / `TrainingSession` / `TrainingPlan`) remains as
+   the canonical HR training system.
 
 ### Current action
 

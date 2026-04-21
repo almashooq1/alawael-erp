@@ -161,16 +161,24 @@ const MODELS_DIR = path.join(BACKEND_ROOT, 'models');
 // MongoDB collections, tracked in Phase 6 of the consolidation roadmap.
 // Each needs a migration script + per-consumer rewiring.
 //
-// Full audit history (2026-04-21): the drift test first flagged 12 pairs
-// by filename collision. Deeper inspection showed 9 of those were already
-// code-level unified via proxy re-export (e.g. `Employee.js` does
-// `module.exports = require('./HR/Employee')`). Only these 3 are genuine
-// splits where both files register a different Mongoose model on a
-// different collection:
+// Full audit history:
+//   • 2026-04-21a — drift test first flagged 12 pairs by filename
+//     collision. Deeper inspection showed 9 were already unified via
+//     proxy re-export (e.g. `Employee.js` does
+//     `module.exports = require('./HR/Employee')`).
+//   • 2026-04-21b — Project.js converted to proxy of project.model.js
+//     after confirming zero production consumers of the legacy class.
+//   • 2026-04-21c — Training orphan-cleanup: training.model.js and
+//     services/hr/reportService.js (its only consumer) removed as dead
+//     code. The 3-tier Training.js (TrainingCourse / TrainingSession /
+//     TrainingPlan) remains as the canonical HR training system.
+//
+// Only this one pair remains as a genuine split where both files register
+// a different Mongoose model on a different collection. A future task
+// will be either the ZKTeco migration (scripts/migrations/zkteco-device-
+// merge.js) reaching --execute status, or a proxy conversion after
+// confirming canonical coverage.
 const GRANDFATHERED_MODEL_PAIRS = new Set([
-  // Resolved 2026-04-21: Project.js converted to proxy of project.model.js.
-  // 'project' — no longer needed here.
-  'training', // Training.js vs training.model.js — both Mongoose, different schemas
   'zktecodevice', // ZktecoDevice.js vs zktecoDevice.model.js — both Mongoose, different schemas
 ]);
 

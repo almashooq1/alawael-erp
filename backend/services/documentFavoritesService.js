@@ -1,6 +1,12 @@
 /**
  * Document Favorites Service — خدمة المستندات المفضلة
  *
+ * @deprecated Use services/documents/documentFavorites.service.js instead.
+ * This in-memory EventEmitter implementation is kept for
+ * documentAdvanced.routes.js legacy compatibility. The canonical version
+ * in services/documents/ persists favorites in Mongo.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Add/remove documents from favorites
  * - Organize favorites into collections

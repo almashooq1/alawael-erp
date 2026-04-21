@@ -1,6 +1,13 @@
 /**
  * Document Audit Trail Service — خدمة سجل المراجعة والتدقيق
  *
+ * @deprecated Use services/documents/documentAudit.service.js instead.
+ * This EventEmitter-based implementation is kept for documentAdvanced.routes.js
+ * legacy compatibility. New code should consume the Mongoose-backed
+ * documentAudit.service.js under services/documents/ which persists audit
+ * entries in a blockchain-style collection.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Comprehensive activity logging for all document operations
  * - Audit reports generation

@@ -1,6 +1,10 @@
 /**
  * Document QR Code Service — خدمة رمز الاستجابة السريعة
  *
+ * @deprecated Use services/documents/documentQRCode.service.js instead.
+ * Kept for documentAdvanced.routes.js legacy compatibility.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Generate QR codes for document verification
  * - QR codes for quick access links

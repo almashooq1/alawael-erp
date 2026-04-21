@@ -1,6 +1,10 @@
 /**
  * Document Watermark Service — خدمة العلامات المائية
  *
+ * @deprecated Use services/documents/documentWatermark.service.js instead.
+ * Kept for documentAdvanced.routes.js legacy compatibility.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Text watermarks (user name, date, confidential)
  * - Image/logo watermarks

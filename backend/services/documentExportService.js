@@ -1,6 +1,10 @@
 /**
  * Document Export/Import Service — خدمة تصدير واستيراد المستندات
  *
+ * @deprecated Use services/documents/documentImportExport.service.js instead.
+ * Kept for documentAdvanced.routes.js legacy compatibility.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Bulk export to ZIP
  * - Export with metadata (JSON manifest)

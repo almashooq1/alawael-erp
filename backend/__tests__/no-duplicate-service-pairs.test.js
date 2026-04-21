@@ -139,3 +139,98 @@ describe('no-duplicate-service-pairs (document namespace)', () => {
     }
   });
 });
+
+// ═══════════════════════════════════════════════════════════════════════
+//  Model namespace — extends the drift guard to backend/models/.
+//
+//  Real-world case that prompted this: backend/models/ZktecoDevice.js
+//  (53-line legacy) vs backend/models/zktecoDevice.model.js (308-line
+//  canonical) — both live in production on different Mongo collections.
+//  This is data fragmentation, not just a code duplicate.
+//
+//  Pattern: a model with name `FooModel.js` (PascalCase, no suffix) vs
+//  `fooModel.model.js` (camelCase, .model suffix). Not every file in
+//  /models uses one pattern or the other — only the duplicates do. So
+//  this test looks for base-name collisions across those two naming
+//  conventions.
+// ═══════════════════════════════════════════════════════════════════════
+
+const MODELS_DIR = path.join(BACKEND_ROOT, 'models');
+
+// Model pairs already tracked in the consolidation roadmap. Each entry
+// is the base name in lowercase — the test lowercases before comparing
+// so "ZktecoDevice" and "zktecoDevice" collide correctly.
+//
+// When this test was first added (2026-04-21) it immediately surfaced
+// 12 pre-existing duplicate pairs across core business entities. Each
+// is a data-fragmentation bug: the two files register Mongoose models
+// on different MongoDB collections, so the same business entity gets
+// written twice with different schemas. All 12 are documented under
+// Phase 6 of docs/technical-debt/consolidation-roadmap.md and need
+// independent migration (each requires picking a canonical model,
+// writing a collection-merge script, and switching consumers).
+const GRANDFATHERED_MODEL_PAIRS = new Set([
+  'analytics', // Analytics.js vs analytics.model.js
+  'attendance', // Attendance.js vs attendance.model.js
+  'auditlog', // AuditLog.js vs auditLog.model.js
+  'employee', // Employee.js vs employee.model.js — critical, central entity
+  'insuranceclaim', // InsuranceClaim.js vs insuranceClaim.model.js
+  'leave', // Leave.js vs leave.model.js
+  'notification', // Notification.js vs notification.model.js
+  'payment', // Payment.js vs payment.model.js
+  'project', // Project.js vs project.model.js
+  'training', // Training.js vs training.model.js
+  'workshift', // WorkShift.js vs workShift.model.js
+  'zktecodevice', // ZktecoDevice.js vs zktecoDevice.model.js — flagged during 2026-04-21 ZKTeco audit
+]);
+
+function listLegacyModelNames() {
+  if (!fs.existsSync(MODELS_DIR)) return [];
+  return fs
+    .readdirSync(MODELS_DIR)
+    .filter(f => /^[A-Z][\w]+\.js$/.test(f)) // PascalCase, no .model suffix
+    .map(f => f.replace(/\.js$/, ''))
+    .filter(Boolean);
+}
+
+function listCanonicalModelNames() {
+  if (!fs.existsSync(MODELS_DIR)) return [];
+  return fs
+    .readdirSync(MODELS_DIR)
+    .filter(f => /^[a-z][\w]+\.model\.js$/.test(f)) // camelCase with .model suffix
+    .map(f => f.replace(/\.model\.js$/, ''))
+    .filter(Boolean);
+}
+
+describe('no-duplicate-model-pairs', () => {
+  const legacy = listLegacyModelNames();
+  const canonical = listCanonicalModelNames();
+
+  it('at least one model in each naming convention exists (sanity check)', () => {
+    expect(legacy.length).toBeGreaterThan(0);
+    expect(canonical.length).toBeGreaterThan(0);
+  });
+
+  it('no NEW model pair is introduced across naming conventions', () => {
+    const canonicalLower = new Set(canonical.map(n => n.toLowerCase()));
+    const newPairs = [];
+    for (const name of legacy) {
+      const lower = name.toLowerCase();
+      if (GRANDFATHERED_MODEL_PAIRS.has(lower)) continue;
+      if (canonicalLower.has(lower)) newPairs.push(name);
+    }
+    if (newPairs.length) {
+      throw new Error(
+        'New duplicate model pair(s) detected:\n  ' +
+          newPairs
+            .map(
+              n =>
+                `- models/${n}.js  ↔  models/${n.charAt(0).toLowerCase() + n.slice(1)}.model.js\n` +
+                `  Pick ONE — Mongoose registering two models on different collections ` +
+                `is a data-fragmentation bug. See docs/technical-debt/consolidation-roadmap.md.`
+            )
+            .join('\n  ')
+      );
+    }
+  });
+});

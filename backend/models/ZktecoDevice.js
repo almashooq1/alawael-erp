@@ -1,6 +1,26 @@
 /**
  * ZktecoDevice — أجهزة ZKTeco البيومترية
  * النظام 37: الحضور البيومتري ZKTeco
+ *
+ * @deprecated Use backend/models/zktecoDevice.model.js instead.
+ * This 53-line schema (mongoose model name: `ZktecoDevice`, lowercase k)
+ * is the System-37 legacy model. The canonical 308-line
+ * zktecoDevice.model.js (registered as `ZKTecoDevice`, uppercase KT)
+ * carries the enterprise enrichments: syncLogs, deviceUsers mapping to
+ * Employees, consecutiveFailures, deviceInfo, fingerprint/face counts,
+ * connection-health fields.
+ *
+ * Both models are in production on DIFFERENT collections — this is a
+ * real data-fragmentation problem, not just a code duplicate. A merge
+ * requires a data-migration script that reconciles rows from the two
+ * collections onto one schema. Migration is tracked in
+ * docs/technical-debt/consolidation-roadmap.md (Phase 6).
+ *
+ * Current consumers of this legacy model:
+ *   • routes/biometric-attendance.routes.js
+ *   • services/zktecoSdk.service.js
+ *   • scheduler/kpi-attendance.scheduler.js
+ * These must migrate to the canonical model first.
  */
 
 const mongoose = require('mongoose');

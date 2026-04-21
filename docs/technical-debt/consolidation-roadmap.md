@@ -111,6 +111,91 @@ polymorphic `Issue` type.
 
 ---
 
+## Phase 6 — Model duplicates across core business entities (DATA FRAGMENTATION, 12 pairs)
+
+When the `no-duplicate-model-pairs` drift test was added during the
+2026-04-21 ZKTeco audit it surfaced **12 pre-existing duplicate model
+pairs** across the backend/models directory. Each pair registers TWO
+Mongoose models on DIFFERENT MongoDB collections, meaning the same
+business entity is being written twice with different schemas.
+
+**This is worse than the document-service duplicates** — services are
+just code duplication; models are live data in separate collections.
+Consumers of one model cannot see data written by consumers of the
+other. Over time the two collections drift, and reconciliation
+becomes harder.
+
+### The 12 pairs found
+
+| Legacy (PascalCase.js) | Canonical (camelCase.model.js) | Notes                                            |
+| ---------------------- | ------------------------------ | ------------------------------------------------ |
+| `Analytics.js`         | `analytics.model.js`           |                                                  |
+| `Attendance.js`        | `attendance.model.js`          | HR critical                                      |
+| `AuditLog.js`          | `auditLog.model.js`            | compliance critical                              |
+| `Employee.js`          | `employee.model.js`            | **central entity** — highest-priority to resolve |
+| `InsuranceClaim.js`    | `insuranceClaim.model.js`      | finance critical                                 |
+| `Leave.js`             | `leave.model.js`               | HR                                               |
+| `Notification.js`      | `notification.model.js`        |                                                  |
+| `Payment.js`           | `payment.model.js`             | finance critical                                 |
+| `Project.js`           | `project.model.js`             |                                                  |
+| `Training.js`          | `training.model.js`            | HR                                               |
+| `WorkShift.js`         | `workShift.model.js`           | HR                                               |
+| `ZktecoDevice.js`      | `zktecoDevice.model.js`        | biometric — flagged during ZKTeco audit          |
+
+### ZKTeco pair (initial case study)
+
+| File                           | Mongoose name  | Lines | Consumer                                                                   |
+| ------------------------------ | -------------- | ----- | -------------------------------------------------------------------------- |
+| `models/ZktecoDevice.js`       | `ZktecoDevice` | 53    | routes/biometric-attendance + zktecoSdk.service + kpi-attendance.scheduler |
+| `models/zktecoDevice.model.js` | `ZKTecoDevice` | 308   | services/hr/zktecoService (1024-line enterprise service)                   |
+
+Schemas diverge:
+
+- Legacy: `name`, `ipAddress`, `lastSyncAt`, `enrolledCount`
+- Canonical: `deviceName`, `port`, `consecutiveFailures`,
+  `deviceInfo`, `deviceUsers`, `syncLogs`
+
+### Migration path (per pair, same template)
+
+1. Audit which model each consumer currently uses and which collection
+   has more recent/richer data.
+2. Pick canonical — usually the one with more fields, more
+   relationships, and the larger consumer base. For most of the 12
+   pairs the `.model.js` version is canonical (newer convention); the
+   legacy `.js` version is earlier scaffolding.
+3. Write a migration script that reads both collections, merges rows
+   by natural key (`serialNumber` for ZKTeco, `employeeNumber` for
+   Employee, etc.), writes to the canonical collection, dedupes.
+4. Migrate consumers one at a time from legacy require path to
+   canonical require path.
+5. Drop the legacy collection once all consumers are migrated.
+6. Delete the legacy file; remove its entry from
+   `GRANDFATHERED_MODEL_PAIRS` in `no-duplicate-service-pairs.test.js`.
+
+### Priority order (suggested)
+
+1. **Employee** — central entity; every HR/clinical/finance feature
+   references it. Data fragmentation here cascades everywhere.
+2. **Attendance + WorkShift + Leave + Training + ZktecoDevice** —
+   the HR cluster. Likely the original fragmentation point
+   (HR was built across two sprints by two different model conventions).
+3. **InsuranceClaim + Payment** — finance cluster.
+4. **AuditLog** — compliance; split audit trails mean compliance
+   queries miss data.
+5. **Analytics + Notification + Project** — less critical; bulk
+   queries, lower correctness stakes.
+
+### Current action
+
+- `@deprecated` marker added to `models/ZktecoDevice.js` (the pair
+  that triggered this section).
+- Drift test `no-duplicate-model-pairs` grandfathers all 12 known
+  pairs. Adding a 13th pair fails the sprint gate — holds the line.
+- Nothing migrated yet. Migration needs DB access + product input on
+  which model has the authoritative historical data for each pair.
+
+---
+
 ## Phase 5 — Referral models (mostly by design, one ambiguous)
 
 | Model                      | Purpose                                        |

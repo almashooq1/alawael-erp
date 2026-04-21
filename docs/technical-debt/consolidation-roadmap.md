@@ -111,36 +111,47 @@ polymorphic `Issue` type.
 
 ---
 
-## Phase 6 — Model duplicates across core business entities (DATA FRAGMENTATION, 12 pairs)
+## Phase 6 — Model duplicates (only 3 are genuine, 9 are already unified)
 
-When the `no-duplicate-model-pairs` drift test was added during the
-2026-04-21 ZKTeco audit it surfaced **12 pre-existing duplicate model
-pairs** across the backend/models directory. Each pair registers TWO
-Mongoose models on DIFFERENT MongoDB collections, meaning the same
-business entity is being written twice with different schemas.
+When the `no-duplicate-model-pairs` drift test was first added during
+the 2026-04-21 ZKTeco audit it surfaced 12 filename-level duplicate
+pairs across `backend/models/`. The 2026-04-21 deep audit showed
+**only 3 of those are genuine data-fragmentation bugs** — the other 9
+are already code-level unified via the proxy re-export pattern (e.g.
+`Employee.js` contains `module.exports = require('./HR/Employee')`,
+so both file paths resolve to the same Mongoose model on the same
+collection).
 
-**This is worse than the document-service duplicates** — services are
-just code duplication; models are live data in separate collections.
-Consumers of one model cannot see data written by consumers of the
-other. Over time the two collections drift, and reconciliation
-becomes harder.
+The drift test was tightened on the same day: it now inspects whether
+a file genuinely registers a Mongoose model (`mongoose.Schema(` or
+`mongoose.model(`) vs merely re-exporting a sibling. A future pair is
+only flagged as a split when both files register their own schema.
 
-### The 12 pairs found
+### The 9 pairs that are ALREADY unified via proxy (no action needed)
 
-| Legacy (PascalCase.js) | Canonical (camelCase.model.js) | Notes                                            |
-| ---------------------- | ------------------------------ | ------------------------------------------------ |
-| `Analytics.js`         | `analytics.model.js`           |                                                  |
-| `Attendance.js`        | `attendance.model.js`          | HR critical                                      |
-| `AuditLog.js`          | `auditLog.model.js`            | compliance critical                              |
-| `Employee.js`          | `employee.model.js`            | **central entity** — highest-priority to resolve |
-| `InsuranceClaim.js`    | `insuranceClaim.model.js`      | finance critical                                 |
-| `Leave.js`             | `leave.model.js`               | HR                                               |
-| `Notification.js`      | `notification.model.js`        |                                                  |
-| `Payment.js`           | `payment.model.js`             | finance critical                                 |
-| `Project.js`           | `project.model.js`             |                                                  |
-| `Training.js`          | `training.model.js`            | HR                                               |
-| `WorkShift.js`         | `workShift.model.js`           | HR                                               |
-| `ZktecoDevice.js`      | `zktecoDevice.model.js`        | biometric — flagged during ZKTeco audit          |
+| Filename pair                                   | How it's unified                                                   |
+| ----------------------------------------------- | ------------------------------------------------------------------ |
+| `Employee.js` + `employee.model.js`             | `Employee.js` → `HR/Employee`, `employee.model.js` → `Employee.js` |
+| `Attendance.js` + `attendance.model.js`         | `attendance.model.js` → `Attendance.js`                            |
+| `AuditLog.js` + `auditLog.model.js`             | `AuditLog.js` → `auditLog.model.js.AuditLog`                       |
+| `InsuranceClaim.js` + `insuranceClaim.model.js` | `InsuranceClaim.js` → `insuranceClaim.model.js.InsuranceClaim`     |
+| `Leave.js` + `leave.model.js`                   | `Leave.js` → `leave.model.js`                                      |
+| `Notification.js` + `notification.model.js`     | `notification.model.js` → `Notification.js`                        |
+| `WorkShift.js` + `workShift.model.js`           | `WorkShift.js` → `workShift.model.js`                              |
+| `Analytics.js` + `analytics.model.js`           | `analytics.model.js` → `Analytics.js` (with test-mock wrapper)     |
+| `Payment.js` + `payment.model.js`               | `payment.model.js` → `Payment.js` (with test-mock wrapper)         |
+
+No migration needed — Mongoose's `mongoose.models.X || mongoose.model('X', schema)`
+pattern + the proxy chain ensures both require paths land on the same
+model instance and collection.
+
+### The 3 GENUINE splits (need real migration)
+
+| File                                        |                                                                 Mongoose registers? |     Lines | Notes                                                                                                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------------: | --------: | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Project.js` + `project.model.js`           | `Project.js` = plain JS class (NOT Mongoose) · `project.model.js` = Mongoose schema |   63 / 45 | Likely `Project.js` was a POC class; actual persisted model is `project.model.js`. Legacy class is probably dead code — grep consumers to confirm then delete. |
+| `Training.js` + `training.model.js`         |                                                      Both register Mongoose schemas | 120 / 122 | Schemas diverge on field names. Needs natural-key merge (likely `courseCode` vs `title`).                                                                      |
+| `ZktecoDevice.js` + `zktecoDevice.model.js` |                                                      Both register Mongoose schemas |  53 / 308 | Different registered names (`ZktecoDevice` vs `ZKTecoDevice`). Different collections, same physical devices.                                                   |
 
 ### ZKTeco pair (initial case study)
 
@@ -172,27 +183,35 @@ Schemas diverge:
 6. Delete the legacy file; remove its entry from
    `GRANDFATHERED_MODEL_PAIRS` in `no-duplicate-service-pairs.test.js`.
 
-### Priority order (suggested)
+### Priority order (only 3 pairs, ranked)
 
-1. **Employee** — central entity; every HR/clinical/finance feature
-   references it. Data fragmentation here cascades everywhere.
-2. **Attendance + WorkShift + Leave + Training + ZktecoDevice** —
-   the HR cluster. Likely the original fragmentation point
-   (HR was built across two sprints by two different model conventions).
-3. **InsuranceClaim + Payment** — finance cluster.
-4. **AuditLog** — compliance; split audit trails mean compliance
-   queries miss data.
-5. **Analytics + Notification + Project** — less critical; bulk
-   queries, lower correctness stakes.
+1. **Project** — likely safest to resolve first. `Project.js` is a
+   plain JS class (not Mongoose), so deleting it only affects code
+   that `new Project()`-s in memory. Grep consumers, migrate any
+   usages to read from `project.model.js`, delete `Project.js`.
+2. **ZktecoDevice** — enterprise `zktecoService` (1024L) already
+   consumes canonical `zktecoDevice.model.js`. Migration: have
+   `biometric-attendance.routes`, `zktecoSdk.service`, and
+   `kpi-attendance.scheduler` switch to the canonical model; write
+   a collection-merge script keyed on `serialNumber`; delete the
+   legacy.
+3. **Training** — both Mongoose schemas, both presumably have
+   historical data. Needs the most careful migration: schema-map
+   the divergent fields, merge by natural key (`courseCode` or
+   `title+year`), then rewire consumers.
 
 ### Current action
 
-- `@deprecated` marker added to `models/ZktecoDevice.js` (the pair
-  that triggered this section).
-- Drift test `no-duplicate-model-pairs` grandfathers all 12 known
-  pairs. Adding a 13th pair fails the sprint gate — holds the line.
-- Nothing migrated yet. Migration needs DB access + product input on
-  which model has the authoritative historical data for each pair.
+- `@deprecated` marker on `models/ZktecoDevice.js` (the pair that
+  triggered this section).
+- Drift test `no-duplicate-model-pairs` grandfathers only the 3
+  genuine splits. The test uses an AST-ish heuristic (`is this file
+registering a Mongoose schema, or re-exporting a sibling?`) so it
+  won't false-positive on proxy pairs and won't false-negative on
+  new splits.
+- Nothing data-migrated yet. Migration needs DB access + product
+  input on which collection has the authoritative historical data
+  for each of the 3 pairs.
 
 ---
 

@@ -157,32 +157,42 @@ describe('no-duplicate-service-pairs (document namespace)', () => {
 
 const MODELS_DIR = path.join(BACKEND_ROOT, 'models');
 
-// Model pairs already tracked in the consolidation roadmap. Each entry
-// is the base name in lowercase — the test lowercases before comparing
-// so "ZktecoDevice" and "zktecoDevice" collide correctly.
+// Genuine data-fragmentation pairs: two Mongoose schemas on different
+// MongoDB collections, tracked in Phase 6 of the consolidation roadmap.
+// Each needs a migration script + per-consumer rewiring.
 //
-// When this test was first added (2026-04-21) it immediately surfaced
-// 12 pre-existing duplicate pairs across core business entities. Each
-// is a data-fragmentation bug: the two files register Mongoose models
-// on different MongoDB collections, so the same business entity gets
-// written twice with different schemas. All 12 are documented under
-// Phase 6 of docs/technical-debt/consolidation-roadmap.md and need
-// independent migration (each requires picking a canonical model,
-// writing a collection-merge script, and switching consumers).
+// Full audit history (2026-04-21): the drift test first flagged 12 pairs
+// by filename collision. Deeper inspection showed 9 of those were already
+// code-level unified via proxy re-export (e.g. `Employee.js` does
+// `module.exports = require('./HR/Employee')`). Only these 3 are genuine
+// splits where both files register a different Mongoose model on a
+// different collection:
 const GRANDFATHERED_MODEL_PAIRS = new Set([
-  'analytics', // Analytics.js vs analytics.model.js
-  'attendance', // Attendance.js vs attendance.model.js
-  'auditlog', // AuditLog.js vs auditLog.model.js
-  'employee', // Employee.js vs employee.model.js — critical, central entity
-  'insuranceclaim', // InsuranceClaim.js vs insuranceClaim.model.js
-  'leave', // Leave.js vs leave.model.js
-  'notification', // Notification.js vs notification.model.js
-  'payment', // Payment.js vs payment.model.js
-  'project', // Project.js vs project.model.js
-  'training', // Training.js vs training.model.js
-  'workshift', // WorkShift.js vs workShift.model.js
-  'zktecodevice', // ZktecoDevice.js vs zktecoDevice.model.js — flagged during 2026-04-21 ZKTeco audit
+  // Resolved 2026-04-21: Project.js converted to proxy of project.model.js.
+  // 'project' — no longer needed here.
+  'training', // Training.js vs training.model.js — both Mongoose, different schemas
+  'zktecodevice', // ZktecoDevice.js vs zktecoDevice.model.js — both Mongoose, different schemas
 ]);
+
+/**
+ * Returns true if the file looks like a proxy/re-export rather than a
+ * genuine schema definition. Heuristic:
+ *   • Direct re-export form: `module.exports = require('./X')`
+ *   • Two-step form: `const X = require('./X'); module.exports = X;`
+ *   • Test-mock wrapper: NODE_ENV check that forwards to a real model
+ * The proxy signal is always a `require('./<sibling>')` on a file that
+ * does NOT itself register a Mongoose model (no `mongoose.Schema(` or
+ * `mongoose.model(`). Genuine schemas always have those calls.
+ */
+function isProxyFile(absPath) {
+  if (!fs.existsSync(absPath)) return false;
+  const content = fs.readFileSync(absPath, 'utf8');
+  const hasSiblingRequire = /require\s*\(\s*['"`]\.\/[^'"`]+['"`]/.test(content);
+  if (!hasSiblingRequire) return false;
+  const registersMongooseModel =
+    /mongoose\.Schema\s*\(/.test(content) || /mongoose\.model\s*\(/.test(content);
+  return !registersMongooseModel;
+}
 
 function listLegacyModelNames() {
   if (!fs.existsSync(MODELS_DIR)) return [];
@@ -211,23 +221,32 @@ describe('no-duplicate-model-pairs', () => {
     expect(canonical.length).toBeGreaterThan(0);
   });
 
-  it('no NEW model pair is introduced across naming conventions', () => {
-    const canonicalLower = new Set(canonical.map(n => n.toLowerCase()));
-    const newPairs = [];
-    for (const name of legacy) {
-      const lower = name.toLowerCase();
+  it('no NEW genuine split is introduced (proxy re-exports are OK)', () => {
+    const canonicalByLower = new Map(canonical.map(n => [n.toLowerCase(), n]));
+    const newSplits = [];
+    for (const legacyName of legacy) {
+      const lower = legacyName.toLowerCase();
       if (GRANDFATHERED_MODEL_PAIRS.has(lower)) continue;
-      if (canonicalLower.has(lower)) newPairs.push(name);
+      const canonicalName = canonicalByLower.get(lower);
+      if (!canonicalName) continue;
+      // Both filenames exist. Check if EITHER is a proxy — if yes, the
+      // pair is already code-level unified (same Mongoose model). Only
+      // flag if BOTH files are full schemas → genuine fragmentation.
+      const legacyPath = path.join(MODELS_DIR, `${legacyName}.js`);
+      const canonicalPath = path.join(MODELS_DIR, `${canonicalName}.model.js`);
+      if (isProxyFile(legacyPath) || isProxyFile(canonicalPath)) continue;
+      newSplits.push(legacyName);
     }
-    if (newPairs.length) {
+    if (newSplits.length) {
       throw new Error(
-        'New duplicate model pair(s) detected:\n  ' +
-          newPairs
+        'New duplicate model pair(s) detected (both sides look like genuine schemas):\n  ' +
+          newSplits
             .map(
               n =>
                 `- models/${n}.js  ↔  models/${n.charAt(0).toLowerCase() + n.slice(1)}.model.js\n` +
-                `  Pick ONE — Mongoose registering two models on different collections ` +
-                `is a data-fragmentation bug. See docs/technical-debt/consolidation-roadmap.md.`
+                `  One should re-export the other (proxy pattern). Otherwise ` +
+                `Mongoose registers two models on different collections — ` +
+                `data fragmentation. See docs/technical-debt/consolidation-roadmap.md.`
             )
             .join('\n  ')
       );

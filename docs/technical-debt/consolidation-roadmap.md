@@ -22,15 +22,21 @@ canonical path, while existing consumers keep running.
   scripts, then one-shot delete in a dedicated commit so it can be
   reverted if CI breaks.
 
-### `/api/v1` dual-mount (241 endpoint families mounted twice)
+### `/api/v1` dual-mount (241 endpoint families mounted twice) — **BLOCKED**
 
 - `dualMount(app, path, handler)` in `routes/_registry.js` registers
   every route under both `/api/<path>` and `/api/v1/<path>`.
-- Frontend uses `/api/v1/*` in only one non-archive file
-  (`ReportsDashboard.jsx`). Mobile app consumers unknown.
-- **Blocker**: mobile app may depend on `/api/v1`.
-- **Gate**: audit mobile app + any third-party API consumers first,
-  then replace `dualMount` with plain `mount` in one PR.
+- **Frontend**: uses `/api/v1/*` in one file (`ReportsDashboard.jsx`).
+- **Mobile app**: `mobile/src/services/ApiService.ts` hard-codes
+  `API_BASE_URL = 'https://api.alawael.com/api/v1'` — every mobile
+  call routes through `/api/v1`. Removing the dual-mount would break
+  the entire mobile client.
+- **Status**: BLOCKED until the mobile app ships a release that
+  switches `API_BASE_URL` to `/api`. After that release is in the
+  field for at least one full mobile release cycle (so users actually
+  update), the dual-mount can be removed.
+- **Do not** attempt to remove `dualMount` before then — verified
+  live mobile dependency.
 
 ---
 
@@ -46,13 +52,14 @@ versions are Mongoose-backed and canonical. Both stay live because:
 - **New consumer**: `routes/api/documents-pro-*.routes.js` (phases
   3–9) → mounted at `/api/documents-pro/*`
 
-| Old (root, deprecated)        | Canonical (services/documents/)   | Consumer               |
-| ----------------------------- | --------------------------------- | ---------------------- |
-| `documentAuditService.js`     | `documentAudit.service.js`        | documents-pro-extended |
-| `documentFavoritesService.js` | `documentFavorites.service.js`    | documents-pro-phase3   |
-| `documentWatermarkService.js` | `documentWatermark.service.js`    | documents-pro-phase7   |
-| `documentQRService.js`        | `documentQRCode.service.js`       | documents-pro-phase5   |
-| `documentExportService.js`    | `documentImportExport.service.js` | documents-pro-phase7   |
+| Old (root, deprecated)         | Canonical (services/documents/)   | Consumer               |
+| ------------------------------ | --------------------------------- | ---------------------- |
+| `documentAuditService.js`      | `documentAudit.service.js`        | documents-pro-extended |
+| `documentComparisonService.js` | `documentComparison.service.js`   | documents-pro (phase)  |
+| `documentFavoritesService.js`  | `documentFavorites.service.js`    | documents-pro-phase3   |
+| `documentWatermarkService.js`  | `documentWatermark.service.js`    | documents-pro-phase7   |
+| `documentQRService.js`         | `documentQRCode.service.js`       | documents-pro-phase5   |
+| `documentExportService.js`     | `documentImportExport.service.js` | documents-pro-phase7   |
 
 **Migration path** (per pair, can be done independently):
 

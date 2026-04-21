@@ -1,6 +1,10 @@
 /**
  * Document Comparison Service — خدمة مقارنة المستندات
  *
+ * @deprecated Use services/documents/documentComparison.service.js instead.
+ * Kept for documentAdvanced.routes.js legacy compatibility.
+ * Migration tracked in docs/technical-debt/consolidation-roadmap.md.
+ *
  * Features:
  * - Side-by-side document comparison
  * - Inline diff highlighting

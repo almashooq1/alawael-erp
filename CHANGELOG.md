@@ -5,7 +5,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased] — 2026-04-21 — Parent portal: multi-child + PDF progress report
+## [Unreleased] — 2026-04-21 — Parent portal: multi-child + PDF + complaints
 
 Parent-facing vertical. Parents can now switch between their children
 from the portal header (selection survives refresh via localStorage),
@@ -33,17 +33,32 @@ bulk via a new cron-friendly digest CLI.
   digests.
 - `frontend/src/theme/palette.js` — `chartColors.category` alias
   (fixes a `DEMO_BY_TYPE` TDZ crash on SessionsDashboard).
+- `backend/routes/parent-portal-v2.routes.js` — `GET/POST
+/api/parent-v2/complaints` so parents can submit complaints /
+  suggestions / feedback from the portal (CBAHI-compliant feedback
+  channel). Server validates subject/description length + type /
+  priority enums, force-sets `source: 'parent'`, auto-fills
+  submitter fields from the Guardian profile, and gates optional
+  `childId` through `assertChildAccess`.
+- `frontend/src/pages/ParentPortal/ParentComplaintsPanel.jsx` —
+  dialog form + history table, mounted below the child-detail tabs.
+- `backend/__tests__/parent-portal-v2.api.test.js` — 9 HTTP smoke
+  tests for mount + body validation + happy-path create/list.
 
 ### Tests
 
-Sprint suite: **1072 passing** (was 1043 at 4.0.10 headline; net
-+29 reflects both the parent-portal additions and drift-test counts
-that weren't in the prior headline because they were added late in
-the 4.0.10 cycle but not re-counted).
+Sprint suite: **1081 passing** (was 1043 at 4.0.10 headline; net
++38 = 16 parentReportService unit + 7 parent-report-digest unit + 9
+parent-portal-v2 API smoke + 6 drift-count deltas from late 4.0.10
+additions that weren't re-counted in that release).
 • 16 unit tests for `parentReportService` (`attendanceRate`,
 `goalProgress`, `latestAssessments`, `displayName`, `assembleReport`)
 • 7 unit tests for the digest planner's `buildPlan` (empty paths,
 missing guardians, email-less guardians, limit clamp, fallback names)
+• 9 HTTP smoke tests for `/api/parent-v2/complaints` (mount,
+body validation for missing/too-short subject/description, invalid
+type/priority enums, happy-path POST+GET for both complaint and
+suggestion types)
 
 ---
 

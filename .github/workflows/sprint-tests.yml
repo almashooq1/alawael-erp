@@ -86,6 +86,7 @@ on:
       - 'backend/__tests__/zkteco-device-merge-script.test.js'
       - 'backend/__tests__/parent-report-service.test.js'
       - 'backend/__tests__/parent-report-digest-script.test.js'
+      - 'backend/__tests__/parent-portal-v2.api.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -199,6 +200,7 @@ on:
       - 'backend/__tests__/zkteco-device-merge-script.test.js'
       - 'backend/__tests__/parent-report-service.test.js'
       - 'backend/__tests__/parent-report-digest-script.test.js'
+      - 'backend/__tests__/parent-portal-v2.api.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -408,4 +410,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 1072 sprint tests green."
+          echo "All 1081 sprint tests green."

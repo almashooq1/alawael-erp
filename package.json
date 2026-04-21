@@ -65,6 +65,8 @@
     "lint:frontend": "cd frontend && npm run lint",
     "logs": "cd backend && npm run logs:view",
     "logs:errors": "cd backend && npm run logs:errors",
+    "migrate:zkteco": "cd backend && npm run migrate:zkteco",
+    "migrate:zkteco:json": "cd backend && npm run migrate:zkteco:json",
     "onboarding:digest": "cd backend && npm run onboarding:digest",
     "onboarding:digest:json": "cd backend && npm run onboarding:digest:json",
     "outcomes:digest": "cd backend && npm run outcomes:digest",

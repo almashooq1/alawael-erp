@@ -17,6 +17,7 @@ SHELL := /bin/bash
 # ── Phony declarations — targets that don't produce files ─────────────
 .PHONY: help ops-check ops-check-json preflight preflight-prod \
         dsar-hash cpe-attention cpe-attention-json \
+        migrate-zkteco migrate-zkteco-json migrate-zkteco-execute \
         drift-tests sprint-tests ops-subsystems-tests ship-check \
         demo-seed demo-seed-dry \
         install backend-install frontend-install mobile-install \
@@ -54,6 +55,24 @@ cpe-attention: ## SCFHS CPE compliance digest — exits 1 if HR needs to act
 
 cpe-attention-json: ## Same, machine-readable JSON (pipe into #hr-compliance)
 	@cd backend && npm run cpe:attention:json --silent
+
+# ─── Migrations (one-shot consolidation scripts) ───────────────────────
+migrate-zkteco: ## ZKTeco device merge — DRY RUN only (read-only, prints plan)
+	@cd backend && npm run migrate:zkteco --silent
+
+migrate-zkteco-json: ## Same dry-run, JSON output (pipe to jq, feed into ops dashboards)
+	@cd backend && npm run migrate:zkteco:json --silent
+
+migrate-zkteco-execute: ## ZKTeco device merge — WRITES to MongoDB (runbook required: docs/runbooks/zkteco-device-merge.md)
+	@echo ""
+	@echo "  ⚠️  About to WRITE to MongoDB (zkteco device-model merge)."
+	@echo "  ⚠️  You MUST have:"
+	@echo "      1. Read docs/runbooks/zkteco-device-merge.md"
+	@echo "      2. Run \`make migrate-zkteco\` and confirmed conflict: 0"
+	@echo "      3. Backed up zktecodevices AND zktecodevice collections"
+	@echo ""
+	@read -p "  Type 'execute' to proceed: " confirm && [ "$$confirm" = "execute" ] || { echo "  aborted."; exit 1; }
+	@cd backend && node scripts/migrations/zkteco-device-merge.js --execute --confirm=I-UNDERSTAND-THIS-WRITES-TO-MONGODB
 
 # ─── Tests ─────────────────────────────────────────────────────────────
 drift-tests: ## Fast static drift checks (~15s) — pre-push sanity tier

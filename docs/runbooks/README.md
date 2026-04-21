@@ -14,11 +14,12 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 
 ### Compliance workflows (not triggered by alerts)
 
-| Workflow                                | Runbook                                        |
-| --------------------------------------- | ---------------------------------------------- |
-| PDPL Data Subject Access Request (DSAR) | [dsar-adapter-audit.md](dsar-adapter-audit.md) |
-| SCFHS CPE credit attention (HR)         | [cpe-attention.md](cpe-attention.md)           |
-| Session attendance risk (front-desk)    | [attendance-digest.md](attendance-digest.md)   |
+| Workflow                                | Runbook                                          |
+| --------------------------------------- | ------------------------------------------------ |
+| PDPL Data Subject Access Request (DSAR) | [dsar-adapter-audit.md](dsar-adapter-audit.md)   |
+| SCFHS CPE credit attention (HR)         | [cpe-attention.md](cpe-attention.md)             |
+| Session attendance risk (front-desk)    | [attendance-digest.md](attendance-digest.md)     |
+| ZKTeco device-model merge (ops, 1-shot) | [zkteco-device-merge.md](zkteco-device-merge.md) |
 
 ## How to use
 

@@ -80,6 +80,8 @@
     "revenue:digest": "cd backend && npm run revenue:digest",
     "revenue:digest:json": "cd backend && npm run revenue:digest:json",
     "routes": "cd backend && npm run routes:list",
+    "saudization:digest": "cd backend && npm run saudization:digest",
+    "saudization:digest:json": "cd backend && npm run saudization:digest:json",
     "seed:demo:dry": "cd backend && npm run seed:demo:dry",
     "seed:demo:reset": "cd backend && npm run seed:demo:reset",
     "setup": "cd backend && npm run setup",

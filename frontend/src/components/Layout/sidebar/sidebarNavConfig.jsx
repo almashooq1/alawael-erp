@@ -1439,6 +1439,13 @@ const getNavigationItems = () => [
         badgeColor: 'success',
       },
       {
+        id: 'admin-onboarding',
+        label: 'إعداد الموظفين الجدد',
+        path: '/admin/onboarding',
+        badge: 'OBN',
+        badgeColor: 'info',
+      },
+      {
         id: 'admin-integrations-ops',
         label: 'لوحة عمليات التكاملات',
         path: '/admin/integrations-ops',

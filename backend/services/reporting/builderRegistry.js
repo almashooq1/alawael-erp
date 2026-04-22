@@ -33,6 +33,8 @@ const qualityReportBuilder = require('./builders/qualityReportBuilder');
 const financeReportBuilder = require('./builders/financeReportBuilder');
 const hrReportBuilder = require('./builders/hrReportBuilder');
 const crmReportBuilder = require('./builders/crmReportBuilder');
+const kpiReportBuilder = require('./builders/kpiReportBuilder');
+const executiveReportBuilder = require('./builders/executiveReportBuilder');
 
 /**
  * Build a stub builder for a category of report. The stub echoes the
@@ -106,16 +108,14 @@ const builders = {
     buildParentEngagement: crmReportBuilder.buildParentEngagement,
     buildComplaintsDigest: crmReportBuilder.buildComplaintsDigest,
   },
-
-  // ─── Stubs (to be replaced commit by commit) ───────────────────
   kpiReportBuilder: {
-    buildExecDigest: stubBuilder('exec.kpi.digest'),
-    buildBoardPack: stubBuilder('exec.kpi.board'),
-    buildBranchKpiPack: stubBuilder('branch.kpi.pack'),
+    buildExecDigest: kpiReportBuilder.buildExecDigest,
+    buildBoardPack: kpiReportBuilder.buildBoardPack,
+    buildBranchKpiPack: kpiReportBuilder.buildBranchKpiPack,
   },
   executiveReportBuilder: {
-    buildProgramsReview: stubBuilder('exec.programs.review'),
-    buildAnnualReport: stubBuilder('exec.annual.report'),
+    buildProgramsReview: executiveReportBuilder.buildProgramsReview,
+    buildAnnualReport: executiveReportBuilder.buildAnnualReport,
   },
 };
 
@@ -158,6 +158,11 @@ const REAL_BUILDERS = new Set([
   'hrReportBuilder.buildCpeCompliance',
   'crmReportBuilder.buildParentEngagement',
   'crmReportBuilder.buildComplaintsDigest',
+  'kpiReportBuilder.buildExecDigest',
+  'kpiReportBuilder.buildBoardPack',
+  'kpiReportBuilder.buildBranchKpiPack',
+  'executiveReportBuilder.buildProgramsReview',
+  'executiveReportBuilder.buildAnnualReport',
 ]);
 
 function isStub(builderPath) {

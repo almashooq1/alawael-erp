@@ -44,12 +44,22 @@ describe('builderRegistry — coverage', () => {
     expect(isStub('crmReportBuilder.buildComplaintsDigest')).toBe(false);
   });
 
-  test('remaining catalog modules are still stubs (only kpi + executive left)', () => {
-    expect(isStub('kpiReportBuilder.buildExecDigest')).toBe(true);
-    expect(isStub('kpiReportBuilder.buildBoardPack')).toBe(true);
-    expect(isStub('kpiReportBuilder.buildBranchKpiPack')).toBe(true);
-    expect(isStub('executiveReportBuilder.buildProgramsReview')).toBe(true);
-    expect(isStub('executiveReportBuilder.buildAnnualReport')).toBe(true);
+  test('every catalog-referenced builder is now real — no stubs remain', () => {
+    // C7h closes the loop: 22/22 catalog-named builder functions are
+    // real. Any isStub(true) here means a stub slipped in.
+    expect(isStub('kpiReportBuilder.buildExecDigest')).toBe(false);
+    expect(isStub('kpiReportBuilder.buildBoardPack')).toBe(false);
+    expect(isStub('kpiReportBuilder.buildBranchKpiPack')).toBe(false);
+    expect(isStub('executiveReportBuilder.buildProgramsReview')).toBe(false);
+    expect(isStub('executiveReportBuilder.buildAnnualReport')).toBe(false);
+  });
+
+  test('NO stubs registered anywhere in the catalog-referenced builders (invariant)', () => {
+    // Walk every catalog entry + assert the registered function is
+    // marked REAL. This is the close-out invariant for C7.
+    const catalog = require('../config/report.catalog');
+    const stubs = catalog.REPORTS.filter(r => isStub(r.builder)).map(r => r.id);
+    expect(stubs).toEqual([]);
   });
 });
 

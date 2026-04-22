@@ -47,9 +47,10 @@ together constitute the 4.0.12 patch release.
 
 ### Tests
 
-Sprint suite: **1298 passing** (was 1097 at the start of Phase 7;
-+201 net). Suite growth breakdown: 15 → 17 → 9 → 23 → 15 → 51 → 20 →
-35 → 15 → 16.
+Sprint suite: **1335 passing** (was 1126 at the start of Phase 7;
++209 net). Phase-7 per-commit growth: 8 → 17 → 9 → 23 → 15 → 51 → 20 →
+35 → 15 → 16. (Earlier doc claimed 1298 from a mid-phase local run; a
+clean end-of-phase run confirms 1335/1335 — docs now reconciled.)
 
 ### Compliance mapping
 
@@ -115,7 +116,7 @@ action matrix as CSV/JSON for CBAHI/SCFHS/SAMA evidence packs.
 
 ### Tests
 
-Sprint suite: **1298 passing** (was 1282; +16).
+Sprint suite: **1335 passing** (was 1319; +16).
 
 ### Phase 7 status
 

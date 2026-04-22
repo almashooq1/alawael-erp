@@ -7,7 +7,7 @@
 #   make help             — list all targets
 #   make ops-check        — gov-integrations health snapshot
 #   make preflight        — deploy gate (exits non-zero on misconfig)
-#   make sprint-tests     — run the 1298-test gate
+#   make sprint-tests     — run the 1335-test gate
 #
 # Discoverability: `make` alone prints the help menu.
 
@@ -78,7 +78,7 @@ migrate-zkteco-execute: ## ZKTeco device merge — WRITES to MongoDB (runbook re
 drift-tests: ## Fast static drift checks (~15s) — pre-push sanity tier
 	@cd backend && npm run test:drift
 
-sprint-tests: ## Run the 1298-test sprint CI gate
+sprint-tests: ## Run the 1335-test sprint CI gate
 	@cd backend && npm run test:sprint
 
 ops-subsystems-tests: ## Run rate-limit / circuit / metrics / preflight tests only

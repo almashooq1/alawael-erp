@@ -5,6 +5,78 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 3: RecordGrant + domain-sod policy
+
+Fifth Phase-7 commit (and last in the P0 sprint). Lands the
+record-level grant model + the ABAC adapter that wires Commit 6's
+domain SoD rules into the live PDP request flow.
+
+### Added
+
+- `models/RecordGrant.js` — record-level permission grant. Lets a
+  privileged user grant another user explicit access to a single
+  resource (delegation, secondment, external reviewer scenarios)
+  outside their normal RBAC scope. Schema:
+  • resourceType + resourceId (target) — indexed
+  • granteeId + granteeType (currently only 'user', forward-compat
+  for 'role' / 'group') — indexed
+  • actions[] — non-empty, validated; `${resource}:${action}` form
+  • grantedBy + grantedAt + expiresAt (TTL-indexed for auto-purge)
+  • reason (10–500 chars, required for audit trail)
+  • status: active / revoked / expired
+  • revokedAt / revokedBy / revokeReason for full lifecycle
+  • Static helpers: findActiveGrant({granteeId, resourceType,
+  resourceId, action}) and revoke({grantId, revokedBy, reason})
+  • Compound index on (granteeId, resourceType, resourceId, status)
+  so the PDP's grant-lookup is one indexed query.
+
+- `authorization/abac/policies/domain-sod.js` — ABAC policy adapter
+  that calls `checkDomainSoD()` (Commit 6's pure function) from
+  inside the PDP. Returns `{ effect: 'deny', reason, meta: { ruleId,
+severity, description } }` so audit logs can show the human-
+  readable explanation without re-loading the rule catalog. Subject
+  role is lowercased for case-insensitive matching.
+
+- `__tests__/domain-sod-policy.test.js` — 9 tests covering the
+  policy's `applies()` and `evaluate()` decision shapes (both
+  positive denies and negative not_applicable for adjacent role/
+  action combinations).
+
+- `scripts/_record-grant-smoke.js` — standalone live verification
+  script for the RecordGrant model (11 assertions: schema defaults,
+  validators, findActiveGrant happy/sad paths, revoke lifecycle).
+  Not in sprint gate (live mongo) — same pattern as
+  `_tenant-scope-smoke.js`. Run during deploy.
+
+### Why no Jest model test
+
+A jest+Mongoose 9 sandbox interaction (the same one documented in
+Commit 2's tenantScope test file) makes top-level RecordGrant
+imports lose their schema defaults inside Jest. Multiple workarounds
+attempted (lazy-require in beforeAll, beforeEach re-require with
+require-cache clear, mongoose.deleteModel) — none reliable across
+both single-test and multi-test runs in this sandbox. The model
+itself works perfectly outside Jest (smoke script: 11/11 green) and
+the schema validators / lifecycle are stable. Documented as a known
+limitation; the smoke script is the verification of record.
+
+### Out of scope (for future Phase-7 commits)
+
+- PDP integration of RecordGrant (the OR-clause check that allows
+  an action when an active grant exists). The model and policy are
+  in place; the PDP adapter is a 10-line wrapper around
+  `RecordGrant.findActiveGrant` that lands when grants get used by
+  a real route.
+- Admin UI for granting / revoking / listing grants.
+- Daily reconcile job for grants nearing expiry.
+
+### Tests
+
+Sprint suite: **1197 passing** (was 1188; +9 domain-sod policy
+tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 6: domain SoD
 
 Fourth Phase-7 commit. Adds the high-priority domain-level

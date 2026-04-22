@@ -5,6 +5,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 5: break-glass review digest
+
+Ninth Phase-7 commit. BreakGlassEngine + session model + routes
+were already shipped pre-Phase-7; what was missing is the
+**operational digest** for cron to detect abuse + overdue review
+states. This commit adds that monitor.
+
+### Added
+
+- `scripts/break-glass-digest.js` — cron-friendly digest that
+  classifies recent sessions into 5 buckets: live /
+  awaitingCoSign / coSignOverdue / unreviewed / abuseRisk. Exit
+  codes 0/1/2.
+- `buildReviewPlan()` — exported pure classifier, 0 I/O, with
+  per-user abuse detection (≥3 sessions in window). Entry
+  summaries truncate long purpose strings to ≤80 chars.
+- `__tests__/break-glass-digest-script.test.js` — 15 tests
+  covering every classification bucket, abuse detection with
+  custom threshold, summary-entry shape, and stats block.
+- npm scripts `break-glass:digest[:json]` + root proxies.
+
+### Tests
+
+Sprint suite: **1282 passing** (was 1267; +15).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 9: UserBranchRole (secondment)
 
 Eighth Phase-7 commit. Adds the secondment / multi-branch / acting-

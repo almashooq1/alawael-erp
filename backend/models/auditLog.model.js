@@ -275,6 +275,23 @@ const auditLogSchema = new mongoose.Schema(
       type: Date,
       // index removed to avoid duplicate with TTL index below
     },
+
+    // ── Phase-7 tamper-evident hash chain ──────────────────────────
+    // chainHash = SHA-256(prevHash || canonicalJSON(entry))
+    // Computed in the pre-save hook from the most recent entry's
+    // chainHash. Empty prevHash = genesis (very first audit entry).
+    // Mutating any historical row breaks every downstream hash; a
+    // scheduled `audit-chain-verify` job detects the drift.
+    prevHash: {
+      type: String,
+      default: '',
+      index: true,
+    },
+    chainHash: {
+      type: String,
+      default: '',
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -534,7 +551,7 @@ auditLogSchema.statics = {
 };
 
 // Middleware
-auditLogSchema.pre('save', function (next) {
+auditLogSchema.pre('save', async function preSaveHook(next) {
   // تعيين تاريخ انتهاء صلاحية تلقائي (90 يوم)
   if (!this.expiresAt) {
     this.expiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
@@ -543,6 +560,31 @@ auditLogSchema.pre('save', function (next) {
   // تحديد الفئة تلقائيًا من نوع الحدث
   if (!this.eventCategory && this.eventType) {
     this.eventCategory = this.eventType.split('.')[0];
+  }
+
+  // Phase-7 hash chain: compute chainHash on first save only. If the
+  // entry already has a chainHash we assume the caller (migration,
+  // test fixture) knows what they're doing.
+  if (this.isNew && !this.chainHash) {
+    try {
+      const { computeEntryHash } = require('../services/auditHashChainService');
+      // Find the immediately preceding entry by createdAt. During a
+      // burst of concurrent writes we may race — the verify job
+      // catches any gaps. For the common serial case this is
+      // deterministic.
+      const Model = this.constructor;
+      const prev = await Model.findOne({})
+        .sort({ createdAt: -1, _id: -1 })
+        .select('chainHash')
+        .lean();
+      const prevHash = prev?.chainHash || '';
+      this.prevHash = prevHash;
+      this.chainHash = computeEntryHash(this.toObject(), prevHash);
+    } catch (err) {
+      // Never block a write on the chain computation — log and move
+      // on. The verify job will flag the missing/empty chainHash.
+      logger.error('[AuditLog] hash-chain compute failed:', err.message);
+    }
   }
 
   if (typeof next === 'function') {

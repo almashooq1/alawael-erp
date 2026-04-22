@@ -94,6 +94,7 @@ on:
       - 'backend/__tests__/domain-sod-policy.test.js'
       - 'backend/__tests__/approval-chains-phase7.test.js'
       - 'backend/__tests__/approval-escalate-digest-script.test.js'
+      - 'backend/__tests__/audit-hash-chain-service.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -146,6 +147,9 @@ on:
       - 'backend/models/RecordGrant.js'
       - 'backend/authorization/approvals/chains.js'
       - 'backend/scripts/approval-escalate-digest.js'
+      - 'backend/scripts/audit-chain-verify.js'
+      - 'backend/services/auditHashChainService.js'
+      - 'backend/models/auditLog.model.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -228,6 +232,7 @@ on:
       - 'backend/__tests__/domain-sod-policy.test.js'
       - 'backend/__tests__/approval-chains-phase7.test.js'
       - 'backend/__tests__/approval-escalate-digest-script.test.js'
+      - 'backend/__tests__/audit-hash-chain-service.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -280,6 +285,9 @@ on:
       - 'backend/models/RecordGrant.js'
       - 'backend/authorization/approvals/chains.js'
       - 'backend/scripts/approval-escalate-digest.js'
+      - 'backend/scripts/audit-chain-verify.js'
+      - 'backend/services/auditHashChainService.js'
+      - 'backend/models/auditLog.model.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -450,4 +458,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 1232 sprint tests green."
+          echo "All 1252 sprint tests green."

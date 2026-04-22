@@ -18,6 +18,8 @@
     "approval-escalate:digest:json": "cd backend && npm run approval-escalate:digest:json",
     "attendance:digest": "cd backend && npm run attendance:digest",
     "attendance:digest:json": "cd backend && npm run attendance:digest:json",
+    "audit-chain:verify": "cd backend && npm run audit-chain:verify",
+    "audit-chain:verify:json": "cd backend && npm run audit-chain:verify:json",
     "build": "cd frontend && npm run build",
     "build:frontend": "cd frontend && npm run build",
     "check:deps": "cd backend && npm run check:deps",

@@ -5,6 +5,75 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 7: tamper-evident audit trail
+
+Seventh Phase-7 commit. Wires a SHA-256 hash chain through the audit
+log so any historical-record tamper (or the storage layer corrupting
+a row) is detectable. CBAHI / PDPL / MOH require audit logs to be
+immutable; the existing append-only write path satisfied "we don't
+overwrite", but didn't satisfy "we can prove nobody else did
+either". This commit closes that gap.
+
+### Added
+
+- `services/auditHashChainService.js` — pure crypto, three exports:
+  • `canonicalJSON(value)` — deterministic JSON with sorted keys,
+  excluding storage-layer fields (`_id`, `__v`, `chainHash`,
+  `prevHash`, `createdAt`, `updatedAt`, `expiresAt`).
+  • `computeEntryHash(entry, prevHash)` — `SHA-256(prevHash ||
+  canonicalJSON(entry))`. Throws on non-string prevHash.
+  Handles mongoose docs via `.toObject()` automatically.
+  • `verifyChain(entries)` — walks an oldest→newest array,
+  recomputes each entry's hash, reports breaks. Detects: - modification (chain_hash_mismatch) - insertion (prev_hash_mismatch) - deletion (downstream prev_hash_mismatch)
+
+- `models/auditLog.model.js`:
+  • New fields `prevHash` + `chainHash` (both indexed).
+  • `pre('save')` hook augmented to fetch the most recent
+  chainHash, compute the new entry's hash via
+  `computeEntryHash`, and stamp both fields on the new doc.
+  Wrapped in try/catch so the hash never blocks a write — verify
+  job catches drops.
+
+- `scripts/audit-chain-verify.js` — cron-friendly integrity check:
+  • Walks the most recent N audit entries (default 10,000) in
+  append order.
+  • Seeds with the `chainHash` of the entry just before the window
+  so window-boundary tampering is detected.
+  • Exit 0 (intact) / 1 (≥1 break, alert) / 2 (internal error).
+  • `--window=N` / `--json` / `--quiet` flags.
+
+- `__tests__/audit-hash-chain-service.test.js` — 20 unit tests:
+  • canonicalJSON: 6 tests (key order, nested, exclusion, null,
+  Date, Set introspection)
+  • computeEntryHash: 7 tests (format, determinism, prevHash
+  sensitivity, content sensitivity, exclusion, type guard,
+  mongoose-doc compat)
+  • verifyChain happy path: 3 tests
+  • verifyChain tamper detection: 4 tests (modification, forged
+  hash, INSERTION, DELETION)
+
+### Wired
+
+- `package.json`: `audit-chain:verify[:json]` npm scripts.
+- Root `package.json`: proxy scripts.
+- Sprint test glob + CI paths trigger.
+
+### Out of scope (future)
+
+- Wiring the verifier into the on-call alert system (Slack /
+  PagerDuty webhook). Today it exits 1 and prints; an ops
+  alertmanager rule flips that into a page.
+- Backfilling chainHash for historical entries written before this
+  commit. They'll fail the verifier with `chain_hash_mismatch`
+  until backfilled — accept this expected break for the migration
+  window, document in the alert response runbook.
+
+### Tests
+
+Sprint suite: **1252 passing** (was 1232; +20 hash-chain tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 8: approval chains + escalate digest
 
 Sixth Phase-7 commit. Closes the approval/governance side of the IAM

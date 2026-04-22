@@ -33,6 +33,7 @@ const TherapySession = require('../models/TherapySession');
 const CarePlan = require('../models/CarePlan');
 const ClinicalAssessment = require('../models/ClinicalAssessment');
 const Complaint = require('../models/Complaint');
+const PortalNotification = require('../models/PortalNotification');
 const parentReportService = require('../services/parentReportService');
 
 router.use(authenticateToken);
@@ -517,6 +518,85 @@ router.post('/complaints', async (req, res) => {
     });
   } catch (err) {
     return safeError(res, err, 'parent-v2.complaints.create');
+  }
+});
+
+// ── GET /notifications ───────────────────────────────────────────────────
+// List portal notifications addressed to the current guardian. Supports
+// ?unreadOnly=true to filter, and a soft cap at 100 so a pathological
+// inbox can't blow up the response.
+router.get('/notifications', async (req, res) => {
+  try {
+    const guardian = await getMyGuardian(req);
+    if (!guardian) {
+      return res.json({ success: true, items: [], unreadCount: 0 });
+    }
+    const unreadOnly = req.query.unreadOnly === 'true';
+    const filter = { guardianId: guardian._id, isArchived: false };
+    if (unreadOnly) filter.isRead = false;
+
+    const [items, unreadCount] = await Promise.all([
+      PortalNotification.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(100)
+        .select('type title message priority isRead readAt createdAt beneficiaryId')
+        .populate('beneficiaryId', 'firstName firstName_ar lastName lastName_ar')
+        .lean(),
+      PortalNotification.countDocuments({
+        guardianId: guardian._id,
+        isArchived: false,
+        isRead: false,
+      }),
+    ]);
+    res.json({ success: true, items, unreadCount });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.notifications.list');
+  }
+});
+
+// ── PATCH /notifications/:id/read ────────────────────────────────────────
+// Mark a single notification as read. Guardian-scoped — a parent can't
+// flip the read flag on someone else's notification.
+router.patch('/notifications/:id/read', async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id))
+      return res.status(400).json({ success: false, message: 'معرّف غير صالح' });
+    const guardian = await getMyGuardian(req);
+    if (!guardian)
+      return res.status(403).json({ success: false, message: 'لا يوجد سجل ولي أمر مرتبط بحسابك' });
+
+    const updated = await PortalNotification.findOneAndUpdate(
+      { _id: req.params.id, guardianId: guardian._id },
+      { $set: { isRead: true, readAt: new Date() } },
+      { new: true }
+    ).lean();
+
+    if (!updated) return res.status(404).json({ success: false, message: 'التنبيه غير موجود' });
+    res.json({ success: true, data: { id: updated._id, isRead: true } });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.notifications.markRead');
+  }
+});
+
+// ── POST /notifications/read-all ─────────────────────────────────────────
+// Bulk mark-as-read for the current guardian. Returns the count of rows
+// updated so the UI can show "marked N as read".
+router.post('/notifications/read-all', async (req, res) => {
+  try {
+    const guardian = await getMyGuardian(req);
+    if (!guardian)
+      return res.status(403).json({ success: false, message: 'لا يوجد سجل ولي أمر مرتبط بحسابك' });
+
+    const result = await PortalNotification.updateMany(
+      { guardianId: guardian._id, isRead: false, isArchived: false },
+      { $set: { isRead: true, readAt: new Date() } }
+    );
+    res.json({
+      success: true,
+      modifiedCount: result.modifiedCount || result.nModified || 0,
+    });
+  } catch (err) {
+    return safeError(res, err, 'parent-v2.notifications.readAll');
   }
 });
 

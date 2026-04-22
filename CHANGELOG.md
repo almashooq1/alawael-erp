@@ -47,10 +47,11 @@ bulk via a new cron-friendly digest CLI.
 
 ### Tests
 
-Sprint suite: **1085 passing** (was 1043 at 4.0.10 headline; net
-+42 = 16 parentReportService unit + 7 parent-report-digest unit + 9
-parent-portal-v2 API smoke + 10 drift-count deltas from late 4.0.10
-additions and organic growth that weren't re-counted in that release).
+Sprint suite: **1089 passing** (was 1043 at 4.0.10 headline; net
++46 = 16 parentReportService unit + 7 parent-report-digest unit + 13
+parent-portal-v2 API smoke (complaints + notifications) + 10 drift-count
+deltas from late 4.0.10 additions and organic growth that weren't
+re-counted in that release).
 • 16 unit tests for `parentReportService` (`attendanceRate`,
 `goalProgress`, `latestAssessments`, `displayName`, `assembleReport`)
 • 7 unit tests for the digest planner's `buildPlan` (empty paths,

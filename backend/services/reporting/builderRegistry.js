@@ -24,6 +24,7 @@
 'use strict';
 
 const rehabReportBuilders = require('../rehabReportBuilders');
+const attendanceReportBuilder = require('./builders/attendanceReportBuilder');
 
 /**
  * Build a stub builder for a category of report. The stub echoes the
@@ -59,10 +60,12 @@ const builders = {
     buildReviewComplianceReport: rehabReportBuilders.buildReviewComplianceReport,
   },
 
-  // ─── Stubs (to be replaced commit by commit) ───────────────────
+  // ─── Real builders (Phase 10 C7 — replacing stubs) ────────────
   attendanceReportBuilder: {
-    buildAdherence: stubBuilder('attendance.adherence'),
+    buildAdherence: attendanceReportBuilder.buildAdherence,
   },
+
+  // ─── Stubs (to be replaced commit by commit) ───────────────────
   therapistReportBuilder: {
     buildProductivity: stubBuilder('therapist.productivity'),
     buildCaseload: stubBuilder('therapist.caseload'),
@@ -119,14 +122,26 @@ function has(builderPath) {
   return !!(builders[mod] && typeof builders[mod][fn] === 'function');
 }
 
+// The set of (module.function) paths that are real implementations,
+// not stubs produced by `stubBuilder`. Each P10-C7-followup commit
+// extends this set as it swaps a stub for a real builder.
+const REAL_BUILDERS = new Set([
+  'rehabReportBuilders.buildIrpSnapshot',
+  'rehabReportBuilders.buildFamilyUpdate',
+  'rehabReportBuilders.buildDisciplineReportCard',
+  'rehabReportBuilders.buildDischargeSummary',
+  'rehabReportBuilders.buildReviewComplianceReport',
+  'attendanceReportBuilder.buildAdherence',
+]);
+
 function isStub(builderPath) {
   if (!has(builderPath)) return false;
-  const [mod, fn] = builderPath.split('.');
-  return mod !== 'rehabReportBuilders' && typeof builders[mod][fn] === 'function';
+  return !REAL_BUILDERS.has(builderPath);
 }
 
 module.exports = {
   builders,
+  REAL_BUILDERS,
   stubBuilder,
   has,
   isStub,

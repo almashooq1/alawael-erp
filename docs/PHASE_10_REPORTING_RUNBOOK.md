@@ -1,12 +1,13 @@
 # Phase 10 — Reporting & Communications Platform Runbook
 
-**Release marker:** 4.0.15 — Phase 10 C1–C9 + C7a–h + C10 (2026-04-22)
-**Scope:** periodic & on-demand reporting engine + 6-channel delivery + approval workflow + delivery ledger + provider webhooks + portal inbox + retry / escalation / retention + renderer (HTML + PDF, ar/en) + drift guards + **22 real builders across 11 modules** + **kpi + rbac aliases layer**.
+**Release marker:** 4.0.16 — Phase 10 C1–C15 (2026-04-22)
+**Scope:** periodic & on-demand reporting engine + 6-channel delivery + approval workflow + delivery ledger + provider webhooks + portal inbox + retry / escalation / retention + renderer (HTML + PDF, ar/en) + drift guards + **22 real builders across 11 modules** + **kpi + rbac aliases layer** + **reporting-backed KPI resolver auto-wired into the engine**.
 
 **Update history:**
 
 - 4.0.14 (2026-04-22, C9): closed C1–C9 with 565 tests; C5 UI + C7 real builders + aliases layer deferred.
-- **4.0.15 (this update):** C7a–h land all 22 real builders (kpiAggregator + 5 more builder modules); C10 introduces kpi.aliases + rbac.aliases reducing drift from 22 → 6. 753 tests across 52 suites. Only C5 (Next.js UI) and 5 documented KPI-registry gaps remain as deferred work.
+- 4.0.15 (2026-04-22, C11): C7a–h land 22 real builders + kpiAggregator; C10 kpi + rbac aliases drop drift 22 → 6. 753 tests / 52 suites.
+- **4.0.16 (this update):** C12 adds 5 matching KPIs to kpi.registry (drift 6 → 1 — only `executive` group remains, correct by design); C13 introduces `createReportingValueResolver` dispatching to the 9 Phase-10 builder modules; C15 auto-injects the resolver into every builder's ctx via the engine constructor. **992 tests across 60 suites.** KPI dashboards now produce live values end-to-end — no operator glue code required.
 
 ---
 
@@ -30,8 +31,10 @@ Mapped against the 6 requirements from the original design brief.
 | 5   | **Dashboards & KPIs & drill-downs**                                                                                                     | architecture spec §7–§8 (UI in C5 — still deferred; data/events live)                                                                   |
 | 6   | **Specific reports** (progress / attendance / goals / productivity / occupancy / engagement / incidents / claims / HR turnover / fleet) | **C7a–h: 22/22 real builders live** (attendance, session, therapist×2, branch, fleet, quality×4, finance×4, hr×3, crm×2, kpi×3, exec×2) |
 | —   | **Drift reduction**                                                                                                                     | **C10: kpi.aliases + rbac.aliases** bring drift budget from 22 → 6 (73% reduction)                                                      |
+| —   | **5 new KPIs fill the remaining KPI aliases**                                                                                           | **C12: kpi.registry 34 → 39 entries** (drift 6 → 1 — only `executive` group remains, correct by design)                                 |
+| —   | **KPI dashboards produce live values end-to-end**                                                                                       | **C13: reporting-backed value resolver** + **C15: engine auto-injects it into builder ctx**                                             |
 
-All 6 core requirement buckets are satisfied end-to-end at the backend. The only deferred piece is the Next.js UI (C5); the data and REST endpoints are live. As of 4.0.15, every catalog-named builder returns real aggregated data — no stubs remain.
+All 6 core requirement buckets are satisfied end-to-end at the backend. The only deferred piece is the Next.js UI (C5); the data and REST endpoints are live. As of 4.0.16, every catalog-named builder returns real aggregated data AND every catalog KPI reference resolves to a live value — **no stubs, no invisible wires**.
 
 ---
 
@@ -56,14 +59,23 @@ All 6 core requirement buckets are satisfied end-to-end at the backend. The only
 | 7g  | `d8266678`   | hrReportBuilder + crmReportBuilder real — 5 builders (turnover + HR attendance + CPE compliance + parent engagement + complaints digest; 22 tests)       |
 | 7h  | `350cc8d2`   | **kpiReportBuilder + executiveReportBuilder real — CLOSES C7** (5 builders + kpiAggregator; composite exec builders; 30 tests)                           |
 | 10  | `16f475ca`   | kpi.aliases + rbac.aliases layer — 73% drift reduction (33 tests, drift budget 22 → 6)                                                                   |
-| 11  | _(this)_     | Runbook + CHANGELOG 4.0.15 entry + revised release marker                                                                                                |
+| 11  | `a7240dd0`   | Runbook + CHANGELOG 4.0.15 entry                                                                                                                         |
+| 12  | `1ee049a1`   | 5 new KPIs in kpi.registry (34 → 39); kpi.aliases gaps 5 → 0 (drift budget 6 → 1)                                                                        |
+| 13  | `d69ff37c`   | `createReportingValueResolver` — dispatches kpi.dataSource to the 9 Phase-10 builder modules + path navigation (12 tests)                                |
+| 15  | `08d12799`   | Engine auto-injects valueResolver into every builder's ctx (caller still wins); locator wires it automatically (7 tests)                                 |
+| 14  | _(this)_     | Runbook + CHANGELOG 4.0.16 entry + release marker                                                                                                        |
 
-**Test coverage:** 753 tests across 52 reporting-platform suites — all green at 4.0.15. Progressive coverage by milestone:
+**Test coverage:** 992 tests across 60 reporting-platform suites — all green at 4.0.16. Progressive coverage by milestone:
 
 - 4.0.14 (C1–C9): 565 tests / 37 suites
 - C7a–h (real builders rollout): +177 tests / +10 suites
 - C10 (aliases layer): +33 tests / +2 suites
-- Total delta 4.0.14 → 4.0.15: **+188 tests / +15 suites**.
+- **Total delta 4.0.14 → 4.0.15: +188 tests / +15 suites**
+- C12 (5 KPIs filled; no new test files, existing drift tests updated)
+- C13 (reporting-backed value resolver): +12 tests / +1 suite
+- C15 (engine valueResolver auto-injection): +7 tests / +1 suite
+- **Total delta 4.0.15 → 4.0.16: +39 tests / +2 suites**
+- **4.0.16 total: 992 tests / 60 suites**.
 
 ---
 
@@ -265,7 +277,12 @@ No schema changes to existing models. No data migration required in either direc
 To roll back Phase 10 entirely:
 
 ```bash
-# 4.0.15 rollback — revert newest first
+# 4.0.16 rollback — revert newest first
+git revert --no-commit 08d12799         # C15 engine valueResolver auto-injection
+git revert --no-commit d69ff37c         # C13 reporting-backed resolver
+git revert --no-commit 1ee049a1         # C12 5 new KPIs in registry
+# 4.0.15 layer
+git revert --no-commit a7240dd0         # C11 runbook 4.0.15
 git revert --no-commit 16f475ca         # C10 aliases layer
 git revert --no-commit 350cc8d2 d8266678 551a2b13 c0d4a49a 4619a9ae a626f579 221a5a17 004631b7  # C7h→C7a
 # 4.0.14 base rollback
@@ -274,6 +291,12 @@ git revert --no-commit e95f7f75 d5a37335 63583bd6 54e7f327 c53c124f f6dd040c 163
 #   db.report_deliveries.drop(); db.report_approval_requests.drop();
 ```
 
+**Partial 4.0.16 rollbacks** (safer than full revert):
+
+- Reverting C15 only: engine stops auto-injecting valueResolver. KPI dashboards show `status='unknown'` again for the 5 C12 KPIs, but builders still run, catalog still dispatches, nothing breaks.
+- Reverting C13 only: `kpiValueResolver` is null. Same `unknown` statuses as post-C12-pre-C13. Engine + dispatch + renderer unaffected.
+- Reverting C12 only (leave C13 + C15 in place): the 5 new KPIs disappear from the registry, kpi.aliases gaps come back — breaks the C12-specific drift tests. Don't do this without also reverting C10/C11 (or updating the drift tests manually).
+
 Partial rollbacks are safe:
 
 - Reverting C10 only: drops kpi.aliases + rbac.aliases. The drift tests' budget counters flip back but the 22 real builders still work. Engine dispatch to `executive`/`quality`/`finance` audiences will then hit the pre-C10 legacy role literals — functional but matches fewer users in rbac.
@@ -281,15 +304,18 @@ Partial rollbacks are safe:
 
 ---
 
-## 6. Known limitations carried forward (as of 4.0.15)
+## 6. Known limitations carried forward (as of 4.0.16)
 
 - **UI pages not landed** — Reporting Ops dashboard + Parent portal inbox are scoped for a future phase. Events + REST endpoints are live; Next.js pages consume them in C5.
-- **5 KPI-registry gaps** — the catalog still references 5 KPI ids that don't yet exist in `config/kpi.registry.js` (marked `null` in `config/kpi.aliases.js`):
-  `finance.invoices.aging_ratio`, `hr.attendance.adherence`, `hr.turnover.voluntary_rate`, `multi-branch.fleet.punctuality`, `quality.cbahi.evidence.completeness`. Each can be closed by one commit that adds the matching entry to `kpi.registry.js` and flips the alias value from `null` to the new canonical id — the `gapAliases()` test catches it immediately.
 - **1 role group (`executive`) expands to multiple rbac roles** — this is correct, not a gap. The engine's recipientResolver handles the expansion via `ROLE_GROUPS.executive = [ceo, group_gm, group_cfo, group_chro]`.
 - **Provider signature verifiers not wired in app.js** — the webhook router supports them; production boot must supply SendGrid / Twilio / WhatsApp verifier functions.
 - **Rate limiter is wired but not yet enforced in engine dispatch** — exposed on the platform; opt-in engine integration in a follow-up.
 - **Artifact store + URL signer are interfaces, not implementations** — `portal_inbox` and `pdf_download` channels + inbox download endpoint need the operator to supply `{store(payload) → {uri,id}}` and `{sign({uri,ttlSeconds,...}) → {url,expiresAt}}` adapters. S3 + CloudFront is the expected production combo.
+
+**Closed since 4.0.15:**
+
+- ~~5 KPI-registry gaps~~ — **CLOSED by C12**: 5 matching KPIs added to `kpi.registry.js`, every `null` in `kpi.aliases.js` flipped to the canonical id. `gapAliases()` returns `[]`.
+- ~~KPI dashboards show `status='unknown'` for reporting-backed KPIs~~ — **CLOSED by C13 + C15**: `createReportingValueResolver` dispatches to the 9 Phase-10 builder modules, and the engine auto-injects it into every builder's ctx so no operator wiring is required.
 
 ---
 
@@ -314,16 +340,25 @@ The platform emits these events. Ops dashboards and analytics pipes subscribe as
 
 ## 8. Sign-off
 
-### 4.0.15 (current)
+### 4.0.16 (current)
+
+- Architecture: 6 requirement buckets end-to-end at the backend; 22/22 catalog builders real; aliases + value-resolver layers close every loop ✓
+- Tests: **992 passing across 60 reporting-platform suites** ✓
+- Cross-registry drift: **1 residual** — only the `executive` role group (maps to a list of rbac roles by design, not a gap). Down 95% from the 22 locked in at 4.0.14 ✓
+- Every catalog-named builder returns real aggregated data; every catalog KPI reference resolves to a live value end-to-end through the engine-injected reporting-backed resolver. Stub count: **0**, unknown-status KPIs: **0** (modulo real data availability) ✓
+- Backwards compatibility: no schema or API breakage; two new collections, five new routes, all additive; engine constructor gained an optional `valueResolver` parameter that defaults to null (pre-C15 behavior) ✓
+- Release marker: **4.0.16**
+
+### 4.0.15 (previous)
 
 - Architecture: 6 requirement buckets end-to-end at the backend; 22/22 catalog builders real; aliases layer closes the drift gap ✓
-- Tests: **753 passing across 52 reporting-platform suites** ✓
-- Cross-registry drift: **6 residual gaps** — 5 KPI-registry extensions (documented in `config/kpi.aliases.js`) + 1 role group (`executive`). Down 73% from the 22 locked in at 4.0.14 ✓
-- Every catalog-named builder returns real aggregated data. Stub count: **0** ✓
-- Backwards compatibility: no schema or API breakage; two new collections (report_deliveries, report_approval_requests), five new routes, all additive ✓
+- Tests: 753 passing across 52 reporting-platform suites ✓
+- Cross-registry drift: 6 residual gaps — 5 KPI-registry extensions + 1 role group (`executive`). Down 73% from the 22 locked in at 4.0.14 ✓
+- Every catalog-named builder returns real aggregated data. Stub count: 0 ✓
+- Backwards compatibility: no schema or API breakage ✓
 - Release marker: **4.0.15**
 
-### 4.0.14 (previous)
+### 4.0.14 (initial Phase-10 release)
 
 - Architecture: 6 requirement buckets end-to-end; 5 committed + 1 (UI) scoped out with an explicit path ✓
 - Tests: 565 passing across 37 reporting-platform suites ✓

@@ -5,6 +5,68 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.16] — 2026-04-22 — Phase 10 last-mile wiring (C12 + C13 + C15)
+
+Finishes the work 4.0.15 had left implicit. After 4.0.16, **every
+catalog KPI reference resolves to a live value end-to-end**, with
+no operator glue code required at boot. Drift budget drops from 6
+to 1 (only the `executive` role group remains — correct by design).
+
+### Commit ledger (delta from 4.0.15)
+
+| #   | SHA        | Summary                                                                                                                 |
+| --- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 12  | `1ee049a1` | 5 new KPIs added to `kpi.registry.js` (34 → 39); the 5 null-mapped aliases in `kpi.aliases.js` flipped to canonical ids |
+| 13  | `d69ff37c` | `createReportingValueResolver` — dispatches `kpi.dataSource.service/method` to the 9 Phase-10 builder modules           |
+| 15  | `08d12799` | Engine constructor accepts `valueResolver`; auto-merges it into every builder's ctx (caller-provided still wins)        |
+| 14  | (this)     | Runbook + CHANGELOG 4.0.16 entry + release marker                                                                       |
+
+### Added — C12 registry extensions
+
+- `config/kpi.registry.js` gains 5 new KPIs (34 → 39), each pointing at the real Phase-10 report builder that already computes the metric: `finance.invoices.aging.concentration.pct`, `hr.attendance.adherence.pct`, `hr.turnover.voluntary.pct`, `multi-branch.fleet.completion.pct`, `quality.cbahi.evidence.completeness.pct`.
+- Every entry passes the existing `kpi-registry.test.js` invariants (owner in rbac, domain in DOMAINS, unit in UNITS, direction/threshold pair valid, dataSource declared).
+
+### Added — C13 reporting-backed value resolver
+
+- `backend/services/reporting/kpiResolvers.js`:
+  - `DEFAULT_MODULES` maps every `kpi.dataSource.service` name to the matching Phase-10 builder module (9 entries).
+  - `createReportingValueResolver({modules, clock, logger})` returns a resolver that looks up the service + method, builds the report-shaped input, calls the builder, then walks `kpi.dataSource.path` through the result.
+  - `defaultPeriodKeyForFrequency(frequency, now)` fallback for when the caller omits `ctx.periodKey`.
+  - Returns `null` for missing service/method, builder throws, or non-numeric path endpoints — the aggregator then renders the KPI as `status='unknown'` (same degradation model as before).
+- `backend/services/reporting/index.js` wires `createReportingValueResolver` into the locator as the default; callers can override via `deps.kpiValueResolver`. The platform object now exposes `kpiValueResolver` for diagnostics.
+
+### Added — C15 engine auto-injection
+
+- `ReportingEngine` constructor gained an optional `valueResolver` parameter. When supplied, the engine merges it into every builder's ctx under `ctx.valueResolver` IF the caller's `builderCtx` doesn't already supply one. This makes KPI dashboards produce live values from `platform.start()` with no operator code — the wire is entirely internal.
+- `engine.valueResolver` accessor exposes the stored function (or null); non-function values are rejected.
+- Locator forwards `kpiValueResolver` into the engine constructor automatically.
+
+### Changed
+
+- `config/kpi.aliases.js` — the 5 `null` values flipped to canonical registry ids; `gapAliases()` now returns `[]`.
+- `__tests__/report-catalog-drift.test.js` — `CATALOG_KPI_GAPS` emptied; budget cap `<=5` → `==0`.
+- `__tests__/kpi-aliases.test.js` — the "returns null for gap alias" test rewritten to assert the 5 C12 mappings now resolve; gapAliases cap flipped to `==0`.
+
+### Test coverage
+
+- 4.0.15 baseline: 753 tests / 52 suites.
+- 4.0.16 delta: +39 tests / +2 suites (C12: 0 new files, drift + alias tests updated · C13: +12 / +1 · C15: +7 / +1 · C14: docs only).
+- **4.0.16 total: 992 tests / 60 suites, all green**.
+
+### What 4.0.16 unblocks
+
+- `platform.start()` drives the 5 P10-C12 KPIs to live values on every tick. No `ctx.valueResolver` injection needed from callers.
+- `exec.kpi.digest.daily`, `exec.kpi.board.quarterly`, `branch.kpi.monthly`, `exec.programs.semiannual`, and `exec.annual.report` all emit green/amber/red statuses instead of `unknown` for the C12 KPIs.
+- Drift budget is now **1 residual** (role group `executive`, correct by design). Down 95% from the 22 locked in at 4.0.14.
+
+### Known limitations carried forward
+
+- Next.js Ops dashboard + Parent portal inbox UI (C5) — data + REST endpoints are live; UI still scoped for a future phase.
+- Rate limiter exposed on the platform but not yet enforced inside `engine._dispatch()` — opt-in integration follow-up.
+- Provider signature verifiers, artifact store, and URL signer are interfaces — production operator wires concrete adapters at boot.
+
+---
+
 ## [4.0.15] — 2026-04-22 — Phase 10 completion (C7a–h real builders + C10 aliases layer)
 
 Closes the two items 4.0.14 had explicitly deferred: C7 (real

@@ -107,6 +107,15 @@ function buildReportingPlatform(deps = {}) {
     logger,
   });
 
+  // Build the rate limiter first so the engine can consult it on every
+  // dispatch — per-recipient 24h cap enforcement (P10-C18).
+  const rateLimiter = createRateLimiter({
+    DeliveryModel: ReportDelivery,
+    overrides: deps.rateLimits,
+    eventBus,
+    logger,
+  });
+
   const engine = new ReportingEngine({
     catalog,
     DeliveryModel: ReportDelivery,
@@ -118,6 +127,7 @@ function buildReportingPlatform(deps = {}) {
     eventBus,
     logger,
     valueResolver: kpiValueResolver,
+    rateLimiter,
   });
 
   const scheduler = new ReportsScheduler({
@@ -127,13 +137,6 @@ function buildReportingPlatform(deps = {}) {
     cron,
     logger,
     useInterval: !cron,
-  });
-
-  const rateLimiter = createRateLimiter({
-    DeliveryModel: ReportDelivery,
-    overrides: deps.rateLimits,
-    eventBus,
-    logger,
   });
 
   const opsScheduler = new ReportsOpsScheduler({

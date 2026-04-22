@@ -99,6 +99,12 @@ class ReportingEngine {
     // the box. Callers can still override per-run by passing their
     // own `input.builderCtx.valueResolver`.
     valueResolver,
+    // P10-C18 — per-recipient rolling 24h cap consulted before every
+    // channel.send(). Over-limit recipients get their delivery row
+    // marked CANCELLED (reason='rate_limited'); a
+    // `report.delivery.cancelled` event fires so ops can alert.
+    // Optional — when absent, the engine's behavior is unchanged.
+    rateLimiter,
   }) {
     if (!catalog) throw new Error('ReportingEngine: catalog required');
     if (!DeliveryModel) throw new Error('ReportingEngine: DeliveryModel required');
@@ -124,6 +130,7 @@ class ReportingEngine {
     this.logger = logger;
     this.clock = clock || { now: () => new Date() };
     this.valueResolver = typeof valueResolver === 'function' ? valueResolver : null;
+    this.rateLimiter = rateLimiter && typeof rateLimiter.check === 'function' ? rateLimiter : null;
   }
 
   // ─── Public API ────────────────────────────────────────────────
@@ -463,6 +470,42 @@ class ReportingEngine {
             reason: 'no_adapter',
           });
           continue;
+        }
+
+        // P10-C18 — per-recipient rolling 24h cap. Consults the limiter
+        // right before spending a channel call so the row is already
+        // persisted for visibility, but no provider traffic is emitted
+        // for over-limit recipients.
+        if (this.rateLimiter) {
+          let decision;
+          try {
+            decision = await this.rateLimiter.check({ recipientId: r.id, role: r.role });
+          } catch (err) {
+            // Fail-open: rate limit check crashing must not block delivery.
+            this.logger.warn &&
+              this.logger.warn(`[rateLimiter] check crashed for ${r.id}: ${err.message}`);
+            decision = { allowed: true };
+          }
+          if (decision && decision.allowed === false) {
+            try {
+              delivery.markCancelled(
+                `rate_limited: ${decision.current}/${decision.limit} in 24h for role=${r.role}`
+              );
+              if (typeof delivery.save === 'function') await delivery.save();
+            } catch (err) {
+              errors.push(`mark-cancelled crashed: ${err.message}`);
+            }
+            this.eventBus.emit('report.delivery.cancelled', {
+              deliveryId: String(delivery._id || delivery.id),
+              recipientId: String(r.id),
+              role: r.role,
+              reason: 'rate_limited',
+              current: decision.current,
+              limit: decision.limit,
+            });
+            deliveries.push(delivery);
+            continue;
+          }
         }
 
         // Send.

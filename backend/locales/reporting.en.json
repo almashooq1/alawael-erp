@@ -1,0 +1,166 @@
+{
+  "common": {
+    "greeting_guardian": "Dear {name},",
+    "greeting_generic": "Hello,",
+    "farewell": "Best regards — Al-Awael Centers Team",
+    "period": "Period",
+    "generatedAt": "Generated on",
+    "beneficiary": "Beneficiary",
+    "branch": "Branch",
+    "confidential_notice": "This report contains protected information — not for redistribution.",
+    "download_pdf": "Download PDF",
+    "view_portal": "Open portal",
+    "no_data": "No data available for this period.",
+    "page": "Page",
+    "of": "of"
+  },
+  "reports": {
+    "ben.progress.weekly": {
+      "subject": "Weekly Progress Report — {beneficiaryName}",
+      "headline": "Weekly Progress Summary",
+      "highlights_header": "Highlights",
+      "concerns_header": "Areas needing attention",
+      "overall_trend": "Overall trend",
+      "trend_improving": "Clearly improving",
+      "trend_stable": "Stable",
+      "trend_declining": "Slightly declining"
+    },
+    "ben.progress.monthly": {
+      "subject": "Monthly Progress Report — {beneficiaryName}",
+      "headline": "Monthly Progress Summary",
+      "highlights_header": "Highlights",
+      "concerns_header": "Areas needing attention"
+    },
+    "ben.attendance.weekly": {
+      "subject": "Weekly Attendance — {beneficiaryName}",
+      "headline": "Attendance Summary",
+      "attended": "Attended",
+      "missed": "Missed",
+      "late": "Late",
+      "rate": "Adherence"
+    },
+    "ben.goal.achievement": {
+      "subject": "Goal Achievement Report — {beneficiaryName}",
+      "headline": "Goal Achievement Review",
+      "achieved": "Achieved",
+      "in_progress": "In progress",
+      "not_started": "Not started",
+      "discipline_header": "Discipline"
+    },
+    "ben.irp.snapshot": {
+      "subject": "Individual Rehabilitation Plan Snapshot",
+      "headline": "IRP Snapshot"
+    },
+    "ben.discharge.summary": {
+      "subject": "Discharge Summary",
+      "headline": "Program Discharge Summary"
+    },
+    "ben.review.compliance": {
+      "subject": "Care-Plan Review Compliance — Weekly",
+      "headline": "Care-Plan Reviews — Compliance Status"
+    },
+    "therapist.productivity.weekly": {
+      "subject": "Therapist Productivity — Weekly",
+      "headline": "Therapist Productivity Summary"
+    },
+    "therapist.caseload.monthly": {
+      "subject": "Therapist Caseload — Monthly",
+      "headline": "Therapist Caseload"
+    },
+    "session.volume.daily": {
+      "subject": "Daily Session Volume",
+      "headline": "Daily Session Volume Summary"
+    },
+    "branch.occupancy.weekly": {
+      "subject": "Branch Occupancy — Weekly",
+      "headline": "Branch Occupancy Metrics"
+    },
+    "branch.kpi.monthly": {
+      "subject": "Branch KPI Pack — Monthly",
+      "headline": "Branch Performance KPI Pack"
+    },
+    "fleet.punctuality.weekly": {
+      "subject": "Fleet Punctuality — Weekly",
+      "headline": "Fleet Punctuality Metrics"
+    },
+    "exec.kpi.digest.daily": {
+      "subject": "Executive KPI Digest — {period}",
+      "headline": "Executive Daily KPI Digest"
+    },
+    "exec.kpi.board.quarterly": {
+      "subject": "Board KPI Pack — {period}",
+      "headline": "Board KPI Pack"
+    },
+    "exec.programs.semiannual": {
+      "subject": "Programs Review — Semi-Annual",
+      "headline": "Semi-Annual Programs Review"
+    },
+    "exec.annual.report": {
+      "subject": "Annual Report — {period}",
+      "headline": "Annual Organizational Report"
+    },
+    "quality.incidents.weekly": {
+      "subject": "Quality Incidents Digest — Weekly",
+      "headline": "Open & Closed Quality Incidents"
+    },
+    "quality.incidents.monthly": {
+      "subject": "Quality Incidents Pack — Monthly",
+      "headline": "Quality Incidents Pack"
+    },
+    "quality.cbahi.evidence.quarterly": {
+      "subject": "CBAHI Evidence Pack — {period}",
+      "headline": "CBAHI Quarterly Evidence Pack"
+    },
+    "quality.red_flags.daily": {
+      "subject": "Red-Flags Digest — {period}",
+      "headline": "Daily Red-Flags Digest"
+    },
+    "finance.claims.weekly": {
+      "subject": "Insurance Claims — Weekly",
+      "headline": "Insurance Claims Summary"
+    },
+    "finance.collections.monthly": {
+      "subject": "Collections — Monthly",
+      "headline": "Collections Summary"
+    },
+    "finance.revenue.quarterly": {
+      "subject": "Revenue Review — {period}",
+      "headline": "Quarterly Revenue Review"
+    },
+    "finance.invoices.aging.weekly": {
+      "subject": "Invoice Aging — Weekly",
+      "headline": "Invoice Aging Report"
+    },
+    "hr.turnover.monthly": {
+      "subject": "HR Turnover — Monthly",
+      "headline": "HR Turnover Report"
+    },
+    "hr.attendance.weekly": {
+      "subject": "Employee Attendance — Weekly",
+      "headline": "Employee Attendance Summary"
+    },
+    "hr.cpe.compliance.monthly": {
+      "subject": "CPE Compliance — Monthly",
+      "headline": "Continuing Medical Education Compliance"
+    },
+    "crm.parent.engagement.monthly": {
+      "subject": "Parent Engagement — Monthly",
+      "headline": "Parent Engagement Metrics"
+    },
+    "crm.complaints.weekly": {
+      "subject": "Complaints Digest — Weekly",
+      "headline": "Customer Complaints Summary"
+    }
+  },
+  "stub": {
+    "placeholder_notice": "This report is under development. This placeholder will be replaced with a detailed analysis in the next release.",
+    "generated_for": "Prepared for"
+  },
+  "status": {
+    "draft": "Draft",
+    "approved": "Approved",
+    "pending_approval": "Pending approval",
+    "rejected": "Rejected",
+    "dispatched": "Dispatched"
+  }
+}

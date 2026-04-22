@@ -1,0 +1,166 @@
+{
+  "common": {
+    "greeting_guardian": "السلام عليكم ورحمة الله وبركاته، {name}",
+    "greeting_generic": "السلام عليكم",
+    "farewell": "مع تحياتنا — فريق مركز العوائل",
+    "period": "الفترة",
+    "generatedAt": "تاريخ الإصدار",
+    "beneficiary": "المستفيد",
+    "branch": "الفرع",
+    "confidential_notice": "هذا التقرير يحتوي معلومات محمية — يُمنع تداوله خارج الجهة المستقبلة.",
+    "download_pdf": "تحميل نسخة PDF",
+    "view_portal": "فتح البوابة",
+    "no_data": "لا توجد بيانات متاحة لهذه الفترة.",
+    "page": "صفحة",
+    "of": "من"
+  },
+  "reports": {
+    "ben.progress.weekly": {
+      "subject": "تقرير التقدم الأسبوعي — {beneficiaryName}",
+      "headline": "ملخص تقدم أسبوعي",
+      "highlights_header": "أبرز الإنجازات",
+      "concerns_header": "نقاط تستدعي الانتباه",
+      "overall_trend": "الاتجاه العام",
+      "trend_improving": "تحسّن واضح",
+      "trend_stable": "مستقر",
+      "trend_declining": "تراجع طفيف"
+    },
+    "ben.progress.monthly": {
+      "subject": "تقرير التقدم الشهري — {beneficiaryName}",
+      "headline": "ملخص تقدم شهري",
+      "highlights_header": "أبرز الإنجازات",
+      "concerns_header": "نقاط تستدعي الانتباه"
+    },
+    "ben.attendance.weekly": {
+      "subject": "التزام الحضور الأسبوعي — {beneficiaryName}",
+      "headline": "ملخص الحضور",
+      "attended": "الحضور",
+      "missed": "الغياب",
+      "late": "التأخر",
+      "rate": "نسبة الالتزام"
+    },
+    "ben.goal.achievement": {
+      "subject": "تقرير تحقيق الأهداف — {beneficiaryName}",
+      "headline": "تقييم تحقيق الأهداف",
+      "achieved": "محققة",
+      "in_progress": "قيد العمل",
+      "not_started": "لم تبدأ",
+      "discipline_header": "التخصص"
+    },
+    "ben.irp.snapshot": {
+      "subject": "لقطة الخطة التأهيلية الفردية",
+      "headline": "لقطة الخطة التأهيلية الفردية"
+    },
+    "ben.discharge.summary": {
+      "subject": "ملخص الخروج من البرنامج",
+      "headline": "ملخص الخروج من البرنامج التأهيلي"
+    },
+    "ben.review.compliance": {
+      "subject": "تقرير التزام المراجعات — أسبوعي",
+      "headline": "مراجعات الخطط العلاجية — حالة الالتزام"
+    },
+    "therapist.productivity.weekly": {
+      "subject": "إنتاجية المعالجين — أسبوعي",
+      "headline": "ملخص إنتاجية المعالجين"
+    },
+    "therapist.caseload.monthly": {
+      "subject": "حجم الحالات للمعالجين — شهري",
+      "headline": "حجم الحالات للمعالجين"
+    },
+    "session.volume.daily": {
+      "subject": "حجم الجلسات اليومي",
+      "headline": "ملخص حجم الجلسات اليومي"
+    },
+    "branch.occupancy.weekly": {
+      "subject": "إشغال الفرع — أسبوعي",
+      "headline": "مؤشرات إشغال الفرع"
+    },
+    "branch.kpi.monthly": {
+      "subject": "حزمة مؤشرات الفرع — شهري",
+      "headline": "حزمة مؤشرات الأداء للفرع"
+    },
+    "fleet.punctuality.weekly": {
+      "subject": "انضباط الأسطول — أسبوعي",
+      "headline": "مؤشرات انضباط الأسطول"
+    },
+    "exec.kpi.digest.daily": {
+      "subject": "ملخص مؤشرات الإدارة — {period}",
+      "headline": "ملخص مؤشرات الإدارة اليومي"
+    },
+    "exec.kpi.board.quarterly": {
+      "subject": "حزمة مؤشرات مجلس الإدارة — {period}",
+      "headline": "حزمة مؤشرات مجلس الإدارة"
+    },
+    "exec.programs.semiannual": {
+      "subject": "مراجعة البرامج — نصف سنوي",
+      "headline": "مراجعة البرامج نصف السنوية"
+    },
+    "exec.annual.report": {
+      "subject": "التقرير السنوي — {period}",
+      "headline": "التقرير السنوي للمؤسسة"
+    },
+    "quality.incidents.weekly": {
+      "subject": "ملخص حوادث الجودة — أسبوعي",
+      "headline": "حوادث الجودة المفتوحة والمغلقة"
+    },
+    "quality.incidents.monthly": {
+      "subject": "حزمة حوادث الجودة — شهري",
+      "headline": "حزمة حوادث الجودة"
+    },
+    "quality.cbahi.evidence.quarterly": {
+      "subject": "حزمة شواهد سباهي — {period}",
+      "headline": "حزمة شواهد سباهي الربع سنوية"
+    },
+    "quality.red_flags.daily": {
+      "subject": "ملخص العلامات الحمراء — {period}",
+      "headline": "ملخص العلامات الحمراء اليومي"
+    },
+    "finance.claims.weekly": {
+      "subject": "مطالبات التأمين — أسبوعي",
+      "headline": "ملخص مطالبات التأمين"
+    },
+    "finance.collections.monthly": {
+      "subject": "التحصيلات — شهري",
+      "headline": "ملخص التحصيلات"
+    },
+    "finance.revenue.quarterly": {
+      "subject": "مراجعة الإيرادات — {period}",
+      "headline": "مراجعة الإيرادات الربع سنوية"
+    },
+    "finance.invoices.aging.weekly": {
+      "subject": "أعمار الفواتير — أسبوعي",
+      "headline": "تقرير أعمار الفواتير"
+    },
+    "hr.turnover.monthly": {
+      "subject": "دوران الموظفين — شهري",
+      "headline": "تقرير دوران الموظفين"
+    },
+    "hr.attendance.weekly": {
+      "subject": "حضور الموظفين — أسبوعي",
+      "headline": "ملخص حضور الموظفين"
+    },
+    "hr.cpe.compliance.monthly": {
+      "subject": "التزام التعليم المستمر — شهري",
+      "headline": "ملخص التزام التعليم الطبي المستمر"
+    },
+    "crm.parent.engagement.monthly": {
+      "subject": "تفاعل أولياء الأمور — شهري",
+      "headline": "مؤشرات تفاعل أولياء الأمور"
+    },
+    "crm.complaints.weekly": {
+      "subject": "ملخص الشكاوى — أسبوعي",
+      "headline": "ملخص شكاوى العملاء"
+    }
+  },
+  "stub": {
+    "placeholder_notice": "هذا تقرير قيد التطوير. سيتم استبدال هذا المحتوى بتحليل مفصّل في التحديث القادم.",
+    "generated_for": "صادر لـ"
+  },
+  "status": {
+    "draft": "مسودة",
+    "approved": "معتمد",
+    "pending_approval": "بانتظار الاعتماد",
+    "rejected": "مرفوض",
+    "dispatched": "مرسل"
+  }
+}

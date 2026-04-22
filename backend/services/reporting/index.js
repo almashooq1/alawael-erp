@@ -28,6 +28,7 @@ const { ReportsScheduler } = require('../../scheduler/reports.scheduler');
 const { builders: builderRegistry } = require('./builderRegistry');
 const { buildChannels } = require('./channels');
 const { createRecipientResolver } = require('./recipientResolver');
+const { createRenderer } = require('./renderer');
 
 const ReportDelivery = require('../../models/ReportDelivery');
 const ReportApprovalRequest = require('../../models/ReportApprovalRequest');
@@ -62,12 +63,18 @@ function buildReportingPlatform(deps = {}) {
     communication = {},
     artifactStore,
     urlSigner,
-    renderer,
+    renderer: providedRenderer,
+    rendererOpts = {},
     scopeProvider,
     eventBus,
     cron,
     logger = console,
   } = deps;
+
+  // Use the injected renderer if one was provided (tests); otherwise
+  // build the default locale-aware HTML+PDF renderer so the engine has
+  // a real render stage out of the box.
+  const renderer = providedRenderer || createRenderer({ logger, ...rendererOpts });
 
   const channels = buildChannels({
     emailService: communication.emailService,

@@ -30,6 +30,7 @@ const { buildChannels } = require('./channels');
 const { createRecipientResolver } = require('./recipientResolver');
 const { createRenderer } = require('./renderer');
 const { createRateLimiter } = require('./rateLimiter');
+const { createReportingValueResolver } = require('./kpiResolvers');
 const { ReportsOpsScheduler } = require('../../scheduler/reports-ops.scheduler');
 
 const ReportDelivery = require('../../models/ReportDelivery');
@@ -71,7 +72,16 @@ function buildReportingPlatform(deps = {}) {
     eventBus,
     cron,
     logger = console,
+    kpiValueResolver: providedKpiResolver,
+    kpiResolverOpts = {},
   } = deps;
+
+  // Reporting-backed KPI value resolver — dispatches kpi.dataSource to
+  // the real Phase-10 report builders. Callers can inject their own
+  // resolver via `deps.kpiValueResolver` when wiring a custom service
+  // locator (e.g. pre-production with an external analytics service).
+  const kpiValueResolver =
+    providedKpiResolver || createReportingValueResolver({ logger, ...kpiResolverOpts });
 
   // Use the injected renderer if one was provided (tests); otherwise
   // build the default locale-aware HTML+PDF renderer so the engine has
@@ -144,6 +154,7 @@ function buildReportingPlatform(deps = {}) {
     channels,
     recipientResolver,
     rateLimiter,
+    kpiValueResolver,
     start() {
       scheduler.start();
       opsScheduler.start();

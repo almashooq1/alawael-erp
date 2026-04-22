@@ -21,6 +21,12 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 | Session attendance risk (front-desk)    | [attendance-digest.md](attendance-digest.md)     |
 | ZKTeco device-model merge (ops, 1-shot) | [zkteco-device-merge.md](zkteco-device-merge.md) |
 
+### Architecture references
+
+| Topic                                     | Doc                              |
+| ----------------------------------------- | -------------------------------- |
+| Phase-7 IAM stack (roles/scope/SoD/audit) | [phase-7-iam.md](phase-7-iam.md) |
+
 ## How to use
 
 1. PagerDuty / Slack → you see an alert firing.

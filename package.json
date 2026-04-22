@@ -83,6 +83,8 @@
     "prepare": "husky",
     "quality": "cd backend && npm run quality:ci",
     "quality:quick": "cd backend && npm run quality:quick",
+    "rbac:export-matrix": "cd backend && npm run rbac:export-matrix",
+    "rbac:export-matrix:json": "cd backend && npm run rbac:export-matrix:json",
     "referrals:digest": "cd backend && npm run referrals:digest",
     "referrals:digest:json": "cd backend && npm run referrals:digest:json",
     "retention:digest": "cd backend && npm run retention:digest",

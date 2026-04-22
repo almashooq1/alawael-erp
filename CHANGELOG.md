@@ -5,6 +5,67 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 10: runbook + matrix CSV export
+
+**Phase-7 roadmap closes (10 of 10).** This commit ships the auditor-
+facing artifacts: a single architecture reference covering the whole
+IAM stack, and a CLI that exports the effective role × resource ×
+action matrix as CSV/JSON for CBAHI/SCFHS/SAMA evidence packs.
+
+### Added
+
+- `docs/runbooks/phase-7-iam.md` — architecture reference:
+  • Layered enforcement diagram (RBAC → tenant scope → branch scope
+  → domain SoD → approval chain → ABAC + record grants → audit hash).
+  • File map for every authorization module with one-line purpose.
+  • Scheduled digests (break-glass, approval-escalate, audit-chain-
+  verify) with cron cadence + exit codes.
+  • Compliance mapping (CBAHI 4.3/8.7, SAMA, Saudi Labor Law § 6,
+  PDPL Art. 4/5/9/23).
+  • Known limitations (Mongoose 9 + Jest sandbox schema-defaults
+  quirk — the pure-function pattern we use around it).
+  • 10 Phase-7 commits with their commit SHAs.
+- `scripts/rbac-export-matrix.js` — CLI emitting the effective
+  permission matrix:
+  • `resolvePermissions(role)` — walks ROLE_HIERARCHY inheritance.
+  • `expandWildcards(map)` — flattens `*` (role/resource/action).
+  • `buildMatrix({roleFilter, resourceFilter})` — flat row set.
+  • `toCSV(rows)` — `role,resource,action,hierarchy_level`.
+  • Flags: `--role=`, `--resource=`, `--json`, `--out=`.
+  • Smoke run (no filters) produces 1825 rows across 46 roles.
+- `__tests__/rbac-export-matrix.test.js` — 16 pure-logic tests:
+  super_admin wildcard, unknown-role empty map, hr-via-viewer
+  inheritance, per-resource + per-action wildcard expansion,
+  role/resource filters, hierarchy-level bounds [0, 100], specific
+  assertions (super_admin → invoices:create, guardian →
+  beneficiaries:read, accountant ⊄ care_plans:read), CSV header +
+  row shape + empty-input handling.
+- npm scripts `rbac:export-matrix` + `rbac:export-matrix:json` with
+  root proxies.
+- `docs/runbooks/README.md` — linked phase-7-iam.md under
+  "Architecture references".
+
+### Tests
+
+Sprint suite: **1298 passing** (was 1282; +16).
+
+### Phase 7 status
+
+- Commit 1 — foundation (46 roles + Region model) ✅
+- Commit 2 — tenantScope plugin ✅
+- Commit 3 — RecordGrant + domain-sod policy adapter ✅
+- Commit 4 — regional branchScope ✅
+- Commit 5 — break-glass digest ✅
+- Commit 6 — domain SoD rules (7 families) ✅
+- Commit 7 — audit hash chain ✅
+- Commit 8 — approval chains (expense + payroll + care plan) ✅
+- Commit 9 — UserBranchRole (secondment) ✅
+- **Commit 10 — runbook + matrix CSV export ✅**
+
+Phase 7 IAM hardening complete.
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 5: break-glass review digest
 
 Ninth Phase-7 commit. BreakGlassEngine + session model + routes

@@ -1,13 +1,14 @@
 # Phase 10 — Reporting & Communications Platform Runbook
 
-**Release marker:** 4.0.16 — Phase 10 C1–C15 (2026-04-22)
+**Release marker:** 4.0.17 — Phase 10 C1–C18 (2026-04-22)
 **Scope:** periodic & on-demand reporting engine + 6-channel delivery + approval workflow + delivery ledger + provider webhooks + portal inbox + retry / escalation / retention + renderer (HTML + PDF, ar/en) + drift guards + **22 real builders across 11 modules** + **kpi + rbac aliases layer** + **reporting-backed KPI resolver auto-wired into the engine**.
 
 **Update history:**
 
 - 4.0.14 (2026-04-22, C9): closed C1–C9 with 565 tests; C5 UI + C7 real builders + aliases layer deferred.
 - 4.0.15 (2026-04-22, C11): C7a–h land 22 real builders + kpiAggregator; C10 kpi + rbac aliases drop drift 22 → 6. 753 tests / 52 suites.
-- **4.0.16 (this update):** C12 adds 5 matching KPIs to kpi.registry (drift 6 → 1 — only `executive` group remains, correct by design); C13 introduces `createReportingValueResolver` dispatching to the 9 Phase-10 builder modules; C15 auto-injects the resolver into every builder's ctx via the engine constructor. **992 tests across 60 suites.** KPI dashboards now produce live values end-to-end — no operator glue code required.
+- 4.0.16 (2026-04-22, C14): C12 adds 5 matching KPIs to kpi.registry (drift 6 → 1 — only `executive` group remains, correct by design); C13 introduces `createReportingValueResolver` dispatching to the 9 Phase-10 builder modules; C15 auto-injects the resolver into every builder's ctx via the engine constructor. 992 tests across 60 suites.
+- **4.0.17 (this update) — Tier A operations:** C16 boots the platform from `server.js` with graceful shutdown + smoke test; C17 adds `GET /api/v1/reports/ops/{status,health,catalog}` for delivery stats, approval queue depth, scheduler snapshots, catalog summary, rate-limiter caps, and engine `valueResolverWired` flag; C18 enforces per-recipient 24h caps inside `engine._dispatch()` — over-limit rows become CANCELLED (reason='rate_limited') and emit `report.delivery.cancelled` events. **1,019 tests across 63 suites.** The platform is now live in `server.js`, observable from one endpoint, and per-recipient caps actually bite.
 
 ---
 
@@ -63,9 +64,13 @@ All 6 core requirement buckets are satisfied end-to-end at the backend. The only
 | 12  | `1ee049a1`   | 5 new KPIs in kpi.registry (34 → 39); kpi.aliases gaps 5 → 0 (drift budget 6 → 1)                                                                        |
 | 13  | `d69ff37c`   | `createReportingValueResolver` — dispatches kpi.dataSource to the 9 Phase-10 builder modules + path navigation (12 tests)                                |
 | 15  | `08d12799`   | Engine auto-injects valueResolver into every builder's ctx (caller still wins); locator wires it automatically (7 tests)                                 |
-| 14  | _(this)_     | Runbook + CHANGELOG 4.0.16 entry + release marker                                                                                                        |
+| 14  | `43aea8eb`   | Runbook + CHANGELOG 4.0.16 entry + release marker                                                                                                        |
+| 16  | `55982839`   | `buildReportingPlatform` wired into `backend/server.js` with `REPORTING_PLATFORM_ENABLED` kill-switch + graceful shutdown hook (4 smoke tests)           |
+| 17  | `ad079706`   | `GET /api/v1/reports/ops/{status,health,catalog}` — observability endpoint with late-binding mount + 5 pure aggregators (18 tests)                       |
+| 18  | `dc1c03fc`   | Rate-limit enforcement in `engine._dispatch()` — CANCELLED row + `report.delivery.cancelled` event; fail-open on limiter crash (5 tests)                 |
+| 19  | _(this)_     | Runbook + CHANGELOG 4.0.17 entry + release marker                                                                                                        |
 
-**Test coverage:** 992 tests across 60 reporting-platform suites — all green at 4.0.16. Progressive coverage by milestone:
+**Test coverage:** 1,019 tests across 63 reporting-platform suites — all green at 4.0.17. Progressive coverage by milestone:
 
 - 4.0.14 (C1–C9): 565 tests / 37 suites
 - C7a–h (real builders rollout): +177 tests / +10 suites
@@ -75,7 +80,11 @@ All 6 core requirement buckets are satisfied end-to-end at the backend. The only
 - C13 (reporting-backed value resolver): +12 tests / +1 suite
 - C15 (engine valueResolver auto-injection): +7 tests / +1 suite
 - **Total delta 4.0.15 → 4.0.16: +39 tests / +2 suites**
-- **4.0.16 total: 992 tests / 60 suites**.
+- C16 (boot smoke): +4 tests / +1 suite
+- C17 (ops observability routes): +18 tests / +1 suite
+- C18 (rate-limit enforcement): +5 tests / +1 suite
+- **Total delta 4.0.16 → 4.0.17: +27 tests / +3 suites**
+- **4.0.17 total: 1,019 tests / 63 suites**.
 
 ---
 
@@ -277,7 +286,12 @@ No schema changes to existing models. No data migration required in either direc
 To roll back Phase 10 entirely:
 
 ```bash
-# 4.0.16 rollback — revert newest first
+# 4.0.17 rollback — revert newest first
+git revert --no-commit dc1c03fc         # C18 rate-limit enforcement
+git revert --no-commit ad079706         # C17 ops observability routes
+git revert --no-commit 55982839         # C16 server.js boot integration
+# 4.0.16 layer
+git revert --no-commit 43aea8eb         # C14 runbook 4.0.16
 git revert --no-commit 08d12799         # C15 engine valueResolver auto-injection
 git revert --no-commit d69ff37c         # C13 reporting-backed resolver
 git revert --no-commit 1ee049a1         # C12 5 new KPIs in registry
@@ -290,6 +304,12 @@ git revert --no-commit e95f7f75 d5a37335 63583bd6 54e7f327 c53c124f f6dd040c 163
 # then drop the two new collections:
 #   db.report_deliveries.drop(); db.report_approval_requests.drop();
 ```
+
+**Partial 4.0.17 rollbacks** (safer than full revert):
+
+- Reverting C18 only: engine stops enforcing the 24h cap; rate limiter is still exposed on the platform handle but inert. `report.delivery.cancelled` events stop firing for `reason='rate_limited'`. No data loss; CANCELLED rows from before the revert remain.
+- Reverting C17 only: `/api/v1/reports/ops/*` returns 404; smoke test stays green; platform dispatch unchanged.
+- Reverting C16 only: platform stops booting from `server.js`; tests still build it directly with injected fakes; scheduler no longer fires in prod. Safe — no data changes.
 
 **Partial 4.0.16 rollbacks** (safer than full revert):
 
@@ -304,13 +324,18 @@ Partial rollbacks are safe:
 
 ---
 
-## 6. Known limitations carried forward (as of 4.0.16)
+## 6. Known limitations carried forward (as of 4.0.17)
 
-- **UI pages not landed** — Reporting Ops dashboard + Parent portal inbox are scoped for a future phase. Events + REST endpoints are live; Next.js pages consume them in C5.
+- **UI pages not landed** — Reporting Ops dashboard + Parent portal inbox are scoped for a future phase. Events + REST endpoints (including `/api/v1/reports/ops/*` since C17) are live; Next.js pages consume them in C5.
 - **1 role group (`executive`) expands to multiple rbac roles** — this is correct, not a gap. The engine's recipientResolver handles the expansion via `ROLE_GROUPS.executive = [ceo, group_gm, group_cfo, group_chro]`.
 - **Provider signature verifiers not wired in app.js** — the webhook router supports them; production boot must supply SendGrid / Twilio / WhatsApp verifier functions.
-- **Rate limiter is wired but not yet enforced in engine dispatch** — exposed on the platform; opt-in engine integration in a follow-up.
 - **Artifact store + URL signer are interfaces, not implementations** — `portal_inbox` and `pdf_download` channels + inbox download endpoint need the operator to supply `{store(payload) → {uri,id}}` and `{sign({uri,ttlSeconds,...}) → {url,expiresAt}}` adapters. S3 + CloudFront is the expected production combo.
+
+**Closed since 4.0.16:**
+
+- ~~Platform not wired into server.js~~ — **CLOSED by C16**: `buildReportingPlatform` boots from `backend/server.js` with `REPORTING_PLATFORM_ENABLED=false` kill-switch and graceful shutdown hook; late-binding mount in `app.js` exposes the platform to request-time routers.
+- ~~No observability endpoint~~ — **CLOSED by C17**: `GET /api/v1/reports/ops/{status,health,catalog}` aggregates delivery + approvals + scheduler state + catalog + rate-limiter caps + engine `valueResolverWired` flag. Safe to poll every 15s.
+- ~~Rate limiter wired but not enforced~~ — **CLOSED by C18**: `engine._dispatch()` consults `rateLimiter.check({ recipientId, role })` right before `channel.send()`; over-limit rows become CANCELLED (reason='rate_limited') and emit `report.delivery.cancelled` events. Fail-open on limiter crash.
 
 **Closed since 4.0.15:**
 
@@ -323,24 +348,34 @@ Partial rollbacks are safe:
 
 The platform emits these events. Ops dashboards and analytics pipes subscribe as needed:
 
-| event                          | payload                                                 | when                                |
-| ------------------------------ | ------------------------------------------------------- | ----------------------------------- |
-| `report.instance.built`        | `{reportId, instanceKey, durationMs}`                   | builder returned JSON               |
-| `report.approval.requested`    | `{requestId, reportId, instanceKey, approverRoles}`     | PENDING approval created            |
-| `report.delivery.sent`         | `{deliveryId, channel}`                                 | channel adapter reported success    |
-| `report.delivery.delivered`    | `{deliveryId, channel, provider}`                       | delivery webhook fired              |
-| `report.delivery.read`         | `{deliveryId, channel, provider}`                       | read webhook fired OR portal view   |
-| `report.delivery.failed`       | `{deliveryId, reason}`                                  | channel / provider returned failure |
-| `report.delivery.retried`      | `{deliveryId, instanceKey}`                             | retry sweep re-dispatched           |
-| `report.delivery.escalated`    | `{deliveryId, reportId, reason, escalatedTo, notified}` | escalation sweep marked + alerted   |
-| `report.delivery.rate_limited` | `{recipientId, role, current, limit}`                   | rate limiter blocked a send         |
-| `report.delivery.purged`       | `{deliveryId, reportId}`                                | retention sweep deleted a row       |
+| event                          | payload                                                   | when                                |
+| ------------------------------ | --------------------------------------------------------- | ----------------------------------- |
+| `report.instance.built`        | `{reportId, instanceKey, durationMs}`                     | builder returned JSON               |
+| `report.approval.requested`    | `{requestId, reportId, instanceKey, approverRoles}`       | PENDING approval created            |
+| `report.delivery.sent`         | `{deliveryId, channel}`                                   | channel adapter reported success    |
+| `report.delivery.delivered`    | `{deliveryId, channel, provider}`                         | delivery webhook fired              |
+| `report.delivery.read`         | `{deliveryId, channel, provider}`                         | read webhook fired OR portal view   |
+| `report.delivery.failed`       | `{deliveryId, reason}`                                    | channel / provider returned failure |
+| `report.delivery.retried`      | `{deliveryId, instanceKey}`                               | retry sweep re-dispatched           |
+| `report.delivery.escalated`    | `{deliveryId, reportId, reason, escalatedTo, notified}`   | escalation sweep marked + alerted   |
+| `report.delivery.rate_limited` | `{recipientId, role, current, limit}`                     | rate limiter blocked a send         |
+| `report.delivery.cancelled`    | `{deliveryId, recipientId, role, reason, current, limit}` | engine cancelled a QUEUED row (C18) |
+| `report.delivery.purged`       | `{deliveryId, reportId}`                                  | retention sweep deleted a row       |
 
 ---
 
 ## 8. Sign-off
 
-### 4.0.16 (current)
+### 4.0.17 (current — Tier A operations)
+
+- Platform live in `server.js` with kill-switch + graceful shutdown ✓
+- Observability endpoint `GET /api/v1/reports/ops/{status,health,catalog}` aggregates delivery + approvals + scheduler + catalog + rate-limiter + engine state — safe to poll every 15s ✓
+- Rate limiter enforced in `engine._dispatch()` — per-recipient 24h cap actually bites; over-limit rows CANCELLED and observable via `report.delivery.cancelled` events ✓
+- Tests: **1,019 passing across 63 reporting-platform suites** ✓
+- Backwards compatibility: no schema or API breakage; two new routes (`/api/v1/reports/ops/*`); engine constructor gained an optional `rateLimiter` that defaults to null (pre-C18 behavior) ✓
+- Release marker: **4.0.17**
+
+### 4.0.16 (previous)
 
 - Architecture: 6 requirement buckets end-to-end at the backend; 22/22 catalog builders real; aliases + value-resolver layers close every loop ✓
 - Tests: **992 passing across 60 reporting-platform suites** ✓

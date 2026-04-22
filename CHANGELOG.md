@@ -5,6 +5,70 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.17] — 2026-04-22 — Phase 10 Tier A: Boot + Observability + Rate-Limit Enforcement (C16 + C17 + C18)
+
+Lights the platform up in production and makes it visible + safe to run.
+Before 4.0.17 the reporting platform existed as a well-tested library
+that nobody booted, nobody observed, and whose rate limiter was exposed
+but inert. 4.0.17 closes all three gaps in three focused commits.
+
+### Commit ledger (delta from 4.0.16)
+
+- **C16 `55982839`** — `buildReportingPlatform` wired into
+  `backend/server.js` between the log-cleanup and message-queue boot
+  blocks. Opt-out via `REPORTING_PLATFORM_ENABLED=false`. Graceful
+  shutdown hook stops both schedulers before process exit. Four smoke
+  tests verify the build/start/stop lifecycle with injected fakes.
+- **C17 `ad079706`** — `GET /api/v1/reports/ops/{status,health,catalog}`
+  observability endpoint. Aggregates delivery stats (configurable 1–168h
+  window, success/failure rates, by-channel, by-status), approval queue
+  depth, scheduler snapshots (both normal + ops), catalog classification,
+  rate-limiter caps, and the engine's `valueResolverWired` flag. Safe to
+  poll every 15s. Mounted in `app.js` with a late-binding closure so
+  the router survives app-load order. 18 supertest cases + 5 pure
+  aggregators exported for reuse.
+- **C18 `dc1c03fc`** — `engine._dispatch()` now consults an optional
+  `rateLimiter.check({ recipientId, role })` right before
+  `channel.send()`. Over-limit recipients get their delivery row marked
+  CANCELLED (reason=`rate_limited:<current>/<limit> in 24h for
+role=<role>`) and a `report.delivery.cancelled` event fires with full
+  context for ops dashboards. Fail-open: a crashing limiter does not
+  block legitimate reports. 5 new tests cover allow / deny / crash /
+  no-limiter / bad-shape paths. Service locator (`services/reporting/
+index.js`) now constructs the limiter before the engine and passes it
+  in.
+
+### Test coverage
+
+- **1,019 passing tests across 63 reporting-platform suites** (delta
+  4.0.16 → 4.0.17: +27 tests / +3 suites).
+- C16 boot smoke: +4 / +1
+- C17 ops routes: +18 / +1
+- C18 rate-limit: +5 / +1
+
+### What's still deferred
+
+- **C5 Next.js UI** — Ops dashboard + Parent portal inbox. Data +
+  REST endpoints (including `/api/v1/reports/ops/*`) are live; the
+  frontend consumes them when scoped.
+- **Provider signature verifiers + artifact store + URL signer** —
+  interfaces exist; operator wires concrete adapters (SendGrid /
+  Twilio / WhatsApp / S3 / CloudFront) at boot.
+
+### Rollback
+
+Three reverts undo Tier A without touching the 4.0.16 layer:
+
+```bash
+git revert --no-commit dc1c03fc  # C18 rate-limit enforcement
+git revert --no-commit ad079706  # C17 ops observability
+git revert --no-commit 55982839  # C16 server.js boot integration
+```
+
+Partial rollbacks are safe; see PHASE_10_REPORTING_RUNBOOK §5.
+
+---
+
 ## [4.0.16] — 2026-04-22 — Phase 10 last-mile wiring (C12 + C13 + C15)
 
 Finishes the work 4.0.15 had left implicit. After 4.0.16, **every

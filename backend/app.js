@@ -195,6 +195,17 @@ try {
   } catch (rehabErr) {
     logger.warn('[RehabDisciplines] routes skipped:', rehabErr.message);
   }
+
+  // Goal-suggestion engine — Phase 9 Commit 8. Returns ranked SMART
+  // goal templates + first-line interventions from the registry given
+  // a beneficiary context (disciplines, age, existing goals).
+  try {
+    const { createRehabGoalSuggestionsRouter } = require('./routes/rehab-goal-suggestions.routes');
+    app.use('/api/v1/rehab/goal-suggestions', authenticate, createRehabGoalSuggestionsRouter());
+    logger.info('[RehabGoalSuggestions] ✓ suggestion routes mounted');
+  } catch (suggErr) {
+    logger.warn('[RehabGoalSuggestions] routes skipped:', suggErr.message);
+  }
   // Fire the periodic sweep in non-test env only. Tests run `runOnce`
   // directly when they need to; a live cron would flake them.
   if (!isTestEnv && cronDep) {

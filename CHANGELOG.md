@@ -5,6 +5,60 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 9: UserBranchRole (secondment)
+
+Eighth Phase-7 commit. Adds the secondment / multi-branch / acting-
+role persistence model. User.branchIds[] (commit a2936c4c) was the
+convenience field; this is the authoritative audited record of
+WHO-CAN-WORK-WHERE with window boundaries and a granter.
+
+### Added
+
+- `models/UserBranchRole.js`:
+  • userId + branchId + role (required; role lowercased, may
+  differ from User.role for acting-role scenarios)
+  • validFrom / validUntil (both null allowed for open-ended
+  secondments; convention is half-open [from, until))
+  • status enum (active / revoked / expired)
+  • grantedBy + grantedAt + reason (10–500 chars for audit)
+  • revokedAt / revokedBy / revokeReason for full lifecycle
+  • Indexes: (userId, status, validUntil) + (branchId, status,
+  validUntil) for both "my branches now" and "who's at this
+  branch now" queries
+  • `filterActive(rows, now)` — pure function, half-open window
+  filter; also attached as schema static
+  • `findActiveForUser(userId, now)` — indexed DB query followed
+  by the in-JS filter
+  • `revoke({assignmentId, revokedBy, reason})` — atomic flip
+
+- `__tests__/user-branch-role-window.test.js` — 15 pure tests for
+  `filterActive`:
+  • 3 status gates (active/revoked/expired)
+  • 3 validFrom boundary cases (future/past/exactly-now)
+  • 3 validUntil boundary cases (future/past/exactly-now)
+  • 3 both-bound windows (inside/before/after)
+  • mixed batch returning only active+in-window
+  • empty input + default-now behavior
+
+- `scripts/_user-branch-role-smoke.js` — 10-assertion standalone
+  smoke covering schema validators, defaults, findActiveForUser
+  window semantics (including hidden future-dated + past-expired
+  rows), and the revoke lifecycle. Same pattern as RecordGrant and
+  tenantScope smokes (Jest+Mongoose 9 sandbox limitation).
+
+### Not yet wired (follow-up)
+
+- branchScope middleware doesn't yet call `findActiveForUser()` to
+  union the user's home branch with their secondment set. That's a
+  ~10-line addition once a real route consumes it. Model + tests
+  land first so the glue commit is small.
+
+### Tests
+
+Sprint suite: **1267 passing** (was 1252; +15 window tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 7: tamper-evident audit trail
 
 Seventh Phase-7 commit. Wires a SHA-256 hash chain through the audit
@@ -21,7 +75,7 @@ either". This commit closes that gap.
   excluding storage-layer fields (`_id`, `__v`, `chainHash`,
   `prevHash`, `createdAt`, `updatedAt`, `expiresAt`).
   • `computeEntryHash(entry, prevHash)` — `SHA-256(prevHash ||
-  canonicalJSON(entry))`. Throws on non-string prevHash.
+canonicalJSON(entry))`. Throws on non-string prevHash.
   Handles mongoose docs via `.toObject()` automatically.
   • `verifyChain(entries)` — walks an oldest→newest array,
   recomputes each entry's hash, reports breaks. Detects: - modification (chain_hash_mismatch) - insertion (prev_hash_mismatch) - deletion (downstream prev_hash_mismatch)

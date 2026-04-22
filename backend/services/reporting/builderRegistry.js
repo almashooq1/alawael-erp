@@ -25,6 +25,7 @@
 
 const rehabReportBuilders = require('../rehabReportBuilders');
 const attendanceReportBuilder = require('./builders/attendanceReportBuilder');
+const sessionReportBuilder = require('./builders/sessionReportBuilder');
 
 /**
  * Build a stub builder for a category of report. The stub echoes the
@@ -64,14 +65,14 @@ const builders = {
   attendanceReportBuilder: {
     buildAdherence: attendanceReportBuilder.buildAdherence,
   },
+  sessionReportBuilder: {
+    buildVolume: sessionReportBuilder.buildVolume,
+  },
 
   // ─── Stubs (to be replaced commit by commit) ───────────────────
   therapistReportBuilder: {
     buildProductivity: stubBuilder('therapist.productivity'),
     buildCaseload: stubBuilder('therapist.caseload'),
-  },
-  sessionReportBuilder: {
-    buildVolume: stubBuilder('session.volume'),
   },
   branchReportBuilder: {
     buildOccupancy: stubBuilder('branch.occupancy'),
@@ -132,6 +133,7 @@ const REAL_BUILDERS = new Set([
   'rehabReportBuilders.buildDischargeSummary',
   'rehabReportBuilders.buildReviewComplianceReport',
   'attendanceReportBuilder.buildAdherence',
+  'sessionReportBuilder.buildVolume',
 ]);
 
 function isStub(builderPath) {

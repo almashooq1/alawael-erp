@@ -5,6 +5,74 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 8: approval chains + escalate digest
+
+Sixth Phase-7 commit. Closes the approval/governance side of the IAM
+hardening roadmap — Phase-7 Commits 1–3, 4, 6 addressed identity,
+scope, and segregation of duties; this one addresses the workflows
+that route approvals through the right roles and escalate when they
+blow past their SLA.
+
+### Added
+
+- `authorization/approvals/chains.js` — 7 new chain definitions
+  (expense × 4 bands, payroll dual sign-off, care plan × 2
+  variants):
+  • **A-12-expense-small** (≤ 5k) — accountant → finance_supervisor
+  • **A-12-expense-mid** (5k–50k) — + branch_manager
+  • **A-12-expense-large** (50k–200k) — + group_cfo
+  • **A-12-expense-huge** (> 200k) — + ceo
+  • **A-14-payroll** — dual sign-off. 3 distinct roles (hr_officer
+  → group_chro → group_cfo) so the existing engine's SoD prevents
+  the same actor from approving twice AND finance/HR leadership
+  each sign independently (Saudi Labor Law § 6 dual-control).
+  • **A-16-careplan** — therapy_supervisor → clinical_director
+  • **A-16-careplan-complex** — + group_quality_officer for
+  multidisciplinary plans
+
+- `selectChain()` — extended to route A-12 (expense) by amount
+  (reusing the A-07/A-08 threshold pattern) and A-16 (care plan) by
+  the `complexMultidisciplinary` flag on the resource.
+
+- `scripts/approval-escalate-digest.js` — cron-friendly SLA monitor:
+  • Scans all open ApprovalRequests and classifies into breaches /
+  nearBreach / healthy buckets.
+  • Exit 0 when healthy, 1 when ≥1 breach or near-breach, 2 on
+  internal error (same contract as other digests).
+  • `--json` for pipelines; `--quiet` for cron.
+  • Env `APPROVAL_ESCALATE_WARN_HOURS` tunable (default 4).
+
+- `buildEscalationPlan()` — exported pure function, takes requests
+
+  - now + warn-hours, returns classified plan. Covered by 10 unit
+    tests (empty input, each bucket, all-three mix, entry shape,
+    boundary behavior at the warn threshold).
+
+- `__tests__/approval-chains-phase7.test.js` — 25 tests:
+  • All 7 new chain IDs registered with ≥1 step
+  • selectChain band thresholds (0–500k expense matrix, 11 cases)
+  • Care-plan complexity flag
+  • Payroll SoD property (3 distinct roles, initiator ≠ signatories)
+  • Drift invariants — every Phase-7 chain role resolves to an
+  rbac.config ROLES value; every dueHours in [1, 336]; every
+  branchScope is one of the 6 valid values.
+
+### Wired
+
+- `backend/package.json`: `test:sprint` / `test:ops-subsystems`
+  include both new test files; `approval-escalate:digest[:json]`
+  npm scripts.
+- Root `package.json`: proxy scripts matching the digest convention.
+- `.github/workflows/sprint-tests.yml`: paths triggers for the new
+  source files + tests.
+
+### Tests
+
+Sprint suite: **1232 passing** (was 1197; +35 = 25 chain tests + 10
+digest tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 3: RecordGrant + domain-sod policy
 
 Fifth Phase-7 commit (and last in the P0 sprint). Lands the

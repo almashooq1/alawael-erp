@@ -183,6 +183,79 @@ const CHAINS = {
       { role: 'hq_cqo', branchScope: 'group', dueHours: 168 },
     ],
   },
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // Phase 7 additions (2026-04-22) — expense, payroll dual sign-off,
+  // care-plan approval. Thresholds match the IAM design doc and the Saudi
+  // Labor Law / SAMA dual-control expectations.
+  // ═════════════════════════════════════════════════════════════════════════
+
+  'A-12-expense-small': {
+    name: 'Expense approval (≤ 5k SAR)',
+    resourceType: 'Expense',
+    steps: [
+      { role: 'accountant', branchScope: 'branch', dueHours: 24 },
+      { role: 'finance_supervisor', branchScope: 'branch', dueHours: 48 },
+    ],
+  },
+  'A-12-expense-mid': {
+    name: 'Expense approval (5k–50k SAR)',
+    resourceType: 'Expense',
+    steps: [
+      { role: 'accountant', branchScope: 'branch', dueHours: 24 },
+      { role: 'finance_supervisor', branchScope: 'branch', dueHours: 48 },
+      { role: 'branch_manager', branchScope: 'branch', dueHours: 72 },
+    ],
+  },
+  'A-12-expense-large': {
+    name: 'Expense approval (50k–200k SAR)',
+    resourceType: 'Expense',
+    steps: [
+      { role: 'accountant', branchScope: 'branch', dueHours: 24 },
+      { role: 'finance_supervisor', branchScope: 'branch', dueHours: 48 },
+      { role: 'branch_manager', branchScope: 'branch', dueHours: 72 },
+      { role: 'group_cfo', branchScope: 'group', dueHours: 96 },
+    ],
+  },
+  'A-12-expense-huge': {
+    name: 'Expense approval (> 200k SAR)',
+    resourceType: 'Expense',
+    steps: [
+      { role: 'accountant', branchScope: 'branch', dueHours: 24 },
+      { role: 'finance_supervisor', branchScope: 'branch', dueHours: 48 },
+      { role: 'branch_manager', branchScope: 'branch', dueHours: 72 },
+      { role: 'group_cfo', branchScope: 'group', dueHours: 96 },
+      { role: 'ceo', branchScope: 'group', dueHours: 168 },
+    ],
+  },
+
+  'A-14-payroll': {
+    name: 'Payroll run (dual sign-off)',
+    resourceType: 'PayrollRun',
+    steps: [
+      { role: 'hr_officer', branchScope: 'branch', dueHours: 24 },
+      { role: 'group_chro', branchScope: 'group', dueHours: 48 },
+      { role: 'group_cfo', branchScope: 'group', dueHours: 48 },
+    ],
+  },
+
+  'A-16-careplan': {
+    name: 'Care plan approval',
+    resourceType: 'CarePlan',
+    steps: [
+      { role: 'therapy_supervisor', branchScope: 'branch', dueHours: 48 },
+      { role: 'clinical_director', branchScope: 'branch', dueHours: 72 },
+    ],
+  },
+  'A-16-careplan-complex': {
+    name: 'Care plan approval (multidisciplinary)',
+    resourceType: 'CarePlan',
+    steps: [
+      { role: 'therapy_supervisor', branchScope: 'branch', dueHours: 48 },
+      { role: 'clinical_director', branchScope: 'branch', dueHours: 72 },
+      { role: 'group_quality_officer', branchScope: 'group', dueHours: 168 },
+    ],
+  },
 };
 
 /**
@@ -209,6 +282,17 @@ function selectChain(family, resource = {}) {
     if (days < 5) return 'A-06-short';
     if (days <= 14) return 'A-06-mid';
     return 'A-06-long';
+  }
+  // Phase-7: expense thresholds 5k / 50k / 200k
+  if (family === 'A-12') {
+    if (amount <= 5000) return 'A-12-expense-small';
+    if (amount < 50000) return 'A-12-expense-mid';
+    if (amount <= 200000) return 'A-12-expense-large';
+    return 'A-12-expense-huge';
+  }
+  // Phase-7: care plan, "complex" flag when multidisciplinary
+  if (family === 'A-16') {
+    return resource.complexMultidisciplinary ? 'A-16-careplan-complex' : 'A-16-careplan';
   }
   return CHAINS[family] ? family : null;
 }

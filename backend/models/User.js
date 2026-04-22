@@ -46,6 +46,29 @@ const userSchema = new mongoose.Schema({
     alias: 'branch', // backward compat: user.branch still works
     index: true,
   },
+  // Phase 7 — region-level governance.
+  // `regionIds` is a multi-value field because regional_director
+  // may cover >1 region (e.g. عمليات المنطقتين الغربية والوسطى).
+  // Branch.regionId is the authoritative parent — when evaluating a
+  // region-scoped query, branchScope middleware resolves each user's
+  // regionIds to an in-set of branches before filtering.
+  regionIds: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Region' }],
+    default: [],
+    index: true,
+  },
+  // `branchIds` for secondment / multi-branch assignment. Old `branchId`
+  // stays as the PRIMARY branch (backwards-compatible) and as the
+  // default for branchFilter() when the user is on their home branch.
+  branchIds: {
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' }],
+    default: [],
+  },
+  department: {
+    type: String,
+    trim: true,
+    maxlength: 80,
+  },
   emailVerified: {
     type: Boolean,
     default: false,
@@ -65,21 +88,55 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: [
+      // Level 0 — HQ / Group
       'super_admin',
       'head_office_admin',
+      'ceo',
+      'group_gm',
+      'group_cfo',
+      'group_chro',
+      'group_quality_officer',
+      'compliance_officer',
+      'internal_auditor',
+      'it_admin',
+      // Level 1 — Region (Phase 7)
+      'regional_director',
+      'regional_quality',
+      // Level 2 — Branch
       'admin',
       'manager',
+      'branch_manager',
+      'clinical_director',
+      'quality_coordinator',
+      // Level 3 — Department
       'supervisor',
-      'hr',
-      'hr_manager',
-      'accountant',
-      'finance',
+      'hr_supervisor',
+      'finance_supervisor',
+      'therapy_supervisor',
+      'special_ed_supervisor',
+      // Level 4 — Specialty / Program
       'doctor',
       'therapist',
+      'therapist_slp',
+      'therapist_ot',
+      'therapist_pt',
+      'therapist_psych',
       'teacher',
+      'special_ed_teacher',
+      'therapy_assistant',
+      // Level 5 — Support
+      'hr',
+      'hr_manager',
+      'hr_officer',
+      'accountant',
+      'finance',
       'receptionist',
       'data_entry',
+      'driver',
+      'bus_assistant',
+      // External
       'parent',
+      'guardian',
       'student',
       'viewer',
       'user',

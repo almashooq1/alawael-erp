@@ -15,21 +15,61 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 const ROLES = {
+  // Level 0 — HQ / Group
   SUPER_ADMIN: 'super_admin',
   HEAD_OFFICE_ADMIN: 'head_office_admin',
+  CEO: 'ceo',
+  GROUP_GM: 'group_gm',
+  GROUP_CFO: 'group_cfo',
+  GROUP_CHRO: 'group_chro',
+  GROUP_QUALITY_OFFICER: 'group_quality_officer',
+  COMPLIANCE_OFFICER: 'compliance_officer',
+  INTERNAL_AUDITOR: 'internal_auditor',
+  IT_ADMIN: 'it_admin',
+
+  // Level 1 — Region (Phase 7)
+  REGIONAL_DIRECTOR: 'regional_director',
+  REGIONAL_QUALITY: 'regional_quality',
+
+  // Level 2 — Branch
   ADMIN: 'admin',
   MANAGER: 'manager',
+  BRANCH_MANAGER: 'branch_manager',
+  CLINICAL_DIRECTOR: 'clinical_director',
+  QUALITY_COORDINATOR: 'quality_coordinator',
+
+  // Level 3 — Department supervisors
   SUPERVISOR: 'supervisor',
-  HR: 'hr',
-  HR_MANAGER: 'hr_manager',
-  ACCOUNTANT: 'accountant',
-  FINANCE: 'finance',
+  HR_SUPERVISOR: 'hr_supervisor',
+  FINANCE_SUPERVISOR: 'finance_supervisor',
+  THERAPY_SUPERVISOR: 'therapy_supervisor',
+  SPECIAL_ED_SUPERVISOR: 'special_ed_supervisor',
+
+  // Level 4 — Specialty / Program
   DOCTOR: 'doctor',
   THERAPIST: 'therapist',
+  THERAPIST_SLP: 'therapist_slp',
+  THERAPIST_OT: 'therapist_ot',
+  THERAPIST_PT: 'therapist_pt',
+  THERAPIST_PSYCH: 'therapist_psych',
   TEACHER: 'teacher',
+  SPECIAL_ED_TEACHER: 'special_ed_teacher',
+  THERAPY_ASSISTANT: 'therapy_assistant',
+
+  // Level 5 — Support
+  HR: 'hr',
+  HR_MANAGER: 'hr_manager',
+  HR_OFFICER: 'hr_officer',
+  ACCOUNTANT: 'accountant',
+  FINANCE: 'finance',
   RECEPTIONIST: 'receptionist',
   DATA_ENTRY: 'data_entry',
+  DRIVER: 'driver',
+  BUS_ASSISTANT: 'bus_assistant',
+
+  // External
   PARENT: 'parent',
+  GUARDIAN: 'guardian',
   STUDENT: 'student',
   VIEWER: 'viewer',
   USER: 'user',
@@ -93,6 +133,176 @@ const ROLE_HIERARCHY = {
   [ROLES.VIEWER]: { level: 10, inherits: [], label: 'مُطّلع', labelEn: 'Viewer' },
   [ROLES.USER]: { level: 10, inherits: [], label: 'مستخدم', labelEn: 'User' },
   [ROLES.GUEST]: { level: 0, inherits: [], label: 'زائر', labelEn: 'Guest' },
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // Phase 7 expansions — 22 new roles added 2026-04-22
+  // ═════════════════════════════════════════════════════════════════════════
+
+  // — Level 0 HQ —
+  [ROLES.CEO]: {
+    level: 95,
+    inherits: [ROLES.HEAD_OFFICE_ADMIN],
+    label: 'المدير التنفيذي',
+    labelEn: 'CEO',
+  },
+  [ROLES.GROUP_GM]: {
+    level: 90,
+    inherits: [ROLES.ADMIN],
+    label: 'المدير العام',
+    labelEn: 'Group GM',
+  },
+  [ROLES.GROUP_CFO]: {
+    level: 85,
+    inherits: [ROLES.FINANCE],
+    label: 'المدير المالي',
+    labelEn: 'Group CFO',
+  },
+  [ROLES.GROUP_CHRO]: {
+    level: 85,
+    inherits: [ROLES.HR_MANAGER],
+    label: 'مدير الموارد البشرية العام',
+    labelEn: 'Group CHRO',
+  },
+  [ROLES.GROUP_QUALITY_OFFICER]: {
+    level: 80,
+    inherits: [ROLES.VIEWER],
+    label: 'مدير الجودة العام',
+    labelEn: 'Group Quality Officer',
+  },
+  [ROLES.COMPLIANCE_OFFICER]: {
+    level: 80,
+    inherits: [ROLES.VIEWER],
+    label: 'مسؤول الامتثال',
+    labelEn: 'Compliance Officer',
+  },
+  [ROLES.INTERNAL_AUDITOR]: {
+    level: 75,
+    inherits: [ROLES.VIEWER],
+    label: 'المراجع الداخلي',
+    labelEn: 'Internal Auditor',
+  },
+  [ROLES.IT_ADMIN]: {
+    level: 95,
+    inherits: [ROLES.ADMIN],
+    label: 'مدير تقنية المعلومات',
+    labelEn: 'IT Admin',
+  },
+
+  // — Level 1 Region —
+  [ROLES.REGIONAL_DIRECTOR]: {
+    level: 75,
+    inherits: [ROLES.MANAGER],
+    label: 'مدير المنطقة',
+    labelEn: 'Regional Director',
+  },
+  [ROLES.REGIONAL_QUALITY]: {
+    level: 65,
+    inherits: [ROLES.VIEWER],
+    label: 'منسق جودة المنطقة',
+    labelEn: 'Regional Quality',
+  },
+
+  // — Level 2 Branch —
+  [ROLES.BRANCH_MANAGER]: {
+    level: 70,
+    inherits: [ROLES.MANAGER],
+    label: 'مدير الفرع',
+    labelEn: 'Branch Manager',
+  },
+  [ROLES.CLINICAL_DIRECTOR]: {
+    level: 70,
+    inherits: [ROLES.DOCTOR],
+    label: 'المدير السريري',
+    labelEn: 'Clinical Director',
+  },
+  [ROLES.QUALITY_COORDINATOR]: {
+    level: 60,
+    inherits: [ROLES.VIEWER],
+    label: 'منسق الجودة',
+    labelEn: 'Quality Coordinator',
+  },
+
+  // — Level 3 Department supervisors —
+  [ROLES.HR_SUPERVISOR]: {
+    level: 60,
+    inherits: [ROLES.HR],
+    label: 'مشرف الموارد البشرية',
+    labelEn: 'HR Supervisor',
+  },
+  [ROLES.FINANCE_SUPERVISOR]: {
+    level: 60,
+    inherits: [ROLES.ACCOUNTANT],
+    label: 'مشرف المالية',
+    labelEn: 'Finance Supervisor',
+  },
+  [ROLES.THERAPY_SUPERVISOR]: {
+    level: 55,
+    inherits: [ROLES.THERAPIST],
+    label: 'مشرف علاجي',
+    labelEn: 'Therapy Supervisor',
+  },
+  [ROLES.SPECIAL_ED_SUPERVISOR]: {
+    level: 55,
+    inherits: [ROLES.TEACHER],
+    label: 'مشرف التربية الخاصة',
+    labelEn: 'Special Ed Supervisor',
+  },
+
+  // — Level 4 Specialty / Program —
+  [ROLES.THERAPIST_SLP]: {
+    level: 50,
+    inherits: [ROLES.THERAPIST],
+    label: 'أخصائي نطق',
+    labelEn: 'Speech-Language Pathologist',
+  },
+  [ROLES.THERAPIST_OT]: {
+    level: 50,
+    inherits: [ROLES.THERAPIST],
+    label: 'أخصائي علاج وظيفي',
+    labelEn: 'Occupational Therapist',
+  },
+  [ROLES.THERAPIST_PT]: {
+    level: 50,
+    inherits: [ROLES.THERAPIST],
+    label: 'أخصائي علاج طبيعي',
+    labelEn: 'Physical Therapist',
+  },
+  [ROLES.THERAPIST_PSYCH]: {
+    level: 50,
+    inherits: [ROLES.THERAPIST],
+    label: 'أخصائي نفسي',
+    labelEn: 'Psychologist',
+  },
+  [ROLES.SPECIAL_ED_TEACHER]: {
+    level: 45,
+    inherits: [ROLES.TEACHER],
+    label: 'معلم تربية خاصة',
+    labelEn: 'Special Ed Teacher',
+  },
+  [ROLES.THERAPY_ASSISTANT]: {
+    level: 35,
+    inherits: [ROLES.VIEWER],
+    label: 'معالج مساعد',
+    labelEn: 'Therapy Assistant',
+  },
+
+  // — Level 5 Support —
+  [ROLES.HR_OFFICER]: {
+    level: 50,
+    inherits: [ROLES.HR],
+    label: 'موظف موارد بشرية',
+    labelEn: 'HR Officer',
+  },
+  [ROLES.DRIVER]: { level: 25, inherits: [ROLES.VIEWER], label: 'سائق', labelEn: 'Driver' },
+  [ROLES.BUS_ASSISTANT]: {
+    level: 25,
+    inherits: [ROLES.VIEWER],
+    label: 'مساعد نقل',
+    labelEn: 'Bus Assistant',
+  },
+
+  // — External —
+  [ROLES.GUARDIAN]: { level: 30, inherits: [ROLES.GUEST], label: 'ولي أمر', labelEn: 'Guardian' },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -381,6 +591,241 @@ const ROLE_PERMISSIONS = {
   },
 
   [ROLES.GUEST]: {},
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // Phase 7 — permission maps for the new roles (2026-04-22).
+  //
+  // Each entry below augments the inherited permissions from its parent
+  // in ROLE_HIERARCHY. Defense-in-depth is handled separately by
+  // branchScope middleware + ABAC policies + (Phase 7 next commit) the
+  // tenantScope mongoose plugin. This map is the RBAC source of truth
+  // for WHAT actions a role can attempt; the tenant/region filters
+  // decide on WHICH rows the action lands.
+  // ═════════════════════════════════════════════════════════════════════════
+
+  // — Level 0 HQ —
+  [ROLES.CEO]: { '*': [ACTIONS.READ, ACTIONS.APPROVE, ACTIONS.EXPORT] },
+  [ROLES.GROUP_GM]: { '*': [ACTIONS.READ, ACTIONS.APPROVE, ACTIONS.UPDATE, ACTIONS.EXPORT] },
+  [ROLES.GROUP_CFO]: {
+    [RESOURCES.FINANCE]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.INVOICES]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.PAYROLL]: [ACTIONS.READ, ACTIONS.APPROVE, ACTIONS.EXPORT],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.ANALYTICS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+  },
+  [ROLES.GROUP_CHRO]: {
+    [RESOURCES.EMPLOYEES]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.DELETE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.HR]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.DELETE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.PAYROLL]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE, ACTIONS.EXPORT],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.EXPORT],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+  },
+  [ROLES.GROUP_QUALITY_OFFICER]: {
+    [RESOURCES.QUALITY]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+    [RESOURCES.CLINICAL_ASSESSMENTS]: [ACTIONS.READ],
+    [RESOURCES.CARE_PLANS_DDD]: [ACTIONS.READ, ACTIONS.APPROVE],
+  },
+  [ROLES.COMPLIANCE_OFFICER]: {
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.DOCUMENTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.QUALITY]: [ACTIONS.READ, ACTIONS.EXPORT],
+  },
+  [ROLES.INTERNAL_AUDITOR]: {
+    '*': [ACTIONS.READ, ACTIONS.EXPORT],
+  },
+  [ROLES.IT_ADMIN]: {
+    [RESOURCES.USERS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.DELETE],
+    [RESOURCES.SETTINGS]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.DELETE,
+      ACTIONS.MANAGE,
+    ],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+  },
+
+  // — Level 1 Region —
+  [ROLES.REGIONAL_DIRECTOR]: {
+    // regional_director gets manager-level ops on everything in their
+    // region. The branch → region filter happens at the scope layer.
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.EXPORT],
+    [RESOURCES.EMPLOYEES]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.ANALYTICS]: [ACTIONS.READ, ACTIONS.EXPORT],
+    [RESOURCES.QUALITY]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.FINANCE]: [ACTIONS.READ, ACTIONS.APPROVE],
+  },
+  [ROLES.REGIONAL_QUALITY]: {
+    [RESOURCES.QUALITY]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+  },
+
+  // — Level 2 Branch —
+  [ROLES.BRANCH_MANAGER]: {
+    // inherits from MANAGER; adds approval on branch-specific workflows
+    [RESOURCES.EMPLOYEES]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.FINANCE]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.INVOICES]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.QUALITY]: [ACTIONS.READ, ACTIONS.UPDATE],
+  },
+  [ROLES.CLINICAL_DIRECTOR]: {
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.CARE_PLANS]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.DELETE,
+    ],
+    [RESOURCES.CARE_PLANS_DDD]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.DELETE,
+    ],
+    [RESOURCES.CLINICAL_ASSESSMENTS]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.DELETE,
+    ],
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.SESSIONS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+  },
+  [ROLES.QUALITY_COORDINATOR]: {
+    [RESOURCES.QUALITY]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.AUDIT_LOGS]: [ACTIONS.READ],
+    [RESOURCES.REPORTS]: [ACTIONS.READ, ACTIONS.EXPORT],
+  },
+
+  // — Level 3 Supervisors —
+  [ROLES.HR_SUPERVISOR]: {
+    [RESOURCES.EMPLOYEES]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.HR]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.READ, ACTIONS.UPDATE],
+  },
+  [ROLES.FINANCE_SUPERVISOR]: {
+    [RESOURCES.FINANCE]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+    [RESOURCES.INVOICES]: [
+      ACTIONS.CREATE,
+      ACTIONS.READ,
+      ACTIONS.UPDATE,
+      ACTIONS.APPROVE,
+      ACTIONS.EXPORT,
+    ],
+  },
+  [ROLES.THERAPY_SUPERVISOR]: {
+    [RESOURCES.CARE_PLANS]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.CARE_PLANS_DDD]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.SESSIONS]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.CLINICAL_ASSESSMENTS]: [ACTIONS.READ, ACTIONS.APPROVE],
+  },
+  [ROLES.SPECIAL_ED_SUPERVISOR]: {
+    [RESOURCES.CARE_PLANS]: [ACTIONS.READ, ACTIONS.APPROVE],
+    [RESOURCES.PROGRAMS]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE, ACTIONS.APPROVE],
+    [RESOURCES.STUDENTS]: [ACTIONS.READ, ACTIONS.UPDATE],
+  },
+
+  // — Level 4 Specialty therapists — all inherit from THERAPIST,
+  // so they get THERAPIST's base permissions automatically via the
+  // inheritance resolver. We leave their maps empty (or set
+  // specialty-specific extras when a real need emerges).
+  [ROLES.THERAPIST_SLP]: {},
+  [ROLES.THERAPIST_OT]: {},
+  [ROLES.THERAPIST_PT]: {},
+  [ROLES.THERAPIST_PSYCH]: {
+    // Psychologists get access to confidentiality-level restricted notes
+    // via ABAC policy (confidentiality-level.policy.js) — no RBAC perm
+    // needed beyond the therapist baseline.
+  },
+  [ROLES.SPECIAL_ED_TEACHER]: {
+    [RESOURCES.STUDENTS]: [ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.PROGRAMS]: [ACTIONS.READ],
+  },
+  [ROLES.THERAPY_ASSISTANT]: {
+    [RESOURCES.SESSIONS]: [ACTIONS.READ],
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.READ],
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ],
+  },
+
+  // — Level 5 Support —
+  [ROLES.HR_OFFICER]: {
+    [RESOURCES.EMPLOYEES]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.HR]: [ACTIONS.CREATE, ACTIONS.READ, ACTIONS.UPDATE],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.READ],
+  },
+  [ROLES.DRIVER]: {
+    [RESOURCES.VEHICLES]: [ACTIONS.READ],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.CREATE, ACTIONS.READ],
+  },
+  [ROLES.BUS_ASSISTANT]: {
+    [RESOURCES.VEHICLES]: [ACTIONS.READ],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.CREATE, ACTIONS.READ],
+  },
+
+  // — External (Guardian is a dedicated role so ABAC can differentiate
+  //   it from a generic PARENT for multi-guardian access rules) —
+  [ROLES.GUARDIAN]: {
+    [RESOURCES.BENEFICIARIES]: [ACTIONS.READ],
+    [RESOURCES.SESSIONS]: [ACTIONS.READ],
+    [RESOURCES.CLINICAL_SESSIONS]: [ACTIONS.READ],
+    [RESOURCES.CARE_PLANS]: [ACTIONS.READ],
+    [RESOURCES.CARE_PLANS_DDD]: [ACTIONS.READ],
+    [RESOURCES.ASSESSMENTS]: [ACTIONS.READ],
+    [RESOURCES.CLINICAL_ASSESSMENTS]: [ACTIONS.READ],
+    [RESOURCES.ATTENDANCE]: [ACTIONS.READ],
+    [RESOURCES.REPORTS]: [ACTIONS.READ],
+    [RESOURCES.NOTIFICATIONS]: [ACTIONS.READ],
+    [RESOURCES.MESSAGES]: [ACTIONS.CREATE, ACTIONS.READ],
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════════════════

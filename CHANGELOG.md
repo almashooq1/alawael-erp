@@ -5,6 +5,81 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM: regions, 22 new roles, drift invariants
+
+Foundation commit for the multi-branch IAM hardening roadmap. Sets up
+the data shapes + RBAC config + drift test that subsequent commits
+(tenantScope plugin, RecordGrant model, SoD expansions, break-glass
+workflow) will build on without reshuffling these primitives.
+
+### Added
+
+- `backend/models/Region.js` — new Region model (code, name_ar/en,
+  primaryBranchId, directorId, status). Authoritative parent for
+  region-level approvals and regional_director scope.
+- `backend/models/Branch.js` — `regionId` (ref Region, indexed).
+  Optional and non-breaking; legacy `location.region` string enum
+  stays as a display fallback.
+- `backend/models/User.js`:
+  • `regionIds: [ObjectId]` — multi-region support for regional_director
+  who may cover 2+ regions.
+  • `branchIds: [ObjectId]` — secondment / multi-branch assignment.
+  `branchId` (primary) stays backwards-compatible.
+  • `department: String` — first-class department label for ABAC
+  policies (HR ↔ Finance separation relies on it).
+  • **Role enum expanded from 19 → 46 values** (added 27 Phase-7
+  roles: ceo, group_gm, group_cfo, group_chro, group_quality_officer,
+  compliance_officer, internal_auditor, it_admin, regional_director,
+  regional_quality, branch_manager, clinical_director,
+  quality_coordinator, hr_supervisor, finance_supervisor,
+  therapy_supervisor, special_ed_supervisor, therapist_slp/ot/pt/psych,
+  special_ed_teacher, therapy_assistant, hr_officer, driver,
+  bus_assistant, guardian).
+- `backend/config/rbac.config.js`:
+  • ROLES map: 27 new entries.
+  • ROLE_HIERARCHY: 27 new entries with levels, inheritance chains,
+  Arabic + English labels.
+  • ROLE_PERMISSIONS: 27 new permission maps. Specialty therapists
+  (slp/ot/pt/psych) deliberately inherit from `therapist` without
+  extra perms — differentiation happens at the ABAC layer
+  (confidentiality-level, caseload-access policies).
+- `backend/__tests__/rbac-roles-consistency.test.js` — 8 drift
+  invariants:
+  • User.role enum ↔ ROLES map (both directions).
+  • Every role has a ROLE_HIERARCHY entry with a level in [0, 100].
+  • Every role has a ROLE_PERMISSIONS entry (even `{}` counts).
+  • Every `inherits[]` reference resolves to a known role.
+  • 27-role Phase-7 "spec lock" — explicit spelling of each required
+  role so a later refactor that drops one trips CI.
+
+### Why this order
+
+Expanding the role enum + RBAC config FIRST (without touching routes
+or middleware) means: every subsequent IAM commit can reference
+`ROLES.CLINICAL_DIRECTOR` or `regional_director` without also landing
+the config. Drift test pins the invariants so nobody breaks them in
+passing.
+
+### Out of scope for this commit (queued for Phase 7 Commits 2-10)
+
+- `tenantScope` mongoose plugin (defense-in-depth auto-filter)
+- `RecordGrant` model + PDP integration (delegation + secondment grants)
+- `regional` branchScope in branchScope.middleware.js
+- Break-glass workflow (model + UI + review dashboard)
+- Domain SoD (HR↔Finance, Clinical↔Finance, Quality independence)
+- Audit integrity hash chain
+- Expense/payroll/contract approval chains in chains.js
+- Runbook + tenancy contract doc
+
+### Tests
+
+Sprint suite: **1097 passing** (was 1089 at commit 88e1be86; +8 =
+new rbac-roles-consistency.test.js).
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+
+---
+
 ## [Unreleased] — 2026-04-21 — Parent portal: multi-child + PDF + complaints
 
 Parent-facing vertical. Parents can now switch between their children

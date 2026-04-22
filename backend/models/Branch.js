@@ -48,6 +48,17 @@ const branchSchema = new mongoose.Schema(
     name_en: { type: String, required: true },
     short_name: { type: String }, // For display in charts
 
+    // ─── Region (Phase 7) ──────────────────────────────────────────────────
+    // Authoritative parent for region-level governance. Populated either
+    // at branch creation time from the HR regional code or derived from
+    // `location.region`. Optional — legacy branches without a regionId
+    // still resolve via `location.region` as a fallback.
+    regionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Region',
+      index: true,
+    },
+
     // ─── Type & Status ─────────────────────────────────────────────────────
     type: {
       type: String,

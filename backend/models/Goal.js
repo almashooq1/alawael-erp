@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const goalSchema = new mongoose.Schema(
@@ -81,6 +80,50 @@ const goalSchema = new mongoose.Schema(
     resources: [String],
     expectedOutcome: String,
     actualOutcome: String,
+
+    // ─── SMART decomposition (Phase 9 Commit 7) ──────────────────────
+    // Optional fields — extend existing baselineValue/targetValue/unit
+    // with the metric kind, mastery rule, dosing, and back-references
+    // to the rehab-disciplines registry. All new fields are optional
+    // so legacy records stay valid; the IRP builder populates them
+    // when a goal is drafted from a registry template.
+    measurableMetric: {
+      type: String,
+      enum: ['PERCENTAGE', 'FREQUENCY', 'DURATION', 'LATENCY', 'RATE', 'RUBRIC', 'COMPOSITE'],
+    },
+    masteryCriteria: String,
+    frequencyPerWeek: {
+      type: Number,
+      min: 0,
+      max: 14,
+    },
+    promptingLevel: {
+      type: String,
+      enum: ['INDEPENDENT', 'GESTURAL', 'VERBAL', 'MODEL', 'PARTIAL_PHYSICAL', 'FULL_PHYSICAL'],
+    },
+    disciplineId: {
+      type: String,
+      // Free-form so any future registry additions work without
+      // schema migrations. Validation lives in the service layer
+      // (rehabDisciplineService.get(id) should resolve).
+      index: true,
+    },
+    templateCode: {
+      type: String,
+      // Back-reference to the goalTemplates[].code in the registry
+      // so we can trace which template seeded this goal.
+      index: true,
+    },
+    progressTrend: {
+      type: String,
+      enum: ['IMPROVING', 'STABLE', 'DECLINING', 'STALLED'],
+    },
+    lastProgressAt: Date,
+    sessionsToDate: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
 
     // Metadata
     createdAt: {

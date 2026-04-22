@@ -5,7 +5,87 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [4.0.14] — 2026-04-22 — Phase 10: Reporting & Communications Platform (release marker)
+## [4.0.15] — 2026-04-22 — Phase 10 completion (C7a–h real builders + C10 aliases layer)
+
+Closes the two items 4.0.14 had explicitly deferred: C7 (real
+builders) and the aliases layer. After 4.0.15, Phase 10 is feature-
+complete at the backend: **0 builder stubs**, **drift budget reduced
+from 22 → 6** (73% reduction), **753 tests across 52 suites** (up
+from 565 / 37 at 4.0.14). The only remaining deferred item is C5
+(the Next.js UI), which consumes data already available via events +
+REST.
+
+### Commit ledger (delta from 4.0.14)
+
+| #   | SHA        | Summary                                                                                              |
+| --- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| 7a  | `004631b7` | attendanceReportBuilder real + shared periodKey helper                                               |
+| 7b  | `221a5a17` | sessionReportBuilder real — establishes aggregation template                                         |
+| 7c  | `a626f579` | therapistReportBuilder real — productivity + caseload                                                |
+| 7d  | `4619a9ae` | branchReportBuilder + fleetReportBuilder real                                                        |
+| 7e  | `c0d4a49a` | qualityReportBuilder real — 4 builders (incidents + CBAHI + red-flags)                               |
+| 7f  | `551a2b13` | financeReportBuilder real — 4 builders (claims + collections + revenue + aging)                      |
+| 7g  | `d8266678` | hrReportBuilder + crmReportBuilder real — 5 builders                                                 |
+| 7h  | `350cc8d2` | kpiReportBuilder + executiveReportBuilder real + kpiAggregator — **C7 CLOSED** (22/22 real builders) |
+| 10  | `16f475ca` | kpi.aliases + rbac.aliases layer — drift budget 22 → 6 (73% reduction)                               |
+| 11  | (this)     | Phase 10 runbook + CHANGELOG 4.0.15 entry + revised release marker                                   |
+
+### Added — C7 real builders (22 builder functions + 1 aggregator + 1 period-key helper)
+
+- `backend/services/reporting/builders/periodKey.js` — shared date-range resolver for all 6 catalog cadences. ISO-8601-accurate week parsing including the Jan-4 rule for week 01.
+- `attendanceReportBuilder.js` (C7a) — beneficiary attendance adherence with 5-point trend detection vs prior period; cancelled sessions intentionally excluded from the rate denominator.
+- `sessionReportBuilder.js` (C7b) — TherapySession rollup + completion/cancellation/no-show rates + byType distribution. Establishes the aggregation template cloned by branch + fleet + therapist builders.
+- `therapistReportBuilder.js` (C7c) — productivity (per-therapist session counts + completion rate, sorted by completed desc) + caseload (unique beneficiary distribution + avgSessionsPerBeneficiary).
+- `branchReportBuilder.js` (C7d) — occupancy = actual sessions / (Branch.capacity.max_daily_sessions × days).
+- `fleetReportBuilder.js` (C7d) — Trip-model rollup with Arabic status enum; completion-rate serves as the on-time-rate proxy pending a scheduled/actual arrival schema migration.
+- `qualityReportBuilder.js` (C7e) — four builders over Incident + RedFlagState: weekly digest, monthly pack (RCA completion + overdue actions + top-10 by severity), CBAHI evidence (MoH reporting rate on catastrophic+major incidents), daily red-flags digest with canonical severity ordering.
+- `financeReportBuilder.js` (C7f) — four Invoice-model builders: claims (approval/denial rates over decided set — PENDING excluded), collections (confidential; PARTIALLY_PAID intentionally contributes to BOTH collected and outstanding), revenue (confidential; prior-period growth rate), aging (point-in-time snapshot bucketed 0-30 / 31-60 / 61-90 / 91+).
+- `hrReportBuilder.js` (C7g) — three builders: turnover (voluntary + involuntary rates against avg headcount), attendance adherence (PRESENT set: present+late+half_day+remote; leave+holiday are neutral), CPE compliance against SCFHS 25-hour rolling 12-month target (overridable via `ctx.cpeTargetHours`).
+- `crmReportBuilder.js` (C7g) — parent engagement proxied via the existing ReportDelivery ledger (recipientRole='guardian'), complaints digest by 7-state lifecycle + priority + category + avg resolution time.
+- `kpiAggregator.js` (C7h) — resolves kpi.registry entries to `{value, status}` via injectable valueResolver + classify(). Dot-path walker for `dataSource.path`; JMESPath-style expressions fall back to null so operators plug in a richer resolver when needed.
+- `kpiReportBuilder.js` (C7h) — three KPI packs on the aggregator: daily exec digest (hourly + daily KPIs), quarterly board pack (byDomain + byCompliance breakdowns), monthly branch-scoped KPI pack.
+- `executiveReportBuilder.js` (C7h) — two composite builders using a `pickBuilder(ctx, module, fn, fallback)` injection hook: semi-annual programs review (rehab KPIs + CBAHI + care-plan reviews), annual report (5 nested sections — KPI board pack + quality + finance + hr + programs). One section failing doesn't sink the others; every sub-call goes through the real downstream builder so fixes propagate automatically.
+
+### Added — C10 aliases layer
+
+- `backend/config/kpi.aliases.js` — 16 catalog KPI ids, 11 mapped to canonical `kpi.registry` ids (e.g. `rehab.goal.mastery_rate` → `rehab.goals.achievement_rate.pct`), 5 `null` for genuine registry gaps (`finance.invoices.aging_ratio`, `hr.attendance.adherence`, `hr.turnover.voluntary_rate`, `multi-branch.fleet.punctuality`, `quality.cbahi.evidence.completeness`). Helpers: `resolveKpiId`, `gapAliases`, `aliasKeys`.
+- `backend/config/rbac.aliases.js` — 6 role aliases, 5 scalar (cfo→group_cfo, finance_manager→finance_supervisor, medical_director→clinical_director, quality_manager→quality_coordinator, therapist_lead→therapy_supervisor) + 1 group (executive → [ceo, group_gm, group_cfo, group_chro]). Helpers: `resolveRole({expand?})`, `resolveRoles`, `isGroup`, `unresolvedAliases`.
+- `services/reporting/recipientResolver.js` now consults rbac.aliases via `_defaultRoleMap()` — the `executive`/`quality`/`finance`/`hr` audiences resolve to **real rbac values present in User documents**. Pre-C10 they searched for `cfo`/`coo`/`cmo` literals that never matched anything in `rbac.config.ROLES`.
+
+### Changed
+
+- `backend/services/reporting/builderRegistry.js` — REAL_BUILDERS set extended with 22 entries, now holds every catalog-referenced builder path. Every `stubBuilder(...)` call deleted. `isStub()` returns `false` for every entry in the catalog.
+- `backend/__tests__/report-catalog-drift.test.js` — drift budget counters:
+  - KPI alias allowlist 16 → gaps 5 (`<= 5` budget cap)
+  - Role alias allowlist 6 → gaps 1 (`<= 1` budget cap; only the `executive` group remains)
+  - New invariants: every kpi alias maps to a real registry id OR is a known gap; every rbac alias (scalar or group) resolves to real rbac values.
+- `docs/PHASE_10_REPORTING_RUNBOOK.md` — 4.0.15 sign-off section, full C1–C11 commit ledger (incl. C7a–h + C10), partial-rollback commands, revised limitations list.
+
+### Test coverage
+
+- **4.0.14 baseline**: 565 tests / 37 suites (C1–C9)
+- **4.0.15 delta**: +188 tests / +15 suites
+- **4.0.15 total**: **753 tests / 52 suites, all green**.
+
+Per-milestone test additions (new only):
+C7a +26 · C7b +17 · C7c +12 · C7d +24 · C7e +24 · C7f +22 · C7g +22 · C7h +30 · C10 +33 · C11 +0 (docs).
+
+### What 4.0.15 unblocks
+
+- Scheduled reports now carry **real aggregated numbers**. When `reporting.start()` is invoked at app boot, cron fires all 30 report types with live data from Invoice, TherapySession, SessionAttendance, HR/Employee, CpeRecord, Complaint, Incident, Trip, Branch, and the KPI registry.
+- `executive`/`quality`/`finance`/`hr` audience dispatch now actually finds matching users (was silently zero pre-C10).
+- Future "add missing KPI" commits are one-liners: flip an alias value in `config/kpi.aliases.js` from `null` → new canonical id. The `gapAliases()` test catches regressions instantly.
+
+### Known limitations carried forward (from 4.0.15)
+
+- Next.js Ops dashboard + Parent portal inbox UI (C5) — data and REST endpoints are live; UI is scoped for a future phase.
+- 5 KPI-registry gaps (listed in `config/kpi.aliases.js`) — each closeable in a one-line commit once the matching registry entry is added.
+- Rate limiter wired on the platform but not yet enforced inside `engine._dispatch()` — opt-in integration follow-up.
+- Provider signature verifiers, artifact store, and URL signer are interfaces — production operator wires concrete adapters at boot.
+
+---
+
+## [4.0.14] — 2026-04-22 — Phase 10: Reporting & Communications Platform (initial release marker)
 
 Closes Phase 10. A complete periodic & on-demand reporting engine built
 on top of the existing `kpi.registry`, `red-flags.registry`,

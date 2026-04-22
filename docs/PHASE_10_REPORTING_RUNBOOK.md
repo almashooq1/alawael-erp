@@ -1,7 +1,12 @@
 # Phase 10 — Reporting & Communications Platform Runbook
 
-**Release marker:** 4.0.14 — Phase 10 C1–C9 (2026-04-22)
-**Scope:** periodic & on-demand reporting engine + 6-channel delivery + approval workflow + delivery ledger + provider webhooks + portal inbox + retry / escalation / retention + renderer (HTML + PDF, ar/en) + drift guards.
+**Release marker:** 4.0.15 — Phase 10 C1–C9 + C7a–h + C10 (2026-04-22)
+**Scope:** periodic & on-demand reporting engine + 6-channel delivery + approval workflow + delivery ledger + provider webhooks + portal inbox + retry / escalation / retention + renderer (HTML + PDF, ar/en) + drift guards + **22 real builders across 11 modules** + **kpi + rbac aliases layer**.
+
+**Update history:**
+
+- 4.0.14 (2026-04-22, C9): closed C1–C9 with 565 tests; C5 UI + C7 real builders + aliases layer deferred.
+- **4.0.15 (this update):** C7a–h land all 22 real builders (kpiAggregator + 5 more builder modules); C10 introduces kpi.aliases + rbac.aliases reducing drift from 22 → 6. 753 tests across 52 suites. Only C5 (Next.js UI) and 5 documented KPI-registry gaps remain as deferred work.
 
 ---
 
@@ -9,23 +14,24 @@
 
 Mapped against the 6 requirements from the original design brief.
 
-| #   | Requirement (from the brief)                                                                                                            | Delivered in                                                                                        |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| 1   | **Report types** (daily / weekly / monthly / quarterly / semi-annual / annual / on-demand)                                              | C1                                                                                                  |
-| 2   | **Report levels** (beneficiary / guardian / therapist / supervisor / branch-mgr / executive / quality / finance / HR — 9 audiences)     | C1 + C2                                                                                             |
-| 3   | **Delivery channels** (email / SMS / WhatsApp / in-app / PDF / portal — 6 adapters)                                                     | C2                                                                                                  |
-| 4a  | **Report templates engine** (30 catalog entries, 6 real templates, ar/en i18n)                                                          | C1 + C3                                                                                             |
-| 4b  | **Scheduling engine** (7 cadences bound to node-cron, per-report fan-out, re-entrance guard)                                            | C1                                                                                                  |
-| 4c  | **Approval workflow before sending** (state machine, payload-hash drift detection, TTL)                                                 | C1                                                                                                  |
-| 4d  | **Delivery status tracking** (per-recipient × channel ledger with 8-state machine)                                                      | C1                                                                                                  |
-| 4e  | **Read receipts** (provider webhooks + portal inbox + access log)                                                                       | C4                                                                                                  |
-| 4f  | **Escalation on failed delivery** (retry-exhausted + SLA-breach → in-app alert to escalateTo role)                                      | C6                                                                                                  |
-| 4g  | **Multi-language reporting** (ar/en per-recipient locale pick; RTL shell, Arabic-capable fonts, Arabic-Indic digit support)             | C3                                                                                                  |
-| 4h  | **Confidentiality controls** (4 classes; restricted + confidential refuse SMS/WhatsApp; confidential watermark; accessLog)              | C1 + C3                                                                                             |
-| 5   | **Dashboards & KPIs & drill-downs**                                                                                                     | architecture spec §7–§8 (UI in C5 — deferred)                                                       |
-| 6   | **Specific reports** (progress / attendance / goals / productivity / occupancy / engagement / incidents / claims / HR turnover / fleet) | catalog entries in C1; real templates for rehab 6, stubs + generic fallback for the rest pending C7 |
+| #   | Requirement (from the brief)                                                                                                            | Delivered in                                                                                                                            |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Report types** (daily / weekly / monthly / quarterly / semi-annual / annual / on-demand)                                              | C1                                                                                                                                      |
+| 2   | **Report levels** (beneficiary / guardian / therapist / supervisor / branch-mgr / executive / quality / finance / HR — 9 audiences)     | C1 + C2                                                                                                                                 |
+| 3   | **Delivery channels** (email / SMS / WhatsApp / in-app / PDF / portal — 6 adapters)                                                     | C2                                                                                                                                      |
+| 4a  | **Report templates engine** (30 catalog entries, 6 real templates, ar/en i18n)                                                          | C1 + C3                                                                                                                                 |
+| 4b  | **Scheduling engine** (7 cadences bound to node-cron, per-report fan-out, re-entrance guard)                                            | C1                                                                                                                                      |
+| 4c  | **Approval workflow before sending** (state machine, payload-hash drift detection, TTL)                                                 | C1                                                                                                                                      |
+| 4d  | **Delivery status tracking** (per-recipient × channel ledger with 8-state machine)                                                      | C1                                                                                                                                      |
+| 4e  | **Read receipts** (provider webhooks + portal inbox + access log)                                                                       | C4                                                                                                                                      |
+| 4f  | **Escalation on failed delivery** (retry-exhausted + SLA-breach → in-app alert to escalateTo role)                                      | C6                                                                                                                                      |
+| 4g  | **Multi-language reporting** (ar/en per-recipient locale pick; RTL shell, Arabic-capable fonts, Arabic-Indic digit support)             | C3                                                                                                                                      |
+| 4h  | **Confidentiality controls** (4 classes; restricted + confidential refuse SMS/WhatsApp; confidential watermark; accessLog)              | C1 + C3                                                                                                                                 |
+| 5   | **Dashboards & KPIs & drill-downs**                                                                                                     | architecture spec §7–§8 (UI in C5 — still deferred; data/events live)                                                                   |
+| 6   | **Specific reports** (progress / attendance / goals / productivity / occupancy / engagement / incidents / claims / HR turnover / fleet) | **C7a–h: 22/22 real builders live** (attendance, session, therapist×2, branch, fleet, quality×4, finance×4, hr×3, crm×2, kpi×3, exec×2) |
+| —   | **Drift reduction**                                                                                                                     | **C10: kpi.aliases + rbac.aliases** bring drift budget from 22 → 6 (73% reduction)                                                      |
 
-All 6 core requirement buckets are satisfied end-to-end at the backend. The one bucket that's not yet surfaced (UI dashboards) has its data emitted as events + available via routes — a future Next.js commit consumes it.
+All 6 core requirement buckets are satisfied end-to-end at the backend. The only deferred piece is the Next.js UI (C5); the data and REST endpoints are live. As of 4.0.15, every catalog-named builder returns real aggregated data — no stubs remain.
 
 ---
 
@@ -39,11 +45,25 @@ All 6 core requirement buckets are satisfied end-to-end at the backend. The one 
 | 4   | `54e7f327`   | Provider webhooks (SendGrid / Mailgun / Twilio / WhatsApp / portal) + portal inbox routes (list / view / seen / download)                                |
 | 5   | _(deferred)_ | Reporting Ops dashboard + Parent portal UI (Next.js — scope for a future phase)                                                                          |
 | 6   | `63583bd6`   | Retry (0.5/5/30/120 min backoff) + Escalation (retry-exhausted + SLA-breach) + Retention (per-catalog) + RateLimiter + ReportsOpsScheduler (3 cron jobs) |
-| 7   | _(deferred)_ | Replace the 11 builder stubs with real builders (attendance / therapist / branch / fleet / finance / hr / crm / quality / exec)                          |
 | 8   | `d5a37335`   | Cross-registry drift tests — catalog ↔ kpi ↔ rbac ↔ builders ↔ templates ↔ model enums ↔ cron (16 tests, 2-tier enforcement)                       |
-| 9   | _(this)_     | Phase 10 runbook + CHANGELOG 4.0.14 entry + release marker                                                                                               |
+| 9   | `e95f7f75`   | Phase 10 runbook + CHANGELOG 4.0.14 entry + first release marker                                                                                         |
+| 7a  | `004631b7`   | attendanceReportBuilder real (+ shared periodKey helper; 26 tests)                                                                                       |
+| 7b  | `221a5a17`   | sessionReportBuilder real (aggregation template for branch/fleet/therapist; 17 tests)                                                                    |
+| 7c  | `a626f579`   | therapistReportBuilder real (productivity + caseload; 12 tests)                                                                                          |
+| 7d  | `4619a9ae`   | branchReportBuilder + fleetReportBuilder real (branch occupancy via Branch.capacity; fleet completion rate via Trip; 24 tests)                           |
+| 7e  | `c0d4a49a`   | qualityReportBuilder real — 4 builders (incidents weekly/monthly + CBAHI quarterly + red-flags daily; 24 tests)                                          |
+| 7f  | `551a2b13`   | financeReportBuilder real — 4 builders (claims + collections + revenue + aging; PARTIALLY_PAID intentionally overlaps collected+outstanding; 22 tests)   |
+| 7g  | `d8266678`   | hrReportBuilder + crmReportBuilder real — 5 builders (turnover + HR attendance + CPE compliance + parent engagement + complaints digest; 22 tests)       |
+| 7h  | `350cc8d2`   | **kpiReportBuilder + executiveReportBuilder real — CLOSES C7** (5 builders + kpiAggregator; composite exec builders; 30 tests)                           |
+| 10  | `16f475ca`   | kpi.aliases + rbac.aliases layer — 73% drift reduction (33 tests, drift budget 22 → 6)                                                                   |
+| 11  | _(this)_     | Runbook + CHANGELOG 4.0.15 entry + revised release marker                                                                                                |
 
-**Test coverage:** 565 tests across 37 reporting-platform suites, all green at C8.
+**Test coverage:** 753 tests across 52 reporting-platform suites — all green at 4.0.15. Progressive coverage by milestone:
+
+- 4.0.14 (C1–C9): 565 tests / 37 suites
+- C7a–h (real builders rollout): +177 tests / +10 suites
+- C10 (aliases layer): +33 tests / +2 suites
+- Total delta 4.0.14 → 4.0.15: **+188 tests / +15 suites**.
 
 ---
 
@@ -245,20 +265,30 @@ No schema changes to existing models. No data migration required in either direc
 To roll back Phase 10 entirely:
 
 ```bash
-git revert --no-commit d5a37335 63583bd6 54e7f327 c53c124f f6dd040c 16373db2
+# 4.0.15 rollback — revert newest first
+git revert --no-commit 16f475ca         # C10 aliases layer
+git revert --no-commit 350cc8d2 d8266678 551a2b13 c0d4a49a 4619a9ae a626f579 221a5a17 004631b7  # C7h→C7a
+# 4.0.14 base rollback
+git revert --no-commit e95f7f75 d5a37335 63583bd6 54e7f327 c53c124f f6dd040c 16373db2
 # then drop the two new collections:
 #   db.report_deliveries.drop(); db.report_approval_requests.drop();
 ```
 
+Partial rollbacks are safe:
+
+- Reverting C10 only: drops kpi.aliases + rbac.aliases. The drift tests' budget counters flip back but the 22 real builders still work. Engine dispatch to `executive`/`quality`/`finance` audiences will then hit the pre-C10 legacy role literals — functional but matches fewer users in rbac.
+- Reverting C7a–h only: stubs return, catalog + engine + scheduler + ops all still function (stubs produce well-formed JSON skeletons). No data loss.
+
 ---
 
-## 6. Known limitations carried forward
+## 6. Known limitations carried forward (as of 4.0.15)
 
 - **UI pages not landed** — Reporting Ops dashboard + Parent portal inbox are scoped for a future phase. Events + REST endpoints are live; Next.js pages consume them in C5.
-- **11 builder stubs still in place** — `attendanceReportBuilder`, `therapistReportBuilder`, `sessionReportBuilder`, `branchReportBuilder`, `fleetReportBuilder`, `kpiReportBuilder`, `executiveReportBuilder`, `qualityReportBuilder`, `financeReportBuilder`, `hrReportBuilder`, `crmReportBuilder` return well-formed skeletons only. C7 swaps them for real data-fetching builders.
-- **16 catalog KPI aliases + 6 role aliases** — catalog references ids that live outside `kpi.registry.js` / `rbac.config.js`. Locked in by drift tests; `rbac.aliases.js` + `kpi.aliases.js` mapping layer planned for C7/C9.
+- **5 KPI-registry gaps** — the catalog still references 5 KPI ids that don't yet exist in `config/kpi.registry.js` (marked `null` in `config/kpi.aliases.js`):
+  `finance.invoices.aging_ratio`, `hr.attendance.adherence`, `hr.turnover.voluntary_rate`, `multi-branch.fleet.punctuality`, `quality.cbahi.evidence.completeness`. Each can be closed by one commit that adds the matching entry to `kpi.registry.js` and flips the alias value from `null` to the new canonical id — the `gapAliases()` test catches it immediately.
+- **1 role group (`executive`) expands to multiple rbac roles** — this is correct, not a gap. The engine's recipientResolver handles the expansion via `ROLE_GROUPS.executive = [ceo, group_gm, group_cfo, group_chro]`.
 - **Provider signature verifiers not wired in app.js** — the webhook router supports them; production boot must supply SendGrid / Twilio / WhatsApp verifier functions.
-- **Rate limiter is wired but not yet enforced in engine dispatch** — exposed on the platform; opt-in engine integration in a C6-follow-up.
+- **Rate limiter is wired but not yet enforced in engine dispatch** — exposed on the platform; opt-in engine integration in a follow-up.
 - **Artifact store + URL signer are interfaces, not implementations** — `portal_inbox` and `pdf_download` channels + inbox download endpoint need the operator to supply `{store(payload) → {uri,id}}` and `{sign({uri,ttlSeconds,...}) → {url,expiresAt}}` adapters. S3 + CloudFront is the expected production combo.
 
 ---
@@ -283,6 +313,17 @@ The platform emits these events. Ops dashboards and analytics pipes subscribe as
 ---
 
 ## 8. Sign-off
+
+### 4.0.15 (current)
+
+- Architecture: 6 requirement buckets end-to-end at the backend; 22/22 catalog builders real; aliases layer closes the drift gap ✓
+- Tests: **753 passing across 52 reporting-platform suites** ✓
+- Cross-registry drift: **6 residual gaps** — 5 KPI-registry extensions (documented in `config/kpi.aliases.js`) + 1 role group (`executive`). Down 73% from the 22 locked in at 4.0.14 ✓
+- Every catalog-named builder returns real aggregated data. Stub count: **0** ✓
+- Backwards compatibility: no schema or API breakage; two new collections (report_deliveries, report_approval_requests), five new routes, all additive ✓
+- Release marker: **4.0.15**
+
+### 4.0.14 (previous)
 
 - Architecture: 6 requirement buckets end-to-end; 5 committed + 1 (UI) scoped out with an explicit path ✓
 - Tests: 565 passing across 37 reporting-platform suites ✓

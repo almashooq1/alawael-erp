@@ -83,8 +83,35 @@ function resolveRole(role) {
 /**
  * Roles that can access data across all branches.
  * Used by branchScope.middleware.js and multi-tenant-isolator.js.
+ *
+ * Phase 7 update (2026-04-22): added the HQ-level roles (ceo,
+ * group_gm, group_cfo, group_chro, group_quality_officer,
+ * compliance_officer, internal_auditor, it_admin) that should
+ * see all branches. Regional roles (regional_director,
+ * regional_quality) are handled separately by branchScope
+ * middleware's region-filter path — they see ONLY branches in
+ * `user.regionIds[]`, not all branches.
  */
-const CROSS_BRANCH_ROLES = [ROLES.SUPER_ADMIN, ROLES.HEAD_OFFICE_ADMIN, ROLES.ADMIN];
+const CROSS_BRANCH_ROLES = [
+  'super_admin',
+  'head_office_admin',
+  'admin',
+  'ceo',
+  'group_gm',
+  'group_cfo',
+  'group_chro',
+  'group_quality_officer',
+  'compliance_officer',
+  'internal_auditor',
+  'it_admin',
+];
+
+/**
+ * Region-scoped roles — see branches in their region(s) only.
+ * branchScope middleware resolves these against Branch.regionId to
+ * build an $in filter.
+ */
+const REGION_SCOPED_ROLES = ['regional_director', 'regional_quality'];
 
 /**
  * Roles that bypass tenant isolation entirely.
@@ -161,6 +188,7 @@ module.exports = {
   ROLE_ALIASES,
   resolveRole,
   CROSS_BRANCH_ROLES,
+  REGION_SCOPED_ROLES,
   TENANT_BYPASS_ROLES,
   ROLE_LEVELS,
   levelOf,

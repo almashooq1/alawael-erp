@@ -5,6 +5,65 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 4: regional branchScope
+
+Third Phase-7 commit. Wires the region-scoped roles
+(`regional_director`, `regional_quality`) added in Commit 1 into the
+existing branchScope middleware so they get an authoritative
+"branches in my region(s)" filter rather than either nothing
+(restricted to a single branch they don't have) or everything.
+
+### Added
+
+- `config/constants/roles.constants.js`:
+  • `CROSS_BRANCH_ROLES` expanded to 11 entries (added: ceo,
+  group_gm, group_cfo, group_chro, group_quality_officer,
+  compliance_officer, internal_auditor, it_admin) so HQ-level
+  roles automatically see all branches without needing
+  per-route gates.
+  • `REGION_SCOPED_ROLES` — new export listing the two regional
+  roles. Used by branchScope middleware to take the regional
+  code path.
+- `middleware/branchScope.middleware.js`:
+  • Regional-role branch: when a user has a region-scoped role,
+  sets `req.branchScope = { restricted: true, regional: true,
+  regionIds, allBranches: false }`. If `regionIds` is empty,
+  rejects with 403 (config error — a regional_director must
+  have at least one region assigned).
+  • `branchFilter()` now emits a sentinel
+  `{ __pending_region_expand__: regionIds }` for regional scope
+  so callers don't accidentally use a null branchId in their
+  Mongo query.
+  • `resolveRegionalBranchFilter()` — async helper that resolves
+  `regionIds[]` to `{ branchId: { $in: [...branches in regions] } }`
+  via the Branch collection. Result is cached on
+  `req.branchScope._resolvedBranchIds` so repeated calls within
+  the same request are free.
+
+### Tests
+
+- `__tests__/branch-scope-region.test.js` — 23 unit tests:
+  • 11 cross-branch roles all map to `allBranches: true`
+  • 2 region-scoped roles with valid regionIds → regional scope
+  • 2 region-scoped roles with empty regionIds → 403
+  • therapist with branchId → restricted; cross-branch query → 403
+  • branchFilter() emits expected shapes for all 3 scope variants
+  • resolveRegionalBranchFilter() caches and expands correctly
+
+### Out of scope
+
+- Wiring `resolveRegionalBranchFilter` into individual admin routes
+  is incremental — each route owner picks it up when they touch
+  that handler. The branchFilter() sentinel forces a hard error if
+  someone accidentally hands the regional pre-expand result to
+  Mongo, so failure mode is loud, not silent.
+
+### Tests
+
+Sprint suite: **1137 passing** (was 1114; +23 region tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 2: tenantScope plugin
 
 Second foundation commit for the multi-branch IAM hardening roadmap.

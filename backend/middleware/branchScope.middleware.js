@@ -14,7 +14,11 @@
 'use strict';
 
 const logger = require('../utils/logger');
-const { CROSS_BRANCH_ROLES, resolveRole } = require('../config/constants/roles.constants');
+const {
+  CROSS_BRANCH_ROLES,
+  REGION_SCOPED_ROLES,
+  resolveRole,
+} = require('../config/constants/roles.constants');
 const { TENANT_FIELD } = require('../config/constants/tenant.constants');
 
 /**
@@ -33,6 +37,34 @@ const requireBranchAccess = (req, res, next) => {
   // المستخدمون ذوو الصلاحية العامة يستطيعون الوصول لكل الفروع
   if (CROSS_BRANCH_ROLES.includes(role)) {
     req.branchScope = { restricted: false, branchId: null, allBranches: true };
+    return next();
+  }
+
+  // Phase 7 — region-scoped roles see every branch in their
+  // regionIds[]. The tenantScope plugin / consumers that read
+  // `req.branchScope.regionIds` can expand to a branch $in via a
+  // separate helper (resolveRegionBranches below). Without regionIds,
+  // the user has no valid scope — deny (fall through to the no-branch
+  // warning path is NOT safe for a regional role).
+  if (REGION_SCOPED_ROLES.includes(role)) {
+    const regionIds = req.user.regionIds || [];
+    if (regionIds.length === 0) {
+      logger.warn(
+        `[BranchScope] Region-scoped user ${req.user.id || req.user._id} role=${role} ` +
+          'has no regionIds — denying (config error).'
+      );
+      return res.status(403).json({
+        success: false,
+        message: 'غير مسموح — دورك يتطلب تخصيص منطقة لم يتم تعيينها بعد',
+      });
+    }
+    req.branchScope = {
+      restricted: true,
+      regional: true,
+      branchId: null,
+      regionIds,
+      allBranches: false,
+    };
     return next();
   }
 
@@ -69,17 +101,57 @@ const requireBranchAccess = (req, res, next) => {
 
 /**
  * branchFilter(req)
- * دالة مساعدة تُعيد فلتر MongoDB المناسب للفرع
+ * Returns a synchronous MongoDB filter appropriate for the user's
+ * scope.
  *
- * @param {Request} req - كائن الطلب (بعد تطبيق requireBranchAccess)
- * @returns {Object} فلتر MongoDB: {} أو { branchId } أو { branch }
+ *   • Unrestricted / allBranches  → {}
+ *   • Single-branch restricted    → { branchId: <user's branch> }
+ *   • Regional (Phase 7)          → emits `{ __pending_region_expand__:
+ *     regionIds }` which the caller must resolve via
+ *     `resolveRegionalBranchFilter(req)` below. Using a marker rather
+ *     than a real $in keeps branchFilter synchronous; routes that
+ *     serve region-scoped roles MUST await the async variant.
  */
 const branchFilter = req => {
-  if (!req.branchScope || req.branchScope.allBranches) {
-    return {}; // بدون قيود — كل الفروع
+  if (!req.branchScope || req.branchScope.allBranches) return {};
+  if (req.branchScope.regional) {
+    return { __pending_region_expand__: req.branchScope.regionIds };
   }
-  // استخدام الحقل الموحد branchId فقط (بعد توحيد النماذج)
   return { [TENANT_FIELD]: req.branchScope.branchId };
+};
+
+/**
+ * resolveRegionalBranchFilter(req) — async variant that actually
+ * resolves regionIds[] to the list of Branch._id in those regions.
+ * Caches the result on `req.branchScope._resolvedBranchIds` so
+ * repeated calls inside the same request don't re-query Branches.
+ *
+ * For non-regional users, behaves identically to branchFilter().
+ */
+const resolveRegionalBranchFilter = async req => {
+  if (!req.branchScope || req.branchScope.allBranches) return {};
+  if (!req.branchScope.regional) {
+    return { [TENANT_FIELD]: req.branchScope.branchId };
+  }
+
+  if (!req.branchScope._resolvedBranchIds) {
+    try {
+      // Lazy-require Branch to avoid circular-import risk at middleware
+      // load time.
+      const Branch = require('../models/Branch');
+      const branches = await Branch.find({
+        regionId: { $in: req.branchScope.regionIds },
+      })
+        .select('_id')
+        .lean();
+      req.branchScope._resolvedBranchIds = branches.map(b => b._id);
+    } catch (err) {
+      logger.error('[BranchScope] resolveRegionalBranchFilter failed:', err.message);
+      req.branchScope._resolvedBranchIds = [];
+    }
+  }
+
+  return { [TENANT_FIELD]: { $in: req.branchScope._resolvedBranchIds } };
 };
 
 /**
@@ -140,8 +212,10 @@ const validateBranchExists = async (req, res, next) => {
 module.exports = {
   requireBranchAccess,
   branchFilter,
+  resolveRegionalBranchFilter,
   branchId,
   injectBranchToBody,
   validateBranchExists,
   CROSS_BRANCH_ROLES,
+  REGION_SCOPED_ROLES,
 };

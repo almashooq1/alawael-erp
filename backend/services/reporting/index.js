@@ -117,6 +117,7 @@ function buildReportingPlatform(deps = {}) {
     renderer,
     eventBus,
     logger,
+    valueResolver: kpiValueResolver,
   });
 
   const scheduler = new ReportsScheduler({

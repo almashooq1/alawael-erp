@@ -93,6 +93,12 @@ class ReportingEngine {
     eventBus,
     logger = console,
     clock,
+    // P10-C15 — reporting-backed KPI resolver auto-injected into
+    // every builder's ctx under `ctx.valueResolver` so the three KPI
+    // builders + two executive composites produce live values out of
+    // the box. Callers can still override per-run by passing their
+    // own `input.builderCtx.valueResolver`.
+    valueResolver,
   }) {
     if (!catalog) throw new Error('ReportingEngine: catalog required');
     if (!DeliveryModel) throw new Error('ReportingEngine: DeliveryModel required');
@@ -117,6 +123,7 @@ class ReportingEngine {
     this.eventBus = eventBus || { emit: () => {} };
     this.logger = logger;
     this.clock = clock || { now: () => new Date() };
+    this.valueResolver = typeof valueResolver === 'function' ? valueResolver : null;
   }
 
   // ─── Public API ────────────────────────────────────────────────
@@ -177,11 +184,21 @@ class ReportingEngine {
           errors: [`builder ${report.builder} not registered`],
         };
       }
+      // Auto-inject the engine's valueResolver into ctx when the
+      // caller didn't supply one — KPI builders rely on
+      // `ctx.valueResolver` to turn kpi.registry entries into live
+      // values via the reporting-backed resolver (C13). Non-KPI
+      // builders simply ignore the extra field.
+      const callerCtx = input.builderCtx || {};
+      const mergedCtx =
+        callerCtx.valueResolver || !this.valueResolver
+          ? callerCtx
+          : { ...callerCtx, valueResolver: this.valueResolver };
       doc = await builderFn({
         report,
         periodKey: input.periodKey,
         scopeKey: input.scopeKey,
-        ctx: input.builderCtx || {},
+        ctx: mergedCtx,
       });
     } catch (err) {
       return {

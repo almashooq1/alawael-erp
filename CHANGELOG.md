@@ -5,6 +5,74 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.12] — 2026-04-22 — Phase 7 IAM hardening (release marker)
+
+Release marker for the Phase-7 IAM slice. All ten commits below
+(Commit 1 through Commit 10) are atomic, green at every point, and
+together constitute the 4.0.12 patch release.
+
+### Summary
+
+| #   | SHA      | Slice                                           |
+| --- | -------- | ----------------------------------------------- |
+| 1   | a2936c4c | Regions + 27 new roles + drift invariants       |
+| 2   | 026f42d0 | tenantScope plugin + requestContext             |
+| 3   | dbab4b91 | RecordGrant model + domain-sod ABAC policy      |
+| 4   | 64772039 | Regional branchScope (11 cross-branch roles)    |
+| 5   | dba7a21b | Break-glass review digest (5-bucket classifier) |
+| 6   | e192813b | Domain SoD rules (7 families)                   |
+| 7   | ca61b882 | Tamper-evident audit hash chain (SHA-256)       |
+| 8   | 4d115934 | Approval chains (expense/payroll/care plan)     |
+| 9   | 5373d58a | UserBranchRole (secondment persistence)         |
+| 10  | c3744449 | Architecture runbook + matrix CSV export        |
+
+### What 4.0.12 means operationally
+
+- **Authorization stack** went from RBAC-only to a 6-layer model:
+  RBAC → tenant-scope (auto-filter) → branch-scope (regional HQ
+  inheritance) → domain SoD (7 rule families) → approval chain (14
+  chains incl. expense bands + payroll dual sign-off + care plan
+  branching) → ABAC + record grants → audit hash chain.
+- **46 canonical roles** now span 6 levels (HQ / Region / Branch /
+  Dept / Specialty / Support) with a per-role hierarchy level and
+  drift-test guarantees.
+- **Audit integrity**: every AuditLog is now SHA-256-chained at
+  write time; `audit-chain-verify` CLI detects tampering.
+- **Operational digests** added for break-glass review, approval
+  escalation, and audit chain verify — all cron-friendly with
+  exit 0/1/2 and `--json`/`--quiet` flags.
+- **Auditor artifacts**: `docs/runbooks/phase-7-iam.md` (single
+  architecture reference) and `scripts/rbac-export-matrix.js` (CSV
+  export: 1825 role × resource × action rows across 46 roles).
+
+### Tests
+
+Sprint suite: **1298 passing** (was 1097 at the start of Phase 7;
++201 net). Suite growth breakdown: 15 → 17 → 9 → 23 → 15 → 51 → 20 →
+35 → 15 → 16.
+
+### Compliance mapping
+
+- **CBAHI 4.3 (Information Security)** — SoD + audit trail + RBAC
+  enforcement with scope walls.
+- **CBAHI 8.7 (Records Management)** — tamper-evident audit +
+  retention governance.
+- **SAMA 2023** — approval chains + audit integrity for any
+  financial-impact flow.
+- **Saudi Labor Law § 6** — payroll dual sign-off (finance_lead +
+  hr_director) at the A-14 chain.
+- **PDPL Art. 4/5/9/23** — scope walls + record grants (consent
+  analog) + audit trail + DSAR-ready data reach.
+
+### Files touched
+
+- New (authz core): 9 modules + 3 scripts + 10 test files
+- New (docs): 1 runbook + 11 CHANGELOG entries
+- Modified: 6 constants/middleware files, CI workflow, 3 dashboard
+  docs. No route contract changes → no frontend breakage.
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 10: runbook + matrix CSV export
 
 **Phase-7 roadmap closes (10 of 10).** This commit ships the auditor-

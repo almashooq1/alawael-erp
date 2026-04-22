@@ -5,6 +5,66 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 8 Commit 1: canonical KPI registry
+
+Phase-8 begins. This commit pins down the **identity and shape** of
+the executive indicators Al-Awael has been computing ad-hoc across
+20-odd analytics services. No new numbers are computed — we just
+give every indicator a stable id, owner, unit, direction, threshold
+triple (target / warning / critical), compliance tags, and a pointer
+to the service method + result path that produces its value.
+
+Having this registry in place is the foundation for:
+
+- **Commit 2** — aggregator that pulls current values by visiting
+  each KPI's declared `dataSource.service/method/path`.
+- **Commit 3** — executive BI dashboard (one grid, 22 cards, colour
+  by `classify(kpi, value)` → green/amber/red).
+- **Commit 4** — KPI-deviation alert digest (daily cron).
+- **Commit 5** — compliance evidence CSV (filter by
+  `byCompliance('CBAHI 8.7')` etc.).
+
+### Added
+
+- `config/kpi.registry.js` — 22 canonical KPIs spanning 7 bounded
+  contexts (quality, crm, documents, finance, hr, scheduling,
+  rehab, communications). Taxonomy sets (DOMAINS, UNITS,
+  DIRECTIONS, FREQUENCIES) exported as frozen arrays; `byId`,
+  `byDomain`, `byOwner`, `byCompliance` lookup helpers; `classify`
+  function that turns a numeric value + threshold triple into one
+  of `green | amber | red | unknown` based on `direction`.
+- `__tests__/kpi-registry.test.js` — 116 drift + shape tests.
+  Every KPI must: (a) declare every required field as a non-empty
+  string, (b) use a domain from DOMAINS + unit from UNITS +
+  direction from DIRECTIONS + frequency from FREQUENCIES, (c) name
+  an owner that resolves to a canonical role in `rbac.config.js`,
+  (d) satisfy threshold ordering (lower-is-better: target ≤ warn
+  ≤ crit; higher-is-better: target ≥ warn ≥ crit), (e) carry a
+  slash-delimited slug id that is globally unique.
+- CI paths + `test:sprint` glob updated to include the new test.
+
+### Why 22 and not 50
+
+50 is the canonical target from the blueprint, but the first 22 are
+the ones that come for free from existing analytics services —
+everything in the registry today is **already being computed**. The
+other 28 will land as those services grow (AR aging, cashflow gap,
+branch benchmarking, etc.). Forcing 50 now would mean declaring
+KPIs we can't actually produce a number for, which silently breaks
+the aggregator in commit 2.
+
+### Tests
+
+Sprint suite: **1451 passing** (was 1335; +116).
+
+### Compliance mapping
+
+Registry entries tag indicators against: CBAHI 4.3 + 8.7, MOH,
+SCFHS, Saudi Labor Law, SAMA, ZATCA, Nitaqat, CCHI, NPHIES. Filter
+by `byCompliance(framework)` to produce an evidence sub-list.
+
+---
+
 ## [4.0.12] — 2026-04-22 — Phase 7 IAM hardening (release marker)
 
 Release marker for the Phase-7 IAM slice. All ten commits below

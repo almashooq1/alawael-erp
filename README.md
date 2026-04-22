@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/node-%3E%3D18-brightgreen" />
   <img src="https://img.shields.io/badge/backend-Express%2FMongoDB-blue" />
   <img src="https://img.shields.io/badge/frontend-React%2018%20%2B%20MUI%205-61DAFB" />
-  <img src="https://img.shields.io/badge/sprint%20gate-1335%20passing-brightgreen" />
+  <img src="https://img.shields.io/badge/sprint%20gate-1451%20passing-brightgreen" />
   <img src="https://img.shields.io/badge/eslint-0%20errors-brightgreen" />
   <img src="https://img.shields.io/badge/license-MIT-green" />
 </p>
@@ -207,7 +207,7 @@ npm run dev:all
 ### Testing
 
 ```bash
-# Run the sprint gate — 1335 tests that CI enforces on every PR
+# Run the sprint gate — 1451 tests that CI enforces on every PR
 npm run test:sprint
 
 # Run the full backend suite (includes many legacy suites with stale

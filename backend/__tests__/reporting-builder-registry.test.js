@@ -27,10 +27,18 @@ describe('builderRegistry — coverage', () => {
     }
   });
 
-  test('non-rehab modules are (currently) stubs', () => {
-    expect(isStub('therapistReportBuilder.buildProductivity')).toBe(true);
+  test('builders already swapped to real are not flagged as stubs', () => {
+    expect(isStub('attendanceReportBuilder.buildAdherence')).toBe(false);
+    expect(isStub('sessionReportBuilder.buildVolume')).toBe(false);
+    expect(isStub('therapistReportBuilder.buildProductivity')).toBe(false);
+    expect(isStub('therapistReportBuilder.buildCaseload')).toBe(false);
+  });
+
+  test('remaining catalog modules are still stubs', () => {
     expect(isStub('financeReportBuilder.buildAgingReport')).toBe(true);
     expect(isStub('hrReportBuilder.buildTurnover')).toBe(true);
+    expect(isStub('branchReportBuilder.buildOccupancy')).toBe(true);
+    expect(isStub('fleetReportBuilder.buildPunctuality')).toBe(true);
   });
 });
 

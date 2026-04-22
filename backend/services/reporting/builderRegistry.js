@@ -31,6 +31,8 @@ const branchReportBuilder = require('./builders/branchReportBuilder');
 const fleetReportBuilder = require('./builders/fleetReportBuilder');
 const qualityReportBuilder = require('./builders/qualityReportBuilder');
 const financeReportBuilder = require('./builders/financeReportBuilder');
+const hrReportBuilder = require('./builders/hrReportBuilder');
+const crmReportBuilder = require('./builders/crmReportBuilder');
 
 /**
  * Build a stub builder for a category of report. The stub echoes the
@@ -95,6 +97,15 @@ const builders = {
     buildRevenueReview: financeReportBuilder.buildRevenueReview,
     buildAgingReport: financeReportBuilder.buildAgingReport,
   },
+  hrReportBuilder: {
+    buildTurnover: hrReportBuilder.buildTurnover,
+    buildAttendanceAdherence: hrReportBuilder.buildAttendanceAdherence,
+    buildCpeCompliance: hrReportBuilder.buildCpeCompliance,
+  },
+  crmReportBuilder: {
+    buildParentEngagement: crmReportBuilder.buildParentEngagement,
+    buildComplaintsDigest: crmReportBuilder.buildComplaintsDigest,
+  },
 
   // ─── Stubs (to be replaced commit by commit) ───────────────────
   kpiReportBuilder: {
@@ -105,15 +116,6 @@ const builders = {
   executiveReportBuilder: {
     buildProgramsReview: stubBuilder('exec.programs.review'),
     buildAnnualReport: stubBuilder('exec.annual.report'),
-  },
-  hrReportBuilder: {
-    buildTurnover: stubBuilder('hr.turnover'),
-    buildAttendanceAdherence: stubBuilder('hr.attendance.adherence'),
-    buildCpeCompliance: stubBuilder('hr.cpe.compliance'),
-  },
-  crmReportBuilder: {
-    buildParentEngagement: stubBuilder('crm.parent.engagement'),
-    buildComplaintsDigest: stubBuilder('crm.complaints.digest'),
   },
 };
 
@@ -151,6 +153,11 @@ const REAL_BUILDERS = new Set([
   'financeReportBuilder.buildCollectionsPack',
   'financeReportBuilder.buildRevenueReview',
   'financeReportBuilder.buildAgingReport',
+  'hrReportBuilder.buildTurnover',
+  'hrReportBuilder.buildAttendanceAdherence',
+  'hrReportBuilder.buildCpeCompliance',
+  'crmReportBuilder.buildParentEngagement',
+  'crmReportBuilder.buildComplaintsDigest',
 ]);
 
 function isStub(builderPath) {

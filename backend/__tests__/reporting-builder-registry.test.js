@@ -38,12 +38,17 @@ describe('builderRegistry — coverage', () => {
     expect(isStub('qualityReportBuilder.buildRedFlagsDigest')).toBe(false);
     expect(isStub('financeReportBuilder.buildClaimsPack')).toBe(false);
     expect(isStub('financeReportBuilder.buildAgingReport')).toBe(false);
+    expect(isStub('hrReportBuilder.buildTurnover')).toBe(false);
+    expect(isStub('hrReportBuilder.buildCpeCompliance')).toBe(false);
+    expect(isStub('crmReportBuilder.buildParentEngagement')).toBe(false);
+    expect(isStub('crmReportBuilder.buildComplaintsDigest')).toBe(false);
   });
 
-  test('remaining catalog modules are still stubs', () => {
-    expect(isStub('hrReportBuilder.buildTurnover')).toBe(true);
-    expect(isStub('crmReportBuilder.buildParentEngagement')).toBe(true);
+  test('remaining catalog modules are still stubs (only kpi + executive left)', () => {
     expect(isStub('kpiReportBuilder.buildExecDigest')).toBe(true);
+    expect(isStub('kpiReportBuilder.buildBoardPack')).toBe(true);
+    expect(isStub('kpiReportBuilder.buildBranchKpiPack')).toBe(true);
+    expect(isStub('executiveReportBuilder.buildProgramsReview')).toBe(true);
     expect(isStub('executiveReportBuilder.buildAnnualReport')).toBe(true);
   });
 });

@@ -258,6 +258,67 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Log cleanup setup skipped:', err.message);
   }
 
+  // Initialize Reporting & Communications Platform (Phase 10, C1–C15)
+  // Fires 30 catalog-driven report types on their declared cadences
+  // (daily/weekly/monthly/quarterly/semi-annual/annual) across 6
+  // channels. Ops sweeps (retry/escalation/retention) run alongside.
+  // Opt-out via REPORTING_PLATFORM_ENABLED=false.
+  if (process.env.REPORTING_PLATFORM_ENABLED !== 'false') {
+    try {
+      const cron = require('node-cron');
+      const { buildReportingPlatform } = require('./services/reporting');
+      const { communicationService } = require('./communication');
+      const Notification = require('./models/Notification');
+      const Beneficiary = require('./models/Beneficiary');
+      const Guardian = require('./models/Guardian');
+      const User = require('./models/User');
+      const Session = require('./models/TherapySession');
+      const Branch = require('./models/Branch');
+      const Employee = require('./models/HR/Employee');
+
+      server._reportingPlatform = buildReportingPlatform({
+        models: {
+          Beneficiary,
+          Guardian,
+          User,
+          Session,
+          Employee,
+          Branch,
+          Notification,
+        },
+        communication: {
+          emailService: communicationService && communicationService.email,
+          smsService: communicationService && communicationService.sms,
+          whatsappService: communicationService && communicationService.whatsapp,
+        },
+        cron,
+        logger,
+      });
+      server._reportingPlatform.start();
+      logger.info(
+        '📋 Reporting & Communications Platform ready — 30 report types, 6 channels, ' +
+          '6 periodicities + ops sweeps (retry */5m, escalation */15m, retention daily 03:00)'
+      );
+
+      // Graceful shutdown — stop both schedulers before process exit
+      try {
+        const { registerShutdownHook } = require('./utils/gracefulShutdown');
+        registerShutdownHook('Reporting Platform', () => {
+          if (server._reportingPlatform) {
+            server._reportingPlatform.stop();
+            logger.info('📋 Reporting Platform schedulers stopped');
+          }
+        });
+      } catch (_) {
+        // gracefulShutdown may not be loaded yet — that's OK
+      }
+    } catch (err) {
+      logger.info('Reporting Platform initialization skipped:', err.message);
+    }
+  } else {
+    logger.info('Reporting Platform disabled via REPORTING_PLATFORM_ENABLED=false');
+  }
+
   // Initialize Message Queue (NATS or In-Memory)
   try {
     const { initializeMessageQueue } = require('./infrastructure/messageQueue');

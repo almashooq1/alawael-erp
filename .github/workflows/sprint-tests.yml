@@ -90,6 +90,7 @@ on:
       - 'backend/__tests__/rbac-roles-consistency.test.js'
       - 'backend/__tests__/tenant-scope-plugin.test.js'
       - 'backend/__tests__/branch-scope-region.test.js'
+      - 'backend/__tests__/sod-domain-rules.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -137,6 +138,7 @@ on:
       - 'backend/authorization/tenantScope.plugin.js'
       - 'backend/middleware/branchScope.middleware.js'
       - 'backend/config/constants/roles.constants.js'
+      - 'backend/authorization/sod/domain-rules.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -215,6 +217,7 @@ on:
       - 'backend/__tests__/rbac-roles-consistency.test.js'
       - 'backend/__tests__/tenant-scope-plugin.test.js'
       - 'backend/__tests__/branch-scope-region.test.js'
+      - 'backend/__tests__/sod-domain-rules.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -262,6 +265,7 @@ on:
       - 'backend/authorization/tenantScope.plugin.js'
       - 'backend/middleware/branchScope.middleware.js'
       - 'backend/config/constants/roles.constants.js'
+      - 'backend/authorization/sod/domain-rules.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -432,4 +436,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 1137 sprint tests green."
+          echo "All 1188 sprint tests green."

@@ -5,6 +5,77 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 6: domain SoD
+
+Fourth Phase-7 commit. Adds the high-priority domain-level
+Segregation-of-Duties policies the IAM blueprint rated P0.
+
+The existing `authorization/sod/registry.js` covered TRANSACTIONAL
+SoD (same actor cannot create+approve the same record). This commit
+adds DOMAIN SoD: certain roles must NEVER perform certain actions
+regardless of whether they touched the record before — Saudi
+healthcare regulators (CBAHI 4.3 / 8.7, SAMA pre-pay rule, MOH
+labor-law dual-control, PDPL data minimization) all require these
+separations and audits flag them on inspection.
+
+### Added
+
+- `authorization/sod/domain-rules.js` — 7 high-severity rules:
+
+  1. **HR ↔ Finance** — HR roles (hr/hr_manager/hr_officer/
+     hr_supervisor/group_chro) cannot create/approve invoices,
+     expenses, POs, finance records (CBAHI 4.3).
+  2. **Finance ↔ Employee PII** — finance roles (accountant/
+     finance/finance_supervisor/group_cfo) cannot create/edit/
+     delete employee records (Saudi Labor Law § 6, GOSI dual-
+     control).
+  3. **Clinical cannot bill** — therapists (all specialties),
+     therapy_assistant, special_ed_teacher, doctor,
+     clinical_director, therapy_supervisor, special_ed_supervisor
+     blocked from invoices/finance write actions (CBAHI 8.7).
+  4. **Finance cannot read clinical** — accountant/finance/
+     finance_supervisor blocked from clinical_assessments and
+     care_plans (PDPL data minimization).
+  5. **Quality independence** — quality_coordinator and
+     regional_quality cannot APPROVE care plans they audit.
+     group_quality_officer (HQ) deliberately exempt — sits
+     outside the audited unit.
+  6. **IT Admin ↔ Audit** — it_admin can configure system but
+     cannot mutate audit_logs (only read).
+  7. **Internal Auditor read-only** — wildcard rule blocking
+     create/update/delete/approve on every resource.
+  8. **Operations ↔ PHI** — driver/bus_assistant cannot read
+     clinical or write beneficiary/session records.
+
+  Helpers: `checkDomainSoD(role, permission) → null | { rule }`
+  with wildcard support (`*:create`, `audit_logs:*`, etc.).
+  `rulesForRole(role)` for UI/admin listing.
+
+### Tests
+
+- `__tests__/sod-domain-rules.test.js` — 51 tests across 9
+  describe blocks:
+  • permMatches helper (5 tests)
+  • each of the 8 rule families (4-6 tests each)
+  • drift invariants: every blockedRole exists in rbac config,
+  every rule has description+severity+actions, ids unique
+  • helper smoke (rulesForRole, allDomainRules clone-safety)
+
+### Wire-up note
+
+The domain-rules check is intentionally exposed as a pure function.
+The next commit (Phase 7 #3 — RecordGrant + PDP integration) will
+call it from the existing ABAC `sod-conflict.policy.js` so denial
+is enforced at request time. Landing the rules + tests first means
+the integration commit is a 5-line PEP wire-up, not a 200-line
+rules-and-tests bundle.
+
+### Tests
+
+Sprint suite: **1188 passing** (was 1137; +51 SoD tests).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 4: regional branchScope
 
 Third Phase-7 commit. Wires the region-scoped roles
@@ -27,7 +98,7 @@ existing branchScope middleware so they get an authoritative
 - `middleware/branchScope.middleware.js`:
   • Regional-role branch: when a user has a region-scoped role,
   sets `req.branchScope = { restricted: true, regional: true,
-  regionIds, allBranches: false }`. If `regionIds` is empty,
+regionIds, allBranches: false }`. If `regionIds` is empty,
   rejects with 403 (config error — a regional_director must
   have at least one region assigned).
   • `branchFilter()` now emits a sentinel

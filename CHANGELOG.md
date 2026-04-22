@@ -5,6 +5,74 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [4.0.14] — 2026-04-22 — Phase 10: Reporting & Communications Platform (release marker)
+
+Closes Phase 10. A complete periodic & on-demand reporting engine built
+on top of the existing `kpi.registry`, `red-flags.registry`,
+`rehabReportBuilders`, `communication/`, and `alerts/dispatcher`
+primitives — rather than a parallel stack.
+
+Six out of the seven Phase-10 commits landed in-tree; one (UI pages)
+is scoped out with an explicit handoff. Full operator documentation
+in `docs/PHASE_10_REPORTING_RUNBOOK.md`.
+
+### Commit ledger
+
+| #   | SHA          | Summary                                                                                                                                                                         |
+| --- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `16373db2`   | Foundation — report catalog (30 entries), engine, scheduler, ReportDelivery ledger, ReportApprovalRequest workflow, architecture doc                                            |
+| 2   | `f6dd040c`   | 6 channel adapters (email / sms / whatsapp / in_app / portal_inbox / pdf_download), recipient resolver (9 audiences), builder registry, service locator                         |
+| 3   | `c53c124f`   | Renderer layer (ar/en HTML templates, pdfkit, i18n via `locales/reporting.{ar,en}.json`, RTL shell, Arabic-capable fonts, confidentiality banners)                              |
+| 4   | `54e7f327`   | Provider webhooks (SendGrid / Mailgun / Twilio / WhatsApp / portal) + portal inbox routes (list / view / seen / download)                                                       |
+| 5   | _(deferred)_ | Reporting Ops dashboard + Parent portal UI (Next.js — future phase)                                                                                                             |
+| 6   | `63583bd6`   | Ops services — retry (backoff 0.5/5/30/120 min), escalation (retry-exhausted + SLA-breach), retention (per-catalog days), rate limiter (per-recipient 24h), ReportsOpsScheduler |
+| 7   | _(deferred)_ | Replace 11 builder stubs with real data-fetching builders                                                                                                                       |
+| 8   | `d5a37335`   | Cross-registry drift tests — catalog ↔ kpi ↔ rbac ↔ builders ↔ templates ↔ model enums ↔ cron (16 tests, 2-tier enforcement)                                              |
+| 9   | (this)       | Phase 10 runbook + CHANGELOG + release marker 4.0.14                                                                                                                            |
+
+**Test coverage:** 565 tests across 37 reporting-platform suites, all green.
+
+### Added
+
+- `config/report.catalog.js` — 30 canonical reports × 7 periodicities × 9 audiences × 6 channels × 4 confidentiality classes; pure data with `byId` / `byPeriodicity` / `byAudience` / `byChannel` / `byCategory` / `byCompliance` / `resolveApprovers` / `classify` helpers.
+- `models/ReportDelivery.js` — per-recipient × channel ledger with 8-state machine (QUEUED → SENT → DELIVERED → READ; FAILED → RETRYING → ESCALATED / CANCELLED). Unique index on `(instanceKey, recipientId, channel)` for idempotency; `accessLog[]` for confidential-report forensics.
+- `models/ReportApprovalRequest.js` — approval workflow state machine (PENDING → APPROVED → DISPATCHED / REJECTED / EXPIRED / CANCELLED); `payloadHash` SHA-256 catches tampering between approve-time and dispatch-time.
+- `services/reporting/reportingEngine.js` — orchestrator (catalog → builder → renderer → approval gate → recipient resolver → channel fan-out → ledger); all collaborators injectable for tests.
+- `services/reporting/builderRegistry.js` — 5 real Phase-9 rehab builders + 11 stubs for the rest of the catalog; `has()` / `isStub()` helpers for drift tests.
+- `services/reporting/recipientResolver.js` — resolves 9 audiences to User / Guardian / Beneficiary / Employee records; scope grammar `type:id`.
+- `services/reporting/channels/` — 6 channel adapters wrapping the existing `communication/email-service`, `sms-service`, `whatsapp-service`, `Notification` model, and the artifact-store / url-signer interfaces for portal + PDF download.
+- `services/reporting/renderer/` — formatters (date / period-key / number / percent / currency SAR / duration / list / HTML escape with Arabic-Indic digit support), translator (locale lookup with array-form keys for dotted catalog ids), HTML template registry (6 real + generic fallback), pdfkit wrapper (injectable PDFDocument, Arabic font auto-discovery, confidential watermark).
+- `services/reporting/webhookHandler.js` — provider-agnostic processor for 5 providers (SendGrid / Mailgun / Twilio / WhatsApp Business / portal); maps provider events to ledger transitions; idempotent; never regresses terminal states.
+- `services/reporting/retryService.js` — exponential-backoff driver (0.5 / 5 / 30 / 120 minutes); `findRetryable`, `retryOne`, `runRetrySweep`.
+- `services/reporting/escalationService.js` — retry-exhausted + SLA-breach detection; `markEscalated` + in-app notification to `escalateTo` role.
+- `services/reporting/retentionService.js` — per-report `retention.days` purge; terminal-only; `dryRun` support; `onPurge` override for soft-delete hooks.
+- `services/reporting/rateLimiter.js` — per-recipient 24h rolling cap (20 / 40 / 80 by role); `report.delivery.rate_limited` event on block.
+- `services/reporting/index.js` — `buildReportingPlatform(deps)` service locator; wires engine + scheduler + ops-scheduler + channels + resolver + rate limiter; single boot entry point.
+- `scheduler/reports.scheduler.js` — binds the 6 scheduled periodicities to node-cron; per-report × scope fan-out via `scopeProvider`.
+- `scheduler/reports-ops.scheduler.js` — retry every 5 min, escalation every 15 min, retention daily 03:00; re-entrance guards; setInterval fallback for tests.
+- `routes/reports-webhooks.routes.js` — 5 endpoints (sendgrid / mailgun / twilio / whatsapp / portal); signature verifiers injected; WhatsApp challenge echo for Meta subscription setup.
+- `routes/reports-inbox.routes.js` — portal endpoints (list / view / seen / download); RBAC second-layer (owner + admin override); accessLog[] populated on confidential download.
+- `locales/reporting.ar.json` + `locales/reporting.en.json` — 29 report-specific translation blocks + common strings (greetings, period labels, confidentiality notices).
+- `docs/reporting/REPORTING_ARCHITECTURE.md` — full architecture: layered view, 30-report catalog, distribution workflows, data model, notification logic, 10 reporting-platform KPIs, dashboard + drill-down specs, rollout plan.
+- `docs/PHASE_10_REPORTING_RUNBOOK.md` — operator runbook: requirements matrix, commit ledger, boot procedure, route mounting, on-demand run, approvals, retention preview, rollback plan, event bus contract, known limitations.
+- 17 new Jest test suites (`report-*`, `reporting-*`, `reports-*`) covering catalog invariants, delivery / approval state machines, engine dispatch + approval gate + drift detection, scheduler periodicity + re-entrance, channel adapters, recipient resolver, builder registry, locator, renderer layer (formatters + translator + templates + pdf), webhook handler, webhooks routes (supertest), inbox routes (supertest), retry / escalation / retention / rate-limiter, ops-scheduler, cross-registry drift.
+
+### What 4.0.14 means operationally
+
+- **Every original requirement bucket is live end-to-end** except the UI dashboards (data is emitted; pages are scoped for a future Next.js commit).
+- Scheduling is **running in real cron** once `reporting.start()` is invoked at app boot. Weekly parent updates, daily executive digests, monthly board packs, quarterly CBAHI evidence packs — all fire on their declared cadences.
+- The platform is **safe to roll back**: two new collections, all code additive, no schema changes to existing models. `git revert` the 6 landed commits + drop the two collections = clean back-out.
+- **16 KPI aliases + 6 role aliases** are locked in via drift tests with a reducing-budget counter — any silent growth fails CI immediately; reductions in C7/C9 must come with explicit test updates.
+
+### Known gaps (non-blocking)
+
+- Reporting Ops dashboard + Parent portal inbox UI — deferred.
+- 11 of 16 catalog-named builders are well-formed stubs — deferred to C7.
+- Rate limiter exposed on platform but not yet enforced inside `engine._dispatch` — opt-in follow-up.
+- Artifact store + URL signer are interfaces; operator supplies concrete S3 / CloudFront adapters in production boot.
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 8 Commit 1: canonical KPI registry
 
 Phase-8 begins. This commit pins down the **identity and shape** of

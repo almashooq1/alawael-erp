@@ -206,6 +206,33 @@ try {
   } catch (suggErr) {
     logger.warn('[RehabGoalSuggestions] routes skipped:', suggErr.message);
   }
+
+  // Reporting Platform observability — Phase 10 Commit 17. Late-binds
+  // to `app._reportingPlatform` which server.js sets after
+  // buildReportingPlatform() runs. Returns 503 until the platform is
+  // wired (prevents boot-order crashes).
+  try {
+    const { buildRouter: buildReportsOpsRouter } = require('./routes/reports-ops.routes');
+    app.use('/api/v1/reports/ops', authenticate, (req, res, next) => {
+      const platform = app._reportingPlatform;
+      if (!platform) {
+        return res.status(503).json({ error: 'reporting platform not yet initialized' });
+      }
+      if (!app._reportingOpsRouter) {
+        app._reportingOpsRouter = buildReportsOpsRouter({
+          platform,
+          DeliveryModel: require('./models/ReportDelivery'),
+          ApprovalModel: require('./models/ReportApprovalRequest'),
+          catalog: require('./config/report.catalog'),
+          logger,
+        });
+      }
+      return app._reportingOpsRouter(req, res, next);
+    });
+    logger.info('[ReportingOps] ✓ observability routes mounted at /api/v1/reports/ops');
+  } catch (opsErr) {
+    logger.warn('[ReportingOps] routes skipped:', opsErr.message);
+  }
   // Fire the periodic sweep in non-test env only. Tests run `runOnce`
   // directly when they need to; a live cron would flake them.
   if (!isTestEnv && cronDep) {

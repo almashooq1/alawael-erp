@@ -295,6 +295,10 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
         logger,
       });
       server._reportingPlatform.start();
+      // Expose on the Express app so late-binding routers (e.g. the
+      // reporting-ops observability router in app.js) can reach the
+      // live platform instance.
+      app._reportingPlatform = server._reportingPlatform;
       logger.info(
         '📋 Reporting & Communications Platform ready — 30 report types, 6 channels, ' +
           '6 periodicities + ops sweeps (retry */5m, escalation */15m, retention daily 03:00)'

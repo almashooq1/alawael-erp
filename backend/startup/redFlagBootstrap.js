@@ -359,11 +359,33 @@ function bootstrapRedFlagSystem(options = {}) {
     }
     const GoalProgressExports = tryLoadModel('../models/GoalProgressSnapshot');
     if (GoalProgressExports) {
+      // Phase-9 Commit 12 — merge progressEngine's stalled/regression
+      // adapter into the same service object so the registry's three
+      // goalProgressService flags all resolve through one locator key:
+      //   • clinical.progress.regression.significant → deltaVsBaseline
+      //   • clinical.goal.stalled.21d               → daysSinceLastProgress
+      //   • clinical.goal.regression.consecutive_2   → consecutiveRatings
+      const baseObs = createGoalProgressObservations({
+        model: GoalProgressExports.GoalProgressSnapshot,
+      });
+      let progressLifecycle = null;
+      try {
+        const { buildGoalProgressTriggerSource } = require('../services/progressEngine');
+        const GoalProgressEntry = tryLoadModel('../models/GoalProgressEntry');
+        if (GoalProgressEntry) {
+          progressLifecycle = buildGoalProgressTriggerSource({
+            fetchEntries: async ({ goalId }) => {
+              if (!goalId) return [];
+              return GoalProgressEntry.find({ goal: goalId }).sort({ recordedAt: 1 }).lean();
+            },
+          });
+        }
+      } catch (lifecycleErr) {
+        logger.warn('[RedFlag] progressEngine trigger-source skipped:', lifecycleErr.message);
+      }
       locator.register(
         'goalProgressService',
-        createGoalProgressObservations({
-          model: GoalProgressExports.GoalProgressSnapshot,
-        })
+        progressLifecycle ? Object.assign({}, baseObs, progressLifecycle) : baseObs
       );
     }
     const BehaviorIncidentExports = tryLoadModel('../models/BehaviorIncident');

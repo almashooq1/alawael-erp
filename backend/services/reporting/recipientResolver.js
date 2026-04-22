@@ -52,22 +52,51 @@ function toRecipient(doc, role, modelName = 'User') {
   };
 }
 
+// Resolve the rbac.aliases group expander lazily so the resolver
+// doesn't require it at import time (tests can still inject their
+// own roleMap when mocking).
+function _defaultRoleMap() {
+  try {
+    const { resolveRoles, ROLE_GROUPS } = require('../../config/rbac.aliases');
+    return {
+      // audience → rbac canonical role values
+      supervisor: resolveRoles('supervisor').length ? resolveRoles('supervisor') : ['supervisor'],
+      branch_manager: resolveRoles('branch_manager').length
+        ? resolveRoles('branch_manager')
+        : ['branch_manager'],
+      executive: [...(ROLE_GROUPS.executive || [])],
+      quality: [resolveRoles('quality_manager')[0]].filter(Boolean), // → quality_coordinator
+      finance: [
+        ...resolveRoles('finance_manager'), // → finance_supervisor
+        'accountant',
+        ...resolveRoles('cfo'), // → group_cfo
+      ].filter(Boolean),
+      hr: ['hr_manager', 'hr_officer'],
+    };
+  } catch (_) {
+    // rbac.aliases may not be loadable (circular / test env); fall
+    // back to the legacy literals so the engine stays operable.
+    return {
+      supervisor: ['supervisor'],
+      branch_manager: ['branch_manager'],
+      executive: ['ceo', 'group_gm', 'group_cfo', 'group_chro'],
+      quality: ['quality_coordinator'],
+      finance: ['finance_supervisor', 'accountant', 'group_cfo'],
+      hr: ['hr_manager', 'hr_officer'],
+    };
+  }
+}
+
 function createRecipientResolver({
   BeneficiaryModel,
   GuardianModel,
   UserModel,
   EmployeeModel,
   SessionModel,
-  roleMap = {
-    supervisor: ['supervisor'],
-    branch_manager: ['branch_manager'],
-    executive: ['ceo', 'coo', 'cmo', 'cfo', 'executive'],
-    quality: ['quality_manager', 'quality_officer'],
-    finance: ['finance_manager', 'accountant', 'cfo'],
-    hr: ['hr_manager', 'hr_specialist'],
-  },
+  roleMap,
   logger = console,
 } = {}) {
+  const effectiveRoleMap = roleMap || _defaultRoleMap();
   function getModel(m) {
     return m && (m.model || m);
   }
@@ -111,7 +140,7 @@ function createRecipientResolver({
 
   async function resolveByRoleList(rolesKey, scope) {
     if (!User) return [];
-    const roles = roleMap[rolesKey];
+    const roles = effectiveRoleMap[rolesKey];
     if (!roles || !roles.length) return [];
     const q = { role: { $in: roles } };
     if (scope && scope.type === 'branch') q.branchId = scope.id;

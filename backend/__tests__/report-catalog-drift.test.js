@@ -35,39 +35,36 @@
 const catalog = require('../config/report.catalog');
 const kpi = require('../config/kpi.registry');
 const rbac = require('../config/rbac.config');
+const kpiAliases = require('../config/kpi.aliases');
+const rbacAliases = require('../config/rbac.aliases');
 const { has: hasBuilder } = require('../services/reporting/builderRegistry');
 const { pickTemplate } = require('../services/reporting/renderer/htmlTemplates');
 const RD = require('../models/ReportDelivery');
 const RA = require('../models/ReportApprovalRequest');
 
 // ─── Known aliases (locked in; reduce these over time) ─────────
+//
+// P10-C10 introduced `config/kpi.aliases.js` + `config/rbac.aliases.js`
+// which resolve most of the drift automatically. What remains here are
+// the GENUINE gaps — catalog references that have no canonical match
+// yet in the target registry.
+//
+// Role-side gap is just 'executive' (a group, not a single role —
+// resolved via ROLE_GROUPS in rbac.aliases). The other 5 role aliases
+// now resolve via rbac.aliases.ROLE_ALIASES.
+//
+// KPI-side gap is 5 catalog ids for KPIs that don't exist in
+// kpi.registry yet (marked null in kpi.aliases.KPI_ALIASES). Future
+// phase commits add the KPI and flip the mapping.
 
-const CATALOG_ROLE_ALIASES = Object.freeze([
-  'cfo',
-  'executive',
-  'finance_manager',
-  'medical_director',
-  'quality_manager',
-  'therapist_lead',
-]);
+const CATALOG_ROLE_GAPS = Object.freeze(['executive']);
 
-const CATALOG_KPI_ALIASES = Object.freeze([
-  'clinical.care_plan.review_adherence',
-  'crm.complaints.resolution_time',
-  'crm.parent.engagement_score',
-  'finance.claims.denial_rate',
-  'finance.collections.dso_days',
+const CATALOG_KPI_GAPS = Object.freeze([
   'finance.invoices.aging_ratio',
   'hr.attendance.adherence',
-  'hr.cpe.compliance_rate',
   'hr.turnover.voluntary_rate',
   'multi-branch.fleet.punctuality',
-  'multi-branch.occupancy.rate',
   'quality.cbahi.evidence.completeness',
-  'rehab.goal.mastery_rate',
-  'rehab.goal.progress_velocity',
-  'scheduling.session.cancellation_rate',
-  'scheduling.session.punctuality',
 ]);
 
 const ALLOWED_COMPLIANCE_LABELS = Object.freeze([
@@ -94,26 +91,37 @@ describe('catalog drift — builder paths', () => {
 // ─── KPI references ─────────────────────────────────────────────
 
 describe('catalog drift — kpi.registry references', () => {
-  test('every catalog.kpiLinks entry resolves in kpi.registry OR is listed as an alias', () => {
-    const unresolved = new Set();
+  test('every catalog.kpiLinks resolves in kpi.registry OR via kpi.aliases', () => {
+    const unresolved = [];
     for (const r of catalog.REPORTS) {
       for (const k of r.kpiLinks || []) {
-        if (!kpi.byId(k)) unresolved.add(k);
+        if (!kpiAliases.resolveKpiId(k)) unresolved.push(`${r.id} -> ${k}`);
       }
     }
-    const stillUnresolved = [...unresolved].filter(k => !CATALOG_KPI_ALIASES.includes(k));
-    expect(stillUnresolved).toEqual([]);
+    // `resolveKpiId` returns non-null only when either the id is
+    // already canonical OR the alias has a canonical target. Gaps
+    // (null-mapped aliases) flow through as unresolved and must be in
+    // the KPI_GAPS allowlist.
+    const gapsOnly = unresolved.every(line => {
+      const id = line.split(' -> ')[1];
+      return CATALOG_KPI_GAPS.includes(id);
+    });
+    expect(gapsOnly).toBe(true);
   });
 
-  test('the CATALOG_KPI_ALIASES allowlist matches exactly the current drift', () => {
-    const drift = new Set();
-    for (const r of catalog.REPORTS) {
-      for (const k of r.kpiLinks || []) {
-        if (!kpi.byId(k)) drift.add(k);
+  test('every kpi alias maps to a real kpi.registry id OR is a known gap', () => {
+    const aliasEntries = Object.entries(kpiAliases.KPI_ALIASES);
+    for (const [alias, target] of aliasEntries) {
+      if (target == null) {
+        expect(CATALOG_KPI_GAPS).toContain(alias);
+      } else {
+        expect(kpi.byId(target)).toBeTruthy();
       }
     }
-    // Any addition OR removal forces an explicit test update.
-    expect([...drift].sort()).toEqual([...CATALOG_KPI_ALIASES].sort());
+  });
+
+  test('CATALOG_KPI_GAPS locks in the exact current gap set', () => {
+    expect([...kpiAliases.gapAliases()].sort()).toEqual([...CATALOG_KPI_GAPS].sort());
   });
 });
 
@@ -132,20 +140,49 @@ describe('catalog drift — rbac.config role references', () => {
     return s;
   }
 
-  test('every referenced role exists in rbac OR is listed as a catalog alias', () => {
-    const unresolved = [...collectRoles()].filter(
-      role => !rbacValues.has(role) && !CATALOG_ROLE_ALIASES.includes(role)
-    );
+  test('every referenced role resolves in rbac OR via rbac.aliases', () => {
+    const unresolved = [...collectRoles()].filter(role => {
+      if (rbacValues.has(role)) return false;
+      // resolveRoles returns [] for unknown aliases, [x] for scalars,
+      // and [x, y, …] for groups — non-empty means "resolved".
+      const resolved = rbacAliases.resolveRoles(role);
+      return !resolved.length;
+    });
     expect(unresolved).toEqual([]);
   });
 
-  test('the CATALOG_ROLE_ALIASES allowlist matches exactly the current drift', () => {
-    const drift = [...collectRoles()].filter(role => !rbacValues.has(role)).sort();
-    expect(drift).toEqual([...CATALOG_ROLE_ALIASES].sort());
+  test('every rbac alias (non-group) maps to a real rbac.config role value', () => {
+    for (const [alias, target] of Object.entries(rbacAliases.ROLE_ALIASES)) {
+      if (target == null) continue; // groups handled below
+      expect(rbacValues.has(target)).toBe(true);
+    }
+    // And groups expand to an array of real rbac values.
+    for (const [group, members] of Object.entries(rbacAliases.ROLE_GROUPS)) {
+      for (const m of members) {
+        expect(rbacValues.has(m)).toBe(true);
+      }
+      expect(Array.isArray(members)).toBe(true);
+      expect(members.length).toBeGreaterThan(0);
+      // The group key must exist in ROLE_ALIASES with a null target.
+      expect(rbacAliases.ROLE_ALIASES[group]).toBeNull();
+    }
   });
 
-  test('rbac-resolved roles on catalog entries — count is non-zero (catalog is not entirely aliased)', () => {
-    const hits = [...collectRoles()].filter(r => rbacValues.has(r));
+  test('CATALOG_ROLE_GAPS locks the residual gap set (group-only aliases)', () => {
+    // A "gap" at the catalog level is a group alias — one that maps
+    // to multiple rbac roles rather than a single one. Today only
+    // `executive`. Everything else flows through rbac.aliases cleanly.
+    const gaps = [...collectRoles()].filter(role => {
+      if (rbacValues.has(role)) return false;
+      return rbacAliases.isGroup(role);
+    });
+    expect(gaps.sort()).toEqual([...CATALOG_ROLE_GAPS].sort());
+  });
+
+  test('rbac-resolved roles on catalog entries — count is non-zero', () => {
+    const hits = [...collectRoles()].filter(
+      r => rbacValues.has(r) || rbacAliases.resolveRoles(r).length
+    );
     expect(hits.length).toBeGreaterThan(0);
   });
 });
@@ -232,14 +269,18 @@ describe('catalog drift — template coverage', () => {
 // ─── Drift budget ──────────────────────────────────────────────
 
 describe('catalog drift — budget counters (fail on silent growth)', () => {
-  test('role-alias count stays at its committed budget', () => {
-    // When we add a new role to rbac.config.js, update both the
-    // allowlist above AND this number.
-    expect(CATALOG_ROLE_ALIASES.length).toBeLessThanOrEqual(6);
+  test('role-gap count stays at the committed budget (only group aliases)', () => {
+    // P10-C10 introduced rbac.aliases — 5 of the original 6 role
+    // aliases now resolve cleanly. Only `executive` (group) remains
+    // as a residual "gap" because it expands to multiple roles.
+    expect(CATALOG_ROLE_GAPS.length).toBeLessThanOrEqual(1);
   });
 
-  test('kpi-alias count stays at its committed budget', () => {
-    // Same deal for KPIs — C7 / C9 should reduce this to 0.
-    expect(CATALOG_KPI_ALIASES.length).toBeLessThanOrEqual(16);
+  test('kpi-gap count stays at the committed budget', () => {
+    // P10-C10 introduced kpi.aliases — 11 of 16 original catalog KPI
+    // aliases now resolve. The remaining 5 are KPIs the catalog
+    // references but kpi.registry doesn't carry yet; adding them is
+    // tracked in the registry's own roadmap.
+    expect(CATALOG_KPI_GAPS.length).toBeLessThanOrEqual(5);
   });
 });

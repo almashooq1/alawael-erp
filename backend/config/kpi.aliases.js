@@ -48,14 +48,16 @@ const KPI_ALIASES = Object.freeze({
   'scheduling.session.cancellation_rate': 'scheduling.noshow.rate.pct',
   'scheduling.session.punctuality': 'rehab.sessions.adherence.pct',
 
-  // Gaps — TODO: add to kpi.registry in a future phase commit. For
-  // now they're `null` so the drift test can count them explicitly
-  // (the catalog-kpi-alias budget test asserts this exact list).
-  'finance.invoices.aging_ratio': null,
-  'hr.attendance.adherence': null,
-  'hr.turnover.voluntary_rate': null,
-  'multi-branch.fleet.punctuality': null,
-  'quality.cbahi.evidence.completeness': null,
+  // P10-C12 closed these 5 gaps by adding matching KPI entries to
+  // kpi.registry.js. Each maps the catalog's short alias to the new
+  // canonical registry id (which carries the unit suffix per registry
+  // convention). See `config/kpi.registry.js` "Phase 10 C12 additions"
+  // block. gap count: 5 → 0.
+  'finance.invoices.aging_ratio': 'finance.invoices.aging.concentration.pct',
+  'hr.attendance.adherence': 'hr.attendance.adherence.pct',
+  'hr.turnover.voluntary_rate': 'hr.turnover.voluntary.pct',
+  'multi-branch.fleet.punctuality': 'multi-branch.fleet.completion.pct',
+  'quality.cbahi.evidence.completeness': 'quality.cbahi.evidence.completeness.pct',
 });
 
 /**

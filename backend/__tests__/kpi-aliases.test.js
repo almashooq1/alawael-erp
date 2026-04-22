@@ -41,9 +41,20 @@ describe('resolveKpiId', () => {
     expect(resolveKpiId(existing)).toBe(existing);
   });
 
-  test('returns null for a gap alias (catalog refers to a KPI not yet in registry)', () => {
-    expect(resolveKpiId('hr.turnover.voluntary_rate')).toBeNull();
-    expect(resolveKpiId('finance.invoices.aging_ratio')).toBeNull();
+  test('the 5 P10-C12 aliases now resolve to canonical registry ids', () => {
+    // P10-C12 added the 5 matching KPIs to kpi.registry and flipped
+    // these mappings from null → canonical ids.
+    expect(resolveKpiId('hr.turnover.voluntary_rate')).toBe('hr.turnover.voluntary.pct');
+    expect(resolveKpiId('finance.invoices.aging_ratio')).toBe(
+      'finance.invoices.aging.concentration.pct'
+    );
+    expect(resolveKpiId('hr.attendance.adherence')).toBe('hr.attendance.adherence.pct');
+    expect(resolveKpiId('multi-branch.fleet.punctuality')).toBe(
+      'multi-branch.fleet.completion.pct'
+    );
+    expect(resolveKpiId('quality.cbahi.evidence.completeness')).toBe(
+      'quality.cbahi.evidence.completeness.pct'
+    );
   });
 
   test('returns null for a completely unknown id', () => {
@@ -54,16 +65,17 @@ describe('resolveKpiId', () => {
 });
 
 describe('gapAliases', () => {
-  test('lists exactly the null-targeted aliases', () => {
+  test('lists exactly the null-targeted aliases (empty at 4.0.16)', () => {
     const gaps = gapAliases().sort();
     const expected = Object.entries(KPI_ALIASES)
       .filter(([, v]) => v == null)
       .map(([k]) => k)
       .sort();
     expect(gaps).toEqual(expected);
+    expect(gaps).toEqual([]); // P10-C12 closed the remaining 5 gaps
   });
 
-  test('gap count is bounded (future commits reduce it)', () => {
-    expect(gapAliases().length).toBeLessThanOrEqual(5);
+  test('gap count is zero — all catalog aliases now resolve', () => {
+    expect(gapAliases().length).toBe(0);
   });
 });

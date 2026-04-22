@@ -51,21 +51,15 @@ const RA = require('../models/ReportApprovalRequest');
 //
 // Role-side gap is just 'executive' (a group, not a single role —
 // resolved via ROLE_GROUPS in rbac.aliases). The other 5 role aliases
-// now resolve via rbac.aliases.ROLE_ALIASES.
+// resolve via rbac.aliases.ROLE_ALIASES.
 //
-// KPI-side gap is 5 catalog ids for KPIs that don't exist in
-// kpi.registry yet (marked null in kpi.aliases.KPI_ALIASES). Future
-// phase commits add the KPI and flip the mapping.
+// KPI-side gap was 5 catalog ids as of 4.0.15; P10-C12 (4.0.16) added
+// the 5 matching KPIs to kpi.registry and flipped the aliases. Gap
+// list is empty.
 
 const CATALOG_ROLE_GAPS = Object.freeze(['executive']);
 
-const CATALOG_KPI_GAPS = Object.freeze([
-  'finance.invoices.aging_ratio',
-  'hr.attendance.adherence',
-  'hr.turnover.voluntary_rate',
-  'multi-branch.fleet.punctuality',
-  'quality.cbahi.evidence.completeness',
-]);
+const CATALOG_KPI_GAPS = Object.freeze([]);
 
 const ALLOWED_COMPLIANCE_LABELS = Object.freeze([
   'CBAHI',
@@ -276,11 +270,13 @@ describe('catalog drift — budget counters (fail on silent growth)', () => {
     expect(CATALOG_ROLE_GAPS.length).toBeLessThanOrEqual(1);
   });
 
-  test('kpi-gap count stays at the committed budget', () => {
-    // P10-C10 introduced kpi.aliases — 11 of 16 original catalog KPI
-    // aliases now resolve. The remaining 5 are KPIs the catalog
-    // references but kpi.registry doesn't carry yet; adding them is
-    // tracked in the registry's own roadmap.
-    expect(CATALOG_KPI_GAPS.length).toBeLessThanOrEqual(5);
+  test('kpi-gap count is zero (P10-C12 added the 5 missing KPIs)', () => {
+    // P10-C10 introduced kpi.aliases and mapped 11/16 aliases; 5
+    // remained as genuine registry gaps. P10-C12 added the 5 matching
+    // KPI entries to kpi.registry (each pointing at the real Phase-10
+    // report builder that computes it) and flipped every `null` in
+    // KPI_ALIASES to its canonical id. Budget cap is now 0 — any
+    // regrowth fails CI.
+    expect(CATALOG_KPI_GAPS.length).toBe(0);
   });
 });

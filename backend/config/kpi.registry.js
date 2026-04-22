@@ -738,6 +738,113 @@ const KPIS = Object.freeze([
     compliance: ['Saudi Labor Law'],
     frequency: 'monthly',
   },
+
+  // ─── Phase 10 C12 additions — close 5 kpi.aliases gaps ─────────
+  // Each KPI below closes a null-mapped entry in config/kpi.aliases.js
+  // so the reporting catalog references resolve without relying on
+  // the gap list. `dataSource` points at the real Phase-10 report
+  // builder that already computes the metric; the reporting-backed
+  // value-resolver in services/reporting/ wires them end-to-end.
+
+  {
+    id: 'finance.invoices.aging.concentration.pct',
+    nameEn: 'Invoice aging concentration (91+ days)',
+    nameAr: 'تركيز أعمار الفواتير (+٩١ يوم)',
+    domain: 'finance',
+    unit: 'percent',
+    direction: 'lower_is_better',
+    target: 5,
+    warningThreshold: 15,
+    criticalThreshold: 30,
+    dataSource: {
+      service: 'financeReportBuilder',
+      method: 'buildAgingReport',
+      path: 'agingRatio',
+    },
+    owner: 'finance_supervisor',
+    compliance: ['ZATCA'],
+    frequency: 'weekly',
+  },
+
+  {
+    id: 'hr.attendance.adherence.pct',
+    nameEn: 'Employee attendance adherence',
+    nameAr: 'التزام حضور الموظفين',
+    domain: 'hr',
+    unit: 'percent',
+    direction: 'higher_is_better',
+    target: 95,
+    warningThreshold: 85,
+    criticalThreshold: 75,
+    dataSource: {
+      service: 'hrReportBuilder',
+      method: 'buildAttendanceAdherence',
+      path: 'adherenceRate',
+    },
+    owner: 'hr_manager',
+    compliance: ['Saudi Labor Law'],
+    frequency: 'weekly',
+  },
+
+  {
+    id: 'hr.turnover.voluntary.pct',
+    nameEn: 'Voluntary turnover rate (monthly)',
+    nameAr: 'معدل الدوران الطوعي (شهري)',
+    domain: 'hr',
+    unit: 'percent',
+    direction: 'lower_is_better',
+    target: 2,
+    warningThreshold: 5,
+    criticalThreshold: 10,
+    dataSource: {
+      service: 'hrReportBuilder',
+      method: 'buildTurnover',
+      path: 'voluntaryRate',
+    },
+    owner: 'hr_manager',
+    compliance: ['Saudi Labor Law'],
+    frequency: 'monthly',
+  },
+
+  {
+    id: 'multi-branch.fleet.completion.pct',
+    nameEn: 'Fleet trip completion rate',
+    nameAr: 'معدل اكتمال رحلات الأسطول',
+    domain: 'multi-branch',
+    unit: 'percent',
+    direction: 'higher_is_better',
+    target: 95,
+    warningThreshold: 85,
+    criticalThreshold: 70,
+    dataSource: {
+      service: 'fleetReportBuilder',
+      method: 'buildPunctuality',
+      path: 'completionRate',
+    },
+    owner: 'manager',
+    compliance: [],
+    frequency: 'weekly',
+  },
+
+  {
+    id: 'quality.cbahi.evidence.completeness.pct',
+    nameEn: 'CBAHI evidence pack completeness',
+    nameAr: 'اكتمال حزمة شواهد سباهي',
+    domain: 'quality',
+    unit: 'percent',
+    direction: 'higher_is_better',
+    target: 95,
+    warningThreshold: 80,
+    criticalThreshold: 60,
+    dataSource: {
+      service: 'qualityReportBuilder',
+      method: 'buildCbahiEvidence',
+      path: 'evidenceCompleteness',
+    },
+    owner: 'quality_coordinator',
+    compliance: ['CBAHI 8.7'],
+    frequency: 'monthly',
+  },
 ]);
 
 // ─── Lookups ────────────────────────────────────────────────────

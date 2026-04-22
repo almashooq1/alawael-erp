@@ -36,13 +36,15 @@ describe('builderRegistry — coverage', () => {
     expect(isStub('fleetReportBuilder.buildPunctuality')).toBe(false);
     expect(isStub('qualityReportBuilder.buildIncidentsDigest')).toBe(false);
     expect(isStub('qualityReportBuilder.buildRedFlagsDigest')).toBe(false);
+    expect(isStub('financeReportBuilder.buildClaimsPack')).toBe(false);
+    expect(isStub('financeReportBuilder.buildAgingReport')).toBe(false);
   });
 
   test('remaining catalog modules are still stubs', () => {
-    expect(isStub('financeReportBuilder.buildAgingReport')).toBe(true);
     expect(isStub('hrReportBuilder.buildTurnover')).toBe(true);
     expect(isStub('crmReportBuilder.buildParentEngagement')).toBe(true);
     expect(isStub('kpiReportBuilder.buildExecDigest')).toBe(true);
+    expect(isStub('executiveReportBuilder.buildAnnualReport')).toBe(true);
   });
 });
 

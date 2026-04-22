@@ -30,6 +30,7 @@ const therapistReportBuilder = require('./builders/therapistReportBuilder');
 const branchReportBuilder = require('./builders/branchReportBuilder');
 const fleetReportBuilder = require('./builders/fleetReportBuilder');
 const qualityReportBuilder = require('./builders/qualityReportBuilder');
+const financeReportBuilder = require('./builders/financeReportBuilder');
 
 /**
  * Build a stub builder for a category of report. The stub echoes the
@@ -88,6 +89,12 @@ const builders = {
     buildCbahiEvidence: qualityReportBuilder.buildCbahiEvidence,
     buildRedFlagsDigest: qualityReportBuilder.buildRedFlagsDigest,
   },
+  financeReportBuilder: {
+    buildClaimsPack: financeReportBuilder.buildClaimsPack,
+    buildCollectionsPack: financeReportBuilder.buildCollectionsPack,
+    buildRevenueReview: financeReportBuilder.buildRevenueReview,
+    buildAgingReport: financeReportBuilder.buildAgingReport,
+  },
 
   // ─── Stubs (to be replaced commit by commit) ───────────────────
   kpiReportBuilder: {
@@ -98,12 +105,6 @@ const builders = {
   executiveReportBuilder: {
     buildProgramsReview: stubBuilder('exec.programs.review'),
     buildAnnualReport: stubBuilder('exec.annual.report'),
-  },
-  financeReportBuilder: {
-    buildClaimsPack: stubBuilder('finance.claims.pack'),
-    buildCollectionsPack: stubBuilder('finance.collections.pack'),
-    buildRevenueReview: stubBuilder('finance.revenue.review'),
-    buildAgingReport: stubBuilder('finance.invoices.aging'),
   },
   hrReportBuilder: {
     buildTurnover: stubBuilder('hr.turnover'),
@@ -146,6 +147,10 @@ const REAL_BUILDERS = new Set([
   'qualityReportBuilder.buildIncidentsPack',
   'qualityReportBuilder.buildCbahiEvidence',
   'qualityReportBuilder.buildRedFlagsDigest',
+  'financeReportBuilder.buildClaimsPack',
+  'financeReportBuilder.buildCollectionsPack',
+  'financeReportBuilder.buildRevenueReview',
+  'financeReportBuilder.buildAgingReport',
 ]);
 
 function isStub(builderPath) {

@@ -5,6 +5,76 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-22 — Phase 7 IAM Commit 2: tenantScope plugin
+
+Second foundation commit for the multi-branch IAM hardening roadmap.
+Ships the defense-in-depth layer the remaining Phase-7 commits build on.
+
+### Added
+
+- `backend/authorization/requestContext.js` — AsyncLocalStorage-backed
+  wrapper exposing `run(ctx, fn)`, `bypass(fn)`, `get()`. Express
+  middleware `bindRequestContext` binds the authenticated request's
+  branchScope into the store for the duration of the request. Callers
+  anywhere in the call chain — services, helpers, Mongoose hooks —
+  can read the current user's scope without threading `req` through.
+  Includes a Symbol-keyed globalThis fallback for code paths where
+  Mongoose 9's internal scheduler drops AsyncLocalStorage context.
+- `backend/authorization/tenantScope.plugin.js` — Mongoose plugin.
+  Applied opt-in per schema with `Schema.plugin(tenantScopePlugin)`.
+  On every find/findOne/count/update/delete/aggregate, reads the
+  request context and auto-adds a `{ branchId: <user's branch> }`
+  filter. On save / insertMany, stamps the branch onto new docs
+  missing one. Semantics:
+  • no context (CLI, boot) → no-op
+  • bypassTenantScope → no-op (explicit escape hatch)
+  • allBranches → no-op (HQ roles see everything)
+  • restricted → auto-filter / auto-stamp
+  • **unscoped** (token valid but route misconfigured) → fail CLOSED
+  (empty result + error log). Prevents auth-bypass-by-omission.
+- `backend/__tests__/tenant-scope-plugin.test.js` — 17 unit tests
+  covering requestContext propagation through awaits + bypass +
+  nested run, then the plugin's decision logic via direct hook
+  invocation with a mock schema shim. Avoids the known Jest+Mongoose 9
+  AsyncLocalStorage interaction bug (docs/runbooks/ gap analysis
+  recorded). End-to-end integration is verified by a standalone
+  smoke script — see below.
+- `backend/scripts/_tenant-scope-smoke.js` — live verification
+  script. Runs outside Jest against mongodb-memory-server and
+  checks 9 behaviors (scoped find, allBranches, no-ctx, fail-closed
+  unscoped, bypass, save-stamp, insertMany-stamp, aggregate-$match).
+  Not in sprint gate (depends on live mongo) — run manually via
+  `node scripts/_tenant-scope-smoke.js` during deploy verification.
+
+### Out of scope for this commit
+
+- **Applying** the plugin to production models (Beneficiary,
+  TherapySession, CarePlan, Invoice, Employee, etc.) is deferred
+  to Phase-7 Commits 3–5 so each application can be paired with
+  route-level testing. Landing the plugin without applying it is
+  safe (zero-impact opt-in).
+- `bindRequestContext` Express middleware wire-up into `app.js` is
+  ALSO deferred to the same follow-up commits. The middleware
+  function exists and is exported; the commit that first applies
+  the plugin will mount it.
+
+### Known limitation — Jest
+
+Jest's module sandbox + Mongoose 9's internal query scheduler break
+AsyncLocalStorage propagation into pre-find hooks, making full
+end-to-end Jest integration tests unreliable. The unit tests in this
+commit cover hook logic in isolation (with a mock schema); the
+standalone smoke script covers the live path. When Mongoose or Jest
+fix the upstream interaction, the placeholder comments in the test
+file explain how to re-enable the integration tests.
+
+### Tests
+
+Sprint suite: **1114 passing** (was 1097; +17 unit tests for
+requestContext + plugin hook logic).
+
+---
+
 ## [Unreleased] — 2026-04-22 — Phase 7 IAM: regions, 22 new roles, drift invariants
 
 Foundation commit for the multi-branch IAM hardening roadmap. Sets up

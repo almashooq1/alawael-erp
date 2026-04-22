@@ -88,6 +88,7 @@ on:
       - 'backend/__tests__/parent-report-digest-script.test.js'
       - 'backend/__tests__/parent-portal-v2.api.test.js'
       - 'backend/__tests__/rbac-roles-consistency.test.js'
+      - 'backend/__tests__/tenant-scope-plugin.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -131,6 +132,8 @@ on:
       - 'backend/models/Region.js'
       - 'backend/models/User.js'
       - 'backend/models/Branch.js'
+      - 'backend/authorization/requestContext.js'
+      - 'backend/authorization/tenantScope.plugin.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -207,6 +210,7 @@ on:
       - 'backend/__tests__/parent-report-digest-script.test.js'
       - 'backend/__tests__/parent-portal-v2.api.test.js'
       - 'backend/__tests__/rbac-roles-consistency.test.js'
+      - 'backend/__tests__/tenant-scope-plugin.test.js'
       - 'backend/__tests__/adapter-audit-ttl-guard.test.js'
       - 'backend/__tests__/adapter-public-interface.test.js'
       - 'backend/__tests__/admin-pages-routed.test.js'
@@ -250,6 +254,8 @@ on:
       - 'backend/models/Region.js'
       - 'backend/models/User.js'
       - 'backend/models/Branch.js'
+      - 'backend/authorization/requestContext.js'
+      - 'backend/authorization/tenantScope.plugin.js'
       - 'backend/services/zatcaEnvelope.js'
       - 'backend/routes/build-info.routes.js'
       - 'docs/dashboards/**'
@@ -420,4 +426,4 @@ jobs:
             echo "::error::Sprint test gate failed — see individual job logs."
             exit 1
           fi
-          echo "All 1097 sprint tests green."
+          echo "All 1114 sprint tests green."

@@ -424,6 +424,15 @@ class ReportingEngine {
           continue;
         }
 
+        // If the delivery was already sent / delivered in a prior run
+        // but not yet terminal (webhook hasn't fired READ yet), do NOT
+        // re-send — we'd produce a duplicate at the provider. Retry is
+        // driven by the ops scheduler for FAILED rows only.
+        if (delivery && (delivery.status === 'SENT' || delivery.status === 'DELIVERED')) {
+          deliveries.push(delivery);
+          continue;
+        }
+
         // No adapter? mark FAILED and move on.
         if (!channel) {
           try {

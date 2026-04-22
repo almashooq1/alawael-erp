@@ -29,6 +29,8 @@ const { builders: builderRegistry } = require('./builderRegistry');
 const { buildChannels } = require('./channels');
 const { createRecipientResolver } = require('./recipientResolver');
 const { createRenderer } = require('./renderer');
+const { createRateLimiter } = require('./rateLimiter');
+const { ReportsOpsScheduler } = require('../../scheduler/reports-ops.scheduler');
 
 const ReportDelivery = require('../../models/ReportDelivery');
 const ReportApprovalRequest = require('../../models/ReportApprovalRequest');
@@ -116,17 +118,40 @@ function buildReportingPlatform(deps = {}) {
     useInterval: !cron,
   });
 
+  const rateLimiter = createRateLimiter({
+    DeliveryModel: ReportDelivery,
+    overrides: deps.rateLimits,
+    eventBus,
+    logger,
+  });
+
+  const opsScheduler = new ReportsOpsScheduler({
+    DeliveryModel: ReportDelivery,
+    catalog,
+    engine,
+    recipientResolver,
+    channels,
+    eventBus,
+    cron,
+    useInterval: !cron,
+    logger,
+  });
+
   return {
     engine,
     scheduler,
+    opsScheduler,
     channels,
     recipientResolver,
+    rateLimiter,
     start() {
       scheduler.start();
+      opsScheduler.start();
       return this;
     },
     stop() {
       scheduler.stop();
+      opsScheduler.stop();
       return this;
     },
   };

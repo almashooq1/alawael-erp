@@ -144,6 +144,66 @@ setupIntegrationBus(app);
 // ═══════════════════════════════════════════════════════════════════════════
 setupSchedulers({ isTestEnv });
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 7.5 BENEFICIARY-360 RED-FLAG SYSTEM
+//     (registry → engine → store → routes — Commits 1–10)
+// ═══════════════════════════════════════════════════════════════════════════
+try {
+  const { bootstrapRedFlagSystem } = require('./startup/redFlagBootstrap');
+  const { authenticate } = require('./middleware/auth');
+  let cronDep = null;
+  try {
+    cronDep = require('node-cron');
+  } catch {
+    /* optional */
+  }
+  const redFlags = bootstrapRedFlagSystem({
+    logger,
+    storeMode: 'auto', // uses Mongo when connection is up, memory otherwise
+    cron: cronDep,
+  });
+  app.locals.redFlagSystem = redFlags;
+  app.use('/api/v1/beneficiaries', authenticate, redFlags.router);
+  app.use('/api/v1/admin/red-flags', authenticate, redFlags.adminRouter);
+  logger.info('[RedFlag] ✓ routes mounted (beneficiary + admin)');
+
+  // Consent capture surface — the HTTP side of the Consent model
+  // (Commit 19). Without these routes, the CRITICAL consent flags
+  // stay dormant because nothing writes records.
+  try {
+    const { createConsentRouter } = require('./routes/beneficiary-consents.routes');
+    const { Consent, CONSENT_TYPES } = require('./models/Consent');
+    const Beneficiary = require('./models/Beneficiary');
+    const consentRouter = createConsentRouter({
+      consentModel: Consent,
+      beneficiaryModel: Beneficiary,
+      consentTypes: CONSENT_TYPES,
+    });
+    app.use('/api/v1/beneficiaries', authenticate, consentRouter);
+    logger.info('[Consent] ✓ capture routes mounted');
+  } catch (consentErr) {
+    logger.warn('[Consent] routes skipped:', consentErr.message);
+  }
+
+  // Rehab-disciplines read-only surface — exposes the canonical
+  // discipline registry (Phase 9 Commit 1) to the UI for IRP builder,
+  // program catalogue, goal suggestions, and measure selection.
+  try {
+    const { createRehabDisciplinesRouter } = require('./routes/rehab-disciplines.routes');
+    app.use('/api/v1/rehab/disciplines', authenticate, createRehabDisciplinesRouter());
+    logger.info('[RehabDisciplines] ✓ registry routes mounted');
+  } catch (rehabErr) {
+    logger.warn('[RehabDisciplines] routes skipped:', rehabErr.message);
+  }
+  // Fire the periodic sweep in non-test env only. Tests run `runOnce`
+  // directly when they need to; a live cron would flake them.
+  if (!isTestEnv && cronDep) {
+    redFlags.scheduler.start({ expression: '0 */6 * * *' });
+  }
+} catch (err) {
+  logger.warn('[RedFlag] bootstrap skipped:', err.message);
+}
+
 // ─── Error Handling (MUST be after all routes) ───────────────────────────────
 app.use(notFoundHandler);
 app.use(errorHandler);

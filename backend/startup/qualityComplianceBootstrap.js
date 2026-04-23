@@ -73,6 +73,7 @@ const {
   createNotificationRouter,
   buildEmailChannel,
 } = require('../services/quality/notifications/notificationRouter.service');
+const { buildSlackChannel } = require('../services/quality/notifications/channels/slackChannel');
 
 /**
  * Entry point. Returns:
@@ -234,7 +235,10 @@ function bootstrapQualityCompliance({
     notificationRouter = createNotificationRouter({
       bus,
       logModel: NotificationLog,
-      channels: { email: buildEmailChannel() },
+      channels: {
+        email: buildEmailChannel(),
+        slack: buildSlackChannel({ logger }),
+      },
       resolveRoleRecipients: extraSources.resolveRoleRecipients || (async () => []),
       logger,
     });

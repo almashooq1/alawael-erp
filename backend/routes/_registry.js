@@ -103,6 +103,7 @@ const evidenceRoutes = safeRequire('../routes/evidence.routes');
 const complianceCalendarRoutes = safeRequire('../routes/complianceCalendar.routes');
 const qualityControlsRoutes = safeRequire('../routes/qualityControls.routes');
 const qualityHealthScoreRoutes = safeRequire('../routes/qualityHealthScore.routes');
+const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
 const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
 const projectsRoutes = safeRequire('../routes/projects.routes');
@@ -279,6 +280,7 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'compliance-calendar', complianceCalendarRoutes);
   dualMount(app, 'quality-controls', qualityControlsRoutes);
   dualMount(app, 'quality/health-score', qualityHealthScoreRoutes);
+  dualMount(app, 'quality/notifications', notificationLogRoutes);
   dualMount(app, 'equipment', equipmentRoutes);
   dualMount(app, 'predictions', predictionsRoutes);
   dualMount(app, 'projects', projectsRoutes);

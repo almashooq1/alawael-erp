@@ -68,6 +68,7 @@ const {
   createRiskReassessmentScheduler,
 } = require('../services/quality/riskReassessmentScheduler.service');
 const { createNcrAutoLinkPipeline } = require('../services/quality/ncrAutoLinkPipeline.service');
+const { buildHealthScoreAdapters } = require('../services/quality/adapters');
 
 /**
  * Entry point. Returns:
@@ -150,22 +151,30 @@ function bootstrapQualityCompliance({
   require('../services/quality/controlLibrary.service')._replaceDefault?.(controlLibrary);
 
   // ── 2. Health-score aggregator ──────────────────────────────────
+  // Phase 14 C1 — build the six cross-module adapters. Callers can
+  // still inject their own via `extraSources` for tests or stubs;
+  // the built-in adapters are the default when `extraSources` is
+  // empty for that pillar.
+  const builtAdapters = buildHealthScoreAdapters({ logger });
   const healthScore = createHealthScoreAggregator({
     sources: {
       controlLibrary,
       managementReview,
       evidenceVault,
       complianceCalendar,
-      // Cross-module sources are best-effort — if a module doesn't
-      // expose the expected adapter shape, the pillar degrades to
-      // null and the score renormalises. Callers can pass
-      // `extraSources` to override.
-      incidents: extraSources.incidents || null,
-      complaints: extraSources.complaints || null,
-      capa: extraSources.capa || null,
-      satisfaction: extraSources.satisfaction || null,
-      training: extraSources.training || null,
-      documents: extraSources.documents || null,
+      incidents:
+        extraSources.incidents !== undefined ? extraSources.incidents : builtAdapters.incidents,
+      complaints:
+        extraSources.complaints !== undefined ? extraSources.complaints : builtAdapters.complaints,
+      capa: extraSources.capa !== undefined ? extraSources.capa : builtAdapters.capa,
+      satisfaction:
+        extraSources.satisfaction !== undefined
+          ? extraSources.satisfaction
+          : builtAdapters.satisfaction,
+      training:
+        extraSources.training !== undefined ? extraSources.training : builtAdapters.training,
+      documents:
+        extraSources.documents !== undefined ? extraSources.documents : builtAdapters.documents,
     },
     logger,
   });

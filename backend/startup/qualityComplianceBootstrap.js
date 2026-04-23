@@ -69,6 +69,10 @@ const {
 } = require('../services/quality/riskReassessmentScheduler.service');
 const { createNcrAutoLinkPipeline } = require('../services/quality/ncrAutoLinkPipeline.service');
 const { buildHealthScoreAdapters } = require('../services/quality/adapters');
+const {
+  createNotificationRouter,
+  buildEmailChannel,
+} = require('../services/quality/notifications/notificationRouter.service');
 
 /**
  * Entry point. Returns:
@@ -219,6 +223,25 @@ function bootstrapQualityCompliance({
     logger.warn(`[QMS] Risk scheduler unavailable: ${err.message}`);
   }
 
+  // ── 3bb. Phase 15 C1 — Notification router ─────────────────────
+  // Subscribes to all quality/compliance events on the bus and
+  // dispatches to registered channels per policy. Defensive: if
+  // NotificationLog or emailService are unavailable, we skip
+  // quietly rather than blocking bootstrap.
+  let notificationRouter = null;
+  try {
+    const NotificationLog = require('../models/quality/NotificationLog.model');
+    notificationRouter = createNotificationRouter({
+      bus,
+      logModel: NotificationLog,
+      channels: { email: buildEmailChannel() },
+      resolveRoleRecipients: extraSources.resolveRoleRecipients || (async () => []),
+      logger,
+    });
+  } catch (err) {
+    logger.warn(`[QMS] notification router unavailable: ${err.message}`);
+  }
+
   // ── 3c. C7 NCR auto-link pipeline ───────────────────────────────
   let ncrPipeline = null;
   try {
@@ -268,6 +291,13 @@ function bootstrapQualityCompliance({
         logger.warn(`[QMS] NCR pipeline failed to start: ${err.message}`);
       }
     }
+    if (notificationRouter) {
+      try {
+        notificationRouter.start();
+      } catch (err) {
+        logger.warn(`[QMS] notification router failed to start: ${err.message}`);
+      }
+    }
   }
 
   // ── 4. Seeding ──────────────────────────────────────────────────
@@ -311,6 +341,11 @@ function bootstrapQualityCompliance({
       /* ignore */
     }
     try {
+      notificationRouter?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
       await bus.flush();
     } catch {
       /* ignore */
@@ -327,6 +362,7 @@ function bootstrapQualityCompliance({
     capaScheduler,
     riskScheduler,
     ncrPipeline,
+    notificationRouter,
     evidenceSweeper,
     calendarSweeper,
     shutdown,

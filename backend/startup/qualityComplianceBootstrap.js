@@ -62,6 +62,12 @@ const {
 const {
   createComplianceCalendarAlertSweeper,
 } = require('../services/quality/complianceCalendarAlertSweeper.service');
+const { createQualityEventBus } = require('../services/quality/qualityEventBus.service');
+const { createCapaAgingScheduler } = require('../services/quality/capaAgingScheduler.service');
+const {
+  createRiskReassessmentScheduler,
+} = require('../services/quality/riskReassessmentScheduler.service');
+const { createNcrAutoLinkPipeline } = require('../services/quality/ncrAutoLinkPipeline.service');
 
 /**
  * Entry point. Returns:
@@ -86,20 +92,38 @@ function bootstrapQualityCompliance({
     return null;
   }
 
+  // ── 0. Event bus (C5) — one in-process pub/sub shared by every
+  //       service below. If the caller injected a dispatcher, we
+  //       wrap it so both the external sink and in-process
+  //       subscribers receive events.
+  const bus = createQualityEventBus({ logger });
+  const combinedDispatcher = dispatcher
+    ? {
+        async emit(name, payload) {
+          try {
+            await dispatcher.emit(name, payload);
+          } catch (err) {
+            logger.warn(`[QMS] external dispatcher ${name} failed: ${err.message}`);
+          }
+          return bus.emit(name, payload);
+        },
+      }
+    : bus;
+
   // ── 1. Core services ────────────────────────────────────────────
   const managementReview = createManagementReviewService({
     model: ManagementReview,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
   });
   const evidenceVault = createEvidenceVaultService({
     model: EvidenceItem,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
   });
   const controlLibrary = createControlLibraryService({
     model: QualityControl,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
     autoCheckRunners,
   });
@@ -109,7 +133,7 @@ function bootstrapQualityCompliance({
   // without the operator having to create stored events for them.
   const complianceCalendar = createComplianceCalendarService({
     model: ComplianceCalendarEvent,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
     adapters: {
       evidence_vault: evidenceVault,
@@ -150,15 +174,58 @@ function bootstrapQualityCompliance({
   // ── 3. Sweepers ─────────────────────────────────────────────────
   const evidenceSweeper = createEvidenceRetentionSweeper({
     evidenceModel: EvidenceItem,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
   });
   const calendarSweeper = createComplianceCalendarAlertSweeper({
     calendarService: complianceCalendar,
     eventModel: ComplianceCalendarEvent,
-    dispatcher,
+    dispatcher: combinedDispatcher,
     logger,
   });
+
+  // ── 3b. C6/C8 schedulers ────────────────────────────────────────
+  // CAPA + Risk sweepers use legacy models that may not be loaded
+  // in stripped-down boot environments; each is created defensively.
+  let capaScheduler = null;
+  let riskScheduler = null;
+  try {
+    const capaModel = require('../models/internal-audit/CorrectivePreventiveAction.model');
+    capaScheduler = createCapaAgingScheduler({
+      capaModel,
+      dispatcher: combinedDispatcher,
+      logger,
+    });
+  } catch (err) {
+    logger.warn(`[QMS] CAPA scheduler unavailable: ${err.message}`);
+  }
+  try {
+    const riskModel = require('../models/quality/Risk.model');
+    riskScheduler = createRiskReassessmentScheduler({
+      riskModel,
+      dispatcher: combinedDispatcher,
+      logger,
+    });
+  } catch (err) {
+    logger.warn(`[QMS] Risk scheduler unavailable: ${err.message}`);
+  }
+
+  // ── 3c. C7 NCR auto-link pipeline ───────────────────────────────
+  let ncrPipeline = null;
+  try {
+    const incidentModel = require('../models/quality/Incident.model');
+    const ncrModel = require('../models/internal-audit/NonConformanceReport.model');
+    const capaModel = require('../models/internal-audit/CorrectivePreventiveAction.model');
+    ncrPipeline = createNcrAutoLinkPipeline({
+      bus,
+      incidentModel,
+      ncrModel,
+      capaModel,
+      logger,
+    });
+  } catch (err) {
+    logger.warn(`[QMS] NCR pipeline unavailable: ${err.message}`);
+  }
 
   if (startSweepers) {
     try {
@@ -170,6 +237,27 @@ function bootstrapQualityCompliance({
       calendarSweeper.start();
     } catch (err) {
       logger.warn(`[QMS] calendar sweeper failed to start: ${err.message}`);
+    }
+    if (capaScheduler) {
+      try {
+        capaScheduler.start();
+      } catch (err) {
+        logger.warn(`[QMS] CAPA scheduler failed to start: ${err.message}`);
+      }
+    }
+    if (riskScheduler) {
+      try {
+        riskScheduler.start();
+      } catch (err) {
+        logger.warn(`[QMS] Risk scheduler failed to start: ${err.message}`);
+      }
+    }
+    if (ncrPipeline) {
+      try {
+        ncrPipeline.start();
+      } catch (err) {
+        logger.warn(`[QMS] NCR pipeline failed to start: ${err.message}`);
+      }
     }
   }
 
@@ -198,14 +286,38 @@ function bootstrapQualityCompliance({
     } catch {
       /* ignore */
     }
+    try {
+      capaScheduler?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      riskScheduler?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      ncrPipeline?.stop();
+    } catch {
+      /* ignore */
+    }
+    try {
+      await bus.flush();
+    } catch {
+      /* ignore */
+    }
   }
 
   return {
+    bus,
     managementReview,
     evidenceVault,
     complianceCalendar,
     controlLibrary,
     healthScore,
+    capaScheduler,
+    riskScheduler,
+    ncrPipeline,
     evidenceSweeper,
     calendarSweeper,
     shutdown,

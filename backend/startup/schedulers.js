@@ -82,6 +82,29 @@ function setupSchedulers({ isTestEnv }) {
       logger.warn('⚠️  Settings seed failed', { error: err.message });
     }
   }, 40000);
+
+  // ── QMS & Compliance bootstrap (Phase 13 C11) ───────────────────────────
+  //
+  // Wires Phase-13 services (ManagementReview, EvidenceVault,
+  // ComplianceCalendar, ControlLibrary, HealthScoreAggregator) with
+  // cross-service adapters, and starts two sweepers: evidence
+  // retention + compliance-calendar alerts.
+  //
+  // Runs at +45s to ensure Mongo is connected and other bootstraps
+  // have settled. Safe to skip if Mongo isn't ready — the
+  // bootstrap returns null and we just move on.
+  setTimeout(() => {
+    try {
+      const { bootstrapQualityCompliance } = require('./qualityComplianceBootstrap');
+      const qms = bootstrapQualityCompliance({ logger, startSweepers: true });
+      if (qms) {
+        registerShutdownHook('QualityCompliance', qms.shutdown);
+        logger.info('✅ Phase 13 QMS & Compliance stack online (sweepers running)');
+      }
+    } catch (err) {
+      logger.warn('⚠️  QMS bootstrap failed', { error: err.message });
+    }
+  }, 45000);
 }
 
 module.exports = { setupSchedulers };

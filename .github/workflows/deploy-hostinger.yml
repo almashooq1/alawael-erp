@@ -425,8 +425,10 @@ jobs:
             set -e
             cd /home/alawael/app
             if pm2 list 2>/dev/null | grep -q "alawael"; then
-              pm2 reload all --update-env
-              echo "🔄 PM2 reloaded"
+              # Use `restart` (not `reload`) because fork-mode pm2 reload was observed
+              # to no-op after rsync — node require-cache keeps the old code in memory.
+              pm2 restart all --update-env
+              echo "🔄 PM2 restarted (hard)"
             fi
             nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"
@@ -438,7 +440,7 @@ jobs:
           sleep 15
           for i in 1 2 3 4 5; do
             HEALTH=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
-              "curl -sf http://127.0.0.1:3001/health 2>/dev/null || curl -sf http://127.0.0.1:5000/health 2>/dev/null" || echo "")
+              "curl -sf http://127.0.0.1:5000/health 2>/dev/null || curl -sf http://127.0.0.1:3001/health 2>/dev/null" || echo "")
             if echo "$HEALTH" | grep -q '"ok"\|"status"'; then
               echo "✅ Health check PASSED (attempt $i)"
               exit 0

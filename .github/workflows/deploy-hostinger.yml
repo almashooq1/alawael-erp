@@ -430,18 +430,24 @@ jobs:
 
       - name: Restart services
         run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" << 'EOF'
+          # Pipe script via `bash -s` instead of heredoc-to-shell. The heredoc
+          # form was observed to run but silently skip `pm2 restart` — pm2
+          # uptime stayed at pre-deploy values. `bash -s` explicitly feeds
+          # stdin to a remote bash interpreter, which behaves predictably.
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'REMOTE_SCRIPT'
             set -e
             cd /home/alawael/app
             if pm2 list 2>/dev/null | grep -q "alawael"; then
               # Use `restart` (not `reload`) because fork-mode pm2 reload was observed
               # to no-op after rsync — node require-cache keeps the old code in memory.
+              PRE_PID=$(pm2 pid alawael-api 2>/dev/null || echo 0)
               pm2 restart all --update-env
-              echo "🔄 PM2 restarted (hard)"
+              POST_PID=$(pm2 pid alawael-api 2>/dev/null || echo 0)
+              echo "🔄 PM2 restarted (pid $PRE_PID -> $POST_PID)"
             fi
             nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"
-          EOF
+          REMOTE_SCRIPT
 
       - name: Health check
         run: |

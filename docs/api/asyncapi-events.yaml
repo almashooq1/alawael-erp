@@ -1,0 +1,585 @@
+asyncapi: 3.0.0
+info:
+  title: Al-Awael ERP — Event Bus Contracts
+  version: 4.0.100
+  summary: |
+    Machine-readable contract for every internal domain event published on
+    the Al-Awael platform, plus the outbound HR webhook channel.
+  description: |
+    The platform runs on three complementary buses:
+
+    1. **`systemIntegrationBus`** (`backend/integration/systemIntegrationBus.js`) —
+       cross-module, durable. Fanout into EventStore + MessageQueue + Socket.IO
+       + in-process EventEmitter. Publish via
+       `await integrationBus.publish(domain, eventType, payload, options)`.
+    2. **`qualityEventBus`** (`backend/services/quality/qualityEventBus.service.js`) —
+       in-process pub/sub for quality / compliance flows. Publish via
+       `await qualityEventBus.emit(name, payload)`. Supports wildcard
+       subscriptions (e.g. `quality.*`).
+    3. **HR outbound webhooks** (`backend/services/hr/hrWebhookDispatcher.js`) —
+       external subscribers receive an HMAC-signed POST per `hr.*` event.
+
+    This document catalogs every name a caller can subscribe to. Payload
+    schemas below cover the most-used flows; unlisted events still pass
+    through the bus but their shape is considered internal and subject to
+    change.
+  contact:
+    name: Al-Awael Platform
+    email: platform@alawael.sa
+
+defaultContentType: application/json
+
+servers:
+  integration-bus:
+    host: in-process
+    protocol: node-eventemitter
+    description: >
+      Durable integration bus. Every message is also persisted to the
+      EventStore and broadcast via the message queue + Socket.IO.
+  quality-bus:
+    host: in-process
+    protocol: node-eventemitter
+    description: In-process quality / compliance pub/sub (not persisted).
+  hr-webhooks:
+    host: subscriber-supplied
+    protocol: https
+    description: >
+      Outbound HTTPS POST per subscribed hr.* event. Body signed with
+      HMAC-SHA256 (hex), placed in `X-HR-Signature` with a `sha256=` prefix.
+
+channels:
+  # ── Integration bus — cross-module durable events ────────────────────────
+  attendance.department.sync:
+    address: attendance.department.sync
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      syncRequested: { $ref: '#/components/messages/AttendanceDepartmentSync' }
+  dashboard.kpi.update:
+    address: dashboard.kpi.update
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      updated: { $ref: '#/components/messages/DashboardKpiUpdate' }
+  finance.leave.deduction_check:
+    address: finance.leave.deduction_check
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      checkRequested: { $ref: '#/components/messages/FinanceLeaveDeductionCheck' }
+  finance.salary.budget_impact:
+    address: finance.salary.budget_impact
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      impactEstimated: { $ref: '#/components/messages/FinanceSalaryBudgetImpact' }
+  finance.workhours.logged:
+    address: finance.workhours.logged
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      hoursLogged: { $ref: '#/components/messages/FinanceWorkhoursLogged' }
+  hr.absence.flagged:
+    address: hr.absence.flagged
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      absenceFlagged: { $ref: '#/components/messages/HrAbsenceFlagged' }
+  medical.record.init_requested:
+    address: medical.record.init_requested
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      initRequested: { $ref: '#/components/messages/MedicalRecordInitRequested' }
+  system.audit.entry:
+    address: system.audit.entry
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      auditEntry: { $ref: '#/components/messages/SystemAuditEntry' }
+  system.security.alert:
+    address: system.security.alert
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      securityAlert: { $ref: '#/components/messages/SystemSecurityAlert' }
+
+  # ── DDD cross-domain events ─────────────────────────────────────────────
+  core.beneficiary.registered:
+    address: core.beneficiary.registered
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      registered: { $ref: '#/components/messages/BeneficiaryRegistered' }
+  episodes.episode.phase_transitioned:
+    address: episodes.episode.phase_transitioned
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      transitioned: { $ref: '#/components/messages/EpisodePhaseTransitioned' }
+  sessions.session.completed:
+    address: sessions.session.completed
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      completed: { $ref: '#/components/messages/SessionCompleted' }
+  sessions.session.no_show:
+    address: sessions.session.no_show
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      noShow: { $ref: '#/components/messages/SessionNoShow' }
+  assessments.assessment.completed:
+    address: assessments.assessment.completed
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      completed: { $ref: '#/components/messages/AssessmentCompleted' }
+  goals.goal.achieved:
+    address: goals.goal.achieved
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      achieved: { $ref: '#/components/messages/GoalAchieved' }
+  behavior.behavior.incident_recorded:
+    address: behavior.behavior.incident_recorded
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      incidentRecorded: { $ref: '#/components/messages/BehaviorIncidentRecorded' }
+  family.family.engagement_low:
+    address: family.family.engagement_low
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      engagementLow: { $ref: '#/components/messages/FamilyEngagementLow' }
+  ai-recommendations.ai.risk_elevated:
+    address: ai-recommendations.ai.risk_elevated
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      riskElevated: { $ref: '#/components/messages/AiRiskElevated' }
+  dashboards.dashboard.alert_triggered:
+    address: dashboards.dashboard.alert_triggered
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      alertTriggered: { $ref: '#/components/messages/DashboardAlertTriggered' }
+  quality.quality.corrective_action_required:
+    address: quality.quality.corrective_action_required
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      correctiveActionRequired: { $ref: '#/components/messages/QualityCorrectiveActionRequired' }
+  ar-vr.arvr.safety_alert:
+    address: ar-vr.arvr.safety_alert
+    servers: [{ $ref: '#/servers/integration-bus' }]
+    messages:
+      safetyAlert: { $ref: '#/components/messages/ArVrSafetyAlert' }
+
+  # ── Quality bus — in-process pub/sub ────────────────────────────────────
+  quality.review.closed:
+    address: quality.review.closed
+    servers: [{ $ref: '#/servers/quality-bus' }]
+    messages:
+      closed: { $ref: '#/components/messages/QualityReviewClosed' }
+  quality.incident.resolved:
+    address: quality.incident.resolved
+    servers: [{ $ref: '#/servers/quality-bus' }]
+    messages:
+      resolved: { $ref: '#/components/messages/QualityIncidentResolved' }
+  compliance.finding.created:
+    address: compliance.finding.created
+    servers: [{ $ref: '#/servers/quality-bus' }]
+    messages:
+      created: { $ref: '#/components/messages/ComplianceFindingCreated' }
+
+  # ── HR outbound webhook channel ─────────────────────────────────────────
+  hr.webhook.out:
+    address: 'hr.*'
+    servers: [{ $ref: '#/servers/hr-webhooks' }]
+    description: |
+      Every `hr.*` internal event is delivered as an HMAC-signed HTTPS POST
+      to each subscriber that registered for that event type (an empty
+      event_types array means "all hr.* events"). Body signature is
+      sha256(secret || body) in hex, placed in `X-HR-Signature` prefixed
+      with `sha256=`.
+    messages:
+      hrEvent: { $ref: '#/components/messages/HrWebhookEnvelope' }
+
+operations:
+  # Subscribers — any internal module can consume these.
+  receive.beneficiary.registered:
+    action: receive
+    channel: { $ref: '#/channels/core.beneficiary.registered' }
+    messages:
+      - { $ref: '#/channels/core.beneficiary.registered/messages/registered' }
+  receive.session.completed:
+    action: receive
+    channel: { $ref: '#/channels/sessions.session.completed' }
+    messages:
+      - { $ref: '#/channels/sessions.session.completed/messages/completed' }
+  receive.hr.absence.flagged:
+    action: receive
+    channel: { $ref: '#/channels/hr.absence.flagged' }
+    messages:
+      - { $ref: '#/channels/hr.absence.flagged/messages/absenceFlagged' }
+  receive.quality.corrective_action:
+    action: receive
+    channel: { $ref: '#/channels/quality.quality.corrective_action_required' }
+    messages:
+      - { $ref: '#/channels/quality.quality.corrective_action_required/messages/correctiveActionRequired' }
+  send.hr.webhook:
+    action: send
+    channel: { $ref: '#/channels/hr.webhook.out' }
+    messages:
+      - { $ref: '#/channels/hr.webhook.out/messages/hrEvent' }
+
+components:
+  messages:
+    AttendanceDepartmentSync:
+      name: AttendanceDepartmentSync
+      title: Attendance records roll up to a department
+      summary: Request to reconcile attendance figures for a given department + period.
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/AttendanceDepartmentSyncPayload' }
+    DashboardKpiUpdate:
+      name: DashboardKpiUpdate
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DashboardKpiUpdatePayload' }
+    FinanceLeaveDeductionCheck:
+      name: FinanceLeaveDeductionCheck
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/FinanceLeaveDeductionCheckPayload' }
+    FinanceSalaryBudgetImpact:
+      name: FinanceSalaryBudgetImpact
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/FinanceSalaryBudgetImpactPayload' }
+    FinanceWorkhoursLogged:
+      name: FinanceWorkhoursLogged
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/FinanceWorkhoursLoggedPayload' }
+    HrAbsenceFlagged:
+      name: HrAbsenceFlagged
+      summary: An employee's absence pattern crossed an HR threshold.
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/HrAbsenceFlaggedPayload' }
+    MedicalRecordInitRequested:
+      name: MedicalRecordInitRequested
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/MedicalRecordInitRequestedPayload' }
+    SystemAuditEntry:
+      name: SystemAuditEntry
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/SystemAuditEntryPayload' }
+    SystemSecurityAlert:
+      name: SystemSecurityAlert
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/SystemSecurityAlertPayload' }
+    BeneficiaryRegistered:
+      name: BeneficiaryRegistered
+      summary: A new beneficiary was registered in the core domain.
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/BeneficiaryRegisteredPayload' }
+    EpisodePhaseTransitioned:
+      name: EpisodePhaseTransitioned
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/EpisodePhaseTransitionedPayload' }
+    SessionCompleted:
+      name: SessionCompleted
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/SessionCompletedPayload' }
+    SessionNoShow:
+      name: SessionNoShow
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/SessionNoShowPayload' }
+    AssessmentCompleted:
+      name: AssessmentCompleted
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/AssessmentCompletedPayload' }
+    GoalAchieved:
+      name: GoalAchieved
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/GoalAchievedPayload' }
+    BehaviorIncidentRecorded:
+      name: BehaviorIncidentRecorded
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/BehaviorIncidentRecordedPayload' }
+    FamilyEngagementLow:
+      name: FamilyEngagementLow
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/FamilyEngagementLowPayload' }
+    AiRiskElevated:
+      name: AiRiskElevated
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/AiRiskElevatedPayload' }
+    DashboardAlertTriggered:
+      name: DashboardAlertTriggered
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/DashboardAlertTriggeredPayload' }
+    QualityCorrectiveActionRequired:
+      name: QualityCorrectiveActionRequired
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/QualityCorrectiveActionRequiredPayload' }
+    ArVrSafetyAlert:
+      name: ArVrSafetyAlert
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/ArVrSafetyAlertPayload' }
+    QualityReviewClosed:
+      name: QualityReviewClosed
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/QualityReviewClosedPayload' }
+    QualityIncidentResolved:
+      name: QualityIncidentResolved
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/QualityIncidentResolvedPayload' }
+    ComplianceFindingCreated:
+      name: ComplianceFindingCreated
+      contentType: application/json
+      payload: { $ref: '#/components/schemas/ComplianceFindingCreatedPayload' }
+    HrWebhookEnvelope:
+      name: HrWebhookEnvelope
+      contentType: application/json
+      headers:
+        type: object
+        properties:
+          X-HR-Signature:
+            type: string
+            description: 'sha256=<hex-encoded HMAC-SHA256 of the raw body using the subscriber''s shared secret>'
+          X-HR-Event-Type:
+            type: string
+            example: hr.employee.hired
+      payload: { $ref: '#/components/schemas/HrWebhookEnvelopePayload' }
+
+  schemas:
+    EventEnvelope:
+      type: object
+      required: [eventId, eventType, occurredAt]
+      properties:
+        eventId:     { type: string, format: uuid }
+        eventType:   { type: string }
+        occurredAt:  { type: string, format: date-time }
+        correlationId: { type: string, nullable: true }
+        actorId:     { type: string, nullable: true }
+        branchId:    { type: string, nullable: true }
+        tenantId:    { type: string, nullable: true }
+        priority:
+          type: string
+          enum: [LOW, NORMAL, HIGH, CRITICAL]
+          default: NORMAL
+
+    AttendanceDepartmentSyncPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            departmentId: { type: string }
+            periodStart:  { type: string, format: date }
+            periodEnd:    { type: string, format: date }
+
+    DashboardKpiUpdatePayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            kpiKey:  { type: string }
+            value:   { type: number }
+            delta:   { type: number, nullable: true }
+
+    FinanceLeaveDeductionCheckPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            employeeId: { type: string }
+            leaveId:    { type: string }
+            days:       { type: integer }
+
+    FinanceSalaryBudgetImpactPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            scenarioId:         { type: string }
+            impactAmount:       { type: number }
+            affectedHeadcount:  { type: integer }
+
+    FinanceWorkhoursLoggedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            employeeId: { type: string }
+            hours:      { type: number }
+            date:       { type: string, format: date }
+
+    HrAbsenceFlaggedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            employeeId:   { type: string }
+            absenceCount: { type: integer }
+            pattern:      { type: string, enum: [repeated_short, unauthorized_long, weekend_adjacent] }
+
+    MedicalRecordInitRequestedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            beneficiaryId: { type: string }
+            reason:        { type: string }
+
+    SystemAuditEntryPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            action:    { type: string }
+            resource:  { type: string }
+            hash:      { type: string, description: Sha256 of the audit row (chain continuity). }
+
+    SystemSecurityAlertPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            severity: { type: string, enum: [info, warn, error, critical] }
+            kind:     { type: string }
+            meta:     { type: object }
+
+    BeneficiaryRegisteredPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          required: [beneficiaryId]
+          properties:
+            beneficiaryId:     { type: string }
+            mrn:               { type: string }
+            name:              { type: string }
+            disabilityType:    { type: string }
+            disabilityLevel:   { type: string }
+
+    EpisodePhaseTransitionedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            episodeId: { type: string }
+            fromPhase: { type: string }
+            toPhase:   { type: string }
+            reason:    { type: string, nullable: true }
+
+    SessionCompletedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            sessionId:     { type: string }
+            beneficiaryId: { type: string }
+            therapistId:   { type: string }
+            durationMin:   { type: integer }
+            notesPresent:  { type: boolean }
+
+    SessionNoShowPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            sessionId:      { type: string }
+            beneficiaryId:  { type: string }
+            rescheduleHref: { type: string, nullable: true }
+
+    AssessmentCompletedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            assessmentId:  { type: string }
+            beneficiaryId: { type: string }
+            tool:          { type: string }
+            score:         { type: number, nullable: true }
+
+    GoalAchievedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            goalId:        { type: string }
+            beneficiaryId: { type: string }
+            achievedOn:    { type: string, format: date }
+
+    BehaviorIncidentRecordedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            incidentId:   { type: string }
+            severity:     { type: string, enum: [low, moderate, severe] }
+            beneficiaryId:{ type: string }
+
+    FamilyEngagementLowPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            beneficiaryId: { type: string }
+            daysSinceLast: { type: integer }
+            channel:       { type: string, enum: [phone, visit, portal] }
+
+    AiRiskElevatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            beneficiaryId: { type: string }
+            riskKind:      { type: string }
+            score:         { type: number }
+            modelVersion:  { type: string }
+
+    DashboardAlertTriggeredPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            kpiKey:   { type: string }
+            boundary: { type: string, enum: [upper, lower] }
+            value:    { type: number }
+
+    QualityCorrectiveActionRequiredPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            triggerKind: { type: string, enum: [ncr, complaint, incident, capa] }
+            triggerId:   { type: string }
+            assignee:    { type: string, nullable: true }
+            dueAt:       { type: string, format: date-time, nullable: true }
+
+    ArVrSafetyAlertPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            sessionId: { type: string }
+            alert:     { type: string }
+
+    QualityReviewClosedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            reviewId: { type: string }
+            outcome:  { type: string }
+
+    QualityIncidentResolvedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            incidentId: { type: string }
+            resolution: { type: string }
+
+    ComplianceFindingCreatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventEnvelope'
+        - type: object
+          properties:
+            findingId: { type: string }
+            severity:  { type: string, enum: [low, medium, high, critical] }
+            source:    { type: string }
+
+    HrWebhookEnvelopePayload:
+      type: object
+      required: [eventType, payload]
+      properties:
+        eventType:
+          type: string
+          example: hr.employee.hired
+          description: One of the hr.* event names.
+        timestamp:
+          type: string
+          format: date-time
+        payload:
+          type: object
+          description: Original hr.* event payload (schema follows the event type).

@@ -1,0 +1,897 @@
+openapi: 3.1.0
+info:
+  title: Al-Awael ERP — Integration APIs
+  version: 4.0.97
+  summary: |
+    Integration-layer HTTP contract for the Al-Awael rehab/day-care ERP.
+  description: |
+    Covers every endpoint added in the integration hardening + external-adapter
+    rollout (v4.0.93 → v4.0.97):
+
+    - **Hardening layer** — idempotent mutations + Dead Letter Queue
+      admin surface + Prometheus metrics.
+    - **Nafath e-signature** — digital signing vertical (request → poll →
+      verify → evidence download).
+    - **Yakeen** — Saudi civil-registry identity verification with
+      persistence + audit.
+    - **Wasel** — Saudi National Address (SPL) verification.
+    - **NPHIES** — health-insurance claim webhook receiver.
+
+    Every mutating endpoint accepts an `Idempotency-Key` header
+    (8–255 chars). Replays return the cached response with an
+    `Idempotent-Replay: true` header.
+
+    All external-adapter calls inherit retry + circuit-breaker + Dead
+    Letter Queue + PII-redacted logging automatically (see the
+    `/api/v1/admin/ops/dlq` surface).
+  contact:
+    name: Al-Awael Platform
+    email: platform@alawael.sa
+  license:
+    name: Proprietary
+servers:
+  - url: http://localhost:3001
+    description: Local development
+  - url: https://staging.alawael.sa
+    description: Staging
+  - url: https://api.alawael.sa
+    description: Production
+
+tags:
+  - name: Nafath Signing
+    description: Digital signature via Nafath. Separate from the Nafath SSO/login flow.
+  - name: Yakeen Verification
+    description: Civil-registry identity verification.
+  - name: Wasel Address
+    description: Saudi National Address (SPL) verification.
+  - name: NPHIES Webhooks
+    description: Async insurance-claim callbacks from NPHIES.
+  - name: Admin Ops — DLQ
+    description: Dead Letter Queue inspection + replay + discard.
+  - name: Observability
+    description: Prometheus metrics for integrations + hardening layer.
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ─── Nafath Signing ──────────────────────────────────────────────────────
+  /api/v1/nafath/signing/request:
+    post:
+      tags: [Nafath Signing]
+      summary: Initiate a Nafath signature request
+      description: |
+        Starts a signing session. The signer receives a push on Nafath mobile
+        and must match the returned `randomNumber`. The response is idempotent
+        — a retry with the same `Idempotency-Key` returns the cached result.
+        Additionally, a fingerprint of
+        (documentType, documentId, documentHash, signerNationalId, purpose)
+        is reused within a 15-minute window even without an idempotency key,
+        to prevent double-push to the signer's phone.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NafathSigningCreate' }
+      responses:
+        '201':
+          description: New signing request created.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathSigningRequestEnvelope' }
+        '200':
+          description: Fingerprint matched an existing in-flight request (reused).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathSigningRequestEnvelope' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/IdempotentInProgress' }
+        '503':
+          description: Nafath live mode not configured.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/nafath/signing/{id}/status:
+    get:
+      tags: [Nafath Signing]
+      summary: Poll the state of a signing request
+      description: |
+        Returns the current state and — on `APPROVED` — verifies the JWS
+        inline before marking the request approved. A mismatched document
+        hash or signer national ID will transition the request to `ERROR`
+        rather than APPROVED.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Current state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathSigningRequestEnvelope' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '502':
+          description: JWS verification failed — upstream responded with a bad signature.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/v1/nafath/signing/{id}/cancel:
+    post:
+      tags: [Nafath Signing]
+      summary: Cancel a pending signing request
+      description: User-initiated cancel. No-op on already resolved states.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Latest state (may already be resolved).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathSigningRequestEnvelope' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/nafath/signing/{id}/verify:
+    get:
+      tags: [Nafath Signing]
+      summary: Re-verify the stored JWS against the current document hash
+      description: |
+        Useful for audit — proves the stored signature still binds to the
+        stored document hash + national ID + is cryptographically valid.
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Verification outcome.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathVerifyResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/nafath/signing/{id}/evidence:
+    get:
+      tags: [Nafath Signing]
+      summary: Download the auditor-ready evidence JSON
+      description: |
+        Admin / auditor only. Returns a self-contained JSON envelope that
+        can be handed to CBAHI / MoHRSD / PDPL reviewers — contains the
+        request, signer attributes, JWS, re-verification proof, and audit
+        context.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Evidence package (attachment).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NafathEvidencePackage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Yakeen Verification ─────────────────────────────────────────────────
+  /api/v1/yakeen/verify:
+    post:
+      tags: [Yakeen Verification]
+      summary: Verify a national ID against the civil registry
+      description: |
+        Returns the adapter result (`match` / `mismatch` / `not_found` /
+        `unknown`) and persists a row for audit. A `match` result for the
+        same (nationalIdHash + name + dob) triple is reused for 24h;
+        non-match results are never cached.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/YakeenVerifyRequest' }
+      responses:
+        '200':
+          description: Verification result.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/YakeenVerifyResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /api/v1/yakeen/verify/history/{nationalId}:
+    get:
+      tags: [Yakeen Verification]
+      summary: Admin/compliance view — verification history for a national ID
+      parameters:
+        - name: nationalId
+          in: path
+          required: true
+          schema: { type: string, pattern: '^[12]\\d{9}$' }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20, maximum: 100 }
+      responses:
+        '200':
+          description: Newest-first list of prior verifications.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  items:
+                    type: array
+                    items: { $ref: '#/components/schemas/YakeenVerificationRow' }
+
+  /api/v1/yakeen/verify/by-entity/{type}/{id}:
+    get:
+      tags: [Yakeen Verification]
+      summary: Fetch the latest verification linked to a domain entity
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema: { type: string, example: guardian }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: The most recent verification row tied to that entity.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  item: { $ref: '#/components/schemas/YakeenVerificationRow' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ─── Wasel ───────────────────────────────────────────────────────────────
+  /api/v1/wasel/address/verify-short-code:
+    post:
+      tags: [Wasel Address]
+      summary: Verify a Saudi National Address short code (e.g. RFYA1234)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [shortCode]
+              properties:
+                shortCode:
+                  type: string
+                  pattern: '^[A-Z]{4}\\d{4}$'
+                  example: RFYA1234
+                nationalId:
+                  type: string
+                  pattern: '^[12]\\d{9}$'
+                  description: Optional — narrows match to addresses registered under this ID.
+      responses:
+        '200':
+          description: Verification outcome (match / not_found / invalid_format).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/WaselShortCodeResponse' }
+
+  /api/v1/wasel/address/search-by-id:
+    post:
+      tags: [Wasel Address]
+      summary: List all national addresses registered under a national ID
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [nationalId]
+              properties:
+                nationalId:
+                  type: string
+                  pattern: '^[12]\\d{9}$'
+      responses:
+        '200':
+          description: Addresses registered under the national ID.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  status:  { type: string, enum: [match, not_found] }
+                  addresses:
+                    type: array
+                    items: { $ref: '#/components/schemas/WaselAddress' }
+
+  /api/v1/wasel/address/health:
+    get:
+      tags: [Wasel Address]
+      summary: Adapter health + mode snapshot
+      responses:
+        '200':
+          description: Connection + config snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  connection:
+                    type: object
+                    properties:
+                      ok:        { type: boolean }
+                      mode:      { type: string, enum: [mock, live] }
+                      latencyMs: { type: integer }
+                  config:
+                    type: object
+
+  # ─── NPHIES webhook ─────────────────────────────────────────────────────
+  /api/v1/webhooks/nphies:
+    post:
+      tags: [NPHIES Webhooks]
+      summary: Async claim-status callback receiver
+      description: |
+        Provider-to-provider endpoint. Secured via HMAC — not JWT.
+        Returns 200 on both "matched" and "unknown claimReference" so NPHIES
+        doesn't retry. 401 on signature mismatch.
+      security:
+        - hmacSignature: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NphiesWebhookPayload' }
+      responses:
+        '200':
+          description: Accepted (matched or not).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accepted:        { type: boolean }
+                  matched:         { type: boolean }
+                  claimId:         { type: string, nullable: true }
+                  claimReference:  { type: string }
+                  status:          { type: string, nullable: true }
+        '401':
+          description: Signature missing / mismatch.
+
+  # ─── Admin Ops — DLQ ─────────────────────────────────────────────────────
+  /api/v1/admin/ops/integration-health:
+    get:
+      tags: [Admin Ops — DLQ]
+      summary: Mission-control snapshot of the entire integration subsystem
+      description: |
+        Aggregates adapter configs, circuit-breaker state, DLQ counters,
+        and idempotency counters into a single payload that powers the
+        operator dashboard. Cheap enough for 10s polling — no external
+        network calls, no DB hits.
+      responses:
+        '200':
+          description: Current integration subsystem state.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IntegrationHealthSnapshot' }
+
+  /api/v1/admin/ops/dlq:
+    get:
+      tags: [Admin Ops — DLQ]
+      summary: List Dead Letter Queue entries
+      parameters:
+        - name: integration
+          in: query
+          schema: { type: string, example: nafath }
+        - name: status
+          in: query
+          schema: { type: string, enum: [parked, replaying, resolved, discarded] }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100, maximum: 500 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Paginated list.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  total: { type: integer }
+                  rows:
+                    type: array
+                    items: { $ref: '#/components/schemas/DlqEntry' }
+
+  /api/v1/admin/ops/dlq/{id}:
+    get:
+      tags: [Admin Ops — DLQ]
+      summary: Inspect a single DLQ entry
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Full entry.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  entry: { $ref: '#/components/schemas/DlqEntry' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/admin/ops/dlq/{id}/replay:
+    post:
+      tags: [Admin Ops — DLQ]
+      summary: Replay a parked entry via its registered adapter
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      responses:
+        '200':
+          description: Replay outcome.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:      { type: boolean }
+                  outcome: { type: object }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '501':
+          description: No replay adapter registered for this integration.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:          { type: boolean, example: false }
+                  error:       { type: string, example: NO_REPLAY_ADAPTER }
+                  integration: { type: string }
+                  message:     { type: string }
+
+  /api/v1/admin/ops/dlq/{id}/discard:
+    post:
+      tags: [Admin Ops — DLQ]
+      summary: Mark an entry as discarded (operator decision)
+      parameters:
+        - $ref: '#/components/parameters/PathId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, example: duplicate-handled-by-support }
+      responses:
+        '200':
+          description: Entry updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:    { type: boolean }
+                  entry: { $ref: '#/components/schemas/DlqEntry' }
+
+  # ─── Observability ──────────────────────────────────────────────────────
+  /api/health/metrics/integrations:
+    get:
+      tags: [Observability]
+      summary: Prometheus text-format metrics for integrations + hardening
+      description: |
+        No auth — intended for Prometheus scrapers. Includes:
+
+        **Gov-adapter metrics:**
+        - `gov_adapter_rate_limit_*` (capacity, available, utilization, active actors)
+        - `gov_adapter_circuit_*` (open, failures, cooldown_ms)
+        - `gov_adapter_calls_total{provider, status}`
+        - `gov_adapter_call_latency_ms_bucket` (histogram)
+        - `gov_adapter_configured{provider}`
+        - `gov_adapter_mode{provider, mode}`
+
+        **Hardening-layer counters (v4.0.96+):**
+        - `integration_dlq_events_total{integration, outcome}` — outcomes:
+          `parked` / `replay_success` / `replay_fail` / `resolved` / `discarded`
+        - `idempotency_events_total{route, outcome}` — outcomes:
+          `hit` / `miss` / `pending_reject` / `invalid_key`
+      security: []
+      responses:
+        '200':
+          description: Prometheus text format.
+          content:
+            text/plain:
+              schema: { type: string }
+              example: |
+                # HELP integration_dlq_events_total Monotonic counter of DLQ lifecycle events.
+                # TYPE integration_dlq_events_total counter
+                integration_dlq_events_total{integration="nafath",outcome="parked"} 3
+                integration_dlq_events_total{integration="nafath",outcome="replay_success"} 2
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Standard user JWT issued by /api/v1/auth/login. Most endpoints
+        require it; unauthenticated endpoints explicitly opt out via
+        `security: []`.
+    hmacSignature:
+      type: apiKey
+      in: header
+      name: X-NPHIES-Signature
+      description: >
+        HMAC-SHA256 of the raw request body, encoded as hex, optionally
+        prefixed with `sha256=`. The exact header name and prefix are
+        configurable via NPHIES_WEBHOOK_HEADER / NPHIES_WEBHOOK_PREFIX.
+        Timestamp replay protection supported via X-NPHIES-Timestamp
+        (5-minute tolerance).
+
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: >
+        Client-generated unique key (8–255 chars). A retry with the same
+        key returns the first successful response unchanged — with an
+        `Idempotent-Replay: true` response header. Invalid keys return
+        400. A second request while the first is still in flight returns
+        409. Applied scope: `tenantId || branchId || user.id || 'global'`.
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+      example: nafath-sign-lx2h-7yh9
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    BadRequest:
+      description: Validation failure.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    Unauthorized:
+      description: Missing or invalid token.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    NotFound:
+      description: Resource not found.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+    IdempotentInProgress:
+      description: >
+        A request with this Idempotency-Key is still being processed
+        on another worker. Retry after a short delay.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error:   { type: string, example: INVALID_IDEMPOTENCY_KEY }
+        code:    { type: string, nullable: true }
+        message: { type: string }
+
+    NafathSigningStatus:
+      type: string
+      enum: [REQUESTED, PENDING, APPROVED, REJECTED, EXPIRED, CANCELLED, ERROR]
+
+    NafathSigningCreate:
+      type: object
+      required: [documentType, documentId, documentHash, signerNationalId]
+      properties:
+        documentType:
+          type: string
+          enum: [IRP, Contract, Consent, Policy, Invoice, Generic]
+        documentId:
+          type: string
+          description: Business identifier for the document being signed.
+        documentHash:
+          type: string
+          minLength: 32
+          description: Hex-encoded SHA-256 of the rendered document bytes.
+        purpose:
+          type: string
+          enum: [sign, approve, acknowledge]
+          default: sign
+        signerNationalId:
+          type: string
+          pattern: '^[12]\\d{9}$'
+          example: "1087654321"
+        signerRole:
+          type: string
+          enum: [guardian, employee, manager, auditor]
+          example: guardian
+
+    NafathSigningRequestEnvelope:
+      type: object
+      properties:
+        success:           { type: boolean }
+        requestId:         { type: string }
+        status:            { $ref: '#/components/schemas/NafathSigningStatus' }
+        transactionId:     { type: string }
+        randomNumber:      { type: string, example: "47" }
+        expiresAt:         { type: string, format: date-time }
+        mode:              { type: string, enum: [mock, live] }
+        reused:            { type: boolean, description: 'true if fingerprint matched an in-flight request' }
+        documentType:      { type: string }
+        documentId:        { type: string }
+        documentHash:      { type: string }
+        signerNationalId:  { type: string }
+        signerAttributes:
+          type: object
+          nullable: true
+          properties:
+            fullName:      { type: string }
+            dateOfBirth:   { type: string }
+            nationality:   { type: string }
+        approvedAt:        { type: string, format: date-time, nullable: true }
+        rejectedAt:        { type: string, format: date-time, nullable: true }
+        cancelledAt:       { type: string, format: date-time, nullable: true }
+        errorMessage:      { type: string, nullable: true }
+
+    NafathVerifyResponse:
+      type: object
+      properties:
+        success:   { type: boolean }
+        verified:  { type: boolean }
+        reason:    { type: string, nullable: true, example: NAFATH_JWS_DOCUMENT_HASH_MISMATCH }
+        payload:   { type: object, nullable: true }
+        header:    { type: object, nullable: true }
+
+    NafathEvidencePackage:
+      type: object
+      properties:
+        kind:        { type: string, example: nafath-signature-evidence }
+        version:     { type: integer, example: 1 }
+        generatedAt: { type: string, format: date-time }
+        request:     { type: object }
+        signer:      { type: object }
+        transaction: { type: object }
+        signature:
+          type: object
+          properties:
+            jws:  { type: string }
+            algo: { type: string }
+        verification: { $ref: '#/components/schemas/NafathVerifyResponse' }
+        auditContext: { type: object }
+
+    YakeenVerifyRequest:
+      type: object
+      required: [nationalId]
+      properties:
+        nationalId:
+          type: string
+          pattern: '^[12]\\d{9}$'
+        firstName_ar:       { type: string, description: Optional — enables name match. }
+        dateOfBirthHijri:   { type: string, example: 1410/01/01 }
+        context:
+          type: string
+          enum: [guardian_admission, employee_onboarding, beneficiary_consent_signer, nafath_signing, adhoc]
+          default: adhoc
+        contextEntityType:  { type: string, nullable: true }
+        contextEntityId:    { type: string, nullable: true }
+        forceRefresh:
+          type: boolean
+          default: false
+          description: Bypass the 24h cache and hit the adapter again.
+
+    YakeenVerifyResponse:
+      type: object
+      properties:
+        success:          { type: boolean }
+        cached:           { type: boolean }
+        verificationId:   { type: string, nullable: true }
+        result:           { type: string, enum: [match, mismatch, not_found, unknown] }
+        attributes:       { $ref: '#/components/schemas/YakeenAttributes' }
+        mode:             { type: string, enum: [mock, live] }
+        message:          { type: string, nullable: true }
+        circuitOpen:      { type: boolean, nullable: true }
+
+    YakeenAttributes:
+      type: object
+      properties:
+        fullName_ar:            { type: string }
+        firstName_ar:           { type: string }
+        lastName_ar:            { type: string }
+        gender:                 { type: string, enum: [M, F] }
+        dateOfBirthHijri:       { type: string }
+        dateOfBirthGregorian:   { type: string, format: date }
+        nationality:            { type: string, example: SAU }
+        isAlive:                { type: boolean }
+
+    YakeenVerificationRow:
+      allOf:
+        - $ref: '#/components/schemas/YakeenVerifyResponse'
+        - type: object
+          properties:
+            _id:                { type: string }
+            lastFour:           { type: string, example: "4321" }
+            context:            { type: string }
+            contextEntityType:  { type: string, nullable: true }
+            contextEntityId:    { type: string, nullable: true }
+            createdAt:          { type: string, format: date-time }
+
+    WaselShortCodeResponse:
+      type: object
+      properties:
+        success:           { type: boolean }
+        status:            { type: string, enum: [match, not_found, invalid_format, unknown] }
+        message:           { type: string, nullable: true }
+        mode:              { type: string, enum: [mock, live] }
+        address:           { type: string, nullable: true }
+        city:              { type: string, nullable: true }
+        district:          { type: string, nullable: true }
+        postalCode:        { type: string, nullable: true }
+        buildingNumber:    { type: string, nullable: true }
+        additionalNumber:  { type: string, nullable: true }
+        geo:
+          type: object
+          nullable: true
+          properties:
+            lat: { type: number }
+            lng: { type: number }
+        isDeliverable:     { type: boolean, nullable: true }
+
+    WaselAddress:
+      type: object
+      properties:
+        shortCode:        { type: string }
+        address:          { type: string }
+        city:             { type: string }
+        district:         { type: string }
+        postalCode:       { type: string }
+        buildingNumber:   { type: string }
+        additionalNumber: { type: string }
+
+    NphiesWebhookPayload:
+      type: object
+      required: [claimReference, status]
+      properties:
+        claimReference:   { type: string, example: NPHIES-REF-99 }
+        status:
+          type: string
+          enum: [APPROVED, ACCEPTED, REJECTED, DENIED, PENDING, PENDING_REVIEW, IN_REVIEW]
+        reason:           { type: string, nullable: true }
+        message:          { type: string, nullable: true }
+        approvedAmount:   { type: number, nullable: true }
+        remainingBalance: { type: number, nullable: true }
+        mode:             { type: string, enum: [mock, live] }
+
+    IntegrationHealthSnapshot:
+      type: object
+      properties:
+        ok: { type: boolean }
+        snapshot:
+          type: object
+          properties:
+            generatedAt: { type: string, format: date-time }
+            durationMs:  { type: integer }
+            overall:
+              type: string
+              enum: [healthy, degraded, critical]
+            headline:
+              type: object
+              properties:
+                adaptersTotal:            { type: integer }
+                adaptersLive:             { type: integer }
+                adaptersMock:             { type: integer }
+                adaptersUnconfiguredLive: { type: integer }
+                openCircuits:             { type: integer }
+                parkedNet:                { type: integer, description: 'parked - resolved - discarded' }
+                dlqReplaySuccessRate:     { type: number, nullable: true, minimum: 0, maximum: 1 }
+                idempotencyHitRate:       { type: number, nullable: true, minimum: 0, maximum: 1 }
+            adapters:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:              { type: string }
+                  mode:              { type: string, enum: [mock, live, unknown] }
+                  configured:        { type: boolean }
+                  missing:           { type: array, items: { type: string } }
+                  circuitOpen:       { type: boolean }
+                  circuitFailures:   { type: integer }
+                  circuitCooldownMs: { type: integer }
+                  error:             { type: string, nullable: true }
+            dlq:
+              type: object
+              properties:
+                totals:
+                  type: object
+                  properties:
+                    parked:         { type: integer }
+                    resolved:       { type: integer }
+                    replay_success: { type: integer }
+                    replay_fail:    { type: integer }
+                    discarded:      { type: integer }
+                byIntegration:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      parked:         { type: integer }
+                      resolved:       { type: integer }
+                      replay_success: { type: integer }
+                      replay_fail:    { type: integer }
+                      discarded:      { type: integer }
+            idempotency:
+              type: object
+              properties:
+                totals:
+                  type: object
+                  properties:
+                    hit:             { type: integer }
+                    miss:            { type: integer }
+                    pending_reject:  { type: integer }
+                    invalid_key:     { type: integer }
+                topRoutes:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      route:          { type: string }
+                      hit:            { type: integer }
+                      miss:           { type: integer }
+                      pending_reject: { type: integer }
+                      invalid_key:    { type: integer }
+
+    DlqEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID v4 generated at park time.
+        status:          { type: string, enum: [parked, replaying, resolved, discarded] }
+        createdAt:       { type: integer, description: Unix ms }
+        updatedAt:       { type: integer, description: Unix ms }
+        integration:     { type: string, example: nafath }
+        operation:       { type: string, nullable: true, example: sign }
+        method:          { type: string, nullable: true, example: POST }
+        endpoint:        { type: string, nullable: true }
+        idempotencyKey:  { type: string, nullable: true }
+        correlationId:   { type: string, nullable: true }
+        attempts:        { type: integer }
+        replayCount:     { type: integer }
+        lastError:
+          type: object
+          nullable: true
+          properties:
+            message: { type: string }
+            code:    { type: string, nullable: true }
+            status:  { type: integer, nullable: true }
+            name:    { type: string, nullable: true }
+        payload:
+          type: object
+          nullable: true
+          description: Original request body with PII redacted.
+        headers:
+          type: object
+          nullable: true
+          description: Original request headers with Authorization + secrets redacted.
+        resolvedAt:      { type: integer, nullable: true }
+        discardedAt:     { type: integer, nullable: true }
+        discardReason:   { type: string, nullable: true }
+        meta:
+          type: object
+          description: Tenant / branch / user tags attached by the caller.

@@ -1,0 +1,214 @@
+{
+  "__comment": "Grafana dashboard for the Integration Hardening layer (Phases I-IV). Expects a Prometheus datasource scraping /api/health/metrics/integrations. Shipped with v4.0.96. Tested against Grafana 10.x.",
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["alawael", "integration-hardening", "dlq", "idempotency"],
+  "title": "Al-Awael — Integration Hardening",
+  "uid": "alawael-integration-hardening",
+  "version": 1,
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "integration",
+        "label": "Integration",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(integration_dlq_events_total, integration)",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      },
+      {
+        "name": "route",
+        "label": "Route",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(idempotency_events_total, route)",
+        "multi": true,
+        "includeAll": true,
+        "current": { "text": "All", "value": "$__all" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "DLQ entries parked in last 24h",
+      "description": "Count of failed external calls that got auto-parked in the Dead Letter Queue.",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(integration_dlq_events_total{outcome=\"parked\"}[24h]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Replay success ratio (24h)",
+      "description": "replay_success / (replay_success + replay_fail) — target >80% once the worker warms.",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(integration_dlq_events_total{outcome=\"replay_success\"}[24h])) / clamp_min(sum(increase(integration_dlq_events_total{outcome=~\"replay_success|replay_fail\"}[24h])), 1)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 0.5 },
+              { "color": "green", "value": 0.8 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Idempotency cache hit rate (1h)",
+      "description": "hits / (hits + misses) — higher means more retries are being served from cache.",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(idempotency_events_total{outcome=\"hit\"}[1h])) / clamp_min(sum(increase(idempotency_events_total{outcome=~\"hit|miss\"}[1h])), 1)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 0.1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Invalid idempotency keys (24h)",
+      "description": "Clients sending malformed Idempotency-Key headers. Spikes suggest a bad client rollout.",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(idempotency_events_total{outcome=\"invalid_key\"}[24h]))"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "DLQ parked rate per integration",
+      "description": "Rate of parked events per-integration. A sustained non-zero rate for one integration points at a downstream outage.",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (integration) (rate(integration_dlq_events_total{outcome=\"parked\", integration=~\"$integration\"}[5m]))",
+          "legendFormat": "{{integration}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Replay outcomes per integration (5m rate)",
+      "description": "Green = replay_success, red = replay_fail. Healthy integrations flip green quickly after an outage.",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (integration, outcome) (rate(integration_dlq_events_total{outcome=~\"replay_success|replay_fail\", integration=~\"$integration\"}[5m]))",
+          "legendFormat": "{{integration}} — {{outcome}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 20,
+      "type": "timeseries",
+      "title": "Idempotency outcomes per route",
+      "description": "hit/miss/pending_reject traffic per route. A steady stream of pending_rejects means clients are firing parallel duplicates.",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (route, outcome) (rate(idempotency_events_total{route=~\"$route\"}[5m]))",
+          "legendFormat": "{{route}} — {{outcome}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 30,
+      "type": "table",
+      "title": "Active integrations with parked entries (right now)",
+      "description": "Raw parked count by integration. Zero means the operator has either resolved or discarded every entry.",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "integration_dlq_events_total{outcome=\"parked\"} - on(integration) group_left integration_dlq_events_total{outcome=\"resolved\"} - on(integration) group_left integration_dlq_events_total{outcome=\"discarded\"}",
+          "format": "table",
+          "instant": true
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "type": "table",
+      "title": "Route-level idempotency stats",
+      "description": "Route × outcome breakdown. Use this to spot clients that bypass the header or send malformed keys.",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "idempotency_events_total",
+          "format": "table",
+          "instant": true
+        }
+      ]
+    }
+  ]
+}

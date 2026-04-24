@@ -1,0 +1,135 @@
+# Alertmanager sample — routes the severity labels emitted by
+# docs/alerts/integration-hardening.rules.yml to concrete channels.
+#
+# This is a TEMPLATE, not a deployment artifact. Before using it:
+#   1. Replace the placeholder URLs / service keys with real secrets from
+#      your secret manager. Never commit the populated file.
+#   2. Tune the `repeat_interval` to your on-call rotation's tolerance.
+#   3. Adjust `group_by` + `group_wait` to whatever the team finds legible —
+#      these defaults err on the side of grouping aggressively so you don't
+#      get 10 pages at once when a single integration flaps.
+#
+# Install: `amtool check-config alertmanager.yml` before pushing.
+
+global:
+  resolve_timeout: 5m
+  # SMTP / PagerDuty / Slack credentials go into $ALERTMANAGER_* env
+  # variables and get loaded via `--config.file` with external-url template
+  # resolution; they do NOT belong in this file.
+
+# ──────────────────────────────────────────────────────────────────────
+# Templates — inline because the rules use simple $labels/$annotations
+# fields. Extend if you need richer HTML.
+# ──────────────────────────────────────────────────────────────────────
+templates: []
+
+# ──────────────────────────────────────────────────────────────────────
+# Inhibition — prevent duplicate warnings when a page already covers them.
+# Example: when GovAdapterCircuitOpen pages, suppress the adjacent
+# DlqParkSpike warning for the same integration (parks are a symptom of
+# the circuit, not a separate incident).
+# ──────────────────────────────────────────────────────────────────────
+inhibit_rules:
+  - source_matchers:
+      - severity="page"
+      - component="gov-adapter"
+    target_matchers:
+      - severity="warn"
+      - component="dlq"
+    equal: ['integration']
+
+# ──────────────────────────────────────────────────────────────────────
+# Routing — severity=page → PagerDuty; severity=warn → Slack.
+# Component-specific overrides live under `routes:`.
+# ──────────────────────────────────────────────────────────────────────
+route:
+  receiver: default-slack
+  group_by: ['alertname', 'integration']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    # ── On-call pages ──────────────────────────────────────────────
+    - matchers:
+        - severity="page"
+      receiver: pagerduty-integrations
+      continue: true            # also fan out to Slack for team visibility
+      group_wait: 10s           # pages should arrive fast
+      repeat_interval: 1h
+
+    # ── Team-wide warnings ────────────────────────────────────────
+    - matchers:
+        - severity="warn"
+      receiver: slack-integrations
+
+    # ── Component-specific Slack overrides ─────────────────────────
+    - matchers:
+        - component="gov-adapter"
+      receiver: slack-integrations-govadapter
+      continue: true
+
+    - matchers:
+        - component="dlq"
+      receiver: slack-integrations-dlq
+      continue: true
+
+receivers:
+  - name: default-slack
+    slack_configs:
+      - channel: '#alerts'
+        send_resolved: true
+        title: '{{ .CommonLabels.alertname }} ({{ .CommonLabels.severity }})'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          {{ if .Labels.integration }}Integration: `{{ .Labels.integration }}`{{ end }}
+          {{ end }}
+
+  - name: pagerduty-integrations
+    pagerduty_configs:
+      - service_key: 'REPLACE_WITH_ENV_VAR_OR_SECRET'
+        description: '{{ .CommonAnnotations.summary }}'
+        severity: 'critical'
+        details:
+          firing: '{{ .Alerts.Firing | len }}'
+          runbook: 'https://internal.docs/alawael/integration-hardening'
+          alertname: '{{ .CommonLabels.alertname }}'
+
+  - name: slack-integrations
+    slack_configs:
+      - channel: '#integrations'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+        title: '{{ .CommonLabels.alertname }} — {{ .CommonLabels.severity }}'
+        text: |
+          {{ range .Alerts }}
+          > *{{ .Annotations.summary }}*
+          > {{ .Annotations.description }}
+          > Runbook: docs/blueprint/15-integration-hardening.md
+          {{ end }}
+
+  - name: slack-integrations-govadapter
+    slack_configs:
+      - channel: '#integrations-govadapter'
+        send_resolved: true
+        title: '[gov-adapter] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          Provider: `{{ .Labels.provider }}`
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          {{ end }}
+
+  - name: slack-integrations-dlq
+    slack_configs:
+      - channel: '#integrations-dlq'
+        send_resolved: true
+        title: '[dlq] {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          Integration: `{{ .Labels.integration }}`
+          {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          Inspect: /api/v1/admin/ops/dlq?integration={{ .Labels.integration }}&status=parked
+          {{ end }}

@@ -1,0 +1,140 @@
+groups:
+  # ──────────────────────────────────────────────────────────────────────
+  # Integration Hardening — alert rules for the Prometheus counters
+  # shipped in v4.0.96 (`integration_dlq_events_total`,
+  # `idempotency_events_total`) plus the existing gov-adapter metrics.
+  #
+  # Drop this file into Prometheus via:
+  #   rule_files:
+  #     - /etc/prometheus/rules/integration-hardening.rules.yml
+  # and route the `severity` labels in Alertmanager as desired.
+  # ──────────────────────────────────────────────────────────────────────
+  - name: integration-circuits
+    interval: 30s
+    rules:
+      - alert: GovAdapterCircuitOpen
+        expr: gov_adapter_circuit_open == 1
+        for: 2m
+        labels:
+          severity: page
+          team: integrations
+          component: gov-adapter
+        annotations:
+          summary: 'Circuit open: {{ $labels.provider }} is unreachable'
+          description: |
+            The circuit breaker for {{ $labels.provider }} has been open for 2m.
+            Every call is failing fast. Check:
+              - Upstream status page
+              - Network egress (NAT gateway IP may have rotated)
+              - Credentials expiry
+            Runbook: docs/blueprint/15-integration-hardening.md
+
+      - alert: GovAdapterRateLimitExhausted
+        expr: gov_adapter_rate_limit_utilization_percent > 85
+        for: 5m
+        labels:
+          severity: warn
+          team: integrations
+          component: gov-adapter
+        annotations:
+          summary: '{{ $labels.provider }} rate-limit > 85% for 5m'
+          description: 'Sustained pressure on {{ $labels.provider }} — expect throttling. Consider staggering cron jobs.'
+
+      - alert: GovAdapterLiveNotConfigured
+        expr: gov_adapter_configured == 0 and gov_adapter_mode{mode="live"} == 1
+        for: 10m
+        labels:
+          severity: page
+          team: integrations
+          component: gov-adapter
+        annotations:
+          summary: '{{ $labels.provider }} is in LIVE mode but missing credentials'
+          description: 'Either provision the missing env vars or flip NAFATH_MODE / ABSHER_MODE back to "mock".'
+
+  - name: integration-dlq
+    interval: 30s
+    rules:
+      - alert: DlqGrowing
+        # Net parked (parked - resolved - discarded) > 10 for one integration.
+        expr: |
+          (
+            integration_dlq_events_total{outcome="parked"}
+            - on(integration) group_left max by (integration) (integration_dlq_events_total{outcome="resolved"} or integration_dlq_events_total{outcome="parked"} * 0)
+            - on(integration) group_left max by (integration) (integration_dlq_events_total{outcome="discarded"} or integration_dlq_events_total{outcome="parked"} * 0)
+          ) > 10
+        for: 10m
+        labels:
+          severity: warn
+          team: integrations
+          component: dlq
+        annotations:
+          summary: 'DLQ backlog for {{ $labels.integration }}'
+          description: |
+            Net parked entries (parked - resolved - discarded) for
+            {{ $labels.integration }} has been > 10 for 10m. Either replay
+            from /admin/ops/dlq or investigate the root cause.
+
+      - alert: DlqReplayFailureRateHigh
+        # More replay failures than successes over the last 15 minutes.
+        expr: |
+          sum(rate(integration_dlq_events_total{outcome="replay_fail"}[15m]))
+          > sum(rate(integration_dlq_events_total{outcome="replay_success"}[15m]))
+        for: 15m
+        labels:
+          severity: page
+          team: integrations
+          component: dlq
+        annotations:
+          summary: 'DLQ replay worker is failing more than succeeding (15m)'
+          description: |
+            The scheduled replay worker is burning through retries without
+            making progress. Either pause it (env NPHIES_RECON_ENABLED=false
+            style guard), or fix the underlying adapter.
+
+      - alert: DlqParkSpike
+        # New park rate spikes above 1/sec sustained for 5m.
+        expr: sum by (integration) (rate(integration_dlq_events_total{outcome="parked"}[5m])) > 1
+        for: 5m
+        labels:
+          severity: page
+          team: integrations
+          component: dlq
+        annotations:
+          summary: 'Sustained DLQ park rate for {{ $labels.integration }}'
+          description: >
+            More than 1 failure/sec for 5m means {{ $labels.integration }} is
+            actively degraded — investigate before the backlog becomes a
+            manual-replay marathon.
+
+  - name: integration-idempotency
+    interval: 30s
+    rules:
+      - alert: IdempotencyInvalidKeysSpike
+        # Any invalid key is noteworthy — clients shouldn't be sending them.
+        expr: sum(rate(idempotency_events_total{outcome="invalid_key"}[15m])) > 0.01
+        for: 15m
+        labels:
+          severity: warn
+          team: integrations
+          component: idempotency
+        annotations:
+          summary: Clients sending malformed Idempotency-Key headers
+          description: >
+            Likely a bad client rollout or someone hitting the API without
+            generating a UUID. Check /admin/ops/integration-health for the
+            top-offending route.
+
+      - alert: IdempotencyPendingRejectHigh
+        # High rate of 409s (in-flight duplicates) — clients firing parallel duplicates.
+        expr: sum by (route) (rate(idempotency_events_total{outcome="pending_reject"}[10m])) > 0.1
+        for: 10m
+        labels:
+          severity: warn
+          team: integrations
+          component: idempotency
+        annotations:
+          summary: 'Parallel duplicate requests on {{ $labels.route }}'
+          description: >
+            Clients are sending the same Idempotency-Key while the first
+            request is still in flight. Usually a buggy retry loop on the
+            client side.

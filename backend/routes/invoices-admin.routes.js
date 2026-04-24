@@ -26,8 +26,16 @@ const { buildEnvelope } = require('../services/zatcaEnvelope');
 const fatoora = require('../services/fatooraAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const idempotency = require('../middleware/idempotency.middleware');
 
 router.use(authenticateToken);
+
+// Tenant-scoped idempotency for ZATCA issuance — duplicate POSTs with the
+// same Idempotency-Key return the cached envelope instead of submitting a
+// second invoice to FATOORA and breaking the chain.
+const invoiceIdempotency = idempotency({
+  scope: req => (req.user && (req.user.tenantId || req.user.branchId)) || 'global',
+});
 
 const STAFF_ROLES = [
   'admin',
@@ -234,7 +242,7 @@ router.patch('/:id', requireRole(WRITE_ROLES), async (req, res) => {
 });
 
 // ── POST /:id/issue — build ZATCA envelope + status=ISSUED ───────────────
-router.post('/:id/issue', requireRole(WRITE_ROLES), async (req, res) => {
+router.post('/:id/issue', invoiceIdempotency, requireRole(WRITE_ROLES), async (req, res) => {
   try {
     if (!mongoose.isValidObjectId(req.params.id))
       return res.status(400).json({ success: false, message: 'معرّف غير صالح' });

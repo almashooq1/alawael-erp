@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // --- SHARED SCHEMAS ---
@@ -52,6 +51,14 @@ const carePlanSchema = new mongoose.Schema(
     startDate: { type: Date, required: true },
     reviewDate: Date,
     status: { type: String, enum: ['DRAFT', 'ACTIVE', 'ARCHIVED'], default: 'DRAFT' },
+
+    // Signature gating — opt-in so pre-existing plans (created
+    // before the red-flag module) don't retroactively flood alerts.
+    // New plans set this to true; the unsigned-14d flag only counts
+    // plans where `requiresSignature === true && signedAt == null`.
+    requiresSignature: { type: Boolean, default: false },
+    signedAt: { type: Date, default: null },
+    signedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
     // 1. Educational Plan (IEP)
     educational: {

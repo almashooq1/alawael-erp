@@ -104,6 +104,24 @@ const complianceCalendarRoutes = safeRequire('../routes/complianceCalendar.route
 const qualityControlsRoutes = safeRequire('../routes/qualityControls.routes');
 const qualityHealthScoreRoutes = safeRequire('../routes/qualityHealthScore.routes');
 const notificationLogRoutes = safeRequire('../routes/notificationLog.routes');
+const slaEngineRoutes = safeRequire('../routes/operations/slaEngine.routes');
+const workOrderOpsRoutes = safeRequire('../routes/operations/workOrder.routes');
+const facilityOpsRoutes = safeRequire('../routes/operations/facility.routes');
+const purchaseRequestOpsRoutes = safeRequire('../routes/operations/purchaseRequest.routes');
+const opsDashboardRoutes = safeRequire('../routes/operations/opsDashboard.routes');
+const meetingGovernanceRoutes = safeRequire('../routes/operations/meetingGovernance.routes');
+const routeOptimizationRoutes = safeRequire('../routes/operations/routeOptimization.routes');
+const notificationDispatchRoutes = safeRequire('../routes/operations/notificationDispatch.routes');
+// Phase 17 Care Platform — CRM + Social + Home Visits + Welfare + Community
+const careCrmRoutes = safeRequire('../routes/care/crm.routes');
+const careSocialRoutes = safeRequire('../routes/care/social.routes');
+const careHomeVisitRoutes = safeRequire('../routes/care/homeVisit.routes');
+const careWelfareRoutes = safeRequire('../routes/care/welfare.routes');
+const careCommunityRoutes = safeRequire('../routes/care/community.routes');
+const carePsychRoutes = safeRequire('../routes/care/psych.routes');
+const careIndependenceRoutes = safeRequire('../routes/care/independence.routes');
+const careBeneficiary360Routes = safeRequire('../routes/care/beneficiary360.routes');
+const careRetentionRoutes = safeRequire('../routes/care/retention.routes');
 const equipmentRoutes = safeRequire('../routes/equipment');
 const predictionsRoutes = safeRequire('../routes/predictions.routes');
 const projectsRoutes = safeRequire('../routes/projects.routes');
@@ -281,6 +299,40 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'quality-controls', qualityControlsRoutes);
   dualMount(app, 'quality/health-score', qualityHealthScoreRoutes);
   dualMount(app, 'quality/notifications', notificationLogRoutes);
+  // ── Phase 16 Commit 1 — Ops SLA engine ───────────────────────────────
+  dualMount(app, 'ops/sla', slaEngineRoutes);
+  // ── Phase 16 Commit 2 — Ops WO state machine ─────────────────────────
+  dualMount(app, 'ops/work-orders', workOrderOpsRoutes);
+  // ── Phase 16 Commit 3 — Facility CRUD + inspections ──────────────────
+  dualMount(app, 'ops/facilities', facilityOpsRoutes);
+  // ── Phase 16 Commit 4 — PR → PO workflow ─────────────────────────────
+  dualMount(app, 'ops/purchase-requests', purchaseRequestOpsRoutes);
+  // ── Phase 16 Commit 5 — Ops Control Tower dashboards ─────────────────
+  dualMount(app, 'ops/dashboard', opsDashboardRoutes);
+  // ── Phase 16 Commit 6 — Meeting governance + decisions + follow-up ───
+  dualMount(app, 'ops/meeting-governance', meetingGovernanceRoutes);
+  // ── Phase 16 Commit 7 — Route optimization (planning + reconciliation) ─
+  dualMount(app, 'ops/route-optimization', routeOptimizationRoutes);
+  // ── Phase 16 Commit 8 — Notification dispatch (priority/quiet/digest) ─
+  dualMount(app, 'ops/notification-dispatch', notificationDispatchRoutes);
+  // ── Phase 17 Commit 1 — Care Platform: CRM lead funnel + inquiries ────
+  dualMount(app, 'care/crm', careCrmRoutes);
+  // ── Phase 17 Commit 2 — Care Platform: Social Services + cases ───────
+  dualMount(app, 'care/social', careSocialRoutes);
+  // ── Phase 17 Commit 3 — Care Platform: Home visits + GPS + follow-up SLA
+  dualMount(app, 'care/home-visits', careHomeVisitRoutes);
+  // ── Phase 17 Commit 4 — Care Platform: Welfare applications + appeals ────
+  dualMount(app, 'care/welfare', careWelfareRoutes);
+  // ── Phase 17 Commit 4 — Care Platform: Community partners + linkages ────
+  dualMount(app, 'care/community', careCommunityRoutes);
+  // ── Phase 17 Commit 5 — Care Platform: Psych (flags + scales + MDT) ────
+  dualMount(app, 'care/psych', carePsychRoutes);
+  // ── Phase 17 Commit 6 — Care Platform: Life Independence (TRA + IADL + Participation) ──
+  dualMount(app, 'care/independence', careIndependenceRoutes);
+  // ── Phase 17 Commit 7 — Care Platform: Beneficiary-360 unified profile ⭐ ──
+  dualMount(app, 'care/360', careBeneficiary360Routes);
+  // ── Phase 17 Commit 8 — Care Platform: Retention / churn risk + interventions ──
+  dualMount(app, 'care/retention', careRetentionRoutes);
   dualMount(app, 'equipment', equipmentRoutes);
   dualMount(app, 'predictions', predictionsRoutes);
   dualMount(app, 'projects', projectsRoutes);
@@ -336,6 +388,15 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
   dualMount(app, 'admin/care-plans', require('../routes/care-plans-admin.routes'));
   dualMount(app, 'parent-v2', require('../routes/parent-portal-v2.routes'));
   dualMount(app, 'therapist-workbench', require('../routes/therapist-workbench.routes'));
+
+  // ── v1 Portal skeletons (frontend contracts; implementations pending) ───
+  // Mounted so that /api/v1/therapist/*, /api/v1/portal/*, /api/v1/student/*
+  // return documented 501 envelopes instead of 404s. Each 501 response carries
+  // the request/response shape the portal app expects — see the per-file docs.
+  safeMount(app, ['/api/v1/therapist'], '../routes/therapist-portal.routes');
+  safeMount(app, ['/api/v1/portal'], '../routes/parent-portal-v1.routes');
+  safeMount(app, ['/api/v1/student'], '../routes/student-portal.routes');
+  safeMount(app, ['/api/v1/hq-reports'], '../routes/hq-reports.routes');
   dualMount(app, 'admin/bi', require('../routes/bi-analytics.routes'));
   dualMount(app, 'admin/invoices', require('../routes/invoices-admin.routes'));
   dualMount(app, 'chat-v2', require('../routes/chat-v2.routes'));

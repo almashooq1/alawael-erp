@@ -111,6 +111,12 @@ const {
 const {
   createBehaviorTrackingObservations,
 } = require('../services/redFlagObservations/behaviorTrackingObservations');
+const {
+  createHrCredentialObservations,
+} = require('../services/redFlagObservations/hrCredentialObservations');
+const {
+  createHrWorkforceObservations,
+} = require('../services/redFlagObservations/hrWorkforceObservations');
 
 // Phase-9 Commit 10 — wire the rehab review service as a red-flag
 // trigger source. Unlike the observation adapters above, this one
@@ -226,6 +232,45 @@ function bootstrapRedFlagSystem(options = {}) {
         createCpeObservations({
           sessionAttendanceModel: SessionAttendanceForCpe,
           employeeModel: HrEmployeeModel,
+        })
+      );
+      // Phase-11 Commit 1 — hrCredentialService backs the two new
+      // critical+blocking flags (license.expired + mandatory_cert.expired).
+      // Requires an additional Certification model; if it's missing we
+      // skip registration so the flag records a loud locator-error
+      // instead of silently returning zero counts.
+      const HrCertificationModel = tryLoadModel('../models/hr/Certification');
+      if (HrCertificationModel) {
+        // EmploymentContract is a soft dep — older deployments may not
+        // have it, in which case the contract flag records locator-error.
+        // License + mandatory-cert flags still evaluate correctly.
+        const HrEmploymentContractModel = tryLoadModel('../models/hr/EmploymentContract');
+        locator.register(
+          'hrCredentialService',
+          createHrCredentialObservations({
+            sessionAttendanceModel: SessionAttendanceForCpe,
+            employeeModel: HrEmployeeModel,
+            certificationModel: HrCertificationModel,
+            employmentContractModel: HrEmploymentContractModel,
+          })
+        );
+      }
+      // Phase-11 Commit 3 — hrWorkforceService backs four info/warning
+      // HR flags (leave overflow, review overdue, probation review,
+      // shift-assignment sync). LeaveBalance/PerformanceReview/Shift
+      // are all soft deps — missing model → locator-error on the
+      // specific flag, others still resolve.
+      const LeaveBalanceModel = tryLoadModel('../models/hr/LeaveBalance');
+      const PerformanceReviewModel = tryLoadModel('../models/hr/PerformanceReview');
+      const ShiftModel = tryLoadModel('../models/Shift');
+      locator.register(
+        'hrWorkforceService',
+        createHrWorkforceObservations({
+          sessionAttendanceModel: SessionAttendanceForCpe,
+          employeeModel: HrEmployeeModel,
+          leaveBalanceModel: LeaveBalanceModel,
+          performanceReviewModel: PerformanceReviewModel,
+          shiftModel: ShiftModel,
         })
       );
     }

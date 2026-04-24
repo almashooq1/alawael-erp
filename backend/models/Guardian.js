@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Guardian Model
  * نموذج ولي الأمر في بوابة المستفيد/ولي الأمر
@@ -80,6 +79,14 @@ const GuardianSchema = new Schema(
         ref: 'Beneficiary',
       },
     ],
+
+    // Date the guardian's court-issued custody/guardianship order
+    // was last refreshed (refiled, reviewed, reissued). PDPL + KSA
+    // child-protection rules treat custody documents as requiring
+    // periodic renewal. Feeds compliance.custody.order.stale.
+    // Optional — legacy guardian records leave this null and the
+    // adapter treats null as "never refreshed" (very stale).
+    custodyOrderRefreshedAt: { type: Date, default: null },
 
     // Address Information معلومات العنوان
     address: {

@@ -36,6 +36,8 @@ const router = express.Router();
 const rateLimiter = require('../services/adapterRateLimiter');
 const circuitBreaker = require('../services/adapterCircuitBreaker');
 const metricsRegistry = require('../services/adapterMetricsRegistry');
+const dlq = require('../infrastructure/deadLetterQueue');
+const idempotencyStore = require('../infrastructure/idempotencyStore');
 
 // Adapters we know exist. Pulling in getConfig lets us report mode +
 // configured without every adapter needing to re-implement.
@@ -214,6 +216,34 @@ router.get('/', (req, res) => {
     }
     lines.push(`gov_adapter_call_latency_ms_sum{provider="${p}"} ${l.sum}`);
     lines.push(`gov_adapter_call_latency_ms_count{provider="${p}"} ${l.count}`);
+  }
+
+  // ─── Integration Hardening counters (DLQ + idempotency) ─────────────
+  // Added in v4.0.96 — lets Grafana show "how often is ZATCA parked" and
+  // "which route gets the most idempotent replays" without scraping Mongo.
+  const dlqRows = dlq.snapshotCounters();
+  if (dlqRows.length) {
+    metric(
+      lines,
+      'integration_dlq_events_total',
+      'Monotonic counter of DLQ lifecycle events (parked/replay_success/replay_fail/resolved/discarded) per integration.',
+      'counter',
+      dlqRows.map(r => ({
+        labels: { integration: r.integration, outcome: r.outcome },
+        value: r.value,
+      }))
+    );
+  }
+
+  const idemRows = idempotencyStore.snapshotCounters();
+  if (idemRows.length) {
+    metric(
+      lines,
+      'idempotency_events_total',
+      'Monotonic counter of idempotency middleware outcomes per route (hit/miss/pending_reject/invalid_key).',
+      'counter',
+      idemRows.map(r => ({ labels: { route: r.route, outcome: r.outcome }, value: r.value }))
+    );
   }
 
   res.set('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');

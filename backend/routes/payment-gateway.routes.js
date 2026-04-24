@@ -3,14 +3,21 @@
 const router = require('express').Router();
 const paymentGatewayService = require('../services/paymentGateway.service');
 const { authenticate, authorize } = require('../middleware/auth');
+const idempotency = require('../middleware/idempotency.middleware');
 
 const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
+const paymentIdempotency = idempotency({
+  scope: req => (req.user && (req.user.tenantId || req.user.branchId)) || 'global',
+});
+
 // ── قائمة المعاملات ─────────────────────────────────────────────────────────
 router.get(
   '/transactions',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.list({ ...req.query, branchId: req.user.branchId });
@@ -21,7 +28,9 @@ router.get(
 // ── إحصائيات ────────────────────────────────────────────────────────────────
 router.get(
   '/stats',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.getStats(req.user.branchId);
@@ -32,7 +41,9 @@ router.get(
 // ── تقرير التسوية ───────────────────────────────────────────────────────────
 router.get(
   '/reconciliation',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const { dateFrom, dateTo, gateway } = req.query;
@@ -49,7 +60,10 @@ router.get(
 // ── بدء معاملة دفع ──────────────────────────────────────────────────────────
 router.post(
   '/initiate',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
+  paymentIdempotency,
   wrap(async (req, res) => {
     const data = await paymentGatewayService.initiatePayment({
       ...req.body,
@@ -63,8 +77,11 @@ router.post(
 // ── استرداد مبلغ ────────────────────────────────────────────────────────────
 router.post(
   '/:id/refund',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
+  paymentIdempotency,
   wrap(async (req, res) => {
     const data = await paymentGatewayService.processRefund(req.params.id, {
       ...req.body,
@@ -77,7 +94,9 @@ router.post(
 // ── إعادة محاولة المعاملات الفاشلة ─────────────────────────────────────────
 router.post(
   '/retry-failed',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await paymentGatewayService.retryFailedPayments(req.user.branchId);
@@ -88,7 +107,9 @@ router.post(
 // ── عرض معاملة واحدة ────────────────────────────────────────────────────────
 router.get(
   '/transactions/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const PaymentTransaction = require('../models/PaymentTransaction');

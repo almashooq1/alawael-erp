@@ -105,6 +105,42 @@ function setupSchedulers({ isTestEnv }) {
       logger.warn('⚠️  QMS bootstrap failed', { error: err.message });
     }
   }, 45000);
+
+  // ── Ops layer bootstrap (Phase 16 C1: SLA engine) ───────────────────────
+  //
+  // Wires the unified ops SLA engine. Runs at +50s, after QMS so the
+  // qualityEventBus singleton is already seated — we reuse it as the
+  // dispatcher so ops.* events flow through the same notification
+  // router Phase 15 configured.
+  setTimeout(() => {
+    try {
+      const { bootstrapOperations } = require('./operationsBootstrap');
+      const ops = bootstrapOperations({ logger, startSchedulers: true });
+      if (ops) {
+        registerShutdownHook('Operations', ops.shutdown);
+        logger.info('✅ Phase 16 Ops layer online (SLA engine ticking)');
+      }
+    } catch (err) {
+      logger.warn('⚠️  Ops bootstrap failed', { error: err.message });
+    }
+  }, 50000);
+
+  // ── Care Platform bootstrap (Phase 17 C1: CRM lead funnel) ──────────────
+  //
+  // Runs at +55s — after ops bootstrap seats the SLA engine singleton,
+  // so the care services can inject it without an extra lookup.
+  setTimeout(() => {
+    try {
+      const { bootstrapCare } = require('./careBootstrap');
+      const care = bootstrapCare({ logger });
+      if (care) {
+        registerShutdownHook('Care', care.shutdown);
+        logger.info('✅ Phase 17 Care Platform online (CRM lead funnel)');
+      }
+    } catch (err) {
+      logger.warn('⚠️  Care bootstrap failed', { error: err.message });
+    }
+  }, 55000);
 }
 
 module.exports = { setupSchedulers };

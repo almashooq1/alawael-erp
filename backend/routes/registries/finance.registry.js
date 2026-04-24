@@ -57,6 +57,25 @@ module.exports = function registerFinanceRoutes(
   // ── Mount: Finance Module (وحدة المالية) ───────────────────────────────
   dualMount(app, 'finance-module', financeModuleRoutes);
 
+  // ── Mount: Financial Statements & Approvals (Phase 12 C1+C2) ──────────
+  //  P&L, Cash Flow, Budget vs Actual, Trial Balance, Aged AR/AP, Consolidation
+  safeMount(
+    app,
+    ['/api/finance/statements', '/api/v1/finance/statements'],
+    '../routes/finance-statements.routes'
+  );
+  safeMount(
+    app,
+    ['/api/finance/approvals', '/api/v1/finance/approvals'],
+    '../routes/finance-approvals.routes'
+  );
+  safeMount(
+    app,
+    ['/api/finance/cheques', '/api/v1/finance/cheques'],
+    '../routes/finance-cheques.routes'
+  );
+  logger.info('Financial Statements + Approval Chain + Cheque lifecycle routes mounted (Phase 12)');
+
   // ── Mount: Payment Gateway, Digital Wallet, Smart Insurance ─────────────
   safeMount(app, ['/api/payment-gateway', '/api/v1/payment-gateway'], './payment-gateway.routes');
   safeMount(app, ['/api/digital-wallet', '/api/v1/digital-wallet'], './digital-wallet.routes');

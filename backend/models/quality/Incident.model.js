@@ -33,6 +33,7 @@ const incidentSchema = new mongoose.Schema(
         'abuse',
         'infection',
         'near_miss',
+        'seizure',
         'other',
       ],
       required: true,
@@ -51,6 +52,18 @@ const incidentSchema = new mongoose.Schema(
     location: { type: String, required: true },
     description: { type: String, required: true },
     involvedPersons: { type: [mongoose.Schema.Types.Mixed], default: [] },
+
+    // Structured beneficiary linkage — distinct from `involvedPersons`
+    // which stayed Mixed-typed for back-compat with pre-existing
+    // clinical-incident UI flows. New incidents populate this field
+    // for first-class queryability (used by beneficiary-360 flags
+    // safety.incident.critical.open, clinical.seizure.cluster.48h,
+    // safety.fall.repeat.30d).
+    beneficiaryIds: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Beneficiary' }],
+      default: [],
+      index: true,
+    },
     immediateActionTaken: { type: String, default: null },
     witnesses: { type: [String], default: [] },
     attachments: { type: [mongoose.Schema.Types.Mixed], default: [] },
@@ -79,6 +92,9 @@ const incidentSchema = new mongoose.Schema(
 
 incidentSchema.index({ branchId: 1, status: 1 });
 incidentSchema.index({ severity: 1, createdAt: -1 }); // incidentNumber already indexed via unique:true
+// Red-flag queries: "open incidents for this beneficiary by type/occurrence date"
+incidentSchema.index({ beneficiaryIds: 1, status: 1 });
+incidentSchema.index({ beneficiaryIds: 1, type: 1, occurredAt: -1 });
 
 const Incident = mongoose.models.Incident || mongoose.model('Incident', incidentSchema);
 

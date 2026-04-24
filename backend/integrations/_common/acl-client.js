@@ -5,13 +5,17 @@
  *   - Timeouts (default 10s)
  *   - Exponential backoff retries with jitter (default 3 retries)
  *   - Circuit breaker (opens after N failures in a window)
- *   - IntegrationLog record per request
+ *   - IntegrationLog record per request (PII-redacted)
  *   - Idempotency-Key header support
+ *   - Auto-park to Dead Letter Queue after final retry exhaustion
  *
  * Each adapter owns an instance with its own baseURL + config.
  */
 
 'use strict';
+
+const dlq = require('../../infrastructure/deadLetterQueue');
+const { redact } = require('../../utils/piiRedactor');
 
 const DEFAULT_TIMEOUT_MS = 10_000;
 const DEFAULT_RETRIES = 3;
@@ -57,6 +61,8 @@ class AclClient {
     circuitBreaker,
     logger,
     integrationLog,
+    deadLetterQueue = dlq,
+    parkOnFailure = true,
   }) {
     if (!name) throw new Error('AclClient: name is required');
     this.name = name;
@@ -66,6 +72,8 @@ class AclClient {
     this.circuitBreaker = circuitBreaker || new CircuitBreaker();
     this.logger = logger || console;
     this.integrationLog = integrationLog;
+    this.deadLetterQueue = deadLetterQueue;
+    this.parkOnFailure = parkOnFailure;
   }
 
   async request({ method = 'GET', path = '/', headers = {}, body, idempotencyKey, meta = {} }) {
@@ -123,6 +131,31 @@ class AclClient {
       }
     }
     this.circuitBreaker.recordFailure();
+
+    if (
+      this.parkOnFailure &&
+      this.deadLetterQueue &&
+      typeof this.deadLetterQueue.park === 'function'
+    ) {
+      try {
+        await this.deadLetterQueue.park({
+          integration: this.name,
+          operation: meta.operation || null,
+          method,
+          endpoint: url,
+          payload: redact(body),
+          headers: redact(finalHeaders),
+          idempotencyKey,
+          correlationId: meta.correlationId || null,
+          attempts: this.retries + 1,
+          lastError,
+          meta: redact(meta),
+        });
+      } catch {
+        /* DLQ failure must not shadow the original error */
+      }
+    }
+
     throw lastError;
   }
 
@@ -152,10 +185,15 @@ class AclClient {
   _log(entry) {
     if (this.integrationLog && typeof this.integrationLog.record === 'function') {
       try {
+        const safeEntry = {
+          ...entry,
+          requestBody: redact(entry.requestBody),
+          meta: redact(entry.meta),
+        };
         this.integrationLog.record({
           integration: this.name,
           durationMs: Date.now() - entry.startedAt,
-          ...entry,
+          ...safeEntry,
         });
       } catch {
         /* never let logging fail the request */

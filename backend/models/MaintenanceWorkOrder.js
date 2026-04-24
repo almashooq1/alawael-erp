@@ -1,8 +1,27 @@
 /**
  * MaintenanceWorkOrder Model — أوامر عمل الصيانة الوقائية والتصحيحية
  * النظام 34: إدارة الأصول والموارد
+ *
+ * Phase 16 Commit 2 (4.0.67) — state enum extended to match the
+ * canonical state machine in `config/workOrder.registry.js`. Legacy
+ * values (`pending`) still accepted; the state-machine service
+ * normalises them. Added `statusHistory` for transition audit and
+ * `slaId` backlink so dashboards can join WO ↔ SLA without a scan.
  */
 const mongoose = require('mongoose');
+const { WO_STATES } = require('../config/workOrder.registry');
+
+const statusHistoryEntrySchema = new mongoose.Schema(
+  {
+    from: { type: String, required: true },
+    to: { type: String, required: true },
+    event: { type: String, required: true },
+    actorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    at: { type: Date, required: true, default: Date.now },
+    notes: { type: String, default: null },
+  },
+  { _id: false }
+);
 
 const maintenanceWorkOrderSchema = new mongoose.Schema(
   {
@@ -23,11 +42,15 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
       enum: ['low', 'normal', 'high', 'critical'],
       default: 'normal',
     },
+    // Canonical WO_STATES + legacy 'pending' (kept for migration tolerance;
+    // the state-machine service normalises it to 'submitted' on first touch).
     status: {
       type: String,
-      enum: ['pending', 'approved', 'in_progress', 'on_hold', 'completed', 'cancelled'],
-      default: 'pending',
+      enum: [...WO_STATES, 'pending'],
+      default: 'draft',
+      index: true,
     },
+    statusHistory: { type: [statusHistoryEntrySchema], default: [] },
     title: { type: String, required: true, trim: true },
     description: { type: String, required: true },
     scheduledDate: { type: Date, required: true },
@@ -52,6 +75,10 @@ const maintenanceWorkOrderSchema = new mongoose.Schema(
     attachments: [{ fileName: String, fileUrl: String, uploadedAt: Date }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    // Phase 16 C2: backlink to the SLA clock for this WO (if one was
+    // activated). Populated by `workOrderStateMachine.service.js` on
+    // the first transition that triggers activation.
+    slaId: { type: mongoose.Schema.Types.ObjectId, ref: 'SLA', default: null, index: true },
   },
   { timestamps: true, collection: 'maintenance_work_orders' }
 );

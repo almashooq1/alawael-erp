@@ -26,8 +26,15 @@ const NphiesClaim = require('../models/NphiesClaim');
 const nphies = require('../services/nphiesAdapter');
 const safeError = require('../utils/safeError');
 const logger = require('../utils/logger');
+const idempotency = require('../middleware/idempotency.middleware');
 
 router.use(authenticateToken);
+
+// Per-claim idempotency on submit — retry after network hiccup returns the
+// original NPHIES reference instead of double-submitting.
+const claimIdempotency = idempotency({
+  scope: req => (req.user && (req.user.tenantId || req.user.branchId)) || 'global',
+});
 
 const STAFF_ROLES = [
   'admin',
@@ -265,7 +272,7 @@ router.post('/:id/check-eligibility', requireRole(WRITE_ROLES), async (req, res)
 });
 
 // ── POST /:id/submit — submit to NPHIES ──────────────────────────────────
-router.post('/:id/submit', requireRole(WRITE_ROLES), async (req, res) => {
+router.post('/:id/submit', claimIdempotency, requireRole(WRITE_ROLES), async (req, res) => {
   try {
     const claim = await NphiesClaim.findById(req.params.id);
     if (!claim) return res.status(404).json({ success: false, message: 'غير موجود' });

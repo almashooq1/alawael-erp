@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Beneficiary Model — النموذج الموحد للمستفيدين
  *
@@ -237,7 +236,20 @@ const beneficiarySchema = new mongoose.Schema(
       diagnosisDate: Date,
       diagnosedBy: String,
       certificationNumber: String,
+      // Saudi Disability Authority card dates — optional for backward
+      // compatibility with records predating the red-flag module.
+      cardIssueDate: Date,
+      cardExpiryDate: Date,
     },
+
+    // Consent-program opt-in gate. Default false so beneficiaries
+    // admitted before the consent digitization rollout don't
+    // retroactively trip the blocking flags (CBAHI 4.3 / PDPL):
+    //   clinical.consent.treatment.missing_pre_session
+    //   compliance.consent.required.missing
+    // Flip to true once the center has captured the required
+    // consents for the beneficiary via the new Consent collection.
+    consentTrackingEnabled: { type: Boolean, default: false },
     // Legacy field alias
     category: {
       type: String,

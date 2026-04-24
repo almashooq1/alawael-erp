@@ -258,6 +258,56 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     logger.info('Log cleanup setup skipped:', err.message);
   }
 
+  // Phase-11 C23 — HR access anomaly scanner as a setInterval,
+  // eliminating the cron dependency for self-contained deploys.
+  // Opt-out via HR_ANOMALY_SCHEDULER_ENABLED=false. Interval +
+  // thresholds configurable via HR_ANOMALY_* env vars (see
+  // hr-anomaly-scan.js for the full list).
+  if (process.env.HR_ANOMALY_SCHEDULER_ENABLED !== 'false') {
+    try {
+      const { AuditLog } = require('./models/auditLog.model');
+      const { createHrAnomalyDetectorService } = require('./services/hr/hrAnomalyDetectorService');
+      const { createHrAnomalyScheduler } = require('./services/hr/hrAnomalyScheduler');
+
+      const detector = createHrAnomalyDetectorService({ auditLogModel: AuditLog });
+      const intervalMs = Number.parseInt(
+        process.env.HR_ANOMALY_INTERVAL_MS || String(15 * 60 * 1000),
+        10
+      );
+      const scanOptions = {
+        windowMinutes: Number.parseInt(process.env.HR_ANOMALY_WINDOW_MINUTES || '60', 10),
+        readsPerHourThreshold: Number.parseInt(process.env.HR_ANOMALY_READS_PER_HOUR || '100', 10),
+        exportsPerDayThreshold: Number.parseInt(process.env.HR_ANOMALY_EXPORTS_PER_DAY || '5', 10),
+        cooldownMinutes: Number.parseInt(process.env.HR_ANOMALY_COOLDOWN_MINUTES || '60', 10),
+      };
+      server._hrAnomalyScheduler = createHrAnomalyScheduler({
+        detector,
+        intervalMs,
+        scanOptions,
+        logger,
+      });
+      server._hrAnomalyScheduler.start();
+      app._hrAnomalyScheduler = server._hrAnomalyScheduler;
+      logger.info(
+        `🛡️ HR Anomaly Scheduler ready (interval=${intervalMs / 1000}s, reads/hour=${scanOptions.readsPerHourThreshold}, exports/day=${scanOptions.exportsPerDayThreshold})`
+      );
+
+      try {
+        const { registerShutdownHook } = require('./utils/gracefulShutdown');
+        registerShutdownHook('HR Anomaly Scheduler', () => {
+          if (server._hrAnomalyScheduler) {
+            server._hrAnomalyScheduler.stop();
+            logger.info('🛡️ HR Anomaly Scheduler stopped');
+          }
+        });
+      } catch (_) {
+        /* gracefulShutdown may not be loaded yet */
+      }
+    } catch (err) {
+      logger.warn('HR Anomaly Scheduler setup skipped:', err.message);
+    }
+  }
+
   // Initialize Reporting & Communications Platform (Phase 10, C1–C15)
   // Fires 30 catalog-driven report types on their declared cadences
   // (daily/weekly/monthly/quarterly/semi-annual/annual) across 6

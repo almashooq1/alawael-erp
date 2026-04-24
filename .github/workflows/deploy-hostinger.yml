@@ -267,6 +267,15 @@ jobs:
             --exclude='coverage/' --exclude='data/' \
             backend/ $SSH_TARGET:${{ env.APP_DIR }}/backend/
 
+          # Phase VI/VIII docs: backend/routes/openapi-integration.routes.js reads
+          # ../../docs/api/*.yaml so the docs/ tree must be present on the VPS.
+          rsync -avz \
+            -e "$SSH_CMD" \
+            docs/api/ $SSH_TARGET:${{ env.APP_DIR }}/docs/api/ 2>&1 || echo "⚠️ docs/api rsync failed (non-fatal)"
+          rsync -avz \
+            -e "$SSH_CMD" \
+            docs/alerts/ $SSH_TARGET:${{ env.APP_DIR }}/docs/alerts/ 2>&1 || echo "⚠️ docs/alerts rsync failed (non-fatal)"
+
           $SSH_CMD $SSH_TARGET "cd ${{ env.APP_DIR }}/backend && npm ci --production --no-audit --no-fund 2>&1 | tail -5"
           echo "✅ Backend deployed"
 

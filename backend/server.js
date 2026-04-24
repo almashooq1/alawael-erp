@@ -467,8 +467,11 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
   // Initialize Cross-Module Email Subscribers
   try {
     const { initializeCrossModuleSubscribers } = require('./integration/crossModuleSubscribers');
-    const systemIntegrationBus = require('./integration/systemIntegrationBus');
-    const result = initializeCrossModuleSubscribers(systemIntegrationBus);
+    // Destructure the singleton instance — the module exports a wrapper
+    // { SystemIntegrationBus, integrationBus, ... } and the subscribers
+    // need the actual bus instance (which has .subscribe/.publish methods).
+    const { integrationBus } = require('./integration/systemIntegrationBus');
+    const result = initializeCrossModuleSubscribers(integrationBus);
     logger.info(`🔗 Cross-Module Subscribers ready (${result.subscriberCount} registered)`);
   } catch (err) {
     logger.info('Cross-Module Subscribers initialization skipped:', err.message);

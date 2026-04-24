@@ -434,16 +434,24 @@ jobs:
           # form was observed to run but silently skip `pm2 restart` — pm2
           # uptime stayed at pre-deploy values. `bash -s` explicitly feeds
           # stdin to a remote bash interpreter, which behaves predictably.
+          # CRITICAL: VPS_USER=root but pm2 alawael-api runs under alawael's own
+          # pm2 daemon (at /home/alawael/.pm2/). `pm2 list` as root shows an empty
+          # list → the grep test fails → pm2 restart never runs. We confirmed this
+          # by inspecting auth.log (all runner sessions are `Accepted publickey for root`)
+          # and running `pm2 list` as root (shows zero processes). The fix is to
+          # use `sudo -u alawael` to jump into alawael's context for every pm2 call.
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" bash -s <<'REMOTE_SCRIPT'
             set -e
             cd /home/alawael/app
-            if pm2 list 2>/dev/null | grep -q "alawael"; then
+            if sudo -u alawael pm2 list 2>/dev/null | grep -q "alawael-api"; then
               # Use `restart` (not `reload`) because fork-mode pm2 reload was observed
               # to no-op after rsync — node require-cache keeps the old code in memory.
-              PRE_PID=$(pm2 pid alawael-api 2>/dev/null || echo 0)
-              pm2 restart all --update-env
-              POST_PID=$(pm2 pid alawael-api 2>/dev/null || echo 0)
+              PRE_PID=$(sudo -u alawael pm2 pid alawael-api 2>/dev/null || echo 0)
+              sudo -u alawael pm2 restart all --update-env
+              POST_PID=$(sudo -u alawael pm2 pid alawael-api 2>/dev/null || echo 0)
               echo "🔄 PM2 restarted (pid $PRE_PID -> $POST_PID)"
+            else
+              echo "⚠️  alawael-api not found in alawael's pm2 — check VPS state"
             fi
             nginx -t 2>/dev/null && systemctl reload nginx 2>/dev/null || true
             echo "✅ Services restarted"

@@ -183,8 +183,8 @@ describe('buildTemplateDoc helper', () => {
     const entry = catalog.getById('beneficiary.intake.registration');
     const doc = buildTemplateDoc(entry, { tenantId: 'T1', branchId: 'B1', createdBy: 'U1' });
 
-    expect(doc.name).toBe('beneficiary.intake.registration');
-    expect(doc.title).toBe(entry.title);
+    expect(doc.templateId).toBe('beneficiary.intake.registration');
+    expect(doc.name).toBe(entry.title);
     expect(doc.metadata.catalogId).toBe(entry.id);
     expect(doc.metadata.catalogVersion).toBe(CATALOG_VERSION);
     expect(doc.metadata.audience).toBe('beneficiary');

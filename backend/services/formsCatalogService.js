@@ -33,23 +33,41 @@ const catalog = require('../config/forms-catalog.registry');
 
 const CATALOG_VERSION = '1.0.0';
 
+// Map our catalog audience → FormTemplate model's category enum.
+// The model only accepts: beneficiary, hr, administration, finance, general,
+// medical, therapy, legal, reports, custom. We preserve the original
+// audience.category slug in metadata + subcategory for filtering.
+const AUDIENCE_TO_CATEGORY = {
+  beneficiary: 'beneficiary',
+  hr: 'hr',
+  management: 'administration',
+};
+
 function buildTemplateDoc(entry, ctx = {}) {
   return {
-    name: entry.id,
-    title: entry.title,
-    titleEn: entry.titleEn || entry.title,
+    // Identity (model required fields)
+    templateId: entry.id,
+    name: entry.title,
+    nameEn: entry.titleEn || entry.title,
     description: entry.description || '',
-    category: `${entry.audience}.${entry.category}`,
-    icon: entry.icon || 'Description',
-    status: 'active',
+    category: AUDIENCE_TO_CATEGORY[entry.audience] || 'custom',
+    subcategory: `${entry.audience}.${entry.category}`,
+    tags: [entry.audience, entry.category, 'catalog'],
+
+    // Visual
+    icon: entry.icon || '📄',
+
+    // Structure
     sections: entry.sections || [],
     fields: entry.fields || [],
     approvalWorkflow: entry.approvalWorkflow || { enabled: false, steps: [] },
     design: entry.design || {},
+
+    // Metadata + tenancy
     metadata: {
       ...(entry.metadata || {}),
       audience: entry.audience,
-      categoryName: entry.category,
+      originalCategory: entry.category,
       catalogId: entry.id,
       catalogVersion: CATALOG_VERSION,
       seededAt: new Date(),
@@ -58,6 +76,7 @@ function buildTemplateDoc(entry, ctx = {}) {
     branchId: ctx.branchId || null,
     createdBy: ctx.createdBy || null,
     isFromCatalog: true,
+    isActive: true,
   };
 }
 

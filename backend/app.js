@@ -221,6 +221,16 @@ try {
   logger.warn('[FormsCatalog] mount skipped:', err.message);
 }
 
+// Phase 24 — Forms fill / submit / review surface used by web-admin.
+// Bridges the existing FormTemplate + FormSubmission models to the routes
+// the formsApi calls (see apps/web-admin/src/lib/api.ts).
+try {
+  app.use('/api/documents-pro/forms', require('./routes/forms-submission.routes'));
+  logger.info('[FormsSubmission] ✓ mounted at /api/documents-pro/forms');
+} catch (err) {
+  logger.warn('[FormsSubmission] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

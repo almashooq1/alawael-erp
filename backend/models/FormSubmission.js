@@ -171,14 +171,13 @@ FormSubmissionSchema.index({ status: 1, createdAt: -1 });
 FormSubmissionSchema.index({ tenantId: 1, status: 1 });
 
 // ─── Auto-generate submission number ───────────────────────────────
-FormSubmissionSchema.pre('save', function (next) {
+FormSubmissionSchema.pre('save', async function () {
   if (!this.submissionNumber) {
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, '0');
     const rand = Math.floor(10000 + Math.random() * 90000);
     this.submissionNumber = `SUB-${year}${month}-${rand}`;
   }
-  next();
 });
 
 // ─── Virtuals ──────────────────────────────────────────────────────

@@ -51,6 +51,11 @@ const DEFAULT_EXCLUDE_PATHS = [
   '/health',
 ];
 
+// Phase 29 — prefix-based exclusions. Public form submission and public
+// landing config reads are unauthenticated by design; CSRF doesn't apply
+// (no session cookie to protect).
+const DEFAULT_EXCLUDE_PREFIXES = ['/api/v1/public/', '/api/v1/landing/'];
+
 // Pre-compute exclude paths set (rebuilt only when env var changes)
 let _cachedExcludeSet = null;
 let _cachedExcludeEnv = null;
@@ -76,6 +81,9 @@ const csrfProtection = (req, res, next) => {
 
   if (getExcludePaths().has(req.path)) {
     return next();
+  }
+  for (const prefix of DEFAULT_EXCLUDE_PREFIXES) {
+    if (req.path.startsWith(prefix)) return next();
   }
 
   const cookies = parseCookies(req.headers.cookie);

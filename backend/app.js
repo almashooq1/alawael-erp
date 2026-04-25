@@ -248,6 +248,16 @@ try {
   logger.warn('[Uploads] mount skipped:', err.message);
 }
 
+// Phase 29 — public form submission (no auth, IP rate-limited).
+// Only templates with isPublic:true are exposed. Used for complaint /
+// suggestion / public-intake forms linked from the landing page.
+try {
+  app.use('/api/v1/public/forms', require('./routes/public-forms.routes'));
+  logger.info('[PublicForms] ✓ mounted at /api/v1/public/forms');
+} catch (err) {
+  logger.warn('[PublicForms] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

@@ -390,6 +390,10 @@ const FormTemplateSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true, index: true },
     isBuiltIn: { type: Boolean, default: false },
     isPublished: { type: Boolean, default: false },
+    // Phase 29 — when true, the template is fillable WITHOUT auth via the
+    // /api/v1/public/forms/:templateId/submit route. Used for complaint,
+    // suggestion, and intake-style forms that visitors should fill.
+    isPublic: { type: Boolean, default: false, index: true },
     usageCount: { type: Number, default: 0 },
     lastUsedAt: Date,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

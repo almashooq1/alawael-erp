@@ -91,6 +91,34 @@ router.get('/templates/:id', async (req, res) => {
   }
 });
 
+// Phase 29 — admin toggles isPublic on a template (or other safe fields)
+router.patch('/templates/:id', async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ ok: false, error: 'FORBIDDEN' });
+    }
+    const FormTemplate = require('../models/FormTemplate');
+    const q = { templateId: req.params.id };
+    let tpl = await FormTemplate.findOne(q);
+    if (!tpl && /^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+      tpl = await FormTemplate.findOne({ _id: req.params.id });
+    }
+    if (!tpl) return res.status(404).json({ ok: false, error: 'TEMPLATE_NOT_FOUND' });
+    const allowed = ['isPublic', 'isActive', 'isPublished'];
+    let touched = false;
+    for (const k of allowed) {
+      if (req.body[k] !== undefined) {
+        tpl[k] = !!req.body[k];
+        touched = true;
+      }
+    }
+    if (touched) await tpl.save();
+    res.json({ ok: true, template: tpl.toObject() });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 // ─── Submissions ────────────────────────────────────────────────────────────
 
 router.post('/:templateId/submit', async (req, res) => {

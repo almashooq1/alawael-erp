@@ -231,6 +231,14 @@ try {
   logger.warn('[FormsSubmission] mount skipped:', err.message);
 }
 
+// Phase 25 — Landing-page CMS. Public GET, admin-gated PUT/PATCH/POST/DELETE.
+try {
+  app.use('/api/v1/landing', require('./routes/landing-config.routes'));
+  logger.info('[LandingConfig] ✓ mounted at /api/v1/landing');
+} catch (err) {
+  logger.warn('[LandingConfig] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

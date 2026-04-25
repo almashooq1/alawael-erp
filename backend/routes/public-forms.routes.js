@@ -86,6 +86,84 @@ router.get('/', async (_req, res) => {
   }
 });
 
+// ─── Public track (no auth, by submission number) ───────────────────────────
+//
+// Visitor submitted via /forms/[id], got back a PUB-XXXX number, and now
+// wants to check status. Returns ONLY non-PII metadata: status, dates,
+// template name, approval progress. Never returns submission `data` (which
+// can contain phone/email/diagnoses/etc) or the submitter object.
+//
+// Defense-in-depth: submissionNumbers are PUB-{base36-time}-{4-base36-rand}
+// (~37 bits of entropy), so guessing is expensive. Rate-limit lookups too.
+
+const trackBuckets = new Map(); // ip → { count, windowStart }
+const TRACK_WINDOW_MS = 60 * 1000;
+const TRACK_MAX = 30;
+
+function trackRateLimit(req, res, next) {
+  const ip = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || 'unknown';
+  const now = Date.now();
+  let b = trackBuckets.get(ip);
+  if (!b || now - b.windowStart > TRACK_WINDOW_MS) {
+    b = { count: 0, windowStart: now };
+    trackBuckets.set(ip, b);
+  }
+  b.count += 1;
+  if (b.count > TRACK_MAX) {
+    return res.status(429).json({ ok: false, error: 'RATE_LIMITED' });
+  }
+  next();
+}
+
+router.get('/track/:submissionNumber', trackRateLimit, async (req, res) => {
+  try {
+    const num = String(req.params.submissionNumber || '').trim();
+    // Only PUB- prefixed numbers are visible to the public lookup
+    if (!/^PUB-[a-z0-9-]+$/i.test(num)) {
+      return res.status(400).json({ ok: false, error: 'INVALID_NUMBER' });
+    }
+    const sub = await FormSubmission.findOne({ submissionNumber: num })
+      .select(
+        'submissionNumber templateName status priority submittedAt approvals currentApprovalStep rejectionReason returnReason createdAt updatedAt'
+      )
+      .lean();
+    if (!sub) {
+      return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
+    }
+    const approvalsPublic = (sub.approvals || []).map(a => ({
+      step: a.step,
+      label: a.label,
+      status: a.status,
+      date: a.date,
+    }));
+    res.set('Cache-Control', 'no-store');
+    res.json({
+      ok: true,
+      submission: {
+        submissionNumber: sub.submissionNumber,
+        templateName: sub.templateName,
+        status: sub.status,
+        priority: sub.priority,
+        submittedAt: sub.submittedAt || sub.createdAt,
+        updatedAt: sub.updatedAt,
+        approvals: approvalsPublic,
+        currentApprovalStep: sub.currentApprovalStep,
+        rejectionReason: sub.rejectionReason,
+        returnReason: sub.returnReason,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+setInterval(() => {
+  const cutoff = Date.now() - TRACK_WINDOW_MS * 4;
+  for (const [ip, b] of trackBuckets.entries()) {
+    if (b.windowStart < cutoff) trackBuckets.delete(ip);
+  }
+}, TRACK_WINDOW_MS).unref?.();
+
 router.get('/:templateId', async (req, res) => {
   try {
     let tpl = await FormTemplate.findOne({

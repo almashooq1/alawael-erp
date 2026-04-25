@@ -44,6 +44,10 @@ const AUDIENCE_TO_CATEGORY = {
 };
 
 function buildTemplateDoc(entry, ctx = {}) {
+  // Tag the template with catalog provenance using only fields the model
+  // declares (no `metadata` field on FormTemplate — strict mode drops it).
+  // `templateId` is the unique slug, `isBuiltIn` flags catalog seeds, and
+  // `tags` carries audience/category/version for filtering.
   return {
     // Identity (model required fields)
     templateId: entry.id,
@@ -52,7 +56,13 @@ function buildTemplateDoc(entry, ctx = {}) {
     description: entry.description || '',
     category: AUDIENCE_TO_CATEGORY[entry.audience] || 'custom',
     subcategory: `${entry.audience}.${entry.category}`,
-    tags: [entry.audience, entry.category, 'catalog'],
+    tags: [
+      'catalog',
+      `aud:${entry.audience}`,
+      `cat:${entry.category}`,
+      `ver:${CATALOG_VERSION}`,
+      ...((entry.metadata && entry.metadata.references) || []).map(r => `ref:${r}`),
+    ],
 
     // Visual
     icon: entry.icon || '📄',
@@ -63,20 +73,12 @@ function buildTemplateDoc(entry, ctx = {}) {
     approvalWorkflow: entry.approvalWorkflow || { enabled: false, steps: [] },
     design: entry.design || {},
 
-    // Metadata + tenancy
-    metadata: {
-      ...(entry.metadata || {}),
-      audience: entry.audience,
-      originalCategory: entry.category,
-      catalogId: entry.id,
-      catalogVersion: CATALOG_VERSION,
-      seededAt: new Date(),
-    },
-    tenantId: ctx.tenantId || null,
-    branchId: ctx.branchId || null,
-    createdBy: ctx.createdBy || null,
-    isFromCatalog: true,
+    // Tenancy + status
+    tenantId: ctx.tenantId || undefined,
+    createdBy: ctx.createdBy || undefined,
     isActive: true,
+    isBuiltIn: true, // catalog seeds are built-in
+    isPublished: true,
   };
 }
 
@@ -114,17 +116,20 @@ function createFormsCatalogService({ formTemplateModel } = {}) {
       throw err;
     }
 
-    const lookup = {
-      'metadata.catalogId': entry.id,
-      tenantId: ctx.tenantId || null,
-      branchId: ctx.branchId || null,
-    };
+    // Idempotency: templateId is unique on the model. For multi-tenant
+    // installs we scope by tenantId so each tenant gets its own copy of
+    // the same template with a derived templateId (or, if running global,
+    // the bare templateId is the catalog id).
+    const scopedTemplateId = ctx.tenantId ? `${entry.id}:${ctx.tenantId}` : entry.id;
+    const lookup = { templateId: scopedTemplateId };
     const existing = await formTemplateModel.findOne(lookup).lean();
     if (existing) {
       return { template: existing, created: false };
     }
 
     const doc = buildTemplateDoc(entry, ctx);
+    // Apply tenant-scoped templateId override
+    doc.templateId = scopedTemplateId;
     const created = await formTemplateModel.create(doc);
     return { template: created.toObject ? created.toObject() : created, created: true };
   }

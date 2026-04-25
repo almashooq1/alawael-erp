@@ -21,10 +21,7 @@ function createMockModel() {
   function search(filter) {
     return (
       docs.find(d => {
-        if (filter['metadata.catalogId'] && d.metadata.catalogId !== filter['metadata.catalogId'])
-          return false;
-        if (filter.tenantId !== undefined && d.tenantId !== filter.tenantId) return false;
-        if (filter.branchId !== undefined && d.branchId !== filter.branchId) return false;
+        if (filter.templateId && d.templateId !== filter.templateId) return false;
         return true;
       }) || null
     );
@@ -112,13 +109,14 @@ describe('formsCatalogService — instantiate (with mock model)', () => {
     });
 
     expect(r.created).toBe(true);
-    expect(r.template.metadata.catalogId).toBe('hr.leave.annual');
-    expect(r.template.metadata.catalogVersion).toBe(CATALOG_VERSION);
-    expect(r.template.metadata.audience).toBe('hr');
+    expect(r.template.templateId).toBe('hr.leave.annual:T1');
+    expect(r.template.tags).toEqual(
+      expect.arrayContaining(['catalog', 'aud:hr', `ver:${CATALOG_VERSION}`])
+    );
     expect(r.template.tenantId).toBe('T1');
-    expect(r.template.branchId).toBe('B1');
     expect(r.template.createdBy).toBe('U1');
-    expect(r.template.isFromCatalog).toBe(true);
+    expect(r.template.isBuiltIn).toBe(true);
+    expect(r.template.isActive).toBe(true);
   });
 
   test('instantiate is idempotent on (catalogId, tenant, branch)', async () => {
@@ -132,14 +130,16 @@ describe('formsCatalogService — instantiate (with mock model)', () => {
     expect(mock.docs.length).toBe(1);
   });
 
-  test('instantiate creates fresh doc when tenant/branch differ', async () => {
+  test('instantiate creates fresh doc per tenant (different tenants → different docs)', async () => {
     const mock = createMockModel();
     const svc = createFormsCatalogService({ formTemplateModel: mock });
 
-    await svc.instantiate('hr.leave.annual', { tenantId: 'T1', branchId: 'B1' });
-    const r = await svc.instantiate('hr.leave.annual', { tenantId: 'T1', branchId: 'B2' });
+    await svc.instantiate('hr.leave.annual', { tenantId: 'T1' });
+    const r = await svc.instantiate('hr.leave.annual', { tenantId: 'T2' });
     expect(r.created).toBe(true);
     expect(mock.docs.length).toBe(2);
+    expect(mock.docs[0].templateId).toBe('hr.leave.annual:T1');
+    expect(mock.docs[1].templateId).toBe('hr.leave.annual:T2');
   });
 
   test('instantiate throws CATALOG_NOT_FOUND for unknown id', async () => {
@@ -185,12 +185,11 @@ describe('buildTemplateDoc helper', () => {
 
     expect(doc.templateId).toBe('beneficiary.intake.registration');
     expect(doc.name).toBe(entry.title);
-    expect(doc.metadata.catalogId).toBe(entry.id);
-    expect(doc.metadata.catalogVersion).toBe(CATALOG_VERSION);
-    expect(doc.metadata.audience).toBe('beneficiary');
-    expect(doc.isFromCatalog).toBe(true);
+    expect(doc.tags).toEqual(
+      expect.arrayContaining(['catalog', 'aud:beneficiary', `ver:${CATALOG_VERSION}`])
+    );
+    expect(doc.isBuiltIn).toBe(true);
     expect(doc.tenantId).toBe('T1');
-    expect(doc.branchId).toBe('B1');
     expect(doc.createdBy).toBe('U1');
   });
 });

@@ -239,6 +239,15 @@ try {
   logger.warn('[LandingConfig] mount skipped:', err.message);
 }
 
+// Phase 27 — admin-only file uploads to /home/alawael/app/uploads/<bucket>/.
+// nginx serves the static path /uploads/* publicly.
+try {
+  app.use('/api/v1/uploads', require('./routes/uploads.routes'));
+  logger.info('[Uploads] ✓ mounted at /api/v1/uploads');
+} catch (err) {
+  logger.warn('[Uploads] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

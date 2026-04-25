@@ -106,12 +106,11 @@ const LandingConfigSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-LandingConfigSchema.pre('save', function (next) {
+LandingConfigSchema.pre('save', async function () {
   if (this.isModified() && !this.isNew) {
     this.version = (this.version || 0) + 1;
     if (!this.publishedAt) this.publishedAt = new Date();
   }
-  next();
 });
 
 // ─── Static: get-or-create singleton ──────────────────────────────────────

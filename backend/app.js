@@ -209,6 +209,18 @@ try {
   logger.warn('[NPHIES] webhook mount skipped:', err.message);
 }
 
+// Phase 19 — Forms Catalog (32 ready-to-use FormTemplate seeds across
+// beneficiary / hr / management audiences). Read endpoints are
+// authenticated-any; instantiate is gated to admin / forms_admin.
+try {
+  const FormTemplate = require('./models/FormTemplate');
+  const { buildRouter } = require('./routes/forms-catalog.routes');
+  app.use('/api/v1/forms/catalog', buildRouter({ formTemplateModel: FormTemplate }));
+  logger.info('[FormsCatalog] ✓ mounted at /api/v1/forms/catalog (32 ready forms)');
+} catch (err) {
+  logger.warn('[FormsCatalog] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

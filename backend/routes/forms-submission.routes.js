@@ -178,6 +178,11 @@ router.get('/submissions', async (req, res) => {
     }
     if (req.query.status) filter.status = req.query.status;
     if (req.query.templateId) filter.templateId = req.query.templateId;
+    // Phase 30 — admins can filter by submitter role to see only public
+    // (unauth) submissions queued from /api/v1/public/forms/*/submit.
+    if (req.query.role && isAdmin(req)) {
+      filter['submittedBy.role'] = req.query.role;
+    }
 
     const limit = Math.min(Number(req.query.limit) || 50, 200);
     const skip = Number(req.query.page) > 1 ? (Number(req.query.page) - 1) * limit : 0;

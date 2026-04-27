@@ -119,12 +119,22 @@ router.patch('/templates/:id', async (req, res) => {
       tpl = await FormTemplate.findOne({ _id: req.params.id });
     }
     if (!tpl) return res.status(404).json({ ok: false, error: 'TEMPLATE_NOT_FOUND' });
-    const allowed = ['isPublic', 'isActive', 'isPublished'];
+    const boolFields = ['isPublic', 'isActive', 'isPublished'];
+    const numFields = ['slaHours'];
     let touched = false;
-    for (const k of allowed) {
+    for (const k of boolFields) {
       if (req.body[k] !== undefined) {
         tpl[k] = !!req.body[k];
         touched = true;
+      }
+    }
+    for (const k of numFields) {
+      if (req.body[k] !== undefined) {
+        const v = req.body[k] === null ? null : Number(req.body[k]);
+        if (v === null || (Number.isFinite(v) && v >= 0)) {
+          tpl[k] = v;
+          touched = true;
+        }
       }
     }
     if (touched) await tpl.save();
@@ -221,6 +231,20 @@ router.get('/submissions', async (req, res) => {
       FormSubmission.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       FormSubmission.countDocuments(filter),
     ]);
+
+    // Phase 30 — enrich each row with its template's slaHours so the admin
+    // queue can compute SLA badges per-template instead of one global value.
+    const templateIds = [...new Set(submissions.map(s => s.templateId).filter(Boolean))];
+    if (templateIds.length > 0) {
+      const tpls = await FormTemplate.find(
+        { templateId: { $in: templateIds } },
+        { templateId: 1, slaHours: 1 }
+      ).lean();
+      const slaMap = new Map(tpls.map(t => [t.templateId, t.slaHours]));
+      for (const s of submissions) {
+        s.templateSlaHours = slaMap.get(s.templateId) ?? null;
+      }
+    }
 
     res.json({ ok: true, submissions, total });
   } catch (err) {

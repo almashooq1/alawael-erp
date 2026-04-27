@@ -394,6 +394,8 @@ const FormTemplateSchema = new mongoose.Schema(
     // /api/v1/public/forms/:templateId/submit route. Used for complaint,
     // suggestion, and intake-style forms that visitors should fill.
     isPublic: { type: Boolean, default: false, index: true },
+    // SLA target for response time (hours since submission). null = env default.
+    slaHours: { type: Number, default: null, min: 0, max: 720 },
     usageCount: { type: Number, default: 0 },
     lastUsedAt: Date,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

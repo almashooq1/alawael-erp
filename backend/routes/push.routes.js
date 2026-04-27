@@ -90,6 +90,61 @@ authRouter.post('/unsubscribe', async (req, res) => {
   }
 });
 
+// Admin list of all push subscriptions across users.
+authRouter.get('/subscriptions', async (req, res) => {
+  try {
+    const u = req.user || {};
+    if (!['admin', 'super_admin'].includes(u.role)) {
+      return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+    }
+    const subs = await PushSubscription.find({})
+      .select('-keys')
+      .populate({ path: 'userId', select: 'name email role' })
+      .sort({ createdAt: -1 })
+      .lean();
+    res.json({ ok: true, subscriptions: subs });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+authRouter.patch('/subscriptions/:id', async (req, res) => {
+  try {
+    const u = req.user || {};
+    if (!['admin', 'super_admin'].includes(u.role)) {
+      return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+    }
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.id))
+      return res.status(400).json({ ok: false, error: 'INVALID_ID' });
+    const update = {};
+    if (typeof req.body?.enabled === 'boolean') update.enabled = req.body.enabled;
+    const sub = await PushSubscription.findByIdAndUpdate(
+      req.params.id,
+      { $set: update },
+      { new: true }
+    ).select('-keys');
+    if (!sub) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
+    res.json({ ok: true, subscription: sub });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+authRouter.delete('/subscriptions/:id', async (req, res) => {
+  try {
+    const u = req.user || {};
+    if (!['admin', 'super_admin'].includes(u.role)) {
+      return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+    }
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.id))
+      return res.status(400).json({ ok: false, error: 'INVALID_ID' });
+    await PushSubscription.deleteOne({ _id: req.params.id });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 authRouter.post('/test', async (req, res) => {
   try {
     const u = req.user || {};

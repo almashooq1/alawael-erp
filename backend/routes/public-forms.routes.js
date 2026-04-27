@@ -27,6 +27,13 @@ const express = require('express');
 const FormTemplate = require('../models/FormTemplate');
 const FormSubmission = require('../models/FormSubmission');
 
+let unifiedNotifier = null;
+try {
+  unifiedNotifier = require('../services/unifiedNotifier');
+} catch {
+  /* notifier optional */
+}
+
 const router = express.Router();
 
 // ─── In-memory rate limiter (per IP) ─────────────────────────────────────────
@@ -291,6 +298,36 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
       message: 'تم استلام طلبك. شكراً لك.',
       messageEn: 'Your submission was received. Thank you.',
     });
+
+    // Best-effort confirmation: send the visitor their PUB-XXXX + tracking
+    // link via WhatsApp/SMS/email so they don't lose the number when the
+    // tab closes. Fire-and-forget — never blocks or fails the response.
+    if ((submitterPhone || submitterEmail) && unifiedNotifier?.notify) {
+      const trackUrl = `https://alaweal.org/forms/track/${encodeURIComponent(sub.submissionNumber)}`;
+      const body = [
+        `مرحباً ${submitterName}،`,
+        '',
+        `استلمنا طلبك "${tpl.name}" بنجاح.`,
+        `الرقم المرجعي: ${sub.submissionNumber}`,
+        '',
+        `تتبع الحالة: ${trackUrl}`,
+        '',
+        '— منصة العواعل لإعادة التأهيل',
+      ].join('\n');
+      unifiedNotifier
+        .notify({
+          to: { phone: submitterPhone || '', email: submitterEmail || '' },
+          subject: `تأكيد استلام طلبك ${sub.submissionNumber}`,
+          body,
+          templateKey: 'public-form.confirmation',
+          metadata: {
+            submissionId: String(sub._id),
+            submissionNumber: sub.submissionNumber,
+            templateId: sub.templateId,
+          },
+        })
+        .catch(err => console.warn('public-form confirmation notify failed:', err.message));
+    }
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }

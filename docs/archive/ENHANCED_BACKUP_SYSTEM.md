@@ -1,4 +1,5 @@
 # 📚 ENHANCED BACKUP MANAGEMENT SYSTEM - DOCUMENTATION
+
 # نظام إدارة النسخ الاحتياطية المحسّن - التوثيق الشامل
 
 ## 🎯 نظرة عامة | Overview
@@ -31,6 +32,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ## 🌟 المميزات الرئيسية | Key Features
 
 ### نسخ احتياطية تلقائية ويدوية | Automated & Manual Backups
+
 ```
 ✅ جدولة تلقائية يومية | Daily automated scheduling
 ✅ نسخ كاملة وزيادية | Full and incremental backups
@@ -39,6 +41,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ```
 
 ### تخزين متعدد المواقع | Multi-Location Storage
+
 ```
 ✅ التخزين المحلي | Local storage
 ✅ AWS S3 | Amazon S3
@@ -48,6 +51,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ```
 
 ### التشفير والضغط | Encryption & Compression
+
 ```
 ✅ تشفير AES-256 | AES-256 Encryption
 ✅ ضغط Gzip | Gzip Compression
@@ -56,6 +60,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ```
 
 ### المراقبة والتنبيهات | Monitoring & Alerts
+
 ```
 ✅ فحوصات الصحة المستمرة | Continuous health checks
 ✅ تتبع مقاييس الأداء | Performance metrics tracking
@@ -64,6 +69,7 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ```
 
 ### إدارة متقدمة | Advanced Management
+
 ```
 ✅ استعادة من نسخة احتياطية | Backup restoration
 ✅ التحقق من السلامة | Integrity validation
@@ -112,12 +118,14 @@ The Enhanced Backup Management System provides a comprehensive and reliable solu
 ## 📦 المتطلبات | Requirements
 
 ### Node.js & npm
+
 ```bash
 Node.js >= 14.0.0
 npm >= 6.0.0
 ```
 
 ### المكتبات المطلوبة | Required Packages
+
 ```json
 {
   "dependencies": {
@@ -136,6 +144,7 @@ npm >= 6.0.0
 ```
 
 ### متغيرات البيئة | Environment Variables
+
 ```bash
 # Backup Configuration
 BACKUP_STORAGE_PATH=./backups
@@ -159,23 +168,27 @@ MONGODB_URI=mongodb://localhost:27017/erp_db
 ## 🔧 التثبيت والإعداد | Installation & Setup
 
 ### الخطوة 1: تثبيت المكتبات | Step 1: Install Dependencies
+
 ```bash
 npm install express mongoose aws-sdk
 npm install --save-dev jest supertest
 ```
 
 ### الخطوة 2: إضافة المتغيرات البيئية | Step 2: Configure Environment
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 ### الخطوة 3: إنشاء مفتاح التشفير | Step 3: Generate Encryption Key
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
 ### الخطوة 4: تثبيت API Routes | Step 4: Install API Routes
+
 ```javascript
 // في server.js / In server.js
 const backupRoutes = require('./routes/backups.routes');
@@ -183,6 +196,7 @@ app.use('/api/backups', backupRoutes);
 ```
 
 ### الخطوة 5: تهيئة الخدمات | Step 5: Initialize Services
+
 ```javascript
 const enhancedBackup = require('./services/enhanced-backup.service');
 const backupMonitoring = require('./services/backup-monitoring.service');
@@ -203,23 +217,23 @@ enhancedBackup.scheduleBackups('0 2 * * *'); // 2 AM daily
 ```
 1. إطلاق النسخ الاحتياطية | Create Backup
    └─ التحقق من المتطلبات | Verify prerequisites
-   
+
 2. تنفيذ النسخ | Execute Backup
    └─ تصدير قاعدة البيانات | Export database
-   
+
 3. معالجة ما بعد النسخ | Post-Processing
    ├─ الضغط | Compression
    ├─ التشفير | Encryption
    └─ حساب البصمة | Checksum calculation
-   
+
 4. التحقق | Verification
    └─ اختبار السلامة | Integrity test
-   
+
 5. التخزين | Storage
    ├─ التخزين المحلي | Local storage
    ├─ التخزين السحابي | Cloud storage
    └─ النسخ الاحتياطية | Replication
-   
+
 6. التنظيف | Cleanup
    ├─ حذف النسخ القديمة | Remove old backups
    └─ تحديث البيانات الوصفية | Update metadata
@@ -230,19 +244,19 @@ enhancedBackup.scheduleBackups('0 2 * * *'); // 2 AM daily
 ```
 1. اختيار النسخة | Select Backup
    └─ التحقق من صحتها | Verify backup
-   
+
 2. فك التشفير (إن وجد) | Decryption
    └─ استخدام مفتاح التشفير | Use encryption key
-   
+
 3. فك الضغط | Decompression
    └─ استخراج البيانات | Extract data
-   
+
 4. استعادة قاعدة البيانات | Restore Database
    └─ mongorestore command
-   
+
 5. التحقق | Verification
    └─ اختبار صحة البيانات | Data integrity test
-   
+
 6. الإبلاغ | Reporting
    └─ توثيق العملية | Log operation
 ```
@@ -254,6 +268,7 @@ enhancedBackup.scheduleBackups('0 2 * * *'); // 2 AM daily
 ### 1. إنشاء نسخة احتياطية | Create Backup
 
 **Request**
+
 ```http
 POST /api/backups/create
 Content-Type: application/json
@@ -266,6 +281,7 @@ Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -289,12 +305,14 @@ Authorization: Bearer {token}
 ### 2. قائمة النسخ الاحتياطية | List Backups
 
 **Request**
+
 ```http
 GET /api/backups/list?type=FULL&status=COMPLETED&limit=50
 Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -315,12 +333,14 @@ Authorization: Bearer {token}
 ### 3. الحصول على تفاصيل النسخة | Get Backup Details
 
 **Request**
+
 ```http
 GET /api/backups/{backupId}
 Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -341,6 +361,7 @@ Authorization: Bearer {token}
 ### 4. استعادة من نسخة اح | Restore Backup
 
 **Request**
+
 ```http
 POST /api/backups/{backupId}/restore
 Content-Type: application/json
@@ -353,6 +374,7 @@ Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -368,12 +390,14 @@ Authorization: Bearer {token}
 ### 5. حالة الصحة | Health Status
 
 **Request**
+
 ```http
 GET /api/backups/health/status
 Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -393,12 +417,14 @@ Authorization: Bearer {token}
 ### 6. المقاييس | Metrics
 
 **Request**
+
 ```http
 GET /api/backups/metrics/current
 Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -419,12 +445,14 @@ Authorization: Bearer {token}
 ### 7. حذف نسخة اح | Delete Backup
 
 **Request**
+
 ```http
 DELETE /api/backups/{backupId}
 Authorization: Bearer {token}
 ```
 
 **Response**
+
 ```json
 {
   "success": true,
@@ -504,9 +532,9 @@ console.log('✅ Automatic backups scheduled');
 const backupMonitoring = require('./services/backup-monitoring.service');
 
 // الاستماع لأحداث الصحة | Listen to health events
-backupMonitoring.on('health:checked', (health) => {
+backupMonitoring.on('health:checked', health => {
   console.log('Health Status:', health.status);
-  
+
   if (health.status !== 'HEALTHY') {
     console.warn('Issues detected:', health.issues);
   }
@@ -559,11 +587,11 @@ await replicateBackup();
 
 ### نوع التنبيهات | Alert Types
 
-| الحالة | الوصف | الإجراء |
-|-------|-------|--------|
+| الحالة      | الوصف   | الإجراء    |
+| ----------- | ------- | ---------- |
 | 🔴 CRITICAL | خطأ حرج | تنبيه فوري |
-| 🟡 WARNING | تحذير | متابعة |
-| 🔵 INFO | معلومة | تسجيل |
+| 🟡 WARNING  | تحذير   | متابعة     |
+| 🔵 INFO     | معلومة  | تسجيل      |
 
 ### أمثلة التنبيهات | Alert Examples
 
@@ -643,6 +671,7 @@ backupMonitoring.createAlert({
 ### المشكلة: فشل النسخ الاحتياطية | Backup Fails
 
 **الحل:**
+
 ```bash
 # 1. تحقق من قاعدة البيانات
 mongo --uri $MONGODB_URI --eval "db.version()"
@@ -660,6 +689,7 @@ tail -100 backup.log
 ### المشكلة: التشفير لا يعمل | Encryption Issues
 
 **الحل:**
+
 ```bash
 # تحقق من مفتاح التشفير
 echo $BACKUP_ENCRYPTION_KEY
@@ -674,6 +704,7 @@ systemctl restart backup-service
 ### المشكلة: استعادة بطيئة | Slow Restore
 
 **الحل:**
+
 ```bash
 # تحقق من أداء MongoDB
 mongo --eval "db.adminCommand('serverStatus')"
@@ -690,22 +721,27 @@ mongorestore --numInsertionWorkersPerCollection 10
 ## 📈 أفضل الممارسات | Best Practices
 
 ✅ **جدولة منتظمة | Regular Scheduling**
+
 - نسخة احتياطية كاملة يومياً | Daily full backups
 - نسخ احتياطية زيادية كل 6 ساعات | Incremental every 6 hours
 
 ✅ **تخزين متعدد المواقع | Multi-Location Storage**
+
 - نسخة محلية للاستعادة السريعة | Local for quick recovery
 - نسخة سحابية للآمان | Cloud for safety
 
 ✅ **التشفير | Encryption**
+
 - استخدام AES-256 دائماً | Always use AES-256
 - حفظ مفاتيح التشفير بأمان | Store keys securely
 
 ✅ **المراقبة | Monitoring**
+
 - فحوصات صحية يومية | Daily health checks
 - التنبيهات الفورية للمشاكل | Immediate alerts for issues
 
 ✅ **الاختبار | Testing**
+
 - اختبار الاستعادة شهرياً | Monthly restore tests
 - التحقق من سلامة البيانات | Verify data integrity
 
@@ -714,6 +750,7 @@ mongorestore --numInsertionWorkersPerCollection 10
 ## 📞 الدعم والمساعدة | Support & Help
 
 للمساعدة أو الإبلاغ عن مشاكل:
+
 - 📧 Email: support@example.com
 - 🔗 GitHub: github.com/project/issues
 - 📖 Wiki: wiki.example.com/backup

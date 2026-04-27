@@ -1,4 +1,5 @@
 # 🚀 دليل تحسينات الإنتاج - ALAWAEL Quality Dashboard v2.0
+
 # Production Enhancements Guide
 
 ## 📑 جدول المحتويات | Table of Contents
@@ -21,6 +22,7 @@
 ## <a name="overview"></a>📋 نظرة عامة | Overview
 
 ### الإصدار السابق v1.0
+
 - لوحة تحكم أساسية لمراقبة الجودة
 - WebSocket للتحديثات الفورية
 - API أساسية بدون حماية متقدمة
@@ -28,6 +30,7 @@
 - سجلات محدودة
 
 ### الإصدار الحالي v2.0 - Enhanced Edition
+
 ✅ **الأمان المتقدم** - Helmet, Rate Limiting, API Authentication
 ✅ **التخزين المؤقت الذكي** - Smart caching with NodeCache
 ✅ **السجلات الشاملة** - Multi-level logging with rotation
@@ -40,6 +43,7 @@
 ## <a name="new-features"></a>🎯 الميزات الجديدة | New Features
 
 ### 1️⃣ طبقة الأمان Security Layer
+
 ```javascript
 // Helmet - HTTP Security Headers
 - Content Security Policy (CSP)
@@ -59,6 +63,7 @@
 ```
 
 ### 2️⃣ نظام التخزين المؤقت Caching System
+
 ```javascript
 // Smart Cache Durations
 - SHORT: 1 minute (frequently changing data)
@@ -75,6 +80,7 @@
 ```
 
 ### 3️⃣ نظام السجلات Logging System
+
 ```javascript
 // Log Levels
 - DEBUG: Detailed information for debugging
@@ -91,6 +97,7 @@
 ```
 
 ### 4️⃣ المراقبة الصحية Health Monitoring
+
 ```javascript
 // System Metrics
 - CPU Load Average
@@ -111,6 +118,7 @@
 ```
 
 ### 5️⃣ تحسين الأداء Performance Optimization
+
 ```javascript
 // Performance Tracking
 - Function execution timing
@@ -130,6 +138,7 @@
 ## <a name="security"></a>🔐 الأمان | Security
 
 ### تكوين Helmet
+
 ```javascript
 // dashboard/server/middleware/security.js
 helmet({
@@ -138,39 +147,41 @@ helmet({
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "ws:", "wss:"]
-    }
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: ["'self'", 'ws:', 'wss:'],
+    },
   },
   hsts: {
     maxAge: 31536000,
     includeSubDomains: true,
-    preload: true
+    preload: true,
   },
   frameguard: { action: 'deny' },
   noSniff: true,
-  xssFilter: true
+  xssFilter: true,
 });
 ```
 
 ### معدل التحديد Rate Limiting
+
 ```javascript
 // API Rate Limiter
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // 100 requests per window
-  message: 'Too many requests from this IP'
+  message: 'Too many requests from this IP',
 });
 
 // Strict Limiter (for admin operations)
 const strictLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 10, // 10 requests per window
-  message: 'Rate limit exceeded'
+  message: 'Rate limit exceeded',
 });
 ```
 
 ### مصادقة API Key
+
 ```javascript
 // Set in .env
 API_KEY=your-secret-api-key-here
@@ -181,6 +192,7 @@ curl -H "X-API-Key: your-secret-api-key-here" \
 ```
 
 ### التحقق من المدخلات Input Validation
+
 ```javascript
 // Automatic sanitization of:
 - HTML tags removal
@@ -194,6 +206,7 @@ curl -H "X-API-Key: your-secret-api-key-here" \
 ## <a name="caching"></a>🗄️ التخزين المؤقت | Caching
 
 ### كيف يعمل؟ How It Works
+
 ```javascript
 // Automatic caching for GET requests
 app.get('/api/data', smartCache, (req, res) => {
@@ -212,6 +225,7 @@ clearCache();
 ```
 
 ### مدد التخزين المؤقت Cache Durations
+
 ```javascript
 const { cacheMiddleware, CacheDurations } = require('./middleware/cache');
 
@@ -227,6 +241,7 @@ app.get('/api/stats', cacheMiddleware(CacheDurations.MEDIUM), ...);
 ```
 
 ### إحصائيات Cache Statistics
+
 ```javascript
 // GET /metrics/cache
 {
@@ -243,6 +258,7 @@ app.get('/api/stats', cacheMiddleware(CacheDurations.MEDIUM), ...);
 ```
 
 ### أفضل الممارسات Best Practices
+
 ```
 ✅ Cache stable data with LONG or HOUR duration
 ✅ Use SHORT for frequently changing data
@@ -258,6 +274,7 @@ app.get('/api/stats', cacheMiddleware(CacheDurations.MEDIUM), ...);
 ## <a name="logging"></a>📝 السجلات | Logging
 
 ### مستويات السجلات Log Levels
+
 ```javascript
 const { logger } = require('./middleware/logger');
 
@@ -275,6 +292,7 @@ logger.error('Database connection failed:', error);
 ```
 
 ### تكوين السجلات Log Configuration
+
 ```bash
 # .env
 LOG_LEVEL=INFO          # DEBUG, INFO, WARN, ERROR
@@ -283,6 +301,7 @@ LOG_MAX_SIZE=10         # Max file size in MB
 ```
 
 ### موقع ملفات السجلات Log Files Location
+
 ```
 dashboard/server/
 └── logs/
@@ -292,6 +311,7 @@ dashboard/server/
 ```
 
 ### تنسيق السجلات Log Format
+
 ```
 [2026-03-02T10:30:45.123Z] [INFO] [req-abc123] User logged in: {"userId":456}
 [2026-03-02T10:31:12.456Z] [WARN] [req-def456] Slow request detected: 1523ms GET /api/data
@@ -299,6 +319,7 @@ dashboard/server/
 ```
 
 ### التناوب التلقائي Automatic Rotation
+
 ```
 - New file created daily
 - Old files rotated when exceeding LOG_MAX_SIZE
@@ -313,6 +334,7 @@ dashboard/server/
 ### نقاط فحص الصحة Health Check Endpoints
 
 #### 1. الفحص الأساسي Basic Health Check
+
 ```bash
 GET /health
 
@@ -334,6 +356,7 @@ Response:
 ```
 
 #### 2. السجل التاريخي Health History
+
 ```bash
 GET /health/history
 
@@ -352,6 +375,7 @@ Response:
 ```
 
 #### 3. مقاييس النظام System Metrics
+
 ```bash
 GET /metrics/system
 
@@ -380,6 +404,7 @@ Response:
 ```
 
 ### الحدود الصحية Health Thresholds
+
 ```bash
 # .env Configuration
 HEALTH_MEMORY_WARNING=85      # Warning at 85% memory
@@ -391,6 +416,7 @@ HEALTH_ERROR_RATE_CRITICAL=10 # Critical at 10% error rate
 ```
 
 ### حالات الصحة Health States
+
 ```
 ✅ healthy - All systems operational
   - Memory < 85%
@@ -413,6 +439,7 @@ HEALTH_ERROR_RATE_CRITICAL=10 # Critical at 10% error rate
 ## <a name="performance-optimization"></a>⚡ تحسين الأداء | Performance Optimization
 
 ### تقرير الأداء Performance Report
+
 ```bash
 GET /metrics/performance
 
@@ -458,28 +485,24 @@ Response:
 ```
 
 ### تتبع الأداء Performance Tracking
+
 ```javascript
 const { performanceOptimizer } = require('./services/performance-optimizer');
 
 // Track function execution
-const result = await performanceOptimizer.measureFunction(
-  'myFunction',
-  async () => {
-    // Your code here
-    return processData();
-  }
-);
+const result = await performanceOptimizer.measureFunction('myFunction', async () => {
+  // Your code here
+  return processData();
+});
 
 // Track database query
-const rows = await performanceOptimizer.trackQueryPerformance(
-  'SELECT * FROM users',
-  async () => {
-    return db.query('SELECT * FROM users');
-  }
-);
+const rows = await performanceOptimizer.trackQueryPerformance('SELECT * FROM users', async () => {
+  return db.query('SELECT * FROM users');
+});
 ```
 
 ### الحدود الافتراضية Default Thresholds
+
 ```bash
 # .env Configuration
 PERF_SLOW_FUNCTION_THRESHOLD=100   # 100ms
@@ -489,6 +512,7 @@ PERF_MAX_HISTORY=1000              # Keep last 1000 operations
 ```
 
 ### اقتراحات التحسين Optimization Suggestions
+
 ```
 النظام يقدم اقتراحات تلقائية بناءً على:
 The system provides automatic suggestions based on:
@@ -514,21 +538,24 @@ The system provides automatic suggestions based on:
 ## <a name="installation"></a>📦 التثبيت والإعداد | Installation & Setup
 
 ### 1. تثبيت Dependencies
+
 ```bash
 cd dashboard/server
 npm install
 ```
 
 ### Dependencies الجديدة:
+
 ```json
 {
-  "helmet": "^7.1.0",           // Security headers
+  "helmet": "^7.1.0", // Security headers
   "express-rate-limit": "^7.1.5", // Rate limiting
-  "node-cache": "^5.1.2"        // In-memory caching
+  "node-cache": "^5.1.2" // In-memory caching
 }
 ```
 
 ### 2. إعداد البيئة Environment Setup
+
 ```bash
 # Copy example file
 cp .env.example .env
@@ -538,6 +565,7 @@ nano .env
 ```
 
 ### الإعدادات المهمة Important Settings:
+
 ```bash
 # MUST CHANGE in production
 API_KEY=your-secret-api-key-here
@@ -551,6 +579,7 @@ RATE_LIMIT_ENABLED=true
 ```
 
 ### 3. إنشاء المجلدات Create Directories
+
 ```bash
 mkdir -p logs
 mkdir -p data
@@ -558,6 +587,7 @@ chmod 755 logs data
 ```
 
 ### 4. تشغيل الخادم Start Server
+
 ```bash
 # Development mode
 npm run dev
@@ -567,6 +597,7 @@ NODE_ENV=production npm start
 ```
 
 ### 5. التحقق من التشغيل Verify Installation
+
 ```bash
 # Check health
 curl http://localhost:3001/health
@@ -585,6 +616,7 @@ curl http://localhost:3001/metrics/cache
 ### Health & Monitoring
 
 #### GET /health
+
 ```bash
 curl http://localhost:3001/health
 
@@ -599,6 +631,7 @@ Response: 200 OK (healthy) or 503 (unhealthy)
 ```
 
 #### GET /health/history
+
 ```bash
 curl http://localhost:3001/health/history
 
@@ -612,6 +645,7 @@ Response: 200 OK
 ```
 
 #### GET /metrics/system
+
 ```bash
 curl http://localhost:3001/metrics/system
 
@@ -628,6 +662,7 @@ Response: 200 OK
 ### Performance Metrics
 
 #### GET /metrics/performance
+
 ```bash
 curl http://localhost:3001/metrics/performance
 
@@ -646,6 +681,7 @@ Response: 200 OK
 ### Cache Management
 
 #### GET /metrics/cache
+
 ```bash
 curl http://localhost:3001/metrics/cache
 
@@ -661,6 +697,7 @@ Response: 200 OK
 ```
 
 #### POST /admin/cache/clear
+
 ```bash
 # Requires API Key
 curl -X POST \
@@ -680,6 +717,7 @@ Response: 200 OK
 ### Admin Operations
 
 #### POST /admin/metrics/reset
+
 ```bash
 # Requires API Key + Strict Rate Limit
 curl -X POST \
@@ -699,6 +737,7 @@ Response: 200 OK
 ## <a name="environment"></a>⚙️ الإعدادات البيئية | Environment Configuration
 
 ### إعدادات الأمان Security Settings
+
 ```bash
 # API Key for admin operations
 API_KEY=your-secret-api-key-here
@@ -708,6 +747,7 @@ ALLOWED_ORIGINS=http://localhost:3002,https://yourdomain.com
 ```
 
 ### إعدادات السجلات Logging Settings
+
 ```bash
 # Log level: DEBUG, INFO, WARN, ERROR
 LOG_LEVEL=INFO
@@ -720,6 +760,7 @@ LOG_MAX_SIZE=10
 ```
 
 ### إعدادات التخزين المؤقت Caching Settings
+
 ```bash
 # Enable caching
 CACHE_ENABLED=true
@@ -735,6 +776,7 @@ CACHE_CHECK_PERIOD=60
 ```
 
 ### إعدادات معدل التحديد Rate Limiting Settings
+
 ```bash
 # Enable rate limiting
 RATE_LIMIT_ENABLED=true
@@ -751,6 +793,7 @@ STRICT_RATE_LIMIT_MAX_REQUESTS=10
 ```
 
 ### إعدادات المراقبة الصحية Health Monitoring Settings
+
 ```bash
 # Memory thresholds (%)
 HEALTH_MEMORY_WARNING=85
@@ -769,6 +812,7 @@ HEALTH_HISTORY_SIZE=100
 ```
 
 ### إعدادات الأداء Performance Settings
+
 ```bash
 # Slow operation thresholds (ms)
 PERF_SLOW_FUNCTION_THRESHOLD=100
@@ -786,6 +830,7 @@ PERF_MAX_HISTORY=1000
 ### خطوات النشر Deployment Steps
 
 #### 1. الإعداد للإنتاج Prepare for Production
+
 ```bash
 # Set production environment
 export NODE_ENV=production
@@ -800,6 +845,7 @@ LOG_LEVEL=WARN
 ```
 
 #### 2. تحسينات الأداء Performance Optimizations
+
 ```bash
 # Enable caching
 CACHE_ENABLED=true
@@ -814,6 +860,7 @@ app.use(compression());
 ```
 
 #### 3. إعداد Nginx Reverse Proxy
+
 ```nginx
 # /etc/nginx/sites-available/dashboard
 server {
@@ -862,6 +909,7 @@ server {
 ```
 
 #### 4. إعداد PM2 Process Manager
+
 ```bash
 # Install PM2
 npm install -g pm2
@@ -901,6 +949,7 @@ pm2 startup
 ```
 
 #### 5. إعداد النسخ الاحتياطي Backup Configuration
+
 ```bash
 # Create backup script
 cat > backup.sh << 'EOF'
@@ -934,6 +983,7 @@ crontab -e
 ```
 
 #### 6. مراقبة الإنتاج Production Monitoring
+
 ```bash
 # Install monitoring tools
 npm install -g @pm2/io
@@ -958,6 +1008,7 @@ curl https://yourdomain.com/health
 ### المشاكل الشائعة Common Issues
 
 #### 1. الخادم لا يبدأ Server Won't Start
+
 ```bash
 # Check if port is in use
 lsof -i :3001
@@ -971,6 +1022,7 @@ tail -f logs/dashboard-*.log
 ```
 
 #### 2. معدل التحديد مرتفع جداً Rate Limit Too High
+
 ```bash
 # Temporary: Clear IP from rate limiter
 # Add to .env
@@ -981,6 +1033,7 @@ RATE_LIMIT_MAX_REQUESTS=200
 ```
 
 #### 3. استهلاك ذاكرة عالي High Memory Usage
+
 ```bash
 # Check memory profile
 curl http://localhost:3001/metrics/performance
@@ -995,6 +1048,7 @@ pm2 restart dashboard-server
 ```
 
 #### 4. Cache لا يعمل Cache Not Working
+
 ```bash
 # Check cache stats
 curl http://localhost:3001/metrics/cache
@@ -1010,6 +1064,7 @@ CACHE_ENABLED=true
 ```
 
 #### 5. السجلات لا تُكتب Logs Not Writing
+
 ```bash
 # Check directory permissions
 ls -la logs/
@@ -1026,6 +1081,7 @@ df -h
 ```
 
 #### 6. WebSocket لا يتصل WebSocket Won't Connect
+
 ```bash
 # Check CORS settings
 ALLOWED_ORIGINS=http://localhost:3002
@@ -1042,6 +1098,7 @@ sudo ufw allow 3001
 ## 📊 مثال على الاستخدام الكامل | Complete Usage Example
 
 ### 1. بدء الخادم Start Server
+
 ```bash
 cd dashboard/server
 npm install
@@ -1049,6 +1106,7 @@ npm start
 ```
 
 ### 2. التحقق من الصحة Check Health
+
 ```bash
 curl http://localhost:3001/health
 
@@ -1063,6 +1121,7 @@ curl http://localhost:3001/health
 ```
 
 ### 3. استخدام API Use API
+
 ```bash
 # Get quality data (cached automatically)
 curl http://localhost:3001/api/quality/current
@@ -1080,6 +1139,7 @@ curl http://localhost:3001/metrics/cache
 ```
 
 ### 4. مراقبة الأداء Monitor Performance
+
 ```bash
 curl http://localhost:3001/metrics/performance
 
@@ -1102,6 +1162,7 @@ curl http://localhost:3001/metrics/performance
 ```
 
 ### 5. إدارة Cache Manage Cache
+
 ```bash
 # Clear specific cache
 curl -X POST \
@@ -1121,6 +1182,7 @@ curl -X POST \
 ## 🎉 الخاتمة | Conclusion
 
 ### ما تم تحقيقه What Was Achieved
+
 ✅ **الأمان** - حماية متقدمة ضد الهجمات الشائعة
 ✅ **الأداء** - تحسين بنسبة 30-50% عبر التخزين المؤقت
 ✅ **المراقبة** - رؤية شاملة لصحة النظام
@@ -1128,6 +1190,7 @@ curl -X POST \
 ✅ **التحسين** - اقتراحات تلقائية لتحسين الأداء
 
 ### الخطوات القادمة Next Steps
+
 1. اختبار شامل في بيئة staging
 2. ضبط الحدود بناءً على الاستخدام الفعلي
 3. إعداد لوحات Grafana للمراقبة
@@ -1135,7 +1198,9 @@ curl -X POST \
 5. توثيق الممارسات الأفضل للفريق
 
 ### الدعم Support
+
 للمساعدة أو الأسئلة، راجع:
+
 - 📚 الوثائق الكاملة في `docs/`
 - 🐛 سجل المشاكل في GitHub Issues
 - 💬 قناة Slack: #quality-dashboard

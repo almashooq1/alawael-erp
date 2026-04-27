@@ -266,6 +266,14 @@ try {
   logger.warn('[PublicUploads] mount skipped:', err.message);
 }
 
+// Phase 30 — admin notifications log viewer.
+try {
+  app.use('/api/v1/admin/notifications-log', require('./routes/notifications-log.routes'));
+  logger.info('[NotificationsLog] ✓ mounted at /api/v1/admin/notifications-log');
+} catch (err) {
+  logger.warn('[NotificationsLog] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

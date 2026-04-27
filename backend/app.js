@@ -292,6 +292,14 @@ try {
   logger.warn('[AuditReviews] mount skipped:', err.message);
 }
 
+// Phase 30 — Visitor passwordless auth (OTP via SMS/email).
+try {
+  app.use('/api/v1/public/visitor', require('./routes/visitor-auth.routes'));
+  logger.info('[VisitorAuth] ✓ mounted at /api/v1/public/visitor');
+} catch (err) {
+  logger.warn('[VisitorAuth] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

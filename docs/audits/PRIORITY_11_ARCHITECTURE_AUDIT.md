@@ -8,18 +8,18 @@
 
 ## Executive Summary
 
-| Metric | Count |
-|--------|-------|
-| Route files | 522 (182,816 lines) |
-| Service files | 615 (219,197 lines) |
-| Model files | 633 (150,874 lines) |
-| Middleware files | 56 (7,034 lines) |
-| Files > 500 lines | **329** |
-| DDD services | 128 (17,488 lines) |
-| DDD models | 124 (not in models/index.js) |
-| Registry mounts | ~223 (main) + ~213 (sub-registries) |
-| Duplicate mount paths | 3 (`dashboard` ×3, `kpi-dashboard` ×2, `telehealth` ×2) |
-| Potentially unmounted route files | **162** |
+| Metric                            | Count                                                   |
+| --------------------------------- | ------------------------------------------------------- |
+| Route files                       | 522 (182,816 lines)                                     |
+| Service files                     | 615 (219,197 lines)                                     |
+| Model files                       | 633 (150,874 lines)                                     |
+| Middleware files                  | 56 (7,034 lines)                                        |
+| Files > 500 lines                 | **329**                                                 |
+| DDD services                      | 128 (17,488 lines)                                      |
+| DDD models                        | 124 (not in models/index.js)                            |
+| Registry mounts                   | ~223 (main) + ~213 (sub-registries)                     |
+| Duplicate mount paths             | 3 (`dashboard` ×3, `kpi-dashboard` ×2, `telehealth` ×2) |
+| Potentially unmounted route files | **162**                                                 |
 
 ---
 
@@ -30,6 +30,7 @@
 **Impact: CRITICAL — eliminates ~60% of DDD service code**
 
 #### Problem
+
 - **128 DDD services** with **1,476 async methods** across 17,488 lines
 - 96 full services (≥50 lines) all repeat identical CRUD patterns:
   - `listXxx(filter)` → `Model.find(filter).sort({createdAt:-1}).lean()` — **92 services**
@@ -41,6 +42,7 @@
 - Only 1 service (`dddCompetencyTracker`) defines a `BaseDomainModule` — but it's local, not shared
 
 #### Evidence (sampled)
+
 ```js
 // dddClinicalTrial.js — lines 18-30
 async listTrials(filter = {}) {
@@ -57,13 +59,14 @@ async updateTrial(id, data) {
 ```
 
 #### Solution
+
 Create `backend/services/BaseCrudService.js`:
 
 ```js
 class BaseCrudService {
   constructor(name, models = {}) {
     this.name = name;
-    this.models = models;        // { primary: Model, ...secondary }
+    this.models = models; // { primary: Model, ...secondary }
     this.primaryModel = models.primary || Object.values(models)[0];
   }
 
@@ -109,12 +112,14 @@ module.exports = BaseCrudService;
 ```
 
 #### Estimated Impact
+
 - **~5,000–7,000 lines eliminated** across 96 full DDD services
 - Average service drops from 137 → ~50 lines (domain logic only)
 - Uniform pagination, population, validation, healthCheck
 - Easier to add cross-cutting concerns (audit, caching, soft-delete)
 
 #### Effort: Medium (2–3 days)
+
 - Day 1: Create BaseCrudService + migrate 5 pilot services + tests
 - Day 2–3: Migrate remaining 91 full services (mechanical, safe)
 - Risk: LOW — additive change, existing API contracts unchanged
@@ -126,7 +131,9 @@ module.exports = BaseCrudService;
 **Impact: HIGH — improves maintainability & startup clarity**
 
 #### Problem
+
 `backend/app.js` is an 840-line monolith that configures:
+
 - ~30 middleware imports (lines 1–100)
 - Security/CORS/body-parsing (lines 150–240)
 - Performance + API versioning (lines 240–280)
@@ -142,15 +149,16 @@ module.exports = BaseCrudService;
 
 #### Solution — Extract 5 modules:
 
-| New file | Lines extracted | Content |
-|----------|----------------|---------|
-| `startup/healthProbes.js` | ~80 | `/health`, `/ready`, `/info` endpoints |
-| `startup/adminEndpoints.js` | ~125 | `/_init`, `/_diag` emergency endpoints |
-| `startup/integrationBus.js` | ~100 | DDD contracts, subscribers, automations, webhooks |
-| `startup/schedulers.js` | ~60 | AI Scheduler, SLA Scheduler, shutdown hooks |
-| `startup/middleware.js` | ~120 | Security, CORS, body-parsing, morgan, rate-limit |
+| New file                    | Lines extracted | Content                                           |
+| --------------------------- | --------------- | ------------------------------------------------- |
+| `startup/healthProbes.js`   | ~80             | `/health`, `/ready`, `/info` endpoints            |
+| `startup/adminEndpoints.js` | ~125            | `/_init`, `/_diag` emergency endpoints            |
+| `startup/integrationBus.js` | ~100            | DDD contracts, subscribers, automations, webhooks |
+| `startup/schedulers.js`     | ~60             | AI Scheduler, SLA Scheduler, shutdown hooks       |
+| `startup/middleware.js`     | ~120            | Security, CORS, body-parsing, morgan, rate-limit  |
 
 app.js becomes a ~200-line orchestrator:
+
 ```js
 const { setupMiddleware } = require('./startup/middleware');
 const { setupHealthProbes } = require('./startup/healthProbes');
@@ -168,6 +176,7 @@ startSchedulers(app);
 ```
 
 #### Effort: Low (1 day)
+
 - Pure extraction — no behavior change
 - Risk: LOW — functions are already clearly sectioned with comments
 
@@ -178,12 +187,14 @@ startSchedulers(app);
 **Impact: HIGH — removes dead weight & confusion**
 
 #### Problem
+
 - **395 non-DDD route files** exist in `backend/routes/`
 - Of these, **162 route files** have names that do NOT appear in `_registry.js` or any sub-registry
 - This means ~41% of non-DDD route files may be dead code — unreachable endpoints
 - The 3 duplicate mount paths (`dashboard` ×3, `kpi-dashboard` ×2, `telehealth` ×2) mean the last mount silently overrides earlier ones
 
 #### Evidence
+
 ```
 Unique mount paths: 167
 Duplicate mount paths: 3
@@ -193,6 +204,7 @@ Duplicate mount paths: 3
 ```
 
 #### Solution
+
 1. **Generate orphan list**: Script to diff route filenames vs registry references → produce candidates
 2. **Verify each candidate**: Check if the file is `require()`'d from anywhere (`grep -r`)
 3. **Archive confirmed dead routes** → `_archived/dead-routes/`
@@ -200,11 +212,13 @@ Duplicate mount paths: 3
 5. **Add CI guard**: Test that counts mounted routes vs route files, fails on drift
 
 #### Estimated Impact
+
 - **~56,700 lines removed** (162 files × avg 350 lines)
 - Clearer route registry, faster `require()` tree
 - Eliminates silent route override bugs
 
 #### Effort: Medium (2 days)
+
 - Day 1: Generate + verify orphan list, archive confirmed dead files
 - Day 2: Fix duplicate mounts, add CI guard
 - Risk: MEDIUM — needs verification that "unmounted" truly means "unused" (some may be dynamically loaded)
@@ -214,27 +228,35 @@ Duplicate mount paths: 3
 ## Quick Wins (< 2 hours each)
 
 ### QW-1: Fix 3 Duplicate Route Mounts
+
 ```
 dashboard: mounted 3 times → keep 1
 kpi-dashboard: mounted 2 times → keep 1
 telehealth: mounted 2 times → keep 1
 ```
+
 **Effort**: 30 min | **Risk**: Low
 
 ### QW-2: Add CI Route Mount Guard
+
 Add a test that asserts:
+
 - No duplicate mount paths in `_registry.js` + sub-registries
 - All route files under `backend/routes/ddd/` are mounted
-**Effort**: 1 hour | **Risk**: None
+  **Effort**: 1 hour | **Risk**: None
 
 ### QW-3: Standardize DDD Service `healthCheck()` Return Shape
+
 84 services have `healthCheck()` but return inconsistent shapes. Standardize to:
+
 ```js
 { service: 'Name', status: 'ok', counts: { model1: N, model2: M }, timestamp: Date }
 ```
+
 **Effort**: 2 hours (mechanical) | **Risk**: Low
 
 ### QW-4: clinical.registry.js is oversized (365 lines, 47 mounts)
+
 Split into `clinical-assessment.registry.js` and `clinical-therapy.registry.js`
 **Effort**: 1 hour | **Risk**: Low
 
@@ -242,28 +264,28 @@ Split into `clinical-assessment.registry.js` and `clinical-therapy.registry.js`
 
 ## File Size Hall of Shame (Top 20)
 
-| File | Lines |
-|------|-------|
-| `services/importExportPro.service.js` | 3,883 |
-| `services/rehabCenterLicense.service.js` | 3,295 |
+| File                                            | Lines |
+| ----------------------------------------------- | ----- |
+| `services/importExportPro.service.js`           | 3,883 |
+| `services/rehabCenterLicense.service.js`        | 3,295 |
 | `services/disability-rehabilitation.service.js` | 3,241 |
-| `routes/workflowEnhanced.routes.js` | 3,068 |
-| `routes/finance.routes.advanced.js` | 2,968 |
-| `models/RehabCenterLicense.js` | 2,662 |
-| `models/rehab-pro.model.js` | 2,649 |
-| `routes/frontend-api-stubs.js` | 2,534 |
-| `routes/finance.routes.unified.js` | 2,375 |
-| `models/rehab-expansion.model.js` | 2,339 |
-| `routes/reports-analytics-module.routes.js` | 2,002 |
-| `services/aiDiagnostic.service.js` | 1,881 |
-| `routes/workflowPro.routes.js` | 1,819 |
-| `routes/enterpriseUltra.routes.js` | 1,771 |
-| `routes/enterprisePro.routes.js` | 1,767 |
-| `models/rehabilitation-advanced.model.js` | 1,711 |
-| `models/rehabilitation-center.model.js` | 1,703 |
-| `models/disability-rehabilitation.model.js` | 1,659 |
-| `models/EnterpriseUltra.js` | 1,616 |
-| `services/reportBuilder.service.js` | 1,577 |
+| `routes/workflowEnhanced.routes.js`             | 3,068 |
+| `routes/finance.routes.advanced.js`             | 2,968 |
+| `models/RehabCenterLicense.js`                  | 2,662 |
+| `models/rehab-pro.model.js`                     | 2,649 |
+| `routes/frontend-api-stubs.js`                  | 2,534 |
+| `routes/finance.routes.unified.js`              | 2,375 |
+| `models/rehab-expansion.model.js`               | 2,339 |
+| `routes/reports-analytics-module.routes.js`     | 2,002 |
+| `services/aiDiagnostic.service.js`              | 1,881 |
+| `routes/workflowPro.routes.js`                  | 1,819 |
+| `routes/enterpriseUltra.routes.js`              | 1,771 |
+| `routes/enterprisePro.routes.js`                | 1,767 |
+| `models/rehabilitation-advanced.model.js`       | 1,711 |
+| `models/rehabilitation-center.model.js`         | 1,703 |
+| `models/disability-rehabilitation.model.js`     | 1,659 |
+| `models/EnterpriseUltra.js`                     | 1,616 |
+| `services/reportBuilder.service.js`             | 1,577 |
 
 **329 files exceed 500 lines** — future priorities should systematically split these.
 
@@ -271,23 +293,24 @@ Split into `clinical-assessment.registry.js` and `clinical-therapy.registry.js`
 
 ## Sub-Registry Breakdown
 
-| Registry | Lines | Mounts | Notes |
-|----------|-------|--------|-------|
-| clinical.registry.js | 365 | 47 | **Oversized** — split candidate |
-| hr.registry.js | 156 | 29 | Acceptable |
-| documents.registry.js | 118 | 22 | OK |
-| government.registry.js | 117 | 16 | OK |
-| fleet.registry.js | 97 | 36 | High mount density |
-| communication.registry.js | 91 | 15 | OK |
-| student-parent.registry.js | 87 | 17 | OK |
-| finance.registry.js | 78 | 21 | OK |
-| education.registry.js | 41 | 10 | Small |
+| Registry                   | Lines | Mounts | Notes                           |
+| -------------------------- | ----- | ------ | ------------------------------- |
+| clinical.registry.js       | 365   | 47     | **Oversized** — split candidate |
+| hr.registry.js             | 156   | 29     | Acceptable                      |
+| documents.registry.js      | 118   | 22     | OK                              |
+| government.registry.js     | 117   | 16     | OK                              |
+| fleet.registry.js          | 97    | 36     | High mount density              |
+| communication.registry.js  | 91    | 15     | OK                              |
+| student-parent.registry.js | 87    | 17     | OK                              |
+| finance.registry.js        | 78    | 21     | OK                              |
+| education.registry.js      | 41    | 10     | Small                           |
 
 ---
 
 ## Error Handling Assessment
 
 The DDD layer has **excellent** error handling discipline:
+
 - 8 catch blocks with proper logging
 - 6 "silent" catches — all **intentional**:
   - `dddNotificationDispatcher.js` (3): Lazy `require()` loaders returning `null` for optional modules
@@ -300,10 +323,10 @@ The DDD layer has **excellent** error handling discipline:
 
 ## API Versioning Assessment
 
-| Path Pattern | Usage |
-|-------------|-------|
-| `/api/xxx` | All routes (via `dualMount`) |
-| `/api/v1/xxx` | All routes (identical — mirror of `/api/`) |
+| Path Pattern  | Usage                                        |
+| ------------- | -------------------------------------------- |
+| `/api/xxx`    | All routes (via `dualMount`)                 |
+| `/api/v1/xxx` | All routes (identical — mirror of `/api/`)   |
 | `/api/v2/xxx` | Only 2 endpoints (domains health + platform) |
 
 **Finding**: There is no real API versioning. `dualMount()` puts every route on both `/api/` and `/api/v1/` identically. `/api/v2/` is barely used.

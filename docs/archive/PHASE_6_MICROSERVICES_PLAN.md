@@ -9,23 +9,23 @@
 
 ## Summary Matrix
 
-| # | Service Name | Port | Extracts From | Endpoints | Priority |
-|---|---|---|---|---|---|
-| 1 | inventory-warehouse-service | 3450 | enterprisePro, inventory.routes.unified, dashboard.stats | ~40 | HIGH |
-| 2 | academic-curriculum-service | 3460 | curriculum, gradebook, exams, subjects, timetable, academicYear | ~50 | HIGH |
-| 3 | student-health-medical-service | 3470 | studentHealthTracker, medicalFiles, caseManagement (medical) | ~35 | HIGH |
-| 4 | visitor-campus-security-service | 3480 | visitors.routes, civilDefense, security.real | ~40 | HIGH |
-| 5 | crisis-safety-service | 3490 | crisis.routes, civilDefense.routes, enterpriseProPlus (EHS) | ~45 | HIGH |
-| 6 | compliance-accreditation-service | 3500 | compliance.routes, quality, disabilityAuthority, rehabCenterLicenses | ~35 | MEDIUM |
-| 7 | events-activities-service | 3510 | studentEvents, enterprisePro (calendar-hub), community | ~30 | MEDIUM |
-| 8 | asset-equipment-service | 3520 | assets, equipment, enterpriseProPlus (ITAsset), maintenance | ~40 | HIGH |
-| 9 | staff-training-development-service | 3530 | training-development, employeeAffairs (career), driverTraining | ~30 | MEDIUM |
-| 10 | cms-announcements-service | 3540 | cms, beneficiaryPortal (announcements), smartContent | ~25 | MEDIUM |
-| 11 | forms-survey-service | 3550 | formTemplates, familySatisfaction, beneficiaryPortal (surveys) | ~30 | MEDIUM |
-| 12 | budget-financial-planning-service | 3560 | budgetManagement, finance (forecast/planning), costBudget | ~35 | HIGH |
-| 13 | student-lifecycle-service | 3570 | studentCertificates, waitlist, student-complaints, rewards | ~40 | MEDIUM |
-| 14 | external-integration-hub-service | 3580 | noor, mudad, taqat, qiwa, gosi, governmentIntegration, moi-passport | ~50 | HIGH |
-| 15 | facility-space-management-service | 3590 | facilities.routes, enterpriseProPlus (Facility, SpaceBooking, Lease) | ~30 | MEDIUM |
+| #   | Service Name                       | Port | Extracts From                                                        | Endpoints | Priority |
+| --- | ---------------------------------- | ---- | -------------------------------------------------------------------- | --------- | -------- |
+| 1   | inventory-warehouse-service        | 3450 | enterprisePro, inventory.routes.unified, dashboard.stats             | ~40       | HIGH     |
+| 2   | academic-curriculum-service        | 3460 | curriculum, gradebook, exams, subjects, timetable, academicYear      | ~50       | HIGH     |
+| 3   | student-health-medical-service     | 3470 | studentHealthTracker, medicalFiles, caseManagement (medical)         | ~35       | HIGH     |
+| 4   | visitor-campus-security-service    | 3480 | visitors.routes, civilDefense, security.real                         | ~40       | HIGH     |
+| 5   | crisis-safety-service              | 3490 | crisis.routes, civilDefense.routes, enterpriseProPlus (EHS)          | ~45       | HIGH     |
+| 6   | compliance-accreditation-service   | 3500 | compliance.routes, quality, disabilityAuthority, rehabCenterLicenses | ~35       | MEDIUM   |
+| 7   | events-activities-service          | 3510 | studentEvents, enterprisePro (calendar-hub), community               | ~30       | MEDIUM   |
+| 8   | asset-equipment-service            | 3520 | assets, equipment, enterpriseProPlus (ITAsset), maintenance          | ~40       | HIGH     |
+| 9   | staff-training-development-service | 3530 | training-development, employeeAffairs (career), driverTraining       | ~30       | MEDIUM   |
+| 10  | cms-announcements-service          | 3540 | cms, beneficiaryPortal (announcements), smartContent                 | ~25       | MEDIUM   |
+| 11  | forms-survey-service               | 3550 | formTemplates, familySatisfaction, beneficiaryPortal (surveys)       | ~30       | MEDIUM   |
+| 12  | budget-financial-planning-service  | 3560 | budgetManagement, finance (forecast/planning), costBudget            | ~35       | HIGH     |
+| 13  | student-lifecycle-service          | 3570 | studentCertificates, waitlist, student-complaints, rewards           | ~40       | MEDIUM   |
+| 14  | external-integration-hub-service   | 3580 | noor, mudad, taqat, qiwa, gosi, governmentIntegration, moi-passport  | ~50       | HIGH     |
+| 15  | facility-space-management-service  | 3590 | facilities.routes, enterpriseProPlus (Facility, SpaceBooking, Lease) | ~30       | MEDIUM   |
 
 ---
 
@@ -36,6 +36,7 @@
 ### 1. inventory-warehouse-service (Port 3450)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/inventory.routes.unified.js](backend/routes/inventory.routes.unified.js) — 23+ endpoints: products, categories, warehouses, stock movements, stock-takes, transfers, dashboard
 - [backend/routes/enterprisePro.routes.js](backend/routes/enterprisePro.routes.js#L881) — Section 5: Warehouse Intelligence (~20 endpoints): `Warehouse`, `WarehouseBin`, `StockLevel`, `StockAlert`, `StockTransferOrder`
 - [backend/routes/dashboard.stats.js](backend/routes/dashboard.stats.js#L128) — Inventory/stock KPI aggregation
@@ -45,6 +46,7 @@
 - [backend/models/EnterprisePro.js](backend/models/EnterprisePro.js) — Warehouse, WarehouseBin, StockLevel, StockAlert, StockTransferOrder schemas
 
 **Key Models/Schemas:**
+
 - `Product` — SKU, barcode, name, category, unit, reorderLevel
 - `Warehouse` — name, location, manager, capacity, type (school supplies / medical / food)
 - `WarehouseBin` — warehouseId, binCode, zone, capacity
@@ -56,6 +58,7 @@
 - `PurchaseRequisition` — items[], requester, department, urgency, budgetRef
 
 **Main API Endpoints:**
+
 ```
 GET    /api/inventory/products                     # List with barcode/category/search filters
 POST   /api/inventory/products                     # Create product
@@ -81,6 +84,7 @@ The monolith currently mixes school supplies, medical supplies, rehabilitation e
 ### 2. academic-curriculum-service (Port 3460)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/curriculum.routes.js](backend/routes/curriculum.routes.js) — Curriculum CRUD (120 lines)
 - [backend/routes/gradebook.routes.js](backend/routes/gradebook.routes.js) — Gradebook entries + semester reports (395 lines)
 - [backend/routes/exams.routes.js](backend/routes/exams.routes.js) — Exam management + submissions (332 lines)
@@ -93,6 +97,7 @@ The monolith currently mixes school supplies, medical supplies, rehabilitation e
 - [backend/services/smartAcademic.service.js](backend/services/smartAcademic.service.js) — AI-driven academic analytics
 
 **Key Models/Schemas:**
+
 - `AcademicYear` — name, startDate, endDate, semesters[], isActive
 - `Curriculum` — name, gradeLevel, subject, lessons[], objectives[], standards[]
 - `Subject` — name, code, department, credits, prerequisites
@@ -103,6 +108,7 @@ The monolith currently mixes school supplies, medical supplies, rehabilitation e
 - `SemesterReport` — studentId, semester, subjectGrades[], GPA, comments, rank
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/academic/years                        # Academic year management
 GET/POST /api/academic/curricula                     # Curriculum plans with learning objectives
@@ -126,6 +132,7 @@ Currently 8 separate route files (1,800+ combined lines) handle academics within
 ### 3. student-health-medical-service (Port 3470)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/studentHealthTracker.routes.js](backend/routes/studentHealthTracker.routes.js) — 373 lines: daily health checks, vital signs, symptoms, medications, vaccinations, mood tracking, allergies
 - [backend/routes/medicalFiles.js](backend/routes/medicalFiles.js) — 487 lines: medical file upload/storage (radiology, lab results, prescriptions, medical reports)
 - [backend/routes/caseManagement.js](backend/routes/caseManagement.js#L672) — Medical record section within case management (bloodType, allergies, chronic diseases)
@@ -134,6 +141,7 @@ Currently 8 separate route files (1,800+ combined lines) handle academics within
 - Frontend: [frontend/src/pages/education/StudentHealthTracker.js](frontend/src/pages/education/StudentHealthTracker.js)
 
 **Key Models/Schemas:**
+
 - `HealthRecord` — studentId, date, type (daily check/vaccination/medication/emergency), vitalSigns {temperature, heartRate, BP, weight, height, oxygenLevel}, generalCondition
 - `MedicalFile` — studentId, fileType (radiology/lab/prescription/report), filePath, uploadedBy, encryptionHash
 - `Medication` — studentId, name, dosage, frequency, startDate, endDate, administeredBy
@@ -143,6 +151,7 @@ Currently 8 separate route files (1,800+ combined lines) handle academics within
 - `GrowthChart` — studentId, date, weight, height, BMI, percentile
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/student-health/records                 # Health records CRUD
 POST     /api/student-health/daily-check             # Daily health screening entry
@@ -167,6 +176,7 @@ Medical records require HIPAA/CBAHI-level data isolation, encryption-at-rest, an
 ### 4. visitor-campus-security-service (Port 3480)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/visitors.routes.js](backend/routes/visitors.routes.js) — 231 lines: Full CRUD, analytics, blacklist, check-in/out, audit logs
 - [backend/services/visitor-advanced.service.js](backend/services/visitor-advanced.service.js) — Advanced visitor service (stats, analytics, currently-inside tracking)
 - [backend/models/Visitor.js](backend/models/Visitor.js) — Visitor model
@@ -177,6 +187,7 @@ Medical records require HIPAA/CBAHI-level data isolation, encryption-at-rest, an
 - Frontend: [frontend/src/pages/visitors/VisitorManagementPage.js](frontend/src/pages/visitors/VisitorManagementPage.js)
 
 **Key Models/Schemas:**
+
 - `Visitor` — name, idNumber, phone, company, purpose, hostEmployee, photo, badgeNumber, status (pre-registered/checked-in/checked-out)
 - `VisitLog` — visitorId, checkInTime, checkOutTime, gateUsed, badgeId, escortedBy
 - `Blacklist` — name, idNumber, reason, addedBy, addedAt
@@ -186,6 +197,7 @@ Medical records require HIPAA/CBAHI-level data isolation, encryption-at-rest, an
 - `CameraFeed` — cameraId, location, streamURL, status, recordingEnabled
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/campus-security/visitors               # Visitor CRUD
 POST     /api/campus-security/visitors/:id/check-in   # Check-in with badge print
@@ -210,6 +222,7 @@ Saudi childcare/rehabilitation centers have strict child protection requirements
 ### 5. crisis-safety-service (Port 3490)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/crisis.routes.js](backend/routes/crisis.routes.js) — 458 lines: Emergency plans, crisis incidents, emergency drills, emergency contacts, crisis dashboard
 - [backend/routes/civilDefense.routes.js](backend/routes/civilDefense.routes.js) — 399 lines: Safety certificates, inspections, fire drills, evacuation plans, civil defense reporting
 - [backend/routes/enterpriseProPlus.routes.js](backend/routes/enterpriseProPlus.routes.js) — Section 5 EHS: SafetyIncident, SafetyInspection, HazardRegister, PPERecord
@@ -218,6 +231,7 @@ Saudi childcare/rehabilitation centers have strict child protection requirements
 - [backend/services/smartCrisis.service.js](backend/services/smartCrisis.service.js), [backend/services/civilDefenseIntegration.service.js](backend/services/civilDefenseIntegration.service.js)
 
 **Key Models/Schemas:**
+
 - `EmergencyPlan` — type (fire/earthquake/flood/medical/security/pandemic), procedures[], requiredEquipment[], assignedRoles[], status
 - `CrisisIncident` — type, severity (critical/high/medium/low), location, reportedBy, responders[], timeline[], status, rootCauseAnalysis
 - `EmergencyDrill` — planId, scheduledDate, participantCount, evaluationScore, findings[], improvements[]
@@ -228,6 +242,7 @@ Saudi childcare/rehabilitation centers have strict child protection requirements
 - `EvacuationRoute` — buildingId, floor, routeMap, assemblyPoint, capacity
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/crisis/plans                            # Emergency plan management
 POST     /api/crisis/plans/:id/activate                # Activate emergency plan
@@ -253,6 +268,7 @@ Emergency management spans 3 separate monolith modules (crisis, civilDefense, EH
 ### 6. compliance-accreditation-service (Port 3500)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/compliance.routes.js](backend/routes/compliance.routes.js) — 381 lines: Compliance dashboard, controls, logs, metrics
 - [backend/routes/quality.js](backend/routes/quality.js) — Quality management routes
 - [backend/routes/rehabCenterLicenses.routes.js](backend/routes/rehabCenterLicenses.routes.js) — Rehab center license management (60+ endpoints)
@@ -263,6 +279,7 @@ Emergency management spans 3 separate monolith modules (crisis, civilDefense, EH
 - [backend/services/quality-management.service.js](backend/services/quality-management.service.js), [backend/services/smartQuality.service.js](backend/services/smartQuality.service.js)
 
 **Key Models/Schemas:**
+
 - `AccreditationStandard` — body (CBAHI/MOE/DisabilityAuthority), standardCode, category, requirement, evidenceRequired[]
 - `ComplianceAssessment` — standardId, assessorId, score, findings[], correctiveActions[], status (compliant/non-compliant/partial)
 - `ComplianceControl` — controlCode, description, category, owner, testFrequency, lastTestDate, status
@@ -272,6 +289,7 @@ Emergency management spans 3 separate monolith modules (crisis, civilDefense, EH
 - `CorrectiveAction` — finding, description, assignedTo, dueDate, status, evidence[]
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/compliance/standards                    # Accreditation standards library
 GET      /api/compliance/standards/gaps                # Gap analysis
@@ -296,6 +314,7 @@ Saudi rehabilitation centers must comply with multiple regulatory bodies simulta
 ### 7. events-activities-service (Port 3510)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/studentEvents.routes.js](backend/routes/studentEvents.routes.js) — 425 lines: Events CRUD, registration, attendance, calendar, types (فعالية, رحلة, مسابقة, ورشة عمل, حفل, يوم مفتوح, معرض, ندوة)
 - [backend/routes/enterprisePro.routes.js](backend/routes/enterprisePro.routes.js) — Section 3 Calendar Hub: CalendarEvent, RoomBooking
 - [backend/routes/community.js](backend/routes/community.js) — Community activities and events
@@ -304,6 +323,7 @@ Saudi rehabilitation centers must comply with multiple regulatory bodies simulta
 - [backend/models/EventParticipation.js](backend/models/EventParticipation.js), [backend/models/CommunityActivity.js](backend/models/CommunityActivity.js)
 
 **Key Models/Schemas:**
+
 - `Event` — title, description, type (academic/sports/cultural/social/rehabilitation/entertainment/religious/health), category, startDate, endDate, location {name, isVirtual, virtualLink, coordinates}
 - `EventRegistration` — eventId, participantId, participantType (student/parent/staff), status (registered/confirmed/attended/no-show)
 - `Activity` — name, type, ageGroup, duration, instructor, materials[], recurrence
@@ -312,6 +332,7 @@ Saudi rehabilitation centers must comply with multiple regulatory bodies simulta
 - `TripPlan` — destination, transportMode, guardianConsent[], medicalKit, firstAidStaff, itinerary[]
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/events                                  # Events CRUD with rich filters
 GET      /api/events/calendar                          # Calendar view (month/week/day)
@@ -335,6 +356,7 @@ Events currently exist across three separate route files (student events, enterp
 ### 8. asset-equipment-service (Port 3520)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/assets.js](backend/routes/assets.js) — 258 lines: Asset CRUD
 - [backend/routes/equipment.js](backend/routes/equipment.js) — 785 lines: Equipment CRUD, maintenance scheduling, lending, fault logs, calibration
 - [backend/routes/maintenance.js](backend/routes/maintenance.js) — Maintenance management
@@ -346,6 +368,7 @@ Events currently exist across three separate route files (student events, enterp
 - Frontend: [src/modules/asset-management.js](src/modules/asset-management.js)
 
 **Key Models/Schemas:**
+
 - `Asset` — name, category (furniture/IT/medical/rehab/vehicle/building), serialNumber, barcode, purchaseDate, value, depreciationMethod, currentValue, location, assignedTo, status
 - `Equipment` — equipmentId, name, manufacturer, model, serialNumber, category, department, calibrationDue, lastCalibrated, status (active/maintenance/retired/lending)
 - `MaintenanceSchedule` — assetId, frequency, lastPerformed, nextDue, taskDescription, assignedTo
@@ -355,6 +378,7 @@ Events currently exist across three separate route files (student events, enterp
 - `FixedAssetRegister` — assetCode, description, acquisition, depreciation, netBookValue, disposalDate
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/assets                                   # Asset register CRUD
 GET      /api/assets/barcode/:barcode                   # Scan barcode lookup
@@ -380,6 +404,7 @@ Rehabilitation centers manage expensive medical/ rehab equipment (standing frame
 ### 9. staff-training-development-service (Port 3530)
 
 **What it extracts from the monolith:**
+
 - [backend/training-development/professional-training-service.js](backend/training-development/professional-training-service.js) — Professional training management
 - [backend/routes/driverTraining.js](backend/routes/driverTraining.js) — Training & certification routes (currently driver-specific but pattern applicable to all staff)
 - [backend/routes/employeeAffairs.routes.js](backend/routes/employeeAffairs.routes.js#L248) — Career certification management
@@ -389,6 +414,7 @@ Rehabilitation centers manage expensive medical/ rehab equipment (standing frame
 - [backend/models/training.model.js](backend/models/training.model.js), [backend/models/DevelopmentPlan.js](backend/models/DevelopmentPlan.js)
 
 **Key Models/Schemas:**
+
 - `TrainingProgram` — title, type (workshop/course/conference/certification/onboarding), provider, duration, mode (in-person/online/blended), targetRoles[], maxParticipants, cost
 - `TrainingEnrollment` — programId, employeeId, status (enrolled/in-progress/completed/failed), completionDate, score, certificateUrl
 - `ProfessionalCertification` — employeeId, certName, issuingBody, issueDate, expiryDate, renewalRequirements, status
@@ -397,6 +423,7 @@ Rehabilitation centers manage expensive medical/ rehab equipment (standing frame
 - `CompetencyMatrix` — role, requiredSkills[], proficiencyLevels[], gapAnalysis
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/training/programs                        # Training program catalog
 POST     /api/training/programs/:id/enroll              # Employee enrollment
@@ -421,6 +448,7 @@ Saudi rehab centers require therapists/specialists to maintain professional cert
 ### 10. cms-announcements-service (Port 3540)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/cms.js](backend/routes/cms.js) — 442 lines: Pages, posts, banners, snippets, versioning
 - [backend/services/cmsService.js](backend/services/cmsService.js) — CMS content management
 - [backend/services/smartContent.service.js](backend/services/smartContent.service.js) — Smart content delivery
@@ -428,6 +456,7 @@ Saudi rehab centers require therapists/specialists to maintain professional cert
 - Frontend student portal: [frontend/src/pages/education/StudentAnnouncements.js](frontend/src/pages/education/StudentAnnouncements.js)
 
 **Key Models/Schemas:**
+
 - `Page` — title, slug, content (rich text), author, status (draft/published/archived), template, SEO metadata
 - `Post` — title, content, category (news/announcement/alert/achievement), targetAudience (all/parents/staff/students), publishDate, expiryDate, featured, attachments[]
 - `Banner` — title, imageUrl, linkUrl, position (hero/sidebar/footer), startDate, endDate, priority
@@ -435,6 +464,7 @@ Saudi rehab centers require therapists/specialists to maintain professional cert
 - `ContentVersion` — contentId, versionNumber, content, changedBy, changeDescription
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/cms/pages                                # Website pages CRUD
 GET      /api/cms/pages/:slug                           # Get page by slug
@@ -458,6 +488,7 @@ Currently the CMS is a basic in-memory service in the monolith. A dedicated micr
 ### 11. forms-survey-service (Port 3550)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/formTemplates.routes.js](backend/routes/formTemplates.routes.js) — 99 lines (MVC architecture with 48 built-in templates)
 - [backend/routes/familySatisfaction.routes.js](backend/routes/familySatisfaction.routes.js) — Family satisfaction surveys
 - [backend/routes/beneficiaryPortal.js](backend/routes/beneficiaryPortal.js#L460) — Survey routes (Survey, SurveyResponse models)
@@ -468,6 +499,7 @@ Currently the CMS is a basic in-memory service in the monolith. A dedicated micr
 - [backend/data/builtInFormTemplates.js](backend/data/builtInFormTemplates.js) — 48 built-in templates
 
 **Key Models/Schemas:**
+
 - `FormTemplate` — title, fields[], conditionalLogic{}, approvalWorkflow[], logo, header, footer, version, category (admission/medical/consent/evaluation/feedback)
 - `FormSubmission` — templateId, respondentId, responses{}, status (draft/submitted/approved/rejected), submittedAt, approvedBy
 - `Survey` — title, questions[], targetAudience, startDate, endDate, anonymous, status
@@ -475,6 +507,7 @@ Currently the CMS is a basic in-memory service in the monolith. A dedicated micr
 - `SatisfactionScore` — surveyId, period, NPS, overallScore, breakdown{service, communication, facility, staff}
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/forms/templates                          # Form template CRUD
 GET      /api/forms/templates/built-in                  # Pre-built templates (48+)
@@ -499,6 +532,7 @@ Currently 3 separate systems handle forms (form templates, family satisfaction, 
 ### 12. budget-financial-planning-service (Port 3560)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/budgetManagement.routes.js](backend/routes/budgetManagement.routes.js) — 195 lines: Budget CRUD, spending, overview stats
 - [backend/models/Budget.js](backend/models/Budget.js) — Budget model
 - [backend/models/CashForecast.js](backend/models/CashForecast.js), [backend/models/FinancialPlanning.js](backend/models/FinancialPlanning.js)
@@ -509,6 +543,7 @@ Currently 3 separate systems handle forms (form templates, family satisfaction, 
 - [backend/services/smartFinance.service.js](backend/services/smartFinance.service.js) — Smart finance
 
 **Key Models/Schemas:**
+
 - `Budget` — name, department, fiscalYear, totalAmount, spentAmount, categories[], status (draft/approved/active/closed)
 - `BudgetCategory` — budgetId, name, allocatedAmount, spentAmount, subcategories[]
 - `CostCenter` — code, name, department, manager, annualBudget
@@ -518,6 +553,7 @@ Currently 3 separate systems handle forms (form templates, family satisfaction, 
 - `BudgetVariance` — budgetId, period, planned, actual, variance, variancePercent, explanation
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/budget/budgets                           # Budget CRUD
 GET      /api/budget/budgets/stats/overview             # Overall budget utilization
@@ -543,6 +579,7 @@ Budget management is currently a basic CRUD in the monolith. A dedicated microse
 ### 13. student-lifecycle-service (Port 3570)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/studentCertificates.routes.js](backend/routes/studentCertificates.routes.js) — 333 lines: Certificates (attendance, completion, enrollment, transfer, graduation, achievement)
 - [backend/routes/waitlist.routes.js](backend/routes/waitlist.routes.js) — Waitlist management
 - [backend/routes/studentComplaints.routes.js](backend/routes/studentComplaints.routes.js) — Student complaint system
@@ -554,6 +591,7 @@ Budget management is currently a basic CRUD in the monolith. A dedicated microse
 - [backend/services/smartRetention.service.js](backend/services/smartRetention.service.js) — Retention analytics
 
 **Key Models/Schemas:**
+
 - `Admission` — studentId, applicationDate, status (waitlisted/admitted/enrolled/withdrawn/graduated/alumni), documents[], interviewDate, assessmentResults
 - `Certificate` — studentId, type (الحضور/إتمام برنامج/إفادة قيد/تفوق/حسن سيرة/مشاركة/نقل/تخرج/إنجاز), status, templateData, printedAt, requestedBy
 - `Waitlist` — studentId, program, priority, appliedAt, position, status
@@ -563,6 +601,7 @@ Budget management is currently a basic CRUD in the monolith. A dedicated microse
 - `Complaint` — studentId, submittedBy, category, description, priority, assignedTo, resolution, status
 
 **Main API Endpoints:**
+
 ```
 POST     /api/student-lifecycle/admissions                 # New admission application
 GET      /api/student-lifecycle/admissions/pipeline        # Admission funnel
@@ -589,6 +628,7 @@ Student journey from waitlist → admission → enrollment → active → gradua
 ### 14. external-integration-hub-service (Port 3580)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/noor.routes.js](backend/routes/noor.routes.js) — Ministry of Education integration (students, IEPs, progress reports, sync)
 - [backend/routes/mudad.routes.js](backend/routes/mudad.routes.js) — Mudad wage protection system
 - [backend/routes/taqat.routes.js](backend/routes/taqat.routes.js) — Taqat employment portal
@@ -602,6 +642,7 @@ Student journey from waitlist → admission → enrollment → active → gradua
 - [backend/models/noor.models.js](backend/models/noor.models.js), [backend/models/mudad.models.js](backend/models/mudad.models.js), [backend/models/taqat.models.js](backend/models/taqat.models.js), [backend/models/qiwa.models.js](backend/models/qiwa.models.js), [backend/models/gosi.models.js](backend/models/gosi.models.js)
 
 **Key Models/Schemas:**
+
 - `IntegrationConfig` — systemName, baseUrl, apiKey (encrypted), authMethod, retryPolicy, rateLimits, status
 - `SyncJob` — integrationId, direction (push/pull/bidirectional), entity, lastSyncAt, recordsProcessed, errors[], status
 - `SyncLog` — jobId, action, entityId, request, response, statusCode, duration
@@ -609,6 +650,7 @@ Student journey from waitlist → admission → enrollment → active → gradua
 - `WebhookSubscription` — externalSystem, eventType, callbackUrl, secret, active
 
 **Main API Endpoints:**
+
 ```
 GET      /api/integrations/systems                      # Available integration systems
 GET/POST /api/integrations/configs                      # Integration configuration CRUD
@@ -636,6 +678,7 @@ Saudi Arabia requires mandatory integration with 7+ government platforms (Noor, 
 ### 15. facility-space-management-service (Port 3590)
 
 **What it extracts from the monolith:**
+
 - [backend/routes/facilities.routes.js](backend/routes/facilities.routes.js) — Facility management
 - [backend/routes/enterpriseProPlus.routes.js](backend/routes/enterpriseProPlus.routes.js) — Section 2 Facilities: Facility, SpaceBooking, LeaseContract, UtilityReading
 - [backend/routes/classrooms.routes.js](backend/routes/classrooms.routes.js) — Classroom management
@@ -645,6 +688,7 @@ Saudi Arabia requires mandatory integration with 7+ government platforms (Noor, 
 - Frontend: [frontend/src/pages/facility/FacilityManagementPage.js](frontend/src/pages/facility/FacilityManagementPage.js)
 
 **Key Models/Schemas:**
+
 - `Facility` — name, type (building/wing/floor), address, capacity, operatingHours, amenities[], certifications[]
 - `Space` — facilityId, name, type (classroom/therapy-room/sensory-room/pool/office/meeting/cafeteria/playground), capacity, equipment[], accessibility {wheelchair, audioLoop, braille}
 - `SpaceBooking` — spaceId, bookedBy, startTime, endTime, purpose, status, recurringPattern
@@ -654,6 +698,7 @@ Saudi Arabia requires mandatory integration with 7+ government platforms (Noor, 
 - `AccessibilityAudit` — facilityId, auditDate, findings[], complianceScore, improvementPlan[]
 
 **Main API Endpoints:**
+
 ```
 GET/POST /api/facilities                                # Facilities CRUD
 GET/POST /api/facilities/spaces                         # Spaces/rooms within facilities
@@ -709,87 +754,76 @@ Rehabilitation centers have specialized spaces (sensory rooms, hydrotherapy pool
 
 ## Inter-Service Communication
 
-| From → To | Protocol | Purpose |
-|---|---|---|
-| academic(3460) → student-lifecycle(3570) | NATS event | Graduation triggers alumni record |
-| student-health(3470) → crisis(3490) | NATS event | Medical emergency triggers crisis alert |
-| events(3510) → facility(3590) | REST | Room booking for event |
-| events(3510) → cms(3540) | NATS event | New event publishes announcement |
-| inventory(3450) → budget(3560) | NATS event | PO triggers budget spend |
-| compliance(3500) → facility(3590) | REST | Safety inspection of facility |
-| asset-equipment(3520) → inventory(3450) | NATS event | Consumable stock check |
-| student-lifecycle(3570) → integration-hub(3580) | REST | Sync admission with Noor |
-| staff-training(3530) → compliance(3500) | NATS event | Certification update triggers compliance check |
-| forms-survey(3550) → cms(3540) | NATS event | Survey results publish as report |
-| crisis(3490) → visitor(3480) | NATS event | Lockdown triggers gate close |
-| budget(3560) → integration-hub(3580) | REST | Sync with ZATCA e-invoicing |
+| From → To                                       | Protocol   | Purpose                                        |
+| ----------------------------------------------- | ---------- | ---------------------------------------------- |
+| academic(3460) → student-lifecycle(3570)        | NATS event | Graduation triggers alumni record              |
+| student-health(3470) → crisis(3490)             | NATS event | Medical emergency triggers crisis alert        |
+| events(3510) → facility(3590)                   | REST       | Room booking for event                         |
+| events(3510) → cms(3540)                        | NATS event | New event publishes announcement               |
+| inventory(3450) → budget(3560)                  | NATS event | PO triggers budget spend                       |
+| compliance(3500) → facility(3590)               | REST       | Safety inspection of facility                  |
+| asset-equipment(3520) → inventory(3450)         | NATS event | Consumable stock check                         |
+| student-lifecycle(3570) → integration-hub(3580) | REST       | Sync admission with Noor                       |
+| staff-training(3530) → compliance(3500)         | NATS event | Certification update triggers compliance check |
+| forms-survey(3550) → cms(3540)                  | NATS event | Survey results publish as report               |
+| crisis(3490) → visitor(3480)                    | NATS event | Lockdown triggers gate close                   |
+| budget(3560) → integration-hub(3580)            | REST       | Sync with ZATCA e-invoicing                    |
 
 ## Recommended Implementation Order
 
 **Wave 1 (Weeks 1-3) — Critical Data Isolation:**
+
 1. student-health-medical-service (3470) — data sensitivity
 2. external-integration-hub-service (3580) — gov compliance
 3. inventory-warehouse-service (3450) — operational need
 
-**Wave 2 (Weeks 4-6) — Core Business:**
-4. academic-curriculum-service (3460) — education core
-5. asset-equipment-service (3520) — asset tracking
-6. budget-financial-planning-service (3560) — financial control
+**Wave 2 (Weeks 4-6) — Core Business:** 4. academic-curriculum-service (3460) — education core 5. asset-equipment-service (3520) — asset tracking 6. budget-financial-planning-service (3560) — financial control
 
-**Wave 3 (Weeks 7-9) — Safety & Compliance:**
-7. crisis-safety-service (3490) — safety critical
-8. compliance-accreditation-service (3500) — regulatory
-9. visitor-campus-security-service (3480) — child protection
+**Wave 3 (Weeks 7-9) — Safety & Compliance:** 7. crisis-safety-service (3490) — safety critical 8. compliance-accreditation-service (3500) — regulatory 9. visitor-campus-security-service (3480) — child protection
 
-**Wave 4 (Weeks 10-12) — Experience & Operations:**
-10. events-activities-service (3510) — engagement
-11. student-lifecycle-service (3570) — student journey
-12. forms-survey-service (3550) — digitization
+**Wave 4 (Weeks 10-12) — Experience & Operations:** 10. events-activities-service (3510) — engagement 11. student-lifecycle-service (3570) — student journey 12. forms-survey-service (3550) — digitization
 
-**Wave 5 (Weeks 13-15) — Enhancement:**
-13. staff-training-development-service (3530) — workforce
-14. cms-announcements-service (3540) — communication
-15. facility-space-management-service (3590) — optimization
+**Wave 5 (Weeks 13-15) — Enhancement:** 13. staff-training-development-service (3530) — workforce 14. cms-announcements-service (3540) — communication 15. facility-space-management-service (3590) — optimization
 
 ## Docker Compose Port Allocation
 
 ```yaml
 # Phase 6 Microservices
-inventory-warehouse-service:       3450
-academic-curriculum-service:       3460
-student-health-medical-service:    3470
-visitor-campus-security-service:   3480
-crisis-safety-service:             3490
-compliance-accreditation-service:  3500
-events-activities-service:         3510
-asset-equipment-service:           3520
+inventory-warehouse-service: 3450
+academic-curriculum-service: 3460
+student-health-medical-service: 3470
+visitor-campus-security-service: 3480
+crisis-safety-service: 3490
+compliance-accreditation-service: 3500
+events-activities-service: 3510
+asset-equipment-service: 3520
 staff-training-development-service: 3530
-cms-announcements-service:         3540
-forms-survey-service:              3550
+cms-announcements-service: 3540
+forms-survey-service: 3550
 budget-financial-planning-service: 3560
-student-lifecycle-service:         3570
-external-integration-hub-service:  3580
+student-lifecycle-service: 3570
+external-integration-hub-service: 3580
 facility-space-management-service: 3590
 ```
 
 ## Total Backend Code Lines to Extract
 
-| Service | Estimated Lines in Monolith | Route Files | Service Files | Model Files |
-|---|---|---|---|---|
-| inventory-warehouse | ~2,400 | 2 | 2 | 3 |
-| academic-curriculum | ~1,800 | 8 | 1 | 8 |
-| student-health-medical | ~860 | 2 | 2 | 2 |
-| visitor-campus-security | ~550 | 1 | 3 | 2 |
-| crisis-safety | ~1,600 | 3 | 2 | 3 |
-| compliance-accreditation | ~900 | 4 | 3 | 4 |
-| events-activities | ~700 | 3 | 1 | 2 |
-| asset-equipment | ~1,800 | 3 | 4 | 4 |
-| staff-training | ~600 | 3 | 2 | 2 |
-| cms-announcements | ~600 | 2 | 2 | 1 |
-| forms-survey | ~500 | 3 | 2 | 3 |
-| budget-financial-planning | ~500 | 1 | 3 | 4 |
-| student-lifecycle | ~1,200 | 5 | 3 | 3 |
-| external-integration-hub | ~1,500 | 7 | 7 | 5 |
-| facility-space-management | ~800 | 3 | 2 | 3 |
+| Service                   | Estimated Lines in Monolith | Route Files | Service Files | Model Files |
+| ------------------------- | --------------------------- | ----------- | ------------- | ----------- |
+| inventory-warehouse       | ~2,400                      | 2           | 2             | 3           |
+| academic-curriculum       | ~1,800                      | 8           | 1             | 8           |
+| student-health-medical    | ~860                        | 2           | 2             | 2           |
+| visitor-campus-security   | ~550                        | 1           | 3             | 2           |
+| crisis-safety             | ~1,600                      | 3           | 2             | 3           |
+| compliance-accreditation  | ~900                        | 4           | 3             | 4           |
+| events-activities         | ~700                        | 3           | 1             | 2           |
+| asset-equipment           | ~1,800                      | 3           | 4             | 4           |
+| staff-training            | ~600                        | 3           | 2             | 2           |
+| cms-announcements         | ~600                        | 2           | 2             | 1           |
+| forms-survey              | ~500                        | 3           | 2             | 3           |
+| budget-financial-planning | ~500                        | 1           | 3             | 4           |
+| student-lifecycle         | ~1,200                      | 5           | 3             | 3           |
+| external-integration-hub  | ~1,500                      | 7           | 7             | 5           |
+| facility-space-management | ~800                        | 3           | 2             | 3           |
 
 **Total: ~15,310 lines extracted from the monolith across 50+ route files, 39+ service files, and 49+ model files.**

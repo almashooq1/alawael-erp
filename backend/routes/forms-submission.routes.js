@@ -198,6 +198,21 @@ router.get('/submissions', async (req, res) => {
     if (req.query.role && isAdmin(req)) {
       filter['submittedBy.role'] = req.query.role;
     }
+    // Date-range filter for reporting / monthly exports.
+    if (req.query.from || req.query.to) {
+      filter.createdAt = {};
+      if (req.query.from) {
+        const from = new Date(String(req.query.from));
+        if (!isNaN(from.getTime())) filter.createdAt.$gte = from;
+      }
+      if (req.query.to) {
+        const to = new Date(String(req.query.to));
+        if (!isNaN(to.getTime())) {
+          to.setHours(23, 59, 59, 999); // include the entire end day
+          filter.createdAt.$lte = to;
+        }
+      }
+    }
 
     const limit = Math.min(Number(req.query.limit) || 50, 200);
     const skip = Number(req.query.page) > 1 ? (Number(req.query.page) - 1) * limit : 0;

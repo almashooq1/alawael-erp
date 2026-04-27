@@ -53,8 +53,13 @@ const DEFAULT_EXCLUDE_PATHS = [
 
 // Phase 29 — prefix-based exclusions. Public form submission and public
 // landing config reads are unauthenticated by design; CSRF doesn't apply
-// (no session cookie to protect).
-const DEFAULT_EXCLUDE_PREFIXES = ['/api/v1/public/', '/api/v1/landing/'];
+// (no session cookie to protect). Phase 30 adds newsletter signup.
+const DEFAULT_EXCLUDE_PREFIXES = [
+  '/api/v1/public/',
+  '/api/v1/landing/',
+  '/api/newsletter/',
+  '/api/v1/newsletter/',
+];
 
 // Pre-compute exclude paths set (rebuilt only when env var changes)
 let _cachedExcludeSet = null;

@@ -258,6 +258,14 @@ try {
   logger.warn('[PublicForms] mount skipped:', err.message);
 }
 
+// Phase 30 — public uploads for visitor attachments (used by intake forms).
+try {
+  app.use('/api/v1/public/uploads', require('./routes/public-uploads.routes'));
+  logger.info('[PublicUploads] ✓ mounted at /api/v1/public/uploads');
+} catch (err) {
+  logger.warn('[PublicUploads] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

@@ -223,6 +223,8 @@ frontend/*.cjs
 # 13. Archived Code & Legacy Backups
 # ───────────────────────────────────────────────────────────────
 _archived/
+_archive/
+**/_archive/
 
 # ───────────────────────────────────────────────────────────────
 # 15. VPS Deployment Scripts (contain credentials - never commit)

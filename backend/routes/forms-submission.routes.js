@@ -28,6 +28,21 @@ const FormTemplate = require('../models/FormTemplate');
 const FormSubmission = require('../models/FormSubmission');
 const { authenticate } = require('../middleware/auth');
 
+// Loaded lazily so the routes file still parses if these aren't installed.
+let unifiedNotifier = null;
+try {
+  unifiedNotifier = require('../services/unifiedNotifier');
+} catch {
+  /* notifier optional */
+}
+
+let Beneficiary = null;
+try {
+  Beneficiary = require('../models/Beneficiary');
+} catch {
+  /* model optional */
+}
+
 const router = express.Router();
 router.use(authenticate);
 
@@ -254,14 +269,123 @@ router.put('/submissions/:id', async (req, res) => {
   }
 });
 
+// ─── Analytics (admin) ───────────────────────────────────────────────────────
+//
+// Aggregate counts for the forms-analytics dashboard. Window defaults to 30
+// days, capped at 365. Returns: total + per-day series + status breakdown +
+// top templates + average review time.
+
+router.get('/analytics', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+
+    const days = Math.min(Math.max(Number(req.query.days) || 30, 1), 365);
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const baseFilter = { createdAt: { $gte: since } };
+    if (req.query.role) baseFilter['submittedBy.role'] = String(req.query.role);
+
+    const [total, byDay, byStatus, byTemplate, byPriority, reviewedAgg] = await Promise.all([
+      FormSubmission.countDocuments(baseFilter),
+      FormSubmission.aggregate([
+        { $match: baseFilter },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            count: { $sum: 1 },
+            approved: {
+              $sum: { $cond: [{ $eq: ['$status', 'approved'] }, 1, 0] },
+            },
+            rejected: {
+              $sum: { $cond: [{ $eq: ['$status', 'rejected'] }, 1, 0] },
+            },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      FormSubmission.aggregate([
+        { $match: baseFilter },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      FormSubmission.aggregate([
+        { $match: baseFilter },
+        {
+          $group: {
+            _id: '$templateId',
+            templateName: { $first: '$templateName' },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 10 },
+      ]),
+      FormSubmission.aggregate([
+        { $match: baseFilter },
+        { $group: { _id: '$priority', count: { $sum: 1 } } },
+      ]),
+      FormSubmission.aggregate([
+        {
+          $match: {
+            ...baseFilter,
+            reviewedAt: { $exists: true },
+            submittedAt: { $exists: true },
+          },
+        },
+        {
+          $project: {
+            ms: { $subtract: ['$reviewedAt', '$submittedAt'] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            avgMs: { $avg: '$ms' },
+            count: { $sum: 1 },
+          },
+        },
+      ]),
+    ]);
+
+    // Fill the daily series: zeros for days with no submissions, so the
+    // chart line is continuous.
+    const seriesMap = new Map(byDay.map(d => [d._id, d]));
+    const series = [];
+    const cur = new Date(since);
+    cur.setHours(0, 0, 0, 0);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    while (cur <= today) {
+      const key = cur.toISOString().slice(0, 10);
+      const e = seriesMap.get(key);
+      series.push({
+        date: key,
+        count: e?.count || 0,
+        approved: e?.approved || 0,
+        rejected: e?.rejected || 0,
+      });
+      cur.setDate(cur.getDate() + 1);
+    }
+
+    res.json({
+      ok: true,
+      windowDays: days,
+      total,
+      series,
+      byStatus,
+      byTemplate,
+      byPriority,
+      avgReviewMs: reviewedAgg[0]?.avgMs || 0,
+      reviewedCount: reviewedAgg[0]?.count || 0,
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 router.put('/submissions/:id/review', async (req, res) => {
   try {
     if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
       return res.status(400).json({ ok: false, error: 'INVALID_ID' });
-    }
-    if (!isAdmin(req) && (req.user || {}).role !== 'reviewer') {
-      // We allow any role that matches one of the pending approval steps;
-      // simplest gate: if not admin and not 'reviewer', must match a step role.
     }
     const sub = await FormSubmission.findById(req.params.id);
     if (!sub) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
@@ -269,34 +393,139 @@ router.put('/submissions/:id/review', async (req, res) => {
     const approved = req.body?.approved === true;
     const comment = req.body?.comment || '';
     const me = userInfo(req);
+    const previousStatus = sub.status;
 
-    // Find the next pending approval — admins can act on any pending step;
-    // others must match the role.
     const stepIdx = (sub.approvals || []).findIndex(a => a.status === 'pending');
-    if (stepIdx === -1) {
-      return res.status(409).json({ ok: false, error: 'NO_PENDING_STEP', status: sub.status });
-    }
-    const step = sub.approvals[stepIdx];
-    if (!isAdmin(req) && step.role !== me.role) {
-      return res.status(403).json({ ok: false, error: 'NOT_YOUR_STEP', requiredRole: step.role });
-    }
 
-    step.status = approved ? 'approved' : 'rejected';
-    step.approvedBy = me.userId;
-    step.approverName = me.name;
-    step.comment = comment;
-    step.date = new Date();
+    if (stepIdx >= 0) {
+      // Workflow path — gate to admins or the role of the pending step.
+      const step = sub.approvals[stepIdx];
+      if (!isAdmin(req) && step.role !== me.role) {
+        return res.status(403).json({ ok: false, error: 'NOT_YOUR_STEP', requiredRole: step.role });
+      }
+      step.status = approved ? 'approved' : 'rejected';
+      step.approvedBy = me.userId;
+      step.approverName = me.name;
+      step.comment = comment;
+      step.date = new Date();
 
-    if (!approved) {
-      sub.status = 'rejected';
-      sub.rejectionReason = comment;
+      if (!approved) {
+        sub.status = 'rejected';
+        sub.rejectionReason = comment;
+      } else {
+        sub.currentApprovalStep = stepIdx + 1;
+        const allDone = sub.approvals.every(a => a.status === 'approved' || a.status === 'skipped');
+        sub.status = allDone ? 'approved' : 'under_review';
+      }
     } else {
-      sub.currentApprovalStep = stepIdx + 1;
-      const allDone = sub.approvals.every(a => a.status === 'approved' || a.status === 'skipped');
-      sub.status = allDone ? 'approved' : 'under_review';
+      // No-workflow path (used heavily by public submissions). Admins can
+      // mark resolved/rejected directly; other roles can't.
+      if (!isAdmin(req)) {
+        return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+      }
+      sub.status = approved ? 'approved' : 'rejected';
+      if (!approved) sub.rejectionReason = comment;
     }
     sub.reviewedAt = new Date();
     await sub.save();
+
+    // ── Side-effects (best-effort, don't block the response) ────────────
+    const isPublicSubmission =
+      sub.submittedBy?.role === 'public' || /^PUB-/.test(sub.submissionNumber || '');
+    const statusChanged = sub.status !== previousStatus;
+
+    if (statusChanged && isPublicSubmission) {
+      // Notify the visitor on phone or email if either was captured.
+      const submitter = sub.submittedBy || {};
+      const trackUrl = `https://alaweal.org/forms/track/${encodeURIComponent(sub.submissionNumber)}`;
+      const statusLabel =
+        sub.status === 'approved'
+          ? 'تمت الموافقة على'
+          : sub.status === 'rejected'
+            ? 'الاعتذار عن'
+            : sub.status;
+      const body = [
+        `مرحباً ${submitter.name || ''}،`,
+        '',
+        `بشأن طلبك (${sub.submissionNumber}) — "${sub.templateName}":`,
+        `${statusLabel} طلبك.`,
+        comment ? `\nالملاحظات: ${comment}` : '',
+        '',
+        `لمتابعة التفاصيل: ${trackUrl}`,
+        '',
+        '— منصة العواعل لإعادة التأهيل',
+      ]
+        .filter(Boolean)
+        .join('\n');
+
+      const to = {
+        phone: submitter.phone || '',
+        email: submitter.email || '',
+      };
+      if ((to.phone || to.email) && unifiedNotifier?.notify) {
+        unifiedNotifier
+          .notify({
+            to,
+            subject: `تحديث على طلبك ${sub.submissionNumber}`,
+            body,
+            templateKey: 'public-form.status-change',
+            metadata: {
+              submissionId: String(sub._id),
+              submissionNumber: sub.submissionNumber,
+              newStatus: sub.status,
+            },
+          })
+          .catch(err => {
+            // Don't fail the API call — log to NotificationLog already
+            // captures failures; this is just for visibility.
+            console.warn('public-form notify failed:', err.message);
+          });
+      }
+    }
+
+    // Auto-convert approved intake submissions to a real Beneficiary record.
+    // Only for the registration template, only when status flips to approved,
+    // and only if the model is loaded.
+    if (
+      statusChanged &&
+      sub.status === 'approved' &&
+      sub.templateId === 'beneficiary.intake.registration' &&
+      Beneficiary
+    ) {
+      try {
+        const data = sub.data || {};
+        const submitter = sub.submittedBy || {};
+        const fullName = data.full_name_ar || data.full_name || data.name || submitter.name;
+        if (fullName) {
+          const ben = await Beneficiary.create({
+            fullName,
+            fullNameEn: data.full_name_en || data.full_name,
+            nationalId: data.national_id || data.id_number,
+            dateOfBirth: data.date_of_birth || data.dob,
+            gender: data.gender,
+            phone: data.phone || submitter.phone,
+            email: data.email || submitter.email,
+            guardianName: data.guardian_name,
+            guardianPhone: data.guardian_phone,
+            address: data.address,
+            disability: data.disability_type,
+            notes: `تم الإنشاء تلقائياً من نموذج ${sub.submissionNumber}.`,
+            status: 'pending_review',
+            createdBy: me.userId,
+            metadata: {
+              sourceSubmissionId: sub._id,
+              sourceSubmissionNumber: sub.submissionNumber,
+            },
+          });
+          // Stamp the link back on the submission for traceability.
+          sub.notes = `${sub.notes || ''}\nتم إنشاء ملف مستفيد: ${ben._id}`.trim();
+          await sub.save();
+        }
+      } catch (err) {
+        console.warn('intake → beneficiary conversion failed:', err.message);
+      }
+    }
+
     res.json({ ok: true, submission: sub.toObject() });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });

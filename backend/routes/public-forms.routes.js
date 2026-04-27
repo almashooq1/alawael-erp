@@ -190,8 +190,35 @@ router.get('/:templateId', async (req, res) => {
 
 // ─── Public submit (rate-limited) ────────────────────────────────────────────
 
+// Bot-detection settings. Real visitors take >1.5s between page load
+// and submit (reading + typing); naive bots POST instantly. The honeypot
+// field is rendered invisibly client-side; humans never fill it, bots
+// usually do (autofilling all inputs). Both checks return the same
+// success shape as a real submit so spammers can't tell they were caught.
+const MIN_FILL_MS = 1500;
+
 router.post('/:templateId/submit', rateLimit, async (req, res) => {
   try {
+    // ── Anti-spam (silent reject) ──────────────────────────────────────
+    // 1. Honeypot: any non-empty `_honeypot` (or `website` — common bot
+    //    autofill target) means it's a bot.
+    const honeypot = req.body?._honeypot || req.body?.website;
+    // 2. Render-to-submit time: client sends `_renderedAt` (ms epoch)
+    //    when it loads the form. If submit fires <1.5s later, it's a bot.
+    const renderedAt = Number(req.body?._renderedAt || 0);
+    const tooFast = renderedAt > 0 && Date.now() - renderedAt < MIN_FILL_MS;
+    if (honeypot || tooFast) {
+      // Pretend success so bot scripts don't probe further. Use the same
+      // shape and randomness as a real number so pattern-matching fails.
+      const fakeRand = Math.random().toString(36).slice(2, 6).toUpperCase();
+      return res.status(201).json({
+        ok: true,
+        submissionNumber: `PUB-${Date.now().toString(36)}-${fakeRand}`,
+        message: 'تم استلام طلبك. شكراً لك.',
+        messageEn: 'Your submission was received. Thank you.',
+      });
+    }
+
     let tpl = await FormTemplate.findOne({
       templateId: req.params.templateId,
       isPublic: true,

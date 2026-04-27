@@ -382,6 +382,111 @@ router.get('/analytics', async (req, res) => {
   }
 });
 
+// ─── Bulk review (admin) ─────────────────────────────────────────────────────
+//
+// Loops review() over an array of submission ids — same semantics, same
+// side-effects (visitor notify, intake → Beneficiary). Capped at 100 to
+// stop a runaway POST from melting the API.
+
+const MAX_BULK = 100;
+
+router.post('/submissions/bulk-review', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+    const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    if (ids.length === 0) return res.status(400).json({ ok: false, error: 'IDS_REQUIRED' });
+    if (ids.length > MAX_BULK)
+      return res.status(400).json({ ok: false, error: 'TOO_MANY', max: MAX_BULK });
+    const approved = req.body?.approved === true;
+    const comment = req.body?.comment || '';
+
+    const results = { approved: 0, rejected: 0, failed: 0, errors: [] };
+
+    for (const id of ids) {
+      if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+        results.failed += 1;
+        results.errors.push({ id, error: 'INVALID_ID' });
+        continue;
+      }
+      try {
+        // Forge a per-iteration mock res and call the real review logic by
+        // invoking the same code path inline. Cleaner than HTTP self-call.
+        const sub = await FormSubmission.findById(id);
+        if (!sub) {
+          results.failed += 1;
+          results.errors.push({ id, error: 'NOT_FOUND' });
+          continue;
+        }
+        const me = userInfo(req);
+        const previousStatus = sub.status;
+        const stepIdx = (sub.approvals || []).findIndex(a => a.status === 'pending');
+        if (stepIdx >= 0) {
+          const step = sub.approvals[stepIdx];
+          step.status = approved ? 'approved' : 'rejected';
+          step.approvedBy = me.userId;
+          step.approverName = me.name;
+          step.comment = comment;
+          step.date = new Date();
+          if (!approved) {
+            sub.status = 'rejected';
+            sub.rejectionReason = comment;
+          } else {
+            sub.currentApprovalStep = stepIdx + 1;
+            const allDone = sub.approvals.every(
+              a => a.status === 'approved' || a.status === 'skipped'
+            );
+            sub.status = allDone ? 'approved' : 'under_review';
+          }
+        } else {
+          sub.status = approved ? 'approved' : 'rejected';
+          if (!approved) sub.rejectionReason = comment;
+        }
+        sub.reviewedAt = new Date();
+        await sub.save();
+
+        const isPublic =
+          sub.submittedBy?.role === 'public' || /^PUB-/.test(sub.submissionNumber || '');
+        if (sub.status !== previousStatus && isPublic) {
+          const submitter = sub.submittedBy || {};
+          const trackUrl = `https://alaweal.org/forms/track/${encodeURIComponent(sub.submissionNumber)}`;
+          const statusLabel = sub.status === 'approved' ? 'تمت الموافقة على' : 'الاعتذار عن';
+          const body = [
+            `مرحباً ${submitter.name || ''}،`,
+            '',
+            `بشأن طلبك (${sub.submissionNumber}):`,
+            `${statusLabel} طلبك.`,
+            comment ? `\nالملاحظات: ${comment}` : '',
+            '',
+            `لمتابعة التفاصيل: ${trackUrl}`,
+          ]
+            .filter(Boolean)
+            .join('\n');
+          if ((submitter.phone || submitter.email) && unifiedNotifier?.notify) {
+            unifiedNotifier
+              .notify({
+                to: { phone: submitter.phone || '', email: submitter.email || '' },
+                subject: `تحديث على طلبك ${sub.submissionNumber}`,
+                body,
+                templateKey: 'public-form.bulk-status-change',
+              })
+              .catch(() => {});
+          }
+        }
+
+        if (sub.status === 'approved') results.approved += 1;
+        else if (sub.status === 'rejected') results.rejected += 1;
+      } catch (err) {
+        results.failed += 1;
+        results.errors.push({ id, error: err.message });
+      }
+    }
+
+    res.json({ ok: true, ...results });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 router.put('/submissions/:id/review', async (req, res) => {
   try {
     if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {

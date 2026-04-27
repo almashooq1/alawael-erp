@@ -25,6 +25,13 @@ try {
   /* optional */
 }
 
+let unifiedNotifier = null;
+try {
+  unifiedNotifier = require('../services/unifiedNotifier');
+} catch {
+  /* notifier optional */
+}
+
 function isAdmin(req) {
   const u = req.user || {};
   return ['admin', 'super_admin'].includes(u.role);
@@ -83,6 +90,35 @@ router.post('/subscribe', limiter, async (req, res) => {
       success: true,
       message: 'تم اشتراكك بنجاح — ستصلك آخر أخبار مراكز الأوائل قريباً.',
     });
+
+    // Welcome email — fire-and-forget so a slow SMTP doesn't delay the
+    // response. Skipped if the row already existed (no $setOnInsert hit
+    // means consent was already given before).
+    const wasInserted =
+      doc.createdAt && Math.abs(Date.now() - new Date(doc.createdAt).getTime()) < 5000;
+    if (wasInserted && unifiedNotifier?.notify) {
+      const greet = name ? `مرحباً ${name}،` : 'مرحباً،';
+      const body = [
+        greet,
+        '',
+        'شكراً لاشتراكك في نشرة العواعل البريدية.',
+        'ستصلك آخر الأخبار والفعاليات والبرامج الجديدة عبر هذا البريد.',
+        '',
+        'لإلغاء الاشتراك في أي وقت، استخدم الرابط في تذييل الرسائل القادمة.',
+        '',
+        '— منصة العواعل لإعادة التأهيل',
+        'https://alaweal.org',
+      ].join('\n');
+      unifiedNotifier
+        .notify({
+          to: { email },
+          subject: 'مرحباً بك في نشرة العواعل',
+          body,
+          templateKey: 'newsletter.welcome',
+          metadata: { subscriberId: String(doc._id) },
+        })
+        .catch(err => logger.warn('newsletter welcome notify failed:', err.message));
+    }
   } catch (err) {
     if (err?.code === 11000) {
       // Concurrent upsert — already subscribed. Treat as success.
@@ -164,6 +200,61 @@ router.get('/export.csv', async (req, res) => {
     res.send('\uFEFF' + csv);
   } catch (err) {
     return safeError(res, err, 'newsletter.export');
+  }
+});
+
+// ─── Broadcast (admin) ─────────────────────────────────────────────────────
+//
+// Sends a one-off message to every active subscriber via unifiedNotifier.
+// Best-effort, fire-and-forget per recipient — the response returns the
+// queued count immediately so the UI can show "تم الإرسال إلى N مشترك"
+// without waiting on every SMTP/SMS delivery.
+
+if (authenticate) router.use('/broadcast', authenticate);
+
+router.post('/broadcast', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(403).json({ success: false, message: 'ADMIN_ONLY' });
+    const subject = (req.body?.subject || '').toString().trim().slice(0, 200);
+    const body = (req.body?.body || '').toString().trim().slice(0, 4000);
+    if (!subject || !body) {
+      return res.status(400).json({ success: false, message: 'subject وbody مطلوبان' });
+    }
+    if (!unifiedNotifier?.notify) {
+      return res
+        .status(503)
+        .json({ success: false, message: 'unifiedNotifier غير متاح على هذا الخادم' });
+    }
+    const subs = await Newsletter.find({ status: 'active' }).select('email name').lean();
+    res.json({
+      success: true,
+      queued: subs.length,
+      message: `تم وضع ${subs.length} رسالة في القائمة`,
+    });
+
+    // Background dispatch — bounded concurrency so we don't slam SMTP.
+    let i = 0;
+    const concurrency = 5;
+    async function worker() {
+      while (i < subs.length) {
+        const s = subs[i++];
+        if (!s.email) continue;
+        const personalized = body.replace(/\{name\}/g, s.name || 'صديقنا الكريم');
+        try {
+          await unifiedNotifier.notify({
+            to: { email: s.email },
+            subject,
+            body: personalized,
+            templateKey: 'newsletter.broadcast',
+          });
+        } catch (err) {
+          logger.warn('newsletter broadcast send failed', { email: s.email, error: err.message });
+        }
+      }
+    }
+    Promise.all(Array.from({ length: concurrency }, () => worker())).catch(() => {});
+  } catch (err) {
+    return safeError(res, err, 'newsletter.broadcast');
   }
 });
 

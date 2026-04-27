@@ -102,6 +102,45 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// Re-fire a failed notification with the same payload. unifiedNotifier
+// inserts a new log row, so the original entry stays as historical record.
+router.post('/:id/retry', async (req, res) => {
+  try {
+    if (!isAdmin(req)) return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });
+    if (!/^[0-9a-fA-F]{24}$/.test(req.params.id)) {
+      return res.status(400).json({ ok: false, error: 'INVALID_ID' });
+    }
+    const Log = getModel();
+    if (!Log) return res.status(503).json({ ok: false, error: 'LOG_MODEL_UNAVAILABLE' });
+    const original = await Log.findById(req.params.id).lean();
+    if (!original) return res.status(404).json({ ok: false, error: 'NOT_FOUND' });
+
+    let unifiedNotifier = null;
+    try {
+      unifiedNotifier = require('../services/unifiedNotifier');
+    } catch {
+      /* unavailable */
+    }
+    if (!unifiedNotifier?.notify) {
+      return res.status(503).json({ ok: false, error: 'NOTIFIER_UNAVAILABLE' });
+    }
+
+    const isEmail = /@/.test(original.to);
+    await unifiedNotifier.notify({
+      to: isEmail ? { email: original.to } : { phone: original.to },
+      channels: original.channel ? [original.channel] : 'auto',
+      subject: original.subject || '(retry)',
+      body: original.body || '',
+      priority: original.priority,
+      templateKey: `${original.templateKey || 'retry'}.retry`,
+      metadata: { ...(original.metadata || {}), retriedFrom: String(original._id) },
+    });
+    res.json({ ok: true, message: 'تمت إعادة المحاولة' });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     if (!isAdmin(req)) return res.status(403).json({ ok: false, error: 'ADMIN_ONLY' });

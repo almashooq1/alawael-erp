@@ -274,6 +274,16 @@ try {
   logger.warn('[NotificationsLog] mount skipped:', err.message);
 }
 
+// Phase 30 — WebPush subscriptions.
+try {
+  const push = require('./routes/push.routes');
+  app.use('/api/v1/push', push.publicRouter);
+  app.use('/api/v1/push', push.authRouter);
+  logger.info('[Push] ✓ mounted at /api/v1/push');
+} catch (err) {
+  logger.warn('[Push] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

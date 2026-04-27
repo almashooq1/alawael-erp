@@ -34,6 +34,13 @@ try {
   /* notifier optional */
 }
 
+let pushSendToAdmins = null;
+try {
+  pushSendToAdmins = require('./push.routes').sendToAdmins;
+} catch {
+  /* push optional */
+}
+
 const router = express.Router();
 
 // ─── In-memory rate limiter (per IP) ─────────────────────────────────────────
@@ -298,6 +305,16 @@ router.post('/:templateId/submit', rateLimit, async (req, res) => {
       message: 'تم استلام طلبك. شكراً لك.',
       messageEn: 'Your submission was received. Thank you.',
     });
+
+    // Push to staff devices (best-effort — works only if web-push +
+    // VAPID env vars are configured on the server).
+    if (pushSendToAdmins) {
+      pushSendToAdmins({
+        title: `طلب جديد: ${tpl.name}`,
+        body: `${submitterName} · ${sub.submissionNumber}`,
+        url: `/admin/forms/submissions/${sub._id}`,
+      }).catch(() => {});
+    }
 
     // Best-effort confirmation: send the visitor their PUB-XXXX + tracking
     // link via WhatsApp/SMS/email so they don't lose the number when the

@@ -284,6 +284,14 @@ try {
   logger.warn('[Push] mount skipped:', err.message);
 }
 
+// Phase 30 — Audit log of submission reviews (chronological feed).
+try {
+  app.use('/api/v1/admin/audit', require('./routes/audit-reviews.routes'));
+  logger.info('[AuditReviews] ✓ mounted at /api/v1/admin/audit');
+} catch (err) {
+  logger.warn('[AuditReviews] mount skipped:', err.message);
+}
+
 // NPHIES reconciliation scheduler — fallback for missed webhooks.
 try {
   if (!isTestEnv && process.env.NPHIES_RECON_ENABLED !== 'false') {

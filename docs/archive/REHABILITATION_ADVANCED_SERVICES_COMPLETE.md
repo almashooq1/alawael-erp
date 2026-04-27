@@ -1,4 +1,5 @@
 # 🏥 منظومة خدمات التأهيل المتقدمة لذوي الإعاقة
+
 ## Complete Advanced Rehabilitation Services System
 
 ---
@@ -7,26 +8,27 @@
 
 ### 🏥 الخدمات العلاجية المتخصصة
 
-| # | الخدمة | الملف | الوظائف الرئيسية |
-|---|--------|-------|------------------|
-| 1 | العلاج الطبيعي المتقدم | `advanced-physical-therapy-service.js` | مكتبة تمارين، تقييم حركي، خطط علاج |
-| 2 | العلاج الوظيفي المتقدم | `advanced-occupational-therapy-service.js` | BADL/IADL، تعديلات بيئية |
-| 3 | التأهيل المهني المتقدم | `advanced-vocational-rehabilitation-service.js` | تقييم مهني، مطابقة المهن |
-| 4 | الدعم النفسي المتقدم | `advanced-psychological-support-service.js` | PHQ-9، GAD-7، تدخل أزمات |
-| 5 | التخاطب المتقدم | `advanced-speech-therapy-service.js` | AAC عربي، تقييم النطق |
+| #   | الخدمة                 | الملف                                           | الوظائف الرئيسية                   |
+| --- | ---------------------- | ----------------------------------------------- | ---------------------------------- |
+| 1   | العلاج الطبيعي المتقدم | `advanced-physical-therapy-service.js`          | مكتبة تمارين، تقييم حركي، خطط علاج |
+| 2   | العلاج الوظيفي المتقدم | `advanced-occupational-therapy-service.js`      | BADL/IADL، تعديلات بيئية           |
+| 3   | التأهيل المهني المتقدم | `advanced-vocational-rehabilitation-service.js` | تقييم مهني، مطابقة المهن           |
+| 4   | الدعم النفسي المتقدم   | `advanced-psychological-support-service.js`     | PHQ-9، GAD-7، تدخل أزمات           |
+| 5   | التخاطب المتقدم        | `advanced-speech-therapy-service.js`            | AAC عربي، تقييم النطق              |
 
 ### 👨‍👩‍👧‍👦 خدمات الدعم والأسرة
 
-| # | الخدمة | الملف | الوظائف الرئيسية |
-|---|--------|-------|------------------|
-| 6 | التدخل المبكر المتقدم | `advanced-early-intervention-service.js` | فحص النمو، تدريب الأسرة |
-| 7 | دعم الأسرة المتقدم | `advanced-family-support-service.js` | Zarit Scale، رعاية مؤقتة |
+| #   | الخدمة                | الملف                                    | الوظائف الرئيسية         |
+| --- | --------------------- | ---------------------------------------- | ------------------------ |
+| 6   | التدخل المبكر المتقدم | `advanced-early-intervention-service.js` | فحص النمو، تدريب الأسرة  |
+| 7   | دعم الأسرة المتقدم    | `advanced-family-support-service.js`     | Zarit Scale، رعاية مؤقتة |
 
 ---
 
 ## 🔧 تفاصيل كل خدمة
 
 ### 1️⃣ العلاج الطبيعي المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-physical-therapy-service.js`
 
 ```javascript
@@ -45,6 +47,7 @@
 ```
 
 ### 2️⃣ العلاج الوظيفي المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-occupational-therapy-service.js`
 
 ```javascript
@@ -63,6 +66,7 @@
 ```
 
 ### 3️⃣ التأهيل المهني المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-vocational-rehabilitation-service.js`
 
 ```javascript
@@ -79,6 +83,7 @@
 ```
 
 ### 4️⃣ الدعم النفسي المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-psychological-support-service.js`
 
 ```javascript
@@ -95,6 +100,7 @@
 ```
 
 ### 5️⃣ التخاطب المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-speech-therapy-service.js`
 
 ```javascript
@@ -112,6 +118,7 @@
 ```
 
 ### 6️⃣ التدخل المبكر المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-early-intervention-service.js`
 
 ```javascript
@@ -129,6 +136,7 @@
 ```
 
 ### 7️⃣ دعم الأسرة المتقدم
+
 **المسار:** `backend/rehabilitation-services/advanced-family-support-service.js`
 
 ```javascript
@@ -166,12 +174,14 @@
 ## 🔗 التكامل مع الأنظمة
 
 ### التكامل مع الخدمات الأساسية
+
 - ✅ نظام إدارة الحالات
 - ✅ نظام التقارير الموحد
 - ✅ لوحة التحكم التأهيلية
 - ✅ نظام النقل المتخصص
 
 ### التكامل الحكومي السعودي
+
 - ✅ وزارة الموارد البشرية
 - ✅ وزارة الصحة
 - ✅ الهيئة الملكية للعلاج
@@ -182,6 +192,7 @@
 ## 🚀 كيفية الاستخدام
 
 ### بدء خدمة جديدة
+
 ```javascript
 const { AdvancedPhysicalTherapyService } = require('./advanced-physical-therapy-service');
 
@@ -191,11 +202,12 @@ const ptService = new AdvancedPhysicalTherapyService();
 const plan = await ptService.createTreatmentPlan(beneficiaryId, {
   diagnosisType: 'cerebral_palsy',
   severityLevel: 'moderate',
-  goals: ['improve_mobility', 'strengthen_muscles']
+  goals: ['improve_mobility', 'strengthen_muscles'],
 });
 ```
 
 ### تقييم الموحد
+
 ```javascript
 const { UnifiedAssessmentService } = require('./unified-assessment-service');
 
@@ -204,7 +216,7 @@ const assessmentService = new UnifiedAssessmentService();
 // إجراء تقييم شامل
 const assessment = await assessmentService.createAssessment(beneficiaryId, {
   type: 'comprehensive',
-  domains: ['physical', 'cognitive', 'social']
+  domains: ['physical', 'cognitive', 'social'],
 });
 ```
 
@@ -213,6 +225,7 @@ const assessment = await assessmentService.createAssessment(beneficiaryId, {
 ## 📞 الدعم الفني
 
 للمساعدة أو الاستفسارات:
+
 - 📧 البريد الإلكتروني: support@alawael.sa
 - 📞 الهاتف: 920000000
 - 🌐 الموقع: www.alawael.sa

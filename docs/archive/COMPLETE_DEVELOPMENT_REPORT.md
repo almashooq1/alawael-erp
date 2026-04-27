@@ -87,12 +87,14 @@ GET    /api/health             - Health check
 ### Guides Created
 
 1. ✅ **Priority 3 Guide**: `docs/PRIORITY_3_DOMAIN_SSL.md`
+
    - Domain registration instructions
    - SSL certificate setup
    - Nginx configuration
    - Auto-renewal setup
 
 2. ✅ **Priority 4 Guide**: `docs/PRIORITY_4_TESTING.md`
+
    - Jest unit testing
    - Integration tests
    - Cypress E2E tests
@@ -153,11 +155,13 @@ curl http://localhost:3001/api/health
 ### Immediate (This Week)
 
 1. **Domain Registration**
+
    - Choose domain name (e.g., alawael-erp.com)
    - Register with Hostinger/GoDaddy
    - Configure DNS records (A, CNAME records)
 
 2. **SSL Certificate**
+
    - Option 1: Use Cloudflare (easiest)
    - Option 2: Use Let's Encrypt (free)
    - Verify certificate validity
@@ -170,18 +174,21 @@ curl http://localhost:3001/api/health
 ### This Month
 
 4. **Deploy to Production**
+
    - Deploy code to VPS
    - Configure PM2 for process management
    - Setup Nginx reverse proxy
    - Enable SSL with auto-renewal
 
 5. **Testing & QA**
+
    - Run unit tests
    - Run integration tests
    - Load testing (1000+ concurrent)
    - Manual testing of all features
 
 6. **Monitoring Setup**
+
    - PM2 Plus monitoring
    - Nginx access logs
    - Application error tracking

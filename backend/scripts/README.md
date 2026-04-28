@@ -49,15 +49,14 @@ node backend/scripts/dsar-hash.js --help        # ✓
 
 ## Diagnostics (dev-side)
 
-| Script                   | What it does                                                         |
-| ------------------------ | -------------------------------------------------------------------- |
-| `check-architecture.js`  | Static audit of layer boundaries (no core→infra imports, etc.)       |
-| `check-deps.js`          | Scans for broken `require()` paths across the tree                   |
-| `check-services.js`      | Walks `services/` and reports missing `module.exports` or stub files |
-| `inspect-routes.js`      | Dumps the live Express route table — useful for "is X mounted?"      |
-| `log-viewer.js`          | Tails + filters the structured log file                              |
-| `project-stats.js`       | Module counts, LoC by layer, test file counts                        |
-| `verify-ddd-platform.js` | Validates the DDD folder structure + boundary rules                  |
+| Script                  | What it does                                                         |
+| ----------------------- | -------------------------------------------------------------------- |
+| `check-architecture.js` | Static audit of layer boundaries (no core→infra imports, etc.)       |
+| `check-deps.js`         | Scans for broken `require()` paths across the tree                   |
+| `check-services.js`     | Walks `services/` and reports missing `module.exports` or stub files |
+| `inspect-routes.js`     | Dumps the live Express route table — useful for "is X mounted?"      |
+| `log-viewer.js`         | Tails + filters the structured log file                              |
+| `project-stats.js`      | Module counts, LoC by layer, test file counts                        |
 
 ## Destructive (use with care)
 

@@ -132,7 +132,6 @@
     "db:seed:ddd": "node seeds/ddd-domains-seed.js",
     "db:seed:ddd:down": "node seeds/ddd-domains-seed.js --down",
     "db:seed:ddd:force": "node seeds/ddd-domains-seed.js --force",
-    "ddd:verify": "node scripts/verify-ddd-platform.js",
     "db:backup:full": "node scripts/db-backup.js backup",
     "db:backup:critical": "node scripts/db-backup.js critical",
     "db:backup:list": "node scripts/db-backup.js list",

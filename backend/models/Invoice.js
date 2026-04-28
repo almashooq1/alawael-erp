@@ -75,14 +75,15 @@ const invoiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Auto-calc total before save
-invoiceSchema.pre('save', function (next) {
+// Auto-calc insurance patientShare before save.
+// Mongoose 9 no longer passes `next` to document hooks — sync work just
+// returns and the chain continues.
+invoiceSchema.pre('save', function () {
   if (this.insurance && this.insurance.coverageAmount > 0) {
     this.insurance.patientShare = this.totalAmount - this.insurance.coverageAmount;
-  } else {
-    if (this.insurance) this.insurance.patientShare = this.totalAmount;
+  } else if (this.insurance) {
+    this.insurance.patientShare = this.totalAmount;
   }
-  next();
 });
 
 // ─── Compound Indexes ────────────────────────────────────────────────────────

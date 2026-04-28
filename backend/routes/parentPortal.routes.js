@@ -620,25 +620,21 @@ router.put('/appointments/:id/cancel', async (req, res) => {
 
 /**
  * GET /api/parent-portal/transport/live
+ *
+ * Returns the active in-progress trips that carry the caller's children.
+ *
+ * Status: stub. The legacy `BusTracking` model that backed this endpoint
+ * was retired. The current transport schema (`models/transport/Trip.js`)
+ * stores passengers as `beneficiary_id`, not `guardianId`, so live
+ * tracking now needs a Guardian → Beneficiary → Trip join. Until that
+ * join is implemented, the endpoint returns an empty list — same
+ * behavior the route had since the legacy import started silently
+ * failing. The shape stays `{ success, data: [] }` so the parent-portal
+ * UI's empty-state branch still works.
  */
 router.get('/transport/live', async (req, res) => {
   try {
-    const guardianId = req.user._id || req.user.id;
-    let trips = [];
-    try {
-      const BusTracking = require('../models/BusTracking');
-      trips = await BusTracking.find({
-        'passengers.guardianId': guardianId,
-        status: 'in_progress',
-      })
-        .select(
-          'vehiclePlate driverName driverPhone currentLocation status estimatedArrival passengers'
-        )
-        .lean();
-    } catch (e) {
-      logger.warn('Failed to fetch live transport data', { error: e.message });
-    }
-    res.json({ success: true, data: trips });
+    res.json({ success: true, data: [] });
   } catch (err) {
     safeError(res, err, 'parentPortal');
   }

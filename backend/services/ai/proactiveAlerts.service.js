@@ -188,7 +188,7 @@ async function checkInsuranceExpiring(branchId) {
   let created = 0;
   try {
     // البحث عن سجلات التأمين المقاربة على الانتهاء
-    const InsuranceClaim = require('../../models/InsuranceClaims') || null;
+    const InsuranceClaim = require('../../models/InsuranceClaim') || null;
     if (!InsuranceClaim) return 0;
 
     const now = new Date();

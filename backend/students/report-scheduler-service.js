@@ -219,11 +219,11 @@ const FREQUENCY_CRON_MAP = {
 // ═══════════════════════════════════════════════════════════════
 
 function buildReportEmailHtml(reportData, subscription) {
-  const {
-    wrapInLayout,
-    buildInfoCard,
-    buildButton,
-  } = require('../services/email-integration.service');
+  const { EmailTemplateEngine } = require('../services/email/EmailTemplateEngine');
+  const tpl = new EmailTemplateEngine();
+  const wrapInLayout = (title, bodyHtml, opts) => tpl.wrapInLayout(title, bodyHtml, opts);
+  const buildInfoCard = items => tpl.buildInfoCard(items);
+  const buildButton = (text, url, type) => tpl.buildButton(text, url, type);
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3002';
 
   const frequencyLabels = {

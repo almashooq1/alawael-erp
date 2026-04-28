@@ -86,6 +86,13 @@ const DEMO_VEHICLES = [
 
 /**
  * Seed mock vehicles if fewer than 3 exist.
+ *
+ * Inserts go through the raw MongoDB driver collection rather than the
+ * `Vehicle` Mongoose model: the demo fixture above pre-dates the current
+ * `models/transport/Vehicle.js` schema (snake_case fields, branch_id
+ * required, different vehicle_type enum), so passing it through Mongoose
+ * validation would fail. The DEMO_VEHICLES rows are intentionally just
+ * enough for the in-memory dev mode to render a populated fleet UI.
  */
 async function seedMockVehicles() {
   try {
@@ -95,15 +102,10 @@ async function seedMockVehicles() {
     const existing = await collection.countDocuments();
     if (existing >= 3) return;
 
-    try {
-      const Vehicle = require('../models/Vehicle');
-      await Vehicle.insertMany(DEMO_VEHICLES);
-      logger.info('Seeded mock vehicles for demo');
-    } catch (_modelErr) {
-      const coll = mongoose.connection.db.collection('vehicles');
-      await coll.insertMany(DEMO_VEHICLES.map(v => ({ ...v, _id: new mongoose.Types.ObjectId() })));
-      logger.info('Seeded vehicles (raw inserts)');
-    }
+    await collection.insertMany(
+      DEMO_VEHICLES.map(v => ({ ...v, _id: new mongoose.Types.ObjectId() }))
+    );
+    logger.info('Seeded mock vehicles (raw insert into `vehicles` collection)');
   } catch (err) {
     logger.info('Mock vehicle seeding skipped:', err.message);
   }

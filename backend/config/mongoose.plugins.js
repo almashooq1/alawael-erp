@@ -15,6 +15,72 @@ const logger = require('../utils/logger');
 const isProd = process.env.NODE_ENV === 'production';
 const SLOW_QUERY_MS = parseInt(process.env.SLOW_QUERY_THRESHOLD_MS, 10) || 500;
 
+// ─── Legacy Hook Adapter (mongoose 9 compat) ────────────────────────────────
+// Mongoose 9 stopped passing `next` to document-level pre/post hooks. This
+// codebase has 90+ models defined with the legacy
+//   `function (next) { ...sync work...; next(); }`
+// shape, which now throws "TypeError: next is not a function" at save-time.
+//
+// Rather than rewrite every model, we patch `Schema.prototype.pre`/`post`
+// once: any hook function that declares a single `next` parameter is wrapped
+// so it sees a real `next` callback again. We honour the user calling
+// `next(err)` as a rejection, sync `next()` as resolution, and a returned
+// Promise (for `async function (next)`) as a fallback completion signal.
+//
+// Modern hooks (no parameter, return-promise) and parallel hooks (two
+// parameters: next + done) bypass the wrapper untouched.
+function legacyHookAdapter(fn) {
+  if (typeof fn !== 'function') return fn;
+  if (fn.length !== 1) return fn; // 0 = modern, 2 = parallel — leave alone
+  // Avoid double-wrapping when registerGlobalPlugins runs again in tests.
+  if (fn.__legacyShimmed) return fn;
+
+  const wrapped = async function shimmedHook() {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const next = err => {
+        if (settled) return;
+        settled = true;
+        if (err) reject(err);
+        else resolve();
+      };
+      try {
+        const ret = fn.call(this, next);
+        if (ret && typeof ret.then === 'function') {
+          ret.then(
+            () => next(),
+            e => next(e)
+          );
+        }
+      } catch (e) {
+        next(e);
+      }
+    });
+  };
+  wrapped.__legacyShimmed = true;
+  return wrapped;
+}
+
+(function patchSchemaPreForLegacyHooks() {
+  if (!mongoose || !mongoose.Schema || !mongoose.Schema.prototype) return;
+  const proto = mongoose.Schema.prototype;
+  if (proto.__legacyHookShimInstalled) return;
+  for (const method of ['pre', 'post']) {
+    const orig = proto[method];
+    if (typeof orig !== 'function') continue;
+    proto[method] = function patched(...args) {
+      // pre/post signature: (event, [options], fn). The hook fn is always
+      // the last argument when one is supplied.
+      const last = args[args.length - 1];
+      if (typeof last === 'function') {
+        args[args.length - 1] = legacyHookAdapter(last);
+      }
+      return orig.apply(this, args);
+    };
+  }
+  proto.__legacyHookShimInstalled = true;
+})();
+
 // ─── Slow Query Logger Plugin ────────────────────────────────────────────────
 // Hooks into every find/findOne/update/aggregate to time execution.
 function slowQueryPlugin(schema) {

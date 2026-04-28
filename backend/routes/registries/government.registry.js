@@ -32,11 +32,11 @@ module.exports = function registerGovernmentRoutes(app, { safeRequire, dualMount
   const gosiFullRoutes = safeRequire('../routes/gosi-full.routes');
   const zatcaPhase2Routes = safeRequire('../routes/zatca-phase2.routes');
   const nphiesRoutes = safeRequire('../routes/nphies.routes');
-  // Enhanced Audit — uses a special export pattern (.router from middleware)
-  // The proxy may not have .router, so we handle both cases
+  // Enhanced Audit — uses a special export pattern (.router from middleware).
+  // Path is two levels up because this file lives at routes/registries/.
   let enhancedAuditRouter;
   try {
-    const auditModule = require('../middleware/enhancedAudit.middleware');
+    const auditModule = require('../../middleware/enhancedAudit.middleware');
     enhancedAuditRouter = auditModule.router || auditModule;
     // If it's still not a function/router, create an empty one
     if (typeof enhancedAuditRouter !== 'function' && !enhancedAuditRouter.use) {

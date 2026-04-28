@@ -10,7 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased] — 2026-04-28 — Test-harness + auth-gate consolidation
 
-Sprint suite: **1551 passing**.
+Sprint suite: **1553 passing**.
 
 ### Fixed
 
@@ -40,6 +40,13 @@ Sprint suite: **1551 passing**.
 
 ### Added
 
+- **`backend/__tests__/no-broken-requires.test.js`** — drift guard
+  that walks every backend `.js` file and resolves every relative
+  `require(...)` against the filesystem, failing the sprint gate
+  if any new typo'd or stale require lands. Wired into both
+  `npm run test:sprint` and `test:drift`. Allowlist for documented
+  false positives (the migration script's string templates + a
+  legacy auto-generated test stub).
 - **`docs/blueprint/13-ops-control-tower-api-playbook.md`** —
   420-line curl-driven reference for all eight Phase-16 ops
   surfaces (was a 0-byte placeholder).

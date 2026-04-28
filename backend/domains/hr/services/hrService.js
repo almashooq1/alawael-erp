@@ -18,64 +18,40 @@
 
 const logger = require('../../../utils/logger');
 
-// ── Lazy-load delegates (richest implementation per sub-domain) ─────────
+// ── Lazy-load delegates ───────────────────────────────────────────────
+//
+// Of the five originally-replaced services, only `employeeAffairs.service`
+// is still on disk; the four phase-2 / phase-3 / advanced / dashboard
+// services were retired and their functionality moved under
+// `services/hr/*` (Phase-11 HRIS rewrite — see employeeAdminService,
+// employeeSelfServiceService, hrDashboardService, etc.). The four
+// retired delegates are kept as `{}` no-ops so any caller that still
+// happens to call e.g. `hrService.compensation.calculate(...)` quietly
+// returns undefined rather than crashing — matching the runtime behavior
+// these stubs always had after the require() failed in the catch.
+//
+// Future cleanup: replace the no-op delegates with the modern
+// `services/hr/*` services (different surface, requires per-method
+// adapter glue) and inline the rest of this facade.
 
-let _empAffairs, _empPhase2, _empPhase3, _hrAdvanced, _hrDashboard;
+let _empAffairs;
+const _emptyDelegate = Object.freeze({});
 
 function empAffairs() {
   if (!_empAffairs) {
     try {
       _empAffairs = require('../../../services/employeeAffairs.service');
     } catch {
-      _empAffairs = {};
+      _empAffairs = _emptyDelegate;
     }
   }
   return _empAffairs;
 }
 
-function empPhase2() {
-  if (!_empPhase2) {
-    try {
-      _empPhase2 = require('../../../services/employeeAffairs.phase2.service');
-    } catch {
-      _empPhase2 = {};
-    }
-  }
-  return _empPhase2;
-}
-
-function empPhase3() {
-  if (!_empPhase3) {
-    try {
-      _empPhase3 = require('../../../services/employeeAffairs.phase3.service');
-    } catch {
-      _empPhase3 = {};
-    }
-  }
-  return _empPhase3;
-}
-
-function hrAdvanced() {
-  if (!_hrAdvanced) {
-    try {
-      _hrAdvanced = require('../../../services/hr-advanced.service');
-    } catch {
-      _hrAdvanced = {};
-    }
-  }
-  return _hrAdvanced;
-}
-
-function hrDashboard() {
-  if (!_hrDashboard) {
-    try {
-      _hrDashboard = require('../../../services/hr-dashboard.service');
-    } catch {
-      _hrDashboard = {};
-    }
-  }
-  return _hrDashboard;
-}
+const empPhase2 = () => _emptyDelegate;
+const empPhase3 = () => _emptyDelegate;
+const hrAdvanced = () => _emptyDelegate;
+const hrDashboard = () => _emptyDelegate;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // 1. EMPLOYEE CRUD — إدارة الموظفين

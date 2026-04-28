@@ -442,10 +442,15 @@ class ReportSchedulerService {
       }
 
       try {
-        const { emailIntegration } = require('../services/email-integration.service');
-        this.emailService = emailIntegration;
+        // The legacy `email-integration.service` was retired; `services/email`
+        // now exposes a singleton `emailManager` with the same surface
+        // (`.initialized`, `.send({to, subject, html})`) that this scheduler
+        // expects. Falling through to a noop on failure preserves the
+        // graceful-degradation behavior of the original try/catch.
+        const { emailManager } = require('../services/email');
+        this.emailService = emailManager;
       } catch (e) {
-        logger.warn('[ReportScheduler] EmailIntegration not available:', e.message);
+        logger.warn('[ReportScheduler] EmailManager not available:', e.message);
       }
 
       try {

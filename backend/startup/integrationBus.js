@@ -93,14 +93,11 @@ function setupIntegrationBus(app) {
       logger.warn('[Integration] DDD automations skipped:', dddAutoErr.message);
     }
 
-    // Initialize DDD scheduled jobs (Phase 4 — 6 cron jobs)
-    try {
-      const { initializeDDDScheduler } = require('../services/dddScheduler');
-      initializeDDDScheduler();
-      logger.info('[Integration] ✓ DDD scheduler initialized');
-    } catch (dddSchedErr) {
-      logger.warn('[Integration] DDD scheduler skipped:', dddSchedErr.message);
-    }
+    // DDD scheduled jobs (Phase 4 — 6 cron jobs) — REMOVED.
+    // The `services/dddScheduler` module was retired; the canonical
+    // schedulers now live under `scheduler/` (KPI, attendance, payment,
+    // wallet, …) and are wired in server.js. The try/catch here was a
+    // silent no-op on every boot; this comment replaces it.
 
     // Wire DDD webhook dispatcher (Phase 5 — external webhook bridge)
     try {

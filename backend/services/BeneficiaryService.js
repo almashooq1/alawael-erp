@@ -35,12 +35,11 @@ try {
   Branch = null;
 }
 
-let ActivityLog;
-try {
-  ActivityLog = require('../models/ActivityLog');
-} catch {
-  ActivityLog = null;
-}
+// `ActivityLog` was retired; activity history is now persisted by the
+// canonical AuditLog (see services/auditHashChainService.js + the
+// AuditLog model). All call sites here null-check ActivityLog first,
+// so leaving it null preserves runtime behavior.
+const ActivityLog = null;
 
 // ─── BeneficiaryService ────────────────────────────────────────────────────────
 class BeneficiaryService {

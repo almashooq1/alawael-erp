@@ -183,7 +183,7 @@ async function escalateTicket(ticket, reason) {
 
     // إرسال إشعار عبر Socket.IO إن كان متاحاً
     try {
-      const { getIO } = require('../utils/socketManager');
+      const { getIO } = require('../utils/socketEmitter');
       const io = getIO();
       if (io) {
         io.to('role:admin').to('role:manager').emit('ticket:sla_breach', {

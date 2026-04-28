@@ -14,13 +14,13 @@ const logger = require('./logger');
  * @param {string} moduleKey
  * @returns {Array}
  */
-function getModuleKPIs(moduleKey) {
-  try {
-    const moduleData = require('../data/moduleMocks')[moduleKey];
-    return moduleData ? moduleData.kpis || [] : [];
-  } catch (_err) {
-    return [];
-  }
+function getModuleKPIs(_moduleKey) {
+  // The `data/moduleMocks` fixture was retired; this used to surface
+  // demo KPIs for unimplemented modules. Real KPIs are now sourced
+  // from `config/kpi.registry.js` via `services/kpiAggregator.service.js`
+  // — which the dashboard widgets consume directly. Returning [] here
+  // matches the runtime behavior the catch block has always produced.
+  return [];
 }
 
 /**
@@ -79,20 +79,11 @@ function getSummarySystems() {
  * @param {number} [limit=4]
  * @returns {Array<Object>}
  */
-function getTopKPIs(limit = 4) {
-  try {
-    const moduleMocks = require('../data/moduleMocks');
-    const allKPIs = [];
-    for (const moduleKey of Object.keys(moduleMocks)) {
-      const mod = moduleMocks[moduleKey];
-      if (mod.kpis) {
-        allKPIs.push(...mod.kpis.map(kpi => ({ ...kpi, module: moduleKey })));
-      }
-    }
-    return allKPIs.slice(0, limit);
-  } catch (_err) {
-    return [];
-  }
+function getTopKPIs(_limit = 4) {
+  // See `getModuleKPIs` above — `data/moduleMocks` is retired and
+  // KPI data lives in the canonical registry now. Empty array is the
+  // observed runtime behavior since the mock fixture went away.
+  return [];
 }
 
 /**

@@ -620,18 +620,18 @@ const sendNotificationEmail = async (to, title, message, options = {}) => {
 
 /**
  * Send OTP Email
+ *
+ * Originally tried `services/email-integration.service` first and used
+ * the local `emailService.send(...)` as a fallback. The integration
+ * service was retired; the local EmailService instance (built above) is
+ * now the only canonical path.
  */
 const sendOTPEmail = async (to, otp, expiry = 5) => {
-  try {
-    const { emailIntegration } = require('../services/email-integration.service');
-    return await emailIntegration.sendOTPEmail({ email: to }, otp, expiry);
-  } catch (error) {
-    return emailService.send({
-      to,
-      subject: `رمز التحقق: ${otp}`,
-      html: `<div dir="rtl" style="font-family: Arial, sans-serif;"><h2>رمز التحقق</h2><p>رمزك هو: <strong>${otp}</strong></p><p>صالح لمدة ${expiry} دقائق.</p></div>`,
-    });
-  }
+  return emailService.send({
+    to,
+    subject: `رمز التحقق: ${otp}`,
+    html: `<div dir="rtl" style="font-family: Arial, sans-serif;"><h2>رمز التحقق</h2><p>رمزك هو: <strong>${otp}</strong></p><p>صالح لمدة ${expiry} دقائق.</p></div>`,
+  });
 };
 
 /**

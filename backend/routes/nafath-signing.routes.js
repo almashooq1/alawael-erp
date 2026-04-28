@@ -4,6 +4,7 @@
  * Mount at /api/v1/nafath/signing.
  *
  * Endpoints (all require authenticate; specific roles per route):
+ *   GET    /                     — list signature requests (filters + pagination)
  *   POST   /request              — initiate a signature (idempotent)
  *   GET    /:id/status           — poll + transition state
  *   POST   /:id/cancel           — user-initiated cancel
@@ -45,6 +46,58 @@ const WRITE_ROLES = [
   'parent',
   'guardian',
 ];
+
+// Roles allowed to see signing requests beyond their own. Regular users
+// (parent/guardian/therapist/etc.) only see requests where they are the
+// signer — enforced server-side below regardless of what the client asks for.
+const ADMIN_VIEW_ROLES = new Set([
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'auditor',
+  'compliance_officer',
+]);
+
+// ── GET / — list signing requests ────────────────────────────────────────
+router.get('/', async (req, res) => {
+  try {
+    const userRole = (req.user?.role || '').toLowerCase();
+    const filters = {};
+
+    if (req.query.status) filters.status = String(req.query.status);
+    if (req.query.documentType) filters.documentType = String(req.query.documentType);
+    if (req.query.mode) filters.mode = String(req.query.mode);
+    if (req.query.since) filters.since = req.query.since;
+    if (req.query.until) filters.until = req.query.until;
+    if (req.query.limit) filters.limit = req.query.limit;
+    if (req.query.skip) filters.skip = req.query.skip;
+
+    if (ADMIN_VIEW_ROLES.has(userRole)) {
+      // Admins can scope by any signer they want (or all).
+      if (req.query.signerNationalId) {
+        filters.signerNationalId = String(req.query.signerNationalId);
+      }
+      if (req.query.signerUserId && mongoose.isValidObjectId(req.query.signerUserId)) {
+        filters.signerUserId = req.query.signerUserId;
+      }
+    } else {
+      // Regular users only see their own — derived from req.user, NOT
+      // the client query (defense against a parent reading another
+      // parent's signing history by spoofing a userId param).
+      if (req.user?.id) {
+        filters.signerUserId = req.user.id;
+      } else {
+        return res.json({ success: true, data: { total: 0, rows: [] } });
+      }
+    }
+
+    const result = await defaultService.listSignatures(filters);
+    res.json({ success: true, data: result });
+  } catch (err) {
+    return safeError(res, err, 'nafath-signing.list');
+  }
+});
 
 // ── POST /request ────────────────────────────────────────────────────────
 router.post('/request', signingIdempotency, authorize(WRITE_ROLES), async (req, res) => {

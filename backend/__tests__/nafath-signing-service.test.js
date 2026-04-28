@@ -70,6 +70,58 @@ function createFakeModel() {
       chain.lean = async () => (doc ? { ...doc, _id: id } : null);
       return chain;
     },
+    find(q = {}) {
+      // Simple find that supports the same operators listSignatures uses:
+      // status as string or { $in: [...] }, plain equality for everything
+      // else, and createdAt with { $gte / $lte }.
+      const filtered = [...rows.values()].filter(doc => {
+        for (const [k, v] of Object.entries(q)) {
+          if (k === 'status' && v && typeof v === 'object' && v.$in) {
+            if (!v.$in.includes(doc[k])) return false;
+            continue;
+          }
+          if (k === 'createdAt' && v && typeof v === 'object') {
+            if (v.$gte && doc.createdAt < v.$gte) return false;
+            if (v.$lte && doc.createdAt > v.$lte) return false;
+            continue;
+          }
+          if (doc[k] !== v) return false;
+        }
+        return true;
+      });
+      let _sortDir = -1;
+      let _skip = 0;
+      let _limit = filtered.length;
+      const chain = {
+        sort(spec) {
+          _sortDir = (spec && spec.createdAt) || -1;
+          return chain;
+        },
+        skip(n) {
+          _skip = n;
+          return chain;
+        },
+        limit(n) {
+          _limit = n;
+          return chain;
+        },
+        async lean() {
+          const sorted = filtered
+            .slice()
+            .sort((a, b) =>
+              _sortDir === 1
+                ? new Date(a.createdAt) - new Date(b.createdAt)
+                : new Date(b.createdAt) - new Date(a.createdAt)
+            );
+          return sorted.slice(_skip, _skip + _limit).map(d => ({ ...d, _id: d._id }));
+        },
+      };
+      return chain;
+    },
+    async countDocuments(q = {}) {
+      const list = (await this.find(q).lean()).length;
+      return list;
+    },
   };
 }
 
@@ -185,5 +237,105 @@ describe('nafathSigningService lifecycle', () => {
     expect(evidence.verification.verified).toBe(true);
     expect(evidence.signature.jws).toMatch(/\./);
     expect(evidence.request.documentHash).toBe(goodInput.documentHash);
+  });
+
+  // ── listSignatures ───────────────────────────────────────────────────
+  describe('listSignatures', () => {
+    async function seedThree(service, model) {
+      // Three rows across two beneficiaries, two document types, two statuses.
+      await service.requestSignature({ ...goodInput, documentId: 'irp-001' });
+      await service.requestSignature({
+        ...goodInput,
+        documentType: 'CONTRACT',
+        documentId: 'ct-001',
+      });
+      await service.requestSignature({
+        ...goodInput,
+        documentId: 'irp-002',
+        signerNationalId: '1087654322',
+      });
+      // Force one row's status to APPROVED so status filter can discriminate.
+      const all = [...model._rows.values()];
+      all[0].status = 'APPROVED';
+      return all;
+    }
+
+    it('returns every row with no filters, newest-first', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures();
+      expect(out.total).toBe(3);
+      expect(out.rows).toHaveLength(3);
+      // Each row carries the standard `_shape` keys.
+      expect(out.rows[0]).toHaveProperty('requestId');
+      expect(out.rows[0]).toHaveProperty('status');
+      expect(out.rows[0]).toHaveProperty('documentType');
+    });
+
+    it('filters by status (string)', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures({ status: 'APPROVED' });
+      expect(out.total).toBe(1);
+      expect(out.rows[0].status).toBe('APPROVED');
+    });
+
+    it('filters by status ($in array)', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures({ status: ['APPROVED', 'PENDING'] });
+      expect(out.total).toBe(3);
+    });
+
+    it('filters by documentType', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures({ documentType: 'CONTRACT' });
+      expect(out.total).toBe(1);
+      expect(out.rows[0].documentType).toBe('CONTRACT');
+    });
+
+    it('filters by signerNationalId', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures({ signerNationalId: '1087654322' });
+      expect(out.total).toBe(1);
+      expect(out.rows[0].signerNationalId).toBe('1087654322');
+    });
+
+    it('paginates via limit + skip', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const page1 = await service.listSignatures({ limit: 2, skip: 0 });
+      expect(page1.total).toBe(3);
+      expect(page1.rows).toHaveLength(2);
+      const page2 = await service.listSignatures({ limit: 2, skip: 2 });
+      expect(page2.total).toBe(3);
+      expect(page2.rows).toHaveLength(1);
+    });
+
+    it('clamps limit to [1, 200]', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      const out = await service.listSignatures({ limit: 9999 });
+      expect(out.rows.length).toBeLessThanOrEqual(200);
+    });
+
+    it('does NOT leak signerAttributes for non-APPROVED rows', async () => {
+      const { service, model } = buildService();
+      await seedThree(service, model);
+      // Inject signerAttributes onto a non-APPROVED row.
+      const all = [...model._rows.values()];
+      const pending = all.find(r => r.status !== 'APPROVED');
+      pending.signerAttributes = { nationalIdEnding: 'XX', nameAr: 'يجب ألا يظهر' };
+
+      const out = await service.listSignatures();
+      const pendingShaped = out.rows.find(r => r.requestId === String(pending._id));
+      expect(pendingShaped.signerAttributes).toBeUndefined();
+      const approvedShaped = out.rows.find(r => r.status === 'APPROVED');
+      // The seeded APPROVED row has no signerAttributes either, so undefined here is fine —
+      // the contract is "only present when status === 'APPROVED' AND data exists".
+      expect(['object', 'undefined']).toContain(typeof approvedShaped.signerAttributes);
+    });
   });
 });

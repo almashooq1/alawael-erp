@@ -283,12 +283,55 @@ function createService({
     };
   }
 
+  /**
+   * List signing requests with filters + pagination.
+   *
+   * @param {object} [filters]
+   * @param {string|string[]} [filters.status]
+   * @param {string} [filters.documentType]
+   * @param {string} [filters.signerNationalId]
+   * @param {string|mongoose.Types.ObjectId} [filters.signerUserId]
+   * @param {'mock'|'live'} [filters.mode]
+   * @param {Date|string} [filters.since] — `createdAt >= since`
+   * @param {Date|string} [filters.until] — `createdAt <= until`
+   * @param {number} [filters.limit=50]
+   * @param {number} [filters.skip=0]
+   */
+  async function listSignatures(filters = {}) {
+    const q = {};
+    if (filters.status) {
+      q.status = Array.isArray(filters.status) ? { $in: filters.status } : filters.status;
+    }
+    if (filters.documentType) q.documentType = filters.documentType;
+    if (filters.signerNationalId) q.signerNationalId = filters.signerNationalId;
+    if (filters.signerUserId) q.signerUserId = filters.signerUserId;
+    if (filters.mode) q.mode = filters.mode;
+    if (filters.since || filters.until) {
+      q.createdAt = {};
+      if (filters.since) q.createdAt.$gte = new Date(filters.since);
+      if (filters.until) q.createdAt.$lte = new Date(filters.until);
+    }
+    const limit = Math.min(Math.max(Number(filters.limit) || 50, 1), 200);
+    const skip = Math.max(Number(filters.skip) || 0, 0);
+    const [rows, total] = await Promise.all([
+      model.find(q).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      model.countDocuments(q),
+    ]);
+    // Re-shape each row through `_shape` to keep the public surface consistent
+    // with `pollSignature` (no JWS leak, signerAttributes only when APPROVED).
+    return {
+      total,
+      rows: rows.map(_shape),
+    };
+  }
+
   return {
     requestSignature,
     pollSignature,
     cancelSignature,
     verifySignature,
     buildEvidencePackage,
+    listSignatures,
   };
 }
 

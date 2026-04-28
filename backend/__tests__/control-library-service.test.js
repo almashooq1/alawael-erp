@@ -9,6 +9,9 @@
  * registry invariants (counts + framework coverage).
  */
 
+jest.unmock('mongoose');
+jest.resetModules();
+
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');

@@ -9,6 +9,9 @@
  * retention-policy defaults.
  */
 
+jest.unmock('mongoose');
+jest.resetModules();
+
 process.env.NODE_ENV = 'test';
 
 const crypto = require('crypto');

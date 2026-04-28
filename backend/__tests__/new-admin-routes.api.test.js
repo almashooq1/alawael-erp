@@ -47,6 +47,10 @@ process.env.JWT_SECRET =
 
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
+
+jest.unmock('mongoose');
+jest.resetModules();
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 const app = require('../app');

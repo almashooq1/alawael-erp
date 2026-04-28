@@ -7,6 +7,9 @@
  * aggregation + dedup + pendingAlertsFor windowing.
  */
 
+jest.unmock('mongoose');
+jest.resetModules();
+
 process.env.NODE_ENV = 'test';
 
 const mongoose = require('mongoose');

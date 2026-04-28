@@ -9,6 +9,9 @@
 
 process.env.NODE_ENV = 'test';
 
+jest.unmock('mongoose');
+jest.resetModules();
+
 const mongoose = require('mongoose');
 const { MongoMemoryServer } = require('mongodb-memory-server');
 

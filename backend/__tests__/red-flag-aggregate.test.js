@@ -10,6 +10,9 @@
 
 process.env.NODE_ENV = 'test';
 
+jest.unmock('mongoose');
+jest.resetModules();
+
 const mongoose = require('mongoose');
 const express = require('express');
 const request = require('supertest');

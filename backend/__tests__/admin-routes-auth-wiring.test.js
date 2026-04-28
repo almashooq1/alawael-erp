@@ -93,12 +93,24 @@ describe('Admin route handlers are role-restricted (not just authenticated)', ()
       // total handlers and how many pass a role-restricting middleware.
       const handlerRe = /router\.(get|post|patch|put|delete)\s*\(([\s\S]*?)\);/g;
 
+      // Role-restriction can also be applied globally with
+      // `router.use(requireRole(...))` / `router.use(authorize(...))`.
+      // When the gate covers every handler at the top of the file, we
+      // don't need to see it on each individual `router.method(...)`.
+      const globalRoleGate =
+        /router\.use\s*\(\s*(?:requireRole|authorizeRoles|authorize|requireAdmin|adminOnly)\b/.test(
+          src
+        );
+
       let m;
       let handlers = 0;
       let matched = 0;
       while ((m = handlerRe.exec(src)) !== null) {
         handlers++;
-        if (/requireRole|authorizeRoles|requireAdmin|adminOnly/.test(m[2])) {
+        if (
+          globalRoleGate ||
+          /requireRole|authorizeRoles|authorize|requireAdmin|adminOnly/.test(m[2])
+        ) {
           matched++;
         }
       }

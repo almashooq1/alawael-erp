@@ -23,9 +23,10 @@ On-call playbooks for the alerts defined in `docs/alerts/*.yml`.
 
 ### Architecture references
 
-| Topic                                     | Doc                              |
-| ----------------------------------------- | -------------------------------- |
-| Phase-7 IAM stack (roles/scope/SoD/audit) | [phase-7-iam.md](phase-7-iam.md) |
+| Topic                                     | Doc                                                      |
+| ----------------------------------------- | -------------------------------------------------------- |
+| Phase-7 IAM stack (roles/scope/SoD/audit) | [phase-7-iam.md](phase-7-iam.md)                         |
+| Phase-13 QMS & compliance vault           | [phase-13-qms-compliance.md](phase-13-qms-compliance.md) |
 
 ## How to use
 

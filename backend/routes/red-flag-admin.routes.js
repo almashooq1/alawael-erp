@@ -8,16 +8,29 @@
  * Mount like:
  *
  *   app.use('/api/v1/admin/red-flags',
- *     authenticate, requireRole(['admin', 'quality_coordinator', ...]),
  *     createRedFlagAdminRouter({ aggregateService }));
  *
- * Authorization is the caller's job. The router only enforces
- * input shape.
+ * Auth + role gate are applied inside the factory (defense in depth).
+ * Earlier versions of this file deferred authorization to the caller;
+ * the canonical mount in app.js only added `authenticate`, leaving any
+ * authenticated user (parent / therapist / receptionist) able to read
+ * the cross-org dashboard. We now bake authorization into the router
+ * so a future mount that forgets the role gate is still safe.
  */
 
 'use strict';
 
 const express = require('express');
+const { authenticate, authorize } = require('../middleware/auth');
+
+const ADMIN_ROLES = [
+  'admin',
+  'super_admin',
+  'superadmin',
+  'manager',
+  'quality_coordinator',
+  'compliance_officer',
+];
 
 function asyncHandler(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -31,6 +44,8 @@ function createRedFlagAdminRouter(deps = {}) {
 
   const router = express.Router();
   router.use(express.json());
+  router.use(authenticate);
+  router.use(authorize(ADMIN_ROLES));
 
   router.get(
     '/dashboard',

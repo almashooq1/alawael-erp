@@ -189,6 +189,13 @@ describe('GET /api/v1/admin/red-flags/dashboard', () => {
     });
     const router = createRedFlagAdminRouter({ aggregateService: svc });
     const app = express();
+    // Stub the test user so the factory's `authenticate` middleware
+    // (which accepts pre-set req.user under JEST_WORKER_ID) lets the
+    // request through and `authorize` sees the admin role.
+    app.use((req, _res, next) => {
+      req.user = { id: 'test-admin', role: 'admin' };
+      next();
+    });
     app.use('/api/v1/admin/red-flags', router);
 
     const res = await request(app).get('/api/v1/admin/red-flags/dashboard');

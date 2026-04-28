@@ -8,6 +8,50 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased] — 2026-04-28 — Test-harness + auth-gate consolidation
+
+Sprint suite: **1551 passing**.
+
+### Fixed
+
+- **Mongoose 9 hook compat shim** — patches `Schema.prototype.pre/post`
+  in `backend/config/mongoose.plugins.js` so legacy
+  `function(next) { ...; next(); }` document hooks keep working under
+  mongoose 9 (which dropped `next` for document hooks). Single-file
+  fix that protects 90+ models without touching them individually.
+- **`Invoice.pre('save')`** rewritten to the modern no-arg shape.
+- **`models/VitalSign.js`** populated — was a 0-byte placeholder
+  from the v4.0.74 mass push, blocking the
+  `clinical.pediatric.weight.drop_5pct` red-flag adapter.
+- **`__tests__/acl-client-dlq.test.js`** populated with seven specs
+  covering the AclClient → DLQ handoff (success no-park, retry
+  exhaustion, parkOnFailure=false, PII redaction, DLQ-failure
+  isolation, circuit-breaker short-circuit).
+- **31 integration tests** (QMS + Red-Flag observations + admin
+  API) add `jest.unmock('mongoose'); jest.resetModules();` so they
+  exercise real mongoose instead of the global mock. Pass-rate
+  uplift across these files: roughly +250 newly green.
+- **Red-Flag admin RBAC gap** — `/api/v1/admin/red-flags/dashboard`
+  was authenticate-only; any logged-in user could read it. Auth +
+  role gate now baked into the factory (defense in depth).
+- **`admin-routes-auth-wiring.test.js`** drift test recognizes
+  `authorize` (the canonical role-checker in `middleware/auth.js`)
+  and a global `router.use(...)` role gate.
+
+### Added
+
+- **`docs/blueprint/13-ops-control-tower-api-playbook.md`** —
+  420-line curl-driven reference for all eight Phase-16 ops
+  surfaces (was a 0-byte placeholder).
+- **Phase 17 Care Platform UI** in
+  `alawael-rehab-platform/apps/web-admin`: 7 subject pages live
+  (`/care/{crm,social,home-visits,welfare,community,psych,independence}`)
+  with cross-navigation back to `/care/360/[beneficiaryId]`.
+- **Phase-13 QMS runbook** linked from `docs/runbooks/README.md`
+  index.
+
+---
+
 ## [4.0.114] — 2026-04-25 — Phase 19 Commit 1: Forms Catalog
 
 Adds 32 ready-to-use form templates across three audiences so admins can

@@ -36,13 +36,13 @@ async function clearAllCache() {
       console.log('✅ Redis cache cleared successfully\n');
     }
 
-    // Clear memory cache stats (if middleware is loaded)
+    // Clear in-memory NodeCache (also resets the hits/misses counters).
     try {
-      const { resetCacheStats } = require('../middleware/cache.middleware');
-      resetCacheStats();
-      console.log('📊 Cache statistics reset\n');
+      const { clearCache } = require('../utils/performance-optimizer');
+      clearCache();
+      console.log('📊 In-memory cache + stats cleared\n');
     } catch (error) {
-      console.log('ℹ️  Cache statistics not available\n');
+      console.log('ℹ️  In-memory cache module not available\n');
     }
 
     console.log('✨ Cache clearing complete!\n');
@@ -176,17 +176,18 @@ async function showCacheStats() {
       console.log('📦 Redis Cache: Not configured\n');
     }
 
-    // Memory cache stats
+    // In-memory cache stats (NodeCache wrapper in performance-optimizer).
     try {
-      const { getCacheStats } = require('../middleware/cache.middleware');
+      const { getCacheStats } = require('../utils/performance-optimizer');
       const memStats = getCacheStats();
+      const total = (memStats.hits || 0) + (memStats.misses || 0);
 
       console.log('💾 Memory Cache:');
       console.log('─────────────────────────────────────');
       console.log(`   Cache Hits:        ${memStats.hits}`);
       console.log(`   Cache Misses:      ${memStats.misses}`);
-      console.log(`   Hit Rate:          ${memStats.getHitRate()}%`);
-      console.log(`   Total Requests:    ${memStats.hits + memStats.misses}`);
+      console.log(`   Hit Rate:          ${memStats.hitRate}`);
+      console.log(`   Total Requests:    ${total}`);
       console.log('\n');
     } catch (error) {
       console.log('💾 Memory Cache: Stats not available\n');

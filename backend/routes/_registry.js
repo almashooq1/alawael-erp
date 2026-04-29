@@ -14,12 +14,29 @@ const logger = require('../utils/logger');
 
 
 // ─── Safe Require — returns empty router on failure ───────────────────────────
+//
+// Two failure shapes worth distinguishing:
+//   1) The requested module file itself is missing (legacy/archived routes
+//      that the registry still references). Boring, expected, captured in
+//      routeHealth — log at debug to avoid drowning real signal.
+//   2) The module exists but a downstream `require()` inside it failed.
+//      Real bug — log at warn so it stays visible.
 function safeRequire(modulePath) {
   try {
     return require(modulePath);
   } catch (err) {
-    logger.warn(`[safeRequire] Failed to load: ${modulePath} — ${err.message}`);
-    routeHealth.failed.push({ path: modulePath, module: modulePath, error: err.message });
+    const isMissingThisModule =
+      err.code === 'MODULE_NOT_FOUND' &&
+      typeof err.message === 'string' &&
+      err.message.includes(`'${modulePath}'`);
+    const level = isMissingThisModule ? 'debug' : 'warn';
+    logger[level](`[safeRequire] Failed to load: ${modulePath} — ${err.message}`);
+    routeHealth.failed.push({
+      path: modulePath,
+      module: modulePath,
+      error: err.message,
+      missing: isMissingThisModule,
+    });
     return express.Router(); // return empty router so app.use() doesn't crash
   }
 }
@@ -441,19 +458,40 @@ const mountAllRoutes = (app, { authRateLimiter } = {}) => {
 
   // ── Route Mount Summary ─────────────────────────────────────────────────
   const summary = routeHealth.summary;
+  // Split into "missing module file" (expected, archived stubs) vs "real
+  // load error" (downstream require / syntax). The former is captured in
+  // route-health and exposed at /api/health/routes — no need to spam logs
+  // with one warn per missing stub.
+  const missingStubs = routeHealth.failed.filter(f => f.missing);
+  const realFailures = routeHealth.failed.filter(f => !f.missing);
+
   if (summary.failed === 0) {
     logger.info(`✅ All ${summary.total} route modules loaded successfully`);
   } else {
-    logger.warn(`⚠️  Route loading: ${summary.ok}/${summary.total} OK, ${summary.failed} FAILED`);
-    summary.failedRoutes.forEach(f => {
-      logger.warn(`   ✗ ${f.path} → ${f.error}`);
-    });
-    // Emit structured event for monitoring/alerting systems (Sentry, Prometheus, etc.)
-    process.emit('route:load:failures', {
-      count: summary.failed,
-      routes: summary.failedRoutes,
-      timestamp: new Date().toISOString(),
-    });
+    logger.info(
+      `Route loading: ${summary.ok}/${summary.total} OK` +
+        (missingStubs.length ? `, ${missingStubs.length} archived stubs` : '') +
+        (realFailures.length ? `, ${realFailures.length} FAILED` : '')
+    );
+    if (missingStubs.length) {
+      logger.debug(
+        `[Routes] Archived stubs (mounted as empty routers): ${missingStubs
+          .map(f => f.path)
+          .join(', ')}`
+      );
+    }
+    if (realFailures.length) {
+      logger.warn(`⚠️  ${realFailures.length} route module(s) failed to load:`);
+      realFailures.forEach(f => {
+        logger.warn(`   ✗ ${f.path} → ${f.error}`);
+      });
+      // Emit structured event for monitoring/alerting systems (Sentry, Prometheus, etc.)
+      process.emit('route:load:failures', {
+        count: realFailures.length,
+        routes: realFailures,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
 };
 

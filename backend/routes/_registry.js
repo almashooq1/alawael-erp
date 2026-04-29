@@ -212,12 +212,22 @@ const safeMount = (app, paths, modulePath) => {
     // which was undefined, throwing inside the catch and bubbling all the
     // way up to mountAllRoutes. That's why ~hundreds of downstream routes
     // were silently aborted on every boot.
+    const isMissingThisModule =
+      err.code === 'MODULE_NOT_FOUND' &&
+      typeof modulePath === 'string' &&
+      typeof err.message === 'string' &&
+      err.message.includes(`'${modulePath}'`);
     routeHealth.failed.push({
       path: pathLabel,
       module: String(modulePath),
       error: err.message,
+      missing: isMissingThisModule,
     });
-    logger.error(`[ROUTE FAIL] ${pathLabel} (${modulePath}): ${err.message}`);
+    // Same split as safeRequire: archived stub paths drop to debug,
+    // real load errors stay at error. The route-mount summary at the
+    // tail of mountAllRoutes still surfaces both counts.
+    const level = isMissingThisModule ? 'debug' : 'error';
+    logger[level](`[ROUTE FAIL] ${pathLabel} (${modulePath}): ${err.message}`);
     return false;
   }
 };

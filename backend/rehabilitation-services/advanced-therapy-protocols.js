@@ -70,7 +70,8 @@ const TherapyProtocolSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const TherapyProtocol = mongoose.model('TherapyProtocol', TherapyProtocolSchema);
+const TherapyProtocol =
+  mongoose.models.TherapyProtocol || mongoose.model('TherapyProtocol', TherapyProtocolSchema);
 
 // ============================================================
 // 20+ بروتوكول علاجي متقدم

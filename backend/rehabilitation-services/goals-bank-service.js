@@ -65,7 +65,7 @@ const GoalSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Goal = mongoose.model('GoalBank', GoalSchema);
+const Goal = mongoose.models.GoalBank || mongoose.model('GoalBank', GoalSchema);
 
 // ============================================================
 // بنك الأهداف - 200+ هدف مصنف

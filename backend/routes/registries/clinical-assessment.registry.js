@@ -99,14 +99,17 @@ module.exports = function registerClinicalAssessmentRoutes(
   );
 
   // Priority 3: Early Warning System (Plateau, Regression, Attendance)
-  safeMount(
-    app,
-    ['/api/early-warning', '/api/v1/early-warning'],
-    '../rehabilitation-services/early-warning-system'
-  );
-  logger.info(
-    'Early Warning System routes mounted (plateau detection, regression alert, attendance monitoring)'
-  );
+  // The service file's default export is `{ router, EarlyWarningService, ... }`
+  // — pre-resolve to the .router so safeMount gets a real Router.
+  try {
+    const ews = require('../../rehabilitation-services/early-warning-system');
+    safeMount(app, ['/api/early-warning', '/api/v1/early-warning'], ews.router);
+    logger.info(
+      'Early Warning System routes mounted (plateau detection, regression alert, attendance monitoring)'
+    );
+  } catch (err) {
+    logger.warn(`[Clinical] Early Warning System skipped: ${err.message}`);
+  }
 
   // Priority 4: Smart Family Portal (Home Activities, Digital Notebook, Engagement)
   safeMount(
@@ -174,35 +177,14 @@ module.exports = function registerClinicalAssessmentRoutes(
     'ADOS-2 & Sensory Profile 2 routes mounted (ADOS-2: Social Affect + RRB algorithm, Modules 1-4 + Toddler; SP2: 6 sensory systems, 4 quadrant patterns, sensory diet)'
   );
 
-  // Upgrade 3: Escalation Notifications System
-  safeMount(
-    app,
-    ['/api/escalation-notifications', '/api/v1/escalation-notifications'],
-    '../rehabilitation-services/escalation-notifications-service'
-  );
-  logger.info(
-    'Escalation Notifications routes mounted (8 default rules: session_missed, crisis_indicator, iep_review_due, goal_regression, attendance_risk, discharge_pending, medication_change, family_complaint)'
-  );
-
-  // Upgrade 4: PDF Report Generator
-  safeMount(
-    app,
-    ['/api/pdf-reports', '/api/v1/pdf-reports'],
-    '../rehabilitation-services/pdf-report-generator'
-  );
-  logger.info(
-    'PDF Report Generator routes mounted (7 report types: IEP, Progress, Session, Assessment, DepartmentStats, CARF, Family — Arabic RTL, Cairo font)'
-  );
-
-  // Upgrade 5: CARF Accreditation Service
-  safeMount(
-    app,
-    ['/api/carf-accreditation', '/api/v1/carf-accreditation'],
-    '../rehabilitation-services/carf-accreditation-service'
-  );
-  logger.info(
-    'CARF Accreditation routes mounted (22 core standards, 8 sections A-K: leadership, strategic-planning, human-resources, rights, service-delivery, outcomes, comprehensive-rehab)'
-  );
+  // Upgrade 3 / 4 / 5: Escalation Notifications, PDF Report Generator,
+  // CARF Accreditation — the source modules are service-only (no
+  // Express router exported). Mounting them as routes was always
+  // failing with "Router.use() requires a middleware function but got
+  // an Object" on every boot. They remain available as services via
+  // direct require for any consumer that wants the class instance.
+  // TODO: ship route files for these three services if HTTP exposure
+  //       is actually needed by the frontend.
 
   // Upgrade 6: Advanced Therapy Protocols (22+ evidence-based protocols)
   safeMount(

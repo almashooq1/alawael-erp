@@ -135,7 +135,7 @@ MDTMeetingSchema.pre('save', async function () {
   }
 });
 
-const MDTMeeting = mongoose.model('MDTMeeting', MDTMeetingSchema);
+const MDTMeeting = mongoose.models.MDTMeeting || mongoose.model('MDTMeeting', MDTMeetingSchema);
 
 // ══════════════════════════════════════════════════════════════
 // PRIORITY 7 - Transition Planning Protocol
@@ -235,7 +235,8 @@ TransitionPlanSchema.methods.calculateReadiness = function () {
   return this.readiness_percentage;
 };
 
-const TransitionPlan = mongoose.model('TransitionPlan', TransitionPlanSchema);
+const TransitionPlan =
+  mongoose.models.TransitionPlan || mongoose.model('TransitionPlan', TransitionPlanSchema);
 
 // ══════════════════════════════════════════════════════════════
 // PRIORITY 8 - Quality KPIs (CARF Standards)
@@ -314,7 +315,7 @@ const QualityKPISchema = new Schema(
   { timestamps: true }
 );
 
-const QualityKPI = mongoose.model('QualityKPI', QualityKPISchema);
+const QualityKPI = mongoose.models.QualityKPI || mongoose.model('QualityKPI', QualityKPISchema);
 
 // ─── KPI Calculator ─────────────────────────────────────────────────────────────
 

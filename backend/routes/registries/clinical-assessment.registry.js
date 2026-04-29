@@ -157,15 +157,11 @@ module.exports = function registerClinicalAssessmentRoutes(
   // ── Al-Awael Professional Upgrade v2 — 6 New Professional Modules ──────
   // ══════════════════════════════════════════════════════════════════════════
 
-  // Upgrade 1: Goals Bank Service (200+ therapeutic goals, 17 domains)
-  safeMount(
-    app,
-    ['/api/goals-bank-service', '/api/v1/goals-bank-service'],
-    '../rehabilitation-services/goals-bank-service'
-  );
-  logger.info(
-    'Goals Bank Service routes mounted (200+ therapeutic goals, 17 domains: COM/COG/FMT/GMT/SOC/SFC/BEH/SEN/ACA/VOC/TRN/PLY/LNG/FED/HRG/VIS/DLV)'
-  );
+  // Upgrade 1: Goals Bank Service — service-only module (exports
+  // `new GoalsBankService()`, no Express router). Removed the bogus
+  // safeMount that always failed with "Router.use() requires a
+  // middleware function but got an Object". Available via direct
+  // require for any consumer that wants the service instance.
 
   // Upgrade 2: ADOS-2 and Sensory Profile 2
   safeMount(
@@ -186,15 +182,12 @@ module.exports = function registerClinicalAssessmentRoutes(
   // TODO: ship route files for these three services if HTTP exposure
   //       is actually needed by the frontend.
 
-  // Upgrade 6: Advanced Therapy Protocols (22+ evidence-based protocols)
-  safeMount(
-    app,
-    ['/api/advanced-therapy-protocols', '/api/v1/advanced-therapy-protocols'],
-    '../rehabilitation-services/advanced-therapy-protocols'
-  );
-  logger.info(
-    'Advanced Therapy Protocols routes mounted (22 protocols: ABA-DTT, PECS, DIR/Floortime, Ayres-SI, CIMT, Dysphagia, PROMPT, RDI, SOS-Feeding, SCERTS, NDT/Bobath, Hanen, PRT, LAMP, PCIT, Video-Modeling, PEERS, Lokomat + more)'
-  );
+  // Upgrade 6: Advanced Therapy Protocols — service-only module (exports
+  // `new AdvancedTherapyProtocolsService()`, no Express router). Removed
+  // the bogus safeMount that always failed with "Router.use() requires
+  // a middleware function but got an Object". Available via direct
+  // require for any consumer that wants the service instance.
+  // (was: 22 protocols: ABA-DTT, PECS, DIR/Floortime, Ayres-SI, CIMT, Dysphagia, PROMPT, RDI, SOS-Feeding, SCERTS, NDT/Bobath, Hanen, PRT, LAMP, PCIT, Video-Modeling, PEERS, Lokomat + more)
 
   logger.info(
     'Al-Awael Professional Upgrade v2 complete: Goals Bank 200+ + ADOS-2/SP2 + Escalation Notifications + PDF Reports + CARF Accreditation + 22 Advanced Protocols'

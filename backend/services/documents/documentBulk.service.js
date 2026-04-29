@@ -77,6 +77,9 @@ const BulkJobSchema = new mongoose.Schema(
   {
     timestamps: true,
     collection: 'document_bulk_jobs',
+    // `errors` is a per-row error log array, not the mongoose-reserved
+    // Document.errors validation slot — opt out of the warning.
+    suppressReservedKeysWarning: true,
   }
 );
 

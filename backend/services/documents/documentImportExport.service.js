@@ -74,7 +74,13 @@ const importExportJobSchema = new mongoose.Schema(
     completedAt: Date,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
-  { timestamps: true, collection: 'import_export_jobs' }
+  {
+    timestamps: true,
+    collection: 'import_export_jobs',
+    // `errors` is the per-row import/export error array, not the
+    // mongoose-reserved Document.errors validation slot.
+    suppressReservedKeysWarning: true,
+  }
 );
 
 importExportJobSchema.index({ type: 1, status: 1 });

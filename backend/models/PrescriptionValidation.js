@@ -33,6 +33,11 @@ const prescriptionValidationSchema = new mongoose.Schema(
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    // Root-level `errors` field is intentional (CDSS validation result list);
+    // mongoose flags it because Document.errors is reserved for save-time
+    // validation errors. We never call .validate() on this collection
+    // expecting that meaning, so the warning is noise.
+    suppressReservedKeysWarning: true,
   }
 );
 

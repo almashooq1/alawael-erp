@@ -30,7 +30,15 @@ const hr = require('./hr');
 const security = require('./security');
 
 // ─── Activated domains (substantial code) ────────────────────────────────────
-const _base = safeDomain('_base', './_base');
+// _base is a directory of base classes (BaseDomainModule, BaseService,
+// BaseRepository, ...), not a domain — there's no _base/index.js. Each
+// concrete domain requires its base classes directly via
+// `require('../_base/BaseDomainModule')`. We keep the placeholder
+// reference so the module exports key set stays stable for any consumer
+// iterating `Object.keys(domains)`, but resolve it to {} without trying
+// the require (which used to log "Failed to load domain '_base'" on
+// every boot).
+const _base = {};
 const aiRecommendations = safeDomain('ai-recommendations', './ai-recommendations');
 const arVr = safeDomain('ar-vr', './ar-vr');
 const assessments = safeDomain('assessments', './assessments');

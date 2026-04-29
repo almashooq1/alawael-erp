@@ -101,7 +101,17 @@ class EmailEventBridge {
   disconnect() {
     if (this._bus) {
       for (const { event, handler } of this._subscriptions) {
-        this._bus.removeListener(event, handler);
+        // Mirror the subscribe path: EventEmitter exposes removeListener/off,
+        // a custom bus may expose unsubscribe. Try in that order so a wrong
+        // bus shape (e.g. the module exports object) can't take the shutdown
+        // path down with it.
+        if (typeof this._bus.removeListener === 'function') {
+          this._bus.removeListener(event, handler);
+        } else if (typeof this._bus.off === 'function') {
+          this._bus.off(event, handler);
+        } else if (typeof this._bus.unsubscribe === 'function') {
+          this._bus.unsubscribe(event, handler);
+        }
       }
     }
     this._subscriptions = [];

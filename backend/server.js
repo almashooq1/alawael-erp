@@ -403,8 +403,8 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
     // Start the email event bridge (routes domain events to email delivery)
     const emailEventBridge = new EmailEventBridge(emailManager);
     try {
-      const systemIntegrationBus = require('./integration/systemIntegrationBus');
-      emailEventBridge.connect({ bus: systemIntegrationBus });
+      const { integrationBus } = require('./integration/systemIntegrationBus');
+      emailEventBridge.connect({ bus: integrationBus });
       logger.info('📧 Email Event Bridge connected to integration bus');
     } catch (_) {
       logger.info('📧 Email Event Bridge running in standalone mode (no integration bus)');

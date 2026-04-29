@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Socket Emitter Utility
  * أداة إرسال الأحداث عبر Socket.IO
@@ -49,7 +48,10 @@ function emitModuleKPIUpdate(moduleKey, data) {
       data,
       timestamp: new Date().toISOString(),
     });
-    logger.info(`[SocketEmitter] KPI update sent to module:${moduleKey}`);
+    // Successful broadcasts log at debug — these fire every 5s for 8 modules
+    // (~96 lines/min in production), which buries actionable signal in pm2
+    // tail. Errors below stay at .error so the on-call alerting still trips.
+    logger.debug(`[SocketEmitter] KPI update sent to module:${moduleKey}`);
     return true;
   } catch (error) {
     logger.error(`[SocketEmitter] Failed to emit KPI update for ${moduleKey}:`, error);
@@ -70,7 +72,9 @@ function emitDashboardUpdate(data) {
       ...data,
       timestamp: new Date().toISOString(),
     });
-    logger.info('[SocketEmitter] Dashboard update sent');
+    // Same reasoning as emitModuleKPIUpdate — successful 5s-tick broadcasts
+    // shouldn't fill the production INFO log.
+    logger.debug('[SocketEmitter] Dashboard update sent');
     return true;
   } catch (error) {
     logger.error('[SocketEmitter] Failed to emit dashboard update:', error);

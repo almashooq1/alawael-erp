@@ -96,7 +96,12 @@ setupAdminEndpoints(app, { isProd });
 try {
   mountAllRoutes(app, { authRateLimiter });
 } catch (err) {
-  logger.warn('[Routes] Some routes failed to mount:', err.message);
+  // Inline err.message into the message string — winston's default format
+  // drops the splat-style second argument, which made this line just say
+  // "[Routes] Some routes failed to mount:" with no actionable detail.
+  logger.warn(`[Routes] Some routes failed to mount: ${err.message}`, {
+    stack: err.stack,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -107,13 +112,15 @@ try {
   mountMessageQueueRoutes(app);
   mountMigrationRoutes(app);
 } catch (err) {
-  logger.warn('[Infrastructure] Some infrastructure routes failed to mount:', err.message);
+  logger.warn(`[Infrastructure] Some infrastructure routes failed to mount: ${err.message}`, {
+    stack: err.stack,
+  });
 }
 
 try {
   mountAllDomains(app);
 } catch (err) {
-  logger.warn('Domain mounting skipped:', err.message);
+  logger.warn(`Domain mounting skipped: ${err.message}`, { stack: err.stack });
 }
 app.get('/api/v2/domains/health', async (_req, res) => {
   try {
@@ -647,10 +654,14 @@ try {
         }
       }
     } catch (adminErr) {
-      logger.warn('[HrEmployeeAdmin] routes skipped:', adminErr.message);
+      logger.warn(`[HrEmployeeAdmin] routes skipped: ${adminErr.message}`, {
+        stack: adminErr.stack,
+      });
     }
   } catch (hrDashErr) {
-    logger.warn('[HrDashboard] routes skipped:', hrDashErr.message);
+    logger.warn(`[HrDashboard] routes skipped: ${hrDashErr.message}`, {
+      stack: hrDashErr.stack,
+    });
   }
 
   // Goal-suggestion engine — Phase 9 Commit 8. Returns ranked SMART

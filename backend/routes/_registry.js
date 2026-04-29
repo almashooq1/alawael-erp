@@ -179,8 +179,6 @@ const registerPhaseRoutes = require('./registries/phases.registry');
 
 // Features / Prompt Modules (~25 modules) — delegated to registries/features.registry.js
 const registerFeatureRoutes = require('./registries/features.registry');
-const safeError = require('../utils/safeError');
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /**
@@ -209,7 +207,16 @@ const safeMount = (app, paths, modulePath) => {
     routeHealth.mounted.push({ path: pathLabel, module: label });
     return true;
   } catch (err) {
-    routeHealth.failed.push({ path: pathLabel, module: String(modulePath), error: safeError(err) });
+    // safeError is the (res, err, context) HTTP-response helper — calling
+    // it here as `safeError(err)` was reading `.stack` off the second arg
+    // which was undefined, throwing inside the catch and bubbling all the
+    // way up to mountAllRoutes. That's why ~hundreds of downstream routes
+    // were silently aborted on every boot.
+    routeHealth.failed.push({
+      path: pathLabel,
+      module: String(modulePath),
+      error: err.message,
+    });
     logger.error(`[ROUTE FAIL] ${pathLabel} (${modulePath}): ${err.message}`);
     return false;
   }

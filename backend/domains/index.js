@@ -52,7 +52,7 @@ const teleRehab = safeDomain('tele-rehab', './tele-rehab');
 const timeline = safeDomain('timeline', './timeline');
 const workflow = safeDomain('workflow', './workflow');
 
-module.exports = {
+const _allDomains = {
   // Core (original)
   notifications,
   hr,
@@ -84,4 +84,60 @@ module.exports = {
   research, // clinical research
   // Workflow
   workflow, // intelligent workflow engine
+};
+
+// Walk every domain and call its `mount`/`register` hook (whichever the
+// domain exposes) on the Express app. Domains that don't expose either
+// are silently skipped — they're library-only at this point.
+function mountAllDomains(app) {
+  let mounted = 0;
+  for (const [name, domain] of Object.entries(_allDomains)) {
+    if (!domain || typeof domain !== 'object') continue;
+    const hook =
+      typeof domain.mount === 'function'
+        ? domain.mount
+        : typeof domain.register === 'function'
+          ? domain.register
+          : null;
+    if (!hook) continue;
+    try {
+      hook(app);
+      mounted++;
+    } catch (err) {
+      logger.warn(`[Domains] mount failed for "${name}": ${err.message}`);
+    }
+  }
+  if (mounted) logger.info(`[Domains] Mounted ${mounted} domain(s)`);
+  return mounted;
+}
+
+// Best-effort aggregate health check across every domain that exposes
+// a `health()`/`healthCheck()` method.
+async function healthCheckAll() {
+  const results = {};
+  for (const [name, domain] of Object.entries(_allDomains)) {
+    if (!domain || typeof domain !== 'object') continue;
+    const probe =
+      typeof domain.health === 'function'
+        ? domain.health
+        : typeof domain.healthCheck === 'function'
+          ? domain.healthCheck
+          : null;
+    if (!probe) {
+      results[name] = { status: 'unknown' };
+      continue;
+    }
+    try {
+      results[name] = (await probe()) || { status: 'ok' };
+    } catch (err) {
+      results[name] = { status: 'error', error: err.message };
+    }
+  }
+  return results;
+}
+
+module.exports = {
+  ..._allDomains,
+  mountAllDomains,
+  healthCheckAll,
 };

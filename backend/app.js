@@ -399,6 +399,10 @@ try {
         return null;
       }
     }
+    // Hoisted above dashboardService — TDZ-trap: the dashboardService
+    // factory reads `auditLogModel` in its arg object, so the const
+    // declaration must run first.
+    const auditLogModel = softRequire('./models/auditLog.model');
     const dashboardService = createHrDashboardService({
       certificationModel: softRequire('./models/hr/Certification'),
       employmentContractModel: softRequire('./models/hr/EmploymentContract'),
@@ -414,7 +418,6 @@ try {
       // security.suspicious_activity events tagged 'hr:anomaly'.
       auditLogModel: auditLogModel ? auditLogModel.AuditLog || auditLogModel : null,
     });
-    const auditLogModel = softRequire('./models/auditLog.model');
     const auditService = auditLogModel
       ? createHrAccessAuditService({
           auditLogModel: auditLogModel.AuditLog || auditLogModel,

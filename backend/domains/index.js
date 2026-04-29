@@ -89,20 +89,30 @@ const _allDomains = {
 // Walk every domain and call its `mount`/`register` hook (whichever the
 // domain exposes) on the Express app. Domains that don't expose either
 // are silently skipped — they're library-only at this point.
+//
+// BaseDomainModule subclasses require `.initialize()` before `.mount()`
+// — kick that off synchronously when present (the implementation only
+// `await`s when truly needed; the registerRoutes path is sync). We
+// keep .mount(app) as a method call so `this` stays bound.
 function mountAllDomains(app) {
   let mounted = 0;
   for (const [name, domain] of Object.entries(_allDomains)) {
     if (!domain || typeof domain !== 'object') continue;
-    const hook =
-      typeof domain.mount === 'function'
-        ? domain.mount
-        : typeof domain.register === 'function'
-          ? domain.register
-          : null;
-    if (!hook) continue;
     try {
-      hook(app);
-      mounted++;
+      // BaseDomainModule.initialize is async-flagged but its body runs
+      // synchronously (just registerRoutes + registerMiddleware). We
+      // call without await so `_initialized = true` lands before the
+      // next line — anything truly async needs an explicit boot phase.
+      if (typeof domain.initialize === 'function' && domain._initialized === false) {
+        domain.initialize();
+      }
+      if (typeof domain.mount === 'function') {
+        domain.mount(app);
+        mounted++;
+      } else if (typeof domain.register === 'function') {
+        domain.register(app);
+        mounted++;
+      }
     } catch (err) {
       logger.warn(`[Domains] mount failed for "${name}": ${err.message}`);
     }

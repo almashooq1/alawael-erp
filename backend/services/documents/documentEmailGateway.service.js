@@ -492,7 +492,7 @@ class DocumentEmailGatewayService extends EventEmitter {
     for (const rule of rules) {
       if (!this._matchConditions(rule.trigger.conditions, eventData)) continue;
       try {
-        const result = await this.send({
+        await this.send({
           documentId: eventData.documentId,
           to: rule.action.recipients,
           templateKey: rule.action.templateKey,

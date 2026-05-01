@@ -317,7 +317,7 @@ describe('KnowledgeCenterService', () => {
       };
       KnowledgeArticle.findById.mockResolvedValue(article);
 
-      const res = await svc.deleteComment('a1', 'c1', 'u1');
+      await svc.deleteComment('a1', 'c1', 'u1');
       expect(article.comments.pull).toHaveBeenCalledWith('c1');
     });
 

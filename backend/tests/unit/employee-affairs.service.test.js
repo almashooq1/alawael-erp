@@ -1520,7 +1520,7 @@ describe('updateEmployeeMOLData', () => {
     empDoc.mol = { workPermitNumber: 'OLD' };
     mockEmployee.findById.mockResolvedValue(empDoc);
 
-    const result = await service.updateEmployeeMOLData('emp1', { workPermitNumber: 'NEW' });
+    await service.updateEmployeeMOLData('emp1', { workPermitNumber: 'NEW' });
     expect(empDoc.mol.workPermitNumber).toBe('NEW');
     expect(empDoc.save).toHaveBeenCalled();
     expect(empDoc.toObject).toHaveBeenCalled();
@@ -1547,7 +1547,7 @@ describe('updateEmployeeSponsorshipData', () => {
     empDoc.sponsorship = { visaExpiry: '2025-01-01' };
     mockEmployee.findById.mockResolvedValue(empDoc);
 
-    const result = await service.updateEmployeeSponsorshipData('emp1', {
+    await service.updateEmployeeSponsorshipData('emp1', {
       visaExpiry: '2026-06-01',
     });
     expect(empDoc.sponsorship.visaExpiry).toBe('2026-06-01');

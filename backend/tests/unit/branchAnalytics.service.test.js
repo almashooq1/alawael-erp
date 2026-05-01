@@ -429,7 +429,7 @@ describe('branchAnalytics.service', () => {
       mockGetRecentLogs.mockResolvedValue([]);
       mockFindOneAndUpdate.mockImplementation((_f, upd) => Promise.resolve(upd.$set));
 
-      const result = await svc.buildDailySnapshot('BR01', {
+      await svc.buildDailySnapshot('BR01', {
         sessions: { completed: 20, completion_rate: 85 },
         patients: { attendance_rate: 88 },
         finance: { daily_revenue: 3000, mtd_revenue: 50000 },

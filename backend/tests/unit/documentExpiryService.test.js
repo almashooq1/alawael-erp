@@ -168,7 +168,7 @@ describe('DocumentExpiryService', () => {
         ownerId: 'u1',
         autoRenew: true,
       });
-      const res = await service.checkExpiry();
+      await service.checkExpiry();
       // The document should have been renewed
       const tracking = service.trackedDocuments.get('docAR');
       expect(tracking.renewalCount).toBe(1);

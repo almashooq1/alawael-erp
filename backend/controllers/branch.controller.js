@@ -526,7 +526,7 @@ exports.getBranchReports = async (req, res) => {
 exports.getBranchKPIs = async (req, res) => {
   try {
     const branchCode = req.branchCode || req.params.branch_code.toUpperCase();
-    const branch = await Branch.findOne({ code: branchCode }).lean();
+    await Branch.findOne({ code: branchCode }).lean();
 
     ok(res, {
       branch_code: branchCode,

@@ -315,7 +315,7 @@ describe('DisabilityAuthorityService', () => {
       it('bulk-writes 28 standards', async () => {
         CBAHIStandard.bulkWrite.mockResolvedValue({ upsertedCount: 28 });
 
-        const r = await Service.seedDefaultStandards();
+        await Service.seedDefaultStandards();
         const ops = CBAHIStandard.bulkWrite.mock.calls[0][0];
         expect(ops.length).toBe(28);
         expect(ops[0].updateOne.filter).toHaveProperty('standardCode');

@@ -180,7 +180,7 @@ describe('DatabaseReplicationService', () => {
       service.status.secondaries = [{ connected: true }];
       service.config.autoFailover = false;
 
-      const results = await service.performHealthCheck();
+      await service.performHealthCheck();
 
       expect(service.status.health).toBe('critical');
     });

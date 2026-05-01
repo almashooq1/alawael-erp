@@ -103,7 +103,7 @@ describe('NoorService', () => {
         toObject: jest.fn().mockReturnValue({ organization: 'ORG-2', credentials: {} }),
       };
       mockConfigCreate.mockResolvedValue(newCfg);
-      const res = await service.getConfig('ORG-2');
+      await service.getConfig('ORG-2');
       expect(mockConfigCreate).toHaveBeenCalled();
     });
   });
@@ -310,7 +310,7 @@ describe('NoorService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
       mockIEPFindById.mockResolvedValue(doc);
-      const res = await service.updateGoalProgress(
+      await service.updateGoalProgress(
         'IEP-1',
         0,
         { progressPercent: 50, status: 'in_progress' },

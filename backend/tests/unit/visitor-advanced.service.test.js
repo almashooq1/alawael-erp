@@ -182,7 +182,7 @@ describe('VisitorAdvancedService', () => {
     it('checks in a pre-registered visitor', async () => {
       const doc = makeDoc();
       Visitor.findById.mockReturnValue(Q(doc));
-      const r = await service.checkIn('v1', { badgeNumber: 'B-001' }, 'u1', 'مشرف');
+      await service.checkIn('v1', { badgeNumber: 'B-001' }, 'u1', 'مشرف');
       expect(doc.status).toBe('checked_in');
       expect(doc.checkInTime).toBeInstanceOf(Date);
       expect(doc.badgeNumber).toBe('B-001');

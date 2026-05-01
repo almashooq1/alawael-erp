@@ -221,7 +221,7 @@ class JourneyService {
 
     const fromPhase = episode.currentPhase;
 
-    const result = await workflowEngine.executeExceptionTransition(episode, toPhase, {
+    await workflowEngine.executeExceptionTransition(episode, toPhase, {
       userId,
       reason,
     });

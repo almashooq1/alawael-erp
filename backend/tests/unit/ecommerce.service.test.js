@@ -196,7 +196,7 @@ describe('EcommerceService', () => {
       Cart.findOne.mockReturnValue({ populate: jest.fn().mockResolvedValue(null) });
       const cartInst = { save: jest.fn().mockResolvedValue(true) };
       Cart.mockImplementation(() => cartInst);
-      const res = await EcommerceService.getCart('u1');
+      await EcommerceService.getCart('u1');
       expect(cartInst.save).toHaveBeenCalled();
     });
   });
@@ -208,7 +208,7 @@ describe('EcommerceService', () => {
       const cart = { items: [item], save: jest.fn().mockResolvedValue(true) };
       Cart.findOne.mockResolvedValue(cart);
 
-      const res = await EcommerceService.updateCartItem('u1', 'p1', 5);
+      await EcommerceService.updateCartItem('u1', 'p1', 5);
       expect(item.quantity).toBe(5);
     });
 
@@ -453,7 +453,7 @@ describe('EcommerceService', () => {
         Object.assign(logInst, data);
         return logInst;
       });
-      const res = await EcommerceService.logInventoryChange('p1', 'stock_in', 10, 'restock');
+      await EcommerceService.logInventoryChange('p1', 'stock_in', 10, 'restock');
       expect(logInst.save).toHaveBeenCalled();
     });
   });
@@ -480,7 +480,7 @@ describe('EcommerceService', () => {
       const q = global.__mkEcomQ();
       q.lean.mockResolvedValue([{ name: 'featured' }]);
       Product.find.mockReturnValue(q);
-      const res = await EcommerceService.getFeaturedProducts();
+      await EcommerceService.getFeaturedProducts();
       expect(Product.find).toHaveBeenCalledWith(expect.objectContaining({ isFeatured: true }));
     });
   });
@@ -542,7 +542,7 @@ describe('EcommerceService', () => {
         return logInst;
       });
 
-      const res = await EcommerceService.updateProductStock('p1', 3);
+      await EcommerceService.updateProductStock('p1', 3);
       expect(product.totalStock).toBe(7);
     });
 

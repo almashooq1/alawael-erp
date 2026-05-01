@@ -133,7 +133,7 @@ class InventoryEnhancedService {
 
   /** تعديل يدوي للمخزون */
   async adjust(itemId, warehouseId, newQuantity, reason, performedBy) {
-    const stock = await InventoryStock.findOneAndUpdate(
+    await InventoryStock.findOneAndUpdate(
       { itemId, warehouseId },
       { quantityOnHand: newQuantity },
       { upsert: true, new: true }

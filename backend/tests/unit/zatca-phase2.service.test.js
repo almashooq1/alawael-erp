@@ -236,11 +236,7 @@ describe('ZatcaPhase2Service', () => {
           requestID: 'req-123',
         },
       });
-      const result = await service.performOnboarding(
-        'branch-1',
-        { organizationName: 'Test' },
-        '123456'
-      );
+      await service.performOnboarding('branch-1', { organizationName: 'Test' }, '123456');
       expect(mockGenerateKeyPairSync).toHaveBeenCalled();
       expect(mockAxiosPost).toHaveBeenCalled();
       const url = mockAxiosPost.mock.calls[0][0];

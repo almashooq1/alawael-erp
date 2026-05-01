@@ -206,7 +206,7 @@ describe('Event Participation', () => {
     };
     EP.findById.mockReturnValue(CQ(mock));
 
-    const r = await svc.recordAttendance('ep1', { date: '2025-03-01', status: 'attended' });
+    await svc.recordAttendance('ep1', { date: '2025-03-01', status: 'attended' });
     expect(mock.attendanceRecords.length).toBe(1);
     expect(mock.save).toHaveBeenCalled();
   });
@@ -336,7 +336,7 @@ describe('Awareness Programs', () => {
     const mock = { workshops: [], save: jest.fn().mockResolvedValue({}) };
     AP.findById.mockReturnValue(CQ(mock));
 
-    const r = await svc.addWorkshop('ap1', { title: 'WS' });
+    await svc.addWorkshop('ap1', { title: 'WS' });
     expect(mock.workshops.length).toBe(1);
     expect(mock.save).toHaveBeenCalled();
   });
@@ -350,7 +350,7 @@ describe('Awareness Programs', () => {
     const mock = { materials: [], save: jest.fn().mockResolvedValue({}) };
     AP.findById.mockReturnValue(CQ(mock));
 
-    const r = await svc.addMaterial('ap1', { title: 'Mat' });
+    await svc.addMaterial('ap1', { title: 'Mat' });
     expect(mock.materials.length).toBe(1);
   });
 

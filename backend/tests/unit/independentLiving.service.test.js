@@ -137,7 +137,7 @@ describe('IndependentLivingService', () => {
         toObject: () => ({ _id: 'a1', updated: true }),
       };
       ADLAssessment.findById.mockImplementation(() => Q(doc));
-      const res = await ILS.updateAssessment('a1', { score: 5 });
+      await ILS.updateAssessment('a1', { score: 5 });
       expect(doc.save).toHaveBeenCalled();
     });
 
@@ -159,7 +159,7 @@ describe('IndependentLivingService', () => {
         toObject: () => ({ _id: 'a1', status: 'reviewed' }),
       };
       ADLAssessment.findById.mockImplementation(() => Q(doc));
-      const res = await ILS.reviewAssessment('a1', 'rev1', 'looks good');
+      await ILS.reviewAssessment('a1', 'rev1', 'looks good');
       expect(doc.save).toHaveBeenCalled();
     });
 
@@ -222,7 +222,7 @@ describe('IndependentLivingService', () => {
   /* ── Plans ───────────────────────────────────────────────────────── */
   describe('Plans', () => {
     test('createPlan — success', async () => {
-      const res = await ILS.createPlan({ beneficiaryId: 'b1' });
+      await ILS.createPlan({ beneficiaryId: 'b1' });
       expect(global.__ilSave).toHaveBeenCalled();
     });
 
@@ -250,7 +250,7 @@ describe('IndependentLivingService', () => {
         toObject: () => ({ _id: 'p1' }),
       };
       IndependentLivingPlan.findById.mockImplementation(() => Q(doc));
-      const res = await ILS.updatePlan('p1', { goal: 'new' });
+      await ILS.updatePlan('p1', { goal: 'new' });
       expect(doc.save).toHaveBeenCalled();
     });
 
@@ -267,7 +267,7 @@ describe('IndependentLivingService', () => {
   /* ── Progress ────────────────────────────────────────────────────── */
   describe('Progress', () => {
     test('recordProgress — success', async () => {
-      const res = await ILS.recordProgress({ planId: 'p1', note: 'good' });
+      await ILS.recordProgress({ planId: 'p1', note: 'good' });
       expect(global.__ilSave).toHaveBeenCalled();
     });
 
@@ -282,7 +282,7 @@ describe('IndependentLivingService', () => {
   /* ── Supported Housing ───────────────────────────────────────────── */
   describe('Supported Housing', () => {
     test('createHousingProgram — success', async () => {
-      const res = await ILS.createHousingProgram({ name: 'House1' });
+      await ILS.createHousingProgram({ name: 'House1' });
       expect(global.__ilSave).toHaveBeenCalled();
     });
 
@@ -309,7 +309,7 @@ describe('IndependentLivingService', () => {
         toObject: () => ({ _id: 'h1' }),
       };
       SupportedHousing.findById.mockImplementation(() => Q(doc));
-      const res = await ILS.updateHousingProgram('h1', { capacity: 5 });
+      await ILS.updateHousingProgram('h1', { capacity: 5 });
       expect(doc.save).toHaveBeenCalled();
     });
 

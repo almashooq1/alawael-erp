@@ -38,7 +38,7 @@ class NotificationEnhancedService {
     const rendered = template.render(locale, data);
 
     // إرسال عبر كل قناة
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       channels.map(ch => this._sendViaChannel(ch, recipient, rendered, template, data))
     );
 

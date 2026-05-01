@@ -123,7 +123,7 @@ describe('DatabaseMigrationService', () => {
     });
 
     it('includes description in options', async () => {
-      const result = await service.createMigration('test', { description: 'My test' });
+      await service.createMigration('test', { description: 'My test' });
       const content = mockFsPromises.writeFile.mock.calls[0][1];
       expect(content).toContain('My test');
     });

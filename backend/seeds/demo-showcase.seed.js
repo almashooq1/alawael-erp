@@ -723,7 +723,7 @@ module.exports = async function seedDemoShowcase({ dryRun = false, reset = false
   // ── Care plans (4, with goals) ────────────────────────────────────────
   for (let i = 0; i < 4; i++) {
     const ben = beneficiaries[i];
-    const plan = await CarePlan.create({
+    await CarePlan.create({
       beneficiary: ben._id,
       planNumber: `DEMO-CP-${2026}-${String(i + 1).padStart(4, '0')}`,
       startDate: new Date(Date.now() - 60 * 24 * 3600 * 1000),

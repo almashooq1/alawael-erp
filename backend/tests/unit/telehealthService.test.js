@@ -42,11 +42,9 @@ jest.mock('uuid', () => ({
 }));
 
 jest.mock('axios', () => ({
-  post: jest
-    .fn()
-    .mockResolvedValue({
-      data: { appointment_id: 'ext1', prescription_id: 'rx_ext1', status: 'issued' },
-    }),
+  post: jest.fn().mockResolvedValue({
+    data: { appointment_id: 'ext1', prescription_id: 'rx_ext1', status: 'issued' },
+  }),
 }));
 
 jest.mock('../../utils/logger', () => ({
@@ -246,7 +244,7 @@ describe('TelehealthService', () => {
         });
       TeleconsultationParticipant.updateMany.mockResolvedValue(undefined);
 
-      const result = await telehealthService.endConsultation('c1', {
+      await telehealthService.endConsultation('c1', {
         clinicalNotes: 'Good progress',
       });
 

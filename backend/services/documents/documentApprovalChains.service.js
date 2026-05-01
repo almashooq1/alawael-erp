@@ -334,7 +334,7 @@ class ApprovalChainsService {
 
     // Check delegation
     const actualApprover = userId;
-    const delegation = await Delegation.findOne({
+    await Delegation.findOne({
       toUser: userId,
       isActive: true,
       $and: [

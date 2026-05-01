@@ -145,7 +145,7 @@ describe('IncidentService', () => {
     test('updates and saves', async () => {
       const doc = makeDoc();
       Incident.findById.mockImplementation(() => Q(doc));
-      const result = await svc.updateIncident('inc-1', { title: 'Updated' }, 'user1');
+      await svc.updateIncident('inc-1', { title: 'Updated' }, 'user1');
       expect(doc.save).toHaveBeenCalled();
     });
 

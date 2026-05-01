@@ -259,7 +259,7 @@ describe('SaudiTaxService', () => {
       mockTFCountDocuments.mockResolvedValue(3);
       const data = { type: 'VAT', periodStart: '2025-01-01' };
       mockTFCreate.mockResolvedValue({ ...data, filingNumber: 'VAT-2025-0004' });
-      const res = await service.createTaxFiling(data, 'USER-1');
+      await service.createTaxFiling(data, 'USER-1');
       expect(data.filingNumber).toBe('VAT-2025-0004');
       expect(data.createdBy).toBe('USER-1');
     });

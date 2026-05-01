@@ -194,7 +194,7 @@ module.exports = async function seedPhase16Ops({
   bump('findings', 2);
 
   // Inspection 2: IN_PROGRESS
-  const inProgressInsp = await FacilityInspection.create({
+  await FacilityInspection.create({
     inspectionNumber: `DEMO-OPS-INSP-${Date.now()}-2`,
     facilityId: clinicFacility._id,
     branchId: branch._id,

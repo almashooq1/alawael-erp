@@ -540,7 +540,7 @@ describe('Scenario D: Route plan → publish → variance summary', () => {
     await svc.optimize(j._id, { minutesPerStop: 10 });
     await svc.assignVehicle(j._id, { vehicleId: 'v1', capabilities: [] });
     await svc.assignDriver(j._id, { driverId: 'd1' });
-    const published = await svc.publish(j._id);
+    await svc.publish(j._id);
 
     // One SLA activation per stop + ops.trip.scheduled emitted per stop.
     const stopActivations = slaEngine.calls.filter(

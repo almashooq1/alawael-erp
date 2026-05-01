@@ -218,7 +218,7 @@ describe('Research Service', () => {
 
     it('createOutcomeMeasure — adds createdBy', async () => {
       OutcomeMeasure.create.mockResolvedValue({ name: 'BI', createdBy: uid });
-      const r = await svc.createOutcomeMeasure({ name: 'BI' }, uid);
+      await svc.createOutcomeMeasure({ name: 'BI' }, uid);
       expect(OutcomeMeasure.create).toHaveBeenCalledWith({ name: 'BI', createdBy: uid });
     });
 
@@ -525,7 +525,7 @@ describe('Research Service', () => {
       ResearchDataExport.findByIdAndUpdate.mockReturnValue({
         lean: jest.fn().mockResolvedValue({ status: 'approved' }),
       });
-      const r = await svc.approveExport(fakeId, uid);
+      await svc.approveExport(fakeId, uid);
       const args = ResearchDataExport.findByIdAndUpdate.mock.calls[0];
       expect(args[1].status).toBe('approved');
       expect(args[1]['compliance.exportApprovedBy']).toBe(uid);

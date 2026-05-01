@@ -309,7 +309,7 @@ describe('LeaveService', () => {
         save: jest.fn().mockResolvedValue(true),
       };
       mockLeaveFindById.mockResolvedValue(doc);
-      const res = await leave.approveLeave('L1', 'ADMIN', 'overdue');
+      await leave.approveLeave('L1', 'ADMIN', 'overdue');
       expect(doc.status).toBe('مرفوض');
       expect(doc.rejectionReason).toBe('overdue');
     });

@@ -579,7 +579,7 @@ describe('Phase 17 E2E — full chain on one beneficiary', () => {
     const { services, bus } = bootE2E();
 
     // 1. Inquiry
-    const inq = await services.leadFunnel.createInquiry({
+    await services.leadFunnel.createInquiry({
       channel: 'walk_in',
       contactName: 'Test',
       subject: 'General support inquiry',

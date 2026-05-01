@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 /**
  * Config Module Tests
  * Tests for configuration files and database setup

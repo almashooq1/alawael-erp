@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-undef */
 /**
  * ⚡ Part 3 Improvements - Simple Verification Test
  * اختبار بسيط للتحقق من جميع تحسينات الجزء 3

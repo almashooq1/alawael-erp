@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 function createVehicleModelMock() {
   return {
     findById: jest.fn().mockResolvedValue({

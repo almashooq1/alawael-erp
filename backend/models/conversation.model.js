@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Conversation Model - Phase 3
  * نموذج المحادثات للدردشة الفورية
@@ -357,6 +356,7 @@ conversationSchema.pre('save', function (next) {
   next();
 });
 
-const Conversation = mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);
+const Conversation =
+  mongoose.models.Conversation || mongoose.model('Conversation', conversationSchema);
 
 module.exports = Conversation;

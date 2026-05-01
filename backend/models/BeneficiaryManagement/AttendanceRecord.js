@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AttendanceRecord.js - Attendance Tracking Model
  * Records daily attendance with alerts and analytics

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const inventorySchema = new mongoose.Schema({
@@ -7,7 +6,6 @@ const inventorySchema = new mongoose.Schema({
   category: { type: String },
   condition: { type: String, enum: ['NEW', 'GOOD', 'FAIR', 'POOR'], default: 'GOOD' },
 });
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 inventorySchema.index({ category: 1 });

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * VendorEvaluation Model — نموذج تقييم الموردين
  */

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * CivilPartnership Model — نموذج الشراكات مع منظمات المجتمع المدني
  *
@@ -197,4 +196,5 @@ civilPartnershipSchema.index({ startDate: 1, endDate: 1 });
 civilPartnershipSchema.index({ 'address.city': 1 });
 civilPartnershipSchema.index({ status: 1, createdAt: -1 });
 
-module.exports = mongoose.models.CivilPartnership || mongoose.model('CivilPartnership', civilPartnershipSchema);
+module.exports =
+  mongoose.models.CivilPartnership || mongoose.model('CivilPartnership', civilPartnershipSchema);

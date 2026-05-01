@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // Performance Optimization Service
 // نظام تحسين الأداء
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Performance Optimizer Utility
  * Implements caching, compression, and response optimization strategies

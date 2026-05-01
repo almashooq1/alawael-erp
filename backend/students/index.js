@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Student Management Module
  * وحدة إدارة الطلاب الشاملة لمراكز التأهيل

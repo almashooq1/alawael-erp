@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const transportRouteSchema = new mongoose.Schema(
@@ -407,4 +406,5 @@ transportRouteSchema.statics.findAvailable = function (date, type) {
   });
 };
 
-module.exports = mongoose.models.TransportRoute || mongoose.model('TransportRoute', transportRouteSchema);
+module.exports =
+  mongoose.models.TransportRoute || mongoose.model('TransportRoute', transportRouteSchema);

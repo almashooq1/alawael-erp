@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Civil Defense Integration Service
  * خدمة التكامل مع الدفاع المدني السعودي

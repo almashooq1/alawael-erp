@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const webhookDeliverySchema = new mongoose.Schema(
@@ -122,4 +121,5 @@ webhookDeliverySchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.WebhookDelivery || mongoose.model('WebhookDelivery', webhookDeliverySchema);
+module.exports =
+  mongoose.models.WebhookDelivery || mongoose.model('WebhookDelivery', webhookDeliverySchema);

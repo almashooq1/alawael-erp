@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // نموذج السجل الطبي للمستفيد
@@ -403,6 +402,7 @@ CaseManagementSchema.methods.getStatistics = function () {
   };
 };
 
-const CaseManagement = mongoose.models.CaseManagement || mongoose.model('CaseManagement', CaseManagementSchema);
+const CaseManagement =
+  mongoose.models.CaseManagement || mongoose.model('CaseManagement', CaseManagementSchema);
 
 module.exports = CaseManagement;

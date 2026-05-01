@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // ===================================
 // WebSocket Service - Real-time Updates
 // ===================================

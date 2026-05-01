@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * WhatsApp Service - خدمة الوتساب
  * Enterprise WhatsApp Business API Integration for Alawael ERP
@@ -1086,7 +1085,9 @@ class WhatsAppService {
    * Delay helper
    */
   delay(ms) {
-    return new Promise(resolve => { setTimeout(resolve, ms); });
+    return new Promise(resolve => {
+      setTimeout(resolve, ms);
+    });
   }
 
   /**

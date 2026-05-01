@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * FinancialTransaction.js - MongoDB Model for Financial Transactions
  * Records all financial transactions including debits and credits
@@ -335,4 +334,6 @@ FinancialTransactionSchema.statics.getAccountTransactions = function (
   }).sort({ transactionDate: 1 });
 };
 
-module.exports = mongoose.models.FinancialTransaction || mongoose.model('FinancialTransaction', FinancialTransactionSchema);
+module.exports =
+  mongoose.models.FinancialTransaction ||
+  mongoose.model('FinancialTransaction', FinancialTransactionSchema);

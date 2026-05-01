@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🚀 Performance & Load Testing Suite
  * مجموعة اختبارات الأداء والحمل الشاملة
@@ -318,7 +317,9 @@ perfDescribe('📊 Load Testing', () => {
       await Promise.allSettled(spikeRequests);
 
       // Wait a bit
-      await new Promise(resolve => { setTimeout(resolve, 1000); });
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      });
 
       // Send normal requests
       const normalRequests = Array.from({ length: 10 }, () =>
@@ -523,7 +524,9 @@ perfDescribe('🌻 Endurance Testing', () => {
 
       responses.push(res.status);
 
-      await new Promise(resolve => { setTimeout(resolve, interval); });
+      await new Promise(resolve => {
+        setTimeout(resolve, interval);
+      });
     }
 
     const successCount = responses.filter(s => [200, 404].includes(s)).length;

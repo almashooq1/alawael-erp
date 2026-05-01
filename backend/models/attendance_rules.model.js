@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Attendance Rules Model - نموذج قواعس الحضور الذكية
  * تحديد قواعس الحضور حسب القسم والرتبة والمشروع
@@ -456,4 +455,5 @@ attendanceRulesSchema.methods.getWorkingHoursInfo = function () {
   };
 };
 
-module.exports = mongoose.models.AttendanceRules || mongoose.model('AttendanceRules', attendanceRulesSchema);
+module.exports =
+  mongoose.models.AttendanceRules || mongoose.model('AttendanceRules', attendanceRulesSchema);

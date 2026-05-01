@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * IntegrationAssessment Model — نموذج قياس مستوى الاندماج الاجتماعي
  *
@@ -249,4 +248,6 @@ integrationAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.IntegrationAssessment || mongoose.model('IntegrationAssessment', integrationAssessmentSchema);
+module.exports =
+  mongoose.models.IntegrationAssessment ||
+  mongoose.model('IntegrationAssessment', integrationAssessmentSchema);

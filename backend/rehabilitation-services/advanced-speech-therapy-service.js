@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Speech Therapy Service for Disability Rehabilitation
  * خدمة التخاطب المتقدمة لتأهيل ذوي الإعاقة

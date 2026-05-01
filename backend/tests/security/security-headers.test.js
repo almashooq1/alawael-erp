@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 const request = require('supertest');
 const app = require('../../server');
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Workflow Engine - محرك سير العمل
  * Enterprise Workflow Automation for Alawael ERP

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نموذج جدولة ذكية - Smart Scheduler Model
  * يدير الجدولة الذكية تعتمد على التوفر والاحتياجات

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نموذج نظام التقييم المتقدم
  * Advanced Performance Evaluation System Model
@@ -221,4 +220,6 @@ PerformanceEvaluationSchema.methods.calculateOverallScore = function () {
   return this.summary.overallScore;
 };
 
-module.exports = mongoose.models.PerformanceEvaluation || mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);
+module.exports =
+  mongoose.models.PerformanceEvaluation ||
+  mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);

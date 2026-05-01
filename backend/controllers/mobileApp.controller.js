@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Mobile App Backend Controller
  * متحكم تطبيق الهاتف المحمول

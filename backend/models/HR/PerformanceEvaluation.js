@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Performance Evaluation Model (HR)
  * Modular, extensible performance evaluation for HR system
@@ -77,4 +76,6 @@ PerformanceEvaluationSchema.index({ employeeId: 1, 'evaluationPeriod.startDate':
 PerformanceEvaluationSchema.index({ status: 1 });
 PerformanceEvaluationSchema.index({ 'summary.overallRating': 1 });
 
-module.exports = mongoose.models.PerformanceEvaluation || mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);
+module.exports =
+  mongoose.models.PerformanceEvaluation ||
+  mongoose.model('PerformanceEvaluation', PerformanceEvaluationSchema);

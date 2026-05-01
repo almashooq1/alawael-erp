@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Snapshot of goal progress at a point in time

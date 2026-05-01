@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Rehabilitation Center Systems
  * أنظمة متقدمة لمراكز تأهيل ذوي الإعاقة
@@ -1677,34 +1676,44 @@ dischargePlanSchema.index({ beneficiary_id: 1, status: 1 });
 
 module.exports = {
   // نظام السلوك
-  BehaviorIncident: mongoose.models.BehaviorIncident || mongoose.model('BehaviorIncident', behaviorIncidentSchema),
+  BehaviorIncident:
+    mongoose.models.BehaviorIncident || mongoose.model('BehaviorIncident', behaviorIncidentSchema),
   BehaviorPlan: mongoose.models.BehaviorPlan || mongoose.model('BehaviorPlan', behaviorPlanSchema),
 
   // نظام التدريب المهني
-  VocationalProfile: mongoose.models.VocationalProfile || mongoose.model('VocationalProfile', vocationalProfileSchema),
+  VocationalProfile:
+    mongoose.models.VocationalProfile ||
+    mongoose.model('VocationalProfile', vocationalProfileSchema),
   JobCoachLog: mongoose.models.JobCoachLog || mongoose.model('JobCoachLog', jobCoachLogSchema),
 
   // نظام المتابعة المنزلية
   HomeProgram: mongoose.models.HomeProgram || mongoose.model('HomeProgram', homeProgramSchema),
 
   // نظام الأدوية
-  MedicationRecord: mongoose.models.MedicationRecord || mongoose.model('MedicationRecord', medicationRecordSchema),
+  MedicationRecord:
+    mongoose.models.MedicationRecord || mongoose.model('MedicationRecord', medicationRecordSchema),
 
   // نظام التوحد
-  AutismProfile: mongoose.models.AutismProfile || mongoose.model('AutismProfile', autismProfileSchema),
+  AutismProfile:
+    mongoose.models.AutismProfile || mongoose.model('AutismProfile', autismProfileSchema),
 
   // نظام العلاج
-  TherapySession: mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
+  TherapySession:
+    mongoose.models.TherapySession || mongoose.model('TherapySession', therapySessionSchema),
 
   // نظام التغذية
-  NutritionPlan: mongoose.models.NutritionPlan || mongoose.model('NutritionPlan', nutritionPlanSchema),
+  NutritionPlan:
+    mongoose.models.NutritionPlan || mongoose.model('NutritionPlan', nutritionPlanSchema),
 
   // نظام غرف الموارد
   ResourceRoom: mongoose.models.ResourceRoom || mongoose.model('ResourceRoom', resourceRoomSchema),
 
   // نظام الشهادات
-  StaffCertification: mongoose.models.StaffCertification || mongoose.model('StaffCertification', staffCertificationSchema),
+  StaffCertification:
+    mongoose.models.StaffCertification ||
+    mongoose.model('StaffCertification', staffCertificationSchema),
 
   // نظام الخروج
-  DischargePlan: mongoose.models.DischargePlan || mongoose.model('DischargePlan', dischargePlanSchema),
+  DischargePlan:
+    mongoose.models.DischargePlan || mongoose.model('DischargePlan', dischargePlanSchema),
 };

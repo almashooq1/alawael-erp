@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Branch-ERP Integration Service
  * خدمة تكامل الفروع مع نظام ERP

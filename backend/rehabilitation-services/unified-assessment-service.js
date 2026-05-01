@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Unified Assessment Service for Disability Rehabilitation
  * خدمة التقييم الموحد لتأهيل ذوي الإعاقة

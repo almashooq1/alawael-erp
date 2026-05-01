@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING INVOICE MODEL - نموذج الفاتورة المحاسبية
@@ -257,6 +256,7 @@ accountingInvoiceSchema.statics.generateInvoiceNumber = async function (prefix =
   return `${prefix}-${year}-${nextNumber.toString().padStart(4, '0')}`;
 };
 
-const AccountingInvoice = mongoose.models.AccountingInvoice || mongoose.model('AccountingInvoice', accountingInvoiceSchema);
+const AccountingInvoice =
+  mongoose.models.AccountingInvoice || mongoose.model('AccountingInvoice', accountingInvoiceSchema);
 
 module.exports = AccountingInvoice;

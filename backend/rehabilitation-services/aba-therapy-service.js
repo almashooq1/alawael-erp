@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Applied Behavior Analysis (ABA) Therapy Service
  * خدمة تحليل السلوك التطبيقي (ABA) لتأهيل ذوي الإعاقة

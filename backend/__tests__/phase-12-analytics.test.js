@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 /**
  * PHASE 12: ADVANCED ANALYTICS TESTS
  * Placeholder test suite - implementation in progress

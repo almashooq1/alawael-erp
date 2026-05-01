@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Animal-Assisted Therapy Service
  * خدمة العلاج بمساعدة الحيوانات لذوي الإعاقة

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Signature Model — Enhanced
  * نموذج التوقيع الإلكتروني — محسّن

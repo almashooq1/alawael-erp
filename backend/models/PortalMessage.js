@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * PortalMessage Model
  * نموذج الرسائل في بوابة المستفيد/ولي الأمر

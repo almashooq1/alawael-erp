@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Physical Therapy Service for Disability Rehabilitation
  * خدمة العلاج الطبيعي لتأهيل ذوي الإعاقة

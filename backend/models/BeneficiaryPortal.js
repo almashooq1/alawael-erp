@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Beneficiary Portal Models
  * نماذج بوابة المستفيدين الذكية

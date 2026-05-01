@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * FinancialSupport.js - Financial Support Model
  * Tracks financial aid requests and disbursements

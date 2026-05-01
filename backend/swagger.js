@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // ═══════════════════════════════════════════════════════════════
 // ALAWAEL ERP - API Documentation (Swagger/OpenAPI Setup)
 // Date: March 2, 2026

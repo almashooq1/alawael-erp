@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * EventParticipation Model — نموذج تتبع مشاركة المستفيدين في الفعاليات
  *
@@ -162,4 +161,6 @@ eventParticipationSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.EventParticipation || mongoose.model('EventParticipation', eventParticipationSchema);
+module.exports =
+  mongoose.models.EventParticipation ||
+  mongoose.model('EventParticipation', eventParticipationSchema);

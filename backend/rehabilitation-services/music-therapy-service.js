@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Music Therapy Service for Disability Rehabilitation
  * خدمة العلاج بالموسيقى لتأهيل ذوي الإعاقة

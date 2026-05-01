@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Multidisciplinary Team Coordination Models
  * نماذج نظام التنسيق متعدد التخصصات

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Vehicle Management Module - وحدة إدارة المركبات
  * Comprehensive Vehicle & Traffic Management for Saudi Arabia

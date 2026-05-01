@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Policy = require('../models/Policy');
 const PolicyAcknowledgement = require('../models/PolicyAcknowledgement');
 const { v4: uuidv4 } = require('uuid');

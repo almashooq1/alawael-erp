@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Smart Leave Request Model - نموذج طلبات الإجازات الذكية
  * مع نظام الموافقة الذكي والتنبيهات

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Cognitive Rehabilitation Service for Disability Rehabilitation
  * خدمة إعادة التأهيل المعرفي لذوي الإعاقة

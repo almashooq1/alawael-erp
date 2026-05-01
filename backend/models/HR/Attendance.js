@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Attendance Model (HR)
  * Modular, extensible attendance record for HR system

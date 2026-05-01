@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AL-AWAEL ERP — RATE LIMITING + WAF SERVICE
  * Phase 24 — حماية متقدمة ضد هجمات DDoS

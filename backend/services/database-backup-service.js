@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-unused-vars */
 /**
  * خدمة النسخ الاحتياطي - Database Backup Service
  * نظام الألوائل للتأهيل وإعادة التأهيل

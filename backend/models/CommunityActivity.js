@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * CommunityActivity Model — نموذج الأنشطة المجتمعية
  *
@@ -222,4 +221,5 @@ communityActivitySchema.virtual('isFull').get(function () {
 communityActivitySchema.set('toJSON', { virtuals: true });
 communityActivitySchema.set('toObject', { virtuals: true });
 
-module.exports = mongoose.models.CommunityActivity || mongoose.model('CommunityActivity', communityActivitySchema);
+module.exports =
+  mongoose.models.CommunityActivity || mongoose.model('CommunityActivity', communityActivitySchema);

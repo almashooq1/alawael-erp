@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Student Transport Routes - مسارات نقل الطلاب
  * API Endpoints for School Bus Management

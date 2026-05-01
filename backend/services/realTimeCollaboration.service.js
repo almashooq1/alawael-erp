@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * خدمة التعاون في الوقت الفعلي
  * Real-Time Collaboration Service

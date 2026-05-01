@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING EXPENSE CONTROLLER - متحكم المصروفات المحاسبية

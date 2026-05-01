@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * OpenTelemetry Integration - نظام التتبع الموزع
  * Professional APM Integration for Alawael ERP

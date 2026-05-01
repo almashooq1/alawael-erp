@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // backend/models/Incident.js
 // نموذج الحوادث الشامل
 // Comprehensive Incident Management Model

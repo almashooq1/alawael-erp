@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Residential Rehabilitation Service for Disability Rehabilitation
  * خدمة التأهيل السكني لذوي الإعاقة

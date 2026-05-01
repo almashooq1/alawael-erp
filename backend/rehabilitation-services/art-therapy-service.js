@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Art Therapy Service for Disability Rehabilitation
  * خدمة العلاج بالفنون لتأهيل ذوي الإعاقة

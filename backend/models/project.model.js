@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const ProjectSchema = new mongoose.Schema({
@@ -35,7 +34,6 @@ const ProjectSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: Date,
 });
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 ProjectSchema.index({ manager: 1 });

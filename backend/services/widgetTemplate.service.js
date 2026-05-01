@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Widget Template Service
  * خدمة قوالب الويدجت

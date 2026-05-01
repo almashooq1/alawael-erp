@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * Advanced Attendance Model - نموذج الحضور والانصراف المتقدم
  * مع ميزات ذكية متقدمة وتحليلات شاملة

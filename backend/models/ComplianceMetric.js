@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ComplianceMetric Model
  * ظ…ط¤ط´ط±ط§طھ ط§ظ„ط§ظ…طھط«ط§ظ„ ظˆط§ظ„ظ‚ظˆط§ظ†ظٹظ†
@@ -110,4 +109,5 @@ complianceMetricSchema.statics.getLatestMetrics = function (organizationId) {
   return this.find({ organizationId }).sort({ 'period.endDate': -1 }).limit(12);
 };
 
-module.exports = mongoose.models.ComplianceMetric || mongoose.model('ComplianceMetric', complianceMetricSchema);
+module.exports =
+  mongoose.models.ComplianceMetric || mongoose.model('ComplianceMetric', complianceMetricSchema);

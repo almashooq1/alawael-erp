@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 const IntegrationServiceClass = require('../services/integrationService');
 const Integration = require('../models/Integration');
 

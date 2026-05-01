@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const leadSchema = new mongoose.Schema(
@@ -38,7 +37,6 @@ const leadSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 leadSchema.index({ status: 1 });

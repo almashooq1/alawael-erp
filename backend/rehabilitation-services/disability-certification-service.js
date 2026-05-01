@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Disability Certification Service
  * خدمة تصنيف وتوثيق الإعاقة

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // backend/services/incidentService.js
 // خدمة إدارة الحوادث الشاملة
 // Comprehensive Incident Management Service

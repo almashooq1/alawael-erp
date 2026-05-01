@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Hydrotherapy (Aquatic Therapy) Service for Disability Rehabilitation
  * خدمة العلاج المائي لتأهيل ذوي الإعاقة

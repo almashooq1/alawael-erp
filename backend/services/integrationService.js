@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Integration = require('../models/Integration');
 const crypto = require('crypto');
 const logger = require('../utils/logger');

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Maintenance Issue Model - نموذج مشاكل وعيوب الصيانة
  *

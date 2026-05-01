@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const express = require('express');

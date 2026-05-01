@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Vehicle Management Service - خدمة إدارة المركبات
  * Comprehensive Fleet & Vehicle Management System

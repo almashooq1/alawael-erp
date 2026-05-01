@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🏛️ Compliance, GDPR & Data Privacy Testing Suite
  * مجموعة اختبارات الامتثال و GDPR وخصوصية البيانات

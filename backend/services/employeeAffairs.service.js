@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Employee Affairs Service - خدمة شؤون الموظفين
  *

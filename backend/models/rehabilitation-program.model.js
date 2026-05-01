@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Program Model
  * نموذج البرامج التأهيلية - Comprehensive Rehabilitation Management
@@ -544,4 +543,6 @@ rehabilitationProgramSchema.statics.getProgramOutcomes = async function (program
   };
 };
 
-module.exports = mongoose.models.RehabilitationProgram || mongoose.model('RehabilitationProgram', rehabilitationProgramSchema);
+module.exports =
+  mongoose.models.RehabilitationProgram ||
+  mongoose.model('RehabilitationProgram', rehabilitationProgramSchema);

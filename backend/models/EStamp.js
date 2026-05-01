@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Stamp Model — الختم الإلكتروني
  *

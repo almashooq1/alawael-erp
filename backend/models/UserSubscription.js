@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const userSubscriptionSchema = new mongoose.Schema(
@@ -207,4 +206,5 @@ userSubscriptionSchema.methods.cancelSubscription = function (reason) {
   return this.save();
 };
 
-module.exports = mongoose.models.UserSubscription || mongoose.model('UserSubscription', userSubscriptionSchema);
+module.exports =
+  mongoose.models.UserSubscription || mongoose.model('UserSubscription', userSubscriptionSchema);

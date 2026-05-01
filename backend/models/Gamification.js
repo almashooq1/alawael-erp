@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Badge Definition (Admin Configured)
@@ -49,5 +48,7 @@ const beneficiaryWalletSchema = new mongoose.Schema(
 
 module.exports = {
   Badge: mongoose.models.Badge || mongoose.model('Badge', badgeSchema),
-  BeneficiaryWallet: mongoose.models.BeneficiaryWallet || mongoose.model('BeneficiaryWallet', beneficiaryWalletSchema),
+  BeneficiaryWallet:
+    mongoose.models.BeneficiaryWallet ||
+    mongoose.model('BeneficiaryWallet', beneficiaryWalletSchema),
 };

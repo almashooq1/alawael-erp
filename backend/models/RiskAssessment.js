@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * RiskAssessment Model
  * تقييم وإدارة المخاطر المالية والتشغيلية
@@ -287,4 +286,5 @@ riskAssessmentSchema.statics.getTotalExposure = async function (organizationId) 
   return result[0]?.total || 0;
 };
 
-module.exports = mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema);
+module.exports =
+  mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema);

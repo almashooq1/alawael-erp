@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Dashboard Service - Phase 10 Advanced Reporting & Analytics
  * Manages dashboard creation, manipulation, and real-time data

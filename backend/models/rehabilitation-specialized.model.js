@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Specialized Rehabilitation Center Systems
  * أنظمة متخصصة لمراكز تأهيل ذوي الإعاقة
@@ -1142,11 +1141,14 @@ clinicalNoteSchema.index({ beneficiary_id: 1, 'note_info.session_date': -1 });
 
 module.exports = {
   // النقل
-  Transportation: mongoose.models.Transportation || mongoose.model('Transportation', transportationSchema),
+  Transportation:
+    mongoose.models.Transportation || mongoose.model('Transportation', transportationSchema),
 
   // التأمين والفوترة
-  InsuranceClaim: mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema),
-  BillingRecord: mongoose.models.BillingRecord || mongoose.model('BillingRecord', billingRecordSchema),
+  InsuranceClaim:
+    mongoose.models.InsuranceClaim || mongoose.model('InsuranceClaim', insuranceClaimSchema),
+  BillingRecord:
+    mongoose.models.BillingRecord || mongoose.model('BillingRecord', billingRecordSchema),
 
   // المتطوعين
   Volunteer: mongoose.models.Volunteer || mongoose.model('Volunteer', volunteerSchema),
@@ -1155,7 +1157,8 @@ module.exports = {
   Donation: mongoose.models.Donation || mongoose.model('Donation', donationSchema),
 
   // الإقامة
-  ResidentialUnit: mongoose.models.ResidentialUnit || mongoose.model('ResidentialUnit', residentialUnitSchema),
+  ResidentialUnit:
+    mongoose.models.ResidentialUnit || mongoose.model('ResidentialUnit', residentialUnitSchema),
 
   // الأنشطة
   Activity: mongoose.models.Activity || mongoose.model('Activity', activitySchema),

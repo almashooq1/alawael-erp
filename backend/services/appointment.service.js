@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * خدمة إدارة المواعيد والجلسات المتقدمة
  * Appointment & Session Enhanced Service

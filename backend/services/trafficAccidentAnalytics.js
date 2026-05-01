@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Traffic Accident Analytics Module - وحدة تحليل الحوادث المرورية
  * تحليلات متقدمة ورؤى حول الحوادث المرورية

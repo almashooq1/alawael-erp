@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * WITHHOLDING TAX MODEL - نموذج ضريبة الاستقطاع
@@ -84,4 +83,5 @@ const withholdingTaxSchema = new mongoose.Schema(
 withholdingTaxSchema.index({ status: 1, fiscalYear: 1 });
 withholdingTaxSchema.index({ beneficiaryName: 1 });
 
-module.exports = mongoose.models.WithholdingTax || mongoose.model('WithholdingTax', withholdingTaxSchema);
+module.exports =
+  mongoose.models.WithholdingTax || mongoose.model('WithholdingTax', withholdingTaxSchema);

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const courseSchema = new mongoose.Schema(
@@ -47,7 +46,6 @@ const courseSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 courseSchema.index({ instructor: 1 });

@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-unused-vars, no-constant-condition */
 const mongoose = require('mongoose');
 const db = require('../config/inMemoryDB');
 const logger = require('../utils/logger');

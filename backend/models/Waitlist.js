@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const waitlistSchema = new mongoose.Schema(
@@ -23,7 +22,6 @@ const waitlistSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 waitlistSchema.index({ beneficiary: 1 });

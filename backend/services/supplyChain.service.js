@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Supply Chain Management Service
  * نظام إدارة سلسلة التوريد

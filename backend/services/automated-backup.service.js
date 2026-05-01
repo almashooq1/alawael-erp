@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AL-AWAEL ERP — AUTOMATED BACKUP SYSTEM SERVICE
  * Phase 23 — نظام النسخ الاحتياطي التلقائي

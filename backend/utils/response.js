@@ -1,5 +1,5 @@
 // @deprecated — Prefer importing from 'errors/responseSystem' for new code
-/* eslint-disable no-unused-vars */
+
 /**
  * Response Helpers - مساعدات الاستجابة
  * Standardized API response utilities

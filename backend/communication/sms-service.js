@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * SMS Service - خدمة الرسائل النصية
  * Enterprise SMS for Alawael ERP

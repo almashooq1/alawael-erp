@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Gratuity Record Model - نموذج سجل مكافأة نهاية الخدمة
  *

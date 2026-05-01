@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Community Integration Service for Disability Rehabilitation
  * خدمة الدمج المجتمعي لتأهيل ذوي الإعاقة

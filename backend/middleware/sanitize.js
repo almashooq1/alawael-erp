@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoSanitize = require('express-mongo-sanitize');
 const { xss } = require('express-xss-sanitizer');
 const hpp = require('hpp');

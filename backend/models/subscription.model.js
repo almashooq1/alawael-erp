@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const useMock = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test';
@@ -55,15 +54,15 @@ if (!useMock) {
     cancelledAt: Date,
   });
 
-
-// ── Indexes ───────────────────────────────────────────────────────────────
-SubscriptionSchema.index({ userId: 1 });
-SubscriptionSchema.index({ status: 1 });
-SubscriptionSchema.index({ plan: 1 });
-SubscriptionSchema.index({ userId: 1, status: 1 });
-SubscriptionSchema.index({ nextBillingDate: 1 });
-SubscriptionSchema.index({ createdAt: -1 });
-  module.exports = mongoose.models.Subscription || mongoose.model('Subscription', SubscriptionSchema);
+  // ── Indexes ───────────────────────────────────────────────────────────────
+  SubscriptionSchema.index({ userId: 1 });
+  SubscriptionSchema.index({ status: 1 });
+  SubscriptionSchema.index({ plan: 1 });
+  SubscriptionSchema.index({ userId: 1, status: 1 });
+  SubscriptionSchema.index({ nextBillingDate: 1 });
+  SubscriptionSchema.index({ createdAt: -1 });
+  module.exports =
+    mongoose.models.Subscription || mongoose.model('Subscription', SubscriptionSchema);
 } else {
   class MockSubscription {
     constructor(data) {

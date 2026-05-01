@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 const puppeteer = require('puppeteer');
 
 describe('E2E smoke', () => {

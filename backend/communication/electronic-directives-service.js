@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Electronic Directives Service - نظام التوجيه الإلكتروني
  * Advanced directive management system for administrative communications

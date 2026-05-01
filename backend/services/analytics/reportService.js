@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Report Service - Phase 10 Report Generation & Export
  * Handles report creation, generation, and export functionality

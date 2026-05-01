@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const availabilitySlotSchema = new mongoose.Schema({
@@ -65,4 +64,6 @@ const therapistAvailabilitySchema = new mongoose.Schema(
 therapistAvailabilitySchema.index({ therapist: 1, 'recurringSchedule.isActive': 1 });
 therapistAvailabilitySchema.index({ updatedAt: -1 });
 
-module.exports = mongoose.models.TherapistAvailability || mongoose.model('TherapistAvailability', therapistAvailabilitySchema);
+module.exports =
+  mongoose.models.TherapistAvailability ||
+  mongoose.model('TherapistAvailability', therapistAvailabilitySchema);

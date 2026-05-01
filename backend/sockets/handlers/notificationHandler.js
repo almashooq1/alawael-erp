@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Notification Handler
  * معالج الإشعارات الفورية

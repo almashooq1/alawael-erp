@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * SSO (Single Sign-On) Service
  * نظام تسجيل الدخول الموحد المركزي

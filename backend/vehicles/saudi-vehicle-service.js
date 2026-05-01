@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Saudi Vehicle Management Service - خدمة إدارة المركبات السعودية
  * Enhanced for Saudi Arabia Requirements

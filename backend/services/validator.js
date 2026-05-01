@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Validation Service
  * Data validation, schema checking, and business rules

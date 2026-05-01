@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const disabilitySessionSchema = new mongoose.Schema(
@@ -90,4 +89,5 @@ disabilitySessionSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.DisabilitySession || mongoose.model('DisabilitySession', disabilitySessionSchema);
+module.exports =
+  mongoose.models.DisabilitySession || mongoose.model('DisabilitySession', disabilitySessionSchema);

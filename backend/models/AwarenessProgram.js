@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AwarenessProgram Model — نموذج برامج التوعية المجتمعية بحقوق ذوي الإعاقة
  *
@@ -266,4 +265,5 @@ awarenessProgramSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.AwarenessProgram || mongoose.model('AwarenessProgram', awarenessProgramSchema);
+module.exports =
+  mongoose.models.AwarenessProgram || mongoose.model('AwarenessProgram', awarenessProgramSchema);

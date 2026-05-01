@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نموذج تخطيط التعاقب الوظيفي
  * Succession Planning Model
@@ -249,4 +248,5 @@ SuccessionPlanSchema.methods.getBestCandidate = function () {
   })[0];
 };
 
-module.exports = mongoose.models.SuccessionPlan || mongoose.model('SuccessionPlan', SuccessionPlanSchema);
+module.exports =
+  mongoose.models.SuccessionPlan || mongoose.model('SuccessionPlan', SuccessionPlanSchema);

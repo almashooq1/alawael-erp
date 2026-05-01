@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const ApiKey = require('../models/ApiKey');
 const safeError = require('../utils/safeError');
 

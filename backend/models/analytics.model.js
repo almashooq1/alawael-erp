@@ -5,7 +5,7 @@
  * This file re-exports the canonical model for production,
  * and provides a mock class for test environments.
  */
-/* eslint-disable no-unused-vars */
+
 const { v4: uuidv4 } = require('uuid');
 
 const useMock = process.env.USE_MOCK_DB === 'true' || process.env.NODE_ENV === 'test';

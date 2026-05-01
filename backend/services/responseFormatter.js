@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Response Formatter Service
  * Standardized API responses with consistent formatting

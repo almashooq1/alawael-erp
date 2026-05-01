@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // aiNotificationService.js
 // خدمة الذكاء الاصطناعي للتنبيهات الذكية
 // مبدئيًا: تحليل بيانات الموظف واقتراح تنبيهات تلقائية

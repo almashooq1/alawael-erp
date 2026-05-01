@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Mobile Device Manager Service
  * خدمة إدارة الأجهزة المحمولة

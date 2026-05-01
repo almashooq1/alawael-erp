@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // نموذج قالب الخطاب الذكي
 const mongoose = require('mongoose');
 
@@ -41,7 +40,6 @@ const TemplateSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 TemplateSchema.index({ category: 1 });

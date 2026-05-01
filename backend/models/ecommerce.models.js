@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * E-Commerce Models
  * Product, Cart, and Order management for e-commerce functionality

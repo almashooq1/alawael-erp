@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Saudi Social Benefits Service for Disability Rehabilitation
  * خدمات الضمان الاجتماعي والمزايا للمستفيدين ذوي الإعاقة

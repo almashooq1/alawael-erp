@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-undef */
 /**
  * ===================================================================
  * ACCOUNTING PAYMENT MODEL - نموذج الدفعة المحاسبية
@@ -190,6 +190,7 @@ accountingPaymentSchema.methods.generateReceipt = async function () {
   };
 };
 
-const AccountingPayment = mongoose.models.AccountingPayment || mongoose.model('AccountingPayment', accountingPaymentSchema);
+const AccountingPayment =
+  mongoose.models.AccountingPayment || mongoose.model('AccountingPayment', accountingPaymentSchema);
 
 module.exports = AccountingPayment;

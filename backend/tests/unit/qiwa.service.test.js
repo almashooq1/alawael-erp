@@ -4,8 +4,6 @@
  * contracts, wages, WPS, Nitaqat, batch ops, cache, metrics, events, errors.
  */
 
-/* eslint-disable no-undef */
-
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
 const mockAxiosInstance = {

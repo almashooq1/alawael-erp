@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نموذج خطة التطوير الفردية
  * Development Plan Model
@@ -205,4 +204,5 @@ DevelopmentPlanSchema.methods.calculateProgress = function () {
   return this.progress.overallProgress;
 };
 
-module.exports = mongoose.models.DevelopmentPlan || mongoose.model('DevelopmentPlan', DevelopmentPlanSchema);
+module.exports =
+  mongoose.models.DevelopmentPlan || mongoose.model('DevelopmentPlan', DevelopmentPlanSchema);

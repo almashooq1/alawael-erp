@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🎭 End-to-End & Visual Testing Suite
  * مجموعة اختبارات E2E والاختبارات البصرية

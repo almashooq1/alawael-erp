@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * CounselingSession.js - Counseling Session Model
  * Tracks counseling sessions and interactions

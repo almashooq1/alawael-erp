@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * WhatsApp Models - نماذج قاعدة البيانات للوتساب
  */

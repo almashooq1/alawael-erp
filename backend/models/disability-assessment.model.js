@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Disability Assessment Model
  * نموذج تقييم الإعاقة - Comprehensive Assessment Metrics
@@ -810,4 +809,6 @@ disabilityAssessmentSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.models.DisabilityAssessment || mongoose.model('DisabilityAssessment', disabilityAssessmentSchema);
+module.exports =
+  mongoose.models.DisabilityAssessment ||
+  mongoose.model('DisabilityAssessment', disabilityAssessmentSchema);

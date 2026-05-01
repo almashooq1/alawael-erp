@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // backend/controllers/fcmController.js
 // إدارة تسجيل توكنات FCM للمستخدمين
 const User = require('../models/User');

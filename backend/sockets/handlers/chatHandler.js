@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Chat Handler
  * معالج الدردشة الفورية

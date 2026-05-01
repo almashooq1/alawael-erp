@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * RBAC Manager Service
  * خدمة مدير التحكم بالوصول القائم على الأدوار

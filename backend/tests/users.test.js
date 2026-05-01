@@ -1,8 +1,7 @@
-/* eslint-disable no-undef, no-unused-vars */
 // Ensure env variables for JWT during tests
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';
 process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh';
-/* eslint-disable no-undef */
+
 const request = require('supertest');
 const app = require('../server');
 

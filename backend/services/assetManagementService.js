@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Asset = require('../models/Asset');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');

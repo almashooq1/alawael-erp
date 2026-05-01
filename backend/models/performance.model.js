@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Performance Management Model
  * نموذج إدارة الأداء

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // ═══════════════════════════════════════════════════════════════
 // ALAWAEL ERP - RBAC Framework (Role-Based Access Control)
 // Core RBAC System for All Services

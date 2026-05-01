@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * نموذج المواعيد - Appointment Model
  * يدير مواعيد الاستشارات والفحوصات والمتابعات

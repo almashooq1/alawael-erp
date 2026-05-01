@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Assistive Technology Service for Disability Rehabilitation
  * خدمة التكنولوجيا المساعدة لتأهيل ذوي الإعاقة

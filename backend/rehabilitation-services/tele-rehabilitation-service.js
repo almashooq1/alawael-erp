@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Tele-Rehabilitation Service
  * خدمة التأهيل عن بعد (الرعاية الصحية عن بعد)

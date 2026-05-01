@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const shiftSchema = new mongoose.Schema(
@@ -13,7 +12,6 @@ const shiftSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 shiftSchema.index({ department: 1 });

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 // backend/controllers/incidentController.js
 // معالجات الحوادث
 // Incident Management Controllers

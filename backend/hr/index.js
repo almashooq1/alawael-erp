@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Saudi HR Module Index
  * فهرس وحدة الموارد البشرية السعودية

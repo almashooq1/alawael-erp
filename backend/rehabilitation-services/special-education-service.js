@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Special Education Service for Disability Rehabilitation
  * خدمة التربية الخاصة لتأهيل ذوي الإعاقة

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
@@ -39,7 +38,6 @@ const quizSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 questionSchema.index({ courseId: 1 });

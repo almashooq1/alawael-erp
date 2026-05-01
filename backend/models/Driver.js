@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Driver Model - نموذج السائق
  *

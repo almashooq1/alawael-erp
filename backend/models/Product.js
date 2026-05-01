@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -42,7 +41,6 @@ productSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 productSchema.index({ status: 1 });

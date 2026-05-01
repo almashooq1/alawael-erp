@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * 🔐 Security Service — خدمة إعدادات الأمان المتقدمة
  * AlAwael ERP — MFA, Sessions, Password, Security Policies, Activity Logs, Analytics

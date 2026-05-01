@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * SupportPlan.js - Support Plan Model
  * Comprehensive support planning and intervention tracking

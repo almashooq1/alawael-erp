@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Vehicle Routes - مسارات المركبات
  * API Endpoints for Vehicle Management

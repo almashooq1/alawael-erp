@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Webhook = require('../models/Webhook');
 const WebhookDelivery = require('../models/WebhookDelivery');
 const logger = require('../utils/logger');

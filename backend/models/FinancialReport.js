@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * FinancialReport Model
  * طھظ‚ط§ط±ظٹط± ظ…ط§ظ„ظٹط© ط´ط§ظ…ظ„ط© (ط§ظ„ظ…ظٹط²ط§ظ†ظٹط© - ظ‚ط§ط¦ظ…ط©
@@ -201,4 +200,5 @@ financialReportSchema.statics.getLatestReport = function (organizationId, report
   });
 };
 
-module.exports = mongoose.models.FinancialReport || mongoose.model('FinancialReport', financialReportSchema);
+module.exports =
+  mongoose.models.FinancialReport || mongoose.model('FinancialReport', financialReportSchema);

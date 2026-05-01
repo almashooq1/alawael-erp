@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 const jwt = require('jsonwebtoken');
 
 // Mock token blacklist so tests don't need Redis

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Document Model
  * نموذج إدارة المستندات - تخزين البيانات الوصفية للملفات

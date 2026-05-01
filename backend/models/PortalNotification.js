@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * PortalNotification Model
  * نموذج التنبيهات في بوابة المستفيد/ولي الأمر
@@ -433,4 +432,6 @@ PortalNotificationSchema.statics.createAndSend = async function (
   return notification.save();
 };
 
-module.exports = mongoose.models.PortalNotification || mongoose.model('PortalNotification', PortalNotificationSchema);
+module.exports =
+  mongoose.models.PortalNotification ||
+  mongoose.model('PortalNotification', PortalNotificationSchema);

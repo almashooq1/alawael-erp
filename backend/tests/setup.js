@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * إعداد Jest للاختبارات
  * Jest Setup Configuration
@@ -64,6 +63,9 @@ global.createMockUser = (overrides = {}) => {
   };
 };
 
-global.delay = ms => new Promise(resolve => { setTimeout(resolve, ms); });
+global.delay = ms =>
+  new Promise(resolve => {
+    setTimeout(resolve, ms);
+  });
 
 console.log('✅ Jest setup complete');

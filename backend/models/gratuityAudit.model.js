@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Gratuity Audit Trail Model - نموذج سجل تدقيق مكافأة نهاية الخدمة
  *
@@ -131,4 +130,5 @@ gratuityAuditSchema.index({
   status: 1,
 });
 
-module.exports = mongoose.models.GratuityAudit || mongoose.model('GratuityAudit', gratuityAuditSchema);
+module.exports =
+  mongoose.models.GratuityAudit || mongoose.model('GratuityAudit', gratuityAuditSchema);

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Achievement.js - Achievement & Recognition Model
  * Tracks certifications, awards, and achievements

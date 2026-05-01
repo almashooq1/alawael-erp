@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Traffic Accident Report Model - نموذج تقرير الحادثة المرورية
  * نموذج شامل ومتكامل لتقارير الحوادث المرورية
@@ -724,6 +723,8 @@ trafficAccidentReportSchema.statics.getSeverityDistribution = async function (fi
 };
 
 // Create the model
-const TrafficAccidentReport = mongoose.models.TrafficAccidentReport || mongoose.model('TrafficAccidentReport', trafficAccidentReportSchema);
+const TrafficAccidentReport =
+  mongoose.models.TrafficAccidentReport ||
+  mongoose.model('TrafficAccidentReport', trafficAccidentReportSchema);
 
 module.exports = TrafficAccidentReport;

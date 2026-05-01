@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const crypto = require('crypto');
 const logger = require('./logger');
 

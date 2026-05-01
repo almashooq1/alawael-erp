@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Email Models - نماذج البريد الإلكتروني
  * MongoDB models for email service

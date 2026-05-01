@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 /**
  * 🔐 Comprehensive Security Testing Suite
  * مجموعة اختبارات الأمان الشاملة

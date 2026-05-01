@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Maintenance Provider Model - نموذج مراكز ومزودي الصيانة
  *

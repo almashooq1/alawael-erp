@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-undef */
 const mongoose = require('mongoose');
 
 const communicationSchema = new mongoose.Schema(

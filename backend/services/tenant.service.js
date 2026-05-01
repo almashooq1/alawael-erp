@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Tenant Service
  * خدمة الالتزامات

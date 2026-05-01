@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AI Recommendations Controller
  * متحكم توصيات الذكاء الاصطناعي

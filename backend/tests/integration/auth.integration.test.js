@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 const request = require('supertest');
 const app = require('../../server');
 
@@ -11,7 +11,9 @@ describe('Auth integration', () => {
     try {
       jest.clearAllTimers();
       if (app && app.close) {
-        await new Promise(resolve => { app.close(resolve); })
+        await new Promise(resolve => {
+          app.close(resolve);
+        });
       }
     } catch (_err) {
       // Ignore cleanup errors

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Payroll Model (HR)
  * Modular, extensible payroll record for HR system

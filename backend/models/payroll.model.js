@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Payroll Model - Advanced Payroll System
  * نموذج الرواتب - نظام الرواتب المتقدم

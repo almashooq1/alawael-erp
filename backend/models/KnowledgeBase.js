@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Knowledge Article Schema
@@ -279,10 +278,15 @@ const knowledgeRatingSchema = new mongoose.Schema(
 );
 
 // Export Models
-const KnowledgeArticle = mongoose.models.KnowledgeArticle || mongoose.model('KnowledgeArticle', knowledgeArticleSchema);
-const KnowledgeCategory = mongoose.models.KnowledgeCategory || mongoose.model('KnowledgeCategory', knowledgeCategorySchema);
-const KnowledgeSearchLog = mongoose.models.KnowledgeSearchLog || mongoose.model('KnowledgeSearchLog', knowledgeSearchLogSchema);
-const KnowledgeRating = mongoose.models.KnowledgeRating || mongoose.model('KnowledgeRating', knowledgeRatingSchema);
+const KnowledgeArticle =
+  mongoose.models.KnowledgeArticle || mongoose.model('KnowledgeArticle', knowledgeArticleSchema);
+const KnowledgeCategory =
+  mongoose.models.KnowledgeCategory || mongoose.model('KnowledgeCategory', knowledgeCategorySchema);
+const KnowledgeSearchLog =
+  mongoose.models.KnowledgeSearchLog ||
+  mongoose.model('KnowledgeSearchLog', knowledgeSearchLogSchema);
+const KnowledgeRating =
+  mongoose.models.KnowledgeRating || mongoose.model('KnowledgeRating', knowledgeRatingSchema);
 
 module.exports = {
   KnowledgeArticle,

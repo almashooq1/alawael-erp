@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * ===================================================================
  * ACCOUNTING PAYMENT CONTROLLER - متحكم المدفوعات المحاسبية

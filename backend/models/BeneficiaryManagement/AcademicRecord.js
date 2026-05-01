@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * AcademicRecord.js - Academic History & Enrollment Model
  * Tracks academic progress, courses, and enrollment information

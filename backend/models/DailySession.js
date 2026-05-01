@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 const goalProgressSchema = new mongoose.Schema({
@@ -29,7 +28,6 @@ const dailySessionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
 
 // ── Indexes ───────────────────────────────────────────────────────────────
 goalProgressSchema.index({ student: 1 });

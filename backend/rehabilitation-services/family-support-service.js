@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Family Support Service for Disability Rehabilitation
  * خدمة دعم الأسرة لتأهيل ذوي الإعاقة

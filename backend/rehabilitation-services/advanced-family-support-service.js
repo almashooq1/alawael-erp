@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Advanced Family Support Service for Disability Rehabilitation
  * خدمة دعم الأسرة المتقدمة لتأهيل ذوي الإعاقة

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Rehabilitation Center Transport Service - خدمة نقل مراكز التأهيل
  * AI-Powered Transport Management for Disability Rehabilitation Centers

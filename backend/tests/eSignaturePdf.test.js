@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 /**
  * E-Signature PDF Routes — Backend Tests
  * اختبارات مسارات PDF للتوقيع الإلكتروني

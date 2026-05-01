@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Case Management Service for Disability Rehabilitation
  * خدمة إدارة الحالات لتأهيل ذوي الإعاقة

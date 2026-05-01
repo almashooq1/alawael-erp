@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Saudi Traffic Service - خدمة المرور السعودية الشاملة
  * Comprehensive Traffic Management for Saudi Arabia

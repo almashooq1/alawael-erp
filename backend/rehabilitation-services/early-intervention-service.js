@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Early Intervention Service for Disability Rehabilitation
  * خدمة التدخل المبكر لتأهيل ذوي الإعاقة

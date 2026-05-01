@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Security Log Model - نموذج سجل الأمان
  */

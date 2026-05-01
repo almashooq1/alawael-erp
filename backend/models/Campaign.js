@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Campaign Model — نموذج حملات التبرع
  */

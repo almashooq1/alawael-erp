@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Widget Manager Service
  * خدمة إدارة الويدجطs المخصصة للوحة المعلومات

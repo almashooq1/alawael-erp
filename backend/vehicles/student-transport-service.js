@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Student Transport Service - خدمة نقل الطلاب
  * Comprehensive School Bus Management System for Saudi Arabia

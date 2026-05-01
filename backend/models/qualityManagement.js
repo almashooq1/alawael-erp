@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const mongoose = require('mongoose');
 
 // Standard Schema - معايير الجودة
@@ -463,10 +462,15 @@ ComplianceTrackingSchema.index({ complianceLevel: 1 });
 QualityIndicatorSchema.index({ category: 1, status: 1 });
 
 const Standard = mongoose.models.Standard || mongoose.model('Standard', StandardSchema);
-const Accreditation = mongoose.models.Accreditation || mongoose.model('Accreditation', AccreditationSchema);
-const QualityAudit = mongoose.models.QualityAudit || mongoose.model('QualityAudit', QualityAuditSchema);
-const ComplianceTracking = mongoose.models.ComplianceTracking || mongoose.model('ComplianceTracking', ComplianceTrackingSchema);
-const QualityIndicator = mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', QualityIndicatorSchema);
+const Accreditation =
+  mongoose.models.Accreditation || mongoose.model('Accreditation', AccreditationSchema);
+const QualityAudit =
+  mongoose.models.QualityAudit || mongoose.model('QualityAudit', QualityAuditSchema);
+const ComplianceTracking =
+  mongoose.models.ComplianceTracking ||
+  mongoose.model('ComplianceTracking', ComplianceTrackingSchema);
+const QualityIndicator =
+  mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', QualityIndicatorSchema);
 
 module.exports = {
   Standard,

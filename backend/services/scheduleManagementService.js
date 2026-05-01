@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const Schedule = require('../models/Schedule');
 const logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');

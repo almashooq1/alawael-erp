@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Database Optimization & Indexes
  * تحسين قاعدة البيانات والفهارس

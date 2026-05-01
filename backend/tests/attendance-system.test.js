@@ -1,4 +1,4 @@
-/* eslint-disable no-undef, no-unused-vars */
+/* eslint-disable no-unused-vars */
 /**
  * Attendance System — Comprehensive Tests
  * ═══════════════════════════════════════════════════════════════════

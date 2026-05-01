@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Maintenance Schedule Model - نموذج جدول الصيانة
  *
@@ -233,4 +232,6 @@ MaintenanceScheduleSchema.virtual('successRate').get(function () {
   return 'N/A';
 });
 
-module.exports = mongoose.models.MaintenanceSchedule || mongoose.model('MaintenanceSchedule', MaintenanceScheduleSchema);
+module.exports =
+  mongoose.models.MaintenanceSchedule ||
+  mongoose.model('MaintenanceSchedule', MaintenanceScheduleSchema);

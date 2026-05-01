@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Saudi Vehicle Routes - مسارات المركبات السعودية
  * API Endpoints for Saudi Vehicle Management

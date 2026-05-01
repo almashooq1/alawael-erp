@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * HR Notification Service - خدمة الإشعارات المتقدمة
  * إدارة الإشعارات المتعددة القنوات للموارد البشرية

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Intelligent Rehabilitation Center Systems
  * أنظمة ذكية ومتقدمة لمراكز تأهيل ذوي الإعاقة
@@ -1191,28 +1190,45 @@ governmentIntegrationSchema.index({ 'entity_info.entity_type': 1, is_active: 1 }
 
 module.exports = {
   // الذكاء الاصطناعي
-  AIRecommendation: mongoose.models.AIRecommendation || mongoose.model('AIRecommendation', aiRecommendationSchema),
-  PredictiveModel: mongoose.models.PredictiveModel || mongoose.model('PredictiveModel', predictiveModelSchema),
-  PredictionResult: mongoose.models.PredictionResult || mongoose.model('PredictionResult', predictionResultSchema),
+  AIRecommendation:
+    mongoose.models.AIRecommendation || mongoose.model('AIRecommendation', aiRecommendationSchema),
+  PredictiveModel:
+    mongoose.models.PredictiveModel || mongoose.model('PredictiveModel', predictiveModelSchema),
+  PredictionResult:
+    mongoose.models.PredictionResult || mongoose.model('PredictionResult', predictionResultSchema),
 
   // إدارة المخاطر
-  RiskAssessment: mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema),
+  RiskAssessment:
+    mongoose.models.RiskAssessment || mongoose.model('RiskAssessment', riskAssessmentSchema),
 
   // الجودة والاعتماد
-  QualityIndicator: mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', qualityIndicatorSchema),
-  AccreditationStandard: mongoose.models.AccreditationStandard || mongoose.model('AccreditationStandard', accreditationStandardSchema),
+  QualityIndicator:
+    mongoose.models.QualityIndicator || mongoose.model('QualityIndicator', qualityIndicatorSchema),
+  AccreditationStandard:
+    mongoose.models.AccreditationStandard ||
+    mongoose.model('AccreditationStandard', accreditationStandardSchema),
 
   // الأبحاث
-  ResearchProject: mongoose.models.ResearchProject || mongoose.model('ResearchProject', researchProjectSchema),
+  ResearchProject:
+    mongoose.models.ResearchProject || mongoose.model('ResearchProject', researchProjectSchema),
 
   // التطوير المهني
-  TrainingProgram: mongoose.models.TrainingProgram || mongoose.model('TrainingProgram', trainingProgramSchema),
-  CompetencyAssessment: mongoose.models.CompetencyAssessment || mongoose.model('CompetencyAssessment', competencyAssessmentSchema),
+  TrainingProgram:
+    mongoose.models.TrainingProgram || mongoose.model('TrainingProgram', trainingProgramSchema),
+  CompetencyAssessment:
+    mongoose.models.CompetencyAssessment ||
+    mongoose.model('CompetencyAssessment', competencyAssessmentSchema),
 
   // الطوارئ
-  EmergencyProtocol: mongoose.models.EmergencyProtocol || mongoose.model('EmergencyProtocol', emergencyProtocolSchema),
-  EmergencyIncident: mongoose.models.EmergencyIncident || mongoose.model('EmergencyIncident', emergencyIncidentSchema),
+  EmergencyProtocol:
+    mongoose.models.EmergencyProtocol ||
+    mongoose.model('EmergencyProtocol', emergencyProtocolSchema),
+  EmergencyIncident:
+    mongoose.models.EmergencyIncident ||
+    mongoose.model('EmergencyIncident', emergencyIncidentSchema),
 
   // التكامل الحكومي
-  GovernmentIntegration: mongoose.models.GovernmentIntegration || mongoose.model('GovernmentIntegration', governmentIntegrationSchema),
+  GovernmentIntegration:
+    mongoose.models.GovernmentIntegration ||
+    mongoose.model('GovernmentIntegration', governmentIntegrationSchema),
 };

@@ -1,4 +1,3 @@
-/* eslint-disable no-undef, no-unused-vars */
 /**
  * Barcode API Testing Suite
  * Comprehensive test cases for all barcode endpoints

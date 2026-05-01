@@ -585,7 +585,7 @@ router.post('/aac/profiles', async (req, res) => {
 
 router.get('/aac/profiles/:beneficiaryId', async (req, res) => {
   try {
-    let profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
+    const profile = await AACProfile.findOne({ beneficiary_id: req.params.beneficiaryId });
     if (!profile) return res.status(404).json({ success: false, error: 'ملف AAC غير موجود' });
     res.json({ success: true, data: profile });
   } catch (err) {
@@ -741,7 +741,7 @@ router.get('/protocols/search/:beneficiaryId', async (req, res) => {
   try {
     // البحث عن بروتوكولات مناسبة للمستفيد بناءً على ملفه
     const { RecommendationReport } = mongoose.models;
-    let filter = { is_active: true };
+    const filter = { is_active: true };
 
     if (RecommendationReport) {
       const rec = await RecommendationReport.findOne({

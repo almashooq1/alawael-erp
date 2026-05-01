@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * Real-Time GPS Tracking WebSocket Service
  * خدمة WebSocket لتتبع GPS في الوقت الفعلي مع إشعارات حية

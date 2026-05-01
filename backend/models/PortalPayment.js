@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
 /**
  * PortalPayment Model
  * نموذج الدفعات في بوابة المستفيد/ولي الأمر
@@ -366,4 +365,5 @@ PortalPaymentSchema.pre('save', function () {
   this.updatedAt = new Date();
 });
 
-module.exports = mongoose.models.PortalPayment || mongoose.model('PortalPayment', PortalPaymentSchema);
+module.exports =
+  mongoose.models.PortalPayment || mongoose.model('PortalPayment', PortalPaymentSchema);

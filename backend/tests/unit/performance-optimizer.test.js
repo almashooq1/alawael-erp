@@ -36,176 +36,176 @@ describe('performance-optimizer service', () => {
 
   test('cacheMiddleware is callable', async () => {
     if (!svc || typeof svc.cacheMiddleware !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.cacheMiddleware({});
+      _r = await svc.cacheMiddleware({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('then is callable', async () => {
     if (!svc || typeof svc.then !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.then({});
+      _r = await svc.then({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getCache is callable', async () => {
     if (!svc || typeof svc.getCache !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getCache({});
+      _r = await svc.getCache({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('setCache is callable', async () => {
     if (!svc || typeof svc.setCache !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.setCache({});
+      _r = await svc.setCache({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('clearCache is callable', async () => {
     if (!svc || typeof svc.clearCache !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.clearCache({});
+      _r = await svc.clearCache({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('compressResponse is callable', async () => {
     if (!svc || typeof svc.compressResponse !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.compressResponse({});
+      _r = await svc.compressResponse({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('decompressData is callable', async () => {
     if (!svc || typeof svc.decompressData !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.decompressData({});
+      _r = await svc.decompressData({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('batchQuery is callable', async () => {
     if (!svc || typeof svc.batchQuery !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.batchQuery({});
+      _r = await svc.batchQuery({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getPaginationParams is callable', async () => {
     if (!svc || typeof svc.getPaginationParams !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getPaginationParams({});
+      _r = await svc.getPaginationParams({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getIndexSuggestions is callable', async () => {
     if (!svc || typeof svc.getIndexSuggestions !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getIndexSuggestions({});
+      _r = await svc.getIndexSuggestions({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('generatePerformanceReport is callable', async () => {
     if (!svc || typeof svc.generatePerformanceReport !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.generatePerformanceReport({});
+      _r = await svc.generatePerformanceReport({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('calculateCacheHitRate is callable', async () => {
     if (!svc || typeof svc.calculateCacheHitRate !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.calculateCacheHitRate({});
+      _r = await svc.calculateCacheHitRate({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('lazyLoadData is callable', async () => {
     if (!svc || typeof svc.lazyLoadData !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.lazyLoadData({});
+      _r = await svc.lazyLoadData({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getCodeSplittingStrategy is callable', async () => {
     if (!svc || typeof svc.getCodeSplittingStrategy !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getCodeSplittingStrategy({});
+      _r = await svc.getCodeSplittingStrategy({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getImageOptimizations is callable', async () => {
     if (!svc || typeof svc.getImageOptimizations !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getImageOptimizations({});
+      _r = await svc.getImageOptimizations({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('monitorQueryPerformance is callable', async () => {
     if (!svc || typeof svc.monitorQueryPerformance !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.monitorQueryPerformance({});
+      _r = await svc.monitorQueryPerformance({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

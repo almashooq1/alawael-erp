@@ -60,7 +60,7 @@ function createSlaEngine({
   now = () => new Date(),
   intervalMs = DEFAULT_INTERVAL_MS,
   batchSize = DEFAULT_BATCH_SIZE,
-  businessHoursProvider = null, // optional: { isBusiness(date): boolean }
+  _businessHoursProvider = null, // optional: { isBusiness(date): boolean }
 } = {}) {
   // Validate the registry at boot so a bad edit fails loudly.
   registry.validate();

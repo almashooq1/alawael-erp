@@ -281,7 +281,7 @@ class DocumentKnowledgeGraphService {
 
   /* ─── Get Full Graph ──────────────────────────────────────── */
   async getFullGraph(options = {}) {
-    const { page = 1, limit = 100, category, department } = options;
+    const { _page = 1, limit = 100, category, department } = options;
     const nodeFilter = { isActive: true };
     if (category) nodeFilter['properties.category'] = category;
     if (department) nodeFilter['properties.department'] = department;

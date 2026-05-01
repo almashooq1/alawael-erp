@@ -156,253 +156,253 @@ describe('websocket.service service', () => {
 
   test('initialize is callable', async () => {
     if (typeof svc.initialize !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.initialize({});
+      _r = await svc.initialize({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('authenticateSocket is callable', async () => {
     if (typeof svc.authenticateSocket !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.authenticateSocket({});
+      _r = await svc.authenticateSocket({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('handleConnection is callable', async () => {
     if (typeof svc.handleConnection !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.handleConnection({});
+      _r = await svc.handleConnection({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('handleDisconnection is callable', async () => {
     if (typeof svc.handleDisconnection !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.handleDisconnection({});
+      _r = await svc.handleDisconnection({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('registerVehicleHandlers is callable', async () => {
     if (typeof svc.registerVehicleHandlers !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.registerVehicleHandlers({});
+      _r = await svc.registerVehicleHandlers({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('registerTripHandlers is callable', async () => {
     if (typeof svc.registerTripHandlers !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.registerTripHandlers({});
+      _r = await svc.registerTripHandlers({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('registerTrackingHandlers is callable', async () => {
     if (typeof svc.registerTrackingHandlers !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.registerTrackingHandlers({});
+      _r = await svc.registerTrackingHandlers({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitVehicleUpdate is callable', async () => {
     if (typeof svc.emitVehicleUpdate !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitVehicleUpdate({});
+      _r = await svc.emitVehicleUpdate({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitGPSUpdate is callable', async () => {
     if (typeof svc.emitGPSUpdate !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitGPSUpdate({});
+      _r = await svc.emitGPSUpdate({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitTripUpdate is callable', async () => {
     if (typeof svc.emitTripUpdate !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitTripUpdate({});
+      _r = await svc.emitTripUpdate({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitTripStarted is callable', async () => {
     if (typeof svc.emitTripStarted !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitTripStarted({});
+      _r = await svc.emitTripStarted({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitTripCompleted is callable', async () => {
     if (typeof svc.emitTripCompleted !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitTripCompleted({});
+      _r = await svc.emitTripCompleted({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitTripCancelled is callable', async () => {
     if (typeof svc.emitTripCancelled !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitTripCancelled({});
+      _r = await svc.emitTripCancelled({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitEmergencyAlert is callable', async () => {
     if (typeof svc.emitEmergencyAlert !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitEmergencyAlert({});
+      _r = await svc.emitEmergencyAlert({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('emitLowFuelWarning is callable', async () => {
     if (typeof svc.emitLowFuelWarning !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.emitLowFuelWarning({});
+      _r = await svc.emitLowFuelWarning({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('broadcastNotification is callable', async () => {
     if (typeof svc.broadcastNotification !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.broadcastNotification({});
+      _r = await svc.broadcastNotification({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getConnectionsCount is callable', async () => {
     if (typeof svc.getConnectionsCount !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getConnectionsCount({});
+      _r = await svc.getConnectionsCount({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getActiveConnections is callable', async () => {
     if (typeof svc.getActiveConnections !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getActiveConnections({});
+      _r = await svc.getActiveConnections({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('disconnectAll is callable', async () => {
     if (typeof svc.disconnectAll !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.disconnectAll({});
+      _r = await svc.disconnectAll({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('registerNotificationHandlers is callable', async () => {
     if (typeof svc.registerNotificationHandlers !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.registerNotificationHandlers({});
+      _r = await svc.registerNotificationHandlers({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('sendNotificationToUser is callable', async () => {
     if (typeof svc.sendNotificationToUser !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.sendNotificationToUser({});
+      _r = await svc.sendNotificationToUser({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('sendBulkNotifications is callable', async () => {
     if (typeof svc.sendBulkNotifications !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.sendBulkNotifications({});
+      _r = await svc.sendBulkNotifications({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('broadcastToAllUsers is callable', async () => {
     if (typeof svc.broadcastToAllUsers !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.broadcastToAllUsers({});
+      _r = await svc.broadcastToAllUsers({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

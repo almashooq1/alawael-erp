@@ -51,99 +51,99 @@ describe('trafficAccidentAnalytics service', () => {
 
   test('analyzeTimelineTrends is callable', async () => {
     if (typeof svc.analyzeTimelineTrends !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeTimelineTrends({});
+      _r = await svc.analyzeTimelineTrends({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeHotspots is callable', async () => {
     if (typeof svc.analyzeHotspots !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeHotspots({});
+      _r = await svc.analyzeHotspots({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeViolationPatterns is callable', async () => {
     if (typeof svc.analyzeViolationPatterns !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeViolationPatterns({});
+      _r = await svc.analyzeViolationPatterns({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeInjuryAndFatalityRates is callable', async () => {
     if (typeof svc.analyzeInjuryAndFatalityRates !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeInjuryAndFatalityRates({});
+      _r = await svc.analyzeInjuryAndFatalityRates({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeFinancialImpact is callable', async () => {
     if (typeof svc.analyzeFinancialImpact !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeFinancialImpact({});
+      _r = await svc.analyzeFinancialImpact({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getInvestigatorPerformance is callable', async () => {
     if (typeof svc.getInvestigatorPerformance !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getInvestigatorPerformance({});
+      _r = await svc.getInvestigatorPerformance({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('analyzeSeasonalTrends is callable', async () => {
     if (typeof svc.analyzeSeasonalTrends !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.analyzeSeasonalTrends({});
+      _r = await svc.analyzeSeasonalTrends({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('generateComprehensiveSummary is callable', async () => {
     if (typeof svc.generateComprehensiveSummary !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.generateComprehensiveSummary({});
+      _r = await svc.generateComprehensiveSummary({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('extractKeyInsights is callable', async () => {
     if (typeof svc.extractKeyInsights !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.extractKeyInsights({});
+      _r = await svc.extractKeyInsights({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

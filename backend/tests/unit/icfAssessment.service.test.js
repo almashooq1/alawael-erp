@@ -58,187 +58,187 @@ describe('icfAssessment.service service', () => {
 
   test('create static method is callable', async () => {
     if (!Svc || typeof Svc.create !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.create({});
+      _r = await Svc.create({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getById static method is callable', async () => {
     if (!Svc || typeof Svc.getById !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.getById({});
+      _r = await Svc.getById({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('list static method is callable', async () => {
     if (!Svc || typeof Svc.list !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.list({});
+      _r = await Svc.list({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('update static method is callable', async () => {
     if (!Svc || typeof Svc.update !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.update({});
+      _r = await Svc.update({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('changeStatus static method is callable', async () => {
     if (!Svc || typeof Svc.changeStatus !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.changeStatus({});
+      _r = await Svc.changeStatus({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('forEach static method is callable', async () => {
     if (!Svc || typeof Svc.forEach !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.forEach({});
+      _r = await Svc.forEach({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('compareWithPrevious static method is callable', async () => {
     if (!Svc || typeof Svc.compareWithPrevious !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.compareWithPrevious({});
+      _r = await Svc.compareWithPrevious({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getBeneficiaryTimeline static method is callable', async () => {
     if (!Svc || typeof Svc.getBeneficiaryTimeline !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.getBeneficiaryTimeline({});
+      _r = await Svc.getBeneficiaryTimeline({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('benchmarkAssessment static method is callable', async () => {
     if (!Svc || typeof Svc.benchmarkAssessment !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.benchmarkAssessment({});
+      _r = await Svc.benchmarkAssessment({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getStatistics static method is callable', async () => {
     if (!Svc || typeof Svc.getStatistics !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.getStatistics({});
+      _r = await Svc.getStatistics({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getDomainDistribution static method is callable', async () => {
     if (!Svc || typeof Svc.getDomainDistribution !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.getDomainDistribution({});
+      _r = await Svc.getDomainDistribution({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('searchCodes static method is callable', async () => {
     if (!Svc || typeof Svc.searchCodes !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.searchCodes({});
+      _r = await Svc.searchCodes({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getCodeTree static method is callable', async () => {
     if (!Svc || typeof Svc.getCodeTree !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.getCodeTree({});
+      _r = await Svc.getCodeTree({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('createBenchmark static method is callable', async () => {
     if (!Svc || typeof Svc.createBenchmark !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.createBenchmark({});
+      _r = await Svc.createBenchmark({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('listBenchmarks static method is callable', async () => {
     if (!Svc || typeof Svc.listBenchmarks !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.listBenchmarks({});
+      _r = await Svc.listBenchmarks({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('importBenchmarks static method is callable', async () => {
     if (!Svc || typeof Svc.importBenchmarks !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc.importBenchmarks({});
+      _r = await Svc.importBenchmarks({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('_calculateGapAnalysis static method is callable', async () => {
     if (!Svc || typeof Svc._calculateGapAnalysis !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await Svc._calculateGapAnalysis({});
+      _r = await Svc._calculateGapAnalysis({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

@@ -25,121 +25,121 @@ describe('offlineSyncManager.service service', () => {
 
   test('queueOperation is callable', async () => {
     if (typeof svc.queueOperation !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.queueOperation({});
+      _r = await svc.queueOperation({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('syncOperations is callable', async () => {
     if (typeof svc.syncOperations !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.syncOperations({});
+      _r = await svc.syncOperations({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getPendingOperations is callable', async () => {
     if (typeof svc.getPendingOperations !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getPendingOperations({});
+      _r = await svc.getPendingOperations({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('compressData is callable', async () => {
     if (typeof svc.compressData !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.compressData({});
+      _r = await svc.compressData({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('decompressData is callable', async () => {
     if (typeof svc.decompressData !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.decompressData({});
+      _r = await svc.decompressData({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('resolveConflict is callable', async () => {
     if (typeof svc.resolveConflict !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.resolveConflict({});
+      _r = await svc.resolveConflict({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getSyncHistory is callable', async () => {
     if (typeof svc.getSyncHistory !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getSyncHistory({});
+      _r = await svc.getSyncHistory({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getSyncStatus is callable', async () => {
     if (typeof svc.getSyncStatus !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getSyncStatus({});
+      _r = await svc.getSyncStatus({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('clearQueue is callable', async () => {
     if (typeof svc.clearQueue !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.clearQueue({});
+      _r = await svc.clearQueue({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('enableAutoSync is callable', async () => {
     if (typeof svc.enableAutoSync !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.enableAutoSync({});
+      _r = await svc.enableAutoSync({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('disableAutoSync is callable', async () => {
     if (typeof svc.disableAutoSync !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.disableAutoSync({});
+      _r = await svc.disableAutoSync({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

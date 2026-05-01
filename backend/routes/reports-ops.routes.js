@@ -139,7 +139,7 @@ function rateLimiterSnapshot(rateLimiter) {
   };
 }
 
-function buildRouter({ platform, DeliveryModel, ApprovalModel, catalog, logger = console } = {}) {
+function buildRouter({ platform, DeliveryModel, ApprovalModel, catalog, _logger = console } = {}) {
   const router = express.Router();
 
   router.get(

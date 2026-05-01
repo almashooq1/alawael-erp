@@ -29,12 +29,10 @@ jest.mock('mongoose', () => ({
     },
     collection: jest.fn().mockReturnValue({ stats: jest.fn().mockResolvedValue({}) }),
   },
-  model: jest
-    .fn()
-    .mockReturnValue({
-      find: jest.fn().mockResolvedValue([]),
-      countDocuments: jest.fn().mockResolvedValue(0),
-    }),
+  model: jest.fn().mockReturnValue({
+    find: jest.fn().mockResolvedValue([]),
+    countDocuments: jest.fn().mockResolvedValue(0),
+  }),
   Schema: mockSchema,
   Types: { ObjectId: jest.fn(v => v || 'mock-id') },
   connect: jest.fn().mockResolvedValue({}),
@@ -75,132 +73,132 @@ describe('HealthCheck service', () => {
 
   test('checkDatabaseHealth is callable', async () => {
     if (typeof svc.checkDatabaseHealth !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.checkDatabaseHealth({});
+      _r = await svc.checkDatabaseHealth({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('checkRedisHealth is callable', async () => {
     if (typeof svc.checkRedisHealth !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.checkRedisHealth({});
+      _r = await svc.checkRedisHealth({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('checkSystemResources is callable', async () => {
     if (typeof svc.checkSystemResources !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.checkSystemResources({});
+      _r = await svc.checkSystemResources({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('forEach is callable', async () => {
     if (typeof svc.forEach !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.forEach({});
+      _r = await svc.forEach({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('checkEndpointHealth is callable', async () => {
     if (typeof svc.checkEndpointHealth !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.checkEndpointHealth({});
+      _r = await svc.checkEndpointHealth({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('checkDatabaseCollections is callable', async () => {
     if (typeof svc.checkDatabaseCollections !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.checkDatabaseCollections({});
+      _r = await svc.checkDatabaseCollections({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('runFullHealthCheck is callable', async () => {
     if (typeof svc.runFullHealthCheck !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.runFullHealthCheck({});
+      _r = await svc.runFullHealthCheck({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('generateRecommendations is callable', async () => {
     if (typeof svc.generateRecommendations !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.generateRecommendations({});
+      _r = await svc.generateRecommendations({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getHealthHistory is callable', async () => {
     if (typeof svc.getHealthHistory !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getHealthHistory({});
+      _r = await svc.getHealthHistory({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('setupAutoHealthCheck is callable', async () => {
     if (typeof svc.setupAutoHealthCheck !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.setupAutoHealthCheck({});
+      _r = await svc.setupAutoHealthCheck({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getCurrentStatus is callable', async () => {
     if (typeof svc.getCurrentStatus !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getCurrentStatus({});
+      _r = await svc.getCurrentStatus({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('shutdown is callable', async () => {
     if (typeof svc.shutdown !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.shutdown({});
+      _r = await svc.shutdown({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

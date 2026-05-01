@@ -39,11 +39,11 @@ const _mockRes = () => {
 
 const _mockNext = jest.fn();
 
-let mw;
+let _mw;
 try {
-  mw = require('../../middleware/enhancedAudit.middleware');
+  _mw = require('../../middleware/enhancedAudit.middleware');
 } catch {
-  mw = null;
+  _mw = null;
 }
 
 describe('middleware/enhancedAudit.middleware.js', () => {

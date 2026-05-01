@@ -76,7 +76,7 @@ function makeSensoryItems() {
   return items;
 }
 
-function makePortageItems(chronoAge = 36) {
+function makePortageItems(_chronoAge = 36) {
   const domains = ['language', 'motor', 'cognitive', 'self_help', 'socialization'];
   const items = [];
   for (const domain of domains) {

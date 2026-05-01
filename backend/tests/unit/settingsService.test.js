@@ -54,77 +54,77 @@ describe('settingsService service', () => {
 
   test('getGroup is callable', async () => {
     if (!svc || typeof svc.getGroup !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getGroup({});
+      _r = await svc.getGroup({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getAllGroups is callable', async () => {
     if (!svc || typeof svc.getAllGroups !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getAllGroups({});
+      _r = await svc.getAllGroups({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('updateBulk is callable', async () => {
     if (!svc || typeof svc.updateBulk !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.updateBulk({});
+      _r = await svc.updateBulk({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('resetBranchSetting is callable', async () => {
     if (!svc || typeof svc.resetBranchSetting !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.resetBranchSetting({});
+      _r = await svc.resetBranchSetting({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('clearCache is callable', async () => {
     if (!svc || typeof svc.clearCache !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.clearCache({});
+      _r = await svc.clearCache({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getPublicSettings is callable', async () => {
     if (!svc || typeof svc.getPublicSettings !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getPublicSettings({});
+      _r = await svc.getPublicSettings({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('seedDefaultSettings is callable', async () => {
     if (!svc || typeof svc.seedDefaultSettings !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.seedDefaultSettings({});
+      _r = await svc.seedDefaultSettings({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

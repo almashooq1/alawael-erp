@@ -61,12 +61,10 @@ jest.mock('mongoose', () => ({
     },
     collection: jest.fn().mockReturnValue({ stats: jest.fn().mockResolvedValue({}) }),
   },
-  model: jest
-    .fn()
-    .mockReturnValue({
-      find: jest.fn().mockResolvedValue([]),
-      countDocuments: jest.fn().mockResolvedValue(0),
-    }),
+  model: jest.fn().mockReturnValue({
+    find: jest.fn().mockResolvedValue([]),
+    countDocuments: jest.fn().mockResolvedValue(0),
+  }),
   Schema: mockSchema,
   Types: { ObjectId: jest.fn(v => v || 'mock-id') },
   connect: jest.fn().mockResolvedValue({}),
@@ -96,66 +94,66 @@ describe('ticketSlaScheduler service', () => {
 
   test('startSlaScheduler is callable', async () => {
     if (!svc || typeof svc.startSlaScheduler !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.startSlaScheduler({});
+      _r = await svc.startSlaScheduler({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('stopSlaScheduler is callable', async () => {
     if (!svc || typeof svc.stopSlaScheduler !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.stopSlaScheduler({});
+      _r = await svc.stopSlaScheduler({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('manualSlaRun is callable', async () => {
     if (!svc || typeof svc.manualSlaRun !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.manualSlaRun({});
+      _r = await svc.manualSlaRun({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('runSlaChecks is callable', async () => {
     if (!svc || typeof svc.runSlaChecks !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.runSlaChecks({});
+      _r = await svc.runSlaChecks({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('calculateSlaDeadlines is callable', async () => {
     if (!svc || typeof svc.calculateSlaDeadlines !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.calculateSlaDeadlines({});
+      _r = await svc.calculateSlaDeadlines({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });
 
   test('getSlaStats is callable', async () => {
     if (!svc || typeof svc.getSlaStats !== 'function') return;
-    let r;
+    let _r;
     try {
-      r = await svc.getSlaStats({});
+      _r = await svc.getSlaStats({});
     } catch (e) {
-      r = e;
+      _r = e;
     }
     expect(true).toBe(true) /* ran without crash */;
   });

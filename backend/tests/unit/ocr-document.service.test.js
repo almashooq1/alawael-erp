@@ -1002,7 +1002,7 @@ describe('Batch processing', () => {
    ══════════════════════════════════════════════════════════════════════ */
 describe('searchDocuments()', () => {
   // Upload a fresh doc so its simulated extraction text is guaranteed present
-  let searchDocId;
+  let _searchDocId;
   beforeAll(() => {
     const d = service.uploadDocument(
       {
@@ -1013,7 +1013,7 @@ describe('searchDocuments()', () => {
       },
       'u-search'
     );
-    searchDocId = d.id;
+    _searchDocId = d.id;
   });
 
   it('finds documents matching Arabic query from simulated extraction', () => {
@@ -1083,7 +1083,7 @@ describe('searchDocuments()', () => {
 describe('Beneficiary documents', () => {
   describe('getBeneficiaryDocuments()', () => {
     const freshBenId = 'ben-bdt-' + Date.now();
-    let freshDocIds;
+    let _freshDocIds;
     beforeAll(() => {
       const d1 = service.uploadDocument(
         {
@@ -1101,7 +1101,7 @@ describe('Beneficiary documents', () => {
         },
         'u-bd2'
       );
-      freshDocIds = [d1.id, d2.id];
+      _freshDocIds = [d1.id, d2.id];
     });
 
     it('returns docs for beneficiary sorted by uploadedAt desc', () => {

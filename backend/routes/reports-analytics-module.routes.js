@@ -1960,7 +1960,7 @@ router.get('/stats', authenticate, requireBranchAccess, async (req, res) => {
 //  دالة مساعدة: تنفيذ التقرير
 // ══════════════════════════════════════════════════════════════════
 
-async function executeReport(template, parameters = {}, exportFormat = 'preview') {
+async function executeReport(template, parameters = {}, _exportFormat = 'preview') {
   const db = mongoose.connection.db;
   const { date_from, date_to, branch_id } = parameters;
 

@@ -50,7 +50,7 @@ function createRetentionService({
   beneficiary360Service,
   psychService = null,
   socialCaseService = null,
-  homeVisitService = null,
+  _homeVisitService = null,
   beneficiaryModel = null,
   dispatcher = null,
   logger = console,

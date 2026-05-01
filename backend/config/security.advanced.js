@@ -132,13 +132,19 @@ const securityHeaders = (req, res, next) => {
 // Request logging middleware. 4xx/5xx responses log at warn so they
 // surface in the warn-filtered tail; 2xx/3xx only log when LOG_LEVEL=debug
 // (a successful-request line per request would drown the file).
+//
+// Capture req.originalUrl up-front: by the time `res.on('finish')` fires
+// the URL may have been rewritten by sub-routers (Express resets req.url
+// when entering a mounted router), so `req.path` was logging "/" for
+// every request through /api/v1/*.
 const requestLogger = (req, res, next) => {
   const start = Date.now();
+  const originalUrl = req.originalUrl || req.url;
 
   res.on('finish', () => {
     const duration = Date.now() - start;
     const isWarning = res.statusCode >= 400;
-    const message = `${req.method} ${req.path} ${res.statusCode} ${duration}ms - ${req.ip}`;
+    const message = `${req.method} ${originalUrl} ${res.statusCode} ${duration}ms - ${req.ip}`;
 
     if (isWarning) {
       logger.warn(message);

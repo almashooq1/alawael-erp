@@ -214,7 +214,7 @@ describe('catalog drift — PERIODICITY_CRON', () => {
     let cron;
     try {
       cron = require('node-cron');
-    } catch (_) {
+    } catch {
       // node-cron not installed in this environment — skip soft.
       return;
     }

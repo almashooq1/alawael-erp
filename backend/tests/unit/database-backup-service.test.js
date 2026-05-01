@@ -146,7 +146,7 @@ describe('database-backup-service', () => {
       mockToArray.mockRejectedValueOnce(new Error('db fail'));
       try {
         await svc.createFullBackup();
-      } catch (e) {
+      } catch {
         /* expected */
       }
       expect(svc.isRunning).toBe(false);

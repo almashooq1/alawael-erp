@@ -11,7 +11,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -35,10 +40,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/auth.middleware'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/auth.middleware');
+} catch (e) {
+  mw = null;
+}
 
 describe('middleware/auth.middleware.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -58,11 +69,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.authenticateToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -75,11 +92,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.requireAdmin(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -92,11 +115,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.requireRole(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -109,11 +138,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.requirePermission(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -126,11 +161,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.requirePermissions(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -143,11 +184,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.optionalAuth(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -160,11 +207,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.extractToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -177,11 +230,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.verifyToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -194,11 +253,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.generateToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -211,11 +276,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.generateTokenWithSession(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -228,11 +299,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.refreshToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -245,11 +322,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.revokeToken(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -262,12 +345,17 @@ describe('middleware/auth.middleware.js', () => {
       const result = mw.authorizeRole(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

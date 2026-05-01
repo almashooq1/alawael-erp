@@ -25,30 +25,24 @@ const mockModelFn = jest.fn().mockImplementation(function (data) {
   this.save = jest.fn().mockResolvedValue(this);
   this.validate = jest.fn().mockResolvedValue(undefined);
 });
-mockModelFn.find = jest
-  .fn()
-  .mockReturnValue({
-    sort: jest.fn().mockReturnThis(),
-    limit: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    lean: jest.fn().mockResolvedValue([]),
-    exec: jest.fn().mockResolvedValue([]),
-    populate: jest.fn().mockReturnThis(),
-  });
-mockModelFn.findOne = jest
-  .fn()
-  .mockReturnValue({
-    lean: jest.fn().mockResolvedValue(null),
-    exec: jest.fn().mockResolvedValue(null),
-    populate: jest.fn().mockReturnThis(),
-  });
-mockModelFn.findById = jest
-  .fn()
-  .mockReturnValue({
-    lean: jest.fn().mockResolvedValue(null),
-    exec: jest.fn().mockResolvedValue(null),
-    populate: jest.fn().mockReturnThis(),
-  });
+mockModelFn.find = jest.fn().mockReturnValue({
+  sort: jest.fn().mockReturnThis(),
+  limit: jest.fn().mockReturnThis(),
+  skip: jest.fn().mockReturnThis(),
+  lean: jest.fn().mockResolvedValue([]),
+  exec: jest.fn().mockResolvedValue([]),
+  populate: jest.fn().mockReturnThis(),
+});
+mockModelFn.findOne = jest.fn().mockReturnValue({
+  lean: jest.fn().mockResolvedValue(null),
+  exec: jest.fn().mockResolvedValue(null),
+  populate: jest.fn().mockReturnThis(),
+});
+mockModelFn.findById = jest.fn().mockReturnValue({
+  lean: jest.fn().mockResolvedValue(null),
+  exec: jest.fn().mockResolvedValue(null),
+  populate: jest.fn().mockReturnThis(),
+});
 mockModelFn.create = jest.fn().mockResolvedValue({ _id: 'mock-id' });
 mockModelFn.countDocuments = jest.fn().mockResolvedValue(0);
 mockModelFn.schema = mockSchema;
@@ -84,7 +78,7 @@ jest.mock('mongoose', () => {
 let Model;
 try {
   Model = require('../../models/analytics.model');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

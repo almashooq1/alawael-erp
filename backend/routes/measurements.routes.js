@@ -79,7 +79,7 @@ router.post('/types', async (req, res) => {
       message: 'تم إنشاء نوع المقياس بنجاح',
       data: newType,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -128,7 +128,7 @@ router.post('/masters', async (req, res) => {
       message: 'تم إنشاء المقياس بنجاح',
       data: newMaster,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -173,7 +173,7 @@ router.post('/results/:beneficiaryId', async (req, res) => {
       message: 'تم تسجيل نتيجة القياس بنجاح وتم تفعيل البرامج المناسبة',
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -265,7 +265,7 @@ router.post('/:beneficiaryId', async (req, res) => {
       message: 'تم إنشاء خطة التأهيل الفردية بنجاح',
       data: plan,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -307,7 +307,7 @@ router.put('/:planId', async (req, res) => {
       message: 'تم تحديث خطة التأهيل بنجاح',
       data: updated,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -436,7 +436,7 @@ router.post('/sessions/:beneficiaryId/:programId', async (req, res) => {
       message: 'تم تسجيل الجلسة بنجاح',
       data: session,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -569,7 +569,7 @@ router.post('/quick-assessment/:beneficiaryId', async (req, res) => {
       message: 'تم حفظ التقييم السريع',
       data: assessment,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -649,7 +649,7 @@ router.put('/types/:id', async (req, res) => {
     }
 
     res.json({ success: true, message: 'تم تحديث نوع المقياس', data: updated });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -693,7 +693,7 @@ router.put('/masters/:id', async (req, res) => {
     }
 
     res.json({ success: true, message: 'تم تحديث المقياس', data: updated });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -749,7 +749,7 @@ router.post('/batch-assessment', async (req, res) => {
       data: results,
       errors: errors.length > 0 ? errors : undefined,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, error: 'خطأ في البيانات المدخلة' });
   }
 });

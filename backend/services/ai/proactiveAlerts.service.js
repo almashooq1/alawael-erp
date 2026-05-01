@@ -274,7 +274,7 @@ async function checkVacantSlots(branchId) {
         if (branchId) waitQuery.branch_id = branchId;
         waitingCount = await Waitlist.countDocuments(waitQuery);
       }
-    } catch (_) {
+    } catch {
       /* ignore */
     }
 

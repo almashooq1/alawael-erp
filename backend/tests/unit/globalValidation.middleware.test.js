@@ -11,7 +11,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -35,10 +40,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/globalValidation'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/globalValidation');
+} catch (e) {
+  mw = null;
+}
 
 describe('middleware/globalValidation.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -58,11 +69,17 @@ describe('middleware/globalValidation.js', () => {
       const result = mw.globalValidation(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -75,11 +92,17 @@ describe('middleware/globalValidation.js', () => {
       const result = mw.isValidObjectId(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -92,12 +115,17 @@ describe('middleware/globalValidation.js', () => {
       const result = mw.scanObject(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

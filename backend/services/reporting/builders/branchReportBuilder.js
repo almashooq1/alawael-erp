@@ -46,7 +46,7 @@ async function listSessions(Model, { start, end, branchId }) {
   if (branchId) filter.branchId = branchId;
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }
@@ -56,7 +56,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -70,7 +70,7 @@ async function loadBranch(ctx, scope) {
       name: b.name || null,
       capacity: b.capacity || null,
     };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }

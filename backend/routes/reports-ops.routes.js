@@ -43,7 +43,7 @@ async function countBy(Model, filter) {
   if (!Model || typeof Model.countDocuments !== 'function') return null;
   try {
     return await Model.countDocuments(filter);
-  } catch (_) {
+  } catch {
     return null;
   }
 }

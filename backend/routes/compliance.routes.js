@@ -22,17 +22,17 @@ try {
   const cc = require('../models/ComplianceControl');
   InternalControl = cc.InternalControl;
   ComplianceItem = cc.ComplianceItem;
-} catch (_e) {
+} catch {
   logger.warn('[Compliance] ComplianceControl model not loaded');
 }
 try {
   ComplianceLog = require('../models/ComplianceLog');
-} catch (_e) {
+} catch {
   /* optional */
 }
 try {
   ComplianceMetric = require('../models/ComplianceMetric');
-} catch (_e) {
+} catch {
   /* optional */
 }
 

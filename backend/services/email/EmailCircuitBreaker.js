@@ -237,7 +237,7 @@ class EmailCircuitBreaker {
     if (this._onStateChange) {
       try {
         this._onStateChange(oldState, newState);
-      } catch (_) {
+      } catch {
         /* callback errors must not break the breaker */
       }
     }

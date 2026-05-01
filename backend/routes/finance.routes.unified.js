@@ -29,37 +29,37 @@ try {
 let Account, JournalEntry, Expense, AccountingInvoice, CostCenter, FixedAsset, Transaction;
 try {
   Account = require('../models/Account');
-} catch (e) {
+} catch {
   logger.warn('[Finance] Account model not available');
 }
 try {
   JournalEntry = require('../models/JournalEntry');
-} catch (e) {
+} catch {
   logger.warn('[Finance] JournalEntry model not available');
 }
 try {
   Expense = require('../models/Expense');
-} catch (e) {
+} catch {
   logger.warn('[Finance] Expense model not available');
 }
 try {
   AccountingInvoice = require('../models/AccountingInvoice');
-} catch (e) {
+} catch {
   logger.warn('[Finance] AccountingInvoice model not available');
 }
 try {
   CostCenter = require('../models/CostCenter');
-} catch (e) {
+} catch {
   logger.warn('[Finance] CostCenter model not available');
 }
 try {
   FixedAsset = require('../models/FixedAsset');
-} catch (e) {
+} catch {
   logger.warn('[Finance] FixedAsset model not available');
 }
 try {
   Transaction = require('../models/Transaction');
-} catch (e) {
+} catch {
   logger.warn('[Finance] Transaction model not available');
 }
 
@@ -68,7 +68,7 @@ let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
-} catch (err) {
+} catch {
   logger.warn('[Finance Routes] RBAC module not available, using fallback');
   createRBACMiddleware = permission => (_req, _res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
@@ -1485,7 +1485,7 @@ router.put(
             })
             .catch(err => logger.error('Failed to send expense approval email:', err.message));
         }
-      } catch (_) {
+      } catch {
         /* user lookup failed, non-critical */
       }
     }
@@ -1533,7 +1533,7 @@ router.put(
             })
             .catch(err => logger.error('Failed to send expense rejection email:', err.message));
         }
-      } catch (_) {
+      } catch {
         /* user lookup failed, non-critical */
       }
     }

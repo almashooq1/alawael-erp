@@ -227,7 +227,7 @@ function bootstrapCare({ logger = console, dispatcher = null, slaEngine = null }
     let beneficiaryModel = null;
     try {
       beneficiaryModel = require('../models/Beneficiary');
-    } catch (_) {
+    } catch {
       /* optional */
     }
     beneficiary360Service = createBeneficiary360Service({
@@ -256,7 +256,7 @@ function bootstrapCare({ logger = console, dispatcher = null, slaEngine = null }
     let beneficiaryModel = null;
     try {
       beneficiaryModel = require('../models/Beneficiary');
-    } catch (_) {
+    } catch {
       /* optional */
     }
     if (beneficiary360Service) {

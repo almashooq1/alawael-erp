@@ -9,7 +9,11 @@ jest.mock('dns', () => ({}));
 jest.mock('util', () => ({}));
 
 let mod;
-try { mod = require('../../utils/urlValidator'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/urlValidator');
+} catch (e) {
+  /* load fail */
+}
 
 describe('utils/urlValidator', () => {
   test('module loads without crash', () => {
@@ -23,29 +27,46 @@ describe('utils/urlValidator', () => {
       if (typeof mod === 'function') instance = new mod();
       else if (mod.default && typeof mod.default === 'function') instance = new mod.default();
       else instance = mod;
-    } catch(e) { instance = mod; }
+    } catch {
+      instance = mod;
+    }
   });
 
   test('validateOutboundUrl exists and is callable', () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    if (typeof target.validateOutboundUrl !== 'function' && typeof target.prototype?.validateOutboundUrl !== 'function') return;
-    expect(typeof (target.validateOutboundUrl || target.prototype?.validateOutboundUrl)).toBe('function');
+    if (
+      typeof target.validateOutboundUrl !== 'function' &&
+      typeof target.prototype?.validateOutboundUrl !== 'function'
+    )
+      return;
+    expect(typeof (target.validateOutboundUrl || target.prototype?.validateOutboundUrl)).toBe(
+      'function'
+    );
   });
 
   test('validateOutboundUrl can be invoked without crash', async () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    const fn = target.validateOutboundUrl || (target.prototype && target.prototype.validateOutboundUrl);
+    const fn =
+      target.validateOutboundUrl || (target.prototype && target.prototype.validateOutboundUrl);
     if (typeof fn !== 'function') return;
-    try { await fn.call(target); } catch(e) { /* allowed */ }
+    try {
+      await fn.call(target);
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
   test('isIn172Private exists and is callable', () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    if (typeof target.isIn172Private !== 'function' && typeof target.prototype?.isIn172Private !== 'function') return;
+    if (
+      typeof target.isIn172Private !== 'function' &&
+      typeof target.prototype?.isIn172Private !== 'function'
+    )
+      return;
     expect(typeof (target.isIn172Private || target.prototype?.isIn172Private)).toBe('function');
   });
 
@@ -54,14 +75,22 @@ describe('utils/urlValidator', () => {
     const target = typeof instance === 'object' ? instance : mod;
     const fn = target.isIn172Private || (target.prototype && target.prototype.isIn172Private);
     if (typeof fn !== 'function') return;
-    try { await fn.call(target); } catch(e) { /* allowed */ }
+    try {
+      await fn.call(target);
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
   test('isPrivateIP exists and is callable', () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    if (typeof target.isPrivateIP !== 'function' && typeof target.prototype?.isPrivateIP !== 'function') return;
+    if (
+      typeof target.isPrivateIP !== 'function' &&
+      typeof target.prototype?.isPrivateIP !== 'function'
+    )
+      return;
     expect(typeof (target.isPrivateIP || target.prototype?.isPrivateIP)).toBe('function');
   });
 
@@ -70,8 +99,11 @@ describe('utils/urlValidator', () => {
     const target = typeof instance === 'object' ? instance : mod;
     const fn = target.isPrivateIP || (target.prototype && target.prototype.isPrivateIP);
     if (typeof fn !== 'function') return;
-    try { await fn.call(target); } catch(e) { /* allowed */ }
+    try {
+      await fn.call(target);
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -29,7 +29,7 @@ function findArabicFont(candidates = DEFAULT_FONT_CANDIDATES) {
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) return p;
-    } catch (_) {
+    } catch {
       /* ignore */
     }
   }
@@ -147,7 +147,7 @@ async function buildPdf(input, deps = {}) {
       }
       try {
         doc.text(line, { align: locale === 'en' ? 'left' : 'right' });
-      } catch (err) {
+      } catch {
         doc.text(line);
       }
     }

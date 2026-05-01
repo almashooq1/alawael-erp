@@ -398,7 +398,7 @@ class DocumentRealtimeEngine extends EventEmitter {
       }
 
       return { success: true, timestamp: new Date() };
-    } catch (err) {
+    } catch {
       return { success: false };
     }
   }

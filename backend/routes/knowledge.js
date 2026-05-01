@@ -219,7 +219,7 @@ router.post(
         message: 'Category created successfully',
         data: category,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -253,7 +253,7 @@ router.put(
         message: 'Category updated successfully',
         data: category,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -328,7 +328,7 @@ router.post(
         message: 'Article created successfully',
         data: article,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -389,7 +389,7 @@ router.post('/articles/:id/rate', authMiddleware, requireBranchAccess, async (re
       message: 'Rating saved successfully',
       data: ratingRecord,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -435,7 +435,7 @@ router.put(
         message: 'Article updated successfully',
         data: article,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -467,7 +467,7 @@ router.delete(
         success: true,
         message: 'Article deleted successfully',
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
     }
   }

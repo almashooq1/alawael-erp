@@ -596,7 +596,7 @@ class RateLimiter {
       if (client && client.status !== 'end') {
         this.redis = client;
       }
-    } catch (_e) {
+    } catch {
       this.redis = null;
     }
   }
@@ -627,7 +627,7 @@ class RateLimiter {
         return { allowed: false, remaining: 0, resetAt };
       }
       return { allowed: true, remaining: this.max - current, resetAt };
-    } catch (_e) {
+    } catch {
       // Redis failed mid-flight — fall back to memory
       return this._checkMemory(identifier);
     }

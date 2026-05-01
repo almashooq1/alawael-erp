@@ -309,7 +309,7 @@ router.get('/health', async (req, res) => {
         uptime: process.uptime(),
       },
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       success: false,
       data: {

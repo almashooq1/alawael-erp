@@ -223,7 +223,7 @@ class DatabaseAnalytics {
             capped: colStats.capped || false,
             sizeBytes: colStats.size,
           });
-        } catch (_) {
+        } catch {
           stats.push({ name: col.name, error: 'Unable to get stats' });
         }
       }
@@ -317,7 +317,7 @@ class DatabaseAnalytics {
               message: 'Missing _id index',
             });
           }
-        } catch (_) {
+        } catch {
           // Skip collections we can't analyze
         }
       }

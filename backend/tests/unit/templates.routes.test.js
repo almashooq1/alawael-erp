@@ -57,7 +57,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/templates.routes');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

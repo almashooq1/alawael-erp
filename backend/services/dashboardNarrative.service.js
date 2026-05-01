@@ -247,7 +247,7 @@ function generate({ dashboardId, kpiSnapshots, context } = {}) {
     let fired = false;
     try {
       fired = Boolean(rule.fires(ctx));
-    } catch (_) {
+    } catch {
       fired = false;
     }
     if (!fired) continue;

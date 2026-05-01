@@ -24,7 +24,7 @@ router.get('/structure', async (req, res) => {
       const Organization = require('../models/organization.model');
       const org = await Organization.findOne().lean();
       if (org) return res.json({ success: true, data: org });
-    } catch (_) {
+    } catch {
       /* model may not exist */
     }
 
@@ -59,7 +59,7 @@ router.get('/structure', async (req, res) => {
       const Branch = require('../models/Branch');
       const branches = await Branch.find().limit(200).lean();
       return res.json({ success: true, data: { name: 'مركز الأوائل للتأهيل', branches } });
-    } catch (_) {
+    } catch {
       return res.json({
         success: true,
         data: { name: 'مركز الأوائل للتأهيل', children: [] },

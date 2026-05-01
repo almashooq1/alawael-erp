@@ -304,7 +304,7 @@ class SchemaRegistry {
                 message: `Collection "${model.collection.collectionName}" does not exist yet`,
               });
             }
-          } catch (_) {
+          } catch {
             // Ignore
           }
         }

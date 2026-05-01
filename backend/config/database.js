@@ -396,7 +396,7 @@ const checkConnection = () => {
       return true;
     }
     return !!mongoose.connection && mongoose.connection.readyState === 1;
-  } catch (e) {
+  } catch {
     return false;
   }
 };
@@ -445,7 +445,7 @@ const getPoolMetrics = () => {
       maxPoolSize: parseInt(process.env.DB_POOL_SIZE) || 10,
       minPoolSize: 2,
     };
-  } catch (_err) {
+  } catch {
     return null;
   }
 };

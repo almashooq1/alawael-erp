@@ -21,7 +21,7 @@ router.post('/attendance/check-in', authenticateToken, requireBranchAccess, asyn
     });
 
     res.json(result);
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -32,32 +32,39 @@ router.post('/attendance/check-out', authenticateToken, requireBranchAccess, asy
     const result = await HRAttendanceService.recordCheckOut(req.user.employeeId, req.body);
 
     res.json(result);
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
 
 // جلب سجل الحضور الشهري
-router.get('/attendance/monthly-report', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month = new Date().getMonth() + 1, year = new Date().getFullYear() } = req.query;
+router.get(
+  '/attendance/monthly-report',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month = new Date().getMonth() + 1, year = new Date().getFullYear() } = req.query;
 
-    const report = await HRAttendanceService.getMonthlyAttendanceReport(
-      req.user.employeeId,
-      parseInt(month),
-      parseInt(year)
-    );
+      const report = await HRAttendanceService.getMonthlyAttendanceReport(
+        req.user.employeeId,
+        parseInt(month),
+        parseInt(year)
+      );
 
-    res.json(report);
-  } catch (error) {
-    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
+      res.json(report);
+    } catch {
+      res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
+    }
   }
-});
+);
 
 // جلب سجل موظف معين (للمديرين)
 router.get(
   '/attendance/employee/:employeeId/monthly',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -70,7 +77,7 @@ router.get(
       );
 
       res.json(report);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -79,7 +86,9 @@ router.get(
 // تحليل أنماط الغياب
 router.get(
   '/attendance/absence-patterns/:employeeId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -91,7 +100,7 @@ router.get(
       );
 
       res.json(analysis);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -100,7 +109,9 @@ router.get(
 // حساب الراتب مع الحضور
 router.get(
   '/attendance/salary-calculation/:employeeId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['finance', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -113,7 +124,7 @@ router.get(
       );
 
       res.json(salary);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -124,7 +135,9 @@ router.get(
 // طلب إجازة
 router.post(
   '/leave/request',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   validate([
     body('type').trim().notEmpty().withMessage('نوع الإجازة مطلوب'),
     body('startDate')
@@ -157,7 +170,7 @@ router.post(
       }
 
       res.json(result);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -166,7 +179,9 @@ router.post(
 // الموافقة على الإجازة
 router.patch(
   '/leave/:leaveId/approve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -176,7 +191,7 @@ router.patch(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -185,7 +200,9 @@ router.patch(
 // رفض الإجازة
 router.patch(
   '/leave/:leaveId/reject',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -195,7 +212,7 @@ router.patch(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -204,7 +221,9 @@ router.patch(
 // الحصول على الطلبات المعلقة
 router.get(
   '/leave/pending',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -217,7 +236,7 @@ router.get(
       });
 
       res.json(result);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -229,7 +248,7 @@ router.get('/leave/remaining-days', authenticateToken, requireBranchAccess, asyn
     const result = await HRAttendanceService.getRemainingLeaveDays(req.user.employeeId);
 
     res.json(result);
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -237,14 +256,16 @@ router.get('/leave/remaining-days', authenticateToken, requireBranchAccess, asyn
 // جلب أيام الإجازة المتبقية لموظف معين
 router.get(
   '/leave/remaining-days/:employeeId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
       const result = await HRAttendanceService.getRemainingLeaveDays(req.params.employeeId);
 
       res.json(result);
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }

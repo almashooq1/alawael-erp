@@ -323,7 +323,7 @@ class MultiTenantIsolator {
         try {
           const count = await db.collection(col.name).countDocuments({ [this._tenantField]: tid });
           totalDocs += count;
-        } catch (_) {
+        } catch {
           // skip
         }
       }

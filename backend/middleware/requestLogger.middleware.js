@@ -21,7 +21,7 @@ const { createChildLogger } = require('../utils/logger');
 function requestLoggerMiddleware(req, _res, next) {
   try {
     req.log = createChildLogger(req.id);
-  } catch (_err) {
+  } catch {
     // Fallback — ensure `req.log` always exists even if child logger fails
     req.log = require('../utils/logger');
   }

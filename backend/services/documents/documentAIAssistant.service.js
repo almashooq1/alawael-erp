@@ -281,7 +281,7 @@ class DocumentAIAssistantService {
 
     const scores = categories.map(cat => {
       let score = 0;
-      let matchedKeywords = [];
+      const matchedKeywords = [];
 
       for (const kw of cat.keywords || []) {
         if (content.includes(kw.toLowerCase())) {
@@ -296,7 +296,7 @@ class DocumentAIAssistantService {
       for (const pattern of cat.patterns || []) {
         try {
           if (new RegExp(pattern, 'i').test(content)) score += 3;
-        } catch (_) {
+        } catch {
           /* skip invalid regex pattern */
         }
       }
@@ -747,7 +747,7 @@ class DocumentAIAssistantService {
             createdAt: doc.createdAt,
           };
         }
-      } catch (_) {
+      } catch {
         /* best-effort: fall through to rule-based Q&A */
       }
     }
@@ -974,7 +974,7 @@ class DocumentAIAssistantService {
   async _log(data) {
     try {
       return await AIInteraction.create(data);
-    } catch (_) {
+    } catch {
       return null;
     }
   }

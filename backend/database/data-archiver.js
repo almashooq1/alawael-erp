@@ -340,7 +340,7 @@ class DataArchiver {
           sizeBytes: colStats.size,
           avgDocSize: colStats.avgObjSize || 0,
         });
-      } catch (_) {
+      } catch {
         stats.push({ collection: col.name, error: 'Unable to get stats' });
       }
     }
@@ -349,7 +349,7 @@ class DataArchiver {
     let recentOps = [];
     try {
       recentOps = await ArchiveMeta.find().sort({ createdAt: -1 }).limit(20).lean();
-    } catch (_) {
+    } catch {
       // ArchiveMeta might not exist yet
     }
 

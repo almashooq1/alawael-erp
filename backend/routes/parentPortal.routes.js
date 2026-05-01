@@ -274,7 +274,7 @@ router.post('/auth/logout', authenticate, async (req, res) => {
       await ParentDevice.updateOne({ deviceToken }, { isActive: false });
     }
     res.json({ success: true, message: 'تم تسجيل الخروج بنجاح' });
-  } catch (err) {
+  } catch {
     res.json({ success: true, message: 'تم تسجيل الخروج' });
   }
 });

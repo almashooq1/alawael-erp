@@ -54,7 +54,7 @@ jest.mock('../../middleware/auth', () => {
 let routeModule;
 try {
   routeModule = require('../../routes/zkteco.routes');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

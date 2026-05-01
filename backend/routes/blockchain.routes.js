@@ -75,7 +75,7 @@ router.post('/templates', async (req, res) => {
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: template });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -92,7 +92,7 @@ router.put('/templates/:id', async (req, res) => {
     );
     if (!template) return res.status(404).json({ success: false, error: 'القالب غير موجود' });
     res.json({ success: true, data: template });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -194,7 +194,7 @@ router.post('/certificates', async (req, res) => {
 
     const certificate = await BlockchainCertificate.create(certData);
     res.status(201).json({ success: true, data: certificate });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });

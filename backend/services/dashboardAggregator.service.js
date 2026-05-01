@@ -89,7 +89,7 @@ async function resolveOneKpi(kpiId, filters, resolver) {
   let resolved;
   try {
     resolved = await resolver(kpi, filters);
-  } catch (err) {
+  } catch {
     resolved = null;
   }
   const r = normaliseResolved(resolved);

@@ -367,7 +367,7 @@ class BackupRestoreManager {
     if (options.drop) {
       try {
         await db.collection(collectionName).drop();
-      } catch (_) {
+      } catch {
         // Collection may not exist
       }
     }
@@ -614,7 +614,7 @@ class BackupRestoreManager {
         const stat = fs.statSync(filePath);
         if (stat.isFile()) size += stat.size;
       }
-    } catch (_) {
+    } catch {
       // ignore
     }
     return size;

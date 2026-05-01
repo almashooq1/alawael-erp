@@ -149,7 +149,7 @@ router.post('/optimize', async (req, res) => {
         status: mongooseConnection.readyState === 1 ? 'healthy' : 'degraded',
         readyState: mongooseConnection.readyState,
       });
-    } catch (error) {
+    } catch {
       optimization.tasks.push({
         name: 'Database connection status',
         status: 'error',

@@ -626,7 +626,7 @@ class DocumentAuditService {
         isSuspicious: suspiciousPatterns.length > 0,
         reason: suspiciousPatterns.join(' | '),
       };
-    } catch (err) {
+    } catch {
       return { isSuspicious: false, reason: '' };
     }
   }

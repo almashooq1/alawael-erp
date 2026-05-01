@@ -316,14 +316,14 @@ router.post(
     const DailySession = (() => {
       try {
         return require('../models/DailySession');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
     const Goal = (() => {
       try {
         return require('../models/Goal');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
@@ -553,7 +553,7 @@ router.post(
     const DailySession = (() => {
       try {
         return require('../models/DailySession');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
@@ -594,7 +594,7 @@ router.post(
     const User = (() => {
       try {
         return require('../models/User');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
@@ -667,7 +667,7 @@ router.post(
       const Assessment = (() => {
         try {
           return require('../models/Assessment');
-        } catch (_) {
+        } catch {
           return null;
         }
       })();
@@ -685,7 +685,7 @@ router.post(
     const Goal = (() => {
       try {
         return require('../models/Goal');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
@@ -773,7 +773,7 @@ router.post(
     const Goal = (() => {
       try {
         return require('../models/Goal');
-      } catch (_) {
+      } catch {
         return null;
       }
     })();
@@ -840,7 +840,7 @@ async function buildKpiTrends(branchId, monthsBack) {
   const DailySession = (() => {
     try {
       return require('../models/DailySession');
-    } catch (_) {
+    } catch {
       return null;
     }
   })();
@@ -913,7 +913,7 @@ async function buildFinancialPrediction(branchId) {
       expected_attendance_rate: 80,
       note: 'تقدير تقريبي بناءً على المواعيد المجدولة',
     };
-  } catch (_) {
+  } catch {
     return { next_month_scheduled_sessions: 0, expected_attendance_rate: 80 };
   }
 }

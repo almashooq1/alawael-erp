@@ -452,7 +452,7 @@ function optimizeRoute(branchLocation, waypoints, startTime, options = {}) {
   }
   try {
     validateCoordinates(branchLocation.lat, branchLocation.lng);
-  } catch (_e) {
+  } catch {
     throw new Error('موقع الفرع غير صالح');
   }
 
@@ -473,7 +473,7 @@ function optimizeRoute(branchLocation, waypoints, startTime, options = {}) {
     }
     try {
       validateCoordinates(wp.lat, wp.lng);
-    } catch (_e) {
+    } catch {
       throw new Error('كل نقطة توقف يجب أن تحتوي على إحداثيات صالحة');
     }
   }

@@ -1,7 +1,12 @@
 'use strict';
 
 // Auto-generated unit test for middleware/branchScope.middleware.js
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer mock.jwt.token' },
@@ -12,7 +17,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -36,10 +46,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/branchScope.middleware'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/branchScope.middleware');
+} catch (e) {
+  mw = null;
+}
 
 describe('middleware/branchScope.middleware.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -59,11 +75,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.requireBranchAccess(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -76,11 +98,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.branchFilter(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -93,11 +121,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.branchId(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -110,11 +144,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.injectBranchToBody(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -127,11 +167,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.validateBranchExists(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -144,12 +190,17 @@ describe('middleware/branchScope.middleware.js', () => {
       const result = mw.CROSS_BRANCH_ROLES(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

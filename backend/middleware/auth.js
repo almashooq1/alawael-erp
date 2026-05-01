@@ -126,7 +126,7 @@ const optionalAuth = (req, res, next) => {
       }
       next();
     });
-  } catch (error) {
+  } catch {
     next();
   }
 };
@@ -298,7 +298,7 @@ const extractToken = req => {
 const verifyToken = token => {
   try {
     return jwt.verify(token, JWT_SECRET);
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -372,7 +372,7 @@ const refreshToken = (req, res) => {
     let refreshDecoded;
     try {
       refreshDecoded = jwt.verify(refreshTk, jwtRefreshSecret);
-    } catch (verifyErr) {
+    } catch {
       return res.status(403).json({
         success: false,
         error: 'Invalid or expired refresh token — please re-login',
@@ -395,7 +395,7 @@ const refreshToken = (req, res) => {
     let decoded;
     try {
       decoded = jwt.verify(accessToken, JWT_SECRET, { ignoreExpiration: true });
-    } catch (verifyErr) {
+    } catch {
       return res.status(403).json({ success: false, error: 'Invalid access token' });
     }
 

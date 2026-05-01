@@ -29,7 +29,7 @@ try {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;
   }
-} catch (e) {
+} catch {
   authenticateToken = (req, res, next) => next();
 }
 
@@ -820,7 +820,7 @@ router.get(
     let pendingSignatures = { total: 0 };
     try {
       pendingSignatures = await signatureService.getPendingSignatures(userId);
-    } catch (_) {}
+    } catch {}
 
     res.json({
       success: true,

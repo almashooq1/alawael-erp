@@ -135,7 +135,7 @@ router.post('/menu-items', async (req, res) => {
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: item });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -148,7 +148,7 @@ router.put('/menu-items/:id', async (req, res) => {
     });
     if (!item) return res.status(404).json({ success: false, error: 'عنصر القائمة غير موجود' });
     res.json({ success: true, data: item });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -237,7 +237,7 @@ router.post('/daily-menus', async (req, res) => {
       createdBy: req.user?._id,
     });
     res.status(201).json({ success: true, data: menu });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -250,7 +250,7 @@ router.put('/daily-menus/:id', async (req, res) => {
     });
     if (!menu) return res.status(404).json({ success: false, error: 'القائمة اليومية غير موجودة' });
     res.json({ success: true, data: menu });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -317,7 +317,7 @@ router.post('/meal-service', async (req, res) => {
   try {
     const record = await MealService.create(pick(req.body, MEAL_SERVICE_FIELDS));
     res.status(201).json({ success: true, data: record });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -330,7 +330,7 @@ router.put('/meal-service/:id', async (req, res) => {
     });
     if (!record) return res.status(404).json({ success: false, error: 'سجل الخدمة غير موجود' });
     res.json({ success: true, data: record });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -410,20 +410,24 @@ router.post('/inventory', async (req, res) => {
       lastRestocked: new Date(),
     });
     res.status(201).json({ success: true, data: item });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
 
 router.put('/inventory/:id', async (req, res) => {
   try {
-    const item = await KitchenInventory.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const item = await KitchenInventory.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });
@@ -438,7 +442,7 @@ router.patch('/inventory/:id/restock', async (req, res) => {
     );
     if (!item) return res.status(404).json({ success: false, error: 'عنصر المخزون غير موجود' });
     res.json({ success: true, data: item, message: 'تم إعادة التخزين بنجاح' });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false });
   }
 });

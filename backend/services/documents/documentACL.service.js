@@ -295,7 +295,7 @@ class DocumentACLService {
         if (ownerId === String(userId)) {
           return { allowed: true, source: 'owner' };
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
 
@@ -324,7 +324,7 @@ class DocumentACLService {
           sources.push({ type: 'owner', permissions: Object.keys(ACTIONS) });
           return { success: true, permissions: [...allPerms], sources, isOwner: true };
         }
-      } catch (e) {
+      } catch {
         /* ignore */
       }
 

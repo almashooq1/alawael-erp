@@ -145,7 +145,7 @@ async function integrationHealthComputer(kpi, ctx) {
       penalty += Math.max(0, (1 - replay) * 10);
     }
     return Math.max(0, Math.min(100, 100 - penalty));
-  } catch (_) {
+  } catch {
     return null;
   }
 }
@@ -167,7 +167,7 @@ async function redFlagsActiveComputer(_kpi, ctx) {
     if (typeof res.totals?.active === 'number') return res.totals.active;
     if (Array.isArray(res.flags)) return res.flags.length;
     return null;
-  } catch (_) {
+  } catch {
     return null;
   }
 }
@@ -360,7 +360,7 @@ function buildDashboardKpiResolver(options = {}) {
           value,
           t: clockNowMs(),
         });
-      } catch (_) {
+      } catch {
         // swallow — history is best-effort
       }
     }

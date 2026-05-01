@@ -149,7 +149,7 @@ async function liveVerifyInner({ nationalId }) {
       `${base}/insurance/v1/status?nationalId=${encodeURIComponent(nationalId)}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-  } catch (err) {
+  } catch {
     // Retry once on network error
     resp = await fetchWithTimeout(
       `${base}/insurance/v1/status?nationalId=${encodeURIComponent(nationalId)}`,

@@ -300,7 +300,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
             logger.info('🛡️ HR Anomaly Scheduler stopped');
           }
         });
-      } catch (_) {
+      } catch {
         /* gracefulShutdown may not be loaded yet */
       }
     } catch (err) {
@@ -363,7 +363,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
             logger.info('📋 Reporting Platform schedulers stopped');
           }
         });
-      } catch (_) {
+      } catch {
         // gracefulShutdown may not be loaded yet — that's OK
       }
     } catch (err) {
@@ -396,7 +396,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
       const { validateAndLog } = require('./services/email/EmailConfigValidator');
       const EmailConfig = require('./services/email/EmailConfig');
       validateAndLog(EmailConfig);
-    } catch (_) {
+    } catch {
       logger.info('📧 Email config validation skipped (validator not available)');
     }
 
@@ -406,7 +406,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
       const { integrationBus } = require('./integration/systemIntegrationBus');
       emailEventBridge.connect({ bus: integrationBus });
       logger.info('📧 Email Event Bridge connected to integration bus');
-    } catch (_) {
+    } catch {
       logger.info('📧 Email Event Bridge running in standalone mode (no integration bus)');
     }
 
@@ -455,7 +455,7 @@ const shouldSkipDBInit = isTestEnv && process.env.SMART_TEST_MODE === 'true';
           );
         }
       });
-    } catch (_) {
+    } catch {
       // gracefulShutdown may not be loaded yet — that's OK
     }
 

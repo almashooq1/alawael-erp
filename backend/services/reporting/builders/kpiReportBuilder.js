@@ -25,7 +25,7 @@ function loadRegistry(ctx) {
   if (ctx.models && ctx.models.kpiRegistry) return ctx.models.kpiRegistry;
   try {
     return require('../../../config/kpi.registry');
-  } catch (_) {
+  } catch {
     return null;
   }
 }
@@ -52,7 +52,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -61,7 +61,7 @@ async function loadBranch(ctx, scope) {
   try {
     const b = await Branch.findById(scope.id);
     return b ? { id: String(b._id || b.id || scope.id), name: b.name || null } : { id: scope.id };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }

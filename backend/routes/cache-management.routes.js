@@ -82,7 +82,7 @@ router.get('/cache/health', (req, res) => {
         hitRate: stats.hitRate,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       success: false,
       status: 'unhealthy',

@@ -54,7 +54,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/aiNotifications');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

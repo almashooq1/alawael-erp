@@ -239,7 +239,7 @@ router.post('/definitions/:id/clone', authMiddleware, requireBranchAccess, async
     const clone = new WorkflowDefinition(original);
     await clone.save();
     res.status(201).json({ success: true, data: clone, message: 'تم نسخ سير العمل' });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'حدث خطأ في النسخ' });
   }
 });
@@ -281,7 +281,7 @@ router.post('/definitions/import', authMiddleware, requireBranchAccess, async (r
     const def = new WorkflowDefinition(data);
     await def.save();
     res.status(201).json({ success: true, data: def, message: 'تم استيراد سير العمل' });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'خطأ في الاستيراد' });
   }
 });
@@ -838,7 +838,7 @@ router.post(
       });
       await def.save();
       res.status(201).json({ success: true, data: def, message: 'تم نشر القالب كسير عمل جديد' });
-    } catch (error) {
+    } catch {
       res.status(400).json({ success: false, message: 'حدث خطأ في النشر' });
     }
   }
@@ -952,7 +952,7 @@ router.post('/instances/:id/suspend', authMiddleware, requireBranchAccess, async
       comment: req.body.reason || 'تعليق سير العمل',
     });
     res.json({ success: true, data: instance, message: 'تم تعليق سير العمل' });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'حدث خطأ' });
   }
 });
@@ -971,7 +971,7 @@ router.post('/instances/:id/resume', authMiddleware, requireBranchAccess, async 
       comment: 'استئناف سير العمل',
     });
     res.json({ success: true, data: instance, message: 'تم استئناف سير العمل' });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'حدث خطأ' });
   }
 });

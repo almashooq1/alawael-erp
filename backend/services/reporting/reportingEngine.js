@@ -542,7 +542,7 @@ class ReportingEngine {
           try {
             delivery.markFailed(err.message);
             if (typeof delivery.save === 'function') await delivery.save();
-          } catch (_) {
+          } catch {
             /* ignore */
           }
           errors.push(`send crashed for ${r.id}/${channelName}: ${err.message}`);

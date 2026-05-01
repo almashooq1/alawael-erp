@@ -228,7 +228,7 @@ class DatabaseEventBus extends EventEmitter {
         // Remove from dead letters
         const idx = this._deadLetters.indexOf(dl);
         if (idx >= 0) this._deadLetters.splice(idx, 1);
-      } catch (_) {
+      } catch {
         // Still failing, leave in dead letters
       }
     }
@@ -284,7 +284,7 @@ class DatabaseEventBus extends EventEmitter {
               break;
             }
           }
-        } catch (_) {
+        } catch {
           // ignore
         }
 

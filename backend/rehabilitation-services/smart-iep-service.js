@@ -747,7 +747,7 @@ class SessionLogService {
               notes: goal.observations,
               session_number: data.session_number,
             });
-          } catch (err) {
+          } catch {
             // استمر حتى لو فشل تحديث أحد الأهداف
           }
         }

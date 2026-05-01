@@ -139,7 +139,7 @@ class SmartIndexOptimizer {
 
     try {
       indexStats = await collection.aggregate([{ $indexStats: {} }]).toArray();
-    } catch (_) {
+    } catch {
       // $indexStats may not be available in all environments
     }
 
@@ -502,7 +502,7 @@ class SmartIndexOptimizer {
                 this.projection?.() || {}
               );
             }
-          } catch (_) {
+          } catch {
             // Query tracking should never break the actual query
           }
         });

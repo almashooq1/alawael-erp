@@ -29,7 +29,7 @@ if (isTestEnv) {
     logger = advanced.logger;
     createChildLogger = advanced.createChildLogger || (() => logger);
     sanitizeLogData = advanced.sanitizeLogData || (data => data);
-  } catch (_err) {
+  } catch {
     // Fallback if winston isn't installed
     logger = {
       info: (message, ...args) => console.log(`[INFO] ${message}`, ...args),

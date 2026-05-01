@@ -58,7 +58,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/performance');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

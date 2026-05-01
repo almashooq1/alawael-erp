@@ -1,7 +1,12 @@
 'use strict';
 
 // Auto-generated unit test for middleware/advancedAuth.js
-jest.mock('../../utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+jest.mock('../../utils/logger', () => ({
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn(),
+}));
 jest.mock('../../utils/safeError', () => ({}));
 
 const mockReq = (overrides = {}) => ({
@@ -13,7 +18,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -37,10 +47,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/advancedAuth'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/advancedAuth');
+} catch (e) {
+  mw = null;
+}
 
 describe('middleware/advancedAuth.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -60,11 +76,17 @@ describe('middleware/advancedAuth.js', () => {
       const result = mw.authenticate(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -77,11 +99,17 @@ describe('middleware/advancedAuth.js', () => {
       const result = mw.optionalAuth(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -94,11 +122,17 @@ describe('middleware/advancedAuth.js', () => {
       const result = mw.authorize(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -111,11 +145,17 @@ describe('middleware/advancedAuth.js', () => {
       const result = mw.checkPermission(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -128,12 +168,17 @@ describe('middleware/advancedAuth.js', () => {
       const result = mw.action(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

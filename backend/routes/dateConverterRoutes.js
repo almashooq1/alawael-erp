@@ -80,7 +80,7 @@ router.post('/hijri-to-gregorian', (req, res) => {
         day: result.day,
       },
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ success: false, message: 'خطأ في البيانات المدخلة' });
   }
 });

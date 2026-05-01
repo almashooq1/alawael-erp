@@ -69,7 +69,7 @@ function createBeneficiary360Service({
         status: b.status || null,
         nationalId: b.nationalId || null,
       };
-    } catch (_) {
+    } catch {
       return null;
     }
   }

@@ -201,7 +201,7 @@ class CacheService {
       await this.client.del(key);
       this.stats.deletes++;
       return true;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return false;
     }
@@ -216,7 +216,7 @@ class CacheService {
     try {
       const result = await this.client.exists(key);
       return result === 1;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -229,7 +229,7 @@ class CacheService {
 
     try {
       return await this.client.ttl(key);
-    } catch (err) {
+    } catch {
       return -2;
     }
   }
@@ -243,7 +243,7 @@ class CacheService {
     try {
       await this.client.expire(key, seconds);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -306,7 +306,7 @@ class CacheService {
         }
       });
       return result;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return {};
     }
@@ -331,7 +331,7 @@ class CacheService {
       await pipeline.exec();
       this.stats.sets += entries.length;
       return true;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return false;
     }
@@ -347,7 +347,7 @@ class CacheService {
       await this.client.del(...keys);
       this.stats.deletes += keys.length;
       return true;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return false;
     }
@@ -393,7 +393,7 @@ class CacheService {
 
       this.stats.deletes += deleted;
       return deleted;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return 0;
     }
@@ -452,7 +452,7 @@ class CacheService {
 
       this.stats.deletes += keys.length + 1;
       return keys.length;
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return 0;
     }
@@ -475,7 +475,7 @@ class CacheService {
     try {
       const result = await this.client.set(key, token, 'NX', 'PX', ttlMs);
       return result === 'OK' ? token : null;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -498,7 +498,7 @@ class CacheService {
     try {
       const result = await this.client.eval(script, 1, key, token);
       return result === 1;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -535,7 +535,7 @@ class CacheService {
         remaining: Math.max(0, maxRequests - count),
         resetIn: windowSeconds,
       };
-    } catch (err) {
+    } catch {
       this.stats.errors++;
       return { allowed: true, count: 0, resetIn: 0 };
     }
@@ -552,7 +552,7 @@ class CacheService {
       const val = await this.client.incrby(key, by);
       if (ttl) await this.client.expire(key, ttl);
       return val;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -562,7 +562,7 @@ class CacheService {
 
     try {
       return await this.client.decrby(key, by);
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -578,7 +578,7 @@ class CacheService {
       await this.client.hset(key, field, JSON.stringify(value));
       if (ttl > 0) await this.client.expire(key, ttl);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }
@@ -589,7 +589,7 @@ class CacheService {
     try {
       const val = await this.client.hget(key, field);
       return val ? JSON.parse(val) : null;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -610,7 +610,7 @@ class CacheService {
         }
       }
       return parsed;
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -621,7 +621,7 @@ class CacheService {
     try {
       await this.client.hdel(key, field);
       return true;
-    } catch (err) {
+    } catch {
       return false;
     }
   }

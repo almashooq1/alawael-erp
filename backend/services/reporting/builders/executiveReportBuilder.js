@@ -75,7 +75,7 @@ async function buildProgramsReview({ report, periodKey, scopeKey, ctx = {} }) {
       ctx: { ...ctx, scope, periodKey },
       filter: { domain: 'rehab' },
     });
-  } catch (_) {
+  } catch {
     result.kpis = null;
   }
 
@@ -96,7 +96,7 @@ async function buildProgramsReview({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.cbahi = null;
   }
 
@@ -113,7 +113,7 @@ async function buildProgramsReview({ report, periodKey, scopeKey, ctx = {} }) {
     if (ctx.reviewInputs) {
       result.reviewCompliance = await reviewBuild(ctx.reviewInputs);
     }
-  } catch (_) {
+  } catch {
     result.reviewCompliance = null;
   }
 
@@ -175,7 +175,7 @@ async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.sections.kpis = null;
   }
 
@@ -193,7 +193,7 @@ async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.sections.quality = null;
   }
 
@@ -211,7 +211,7 @@ async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.sections.finance = null;
   }
 
@@ -224,7 +224,7 @@ async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.sections.hr = null;
   }
 
@@ -236,7 +236,7 @@ async function buildAnnualReport({ report, periodKey, scopeKey, ctx = {} }) {
       scopeKey,
       ctx,
     });
-  } catch (_) {
+  } catch {
     result.sections.programs = null;
   }
 

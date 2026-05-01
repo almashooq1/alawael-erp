@@ -44,7 +44,7 @@ const validateRequest = (req, res, next) => {
     const { _body, user } = req;
     req.userId = user?.id || 'system';
     next();
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       error: 'Invalid request',
@@ -424,7 +424,7 @@ router.get('/health', async (_req, res) => {
       success: healthStatus.status === 'healthy',
       data: healthStatus,
     });
-  } catch (error) {
+  } catch {
     res.status(503).json({
       success: false,
       error: 'Health check failed',

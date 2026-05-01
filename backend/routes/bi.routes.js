@@ -19,7 +19,7 @@ router.use(requireBranchAccess);
 function safeModel(name) {
   try {
     return mongoose.model(name);
-  } catch (_e) {
+  } catch {
     return null;
   }
 }
@@ -243,7 +243,7 @@ router.get('/modules', async (req, res) => {
         try {
           const count = await Model.estimatedDocumentCount();
           return { module: name, status: 'active', count };
-        } catch (_err) {
+        } catch {
           return { module: name, status: 'error', count: 0 };
         }
       })

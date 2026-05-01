@@ -49,7 +49,7 @@ router.get('/db', async (req, res) => {
       mongoose: mongooseStatus,
       timestamp: new Date().toISOString(),
     });
-  } catch (_error) {
+  } catch {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -96,7 +96,7 @@ router.get('/models', async (req, res) => {
       totalRecords: assetCount + scheduleCount + analyticsCount + programCount,
       timestamp: new Date().toISOString(),
     });
-  } catch (_error) {
+  } catch {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -179,7 +179,7 @@ router.get('/system', async (req, res) => {
     };
 
     res.json(health);
-  } catch (_error) {
+  } catch {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -252,14 +252,14 @@ router.get('/full', async (req, res) => {
         try {
           const { routeHealth } = require('./_registry');
           return routeHealth.summary;
-        } catch (_e) {
+        } catch {
           return { error: 'unavailable' };
         }
       })(),
     };
 
     res.status(overallStatus === 'healthy' ? 200 : 503).json(fullHealth);
-  } catch (_error) {
+  } catch {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -290,7 +290,7 @@ router.get('/ready', async (req, res) => {
       ready: true,
       timestamp: new Date().toISOString(),
     });
-  } catch (_error) {
+  } catch {
     res.status(503).json({
       ready: false,
       reason: 'حدث خطأ في الخادم',
@@ -355,8 +355,7 @@ router.get('/domains', (_req, res) => {
     const summary = [];
     for (const [name, mod] of Object.entries(domains)) {
       if (skip.has(name) || !mod || typeof mod !== 'object') continue;
-      const isDomainModule =
-        typeof mod.mount === 'function' && typeof mod.getInfo === 'function';
+      const isDomainModule = typeof mod.mount === 'function' && typeof mod.getInfo === 'function';
       if (!isDomainModule) {
         summary.push({ name, kind: 'library' });
         continue;
@@ -364,16 +363,15 @@ router.get('/domains', (_req, res) => {
       const info = (() => {
         try {
           return mod.getInfo();
-        } catch (_e) {
+        } catch {
           return {};
         }
       })();
       const routeCount = (() => {
         try {
-          return (mod.router && mod.router.stack ? mod.router.stack : []).filter(
-            l => l.route,
-          ).length;
-        } catch (_e) {
+          return (mod.router && mod.router.stack ? mod.router.stack : []).filter(l => l.route)
+            .length;
+        } catch {
           return 0;
         }
       })();

@@ -135,7 +135,7 @@ async function listTrips(Model, { start, end, scope }) {
   if (scope && scope.type === 'driver' && scope.id) filter.driver = scope.id;
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }

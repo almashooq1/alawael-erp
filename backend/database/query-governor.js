@@ -212,7 +212,7 @@ class QueryGovernor {
       const { tenantStore } = require('./multi-tenant-isolator');
       const store = tenantStore.getStore();
       if (store) return store;
-    } catch (_) {
+    } catch {
       // Not available
     }
     return null;

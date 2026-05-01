@@ -96,7 +96,7 @@ class PolicyDecisionPoint {
       let applies = false;
       try {
         applies = !!policy.applies(context);
-      } catch (err) {
+      } catch {
         // Policy threw while matching — treat as not-applicable but log.
         // In a real system, emit a metric/alert.
         continue;

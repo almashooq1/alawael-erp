@@ -233,7 +233,7 @@ class DocumentFavoritesService {
     try {
       const exists = await Bookmark.findOne({ userId, documentId, type: 'favorite' });
       return { success: true, isFavorite: !!exists };
-    } catch (err) {
+    } catch {
       return { success: true, isFavorite: false };
     }
   }

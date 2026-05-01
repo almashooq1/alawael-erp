@@ -132,7 +132,7 @@ async function listSessions(Model, { start, end, scope }) {
   }
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }
@@ -142,7 +142,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -151,7 +151,7 @@ async function loadBranch(ctx, scope) {
   try {
     const b = await Branch.findById(scope.id);
     return b ? { id: String(b._id || b.id || scope.id), name: b.name || null } : { id: scope.id };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }

@@ -515,7 +515,7 @@ class Beneficiary360Service {
             phase: a.phase,
           });
         });
-      } catch (e) {
+      } catch {
         /* workflow may not be available */
       }
     }
@@ -543,7 +543,7 @@ class Beneficiary360Service {
           });
         });
       }
-    } catch (e) {
+    } catch {
       /* tasks may not exist yet */
     }
 
@@ -631,7 +631,7 @@ class Beneficiary360Service {
           })),
         }));
       }
-    } catch (e) {
+    } catch {
       /* goals model may not exist */
     }
 

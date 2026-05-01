@@ -102,7 +102,7 @@ class TransactionManager {
         // Abort if still in transaction
         try {
           await session.abortTransaction();
-        } catch (_abortErr) {
+        } catch {
           // Ignore abort errors
         }
 

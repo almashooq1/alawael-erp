@@ -71,7 +71,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/dashboard.stats');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

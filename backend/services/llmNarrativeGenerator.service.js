@@ -176,7 +176,7 @@ function parseModelJson(raw) {
   let parsed;
   try {
     parsed = JSON.parse(stripped);
-  } catch (_) {
+  } catch {
     return null;
   }
   if (!parsed || typeof parsed !== 'object') return null;

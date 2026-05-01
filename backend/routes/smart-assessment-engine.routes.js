@@ -102,7 +102,9 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
 // ─── M-CHAT-R/F ──────────────────────────────────────────────
 router.post(
   '/mchat',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, informant, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreMCHAT(items);
@@ -130,7 +132,9 @@ router.post(
 // ─── CARS-2 ──────────────────────────────────────────────────
 router.post(
   '/cars2',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, items, form_type, notes } = req.body;
     if (!beneficiary)
@@ -169,7 +173,9 @@ router.post(
 // ─── Sensory Profile 2 ──────────────────────────────────────
 router.post(
   '/sensory-profile',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, respondent, form_type, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreSensoryProfile(items);
@@ -196,7 +202,9 @@ router.post(
 // ─── BRIEF-2 ─────────────────────────────────────────────────
 router.post(
   '/brief2',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, respondent, form_type, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreBRIEF2(items);
@@ -223,7 +231,9 @@ router.post(
 // ─── SRS-2 ───────────────────────────────────────────────────
 router.post(
   '/srs2',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, respondent, form_type, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreSRS2(items);
@@ -254,7 +264,9 @@ router.post(
 // ─── Portage Guide ───────────────────────────────────────────
 router.post(
   '/portage',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, age_months, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scorePortage(items, age_months);
@@ -278,7 +290,9 @@ router.post(
 // ─── ABC Data Collection ─────────────────────────────────────
 router.post(
   '/abc-data',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, target_behaviors, collection_period } = req.body;
     const collection = await ABCDataCollection.create({
@@ -295,7 +309,9 @@ router.post(
 
 router.post(
   '/abc-data/:id/record',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const collection = await ABCDataCollection.findById(req.params.id);
     if (!collection)
@@ -311,7 +327,9 @@ router.post(
 
 router.post(
   '/abc-data/:id/analyze',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const collection = await ABCDataCollection.findById(req.params.id);
     if (!collection)
@@ -332,7 +350,9 @@ router.post(
 // ─── Family Needs Survey ─────────────────────────────────────
 router.post(
   '/family-needs',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const survey = await FamilyNeedsSurvey.create({
       ...req.body,
@@ -347,7 +367,9 @@ router.post(
 // ─── Quality of Life ─────────────────────────────────────────
 router.post(
   '/quality-of-life',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, respondent, domains, overall_qol, overall_health_satisfaction, notes } =
       req.body;
@@ -374,7 +396,9 @@ router.post(
 // ─── Transition Readiness ────────────────────────────────────
 router.post(
   '/transition',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, transition_type, domains, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreTransitionReadiness(domains);
@@ -397,7 +421,9 @@ router.post(
 // ─── Saudi Developmental Screening ───────────────────────────
 router.post(
   '/saudi-screening',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const screening = await SaudiDevelopmentalScreening.create({
       ...req.body,
@@ -412,7 +438,9 @@ router.post(
 // ─── Behavioral Function Assessment (FBA) ────────────────────
 router.post(
   '/behavioral-function',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const assessment = await BehavioralFunctionAssessment.create({
       ...req.body,
@@ -426,7 +454,9 @@ router.post(
 // ─── Caregiver Burden ────────────────────────────────────────
 router.post(
   '/caregiver-burden',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiary, caregiver_name, caregiver_relationship, items, notes } = req.body;
     const scoring = SmartAssessmentEngine.scoreCaregiverBurden(items);
@@ -457,7 +487,9 @@ router.post(
 
 router.post(
   '/score/:scaleType',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { scaleType } = req.params;
     const { items, age_months, form_type, chronological_age_months, raw_scores } = req.body;
@@ -511,7 +543,9 @@ router.post(
 
 router.get(
   '/protocol/:diagnosis',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { diagnosis } = req.params;
     const ageMonths = parseInt(req.query.age_months) || 48;
@@ -523,7 +557,9 @@ router.get(
 
 router.get(
   '/battery/:ageMonths/:diagnosis',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const ageMonths = parseInt(req.params.ageMonths) || 48;
     const diagnosis = req.params.diagnosis || 'default';
@@ -537,7 +573,9 @@ router.get(
 
 router.post(
   '/goal-recommendations',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const recommendations = ClinicalDecisionSupport.generateGoalRecommendations(req.body);
     res.json({ success: true, data: recommendations });
@@ -546,7 +584,9 @@ router.post(
 
 router.post(
   '/risk-check',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const alerts = ClinicalDecisionSupport.checkRisks(req.body);
     res.json({
@@ -558,7 +598,9 @@ router.post(
 
 router.post(
   '/discharge-readiness',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const result = ClinicalDecisionSupport.evaluateDischargeReadiness(req.body);
     res.json({ success: true, data: result });
@@ -571,7 +613,9 @@ router.post(
 
 router.post(
   '/analytics/effect-size',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { pre_score, post_score, sd } = req.body;
     const result = ProgressAnalytics.cohenD(pre_score, post_score, sd);
@@ -581,7 +625,9 @@ router.post(
 
 router.post(
   '/analytics/rci',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { pre_score, post_score, sd, reliability } = req.body;
     const result = ProgressAnalytics.reliableChangeIndex(pre_score, post_score, sd, reliability);
@@ -591,7 +637,9 @@ router.post(
 
 router.post(
   '/analytics/clinical-significance',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { pre_score, post_score, ...params } = req.body;
     const result = ProgressAnalytics.clinicalSignificance(pre_score, post_score, params);
@@ -601,7 +649,9 @@ router.post(
 
 router.post(
   '/analytics/trend',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { data_points } = req.body;
     const result = ProgressAnalytics.trendAnalysis(data_points);
@@ -611,7 +661,9 @@ router.post(
 
 router.post(
   '/analytics/predict-goal',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { data_points, target_score } = req.body;
     const result = ProgressAnalytics.predictGoalAttainment(data_points, target_score);
@@ -621,7 +673,9 @@ router.post(
 
 router.post(
   '/analytics/benchmark',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { current_score, ...params } = req.body;
     const result = ProgressAnalytics.benchmark(current_score, params);
@@ -631,7 +685,9 @@ router.post(
 
 router.post(
   '/analytics/progress-report',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const report = ProgressAnalytics.generateProgressReport(req.body);
     res.json({ success: true, data: report });
@@ -640,7 +696,9 @@ router.post(
 
 router.post(
   '/analytics/roi',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const result = ProgressAnalytics.therapeuticROI(req.body);
     res.json({ success: true, data: result });
@@ -653,7 +711,9 @@ router.post(
 
 router.get(
   '/scales',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     try {
       const ClinicalScaleItem = mongoose.models.ClinicalScaleItem;
@@ -669,7 +729,7 @@ router.get(
         'scale_id scale_name_ar scale_name_en category metadata'
       ).lean();
       res.json({ success: true, data: scales });
-    } catch (e) {
+    } catch {
       res.json({ success: true, data: [], message: 'شغّل البذور أولاً: npm run db:seed' });
     }
   })
@@ -677,7 +737,9 @@ router.get(
 
 router.get(
   '/scales/:scaleId/items',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     try {
       const ClinicalScaleItem = mongoose.models.ClinicalScaleItem;
@@ -688,7 +750,7 @@ router.get(
           .status(404)
           .json({ success: false, message: `مقياس ${req.params.scaleId} غير موجود` });
       res.json({ success: true, data: scale });
-    } catch (e) {
+    } catch {
       res.status(404).json({ success: false, message: 'شغّل البذور أولاً' });
     }
   })
@@ -715,7 +777,9 @@ const ASSESSMENT_MODELS = {
 
 router.get(
   '/history/:beneficiaryId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiaryId } = req.params;
     const history = {};
@@ -726,7 +790,7 @@ router.get(
           .sort({ createdAt: -1 })
           .limit(10)
           .lean();
-      } catch (e) {
+      } catch {
         history[type] = [];
       }
     }
@@ -737,7 +801,9 @@ router.get(
 
 router.get(
   '/history/:beneficiaryId/:type',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiaryId, type } = req.params;
     const Model = ASSESSMENT_MODELS[type];
@@ -760,7 +826,9 @@ router.get(
 // ─── قائمة مع صفحات + فلترة + ترتيب ─────────────────────────
 router.get(
   '/list/:type',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const Model = ASSESSMENT_MODELS[req.params.type];
     if (!Model)
@@ -815,7 +883,9 @@ router.get(
 // ─── جلب تقييم واحد بالمعرّف ─────────────────────────────────
 router.get(
   '/detail/:type/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const Model = ASSESSMENT_MODELS[req.params.type];
     if (!Model)
@@ -836,7 +906,9 @@ router.get(
 // ─── تعديل تقييم ─────────────────────────────────────────────
 router.put(
   '/detail/:type/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const Model = ASSESSMENT_MODELS[req.params.type];
     if (!Model)
@@ -862,7 +934,9 @@ router.put(
 // ─── حذف ناعم ────────────────────────────────────────────────
 router.delete(
   '/detail/:type/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const Model = ASSESSMENT_MODELS[req.params.type];
     if (!Model)
@@ -887,7 +961,9 @@ router.delete(
 
 router.post(
   '/rescore/:type/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const Model = ASSESSMENT_MODELS[req.params.type];
     if (!Model)
@@ -945,7 +1021,9 @@ router.post(
 
 router.post(
   '/compare',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { type, pre_id, post_id, beneficiary_id, scale_field } = req.body;
     const Model = ASSESSMENT_MODELS[type];
@@ -1023,7 +1101,9 @@ router.post(
 
 router.get(
   '/stats/dashboard',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const branchFilter = req.user?.branch ? { branch: req.user.branch } : {};
     const now = new Date();
@@ -1055,7 +1135,7 @@ router.get(
         grandTotal += total;
         monthTotal += thisMonth;
         weekTotal += thisWeek;
-      } catch (e) {
+      } catch {
         results[type] = { total: 0, thisMonth: 0, thisWeek: 0 };
       }
     }
@@ -1097,7 +1177,9 @@ router.get(
 
 router.post(
   '/batch-score',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { assessments } = req.body; // [{type, items, age_months, ...}, ...]
     if (!Array.isArray(assessments) || assessments.length === 0)
@@ -1155,7 +1237,9 @@ router.post(
 
 router.get(
   '/report/:beneficiaryId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const bid = req.params.beneficiaryId;
 
@@ -1252,7 +1336,9 @@ router.get(
 // ─── تقرير تقييم واحد (نص أو HTML) ──────────────────────────
 router.get(
   '/report/export/:type/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { type, id } = req.params;
     const format = req.query.format || 'text'; // text | html
@@ -1281,7 +1367,9 @@ router.get(
 // ─── تقرير مقارنة قبلي/بعدي ─────────────────────────────────
 router.post(
   '/report/comparison',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { pre_id, post_id, type } = req.body;
     const Model = ASSESSMENT_MODELS[type];
@@ -1324,7 +1412,9 @@ router.post(
 // ─── تقرير شامل لمستفيد ─────────────────────────────────────
 router.get(
   '/report/full/:beneficiaryId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { beneficiaryId } = req.params;
     const allAssessments = {};
@@ -1335,7 +1425,7 @@ router.get(
           .sort({ createdAt: -1 })
           .limit(10)
           .lean();
-      } catch (_) {
+      } catch {
         allAssessments[type] = [];
       }
     }
@@ -1348,7 +1438,7 @@ router.get(
         (await Beneficiary.findById(beneficiaryId)
           .select('name fileNumber dateOfBirth diagnosis')
           .lean()) || {};
-    } catch (_) {
+    } catch {
       /* best-effort: proceed with empty beneficiaryInfo */
     }
 

@@ -73,7 +73,7 @@ function _defaultRoleMap() {
       ].filter(Boolean),
       hr: ['hr_manager', 'hr_officer'],
     };
-  } catch (_) {
+  } catch {
     // rbac.aliases may not be loadable (circular / test env); fall
     // back to the legacy literals so the engine stays operable.
     return {

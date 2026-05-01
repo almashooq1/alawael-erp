@@ -28,7 +28,7 @@ function serialiseScope(scope) {
   if (typeof scope === 'string') return scope;
   try {
     return JSON.stringify(scope);
-  } catch (_) {
+  } catch {
     return String(scope);
   }
 }

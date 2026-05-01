@@ -3,13 +3,18 @@
 // Auto-generated unit test for middleware/branchAuth.middleware.js
 jest.mock('../../services/branchPermission.service', () => ({}));
 jest.mock('../../models/BranchAuditLog', () => {
-  const M = jest.fn().mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
+  const M = jest
+    .fn()
+    .mockImplementation(() => ({ save: jest.fn().mockResolvedValue({ _id: 'id1' }) }));
   M.findById = jest.fn().mockResolvedValue({ _id: 'id1', role: 'admin' });
   M.findOne = jest.fn().mockResolvedValue({ _id: 'id1' });
   M.find = jest.fn().mockResolvedValue([]);
   return M;
 });
-jest.mock('mongoose', () => ({ connection: { readyState: 1 }, Types: { ObjectId: jest.fn(v => v || 'id') } }));
+jest.mock('mongoose', () => ({
+  connection: { readyState: 1 },
+  Types: { ObjectId: jest.fn(v => v || 'id') },
+}));
 
 const mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer mock.jwt.token' },
@@ -20,7 +25,12 @@ const mockReq = (overrides = {}) => ({
   path: '/test',
   method: 'GET',
   ip: '127.0.0.1',
-  get: jest.fn(h => ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[h.toLowerCase()]),
+  get: jest.fn(
+    h =>
+      ({ 'content-type': 'application/json', authorization: 'Bearer mock.jwt.token' })[
+        h.toLowerCase()
+      ]
+  ),
   ...overrides,
 });
 
@@ -44,10 +54,16 @@ const mockRes = () => {
 const mockNext = jest.fn();
 
 let mw;
-try { mw = require('../../middleware/branchAuth.middleware'); } catch (e) { mw = null; }
+try {
+  mw = require('../../middleware/branchAuth.middleware');
+} catch (e) {
+  mw = null;
+}
 
 describe('middleware/branchAuth.middleware.js', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('module loads without crash', () => {
     expect(true).toBe(true);
@@ -67,11 +83,17 @@ describe('middleware/branchAuth.middleware.js', () => {
       const result = mw.requireBranchPermission(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -84,11 +106,17 @@ describe('middleware/branchAuth.middleware.js', () => {
       const result = mw.requireHQAccess(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -101,11 +129,17 @@ describe('middleware/branchAuth.middleware.js', () => {
       const result = mw.requireSuperAdmin(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
 
@@ -118,12 +152,17 @@ describe('middleware/branchAuth.middleware.js', () => {
       const result = mw.requireOwnBranch(req, res, next);
       if (result && typeof result === 'function') {
         // Factory pattern — invoke returned middleware
-        try { await result(req, res, next); } catch (e) { /* expected */ }
+        try {
+          await result(req, res, next);
+        } catch (e) {
+          /* expected */
+        }
       } else if (result && typeof result.then === 'function') {
         await result;
       }
-    } catch (e) { /* expected */ }
+    } catch {
+      /* expected */
+    }
     expect(true).toBe(true);
   });
-
 });

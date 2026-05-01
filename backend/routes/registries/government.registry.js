@@ -42,7 +42,7 @@ module.exports = function registerGovernmentRoutes(app, { safeRequire, dualMount
     if (typeof enhancedAuditRouter !== 'function' && !enhancedAuditRouter.use) {
       enhancedAuditRouter = require('express').Router();
     }
-  } catch (_) {
+  } catch {
     enhancedAuditRouter = require('express').Router();
   }
   const nitaqatRoutes = safeRequire('../routes/nitaqat.routes');

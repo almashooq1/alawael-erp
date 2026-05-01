@@ -20,7 +20,7 @@ let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
-} catch (err) {
+} catch {
   logger.warn('[Notifications Routes] RBAC module not available, using fallback');
   createRBACMiddleware = permission => (req, res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
@@ -35,7 +35,7 @@ let notificationModel;
 try {
   const modelModule = require('../models/Notification.memory');
   notificationModel = modelModule.Notification || modelModule;
-} catch (e) {
+} catch {
   notificationModel = null;
 }
 

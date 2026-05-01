@@ -24,7 +24,7 @@ router.get('/children-progress', async (req, res) => {
     const BenProgress = require('../models/BeneficiaryProgress');
     const data = await BenProgress.find({ guardianId: req.user?.id }).lean();
     res.json({ success: true, data: data || [] });
-  } catch (_err) {
+  } catch {
     // Fallback with useful message
     res.json({ success: true, data: [] });
   }
@@ -36,7 +36,7 @@ router.get('/attendance', async (req, res) => {
     const BenMgmt = require('../models/BeneficiaryManagement');
     const data = await BenMgmt.AttendanceRecord.find().sort({ date: -1 }).limit(30).lean();
     res.json({ success: true, data });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });
@@ -49,7 +49,7 @@ router.get('/payments', async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
     res.json({ success: true, data: data || [] });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });
@@ -60,7 +60,7 @@ router.get('/documents', async (req, res) => {
     const Document = require('../models/Document');
     const data = await Document.find({ accessibleTo: req.user?.id }).sort({ createdAt: -1 }).lean();
     res.json({ success: true, data: data || [] });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });
@@ -71,7 +71,7 @@ router.get('/appointments', async (req, res) => {
     const Schedule = require('../models/Schedule');
     const data = await Schedule.find({ guardianId: req.user?.id }).sort({ date: 1 }).lean();
     res.json({ success: true, data: data || [] });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });
@@ -86,7 +86,7 @@ router.get('/messages', async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
     res.json({ success: true, data: data || [] });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });

@@ -27,7 +27,7 @@ async function gatherMonthlyData(beneficiary, periodStart, periodEnd) {
   const DailySession = (() => {
     try {
       return require('../../models/DailySession');
-    } catch (_) {
+    } catch {
       return null;
     }
   })();
@@ -35,7 +35,7 @@ async function gatherMonthlyData(beneficiary, periodStart, periodEnd) {
   const Goal = (() => {
     try {
       return require('../../models/Goal');
-    } catch (_) {
+    } catch {
       return null;
     }
   })();
@@ -43,7 +43,7 @@ async function gatherMonthlyData(beneficiary, periodStart, periodEnd) {
   const Assessment = (() => {
     try {
       return require('../../models/Assessment');
-    } catch (_) {
+    } catch {
       return null;
     }
   })();

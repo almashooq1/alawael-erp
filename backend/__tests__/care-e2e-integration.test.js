@@ -135,7 +135,7 @@ function makeBus() {
       for (const fn of listeners[name] || []) {
         try {
           await fn(payload);
-        } catch (_) {
+        } catch {
           /* swallow for E2E */
         }
       }
@@ -220,7 +220,7 @@ function bootE2E() {
         riskLevel: 'high',
         reason: `home_visit_critical_concern (${payload.visitNumber || payload.visitId})`,
       });
-    } catch (_) {
+    } catch {
       /* E2E noise swallow */
     }
   });
@@ -232,7 +232,7 @@ function bootE2E() {
         riskLevel: 'high',
         reason: `psych_risk_flag_critical (${payload.flagNumber || payload.flagId})`,
       });
-    } catch (_) {
+    } catch {
       /* */
     }
   });

@@ -55,7 +55,7 @@ async function listSessions(Model, { start, end, scope }) {
   if (scope && scope.type === 'branch' && scope.id) filter.branchId = scope.id;
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }
@@ -65,7 +65,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -74,7 +74,7 @@ async function loadBranch(ctx, scope) {
   try {
     const b = await Branch.findById(scope.id);
     return b ? { id: String(b._id || b.id || scope.id), name: b.name || null } : { id: scope.id };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }
@@ -88,7 +88,7 @@ async function loadTherapistNames(ctx, ids) {
       const list = (await ctx.loadTherapists(uniqueIds)) || [];
       for (const t of list) out.set(String(t._id || t.id), t.name || t.fullName || null);
       return out;
-    } catch (_) {
+    } catch {
       /* fall through */
     }
   }
@@ -97,7 +97,7 @@ async function loadTherapistNames(ctx, ids) {
   try {
     const rows = (await Employee.find({ _id: { $in: uniqueIds } })) || [];
     for (const r of rows) out.set(String(r._id || r.id), r.fullName || r.name || null);
-  } catch (_) {
+  } catch {
     /* ignore */
   }
   return out;

@@ -28,7 +28,7 @@ async function findRows(Model, filter) {
   if (!Model) return [];
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }
@@ -41,7 +41,7 @@ async function countDocs(Model, filter) {
     }
     const rows = await Model.find(filter);
     return Array.isArray(rows) ? rows.length : 0;
-  } catch (_) {
+  } catch {
     return 0;
   }
 }
@@ -51,7 +51,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -60,7 +60,7 @@ async function loadBranch(ctx, scope) {
   try {
     const b = await Branch.findById(scope.id);
     return b ? { id: String(b._id || b.id || scope.id), name: b.name || null } : { id: scope.id };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }

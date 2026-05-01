@@ -41,7 +41,7 @@ router.get('/', authenticate, requireBranchAccess, async (req, res) => {
       ],
       message: 'وحدة الجودة — Quality module',
     });
-  } catch (error) {
+  } catch {
     res.json({
       success: true,
       module: 'quality',
@@ -144,7 +144,7 @@ router.post(
         message: 'Standard created successfully',
         data: standard,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error creating standard',
@@ -185,7 +185,7 @@ router.put(
         message: 'Standard updated successfully',
         data: standard,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating standard',
@@ -300,7 +300,7 @@ router.post(
         message: 'Accreditation created successfully',
         data: accreditation,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error creating accreditation',
@@ -375,7 +375,7 @@ router.put(
         message: 'Accreditation updated successfully',
         data: accreditation,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating accreditation',
@@ -493,7 +493,7 @@ router.post(
         message: 'Audit created successfully',
         data: audit,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error creating audit',
@@ -564,7 +564,7 @@ router.put(
         message: 'Audit updated successfully',
         data: audit,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating audit',
@@ -628,7 +628,7 @@ router.post(
         message: 'Finding added successfully',
         data: audit,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error adding finding',
@@ -671,7 +671,7 @@ router.patch(
         message: 'Finding status updated',
         data: finding,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating finding status',
@@ -732,7 +732,7 @@ router.post(
         message: 'Compliance tracking created successfully',
         data: tracking,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error creating compliance tracking',
@@ -819,7 +819,7 @@ router.put(
         message: 'Compliance tracking updated successfully',
         data: tracking,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating compliance tracking',
@@ -890,7 +890,7 @@ router.patch(
         message: 'Gap status updated',
         data: tracking,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating gap status',
@@ -969,7 +969,7 @@ router.post(
         message: 'Indicator created successfully',
         data: indicator,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error creating indicator',
@@ -1036,7 +1036,7 @@ router.put(
         message: 'Indicator updated successfully',
         data: indicator,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error updating indicator',
@@ -1105,7 +1105,7 @@ router.post(
         message: 'Measurement added successfully',
         data: indicator,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'Error adding measurement',

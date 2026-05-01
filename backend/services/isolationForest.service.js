@@ -150,7 +150,7 @@ function buildIsolationForestDetector({
     let trainingPoints;
     try {
       trainingPoints = history.map(h => featureExtractor(h));
-    } catch (_) {
+    } catch {
       return { anomaly: false, score: null, reason: 'feature_extractor_failed', threshold };
     }
     const valid = trainingPoints.filter(
@@ -171,7 +171,7 @@ function buildIsolationForestDetector({
     let currentVec;
     try {
       currentVec = featureExtractor(current);
-    } catch (_) {
+    } catch {
       return { anomaly: false, score: null, reason: 'current_feature_extractor_failed', threshold };
     }
     if (!Array.isArray(currentVec) || !currentVec.every(n => Number.isFinite(n))) {

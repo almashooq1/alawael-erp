@@ -32,7 +32,7 @@ router.post('/check-in', authMiddleware, requireBranchAccess, async (req, res) =
       message: 'تم تسجيل الدخول بنجاح',
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -53,7 +53,7 @@ router.post('/check-out', authMiddleware, requireBranchAccess, async (req, res) 
       message: 'تم تسجيل الخروج بنجاح',
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -73,7 +73,7 @@ router.get('/today', authMiddleware, requireBranchAccess, async (req, res) => {
       success: true,
       data: record,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -99,7 +99,7 @@ router.get('/monthly/:month/:year', authMiddleware, requireBranchAccess, async (
       success: true,
       data: report,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -154,7 +154,7 @@ router.get('/stats', authMiddleware, requireBranchAccess, async (req, res) => {
       success: true,
       data: stats,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -168,7 +168,8 @@ router.get('/stats', authMiddleware, requireBranchAccess, async (req, res) => {
  */
 router.get(
   '/employee/:employeeId',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -196,7 +197,7 @@ router.get(
         success: true,
         data: records,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -211,7 +212,8 @@ router.get(
  */
 router.put(
   '/:attendanceId',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -250,7 +252,7 @@ router.put(
         message: 'تم تحديث السجل بنجاح',
         data: attendance,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -265,7 +267,8 @@ router.put(
  */
 router.post(
   '/:attendanceId/approve',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -288,7 +291,7 @@ router.post(
         message: 'تمت الموافقة على السجل',
         data: attendance,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -303,7 +306,8 @@ router.post(
  */
 router.post(
   '/:attendanceId/reject',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -326,7 +330,7 @@ router.post(
         message: 'تم رفض السجل',
         data: attendance,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -372,7 +376,7 @@ router.post('/leave/request', authMiddleware, requireBranchAccess, async (req, r
       message: 'تم تقديم طلب الإجازة بنجاح',
       data: newLeave,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -394,7 +398,7 @@ router.get('/leave/my-requests', authMiddleware, requireBranchAccess, async (req
       success: true,
       data: leaves,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -408,7 +412,8 @@ router.get('/leave/my-requests', authMiddleware, requireBranchAccess, async (req
  */
 router.get(
   '/leave/pending',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -422,7 +427,7 @@ router.get(
         data: leaves,
         count: leaves.length,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -437,7 +442,8 @@ router.get(
  */
 router.post(
   '/leave/:leaveId/approve',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -460,7 +466,7 @@ router.post(
         message: 'تمت الموافقة على الإجازة',
         data: leave,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -475,7 +481,8 @@ router.post(
  */
 router.post(
   '/leave/:leaveId/reject',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['manager', 'hr', 'admin']),
   async (req, res) => {
     try {
@@ -498,7 +505,7 @@ router.post(
         message: 'تم رفض الإجازة',
         data: leave,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',
@@ -540,7 +547,7 @@ router.post('/leave/:leaveId/cancel', authMiddleware, requireBranchAccess, async
       message: 'تم إلغاء الإجازة',
       data: leave,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({
       success: false,
       message: 'خطأ في البيانات المدخلة',
@@ -558,7 +565,8 @@ router.post('/leave/:leaveId/cancel', authMiddleware, requireBranchAccess, async
  */
 router.get(
   '/report/comprehensive',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   roleMiddleware(['hr', 'admin']),
   async (req, res) => {
     try {
@@ -634,7 +642,7 @@ router.get(
           summary,
         },
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         success: false,
         message: 'خطأ في البيانات المدخلة',

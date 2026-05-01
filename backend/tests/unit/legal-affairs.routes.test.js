@@ -64,7 +64,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/legal-affairs.routes');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

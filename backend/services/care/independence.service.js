@@ -423,7 +423,7 @@ function createIndependenceService({
       try {
         const p = await partnerModel.findById(data.partnerId);
         if (p && !p.deleted_at) partnerNameSnapshot = p.name;
-      } catch (_) {
+      } catch {
         /* best-effort snapshot */
       }
     }

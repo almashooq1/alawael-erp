@@ -61,7 +61,7 @@ jest.mock('../../utils/logger', () => ({
 let routeModule;
 try {
   routeModule = require('../../routes/financeOperations.routes');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

@@ -103,7 +103,7 @@ async function aggregate(catalog, opts = {}) {
       try {
         const v = await valueResolver(k, ctx);
         value = typeof v === 'number' && Number.isFinite(v) ? v : null;
-      } catch (_) {
+      } catch {
         value = null;
       }
     }

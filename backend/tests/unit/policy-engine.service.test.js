@@ -422,7 +422,7 @@ describe('PolicyEngine Service', () => {
     it('should log error when policy not found', () => {
       try {
         service.getPolicy('nope');
-      } catch (_) {
+      } catch {
         /* expected */
       }
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error getting policy'));

@@ -705,7 +705,7 @@ class ClinicalDecisionSupport {
             detected_at: new Date(),
           });
         }
-      } catch (e) {
+      } catch {
         // Skip rule if data insufficient
       }
     }

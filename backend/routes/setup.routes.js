@@ -33,7 +33,7 @@ router.get('/status', async (req, res) => {
       db: states[dbState] || 'unknown',
       timestamp: new Date().toISOString(),
     });
-  } catch (err) {
+  } catch {
     return res.json({ success: false, error: 'Internal error' });
   }
 });

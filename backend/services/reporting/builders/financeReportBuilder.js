@@ -43,7 +43,7 @@ async function listInvoices(Model, { start, end, branchId, dateField = 'issueDat
   if (extra) Object.assign(filter, extra);
   try {
     return (await Model.find(filter)) || [];
-  } catch (_) {
+  } catch {
     return [];
   }
 }
@@ -53,7 +53,7 @@ async function loadBranch(ctx, scope) {
   if (typeof ctx.loadBranch === 'function') {
     try {
       return (await ctx.loadBranch(scope.id)) || { id: scope.id };
-    } catch (_) {
+    } catch {
       return { id: scope.id };
     }
   }
@@ -62,7 +62,7 @@ async function loadBranch(ctx, scope) {
   try {
     const b = await Branch.findById(scope.id);
     return b ? { id: String(b._id || b.id || scope.id), name: b.name || null } : { id: scope.id };
-  } catch (_) {
+  } catch {
     return { id: scope.id };
   }
 }
@@ -440,7 +440,7 @@ async function buildAgingReport({ report, periodKey, scopeKey, ctx = {} }) {
   try {
     const Model = Invoice && (Invoice.model || Invoice);
     rows = Model ? (await Model.find(filter)) || [] : [];
-  } catch (_) {
+  } catch {
     rows = [];
   }
   const roll = rollupAging(rows, (ctx.clock && ctx.clock.now && ctx.clock.now()) || range.end);

@@ -127,7 +127,7 @@ class ReportsScheduler {
       try {
         if (handle && typeof handle.stop === 'function') handle.stop();
         else if (handle) clearInterval(handle);
-      } catch (_) {
+      } catch {
         /* ignore */
       }
     }

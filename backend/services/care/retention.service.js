@@ -285,7 +285,7 @@ function createRetentionService({
         .sort({ computedAt: -1 })
         .limit(1);
       previous = rows[0] || null;
-    } catch (_) {
+    } catch {
       /* best-effort */
     }
 
@@ -310,7 +310,7 @@ function createRetentionService({
       try {
         const b = await beneficiaryModel.findById(beneficiaryId);
         branchId = b?.branchId || null;
-      } catch (_) {
+      } catch {
         /* optional */
       }
     }

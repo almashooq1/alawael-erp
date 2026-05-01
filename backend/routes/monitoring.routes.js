@@ -36,7 +36,7 @@ router.get('/cache', async (req, res) => {
     const AnalyticsCache = require('../models/AnalyticsCache');
     const entries = await AnalyticsCache.find().sort({ updatedAt: -1 }).limit(20).lean();
     res.json({ success: true, data: { entries, totalKeys: entries.length } });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: { entries: [], totalKeys: 0, note: 'Cache not available' } });
   }
 });
@@ -107,7 +107,7 @@ router.get('/alerts', async (req, res) => {
       .limit(10)
       .lean();
     res.json({ success: true, data: alerts });
-  } catch (_err) {
+  } catch {
     res.json({ success: true, data: [] });
   }
 });

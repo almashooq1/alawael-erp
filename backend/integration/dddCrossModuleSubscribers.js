@@ -483,7 +483,7 @@ function initializeDDDSubscribers(integrationBus, moduleConnector) {
     try {
       integrationBus.subscribe(sub.pattern, sub.handler);
       registered++;
-    } catch (err) {
+    } catch {
       // Fallback: use EventEmitter pattern if subscribe() not available
       try {
         integrationBus.on(sub.pattern, sub.handler);

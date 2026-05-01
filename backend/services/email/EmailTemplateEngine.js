@@ -1189,7 +1189,7 @@ class EmailTemplateEngine {
       const html = await fs.readFile(filePath, 'utf-8');
       this._cache.set(cacheKey, { html, time: Date.now() });
       return this._interpolate(html, variables);
-    } catch (err) {
+    } catch {
       throw new Error(`Template file not found: ${filePath}`);
     }
   }

@@ -50,7 +50,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/predictions.routes');
-} catch (e) {
+} catch {
   /* load fail */
 }
 

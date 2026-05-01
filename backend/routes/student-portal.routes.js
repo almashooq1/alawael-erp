@@ -93,7 +93,7 @@ async function maybeAutoRaiseMoodRedFlag(beneficiaryId, moods) {
         sessionId: null,
       },
     });
-  } catch (err) {
+  } catch {
     // Duplicate key (already active) or DB hiccup — swallow silently.
     // This path must never break the mood submission UX.
   }

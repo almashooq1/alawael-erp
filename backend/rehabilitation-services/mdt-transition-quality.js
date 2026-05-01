@@ -370,7 +370,7 @@ class KPICalculator {
         alert_type: 'regression',
         status: 'active',
       });
-    } catch (e) {
+    } catch {
       /* ignore if model not available */
     }
 

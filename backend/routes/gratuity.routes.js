@@ -52,7 +52,9 @@ router.param('gratuityId', (req, res, next, val) => {
  */
 router.post(
   '/calculate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'manager', 'admin']),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
@@ -87,7 +89,7 @@ router.post(
         message: 'تم حساب المكافأة بنجاح',
         data: result,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         error: 'خطأ في البيانات المدخلة',
         message: 'خطأ في حساب المكافأة',
@@ -115,7 +117,7 @@ router.post('/preview', authenticateToken, requireBranchAccess, async (req, res)
       preview: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -126,7 +128,9 @@ router.post('/preview', authenticateToken, requireBranchAccess, async (req, res)
  */
 router.post(
   '/custom-calculation',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -169,7 +173,7 @@ router.post(
         custom: true,
         data: result,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -185,7 +189,9 @@ router.post(
  */
 router.post(
   '/create',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   [
     body('employeeId').isMongoId().withMessage('معرف الموظف غير صالح'),
@@ -224,7 +230,7 @@ router.post(
         message: 'تم إنشاء سجل المكافأة بنجاح',
         data: result.record,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({
         error: 'خطأ في البيانات المدخلة',
         message: 'خطأ في إنشاء السجل',
@@ -251,7 +257,7 @@ router.get('/:gratuityId', authenticateToken, requireBranchAccess, async (req, r
       success: true,
       data: gratuity,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -271,7 +277,7 @@ router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, asyn
       count: gratuities.length,
       data: gratuities,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -288,49 +294,55 @@ router.get('/employee/:employeeId', authenticateToken, requireBranchAccess, asyn
  * - page: رقم الصفحة
  * - limit: عدد النتائج
  */
-router.get('/', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'finance', 'admin']), async (req, res) => {
-  try {
-    const { status, scenario, department, fromDate, toDate, page = 1, limit = 20 } = req.query;
-    const safePage = Math.max(1, parseInt(page) || 1);
-    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
+router.get(
+  '/',
+  authenticateToken,
+  requireBranchAccess,
+  authorizeRole(['hr', 'finance', 'admin']),
+  async (req, res) => {
+    try {
+      const { status, scenario, department, fromDate, toDate, page = 1, limit = 20 } = req.query;
+      const safePage = Math.max(1, parseInt(page) || 1);
+      const safeLimit = Math.min(Math.max(1, parseInt(limit) || 20), MAX_PAGE_LIMIT);
 
-    const filter = {};
+      const filter = {};
 
-    if (status) filter.status = status;
-    if (scenario) filter.terminationScenario = scenario;
-    if (department) filter.department = department;
+      if (status) filter.status = status;
+      if (scenario) filter.terminationScenario = scenario;
+      if (department) filter.department = department;
 
-    if (fromDate || toDate) {
-      filter.terminationDate = {};
-      if (fromDate) filter.terminationDate.$gte = new Date(fromDate);
-      if (toDate) filter.terminationDate.$lte = new Date(toDate);
+      if (fromDate || toDate) {
+        filter.terminationDate = {};
+        if (fromDate) filter.terminationDate.$gte = new Date(fromDate);
+        if (toDate) filter.terminationDate.$lte = new Date(toDate);
+      }
+
+      const skip = (safePage - 1) * safeLimit;
+
+      const [data, total] = await Promise.all([
+        Gratuity.find(filter)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(safeLimit)
+          .populate('employeeId', 'name position'),
+        Gratuity.countDocuments(filter),
+      ]);
+
+      res.json({
+        success: true,
+        data,
+        pagination: {
+          total,
+          page: safePage,
+          limit: safeLimit,
+          pages: Math.ceil(total / safeLimit),
+        },
+      });
+    } catch {
+      res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
-
-    const skip = (safePage - 1) * safeLimit;
-
-    const [data, total] = await Promise.all([
-      Gratuity.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(safeLimit)
-        .populate('employeeId', 'name position'),
-      Gratuity.countDocuments(filter),
-    ]);
-
-    res.json({
-      success: true,
-      data,
-      pagination: {
-        total,
-        page: safePage,
-        limit: safeLimit,
-        pages: Math.ceil(total / safeLimit),
-      },
-    });
-  } catch (error) {
-    res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
-});
+);
 
 // ============================================================
 // 3. الموافقات والمعالجة
@@ -342,7 +354,9 @@ router.get('/', authenticateToken, requireBranchAccess, authorizeRole(['hr', 'fi
  */
 router.post(
   '/:gratuityId/approve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -356,7 +370,7 @@ router.post(
         message: 'تمت الموافقة على المكافأة',
         data: result,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -368,7 +382,9 @@ router.post(
  */
 router.post(
   '/:gratuityId/reject',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -403,7 +419,7 @@ router.post(
         message: 'تم رفض المكافأة',
         status: 'REJECTED',
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -415,7 +431,9 @@ router.post(
  */
 router.post(
   '/:gratuityId/edit',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -459,7 +477,7 @@ router.post(
         message: 'تم تحديث السجل',
         data: gratuity,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -475,7 +493,9 @@ router.post(
  */
 router.post(
   '/:gratuityId/process-payment',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['finance', 'admin']),
   [body('paymentMethod').trim().notEmpty().withMessage('طريقة الدفع مطلوبة'), validate],
   async (req, res) => {
@@ -490,7 +510,7 @@ router.post(
         message: 'تم بدء معالجة الدفع',
         data: result,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -502,7 +522,9 @@ router.post(
  */
 router.post(
   '/:gratuityId/complete-payment',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['finance', 'admin']),
   async (req, res) => {
     try {
@@ -516,7 +538,7 @@ router.post(
         message: 'تم إكمال الدفع',
         data: result,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -539,7 +561,7 @@ router.get('/:gratuityId/audit-trail', authenticateToken, requireBranchAccess, a
       count: auditLogs.length,
       data: auditLogs,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -550,7 +572,9 @@ router.get('/:gratuityId/audit-trail', authenticateToken, requireBranchAccess, a
  */
 router.get(
   '/reports/summary',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -599,7 +623,7 @@ router.get(
         success: true,
         data: summary,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -611,7 +635,9 @@ router.get(
  */
 router.get(
   '/reports/detailed',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'finance', 'admin']),
   async (req, res) => {
     try {
@@ -641,7 +667,7 @@ router.get(
         message: 'تقرير مفصل متاح بصيغة ' + format,
         data: gratuities,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }
@@ -653,7 +679,9 @@ router.get(
  */
 router.get(
   '/reports/compliance',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['hr', 'compliance', 'admin']),
   async (req, res) => {
     try {
@@ -705,7 +733,7 @@ router.get(
         success: true,
         data: compliance,
       });
-    } catch (error) {
+    } catch {
       res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
     }
   }

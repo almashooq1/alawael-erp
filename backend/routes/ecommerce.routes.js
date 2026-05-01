@@ -16,7 +16,7 @@ let createRBACMiddleware;
 try {
   const rbacModule = require('../rbac');
   createRBACMiddleware = rbacModule.createRBACMiddleware;
-} catch (err) {
+} catch {
   logger.warn('[E-Commerce Routes] RBAC module not available, using fallback');
   createRBACMiddleware = permission => (req, res, _next) => {
     logger.warn(`RBAC middleware unavailable, blocking request for permission: ${permission}`);
@@ -146,7 +146,7 @@ router.get('/products/:id', async (req, res) => {
       success: true,
       data: product,
     });
-  } catch (error) {
+  } catch {
     res.status(404).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -187,7 +187,7 @@ router.post('/products/:id/reviews', authenticate, requireBranchAccess, async (r
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -215,7 +215,7 @@ router.post('/cart', authenticate, requireBranchAccess, async (req, res) => {
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -259,7 +259,7 @@ router.put('/cart/:productId', authenticate, requireBranchAccess, async (req, re
       success: true,
       data: cart,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -279,7 +279,7 @@ router.delete('/cart/:productId', authenticate, requireBranchAccess, async (req,
       success: true,
       data: cart,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -323,7 +323,7 @@ router.post('/cart/coupon', authenticate, requireBranchAccess, async (req, res) 
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -351,7 +351,7 @@ router.post('/checkout', authenticate, requireBranchAccess, async (req, res) => 
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -370,7 +370,7 @@ router.get('/checkout/:sessionId', authenticate, requireBranchAccess, async (req
       success: true,
       data: checkout,
     });
-  } catch (error) {
+  } catch {
     res.status(404).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -398,7 +398,7 @@ router.put('/checkout/:sessionId/payment', authenticate, requireBranchAccess, as
       success: true,
       data: result,
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -442,7 +442,7 @@ router.post('/wishlist/:productId', authenticate, requireBranchAccess, async (re
       data: wishlist,
       message: 'Product added to wishlist',
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });
@@ -463,7 +463,7 @@ router.delete('/wishlist/:productId', authenticate, requireBranchAccess, async (
       data: wishlist,
       message: 'Product removed from wishlist',
     });
-  } catch (error) {
+  } catch {
     res.status(400).json({ error: 'خطأ في البيانات المدخلة' });
   }
 });

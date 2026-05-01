@@ -107,7 +107,7 @@ async function listAttendance(Model, { beneficiaryId, start, end }) {
         scheduledDate: { $gte: start, $lt: end },
       })) || []
     );
-  } catch (_err) {
+  } catch {
     return [];
   }
 }
@@ -117,7 +117,7 @@ async function loadBeneficiary(ctx, id) {
   if (typeof ctx.loadBeneficiary === 'function') {
     try {
       return (await ctx.loadBeneficiary(id)) || null;
-    } catch (_) {
+    } catch {
       /* fallthrough */
     }
   }
@@ -131,7 +131,7 @@ async function loadBeneficiary(ctx, id) {
       fullName: b.fullName || b.name || null,
       branchId: b.branchId || null,
     };
-  } catch (_) {
+  } catch {
     return { id };
   }
 }

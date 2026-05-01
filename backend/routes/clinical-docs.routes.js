@@ -32,7 +32,7 @@ const logger = require('../utils/logger');
 const UPLOAD_DIR = path.join(__dirname, '../uploads/clinical-docs');
 try {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-} catch (e) {
+} catch {
   /* dir may exist */
 }
 

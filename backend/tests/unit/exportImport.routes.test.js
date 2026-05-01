@@ -61,7 +61,7 @@ jest.mock(
 let routeModule;
 try {
   routeModule = require('../../routes/exportImport.routes');
-} catch (_e) {
+} catch {
   /* load fail */
 }
 

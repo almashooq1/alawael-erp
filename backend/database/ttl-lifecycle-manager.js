@@ -467,7 +467,7 @@ class TTLLifecycleManager {
         source: 'system',
         severity: 'low',
       });
-    } catch (_) {
+    } catch {
       // audit trail not available
     }
   }
@@ -545,7 +545,7 @@ class TTLLifecycleManager {
             cutoffDate: cutoff,
           });
         }
-      } catch (_) {
+      } catch {
         // skip
       }
     }
@@ -631,7 +631,7 @@ class TTLLifecycleManager {
             lastProcessed: policy.lastProcessedAt,
             totalProcessed: policy.totalProcessed,
           });
-        } catch (_) {
+        } catch {
           status.policies.push({
             collection: policy.collection,
             error: 'failed to check',

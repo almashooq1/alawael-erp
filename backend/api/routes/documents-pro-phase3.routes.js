@@ -27,7 +27,7 @@ try {
     authenticateToken =
       authenticateToken.authenticateToken || authenticateToken.default || authenticateToken.auth;
   }
-} catch (e) {
+} catch {
   authenticateToken = (req, res, next) => next();
 }
 

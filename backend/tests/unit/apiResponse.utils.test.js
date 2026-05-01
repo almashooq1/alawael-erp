@@ -4,9 +4,12 @@
  */
 'use strict';
 
-
 let mod;
-try { mod = require('../../utils/apiResponse'); } catch(e) { /* load fail */ }
+try {
+  mod = require('../../utils/apiResponse');
+} catch (e) {
+  /* load fail */
+}
 
 describe('utils/apiResponse', () => {
   test('module loads without crash', () => {
@@ -20,13 +23,19 @@ describe('utils/apiResponse', () => {
       if (typeof mod === 'function') instance = new mod();
       else if (mod.default && typeof mod.default === 'function') instance = new mod.default();
       else instance = mod;
-    } catch(e) { instance = mod; }
+    } catch {
+      instance = mod;
+    }
   });
 
   test('ApiResponse exists and is callable', () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    if (typeof target.ApiResponse !== 'function' && typeof target.prototype?.ApiResponse !== 'function') return;
+    if (
+      typeof target.ApiResponse !== 'function' &&
+      typeof target.prototype?.ApiResponse !== 'function'
+    )
+      return;
     expect(typeof (target.ApiResponse || target.prototype?.ApiResponse)).toBe('function');
   });
 
@@ -35,14 +44,19 @@ describe('utils/apiResponse', () => {
     const target = typeof instance === 'object' ? instance : mod;
     const fn = target.ApiResponse || (target.prototype && target.prototype.ApiResponse);
     if (typeof fn !== 'function') return;
-    try { await fn.call(target); } catch(e) { /* allowed */ }
+    try {
+      await fn.call(target);
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
 
   test('ApiError exists and is callable', () => {
     if (!instance) return;
     const target = typeof instance === 'object' ? instance : mod;
-    if (typeof target.ApiError !== 'function' && typeof target.prototype?.ApiError !== 'function') return;
+    if (typeof target.ApiError !== 'function' && typeof target.prototype?.ApiError !== 'function')
+      return;
     expect(typeof (target.ApiError || target.prototype?.ApiError)).toBe('function');
   });
 
@@ -51,8 +65,11 @@ describe('utils/apiResponse', () => {
     const target = typeof instance === 'object' ? instance : mod;
     const fn = target.ApiError || (target.prototype && target.prototype.ApiError);
     if (typeof fn !== 'function') return;
-    try { await fn.call(target); } catch(e) { /* allowed */ }
+    try {
+      await fn.call(target);
+    } catch (e) {
+      /* allowed */
+    }
     expect(true).toBe(true);
   });
-
 });

@@ -25,7 +25,7 @@ jest.mock(
 let mod;
 try {
   mod = require('../../utils/errorHandler');
-} catch (e) {
+} catch {
   /* load fail */
 }
 
@@ -45,7 +45,7 @@ describe('utils/errorHandler', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn();
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -62,7 +62,7 @@ describe('utils/errorHandler', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn();
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -79,7 +79,7 @@ describe('utils/errorHandler', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn();
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);
@@ -96,7 +96,7 @@ describe('utils/errorHandler', () => {
     if (typeof fn !== 'function') return;
     try {
       await fn();
-    } catch (e) {
+    } catch {
       /* allowed */
     }
     expect(true).toBe(true);

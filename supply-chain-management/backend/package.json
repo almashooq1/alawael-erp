@@ -14,6 +14,9 @@
     "test:coverage": "jest --coverage --testEnvironment=node",
     "test:watch": "jest --watch --testEnvironment=node"
   },
+  "overrides": {
+    "tar": ">=7.5.11"
+  },
   "dependencies": {
     "bcrypt": "^5.0.0",
     "bwip-js": "^4.8.0",

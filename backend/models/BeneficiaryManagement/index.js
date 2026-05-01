@@ -6,7 +6,10 @@
  * @module models/BeneficiaryManagement/index
  */
 
-const Beneficiary = require('./Beneficiary');
+// Beneficiary is the canonical model from ../Beneficiary (consolidated v2.0.0).
+// The local ./Beneficiary variant was archived 2026-05-01 (collision risk:
+// same model name + same collection but divergent schema). See _archived/.
+const Beneficiary = require('../Beneficiary');
 const AcademicRecord = require('./AcademicRecord');
 const AttendanceRecord = require('./AttendanceRecord');
 const Scholarship = require('./Scholarship');

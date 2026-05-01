@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-undef, no-empty, prefer-const, no-constant-condition, no-unused-expressions */
+/* eslint-disable no-unused-vars */
 /**
  * خدمة الصيانة التلقائية لقاعدة البيانات - Database Maintenance Service
  * نظام الألوائل للتأهيل وإعادة التأهيل
@@ -393,7 +393,8 @@ class DatabaseMaintenanceService {
     }
   }
 
-  // تسجيل الأحداث
+  // تسجيل الأحداث — يحترم مستوى السجل المُمرَّر (info/warn/error) بدلاً
+  // من إرسال كل شيء عبر logger.info مع أسطر "[ERROR]" نصية فقط.
   log(level, message) {
     const logEntry = {
       timestamp: new Date(),
@@ -409,7 +410,8 @@ class DatabaseMaintenanceService {
       this.logs = this.logs.slice(-1000);
     }
 
-    logger.info(`[${logEntry.timestamp.toISOString()}] [${level.toUpperCase()}] ${message}`);
+    const fn = typeof logger[level] === 'function' ? logger[level] : logger.info;
+    fn.call(logger, `[DatabaseMaintenance] ${message}`);
   }
 
   // الحصول على السجلات

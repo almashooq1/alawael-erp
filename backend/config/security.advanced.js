@@ -129,18 +129,21 @@ const securityHeaders = (req, res, next) => {
   next();
 };
 
-// Request logging middleware
+// Request logging middleware. 4xx/5xx responses log at warn so they
+// surface in the warn-filtered tail; 2xx/3xx only log when LOG_LEVEL=debug
+// (a successful-request line per request would drown the file).
 const requestLogger = (req, res, next) => {
   const start = Date.now();
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    const logLevel = res.statusCode >= 400 ? 'WARN' : 'INFO';
+    const isWarning = res.statusCode >= 400;
+    const message = `${req.method} ${req.path} ${res.statusCode} ${duration}ms - ${req.ip}`;
 
-    if (process.env.LOG_LEVEL === 'debug' || logLevel === 'WARN') {
-      logger.info(
-        `[${logLevel}] ${req.method} ${req.path} ${res.statusCode} ${duration}ms - ${req.ip}`
-      );
+    if (isWarning) {
+      logger.warn(message);
+    } else if (process.env.LOG_LEVEL === 'debug') {
+      logger.info(message);
     }
   });
 

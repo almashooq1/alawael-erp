@@ -26,11 +26,7 @@ const mongoose = require('mongoose');
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_TICK_MS = DAY_MS; // every 24h
 
-async function seedChartOfAccounts({ logger }) {
-  if (mongoose.connection?.readyState !== 1) {
-    logger.warn?.('[financeBootstrap] skip COA seed — Mongo not ready');
-    return null;
-  }
+async function _doSeed(logger) {
   try {
     const ChartOfAccount = require('../models/finance/ChartOfAccount');
     const { bootstrap } = require('../services/finance/chartOfAccountsBootstrap');
@@ -43,6 +39,25 @@ async function seedChartOfAccounts({ logger }) {
     logger.warn?.('[financeBootstrap] COA seed failed', { error: err.message });
     return null;
   }
+}
+
+async function seedChartOfAccounts({ logger }) {
+  // Mongo connect is async; bootstrapFinance runs synchronously at
+  // app.js module-load time, so on a cold boot readyState is usually 2
+  // (connecting). Don't bail loudly — wait for the `open` event and seed
+  // then. This drops the "[financeBootstrap] skip COA seed — Mongo not
+  // ready" + "[financeBootstrap] COA seed failed" pair from every boot.
+  if (mongoose.connection?.readyState === 1) {
+    return _doSeed(logger);
+  }
+  if (mongoose.connection) {
+    mongoose.connection.once('open', () => {
+      _doSeed(logger).catch(err => {
+        logger.warn?.('[financeBootstrap] deferred COA seed failed', { error: err.message });
+      });
+    });
+  }
+  return null;
 }
 
 function startChequeExpiryScheduler({ logger, tickMs = DEFAULT_TICK_MS }) {

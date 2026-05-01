@@ -24,17 +24,13 @@ const fs = require('fs');
 const path = require('path');
 
 const BACKEND_ROOT = path.resolve(__dirname, '..', '..');
-const SCAN_ROOTS = [
-  path.join(BACKEND_ROOT, 'models'),
-  path.join(BACKEND_ROOT, 'domains'),
-];
+const SCAN_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, 'domains')];
 
 // Ratchet baseline — measured 2026-05-01. Lower this number as duplicates
 // are eliminated; never raise it.
-const MAX_COLLIDING_NAMES = 86;
+const MAX_COLLIDING_NAMES = 85;
 
-const REGISTER_RE =
-  /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
+const REGISTER_RE = /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
 
 /** Recursively yields all .js files under `dir` (skipping node_modules). */
 function* walk(dir) {
@@ -77,13 +73,13 @@ function main() {
 
   const totalRegistrations = [...registrations.values()].reduce(
     (sum, files) => sum + files.length,
-    0,
+    0
   );
 
   console.log(
     `[guard:model-collisions] ${totalRegistrations} mongoose.model() ` +
       `registrations across ${registrations.size} unique names; ` +
-      `${collisions.length} colliding (baseline ≤ ${MAX_COLLIDING_NAMES}).`,
+      `${collisions.length} colliding (baseline ≤ ${MAX_COLLIDING_NAMES}).`
   );
 
   if (collisions.length > MAX_COLLIDING_NAMES) {
@@ -91,8 +87,8 @@ function main() {
       `\n❌ Model collision regression: ${collisions.length} colliding names ` +
         `> baseline ${MAX_COLLIDING_NAMES}.\n` +
         'New duplicates were introduced. Either consolidate the new ' +
-        "registration into the existing canonical file or replace the new " +
-        'file with a re-export shim.\n\nColliding names:',
+        'registration into the existing canonical file or replace the new ' +
+        'file with a re-export shim.\n\nColliding names:'
     );
     for (const [name, files] of collisions) {
       console.error(`  - ${name}`);
@@ -105,7 +101,7 @@ function main() {
     console.log(
       `✅ Collisions ratcheted down. Lower MAX_COLLIDING_NAMES in ` +
         `${path.relative(BACKEND_ROOT, __filename).replace(/\\/g, '/')} ` +
-        `to ${collisions.length}.`,
+        `to ${collisions.length}.`
     );
   } else {
     console.log('✅ Collisions at baseline; no regression.');

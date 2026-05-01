@@ -73,7 +73,6 @@ const Leave = require('./Leave');
 const LeaveRequest = require('./LeaveRequest');
 const Attendance = require('./Attendance');
 const Shift = require('./Shift');
-const Training = require('./Training');
 const PerformanceEvaluation = require('./PerformanceEvaluation');
 const SuccessionPlan = require('./SuccessionPlan');
 
@@ -185,7 +184,6 @@ module.exports = {
   LeaveRequest,
   Attendance,
   Shift,
-  Training,
   PerformanceEvaluation,
   SuccessionPlan,
 

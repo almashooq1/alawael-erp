@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Health & Monitoring Routes - Phase 4
  * Comprehensive health checks and system monitoring endpoints
  */
@@ -28,7 +28,9 @@ router.get('/db', async (req, res) => {
     const _dbHealth = await Promise.race([
       Asset.countDocuments().lean(),
       new Promise((_, reject) =>
-        setTimeout(() => { reject(new Error('Database query timeout')); }, 5000)
+        setTimeout(() => {
+          reject(new Error('Database query timeout'));
+        }, 5000)
       ),
     ]);
 
@@ -47,7 +49,7 @@ router.get('/db', async (req, res) => {
       mongoose: mongooseStatus,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -94,7 +96,7 @@ router.get('/models', async (req, res) => {
       totalRecords: assetCount + scheduleCount + analyticsCount + programCount,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -127,7 +129,9 @@ router.get('/system', async (req, res) => {
           const start = Date.now();
           await Promise.race([
             client.ping(),
-            new Promise((_, rej) => { setTimeout(() => rej(new Error('Redis ping timeout')), 3000); }),
+            new Promise((_, rej) => {
+              setTimeout(() => rej(new Error('Redis ping timeout')), 3000);
+            }),
           ]);
           redisPingMs = Date.now() - start;
           redisOk = true;
@@ -175,7 +179,7 @@ router.get('/system', async (req, res) => {
     };
 
     res.json(health);
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -255,7 +259,7 @@ router.get('/full', async (req, res) => {
     };
 
     res.status(overallStatus === 'healthy' ? 200 : 503).json(fullHealth);
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       status: 'unhealthy',
       error: 'حدث خطأ في الخادم',
@@ -286,7 +290,7 @@ router.get('/ready', async (req, res) => {
       ready: true,
       timestamp: new Date().toISOString(),
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(503).json({
       ready: false,
       reason: 'حدث خطأ في الخادم',
@@ -304,6 +308,38 @@ router.get('/alive', (_req, res) => {
     pid: process.pid,
     timestamp: new Date().toISOString(),
   });
+});
+
+/**
+ * GET /api/v1/health/routes
+ * Route registry health — exposes mounted vs failed routes from _registry.js
+ * (separates missing-stub failures from real downstream require errors).
+ */
+router.get('/routes', (_req, res) => {
+  try {
+    const { routeHealth } = require('./_registry');
+    const failed = routeHealth.failed || [];
+    const missing = failed.filter(f => f.missing);
+    const realFailures = failed.filter(f => !f.missing);
+    res.json({
+      success: true,
+      summary: {
+        total: routeHealth.mounted.length + failed.length,
+        mounted: routeHealth.mounted.length,
+        failed: failed.length,
+        missingStubs: missing.length,
+        realFailures: realFailures.length,
+      },
+      realFailures: realFailures.map(f => ({
+        path: f.path,
+        module: f.module,
+        error: f.error,
+      })),
+      missingStubs: missing.map(f => f.module),
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 module.exports = router;

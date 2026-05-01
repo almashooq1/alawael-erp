@@ -391,7 +391,7 @@ class GoalsBankService {
       ];
     }
 
-    return await GoalsBank.find(query).sort({ usage_count: -1, success_rate: -1 }).lean();
+    return GoalsBank.find(query).sort({ usage_count: -1, success_rate: -1 }).lean();
   }
 
   /**

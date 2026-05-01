@@ -335,7 +335,7 @@ class MuqeemFullService {
     }
 
     logger.info(`[Muqeem] Iqama renewed: ${iqamaNumber}, new expiry: ${response.new_expiry_date}`);
-    return await EmployeeResidency.findById(residency._id);
+    return EmployeeResidency.findById(residency._id);
   }
 
   /**
@@ -510,7 +510,7 @@ class MuqeemFullService {
       muqeemResponse: response,
     });
 
-    return await VisaRequest.findById(visaRequestId);
+    return VisaRequest.findById(visaRequestId);
   }
 
   /**
@@ -536,7 +536,7 @@ class MuqeemFullService {
       muqeemResponse: response,
     });
 
-    return await VisaRequest.findById(visa._id);
+    return VisaRequest.findById(visa._id);
   }
 
   // =========================================================================
@@ -596,7 +596,7 @@ class MuqeemFullService {
     });
 
     logger.info(`[Muqeem] Transfer request created for employee ${employeeId}`);
-    return await TransferRequest.findById(transfer._id);
+    return TransferRequest.findById(transfer._id);
   }
 
   /**
@@ -632,7 +632,7 @@ class MuqeemFullService {
     });
 
     logger.info(`[Muqeem] Transfer approved: ${transferId}`);
-    return await TransferRequest.findById(transferId);
+    return TransferRequest.findById(transferId);
   }
 
   /**
@@ -668,7 +668,7 @@ class MuqeemFullService {
       status: 'active',
     });
 
-    return await TransferRequest.findById(transferId);
+    return TransferRequest.findById(transferId);
   }
 
   /**

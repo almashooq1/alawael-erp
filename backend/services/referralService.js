@@ -135,7 +135,7 @@ async function receiveReferral(data) {
     $inc: { totalReferralsSent: 1 },
   });
 
-  return await Referral.findById(referral._id)
+  return Referral.findById(referral._id)
     .populate('referringFacility', 'name city type')
     .populate('assignedTo', 'name specialty');
 }
@@ -239,7 +239,7 @@ async function reviewReferral(referralId, reviewerId, reviewData) {
     logger.error('[Referral] Notification error:', err.message)
   );
 
-  return await Referral.findById(referralId)
+  return Referral.findById(referralId)
     .populate('referringFacility', 'name')
     .populate('reviewedBy', 'name')
     .populate('assignedTo', 'name');
@@ -265,7 +265,7 @@ async function transitionStatus(referralId, newStatus, data = {}, userId = null)
 
   await referral.updateOne(updateData);
 
-  return await Referral.findById(referralId);
+  return Referral.findById(referralId);
 }
 
 // ─── Send Communication ───────────────────────────────────────────────────────

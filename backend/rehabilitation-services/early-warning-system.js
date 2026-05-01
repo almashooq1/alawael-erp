@@ -399,7 +399,7 @@ class EarlyWarningService {
    * جلب تنبيهات مستفيد معين
    */
   static async getBeneficiaryAlerts(beneficiaryId, status = 'active') {
-    return await EarlyWarningAlert.find({ beneficiary_id: beneficiaryId, status })
+    return EarlyWarningAlert.find({ beneficiary_id: beneficiaryId, status })
       .sort({ severity: 1, createdAt: -1 })
       .lean();
   }
@@ -427,7 +427,7 @@ class EarlyWarningService {
    * الإقرار بتنبيه
    */
   static async acknowledgeAlert(alertId, userId, notes) {
-    return await EarlyWarningAlert.findByIdAndUpdate(
+    return EarlyWarningAlert.findByIdAndUpdate(
       alertId,
       {
         status: 'acknowledged',
@@ -443,7 +443,7 @@ class EarlyWarningService {
    * حل تنبيه
    */
   static async resolveAlert(alertId, userId, notes) {
-    return await EarlyWarningAlert.findByIdAndUpdate(
+    return EarlyWarningAlert.findByIdAndUpdate(
       alertId,
       {
         status: 'resolved',

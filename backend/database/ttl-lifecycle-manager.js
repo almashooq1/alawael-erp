@@ -380,7 +380,7 @@ class TTLLifecycleManager {
 
   async _archiveExpired(collection, policy, filter, cutoffDate, dryRun) {
     if (dryRun) {
-      return await collection.countDocuments(filter);
+      return collection.countDocuments(filter);
     }
 
     try {

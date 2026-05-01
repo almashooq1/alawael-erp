@@ -179,7 +179,7 @@ async function endConsultation(consultationId, clinicalData = {}) {
     });
   }
 
-  return await Teleconsultation.findById(consultationId)
+  return Teleconsultation.findById(consultationId)
     .populate('beneficiary', 'name nationalId')
     .populate('provider', 'name');
 }
@@ -354,7 +354,7 @@ async function issuePrescription(consultationId, prescriberId, data) {
     await prescription.updateOne({ status: 'issued', issuedAt: new Date() });
   }
 
-  return await RemotePrescription.findById(prescription._id)
+  return RemotePrescription.findById(prescription._id)
     .populate('prescriber', 'name licenseNumber')
     .populate('beneficiary', 'name nationalId');
 }

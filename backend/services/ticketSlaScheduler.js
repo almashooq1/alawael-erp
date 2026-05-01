@@ -351,7 +351,7 @@ function stopSlaScheduler() {
  */
 async function manualSlaRun() {
   logger.info('[SLA-Scheduler] Manual SLA run triggered');
-  return await runSlaChecks();
+  return runSlaChecks();
 }
 
 module.exports = {

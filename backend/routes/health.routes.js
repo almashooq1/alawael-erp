@@ -342,4 +342,67 @@ router.get('/routes', (_req, res) => {
   }
 });
 
+/**
+ * GET /api/v1/health/domains
+ * Domain registry health — lists every BaseDomainModule, whether it
+ * initialized, what prefix it mounted on, and how many routes it owns.
+ * Complements /health/routes (which covers the legacy `routes/*` files).
+ */
+router.get('/domains', (_req, res) => {
+  try {
+    const domains = require('../domains');
+    const skip = new Set(['mountAllDomains', 'healthCheckAll']);
+    const summary = [];
+    for (const [name, mod] of Object.entries(domains)) {
+      if (skip.has(name) || !mod || typeof mod !== 'object') continue;
+      const isDomainModule =
+        typeof mod.mount === 'function' && typeof mod.getInfo === 'function';
+      if (!isDomainModule) {
+        summary.push({ name, kind: 'library' });
+        continue;
+      }
+      const info = (() => {
+        try {
+          return mod.getInfo();
+        } catch (_e) {
+          return {};
+        }
+      })();
+      const routeCount = (() => {
+        try {
+          return (mod.router && mod.router.stack ? mod.router.stack : []).filter(
+            l => l.route,
+          ).length;
+        } catch (_e) {
+          return 0;
+        }
+      })();
+      summary.push({
+        name,
+        kind: 'domain-module',
+        version: info.version,
+        prefix: info.prefix,
+        initialized: info.initialized === true,
+        dependencies: info.dependencies || [],
+        healthChecks: info.healthChecks || [],
+        routeCount,
+      });
+    }
+    const initialized = summary.filter(s => s.initialized === true).length;
+    const moduleCount = summary.filter(s => s.kind === 'domain-module').length;
+    res.json({
+      success: true,
+      summary: {
+        total: summary.length,
+        domainModules: moduleCount,
+        initialized,
+        libraryOnly: summary.length - moduleCount,
+      },
+      domains: summary,
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;

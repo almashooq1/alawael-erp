@@ -48,7 +48,7 @@ const DAY_NAMES_EN = {
  * @returns {Object} - { schedule, stats, optimization_score, suggestions }
  */
 function optimizeWeeklySchedule({
-  branchId,
+  _branchId,
   weekStart,
   beneficiaries = [],
   specialists = [],

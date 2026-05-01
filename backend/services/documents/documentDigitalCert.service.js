@@ -205,7 +205,7 @@ class DigitalCertificateService {
     return c;
   }
 
-  async revokeCertificate(certId, reason, userId) {
+  async revokeCertificate(certId, reason, _userId) {
     const cert = await DigitalCertificate.findById(certId);
     if (!cert) throw new Error('الشهادة غير موجودة');
     cert.status = 'revoked';

@@ -263,7 +263,7 @@ class DocumentCommentsService {
   /**
    * حذف تعليق (soft)
    */
-  async deleteComment(commentId, userId) {
+  async deleteComment(commentId, _userId) {
     try {
       const comment = await DocumentComment.findById(commentId);
       if (!comment) throw new Error('التعليق غير موجود');

@@ -45,7 +45,7 @@ jest.mock('../../services/email/EmailConfig', () => ({
 
 jest.mock('../../services/email/EmailTemplateEngine', () => ({
   EmailTemplateEngine: jest.fn().mockImplementation(() => ({
-    render: jest.fn((tpl, data) => ({
+    render: jest.fn((tpl, _data) => ({
       subject: `Subject: ${tpl}`,
       html: `<p>Template ${tpl}</p>`,
     })),

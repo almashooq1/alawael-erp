@@ -116,7 +116,7 @@ class NotificationEnhancedService {
     }
   }
 
-  async _sendPush(recipient, title, body) {
+  async _sendPush(recipient, title, _body) {
     try {
       // تكامل مع FCM
       logger.info(`[Push] ${title} → ${recipient._id || recipient.id}`);
@@ -418,7 +418,7 @@ class NotificationEnhancedService {
       .sort({ createdAt: -1 });
   }
 
-  async acknowledgeEscalation(id, userId) {
+  async acknowledgeEscalation(id, _userId) {
     return Escalation.findByIdAndUpdate(
       id,
       { status: 'acknowledged', acknowledgedAt: new Date() },

@@ -573,7 +573,7 @@ class DocumentAuditService {
   //  كشف الأنشطة المشبوهة
   // ═══════════════════════════════════════════════════════════
 
-  async _detectSuspiciousActivity(action, userId, documentId) {
+  async _detectSuspiciousActivity(action, userId, _documentId) {
     try {
       const suspiciousPatterns = [];
 

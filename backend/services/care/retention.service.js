@@ -73,7 +73,7 @@ function createRetentionService({
 
   // ── Risk-factor detectors ──────────────────────────────────────
 
-  function _detectFactors(profile, healthScore) {
+  function _detectFactors(profile, _healthScore) {
     const factors = [];
     const nowDate = now();
     const sixtyDaysAgo = new Date(

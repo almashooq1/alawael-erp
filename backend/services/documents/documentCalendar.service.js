@@ -248,7 +248,7 @@ class DocumentCalendarService extends EventEmitter {
   }
 
   /* ── Snooze Event ─────────────────────────────────────────── */
-  async snoozeEvent(eventId, snoozeUntil, userId) {
+  async snoozeEvent(eventId, snoozeUntil, _userId) {
     const event = await CalendarEvent.findByIdAndUpdate(
       eventId,
       {

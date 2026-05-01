@@ -29,7 +29,7 @@ const logger = console;
  * @param {SystemIntegrationBus} integrationBus
  * @param {ModuleConnector} moduleConnector
  */
-function initializeDDDSubscribers(integrationBus, moduleConnector) {
+function initializeDDDSubscribers(integrationBus, _moduleConnector) {
   if (!integrationBus) {
     logger.warn('[DDD-CrossModule] No integration bus — skipping subscriber registration');
     return;
@@ -68,7 +68,7 @@ function initializeDDDSubscribers(integrationBus, moduleConnector) {
   subscribers.push({
     name: 'core:registered → dashboards:kpi',
     pattern: 'core.beneficiary.registered',
-    handler: async event => {
+    handler: async _event => {
       try {
         const mongoose = require('mongoose');
         const KPISnapshot = mongoose.models.KPISnapshot;

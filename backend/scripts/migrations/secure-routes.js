@@ -95,7 +95,7 @@ function processFile(filePath) {
   }
 }
 
-function addBranchScopeImport(content, fileName) {
+function addBranchScopeImport(content, _fileName) {
   // Find the auth require line and add branchScope import after it
   const authRequirePattern =
     /^(const\s+\{[^}]*\}\s*=\s*require\(['"]\.\.\/middleware\/auth['"]\);?\s*\n)/m;

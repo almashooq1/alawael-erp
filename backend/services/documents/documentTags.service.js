@@ -253,7 +253,7 @@ class DocumentTagsService {
   // ══════════════════════════════════════════
   //  تحديث وسم (مع تحديث المستندات)
   // ══════════════════════════════════════════
-  async updateTag(tagId, updates, userId) {
+  async updateTag(tagId, updates, _userId) {
     try {
       const oldTag = await Tag.findById(tagId);
       if (!oldTag) return { success: false, error: 'الوسم غير موجود' };
@@ -320,7 +320,7 @@ class DocumentTagsService {
   // ══════════════════════════════════════════
   //  دمج وسوم
   // ══════════════════════════════════════════
-  async mergeTags(sourceTagIds, targetTagId, userId) {
+  async mergeTags(sourceTagIds, targetTagId, _userId) {
     try {
       const targetTag = await Tag.findById(targetTagId);
       if (!targetTag) return { success: false, error: 'الوسم الهدف غير موجود' };

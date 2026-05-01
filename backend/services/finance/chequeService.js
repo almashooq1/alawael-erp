@@ -261,7 +261,7 @@ async function bounceCheque({
   return { cheque: updated, journal };
 }
 
-async function cancelCheque({ ChequeModel, id, reason, userId }) {
+async function cancelCheque({ ChequeModel, id, reason, _userId }) {
   const cheque = await ChequeModel.findById(id);
   if (!cheque) {
     const err = new Error('cheque not found');

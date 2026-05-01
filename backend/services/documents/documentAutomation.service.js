@@ -429,7 +429,7 @@ class DocumentAutomationService {
     };
   }
 
-  async _executeAction(action, eventData) {
+  async _executeAction(action, _eventData) {
     // Simulate action execution
     await new Promise(resolve => setTimeout(resolve, 100));
 

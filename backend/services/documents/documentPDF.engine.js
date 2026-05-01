@@ -590,7 +590,7 @@ class DocumentPDFEngine {
   }
 
   // ── Helper: simulate conversion ──────────
-  _simulateConversion(doc, options) {
+  _simulateConversion(doc, _options) {
     const fileSize = doc.fileSize || 5000;
     const pages = Math.max(1, Math.ceil(fileSize / 2000));
     return {

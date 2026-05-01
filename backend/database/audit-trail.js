@@ -597,7 +597,7 @@ class AuditTrail {
         }
       });
 
-      schema.post('findOneAndUpdate', function (doc) {
+      schema.post('findOneAndUpdate', function (_doc) {
         if (this._auditSoftDelete && this._auditDoc) {
           self.batchLog({
             action: 'delete',

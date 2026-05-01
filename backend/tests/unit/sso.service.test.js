@@ -11,12 +11,12 @@ jest.mock('jsonwebtoken', () => {
   const _store = new Map();
   let _seq = 0;
   return {
-    sign: jest.fn((payload, secret) => {
+    sign: jest.fn((payload, _secret) => {
       const token = `tok_${++_seq}_${Date.now()}`;
       _store.set(token, { ...payload });
       return token;
     }),
-    verify: jest.fn((token, secret) => {
+    verify: jest.fn((token, _secret) => {
       const data = _store.get(token);
       if (!data) throw new Error('invalid token');
       return data;

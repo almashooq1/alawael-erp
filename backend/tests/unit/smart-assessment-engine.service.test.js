@@ -848,7 +848,7 @@ describe('SmartAssessmentEngine — analyzeABCData', () => {
   });
 
   it('should detect escape function when demand/escape patterns dominate', () => {
-    const records = Array.from({ length: 10 }, (_, i) => ({
+    const records = Array.from({ length: 10 }, (_, _i) => ({
       antecedent: { category: 'demand_placed' },
       consequence: { category: 'demand_removed' },
       behavior: { category: 'aggression', duration_seconds: 20 },

@@ -242,7 +242,7 @@ class NitaqatService {
   /**
    * تصنيف الموظفين حسب الجنسية والراتب والفئة
    */
-  _classifyEmployees(employees, activityCode) {
+  _classifyEmployees(employees, _activityCode) {
     const classification = {
       saudiCount: 0,
       expatCount: 0,

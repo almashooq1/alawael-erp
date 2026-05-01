@@ -315,7 +315,7 @@ class DocumentFormsService {
     return { success: true, template };
   }
 
-  async updateTemplate(templateId, data, userId) {
+  async updateTemplate(templateId, data, _userId) {
     const template = await FormTemplate.findById(templateId);
     if (!template) throw new Error('القالب غير موجود');
 

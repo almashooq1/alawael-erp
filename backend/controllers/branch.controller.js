@@ -242,7 +242,7 @@ exports.getConsolidatedFinancials = async (req, res) => {
       total_expenses: 1560000,
       net_profit: 585000,
       profit_margin: 27.3,
-      by_branch: branches.map((b, i) => ({
+      by_branch: branches.map((b, _i) => ({
         code: b.code,
         name_ar: b.name_ar,
         revenue: Math.floor(100000 + Math.random() * 300000),

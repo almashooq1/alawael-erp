@@ -493,7 +493,7 @@ class ApprovalChainsService {
     return { success: true, requests, delegations };
   }
 
-  async cancelRequest(requestId, userId) {
+  async cancelRequest(requestId, _userId) {
     const request = await ApprovalRequest.findById(requestId);
     if (!request) throw new Error('طلب الموافقة غير موجود');
     if (['approved', 'rejected', 'cancelled'].includes(request.status)) {
@@ -505,7 +505,7 @@ class ApprovalChainsService {
     return { success: true, request };
   }
 
-  async resubmitRequest(requestId, note, userId) {
+  async resubmitRequest(requestId, note, _userId) {
     const request = await ApprovalRequest.findById(requestId);
     if (!request) throw new Error('طلب الموافقة غير موجود');
     if (!['rejected', 'returned'].includes(request.status)) {

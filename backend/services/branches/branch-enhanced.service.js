@@ -79,7 +79,7 @@ class BranchEnhancedService {
   /**
    * تحديث إعدادات الفرع دفعةً واحدة
    */
-  async updateSettings(branchId, settings, updatedBy) {
+  async updateSettings(branchId, settings, _updatedBy) {
     const ops = Object.entries(settings).map(([key, value]) =>
       BranchSetting.findOneAndUpdate({ branchId, key }, { value: String(value) }, { new: true })
     );

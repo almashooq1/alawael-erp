@@ -40,7 +40,7 @@ function makeFakeStore({ transitionsByBId = {}, throwFor = [] } = {}) {
     errored: [],
   };
   return {
-    async applyVerdicts(beneficiaryId, verdicts) {
+    async applyVerdicts(beneficiaryId, _verdicts) {
       if (throwFor.includes(beneficiaryId)) {
         throw new Error(`store boom for ${beneficiaryId}`);
       }

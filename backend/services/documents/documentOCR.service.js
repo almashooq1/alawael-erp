@@ -338,7 +338,7 @@ class DocumentOCRService extends EventEmitter {
     ];
   }
 
-  _detectSignatures(doc) {
+  _detectSignatures(_doc) {
     return [];
   }
 

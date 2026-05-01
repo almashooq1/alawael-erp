@@ -231,7 +231,7 @@ class Beneficiary360Service {
   /**
    * Widget 4: آخر التقييمات والمقاييس
    */
-  async _buildAssessments(beneficiaryId, episodeId) {
+  async _buildAssessments(beneficiaryId, _episodeId) {
     const ClinicalAssessment = this._model('ClinicalAssessment');
     if (!ClinicalAssessment) return { recent: [], count: 0 };
 
@@ -279,7 +279,7 @@ class Beneficiary360Service {
   /**
    * Widget 5: الأهداف الذكية وحالتها
    */
-  async _buildGoals(beneficiaryId, episodeId) {
+  async _buildGoals(beneficiaryId, _episodeId) {
     const TherapeuticGoal = this._model('TherapeuticGoal');
     if (!TherapeuticGoal) return { active: [], completed: [], counts: {} };
 

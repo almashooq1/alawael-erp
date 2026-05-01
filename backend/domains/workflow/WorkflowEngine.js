@@ -646,7 +646,7 @@ class WorkflowEngine extends EventEmitter {
     }
   }
 
-  async _executeSideEffects(toPhase, episode, context) {
+  async _executeSideEffects(toPhase, episode, _context) {
     switch (toPhase) {
       case 'intake':
         this.emit('task:create', {

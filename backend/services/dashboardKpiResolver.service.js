@@ -73,7 +73,7 @@ function stableFilterHash(filters) {
   return crypto.createHash('sha1').update(payload).digest('hex').slice(0, 10);
 }
 
-function shiftPeriodKey(periodKey, frequency) {
+function shiftPeriodKey(periodKey, _frequency) {
   if (!periodKey || typeof periodKey !== 'string') return null;
 
   // YYYY-MM-DD

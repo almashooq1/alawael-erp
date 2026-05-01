@@ -313,7 +313,7 @@ class DocumentWatermarkService {
   }
 
   /* ─── Revoke ──────────────────────────────────────────────── */
-  async revokeWatermark(trackingCode, userId) {
+  async revokeWatermark(trackingCode, _userId) {
     const log = await WatermarkLog.findOneAndUpdate(
       { trackingCode },
       { $set: { status: 'revoked' } },

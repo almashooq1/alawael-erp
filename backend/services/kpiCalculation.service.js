@@ -70,7 +70,7 @@ function getPreviousPeriod(type, year, period) {
 /**
  * حساب قيمة KPI حسب نوع البيانات
  */
-async function computeRawValue(definition, branchId, dateFrom, dateTo) {
+async function computeRawValue(definition, _branchId, _dateFrom, _dateTo) {
   // في هذا التطبيق نُرجع قيمة عشوائية لأغراض العرض التجريبي
   // في بيئة الإنتاج يجب ربط كل dataSource بالنموذج المناسب
 

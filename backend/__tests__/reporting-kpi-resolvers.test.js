@@ -89,7 +89,7 @@ describe('createReportingValueResolver — dispatch + path navigation', () => {
   });
 
   test('calls the builder with a report-shaped input and navigates the path', async () => {
-    const build = jest.fn(async ({ report, periodKey, scopeKey, ctx }) => {
+    const build = jest.fn(async ({ report, periodKey, _scopeKey, ctx }) => {
       expect(report.id).toBe('finance.invoices.aging.concentration.pct');
       expect(typeof periodKey).toBe('string');
       expect(ctx).toEqual(expect.any(Object));

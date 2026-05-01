@@ -373,7 +373,7 @@ function calculateOutcomeMeasure(assessmentData) {
   };
 }
 
-function _interpretScore(scale, score, maxScore, percentChange) {
+function _interpretScore(scale, score, maxScore, _percentChange) {
   if (scale === REHAB_CONSTANTS.MEASUREMENT_SCALES.FUNCTIONAL_INDEPENDENCE) {
     // FIM: 1-7 لكل عنصر، 18-126 إجمالي
     if (score >= 108) return 'complete_independence';

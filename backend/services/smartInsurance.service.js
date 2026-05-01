@@ -118,7 +118,7 @@ class SmartInsuranceService {
   }
 
   // فحص محلي بدون NPHIES
-  async _localEligibilityCheck(policy, options) {
+  async _localEligibilityCheck(policy, _options) {
     const now = new Date();
     const isActive = policy.status === 'active' && policy.endDate > now;
     const remaining = policy.coverageLimit - policy.usedCoverage;

@@ -151,7 +151,7 @@ class EmailManager {
     }
   }
 
-  async _loadModels(connection) {
+  async _loadModels(_connection) {
     try {
       // Attempt to use models from communication/email-models.js
       const { EmailLog, EmailQueue } = require('../../communication/email-models');

@@ -539,7 +539,7 @@ async function seed(connection) {
     { name: 'تقرير حالات الخروج', category: 'clinical', frequency: 'monthly' },
     { name: 'لوحة المؤشرات التنفيذية', category: 'operational', frequency: 'daily' },
   ];
-  const templates = reportTemplates.map((t, i) => ({
+  const templates = reportTemplates.map((t, _i) => ({
     _id: new ObjectId(),
     name: t.name,
     title: t.name,

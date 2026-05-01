@@ -99,7 +99,7 @@ describe('alertNotificationDispatcher.dispatch — happy path', () => {
   it('maps severity → priority correctly', async () => {
     const notify = jest.fn(async () => ({ ok: true }));
     const resolveRecipients = async () => [{ userId: 'u1', email: 'a@example.com' }];
-    const build = severity =>
+    const build = _severity =>
       buildAlertNotificationDispatcher({ notifier: { notify }, resolveRecipients });
 
     const cases = [

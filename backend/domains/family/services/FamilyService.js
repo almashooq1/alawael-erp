@@ -195,7 +195,7 @@ class FamilyService {
   // Family Portal View (safe, filtered data)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  async getFamilyPortalData(beneficiaryId, familyMemberId) {
+  async getFamilyPortalData(beneficiaryId, _familyMemberId) {
     const [Beneficiary, TherapeuticGoal, ClinicalSession] = [
       mongoose.model('Beneficiary'),
       mongoose.model('TherapeuticGoal'),

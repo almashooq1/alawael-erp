@@ -370,7 +370,7 @@ describe('ReportingEngine — approval gate', () => {
     // Simulate approval.
     const approval = ApprovalModel.model.__rows[0];
     approval.state = 'APPROVED';
-    approval.markDispatched = function (actor) {
+    approval.markDispatched = function (_actor) {
       this.state = 'DISPATCHED';
       this.dispatchedAt = new Date();
     };

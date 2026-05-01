@@ -209,7 +209,7 @@ class PaymentGatewayService {
   /**
    * HyperPay
    */
-  async _callHyperpay(transaction, options) {
+  async _callHyperpay(transaction, _options) {
     const accessToken = process.env.HYPERPAY_ACCESS_TOKEN;
     const entityId =
       transaction.paymentMethod === 'mada'
@@ -296,7 +296,7 @@ class PaymentGatewayService {
   /**
    * SADAD — الدفع الحكومي
    */
-  async _callSadad(transaction, options) {
+  async _callSadad(_transaction, _options) {
     const billNumber = `SAD-${Date.now()}`;
     // في الإنتاج: تكامل حقيقي مع SADAD API
     return {
@@ -377,7 +377,7 @@ class PaymentGatewayService {
   /**
    * STC Pay
    */
-  async _callStcPay(transaction, options) {
+  async _callStcPay(_transaction, _options) {
     // تكامل مع STC Pay API
     return {
       id: `STC-${Date.now()}`,
@@ -522,7 +522,7 @@ class PaymentGatewayService {
   /**
    * استرداد عبر البوابة
    */
-  async _processGatewayRefund(transaction, amount) {
+  async _processGatewayRefund(_transaction, _amount) {
     // تكامل مع بوابة الدفع للاسترداد
     return { id: `REFUND-${Date.now()}`, status: 'completed' };
   }

@@ -505,7 +505,7 @@ class DocumentIntegrationsService extends EventEmitter {
   }
 
   /* ── Build Payload ────────────────────────────────────────── */
-  _buildPayload(integration, event, data, template) {
+  _buildPayload(integration, event, data, _template) {
     const providerTemplate = PROVIDER_TEMPLATES[integration.provider];
     if (providerTemplate?.payloadTemplate) {
       return providerTemplate.payloadTemplate({ event, ...data });

@@ -359,7 +359,7 @@ describe('GET /me/access-log — retention-aware (C28)', () => {
     expect(res.status).toBe(200);
     expect(res.body.window.archived_included).toBe(false);
     // Only 1 non-archived visible (+ possibly a self-audit row)
-    const archivedResults = res.body.events.filter(e => false); // should be none
+    const archivedResults = res.body.events.filter(_e => false); // should be none
     expect(archivedResults).toHaveLength(0);
     expect(res.body.total).toBeGreaterThanOrEqual(1);
     expect(res.body.total).toBeLessThanOrEqual(3); // self-audit may count

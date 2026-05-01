@@ -234,7 +234,7 @@ class DocumentQRCodeService extends EventEmitter {
     </svg>`;
   }
 
-  _generateBarcodeSVG(data, w, h, type) {
+  _generateBarcodeSVG(data, w, h, _type) {
     const hash = crypto.createHash('md5').update(data).digest('hex');
     const barCount = Math.min(data.length * 3, 60);
     const barWidth = w / (barCount * 1.5);

@@ -478,7 +478,7 @@ class DocumentTranslationService {
   }
 
   /* ─── Cancel Job ─── */
-  async cancelJob(jobId, userId) {
+  async cancelJob(jobId, _userId) {
     const job = await TranslationJob.findById(jobId);
     if (!job) throw new Error('مهمة الترجمة غير موجودة');
     if (['completed', 'cancelled'].includes(job.status))

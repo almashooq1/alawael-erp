@@ -161,7 +161,7 @@ function createHrDashboardService(deps = {}) {
     return { expired, expiring_within_60d: expiringWithin60d };
   }
 
-  async function leaveBalanceSection({ branchId, now, overflowThresholdDays = 45 }) {
+  async function leaveBalanceSection({ _branchId, now, overflowThresholdDays = 45 }) {
     if (LeaveBalance == null) return null;
     const year = now.getFullYear();
     // branch_id isn't on LeaveBalance; we'd need to join via employee_id.

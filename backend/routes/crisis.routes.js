@@ -19,7 +19,7 @@ const {
   EmergencyDrill,
   EmergencyContact,
 } = require('../models/crisis.model');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // ── All crisis routes require authentication ──────────────────────

@@ -6,7 +6,7 @@
  */
 
 const { v4: uuidv4 } = require('uuid');
-const axios = require('axios');
+const _axios = require('axios');
 const logger = require('../utils/logger');
 
 const {

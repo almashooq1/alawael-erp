@@ -12,7 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { MenuItem, DailyMenu, MealService, KitchenInventory } = require('../models/kitchen.model');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');

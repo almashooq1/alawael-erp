@@ -8,7 +8,7 @@
  */
 
 const crypto = require('crypto');
-const logger = require('../../utils/logger');
+const _logger = require('../../utils/logger');
 
 // ─────────────────────────────────────────────
 // التصنيف الذكي المتقدم

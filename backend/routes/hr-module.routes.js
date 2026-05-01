@@ -5,13 +5,13 @@ const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const { escapeRegex } = require('../utils/escapeRegex');
 const Employee = require('../models/HR/Employee');
-const EmploymentContract = require('../models/HR/EmploymentContract');
+const _EmploymentContract = require('../models/HR/EmploymentContract');
 const PayrollRecord = require('../models/HR/PayrollRecord');
 const Leave = require('../models/HR/Leave');
 const LeaveBalance = require('../models/HR/LeaveBalance');
 const AttendanceRecord = require('../models/HR/AttendanceRecord');
-const Certification = require('../models/HR/Certification');
-const PerformanceReview = require('../models/HR/PerformanceReview');
+const _Certification = require('../models/HR/Certification');
+const _PerformanceReview = require('../models/HR/PerformanceReview');
 const EndOfServiceCalculation = require('../models/HR/EndOfServiceCalculation');
 const safeError = require('../utils/safeError');
 const {

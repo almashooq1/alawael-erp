@@ -729,7 +729,7 @@ exports.getPermissionMatrix = async (req, res) => {
 const analyticsService = require('../services/branchAnalytics.service');
 const notificationService = require('../services/branchNotification.service');
 const BranchTarget = require('../models/BranchTarget');
-const BranchPerformanceLog = require('../models/BranchPerformanceLog');
+const _BranchPerformanceLog = require('../models/BranchPerformanceLog');
 
 // [26] GET /hq/analytics?days=N — Network intelligence
 exports.getHQAnalytics = async (req, res) => {

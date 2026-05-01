@@ -13,7 +13,7 @@
 
 const BranchPerformanceLog = require('../models/BranchPerformanceLog');
 const BranchTarget = require('../models/BranchTarget');
-const BranchAuditLog = require('../models/BranchAuditLog');
+const _BranchAuditLog = require('../models/BranchAuditLog');
 
 // ─── KPI Weights (sum = 100) ──────────────────────────────────────────────────
 const KPI_WEIGHTS = {

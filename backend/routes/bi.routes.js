@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');

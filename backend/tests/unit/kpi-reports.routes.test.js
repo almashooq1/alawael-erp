@@ -48,13 +48,11 @@ jest.mock(
 );
 jest.mock('../../models/KpiReport', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -63,13 +61,11 @@ jest.mock('../../models/KpiReport', () => {
 });
 jest.mock('../../models/KpiValue', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -78,13 +74,11 @@ jest.mock('../../models/KpiValue', () => {
 });
 jest.mock('../../models/KpiScorecard', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -111,7 +105,7 @@ describe('routes/kpi-reports.routes', () => {
   });
 
   test('express.Router() was called', () => {
-    const express = require('express');
+    const _express = require('express');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);

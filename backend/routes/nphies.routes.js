@@ -9,7 +9,7 @@ const router = express.Router();
 const nphiesService = require('../services/nphies.service');
 const { authenticateToken, requirePermission } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // =========================================================================

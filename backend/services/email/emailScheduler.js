@@ -15,7 +15,7 @@
  */
 
 const logger = require('../../utils/logger');
-const EmailConfig = require('./EmailConfig');
+const _EmailConfig = require('./EmailConfig');
 
 class EmailScheduler {
   /**

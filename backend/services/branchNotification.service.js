@@ -11,7 +11,7 @@
  */
 
 const BranchPerformanceLog = require('../models/BranchPerformanceLog');
-const BranchAuditLog = require('../models/BranchAuditLog');
+const _BranchAuditLog = require('../models/BranchAuditLog');
 
 // ─── Alert Rules Definition ───────────────────────────────────────────────────
 const ALERT_RULES = [

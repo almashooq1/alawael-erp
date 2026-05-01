@@ -22,7 +22,7 @@ const crypto = require('crypto');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
 const Document = require('../models/Document');
-const Beneficiary = require('../models/Beneficiary');
+const _Beneficiary = require('../models/Beneficiary');
 const Guardian = require('../models/Guardian');
 const User = require('../models/User');
 const safeError = require('../utils/safeError');

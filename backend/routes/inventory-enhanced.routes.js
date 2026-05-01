@@ -71,7 +71,7 @@ router.post(
 router.get('/items/:itemId', authenticate, requireBranchAccess, async (req, res) => {
   try {
     const { InventoryItem } = require('../models/InventoryItem');
-    const escapeRegex = require('../utils/escapeRegex');
+    const _escapeRegex = require('../utils/escapeRegex');
     const item = await InventoryItem.findById(req.params.itemId).populate('categoryId');
     if (!item) return res.status(404).json({ success: false, message: 'الصنف غير موجود' });
     res.json({ success: true, data: item });

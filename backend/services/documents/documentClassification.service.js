@@ -4,7 +4,7 @@
  */
 
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 /* ─── Schemas ────────────────────────────────────────────── */
 const classificationModelSchema = new mongoose.Schema(

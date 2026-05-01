@@ -101,13 +101,11 @@ jest.mock(
 );
 jest.mock('../../models/Account', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -116,13 +114,11 @@ jest.mock('../../models/Account', () => {
 });
 jest.mock('../../models/JournalEntry', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -131,13 +127,11 @@ jest.mock('../../models/JournalEntry', () => {
 });
 jest.mock('../../models/Expense', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -146,13 +140,11 @@ jest.mock('../../models/Expense', () => {
 });
 jest.mock('../../models/AccountingInvoice', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -161,13 +153,11 @@ jest.mock('../../models/AccountingInvoice', () => {
 });
 jest.mock('../../models/CostCenter', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -176,13 +166,11 @@ jest.mock('../../models/CostCenter', () => {
 });
 jest.mock('../../models/FixedAsset', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -191,13 +179,11 @@ jest.mock('../../models/FixedAsset', () => {
 });
 jest.mock('../../models/Transaction', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -210,13 +196,11 @@ jest.mock(
 );
 jest.mock('../../models/User', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -225,13 +209,11 @@ jest.mock('../../models/User', () => {
 });
 jest.mock('../../models/User', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -258,7 +240,7 @@ describe('routes/finance.routes.unified', () => {
   });
 
   test('express.Router() was called', () => {
-    const express = require('express');
+    const _express = require('express');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);

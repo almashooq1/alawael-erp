@@ -7,7 +7,7 @@
 const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
+const _bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');

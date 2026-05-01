@@ -67,13 +67,11 @@ jest.mock(
 );
 jest.mock('../../models/Volunteer', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -82,13 +80,11 @@ jest.mock('../../models/Volunteer', () => {
 });
 jest.mock('../../models/VolunteerOpportunity', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -97,13 +93,11 @@ jest.mock('../../models/VolunteerOpportunity', () => {
 });
 jest.mock('../../models/VolunteerAssignment', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -112,13 +106,11 @@ jest.mock('../../models/VolunteerAssignment', () => {
 });
 jest.mock('../../models/VolunteerTrainingSession', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -127,13 +119,11 @@ jest.mock('../../models/VolunteerTrainingSession', () => {
 });
 jest.mock('../../models/VolunteerRecognition', () => {
   const M = jest.fn(() => ({ save: jest.fn().mockResolvedValue({}) }));
-  M.find = jest
-    .fn()
-    .mockReturnValue({
-      sort: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      lean: jest.fn().mockResolvedValue([]),
-    });
+  M.find = jest.fn().mockReturnValue({
+    sort: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    lean: jest.fn().mockResolvedValue([]),
+  });
   M.findOne = jest.fn().mockResolvedValue(null);
   M.findById = jest.fn().mockResolvedValue(null);
   M.create = jest.fn().mockResolvedValue({ _id: 'id1' });
@@ -160,7 +150,7 @@ describe('routes/volunteer.routes', () => {
   });
 
   test('express.Router() was called', () => {
-    const express = require('express');
+    const _express = require('express');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);

@@ -48,7 +48,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/secrets');
 

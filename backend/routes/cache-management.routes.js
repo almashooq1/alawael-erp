@@ -12,7 +12,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const { getCacheStats, clearCache } = require('../utils/performance-optimizer');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // Apply authentication to all routes

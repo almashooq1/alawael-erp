@@ -3,7 +3,7 @@ const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { PerformanceAnalyticsService } = require('../services/performanceAnalyticsService');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // Initialize service

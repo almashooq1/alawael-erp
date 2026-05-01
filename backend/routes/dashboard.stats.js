@@ -11,7 +11,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { _authenticateToken, optionalAuth } = require('../middleware/auth');
 
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // ── Helpers ────────────────────────────────────────────────────────

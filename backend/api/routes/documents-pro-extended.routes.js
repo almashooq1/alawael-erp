@@ -10,8 +10,8 @@
 
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const _mongoose = require('mongoose');
+const _logger = require('../../utils/logger');
 
 // الخدمات
 const signatureService = require('../../services/documents/documentSignature.service');

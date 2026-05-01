@@ -20,7 +20,7 @@ const {
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 // ── Auth: all routes below require authentication ────────────────────────────

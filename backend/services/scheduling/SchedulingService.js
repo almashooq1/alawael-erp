@@ -1,7 +1,7 @@
 const Appointment = require('../../models/scheduling/Appointment');
 const TherapistAvailability = require('../../models/scheduling/TherapistAvailability');
 const AppointmentRecurrence = require('../../models/scheduling/AppointmentRecurrence');
-const RoomBooking = require('../../models/scheduling/RoomBooking');
+const _RoomBooking = require('../../models/scheduling/RoomBooking');
 const WaitlistEntry = require('../../models/scheduling/WaitlistEntry');
 
 // ===== خدمة كشف تعارضات المواعيد =====

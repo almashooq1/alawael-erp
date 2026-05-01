@@ -18,7 +18,7 @@
 'use strict';
 
 const Beneficiary = require('../models/Beneficiary');
-const Guardian = require('../models/Guardian');
+const _Guardian = require('../models/Guardian');
 const BeneficiaryTransfer = require('../models/BeneficiaryTransfer');
 const WaitlistEntry = require('../models/WaitlistEntry');
 const {

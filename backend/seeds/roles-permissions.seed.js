@@ -6,7 +6,7 @@
 
 'use strict';
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Permissions Registry

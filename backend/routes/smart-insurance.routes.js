@@ -37,8 +37,8 @@ const PriorAuthorization = require('../models/PriorAuthorization');
 const InsuranceEligibilityCheck = require('../models/InsuranceEligibilityCheck');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
-const safeError = require('../utils/safeError');
+const _logger = require('../utils/logger');
+const _safeError = require('../utils/safeError');
 const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

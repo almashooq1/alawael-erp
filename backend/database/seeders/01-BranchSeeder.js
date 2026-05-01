@@ -4,7 +4,7 @@
  */
 'use strict';
 
-const mongoose = require('mongoose');
+const _mongoose = require('mongoose');
 const Branch = require('../../models/Branch');
 
 const BRANCHES = [

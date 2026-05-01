@@ -46,7 +46,7 @@ const dashboardRegistry = require('../config/dashboard.registry');
 const kpiRegistry = require('../config/kpi.registry');
 const widgetCatalog = require('../config/widget.catalog');
 const aggregator = require('../services/dashboardAggregator.service');
-const narrative = require('../services/dashboardNarrative.service');
+const _narrative = require('../services/dashboardNarrative.service');
 
 function asyncWrap(fn) {
   return (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

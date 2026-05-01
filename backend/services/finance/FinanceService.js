@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const Invoice = require('../../models/finance/Invoice');
 const JournalEntry = require('../../models/finance/JournalEntry');
-const Payment = require('../../models/finance/Payment');
+const _Payment = require('../../models/finance/Payment');
 const InsuranceClaim = require('../../models/finance/InsuranceClaim');
 
 // ===== خدمة المحاسبة والقيود اليومية =====

@@ -6,7 +6,7 @@
 
 const AttendanceLog = require('../models/AttendanceLog');
 const DailyAttendance = require('../models/DailyAttendance');
-const WorkShift = require('../models/WorkShift');
+const _WorkShift = require('../models/WorkShift');
 const EmployeeShiftAssignment = require('../models/EmployeeShiftAssignment');
 const LeaveRequest = require('../models/LeaveRequest');
 const AttendancePolicyModel = require('../models/AttendancePolicyModel');

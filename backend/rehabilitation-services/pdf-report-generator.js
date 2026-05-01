@@ -9,7 +9,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
+const _os = require('os');
 
 // ============================================================
 // إعدادات القوالب

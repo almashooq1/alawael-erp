@@ -318,7 +318,7 @@ const generateDailyAttendanceSummaries = async () => {
   }
 
   const DailyAttendance = require('../models/DailyAttendance');
-  const WorkShift = require('../models/WorkShift');
+  const _WorkShift = require('../models/WorkShift');
   const EmployeeShiftAssignment = require('../models/EmployeeShiftAssignment');
 
   const branches = await getActiveBranches();

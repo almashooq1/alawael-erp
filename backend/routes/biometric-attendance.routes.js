@@ -9,14 +9,14 @@ const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 
 // 🔒 All biometric attendance routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);
 const ZktecoDevice = require('../models/ZktecoDevice');
 const AttendanceLog = require('../models/AttendanceLog');
-const DailyAttendance = require('../models/DailyAttendance');
+const _DailyAttendance = require('../models/DailyAttendance');
 const WorkShift = require('../models/WorkShift');
 const EmployeeShiftAssignment = require('../models/EmployeeShiftAssignment');
 const AttendancePolicyModel = require('../models/AttendancePolicyModel');

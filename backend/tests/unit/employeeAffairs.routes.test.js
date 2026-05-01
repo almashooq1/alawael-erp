@@ -77,8 +77,8 @@ describe('routes/employeeAffairs.routes', () => {
   });
 
   test('express.Router() was called', () => {
-    const express = require('express');
-    const safeError = require('../../utils/safeError');
+    const _express = require('express');
+    const _safeError = require('../../utils/safeError');
     if (!routeModule) return;
     // Router may or may not have been called depending on mock timing
     expect(true).toBe(true);

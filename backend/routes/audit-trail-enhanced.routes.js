@@ -35,7 +35,7 @@ try {
   } catch {
     // إنشاء نموذج مبسط إذا لم يكن موجوداً
     const mongoose = require('mongoose');
-    const escapeRegex = require('../utils/escapeRegex');
+    const _escapeRegex = require('../utils/escapeRegex');
     const auditSchema = new mongoose.Schema(
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

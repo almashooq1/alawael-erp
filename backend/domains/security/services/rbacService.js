@@ -13,7 +13,7 @@
  * @version 3.0.0
  */
 
-const logger = require('../../../utils/logger');
+const _logger = require('../../../utils/logger');
 
 // ── Lazy-load delegates (pick one canonical impl per function) ──────────
 

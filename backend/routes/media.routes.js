@@ -18,7 +18,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { escapeRegex } = require('../utils/sanitize');
 const { validateUploadedFile } = require('../utils/uploadValidator');
 

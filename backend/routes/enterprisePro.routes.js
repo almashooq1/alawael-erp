@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
 const {

@@ -1,4 +1,4 @@
-const Vehicle = require('../../models/transport/Vehicle');
+const _Vehicle = require('../../models/transport/Vehicle');
 const TransportRoute = require('../../models/transport/TransportRoute');
 const Trip = require('../../models/transport/Trip');
 const GpsTracking = require('../../models/transport/GpsTracking');

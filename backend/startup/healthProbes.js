@@ -7,7 +7,7 @@
  */
 
 const mongoose = require('mongoose');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { getRedisStatus } = require('../config/performance');
 
 /**

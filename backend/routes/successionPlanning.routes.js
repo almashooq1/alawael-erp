@@ -12,7 +12,7 @@ const DevelopmentPlan = require('../models/DevelopmentPlan');
 const { authenticate: authMiddleware, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 

@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const SmartNotification = require('../models/SmartNotification');
 const safeError = require('../utils/safeError');
 

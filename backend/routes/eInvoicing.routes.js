@@ -8,7 +8,7 @@ const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
 const { requireBranchAccess } = require('../middleware/branchScope.middleware');
-const logger = require('../utils/logger');
+const _logger = require('../utils/logger');
 const EInvoice = require('../models/EInvoice');
 const safeError = require('../utils/safeError');
 

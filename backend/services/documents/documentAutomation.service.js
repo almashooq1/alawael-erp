@@ -8,7 +8,7 @@
  */
 
 const mongoose = require('mongoose');
-const crypto = require('crypto');
+const _crypto = require('crypto');
 
 /* ─── Automation Rule Model ──────────────────────────────────── */
 const automationRuleSchema = new mongoose.Schema(

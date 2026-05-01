@@ -378,7 +378,7 @@ describe('DatabaseMigrationService', () => {
 
   describe('createBackup', () => {
     it('writes backup file with all collections', async () => {
-      const mongoose = require('mongoose');
+      const _mongoose = require('mongoose');
       service.connection = {
         db: {
           listCollections: jest.fn().mockReturnValue({

@@ -933,7 +933,7 @@ router.put(
   '/waitlist/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { created_by, priority_score, ...updateData } = req.body;
+    const { _created_by, _priority_score, ...updateData } = req.body;
     const entry = await WaitlistEntry.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },

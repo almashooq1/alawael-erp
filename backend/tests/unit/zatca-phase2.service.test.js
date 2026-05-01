@@ -552,7 +552,7 @@ describe('ZatcaPhase2Service', () => {
     });
 
     it('defaults invoiceTime to 00:00:00 when not provided', () => {
-      const { invoiceTime, ...noTime } = qrInput;
+      const { _invoiceTime, ...noTime } = qrInput;
       const result = service.generateQrCode(noTime);
       const decoded = service.decodeQrCode(result);
       expect(decoded.data.timestamp).toBe('2024-01-15T00:00:00');

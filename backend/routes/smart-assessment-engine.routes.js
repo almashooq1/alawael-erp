@@ -917,7 +917,7 @@ router.put(
         .json({ success: false, message: `نوع تقييم غير معروف: ${req.params.type}` });
 
     // حماية الحقول الحساسة
-    const { _id, __v, createdAt, assessor, branch, ...safeUpdate } = req.body;
+    const { _id, __v, _createdAt, _assessor, _branch, ...safeUpdate } = req.body;
     safeUpdate.updatedBy = req.user?._id || req.user?.id;
     safeUpdate.lastModified = new Date();
 

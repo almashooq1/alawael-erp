@@ -146,7 +146,7 @@ router.put(
   '/accounts/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { account_code, created_by, ...updateData } = req.body;
+    const { _account_code, _created_by, ...updateData } = req.body;
     const account = await ChartOfAccount.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },

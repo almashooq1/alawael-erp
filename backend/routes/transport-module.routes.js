@@ -141,7 +141,7 @@ router.put(
   '/vehicles/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { plate_number, vehicle_number, created_by, ...updateData } = req.body;
+    const { _plate_number, _vehicle_number, _created_by, ...updateData } = req.body;
     const vehicle = await Vehicle.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
@@ -271,7 +271,7 @@ router.put(
   '/routes/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { route_number, created_by, ...updateData } = req.body;
+    const { _route_number, _created_by, ...updateData } = req.body;
     const route = await TransportRoute.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
@@ -455,7 +455,7 @@ router.put(
   '/trips/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { trip_number, created_by, ...updateData } = req.body;
+    const { _trip_number, _created_by, ...updateData } = req.body;
     const trip = await Trip.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },
@@ -852,7 +852,7 @@ router.put(
   '/maintenance/:id',
   validateObjectId(),
   asyncHandler(async (req, res) => {
-    const { created_by, ...updateData } = req.body;
+    const { _created_by, ...updateData } = req.body;
     const record = await VehicleMaintenance.findOneAndUpdate(
       { _id: req.params.id, deleted_at: null },
       { ...updateData, updated_at: new Date() },

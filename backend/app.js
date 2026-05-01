@@ -343,9 +343,15 @@ try {
   } catch {
     /* optional */
   }
+  // Force mongo store. The 'auto' mode falls back to in-memory because
+  // bootstrapRedFlagSystem runs synchronously at app.js module-load time,
+  // before mongoose finishes connecting — meaning red-flag state would
+  // never persist across restarts. createMongoStateStore() only captures
+  // the model reference; mongoose buffers queries until the connection
+  // opens, so this is safe to call before mongoose.connect resolves.
   const redFlags = bootstrapRedFlagSystem({
     logger,
-    storeMode: 'auto', // uses Mongo when connection is up, memory otherwise
+    storeMode: 'mongo',
     cron: cronDep,
   });
   app.locals.redFlagSystem = redFlags;

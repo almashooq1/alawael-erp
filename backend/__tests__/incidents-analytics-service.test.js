@@ -16,8 +16,9 @@ function inc({
   permanentFix = false,
   regulatory = false,
   escalated = false,
+  now = new Date(),
 }) {
-  const reported = new Date(Date.now() - reportedDaysAgo * 86400000);
+  const reported = new Date(now.getTime() - reportedDaysAgo * 86400000);
   const resolved =
     resolvedHoursAfterReport != null
       ? new Date(reported.getTime() + resolvedHoursAfterReport * 3600000)
@@ -162,12 +163,14 @@ describe('incidentsAnalyticsService.monthlyTrend', () => {
 
 describe('incidentsAnalyticsService.detectSurge', () => {
   it('fires on month-over-month spike', () => {
+    // Anchor on a mid-month "now" so reportedDaysAgo: 40 lands cleanly in the prior month
+    // regardless of the test runner's calendar position. Without this, on May 1
+    // "40 days ago" = March 22 (two months back), missing prior-month bucket entirely.
+    const now = new Date('2026-05-15T12:00:00Z');
     const items = [];
-    // 3 last month
-    for (let i = 0; i < 3; i++) items.push(inc({ reportedDaysAgo: 40 }));
-    // 10 this month
-    for (let i = 0; i < 10; i++) items.push(inc({ reportedDaysAgo: 2 }));
-    const s = svc.detectSurge(items);
+    for (let i = 0; i < 3; i++) items.push(inc({ reportedDaysAgo: 40, now })); // April 5 → prior
+    for (let i = 0; i < 10; i++) items.push(inc({ reportedDaysAgo: 2, now })); // May 13 → current
+    const s = svc.detectSurge(items, now);
     expect(s.active).toBe(true);
     expect(s.jumpPct).toBeGreaterThan(50);
   });

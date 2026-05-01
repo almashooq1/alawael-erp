@@ -13,8 +13,9 @@ function c({
   submitterType = 'parent',
   createdDaysAgo = 5,
   resolvedDaysAfterCreate = null,
+  now = new Date(),
 }) {
-  const createdAt = new Date(Date.now() - createdDaysAgo * 86400000);
+  const createdAt = new Date(now.getTime() - createdDaysAgo * 86400000);
   const resolvedAt =
     resolvedDaysAfterCreate != null
       ? new Date(createdAt.getTime() + resolvedDaysAfterCreate * 86400000)
@@ -169,12 +170,13 @@ describe('complaintsAnalyticsService.slaBreaches', () => {
 
 describe('complaintsAnalyticsService.detectSpike', () => {
   it('fires on month-over-month spike above threshold', () => {
+    // Anchor on a mid-month "now" so createdDaysAgo: 35 lands cleanly in the prior
+    // month regardless of the test runner's calendar position.
+    const now = new Date('2026-05-15T12:00:00Z');
     const items = [];
-    // 5 last month
-    for (let i = 0; i < 5; i++) items.push(c({ createdDaysAgo: 35 }));
-    // 15 this month
-    for (let i = 0; i < 15; i++) items.push(c({ createdDaysAgo: 2 }));
-    const s = svc.detectSpike(items);
+    for (let i = 0; i < 5; i++) items.push(c({ createdDaysAgo: 35, now })); // April 10 → prior
+    for (let i = 0; i < 15; i++) items.push(c({ createdDaysAgo: 2, now })); // May 13 → current
+    const s = svc.detectSpike(items, now);
     expect(s.active).toBe(true);
     expect(s.jumpPct).toBeGreaterThan(40);
   });

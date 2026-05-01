@@ -342,7 +342,7 @@ async function importFromFhir(fhirResource, branchId, facilityId) {
 
 function parseFhirServiceRequest(resource) {
   // Map FHIR R4 ServiceRequest fields to our referral model
-  const patient = resource.subject?.reference || '';
+  const _patient = resource.subject?.reference || '';
   const requester = resource.requester?.reference || '';
 
   return {

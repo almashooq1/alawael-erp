@@ -18,7 +18,7 @@ jest.mock('../../utils/logger', () => ({
 const mockFindOne = jest.fn();
 const mockFindOneAndUpdate = jest.fn();
 const mockCountDocuments = jest.fn();
-const mockAggregate = jest.fn();
+const _mockAggregate = jest.fn();
 jest.mock('../../models/AnalyticsCache', () => ({
   findOne: mockFindOne,
   findOneAndUpdate: mockFindOneAndUpdate,

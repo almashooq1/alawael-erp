@@ -86,7 +86,7 @@ function token(role = 'admin') {
   );
 }
 const bearerAdmin = () => ({ Authorization: `Bearer ${token('admin')}` });
-const bearer = r => ({ Authorization: `Bearer ${token(r)}` });
+const _bearer = r => ({ Authorization: `Bearer ${token(r)}` });
 
 // ═══════════════════════════════════════════════════════════════════════
 // Route mounting — every new route should NOT 404 with auth attempted

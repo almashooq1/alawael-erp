@@ -284,7 +284,7 @@ describe('WidgetTemplateService', () => {
     test('returns sorted by usage (custom only)', () => {
       // Clear built-ins which lack metadata
       svc.templates.clear();
-      const t1 = seedCustom({ name: 'T1' });
+      const _t1 = seedCustom({ name: 'T1' });
       const t2 = seedCustom({ name: 'T2' });
       svc.trackUsage(t2.id);
       svc.trackUsage(t2.id);

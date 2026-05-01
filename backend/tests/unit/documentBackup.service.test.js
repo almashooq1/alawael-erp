@@ -15,7 +15,7 @@ const mongoose = require('mongoose');
 const service = require('../../services/documents/documentBackup.service');
 
 // Helpers to get mock models created during module load
-const getModel = name => mongoose.model(name);
+const _getModel = name => mongoose.model(name);
 
 describe('DocumentBackupService', () => {
   // ═══════════════════════════════════════

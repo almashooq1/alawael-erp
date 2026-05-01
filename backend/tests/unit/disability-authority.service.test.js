@@ -58,13 +58,13 @@ describe('DisabilityAuthorityService', () => {
     describe('createReport', () => {
       it('generates reportNumber and creates report', async () => {
         DisabilityAuthorityReport.countDocuments.mockResolvedValue(5);
-        const mockSave = jest
+        const _mockSave = jest
           .fn()
           .mockResolvedValue({ _id: fakeId, reportNumber: 'MSR-2025-0006' });
         // The constructor: `new DisabilityAuthorityReport(...)` — for a model mock we need to handle create differently
         // Since DisabilityAuthorityReport is a plain mock object (not a constructor), the service uses `new DisabilityAuthorityReport(...)`.
         // We need to make it a constructor.
-        const originalReport = DisabilityAuthorityReport;
+        const _originalReport = DisabilityAuthorityReport;
         // The service does: const report = new DisabilityAuthorityReport({...}); report.save();
         // We need to intercept constructor calls.
         // Actually looking at the code: it does `new DisabilityAuthorityReport(...)` followed by `report.save()`.

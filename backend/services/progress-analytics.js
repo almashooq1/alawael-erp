@@ -522,7 +522,7 @@ class ProgressAnalytics {
     // Assessment progress per domain
     if (assessments && assessments.length >= 2) {
       const first = assessments[0];
-      const last = assessments[assessments.length - 1];
+      const _last = assessments[assessments.length - 1];
       report.domain_progress = {};
 
       const allDomains = new Set();

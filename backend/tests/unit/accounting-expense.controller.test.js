@@ -56,7 +56,7 @@ jest.mock('../../utils/logger', () => ({
 jest.mock('../../utils/sanitize', () => ({}));
 jest.mock('../../utils/safeError', () => ({}));
 
-const mockReq = (overrides = {}) => ({
+const _mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer token' },
   body: {},
   params: {},
@@ -69,7 +69,7 @@ const mockReq = (overrides = {}) => ({
   ...overrides,
 });
 
-const mockRes = () => {
+const _mockRes = () => {
   const res = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
@@ -83,7 +83,7 @@ const mockRes = () => {
   return res;
 };
 
-const mockNext = jest.fn();
+const _mockNext = jest.fn();
 
 let ctrl;
 try {

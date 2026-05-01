@@ -1167,7 +1167,7 @@ describe('MuqeemFullService', () => {
     const futureDate = days => new Date(Date.now() + days * 24 * 60 * 60 * 1000);
     const pastDate = days => new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
-    const makeChain = data => {
+    const _makeChain = data => {
       const chain = {
         find: jest.fn().mockReturnThis(),
         populate: jest.fn().mockReturnThis(),

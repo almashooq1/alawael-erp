@@ -195,7 +195,7 @@ class DocumentQRCodeService extends EventEmitter {
         const isFinderTL = row < 7 && col < 7;
         const isFinderTR = row < 7 && col >= modules - 7;
         const isFinderBL = row >= modules - 7 && col < 7;
-        const isFinderBorder =
+        const _isFinderBorder =
           (isFinderTL || isFinderTR || isFinderBL) &&
           (row === 0 ||
             row === 6 ||

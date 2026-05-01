@@ -93,7 +93,7 @@ const riskFactorSchema = new mongoose.Schema(
 );
 
 // ── Screening Tool Result ──
-const screeningToolResultSchema = new mongoose.Schema(
+const _screeningToolResultSchema = new mongoose.Schema(
   {
     toolName: { type: String, required: true },
     toolNameAr: { type: String },

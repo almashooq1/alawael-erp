@@ -11,8 +11,8 @@ const AttendanceLog = require('../models/AttendanceLog');
 
 // ─── أوامر ZKTeco ────────────────────────────────────────────────────────────
 
-const CMD_CONNECT = 0x03e8;
-const CMD_DISCONNECT = 0x02bc;
+const _CMD_CONNECT = 0x03e8;
+const _CMD_DISCONNECT = 0x02bc;
 const CMD_ATTLOG = 0x000d;
 const CMD_SET_USER = 0x005c;
 const CMD_DELETE_USER = 0x0072;

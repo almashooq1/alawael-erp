@@ -107,7 +107,7 @@ const validateGoalData = body => {
 };
 
 /** التحقق من معرّف ObjectId */
-const isValidId = id => /^[a-fA-F0-9]{24}$/.test(id);
+const _isValidId = id => /^[a-fA-F0-9]{24}$/.test(id);
 
 // ────────────────────────────────────────────────────────────────────────────
 // 1. إنشاء خطة تأهيل شخصية جديدة

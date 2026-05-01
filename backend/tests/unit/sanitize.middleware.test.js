@@ -11,7 +11,7 @@ jest.mock('express-mongo-sanitize', () => jest.fn(() => (req, res, next) => next
 jest.mock('express-xss-sanitizer', () => jest.fn(() => (req, res, next) => next()));
 jest.mock('hpp', () => jest.fn(() => (req, res, next) => next()));
 
-const mockReq = (overrides = {}) => ({
+const _mockReq = (overrides = {}) => ({
   headers: { authorization: 'Bearer mock.jwt.token' },
   cookies: {},
   body: {},
@@ -29,7 +29,7 @@ const mockReq = (overrides = {}) => ({
   ...overrides,
 });
 
-const mockRes = () => {
+const _mockRes = () => {
   const res = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
@@ -46,7 +46,7 @@ const mockRes = () => {
   return res;
 };
 
-const mockNext = jest.fn();
+const _mockNext = jest.fn();
 
 let mw;
 try {

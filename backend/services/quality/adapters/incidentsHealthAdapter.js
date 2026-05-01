@@ -62,7 +62,7 @@ function createIncidentsHealthAdapter({ model, logger = console } = {}) {
       return { seriousRate: 0, closureRate: null, sentinelOpen: [] };
     }
 
-    const nowMs = Date.now();
+    const _nowMs = Date.now();
 
     // Serious rate: open major+catastrophic per normalised day.
     // Can't know beneficiary-days without a census feed; use a

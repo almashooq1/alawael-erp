@@ -746,7 +746,7 @@ router.patch('/inventories/:id/complete', authorize(['admin', 'manager']), async
 router.get('/dashboard', async (req, res) => {
   try {
     const now = new Date();
-    const soon30 = new Date(now.getTime() + 30 * 864e5);
+    const _soon30 = new Date(now.getTime() + 30 * 864e5);
     const soon60 = new Date(now.getTime() + 60 * 864e5);
     const [
       totalAssets,

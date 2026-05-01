@@ -134,7 +134,7 @@ class JourneyService {
     }
 
     // 1. Update episode
-    const phaseUpdate = {
+    const _phaseUpdate = {
       currentPhase: toPhase,
     };
 

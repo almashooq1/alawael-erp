@@ -279,11 +279,11 @@ function calculateConfidence(similarCount) {
  */
 async function findSimilarBeneficiaries(beneficiary, BeneficiaryModel) {
   try {
-    const ageTolerance = 2; // ± 2 سنة
+    const _ageTolerance = 2; // ± 2 سنة
     const dob = beneficiary.date_of_birth || beneficiary.dob;
     const enrollmentDate = beneficiary.enrollment_date || beneficiary.created_at;
 
-    const ageAtEnrollment =
+    const _ageAtEnrollment =
       dob && enrollmentDate
         ? Math.floor((new Date(enrollmentDate) - new Date(dob)) / (365.25 * 24 * 3600 * 1000))
         : null;

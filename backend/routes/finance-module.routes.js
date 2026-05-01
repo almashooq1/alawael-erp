@@ -40,7 +40,7 @@ const escapeRegex = require('../utils/escapeRegex');
 
 const accountingService = new AccountingService();
 const zatcaService = new ZatcaService();
-const insuranceClaimService = new InsuranceClaimService();
+const _insuranceClaimService = new InsuranceClaimService();
 
 // ─── Middleware helpers ───────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

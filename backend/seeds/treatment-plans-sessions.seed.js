@@ -132,7 +132,7 @@ const THERAPY_BY_DISABILITY = {
   LEARNING: ['speech_therapy'],
 };
 
-const THERAPIST_BY_SPECIALTY = {
+const _THERAPIST_BY_SPECIALTY = {
   speech_therapy: ['THR-RUH-001', 'THR-JED-001', 'THR-DAM-001'],
   occupational_therapy: ['THR-RUH-002', 'THR-JED-003', 'THR-DAM-002'],
   physical_therapy: ['THR-RUH-003', 'THR-JED-002', 'THR-DAM-003'],

@@ -13,7 +13,7 @@ const SERVICE_RATES = {
   transport_monthly: { ar: 'خدمة نقل شهرية', en: 'Monthly Transport', rate: 800 },
 };
 
-const INSURANCE_PROVIDERS = ['bupa', 'tawuniya', 'medgulf', 'walaa'];
+const _INSURANCE_PROVIDERS = ['bupa', 'tawuniya', 'medgulf', 'walaa'];
 
 function roundTwo(n) {
   return Math.round(n * 100) / 100;

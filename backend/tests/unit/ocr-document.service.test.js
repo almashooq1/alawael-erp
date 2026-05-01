@@ -575,7 +575,7 @@ describe('reprocessDocument()', () => {
   });
 
   it('removes old extraction and creates new one', () => {
-    const beforeExtIds = [...service.extractedData.values()]
+    const _beforeExtIds = [...service.extractedData.values()]
       .filter(e => e.documentId === 'doc-301')
       .map(e => e.id);
 

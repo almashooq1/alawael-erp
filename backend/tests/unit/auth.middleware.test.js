@@ -81,7 +81,7 @@ const mockRes = () => {
   return res;
 };
 
-const mockNext = jest.fn();
+const _mockNext = jest.fn();
 
 let mw;
 try {

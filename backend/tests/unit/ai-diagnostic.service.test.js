@@ -226,7 +226,7 @@ describe('AIDiagnosticService — Beneficiaries', () => {
   });
 
   it('updateBeneficiary should merge fields', () => {
-    const original = service.getBeneficiary('ben-101');
+    const _original = service.getBeneficiary('ben-101');
     const updated = service.updateBeneficiary('ben-101', { guardian: { name: 'New Guardian' } });
     expect(updated.guardian.name).toBe('New Guardian');
     expect(updated.id).toBe('ben-101');

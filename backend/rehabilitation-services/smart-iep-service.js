@@ -626,7 +626,7 @@ class SmartIEPService {
       goal.current_performance = `${progressData.accuracy_percentage}% دقة`;
 
       // فحص تحقق الهدف
-      const masteryMet = progressData.accuracy_percentage >= 80;
+      const _masteryMet = progressData.accuracy_percentage >= 80;
       const recentLogs = goal.progress_log.slice(-3);
       const allMastered =
         recentLogs.length >= 3 && recentLogs.every(l => l.accuracy_percentage >= 80);

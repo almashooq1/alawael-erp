@@ -21,7 +21,7 @@ class DocumentAnalyticsEngine {
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
       const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const _lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
       const [
         totalDocs,

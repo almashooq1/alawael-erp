@@ -48,7 +48,7 @@ const fakeWorkflow = (overrides = {}) => ({
   ...overrides,
 });
 
-const mockChain = resolveVal => ({
+const _mockChain = resolveVal => ({
   sort: jest.fn().mockReturnThis(),
   skip: jest.fn().mockReturnThis(),
   limit: jest.fn().mockReturnThis(),

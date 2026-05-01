@@ -53,7 +53,7 @@ const OPEN_STATUSES = [
   'waiting_vendor',
   'reopened',
 ];
-const CLOSED_STATUSES = ['resolved', 'closed', 'cancelled'];
+const _CLOSED_STATUSES = ['resolved', 'closed', 'cancelled'];
 
 const TYPE_LABELS = {
   technical_issue: 'مشكلة تقنية',

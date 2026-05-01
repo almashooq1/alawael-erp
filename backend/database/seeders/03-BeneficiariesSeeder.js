@@ -15,9 +15,9 @@ function randomDate(start, end) {
 
 // ─── بيانات المستفيدين ──────────────────────────────────────────────────────
 function buildBeneficiaries(riyadh, jeddah, dammam) {
-  const riyadhId = riyadh._id;
-  const jeddahId = jeddah._id;
-  const dammamId = dammam._id;
+  const _riyadhId = riyadh._id;
+  const _jeddahId = jeddah._id;
+  const _dammamId = dammam._id;
 
   return [
     // ══════════════════════════ فرع الرياض (20 مستفيد) ══════════════════════════

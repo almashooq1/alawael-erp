@@ -101,7 +101,7 @@ const SRS2_SEVERITY = {
 /**
  * Portage developmental milestones per age band (count per domain)
  */
-const PORTAGE_MILESTONES_COUNT = {
+const _PORTAGE_MILESTONES_COUNT = {
   infant_stimulation: { '0-1': 45 },
   socialization: { '0-1': 12, '1-2': 13, '2-3': 14, '3-4': 14, '4-5': 15, '5-6': 14 },
   language: { '0-1': 15, '1-2': 20, '2-3': 22, '3-4': 22, '4-5': 23, '5-6': 23 },

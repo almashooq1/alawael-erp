@@ -342,7 +342,7 @@ const TICKET_TEMPLATES = [
 // ─────────────────────────────────────────────────────────────────────────────
 // حالات التذاكر والتعليقات
 // ─────────────────────────────────────────────────────────────────────────────
-const TICKET_STATUSES = ['open', 'in_progress', 'resolved', 'closed', 'escalated'];
+const _TICKET_STATUSES = ['open', 'in_progress', 'resolved', 'closed', 'escalated'];
 
 const COMMENT_TEMPLATES = {
   open: [
@@ -619,7 +619,7 @@ async function seed(connection) {
   }
 
   // إحصائيات ملخصة
-  const byStatus = {};
+  const _byStatus = {};
   const byPriority = {};
   TICKET_TEMPLATES.forEach(t => {
     byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;

@@ -37,7 +37,7 @@ const NPHIES_BASE_URL =
     ? process.env.NPHIES_BASE_URL || 'https://HSB.nphies.sa/$process-message'
     : 'https://HSB.nphies.sa/test/$process-message';
 
-const NPHIES_SENDER_ID = process.env.NPHIES_SENDER_ID || '';
+const _NPHIES_SENDER_ID = process.env.NPHIES_SENDER_ID || '';
 const NPHIES_LICENSE_ID = process.env.NPHIES_LICENSE_ID || '';
 const NPHIES_PROVIDER_ID = process.env.NPHIES_PROVIDER_ID || '';
 const NPHIES_ACCESS_TOKEN = process.env.NPHIES_ACCESS_TOKEN || '';

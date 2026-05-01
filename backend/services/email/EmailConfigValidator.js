@@ -69,7 +69,7 @@ const emailConfigSchema = Joi.object({
     // every boot logs warnings about its own defaults.
     maxPerMinute: Joi.number().integer().min(1).max(1000).default(30),
     maxPerHour: Joi.number().integer().min(1).max(50000).default(1800),
-    maxPerDay: Joi.number().integer().min(1).max(500000).default(10000),
+    maxPerDay: Joi.number().integer().min(1).max(500000).default(43200),
   }),
 
   retry: Joi.object({

@@ -77,14 +77,13 @@ const EmailConfig = {
   // Layered burst/sustained/budget caps. The validator flags inconsistency
   // when maxPerMinute × 60 > maxPerHour or maxPerHour × 24 > maxPerDay,
   // and the warning fires once per tier on every boot if defaults are
-  // incoherent. Keep the inequalities satisfied so the no-env-vars case
-  // boots cleanly: 30/min × 60 = 1800/hr; 1800/hr × 24 ≈ 43k/day; cap
-  // budget at 10k/day on the assumption real workload averages far
-  // below burst.
+  // incoherent. Defaults satisfy both: 30/min × 60 = 1800/hr; 1800/hr ×
+  // 24 = 43200/day. Real workload averages far below these — env vars
+  // override for tighter budget caps.
   rateLimit: {
     maxPerMinute: parseInt(process.env.EMAIL_RATE_PER_MINUTE || '30', 10),
     maxPerHour: parseInt(process.env.EMAIL_RATE_PER_HOUR || '1800', 10),
-    maxPerDay: parseInt(process.env.EMAIL_RATE_PER_DAY || '10000', 10),
+    maxPerDay: parseInt(process.env.EMAIL_RATE_PER_DAY || '43200', 10),
   },
 
   // ─── Retry / Queue ────────────────────────────────────────

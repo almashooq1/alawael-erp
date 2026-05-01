@@ -1,0 +1,42 @@
+﻿const express = require('express');
+const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
+const _logger = require('../utils/logger');
+const safeError = require('../utils/safeError');
+
+router.use(authenticate);
+router.use(requireBranchAccess);
+// POST /:id/schedule
+router.post('/:id/schedule', async (req, res) => {
+  try {
+    const Report = require('../models/Report');
+    const report = await Report.create({
+      ...req.body,
+      studentId: req.params.id,
+      type: 'scheduled',
+      createdBy: req.user?.id,
+    });
+    res.status(201).json({ success: true, data: report, message: 'تم جدولة التقرير' });
+  } catch (err) {
+    safeError(res, err, 'Student report schedule error');
+  }
+});
+
+// POST /:id/comparison
+router.post('/:id/comparison', async (req, res) => {
+  try {
+    const Report = require('../models/Report');
+    const report = await Report.create({
+      ...req.body,
+      studentId: req.params.id,
+      type: 'comparison',
+      createdBy: req.user?.id,
+    });
+    res.status(201).json({ success: true, data: report, message: 'تم إنشاء تقرير المقارنة' });
+  } catch (err) {
+    safeError(res, err, 'Student report comparison error');
+  }
+});
+
+module.exports = router;

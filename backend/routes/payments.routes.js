@@ -1,0 +1,170 @@
+﻿const express = require('express');
+const router = express.Router();
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess, _branchFilter } = require('../middleware/branchScope.middleware');
+const { sensitiveOperationLimiter } = require('../middleware/rateLimiter');
+const _logger = require('../utils/logger');
+const Payment = require('../models/Payment');
+const safeError = require('../utils/safeError');
+
+router.use(authenticate);
+router.use(requireBranchAccess);
+// ── Payment-specific rate limiter (5 write operations / hour) ──
+router.use(['/', '/:id'], (req, res, next) => {
+  // Only rate-limit write operations, not reads
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
+    return sensitiveOperationLimiter(req, res, next);
+  }
+  next();
+});
+
+// ── Whitelist helper: pick only allowed fields from request body ──
+const ALLOWED_PAYMENT_FIELDS = [
+  'invoiceId',
+  'reference',
+  'paymentDate',
+  'amount',
+  'currency',
+  'paymentMethod',
+  'accountId',
+  'checkNumber',
+  'bankName',
+  'transactionId',
+  'notes',
+];
+
+function pickFields(body, allowedFields) {
+  const result = {};
+  for (const key of allowedFields) {
+    if (body[key] !== undefined) result[key] = body[key];
+  }
+  return result;
+}
+
+function validatePaymentBody(body) {
+  const errors = [];
+  if (body.amount !== undefined) {
+    const amount = Number(body.amount);
+    if (isNaN(amount) || amount < 0) errors.push('المبلغ يجب أن يكون رقماً موجباً');
+  }
+  if (body.paymentMethod !== undefined) {
+    const valid = [
+      'cash',
+      'bank_transfer',
+      'check',
+      'credit_card',
+      'debit_card',
+      'online',
+      'other',
+    ];
+    if (!valid.includes(body.paymentMethod)) errors.push('طريقة الدفع غير صالحة');
+  }
+  return errors;
+}
+
+// GET /all
+router.get('/all', async (req, res) => {
+  try {
+    const { page = 1, limit = 20, status } = req.query;
+    const filter = {};
+    if (status) filter.status = status;
+    const skip = (Math.max(1, +page) - 1) * +limit;
+    const [data, total] = await Promise.all([
+      Payment.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
+      Payment.countDocuments(filter),
+    ]);
+    res.json({ success: true, data, pagination: { page: +page, limit: +limit, total } });
+  } catch (err) {
+    safeError(res, err, 'Payments all error');
+  }
+});
+
+// GET /history
+router.get('/history', async (req, res) => {
+  try {
+    const data = await Payment.find({ userId: req.user?.id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+    res.json({ success: true, data });
+  } catch (err) {
+    safeError(res, err, 'Payment history error');
+  }
+});
+
+// POST /stripe
+router.post('/stripe', async (req, res) => {
+  try {
+    const errors = validatePaymentBody(req.body);
+    if (errors.length) return res.status(400).json({ success: false, message: errors.join(', ') });
+    const fields = pickFields(req.body, ALLOWED_PAYMENT_FIELDS);
+    const payment = await Payment.create({
+      ...fields,
+      method: 'stripe',
+      userId: req.user?.id,
+      status: 'pending',
+    });
+    res.status(201).json({ success: true, data: payment, message: 'تم إنشاء طلب الدفع' });
+  } catch (err) {
+    safeError(res, err, 'Stripe payment error');
+  }
+});
+
+// POST /paypal
+router.post('/paypal', async (req, res) => {
+  try {
+    const errors = validatePaymentBody(req.body);
+    if (errors.length) return res.status(400).json({ success: false, message: errors.join(', ') });
+    const fields = pickFields(req.body, ALLOWED_PAYMENT_FIELDS);
+    const payment = await Payment.create({
+      ...fields,
+      method: 'paypal',
+      userId: req.user?.id,
+      status: 'pending',
+    });
+    res.status(201).json({ success: true, data: payment, message: 'تم إنشاء طلب الدفع' });
+  } catch (err) {
+    safeError(res, err, 'PayPal payment error');
+  }
+});
+
+// POST /installment
+router.post('/installment', async (req, res) => {
+  try {
+    const errors = validatePaymentBody(req.body);
+    if (errors.length) return res.status(400).json({ success: false, message: errors.join(', ') });
+    const fields = pickFields(req.body, ALLOWED_PAYMENT_FIELDS);
+    const payment = await Payment.create({
+      ...fields,
+      method: 'installment',
+      userId: req.user?.id,
+      status: 'pending',
+    });
+    res.status(201).json({ success: true, data: payment, message: 'تم إنشاء خطة التقسيط' });
+  } catch (err) {
+    safeError(res, err, 'Installment error');
+  }
+});
+
+// POST /subscriptions/create
+router.post('/subscriptions/create', async (req, res) => {
+  try {
+    const Subscription = require('../models/subscription.model');
+    const allowedSubFields = [
+      'plan',
+      'startDate',
+      'endDate',
+      'amount',
+      'currency',
+      'paymentMethod',
+      'notes',
+    ];
+    const fields = pickFields(req.body, allowedSubFields);
+    const sub = await Subscription.create({ ...fields, userId: req.user?.id, status: 'active' });
+    res.status(201).json({ success: true, data: sub, message: 'تم إنشاء الاشتراك' });
+  } catch (err) {
+    safeError(res, err, 'Subscription create error');
+  }
+});
+
+module.exports = router;

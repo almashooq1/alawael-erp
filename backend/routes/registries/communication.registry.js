@@ -20,13 +20,13 @@
  */
 module.exports = function registerCommunicationRoutes(
   app,
-  { safeRequire, dualMount, safeMount, logger }
+  { safeRequire, dualMount, _safeMount, logger }
 ) {
   // ══════════════════════════════════════════════════════════════════════════
   // ── Imports ─────────────────────────────────────────────────────────────
   // ══════════════════════════════════════════════════════════════════════════
-  const communicationsRouter = safeRequire('../routes/communications.real.routes');
-  // PHANTOM: const aiCommRouter = safeRequire('../routes/aiCommunication.real.routes');
+  const communicationsRouter = safeRequire('../routes/communications.routes');
+  // PHANTOM: const aiCommRouter = safeRequire('../routes/aiCommunication.routes');
   const communicationRoutes = safeRequire('../routes/communication.routes');
   // PHANTOM: const emailV2Routes = safeRequire('../routes/email-v2.routes');
   // PHANTOM: const whatsappRoutes = safeRequire('../routes/whatsapp.routes');

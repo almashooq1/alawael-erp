@@ -26,7 +26,7 @@ module.exports = function registerFinanceRoutes(
   //       — all routes consolidated in finance.routes.unified.js
 
   // ── Other Finance Modules ───────────────────────────────────────────────
-  const paymentsRouter = safeRequire('../routes/payments.real.routes');
+  const paymentsRouter = safeRequire('../routes/payments.routes');
   const saudiTaxRoutes = safeRequire('../routes/saudiTax.routes');
   const financeOperationsRoutes = safeRequire('../routes/financeOperations.routes');
   const financeModuleRoutes = safeRequire('../routes/finance-module.routes');

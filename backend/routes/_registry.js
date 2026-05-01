@@ -80,20 +80,20 @@ const elearningRoutes = safeRequire('../routes/elearning');
 const orgBrandingRoutes = safeRequire('../routes/orgBranding');
 
 // Real Mongoose CRUD routes (converted from frontend-api-stubs)
-const adminRouter = safeRequire('../routes/admin.real.routes');
+const adminRouter = safeRequire('../routes/admin.routes');
 const userManagementRouter = safeRequire('../routes/user-management.routes');
-const accountRouter = safeRequire('../routes/account.real.routes');
-const monitoringRouter = safeRequire('../routes/monitoring.real.routes');
-const aiPredictionsRouter = safeRequire('../routes/aiPredictions.real.routes');
+const accountRouter = safeRequire('../routes/account.routes');
+const monitoringRouter = safeRequire('../routes/monitoring.routes');
+const aiPredictionsRouter = safeRequire('../routes/aiPredictions.routes');
 const aiAnalyticsRouter = safeRequire('../routes/ai-analytics.routes');
-const integratedCareRouter = safeRequire('../routes/integratedCare.real.routes');
-const securityRouter = safeRequire('../routes/security.real.routes');
-const organizationRouter = safeRequire('../routes/organization.real.routes');
-const exportImportRouter = safeRequire('../routes/exportImport.real.routes');
-const exportsRouter = safeRequire('../routes/exports.real.routes');
-const pmRouter = safeRequire('../routes/pm.real.routes');
-const analyticsExtraRouter = safeRequire('../routes/analyticsExtra.real.routes');
-const dashboardExtrasRouter = safeRequire('../routes/dashboardExtras.real.routes');
+const integratedCareRouter = safeRequire('../routes/integratedCare.routes');
+const securityRouter = safeRequire('../routes/security.routes');
+const organizationRouter = safeRequire('../routes/organization.routes');
+const exportImportRouter = safeRequire('../routes/exportImport.routes');
+const exportsRouter = safeRequire('../routes/exports.routes');
+const pmRouter = safeRequire('../routes/pm.routes');
+const analyticsExtraRouter = safeRequire('../routes/analyticsExtra.routes');
+const dashboardExtrasRouter = safeRequire('../routes/dashboardExtras.routes');
 
 // Previously Unmounted Route Files (CRUD-complete)
 const qiwaRoutes = safeRequire('../routes/qiwa.routes');

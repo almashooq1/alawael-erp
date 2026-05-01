@@ -5,7 +5,7 @@ const paymentGatewayService = require('../services/paymentGateway.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const idempotency = require('../middleware/idempotency.middleware');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const paymentIdempotency = idempotency({

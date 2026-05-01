@@ -10,7 +10,7 @@ const { validate } = require('../middleware/validate');
 const SuccessionPlan = require('../models/SuccessionPlan');
 const DevelopmentPlan = require('../models/DevelopmentPlan');
 const { authenticate: authMiddleware, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const adminOnly = authorize(['admin', 'super_admin', 'manager']);
 const logger = require('../utils/logger');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -109,7 +109,8 @@ router.get('/reports/top-candidates', authMiddleware, requireBranchAccess, async
 // POST / — Create plan (frontend-compatible alias)
 router.post(
   '/',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   adminOnly,
   validate([
     body('positionTitle').trim().notEmpty().withMessage('عنوان المنصب مطلوب'),
@@ -159,66 +160,84 @@ router.post('/create', authMiddleware, requireBranchAccess, adminOnly, async (re
 });
 
 // POST /:planId/candidates — Add candidate (frontend-compatible alias)
-router.post('/:planId/candidates', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const plan = await SuccessionPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        $push: {
-          successors: {
-            ...req.body,
-            assessedBy: req.userId,
-            assessmentDate: new Date(),
+router.post(
+  '/:planId/candidates',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        {
+          $push: {
+            successors: {
+              ...req.body,
+              assessedBy: req.userId,
+              assessmentDate: new Date(),
+            },
           },
         },
-      },
-      { new: true }
-    );
-    if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
-    res.json({ success: true, message: 'تم إضافة المرشح بنجاح', data: plan });
-  } catch (error) {
-    safeError(res, error, 'Add candidate error');
+        { new: true }
+      );
+      if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+      res.json({ success: true, message: 'تم إضافة المرشح بنجاح', data: plan });
+    } catch (error) {
+      safeError(res, error, 'Add candidate error');
+    }
   }
-});
+);
 
 // PUT /:planId/candidates/:candidateId — Update candidate
-router.put('/:planId/candidates/:candidateId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const updateFields = {};
-    Object.keys(req.body).forEach(key => {
-      updateFields[`successors.$[elem].${key}`] = req.body[key];
-    });
-    const plan = await SuccessionPlan.findByIdAndUpdate(
-      req.params.planId,
-      { $set: updateFields },
-      { arrayFilters: [{ 'elem._id': req.params.candidateId }], new: true }
-    );
-    if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
-    res.json({ success: true, message: 'تم تحديث المرشح بنجاح', data: plan });
-  } catch (error) {
-    safeError(res, error, 'Update candidate error');
+router.put(
+  '/:planId/candidates/:candidateId',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const updateFields = {};
+      Object.keys(req.body).forEach(key => {
+        updateFields[`successors.$[elem].${key}`] = req.body[key];
+      });
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        { $set: updateFields },
+        { arrayFilters: [{ 'elem._id': req.params.candidateId }], new: true }
+      );
+      if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
+      res.json({ success: true, message: 'تم تحديث المرشح بنجاح', data: plan });
+    } catch (error) {
+      safeError(res, error, 'Update candidate error');
+    }
   }
-});
+);
 
 // GET /:planId/candidates/:candidateId/development — Get candidate development plan
-router.get('/:planId/candidates/:candidateId/development', authMiddleware, requireBranchAccess, async (req, res) => {
-  try {
-    const devPlan = await DevelopmentPlan.findOne({
-      employeeId: req.params.candidateId,
-    }).lean();
-    if (!devPlan) {
-      return res.json({ success: true, data: null, message: 'لا توجد خطة تطوير' });
+router.get(
+  '/:planId/candidates/:candidateId/development',
+  authMiddleware,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const devPlan = await DevelopmentPlan.findOne({
+        employeeId: req.params.candidateId,
+      }).lean();
+      if (!devPlan) {
+        return res.json({ success: true, data: null, message: 'لا توجد خطة تطوير' });
+      }
+      res.json({ success: true, data: devPlan });
+    } catch (error) {
+      safeError(res, error, 'Get candidate development error');
     }
-    res.json({ success: true, data: devPlan });
-  } catch (error) {
-    safeError(res, error, 'Get candidate development error');
   }
-});
+);
 
 // POST /:planId/candidates/:candidateId/readiness — Assess readiness
 router.post(
   '/:planId/candidates/:candidateId/readiness',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -247,7 +266,8 @@ router.post(
 // PUT /:planId — Update plan
 router.put(
   '/:planId',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   adminOnly,
   validate([
     param('planId').isMongoId().withMessage('معرف الخطة غير صالح'),
@@ -262,10 +282,14 @@ router.put(
   ]),
   async (req, res) => {
     try {
-      const plan = await SuccessionPlan.findByIdAndUpdate(req.params.planId, stripUpdateMeta(req.body), {
-        new: true,
-        runValidators: true,
-      });
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        stripUpdateMeta(req.body),
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
       if (!plan) return res.status(404).json({ success: false, message: 'الخطة غير موجودة' });
       res.json({ success: true, message: 'تم تحديث خطة التعاقب بنجاح', data: plan });
     } catch (error) {
@@ -275,54 +299,61 @@ router.put(
 );
 
 // POST /:planId/add-successor — Original add-successor (kept for backward compatibility)
-router.post('/:planId/add-successor', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const {
-      candidateId,
-      readinessLevel,
-      readinessPercentage,
-      keyStrengths,
-      developmentNeeds,
-      assessmentComments,
-    } = req.body;
+router.post(
+  '/:planId/add-successor',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const {
+        candidateId,
+        readinessLevel,
+        readinessPercentage,
+        keyStrengths,
+        developmentNeeds,
+        assessmentComments,
+      } = req.body;
 
-    const plan = await SuccessionPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        $push: {
-          successors: {
-            candidateId,
-            readinessLevel,
-            readinessPercentage,
-            keyStrengths,
-            developmentNeeds,
-            assessmentComments,
-            assessedBy: req.userId,
-            assessmentDate: new Date(),
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        {
+          $push: {
+            successors: {
+              candidateId,
+              readinessLevel,
+              readinessPercentage,
+              keyStrengths,
+              developmentNeeds,
+              assessmentComments,
+              assessedBy: req.userId,
+              assessmentDate: new Date(),
+            },
           },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'تم إضافة مرشح الخلافة بنجاح',
+        data: plan,
+      });
+    } catch (error) {
+      safeError(res, error, 'Add successor (legacy) error');
     }
-
-    res.json({
-      success: true,
-      message: 'تم إضافة مرشح الخلافة بنجاح',
-      data: plan,
-    });
-  } catch (error) {
-    safeError(res, error, 'Add successor (legacy) error');
   }
-});
+);
 
 // POST - إنشاء خطة تطوير فردية
 router.post(
   '/:planId/create-development-plan/:successorId',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -364,40 +395,47 @@ router.post(
 );
 
 // PUT - تحديث خطة التطوير
-router.put('/development-plan/:planId/update', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const { developmentGoals, plannedTrainings, expandedResponsibilities, notes } = req.body;
+router.put(
+  '/development-plan/:planId/update',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const { developmentGoals, plannedTrainings, expandedResponsibilities, notes } = req.body;
 
-    const plan = await DevelopmentPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        developmentGoals,
-        plannedTrainings,
-        expandedResponsibilities,
-        notes,
-        updatedAt: new Date(),
-      },
-      { new: true }
-    );
+      const plan = await DevelopmentPlan.findByIdAndUpdate(
+        req.params.planId,
+        {
+          developmentGoals,
+          plannedTrainings,
+          expandedResponsibilities,
+          notes,
+          updatedAt: new Date(),
+        },
+        { new: true }
+      );
 
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'تم تحديث خطة التطوير بنجاح',
+        data: plan,
+      });
+    } catch (error) {
+      safeError(res, error, 'Update development plan error');
     }
-
-    res.json({
-      success: true,
-      message: 'تم تحديث خطة التطوير بنجاح',
-      data: plan,
-    });
-  } catch (error) {
-    safeError(res, error, 'Update development plan error');
   }
-});
+);
 
 // PUT - تحديث حالة الهدف التطويري
 router.put(
   '/development-plan/:planId/goal-status/:goalIndex',
-  authMiddleware, requireBranchAccess,
+  authMiddleware,
+  requireBranchAccess,
   adminOnly,
   async (req, res) => {
     try {
@@ -430,71 +468,83 @@ router.put(
 );
 
 // POST - إضافة برنامج الإعداد القيادي
-router.post('/:planId/add-leadership-program', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const { programName, provider, startDate, endDate, objectives, participants } = req.body;
+router.post(
+  '/:planId/add-leadership-program',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const { programName, provider, startDate, endDate, objectives, participants } = req.body;
 
-    const plan = await SuccessionPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        leadershipProgram: {
-          programName,
-          provider,
-          startDate,
-          endDate,
-          objectives,
-          participants,
-          status: 'planned',
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        {
+          leadershipProgram: {
+            programName,
+            provider,
+            startDate,
+            endDate,
+            objectives,
+            participants,
+            status: 'planned',
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'تم إضافة برنامج الإعداد القيادي بنجاح',
+        data: plan,
+      });
+    } catch (error) {
+      safeError(res, error, 'Leadership program error');
     }
-
-    res.json({
-      success: true,
-      message: 'تم إضافة برنامج الإعداد القيادي بنجاح',
-      data: plan,
-    });
-  } catch (error) {
-    safeError(res, error, 'Leadership program error');
   }
-});
+);
 
 // POST - إضافة برنامج التوجيه الفردي (Mentorship)
-router.post('/:planId/add-mentorship/:successorId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const { mentorId, startDate, objectives } = req.body;
+router.post(
+  '/:planId/add-mentorship/:successorId',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const { mentorId, startDate, objectives } = req.body;
 
-    const plan = await SuccessionPlan.findByIdAndUpdate(
-      req.params.planId,
-      {
-        mentorshipProgram: {
-          mentorId,
-          startDate,
-          objectives,
-          status: 'active',
+      const plan = await SuccessionPlan.findByIdAndUpdate(
+        req.params.planId,
+        {
+          mentorshipProgram: {
+            mentorId,
+            startDate,
+            objectives,
+            status: 'active',
+          },
         },
-      },
-      { new: true }
-    );
+        { new: true }
+      );
 
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'تم إضافة برنامج التوجيه بنجاح',
+        data: plan,
+      });
+    } catch (error) {
+      safeError(res, error, 'Mentorship program error');
     }
-
-    res.json({
-      success: true,
-      message: 'تم إضافة برنامج التوجيه بنجاح',
-      data: plan,
-    });
-  } catch (error) {
-    safeError(res, error, 'Mentorship program error');
   }
-});
+);
 
 // GET - الحصول على خطة تطوير
 router.get('/development-plan/:planId', authMiddleware, requireBranchAccess, async (req, res) => {
@@ -679,21 +729,27 @@ router.delete('/:planId', authMiddleware, requireBranchAccess, adminOnly, async 
 });
 
 // DELETE - حذف خطة تطوير
-router.delete('/development-plan/:planId', authMiddleware, requireBranchAccess, adminOnly, async (req, res) => {
-  try {
-    const plan = await DevelopmentPlan.findByIdAndDelete(req.params.planId);
+router.delete(
+  '/development-plan/:planId',
+  authMiddleware,
+  requireBranchAccess,
+  adminOnly,
+  async (req, res) => {
+    try {
+      const plan = await DevelopmentPlan.findByIdAndDelete(req.params.planId);
 
-    if (!plan) {
-      return res.status(404).json({ success: false, message: 'Plan not found' });
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+
+      res.json({
+        success: true,
+        message: 'تم حذف خطة التطوير بنجاح',
+      });
+    } catch (error) {
+      safeError(res, error, 'Delete development plan error');
     }
-
-    res.json({
-      success: true,
-      message: 'تم حذف خطة التطوير بنجاح',
-    });
-  } catch (error) {
-    safeError(res, error, 'Delete development plan error');
   }
-});
+);
 
 module.exports = router;

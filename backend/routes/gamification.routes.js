@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const SmartGamificationService = require('../services/smartGamification.service');
 const { Badge, BeneficiaryWallet } = require('../models/Gamification');
 const logger = require('../utils/logger');

@@ -18,7 +18,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // ── Service ──

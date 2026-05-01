@@ -33,7 +33,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -284,10 +284,14 @@ router.get('/opportunities/:id', async (req, res) => {
 
 router.put('/opportunities/:id', async (req, res) => {
   try {
-    const doc = await VolunteerOpportunity.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await VolunteerOpportunity.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return fail(res, 'الفرصة غير موجودة', 404);
     ok(res, { data: doc, message: 'تم التحديث بنجاح' });
   } catch (err) {

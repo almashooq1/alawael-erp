@@ -24,7 +24,7 @@ function safeModel(name) {
 
 // ── Auth ─────────────────────────────────────────────────────────
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 router.use(authenticate);

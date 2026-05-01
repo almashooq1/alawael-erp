@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { PerformanceAnalyticsService } = require('../services/performanceAnalyticsService');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');

@@ -7,7 +7,6 @@
 
 'use strict';
 
-const { ObjectId } = require('mongodb');
 const { EXTRA_BENEFICIARIES, mergeWithDefaults } = require('./seed-extensions.config');
 
 // ─────────────────────────────────────────────────────────────────────────────

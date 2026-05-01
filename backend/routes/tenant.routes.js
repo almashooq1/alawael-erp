@@ -10,7 +10,6 @@ const express = require('express');
 const tenantController = require('../controllers/tenant.controller');
 const { _authenticateToken } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // If tenantController is a Router, use it directly

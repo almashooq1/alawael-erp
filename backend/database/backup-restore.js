@@ -22,7 +22,7 @@ const path = require('path');
 const { createGzip, createGunzip } = require('zlib');
 const crypto = require('crypto');
 const { pipeline } = require('stream/promises');
-const { Readable, Writable, Transform } = require('stream');
+const { Writable, Transform } = require('stream');
 const logger = require('../utils/logger');
 
 // ══════════════════════════════════════════════════════════════════

@@ -18,7 +18,7 @@ const {
   ClaimItem,
 } = require('../models/insuranceClaim.model');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { body, param, validationResult } = require('express-validator');

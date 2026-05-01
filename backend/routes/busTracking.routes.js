@@ -20,7 +20,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 
 const MAX_PAGE_LIMIT = 100;

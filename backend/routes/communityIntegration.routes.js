@@ -17,7 +17,7 @@ const router = express.Router();
 const controller = require('../controllers/communityIntegration.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // Apply authentication to all routes
 router.use(authenticate);
 router.use(requireBranchAccess);

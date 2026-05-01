@@ -21,7 +21,7 @@ const {
   Allergy,
 } = require('../models/emr.model');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
@@ -181,13 +181,11 @@ router.get('/vitals/latest/:beneficiaryId', async (req, res) => {
     res.json({ success: true, data: latest });
   } catch (error) {
     logger.error('[EMR] Latest vitals error:', { message: error.message });
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: 'خطأ في جلب آخر العلامات الحيوية',
-        error: safeError(error),
-      });
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب آخر العلامات الحيوية',
+      error: safeError(error),
+    });
   }
 });
 
@@ -225,13 +223,11 @@ router.get('/vitals/trend/:beneficiaryId', async (req, res) => {
     res.json({ success: true, data: vitals });
   } catch (error) {
     logger.error('[EMR] Vitals trend error:', { message: error.message });
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: 'خطأ في جلب اتجاه العلامات الحيوية',
-        error: safeError(error),
-      });
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في جلب اتجاه العلامات الحيوية',
+      error: safeError(error),
+    });
   }
 });
 

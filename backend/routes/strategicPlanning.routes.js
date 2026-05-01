@@ -7,7 +7,7 @@ const router = express.Router();
 const { body } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const StrategicGoal = require('../models/StrategicGoal');
 const StrategicInitiative = require('../models/StrategicInitiative');
@@ -171,10 +171,14 @@ router.post(
 
 router.put('/initiatives/:id', authorize(['admin', 'super_admin', 'manager']), async (req, res) => {
   try {
-    const doc = await StrategicInitiative.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const doc = await StrategicInitiative.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!doc) return res.status(404).json({ success: false, message: 'المبادرة غير موجودة' });
     res.json({ success: true, data: doc, message: 'تم تحديث المبادرة بنجاح' });
   } catch (err) {

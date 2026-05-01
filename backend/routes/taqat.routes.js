@@ -8,7 +8,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const taqatService = require('../services/taqat.service');
 
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -21,7 +21,9 @@ const TAQAT_ROLES = ['admin', 'hr_manager', 'hr', 'social_worker', 'rehabilitati
 
 router.post(
   '/job-seekers',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const seeker = await taqatService.createJobSeeker(req.body, req.user._id || req.user.id);
@@ -31,7 +33,9 @@ router.post(
 
 router.put(
   '/job-seekers/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const seeker = await taqatService.updateJobSeeker(
@@ -45,7 +49,9 @@ router.put(
 
 router.get(
   '/job-seekers',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const { page, limit, ...filters } = req.query;
@@ -60,7 +66,9 @@ router.get(
 
 router.get(
   '/job-seekers/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const seeker = await taqatService.getJobSeekerById(req.params.id);
@@ -70,7 +78,9 @@ router.get(
 
 router.post(
   '/job-seekers/:id/assess-readiness',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const seeker = await taqatService.assessEmploymentReadiness(
@@ -84,7 +94,9 @@ router.post(
 
 router.get(
   '/job-seekers/:id/match-jobs',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const matches = await taqatService.matchJobsToSeeker(req.params.id);
@@ -98,7 +110,9 @@ router.get(
 
 router.post(
   '/job-opportunities',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const job = await taqatService.createJobOpportunity(req.body, req.user._id || req.user.id);
@@ -108,7 +122,9 @@ router.post(
 
 router.put(
   '/job-opportunities/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const job = await taqatService.updateJobOpportunity(
@@ -122,7 +138,9 @@ router.put(
 
 router.get(
   '/job-opportunities',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { page, limit, ...filters } = req.query;
     const result = await taqatService.getJobOpportunities(
@@ -140,7 +158,9 @@ router.get(
 
 router.post(
   '/applications',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const { seekerId, jobId, ...appData } = req.body;
@@ -156,7 +176,9 @@ router.post(
 
 router.put(
   '/applications/:id/status',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { status, notes } = req.body;
@@ -172,7 +194,9 @@ router.put(
 
 router.get(
   '/applications',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const { page, limit, ...filters } = req.query;
@@ -191,7 +215,9 @@ router.get(
 
 router.post(
   '/training-programs',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const program = await taqatService.createTrainingProgram(req.body, req.user._id || req.user.id);
@@ -201,7 +227,9 @@ router.post(
 
 router.get(
   '/training-programs',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const programs = await taqatService.getTrainingPrograms(req.query);
     res.json({ success: true, data: programs });
@@ -214,7 +242,9 @@ router.get(
 
 router.get(
   '/dashboard',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const stats = await taqatService.getDashboardStats();
@@ -224,7 +254,9 @@ router.get(
 
 router.get(
   '/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(TAQAT_ROLES),
   asyncHandler(async (req, res) => {
     const stats = await taqatService.getDashboardStats();
@@ -234,7 +266,9 @@ router.get(
 
 router.post(
   '/stats/generate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { period, periodType } = req.body;

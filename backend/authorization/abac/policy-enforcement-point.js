@@ -8,7 +8,7 @@
 
 'use strict';
 
-const { PERMIT, DENY, NOT_APPLICABLE } = require('./policy-decision-point');
+const { PERMIT, DENY } = require('./policy-decision-point');
 
 /**
  * Build a subject object from req.user.

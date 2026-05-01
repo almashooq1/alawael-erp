@@ -22,7 +22,7 @@ const {
 const logger = require('../utils/logger');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // All pharmacy routes require authentication
@@ -245,10 +245,14 @@ router.post('/prescriptions', async (req, res) => {
 
 router.put('/prescriptions/:id', async (req, res) => {
   try {
-    const prescription = await Prescription.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    });
+    const prescription = await Prescription.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     if (!prescription)
       return res.status(404).json({ success: false, message: 'الوصفة غير موجودة' });
     res.json({ success: true, data: prescription });

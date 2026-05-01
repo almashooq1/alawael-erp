@@ -42,7 +42,7 @@ const {
 } = require('../models/WorkflowEnhanced');
 
 const { authenticateToken: authMiddleware } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { validateOutboundUrl } = require('../utils/validateUrl');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');

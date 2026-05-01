@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const AdvancedTicket = require('../models/AdvancedTicket');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -18,11 +18,19 @@ router.get('/stats/sla', async (req, res) => {
   try {
     const total = await AdvancedTicket.countDocuments();
     const breached = await AdvancedTicket.countDocuments({ 'sla.isBreached': true });
-    const byStatus = await AdvancedTicket.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]);
-    const byPriority = await AdvancedTicket.aggregate([{ $group: { _id: '$priority', count: { $sum: 1 } } }]);
+    const byStatus = await AdvancedTicket.aggregate([
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+    const byPriority = await AdvancedTicket.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } },
+    ]);
     const stats = { total, breached, withinSLA: total - breached, byStatus: {}, byPriority: {} };
-    byStatus.forEach((s) => { stats.byStatus[s._id] = s.count; });
-    byPriority.forEach((p) => { stats.byPriority[p._id] = p.count; });
+    byStatus.forEach(s => {
+      stats.byStatus[s._id] = s.count;
+    });
+    byPriority.forEach(p => {
+      stats.byPriority[p._id] = p.count;
+    });
     res.json({ success: true, data: stats, message: 'إحصائيات SLA' });
   } catch (error) {
     safeError(res, error, 'fetching SLA stats');
@@ -43,7 +51,12 @@ router.get('/', async (req, res) => {
       AdvancedTicket.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
       AdvancedTicket.countDocuments(filter),
     ]);
-    res.json({ success: true, data, pagination: { page: +page, limit: +limit, total }, message: 'قائمة التذاكر' });
+    res.json({
+      success: true,
+      data,
+      pagination: { page: +page, limit: +limit, total },
+      message: 'قائمة التذاكر',
+    });
   } catch (error) {
     safeError(res, error, 'fetching tickets');
   }
@@ -72,8 +85,13 @@ router.post('/', async (req, res) => {
     const slaMap = { low: 48, medium: 24, high: 8, critical: 4 };
     const p = priority || 'medium';
     const ticket = await AdvancedTicket.create({
-      ticketId, title, description, category: category || 'general',
-      priority: p, reporter: req.user.id, reporterName: req.user.name || req.user.email,
+      ticketId,
+      title,
+      description,
+      category: category || 'general',
+      priority: p,
+      reporter: req.user.id,
+      reporterName: req.user.name || req.user.email,
       sla: { responseTime: slaMap[p] || 24, resolutionTime: (slaMap[p] || 24) * 3 },
     });
     res.status(201).json({ success: true, data: ticket, message: 'تم إنشاء التذكرة بنجاح' });
@@ -89,7 +107,10 @@ router.put('/:id', async (req, res) => {
     if (updates.status === 'resolved' || updates.status === 'closed') {
       updates['sla.resolvedAt'] = new Date();
     }
-    const ticket = await AdvancedTicket.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
+    const ticket = await AdvancedTicket.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    }).lean();
     if (!ticket) return res.status(404).json({ success: false, message: 'التذكرة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'تم تحديث التذكرة بنجاح' });
   } catch (error) {

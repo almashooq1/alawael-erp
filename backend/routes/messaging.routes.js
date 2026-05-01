@@ -19,7 +19,7 @@ const express = require('express');
 const router = express.Router();
 const messagingService = require('../services/messaging.service');
 const { authenticateToken } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 

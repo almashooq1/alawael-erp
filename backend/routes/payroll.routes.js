@@ -16,7 +16,7 @@ const {
 const PayrollCalculationService = require('../services/payrollCalculationService');
 const PayrollReportService = require('../services/payrollReportService');
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 const safeError = require('../utils/safeError');
 

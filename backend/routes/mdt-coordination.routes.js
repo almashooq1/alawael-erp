@@ -15,7 +15,7 @@ const router = express.Router();
 const { body, _param, _query } = require('express-validator');
 const { validate } = require('../middleware/validate');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const { MDTMeeting, UnifiedRehabPlan, ReferralTicket } = require('../models/MDTCoordination');
 const { stripUpdateMeta } = require('../utils/sanitize');
@@ -420,10 +420,14 @@ router.post(
 // ─── Update Plan ─────────────────────────────────────────────────────────────
 router.put('/plans/:id', authorize(['admin', 'manager', 'therapist']), async (req, res) => {
   try {
-    const plan = await UnifiedRehabPlan.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    }).lean();
+    const plan = await UnifiedRehabPlan.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).lean();
     if (!plan) return res.status(404).json({ success: false, message: 'خطة التأهيل غير موجودة' });
     res.json({ success: true, data: plan, message: 'تم تحديث خطة التأهيل بنجاح' });
   } catch (error) {
@@ -764,10 +768,14 @@ router.post(
 // ─── Update Referral Ticket ──────────────────────────────────────────────────
 router.put('/referrals/:id', authorize(['admin', 'manager']), async (req, res) => {
   try {
-    const ticket = await ReferralTicket.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-      runValidators: true,
-    }).lean();
+    const ticket = await ReferralTicket.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).lean();
     if (!ticket)
       return res.status(404).json({ success: false, message: 'تذكرة الإحالة غير موجودة' });
     res.json({ success: true, data: ticket, message: 'تم تحديث تذكرة الإحالة بنجاح' });

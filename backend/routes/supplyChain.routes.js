@@ -9,7 +9,7 @@ const supplyChainService = require('../services/supplyChain.service');
 const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // Maximum records per page — prevents DoS via unbounded queries
 const MAX_PAGE_LIMIT = 200;
 const clampLimit = (raw, fallback = 100) => Math.min(parseInt(raw, 10) || fallback, MAX_PAGE_LIMIT);

@@ -10,7 +10,7 @@ const HRAttendanceService = require('../services/hr/attendanceService');
 const HRNotificationService = require('../services/hr/notificationService');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // تسجيل الحضور
 router.post('/attendance/check-in', authenticateToken, requireBranchAccess, async (req, res) => {
   try {

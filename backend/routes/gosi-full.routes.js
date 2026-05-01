@@ -18,7 +18,7 @@ const router = express.Router();
 const gosiService = require('../services/gosi-full.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // ── Async wrapper ─────────────────────────────────────────────────────────
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
@@ -39,7 +39,9 @@ const buildContext = req => ({
  */
 router.get(
   '/dashboard',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'finance']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -54,7 +56,9 @@ router.get(
  */
 router.get(
   '/rates',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const data = gosiService.getRatesTable();
     res.json({ success: true, data });
@@ -72,7 +76,9 @@ router.get(
  */
 router.post(
   '/calculate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { basicSalary, housingAllowance = 0, nationalityCode = 'SA', hireDate } = req.body;
     if (!basicSalary || basicSalary <= 0) {
@@ -98,7 +104,9 @@ router.post(
  */
 router.post(
   '/monthly/:period',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance']),
   asyncHandler(async (req, res) => {
     const { period } = req.params;
@@ -134,7 +142,9 @@ router.post(
  */
 router.post(
   '/employees/:employeeId/register',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { employeeId } = req.params;
@@ -156,7 +166,9 @@ router.post(
  */
 router.put(
   '/subscriptions/:subscriptionId/wage',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const { subscriptionId } = req.params;
@@ -182,7 +194,9 @@ router.put(
  */
 router.post(
   '/payroll/:payrollId/link',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'finance']),
   asyncHandler(async (req, res) => {
     const { payrollId } = req.params;
@@ -210,7 +224,9 @@ router.post(
  */
 router.post(
   '/payments/:paymentId/record',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   asyncHandler(async (req, res) => {
     const { paymentId } = req.params;
@@ -230,7 +246,9 @@ router.post(
  */
 router.get(
   '/reports/:period',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr', 'finance']),
   asyncHandler(async (req, res) => {
     const { period } = req.params;
@@ -254,7 +272,9 @@ router.get(
  */
 router.post(
   '/end-of-service/calculate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { employee, terminationType, endDate } = req.body;
@@ -292,7 +312,9 @@ router.post(
  */
 router.post(
   '/end-of-service/estimate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const { employee } = req.body;
@@ -315,7 +337,9 @@ router.post(
  */
 router.put(
   '/end-of-service/:calculationId/confirm',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager']),
   asyncHandler(async (req, res) => {
     const ctx = buildContext(req);
@@ -331,7 +355,9 @@ router.put(
  */
 router.put(
   '/end-of-service/:calculationId/paid',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   asyncHandler(async (req, res) => {
     const { paidDate } = req.body;
@@ -346,7 +372,9 @@ router.put(
  */
 router.get(
   '/end-of-service/employee/:employeeId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'hr_manager', 'hr']),
   asyncHandler(async (req, res) => {
     const data = await gosiService.getEmployeeEndOfServiceHistory(req.params.employeeId);

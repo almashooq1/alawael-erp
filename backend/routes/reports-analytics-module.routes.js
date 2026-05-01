@@ -55,7 +55,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const ReportTemplate = require('../models/reports/ReportTemplate');
 const ReportJob = require('../models/reports/ReportJob');
 const ReportSchedule = require('../models/reports/ReportSchedule');

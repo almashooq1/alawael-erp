@@ -8,7 +8,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const QualityIndicator = require('../models/quality/QualityIndicator');
 const QualityMeasurement = require('../models/quality/QualityMeasurement');
 const IncidentReport = require('../models/quality/IncidentReport');

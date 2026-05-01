@@ -8,7 +8,6 @@ const router = express.Router();
 const AdvancedAnalyticsController = require('../controllers/advancedAnalytics.controller');
 const { protect, _authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب المصادقة
 router.use(protect);
 

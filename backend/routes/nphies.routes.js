@@ -8,7 +8,7 @@ const express = require('express');
 const router = express.Router();
 const nphiesService = require('../services/nphies.service');
 const { authenticateToken, requirePermission } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 
@@ -22,7 +22,9 @@ const safeError = require('../utils/safeError');
  */
 router.post(
   '/eligibility/check',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:eligibility:check'),
   async (req, res) => {
     try {
@@ -68,7 +70,9 @@ router.post(
  */
 router.post(
   '/prior-auth/request',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:prior-auth:request'),
   async (req, res) => {
     try {
@@ -123,7 +127,9 @@ router.post(
  */
 router.post(
   '/claims/submit',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:claims:submit'),
   async (req, res) => {
     try {
@@ -174,7 +180,9 @@ router.post(
  */
 router.get(
   '/claims/:claimId/status',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:claims:read'),
   async (req, res) => {
     try {
@@ -207,7 +215,9 @@ router.get(
  */
 router.delete(
   '/claims/:claimId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:claims:cancel'),
   async (req, res) => {
     try {
@@ -237,7 +247,9 @@ router.delete(
  */
 router.post(
   '/communication/respond',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:communication:respond'),
   async (req, res) => {
     try {
@@ -282,7 +294,9 @@ router.post(
  */
 router.post(
   '/payment/reconcile',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:payment:reconcile'),
   async (req, res) => {
     try {
@@ -402,7 +416,9 @@ router.get('/status', authenticateToken, requireBranchAccess, async (req, res) =
  */
 router.post(
   '/fhir/bundle',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   requirePermission('nphies:admin'),
   async (req, res) => {
     try {

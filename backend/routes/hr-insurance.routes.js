@@ -17,7 +17,7 @@ const crypto = require('crypto');
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const authorizeRole = authorize;
 const {
   EmployeeInsurance,
@@ -188,7 +188,9 @@ router.get('/:id', authenticateToken, requireBranchAccess, async (req, res) => {
  */
 router.post(
   '/',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -226,7 +228,9 @@ router.post(
  */
 router.put(
   '/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -258,29 +262,35 @@ router.put(
 /**
  * DELETE /:id — حذف/إلغاء وثيقة تأمين
  */
-router.delete('/:id', authenticateToken, requireBranchAccess, authorizeRole(['Admin', 'admin']), async (req, res) => {
-  try {
-    const policy = await EmployeeInsurance.findById(req.params.id);
-    if (!policy) {
-      return res.status(404).json({ success: false, message: 'وثيقة التأمين غير موجودة' });
+router.delete(
+  '/:id',
+  authenticateToken,
+  requireBranchAccess,
+  authorizeRole(['Admin', 'admin']),
+  async (req, res) => {
+    try {
+      const policy = await EmployeeInsurance.findById(req.params.id);
+      if (!policy) {
+        return res.status(404).json({ success: false, message: 'وثيقة التأمين غير موجودة' });
+      }
+
+      policy.status = 'cancelled';
+      policy.activityLog.push({
+        action: 'POLICY_CANCELLED',
+        actionAr: 'تم إلغاء الوثيقة',
+        performedBy: req.user.id,
+        performedByName: req.user.name || req.user.email,
+      });
+      await policy.save();
+
+      res.json({ success: true, message: 'تم إلغاء وثيقة التأمين بنجاح' });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في إلغاء الوثيقة', error: safeError(error) });
     }
-
-    policy.status = 'cancelled';
-    policy.activityLog.push({
-      action: 'POLICY_CANCELLED',
-      actionAr: 'تم إلغاء الوثيقة',
-      performedBy: req.user.id,
-      performedByName: req.user.name || req.user.email,
-    });
-    await policy.save();
-
-    res.json({ success: true, message: 'تم إلغاء وثيقة التأمين بنجاح' });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في إلغاء الوثيقة', error: safeError(error) });
   }
-});
+);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // إدارة المعالين / التابعين (Dependents Management)
@@ -291,7 +301,9 @@ router.delete('/:id', authenticateToken, requireBranchAccess, authorizeRole(['Ad
  */
 router.post(
   '/:id/dependents',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -328,7 +340,9 @@ router.post(
  */
 router.put(
   '/:id/dependents/:depId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -366,7 +380,9 @@ router.put(
  */
 router.delete(
   '/:id/dependents/:depId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -470,7 +486,9 @@ router.post('/:id/claims', authenticateToken, requireBranchAccess, async (req, r
  */
 router.put(
   '/:id/claims/:claimId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -523,7 +541,9 @@ router.put(
  */
 router.post(
   '/:id/renew',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'HR', 'admin', 'hr_manager']),
   async (req, res) => {
     try {
@@ -579,7 +599,9 @@ router.post(
  */
 router.post(
   '/bulk-enroll',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorizeRole(['Admin', 'admin']),
   async (req, res) => {
     try {
@@ -697,36 +719,41 @@ router.get('/reports/summary', authenticateToken, requireBranchAccess, async (re
 /**
  * GET /reports/payroll-deductions — تقرير خصومات التأمين من الرواتب
  */
-router.get('/reports/payroll-deductions', authenticateToken, requireBranchAccess, async (req, res) => {
-  try {
-    const { month, year } = req.query;
+router.get(
+  '/reports/payroll-deductions',
+  authenticateToken,
+  requireBranchAccess,
+  async (req, res) => {
+    try {
+      const { month, year } = req.query;
 
-    const deductions = await EmployeeInsurance.find({ status: 'active' })
-      .select(
-        'employeeId employeeName department premium.monthlyDeduction premium.employeeShare premium.employerShare'
-      )
-      .sort({ department: 1, employeeName: 1 });
+      const deductions = await EmployeeInsurance.find({ status: 'active' })
+        .select(
+          'employeeId employeeName department premium.monthlyDeduction premium.employeeShare premium.employerShare'
+        )
+        .sort({ department: 1, employeeName: 1 });
 
-    const summary = deductions.reduce(
-      (acc, d) => {
-        acc.totalEmployeeShare += d.premium?.employeeShare || 0;
-        acc.totalEmployerShare += d.premium?.employerShare || 0;
-        acc.totalMonthlyDeduction += d.premium?.monthlyDeduction || 0;
-        return acc;
-      },
-      { totalEmployeeShare: 0, totalEmployerShare: 0, totalMonthlyDeduction: 0 }
-    );
+      const summary = deductions.reduce(
+        (acc, d) => {
+          acc.totalEmployeeShare += d.premium?.employeeShare || 0;
+          acc.totalEmployerShare += d.premium?.employerShare || 0;
+          acc.totalMonthlyDeduction += d.premium?.monthlyDeduction || 0;
+          return acc;
+        },
+        { totalEmployeeShare: 0, totalEmployerShare: 0, totalMonthlyDeduction: 0 }
+      );
 
-    res.json({
-      success: true,
-      data: { deductions, summary, period: { month, year } },
-    });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: 'خطأ في تقرير الخصومات', error: safeError(error) });
+      res.json({
+        success: true,
+        data: { deductions, summary, period: { month, year } },
+      });
+    } catch (error) {
+      res
+        .status(500)
+        .json({ success: false, message: 'خطأ في تقرير الخصومات', error: safeError(error) });
+    }
   }
-});
+);
 
 /**
  * GET /employee/:employeeId — وثائق تأمين موظف محدد

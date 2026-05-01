@@ -12,7 +12,7 @@ const { escapeRegex } = require('../utils/sanitize');
 const validateObjectId = require('../middleware/validateObjectId');
 const { authenticate } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const MAX_PAGE_LIMIT = 100;
 
 /* ━━━ Sort Whitelist ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */

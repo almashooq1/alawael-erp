@@ -12,7 +12,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize: _authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const saudiTaxService = require('../services/saudiTax.service');
 const logger = require('../utils/logger');
 const { body, param, validationResult } = require('express-validator');

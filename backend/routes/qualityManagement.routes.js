@@ -6,7 +6,7 @@
 const express = require('express');
 const { body, param } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/qualityManagement.service');
 
 const router = express.Router();
@@ -27,7 +27,9 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
 
 router.get(
   '/dashboard',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getDashboard();
     res.json({ success: true, data });
@@ -36,7 +38,9 @@ router.get(
 
 router.get(
   '/statistics',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getStatistics();
     res.json({ success: true, data });
@@ -45,7 +49,9 @@ router.get(
 
 router.get(
   '/reference',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     res.json({
       success: true,
@@ -68,7 +74,9 @@ router.get(
 
 router.get(
   '/audits',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listAudits(req.query);
     res.json({ success: true, data });
@@ -77,7 +85,9 @@ router.get(
 
 router.get(
   '/audits/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -89,7 +99,9 @@ router.get(
 
 router.post(
   '/audits',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager', 'auditor'),
   [
     body('titleAr').notEmpty().withMessage('عنوان التدقيق بالعربية مطلوب'),
@@ -110,7 +122,9 @@ router.post(
 
 router.put(
   '/audits/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager', 'auditor'),
   param('id').notEmpty(),
   handleValidation,
@@ -123,7 +137,9 @@ router.put(
 
 router.delete(
   '/audits/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -138,7 +154,9 @@ router.delete(
 
 router.get(
   '/findings',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listFindings(req.query);
     res.json({ success: true, data });
@@ -147,7 +165,9 @@ router.get(
 
 router.get(
   '/findings/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -159,7 +179,9 @@ router.get(
 
 router.post(
   '/findings',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager', 'auditor'),
   [
     body('auditId').notEmpty().withMessage('معرف التدقيق مطلوب'),
@@ -177,7 +199,9 @@ router.post(
 
 router.put(
   '/findings/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager', 'auditor'),
   param('id').notEmpty(),
   handleValidation,
@@ -190,7 +214,9 @@ router.put(
 
 router.post(
   '/findings/:id/close',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -205,7 +231,9 @@ router.post(
 
 router.get(
   '/non-conformances',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listNonConformances(req.query);
     res.json({ success: true, data });
@@ -214,7 +242,9 @@ router.get(
 
 router.get(
   '/non-conformances/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -226,7 +256,9 @@ router.get(
 
 router.post(
   '/non-conformances',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager', 'auditor'),
   [
     body('titleAr').notEmpty().withMessage('عنوان عدم المطابقة بالعربية مطلوب'),
@@ -245,7 +277,9 @@ router.post(
 
 router.put(
   '/non-conformances/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -258,7 +292,9 @@ router.put(
 
 router.delete(
   '/non-conformances/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -273,7 +309,9 @@ router.delete(
 
 router.get(
   '/capa',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listCAPAs(req.query);
     res.json({ success: true, data });
@@ -282,7 +320,9 @@ router.get(
 
 router.get(
   '/capa/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -294,7 +334,9 @@ router.get(
 
 router.post(
   '/capa',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [
     body('ncId').notEmpty().withMessage('معرف عدم المطابقة مطلوب'),
@@ -312,7 +354,9 @@ router.post(
 
 router.put(
   '/capa/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -325,7 +369,9 @@ router.put(
 
 router.post(
   '/capa/:id/verify',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -340,7 +386,9 @@ router.post(
 
 router.get(
   '/indicators',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listIndicators(req.query);
     res.json({ success: true, data });
@@ -349,7 +397,9 @@ router.get(
 
 router.get(
   '/indicators/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -361,7 +411,9 @@ router.get(
 
 router.post(
   '/indicators',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [
     body('code').notEmpty().withMessage('رمز المؤشر مطلوب'),
@@ -380,7 +432,9 @@ router.post(
 
 router.put(
   '/indicators/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -393,7 +447,9 @@ router.put(
 
 router.delete(
   '/indicators/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -408,7 +464,9 @@ router.delete(
 
 router.get(
   '/indicators/:id/records',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -419,7 +477,9 @@ router.get(
 
 router.post(
   '/indicators/:id/records',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [
     param('id').notEmpty(),
@@ -436,7 +496,9 @@ router.post(
 
 router.get(
   '/indicators/:id/trend',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -450,7 +512,9 @@ router.get(
 
 router.get(
   '/documents',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listDocuments(req.query);
     res.json({ success: true, data });
@@ -459,7 +523,9 @@ router.get(
 
 router.get(
   '/documents/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -471,7 +537,9 @@ router.get(
 
 router.post(
   '/documents',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [
     body('code').notEmpty().withMessage('رمز الوثيقة مطلوب'),
@@ -489,7 +557,9 @@ router.post(
 
 router.put(
   '/documents/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -502,7 +572,9 @@ router.put(
 
 router.post(
   '/documents/:id/approve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -515,7 +587,9 @@ router.post(
 
 router.delete(
   '/documents/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -530,7 +604,9 @@ router.delete(
 
 router.get(
   '/risks',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listRisks(req.query);
     res.json({ success: true, data });
@@ -539,7 +615,9 @@ router.get(
 
 router.get(
   '/risks/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -551,7 +629,9 @@ router.get(
 
 router.post(
   '/risks',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [
     body('titleAr').notEmpty().withMessage('عنوان الخطر بالعربية مطلوب'),
@@ -569,7 +649,9 @@ router.post(
 
 router.put(
   '/risks/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -582,7 +664,9 @@ router.put(
 
 router.delete(
   '/risks/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   param('id').notEmpty(),
   handleValidation,
@@ -597,7 +681,9 @@ router.delete(
 
 router.get(
   '/accreditation-reports',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listAccreditationReports(req.query);
     res.json({ success: true, data });
@@ -606,7 +692,9 @@ router.get(
 
 router.get(
   '/accreditation-reports/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -618,7 +706,9 @@ router.get(
 
 router.post(
   '/accreditation-reports/generate',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   [body('standard').notEmpty().withMessage('المعيار مطلوب')],
   handleValidation,
@@ -631,7 +721,9 @@ router.post(
 
 router.get(
   '/accreditation-reports/:id/export',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -646,7 +738,9 @@ router.get(
 
 router.get(
   '/compliance-matrix/:standardId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('standardId').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -660,7 +754,9 @@ router.get(
 
 router.get(
   '/audit-log',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize('admin', 'quality_manager'),
   wrap((req, res) => {
     const data = svc.getAuditLog(req.query);

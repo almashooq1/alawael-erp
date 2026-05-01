@@ -6,7 +6,7 @@ const express = require('express');
 const DriverController = require('../controllers/driver.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // Apply authentication to all routes

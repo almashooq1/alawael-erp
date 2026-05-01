@@ -14,7 +14,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // Apply authentication to all routes in this file

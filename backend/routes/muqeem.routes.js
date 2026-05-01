@@ -5,7 +5,7 @@
 'use strict';
 
 const express = require('express');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 const muqeemService = require('../services/muqeem.service');
 const { authenticateToken } = require('../middleware/auth.middleware');

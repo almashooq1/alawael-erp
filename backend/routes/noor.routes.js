@@ -15,7 +15,7 @@ const router = express.Router();
 const noorService = require('../services/noor.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // Async handler helper
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

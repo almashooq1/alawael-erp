@@ -21,7 +21,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { visitorAdvancedService } = require('../services/visitor-advanced.service');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');

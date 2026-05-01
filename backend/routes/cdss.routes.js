@@ -37,7 +37,7 @@
 
 const express = require('express');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
@@ -409,7 +409,11 @@ router.post(
   authorize(['admin', 'manager', 'therapist']),
   asyncHandler(async (req, res) => {
     const branchId = getBranchId(req);
-    const drug = await DrugLibrary.create({ ...stripUpdateMeta(req.body), branchId, createdBy: req.user?._id });
+    const drug = await DrugLibrary.create({
+      ...stripUpdateMeta(req.body),
+      branchId,
+      createdBy: req.user?._id,
+    });
     res.status(201).json({ message: 'تم إضافة الدواء بنجاح', data: drug });
   })
 );

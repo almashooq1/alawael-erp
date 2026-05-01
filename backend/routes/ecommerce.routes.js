@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const EcommerceService = require('../services/EcommerceService');
 const { authenticateToken: authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 

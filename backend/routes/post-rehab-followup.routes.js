@@ -14,7 +14,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const postRehabService = require('../services/postRehabFollowUp.service');
 
 // ── Role Groups ──
@@ -46,7 +46,9 @@ const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next
  */
 router.post(
   '/cases',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const data = { ...req.body, createdBy: req.user._id || req.user.id };
@@ -61,7 +63,9 @@ router.post(
  */
 router.get(
   '/cases',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.listCases(req.query);
@@ -75,7 +79,9 @@ router.get(
  */
 router.get(
   '/cases/overdue',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getOverdueCases();
@@ -88,7 +94,9 @@ router.get(
  */
 router.get(
   '/cases/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getCaseById(req.params.id);
@@ -101,7 +109,9 @@ router.get(
  */
 router.put(
   '/cases/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.updateCase(req.params.id, req.body);
@@ -114,7 +124,9 @@ router.put(
  */
 router.post(
   '/cases/:id/alerts',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.addAlert(req.params.id, req.body);
@@ -127,7 +139,9 @@ router.post(
  */
 router.put(
   '/cases/:caseId/alerts/:alertId/resolve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.resolveAlert(
@@ -149,7 +163,9 @@ router.put(
  */
 router.post(
   '/visits',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const data = { ...req.body, createdBy: req.user._id || req.user.id };
@@ -163,7 +179,9 @@ router.post(
  */
 router.get(
   '/visits',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.listVisits(req.query);
@@ -177,7 +195,9 @@ router.get(
  */
 router.get(
   '/visits/upcoming',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const days = req.query.days || 7;
@@ -192,7 +212,9 @@ router.get(
  */
 router.get(
   '/visits/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getVisitById(req.params.id);
@@ -206,7 +228,9 @@ router.get(
  */
 router.put(
   '/visits/:id/complete',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.completeVisit(req.params.id, req.body);
@@ -219,7 +243,9 @@ router.put(
  */
 router.put(
   '/visits/:id/missed',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.markVisitMissed(req.params.id, req.body.reason);
@@ -237,7 +263,9 @@ router.put(
  */
 router.post(
   '/impact',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const data = {
@@ -255,7 +283,9 @@ router.post(
  */
 router.get(
   '/impact',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.listImpactMeasurements(req.query);
@@ -268,7 +298,9 @@ router.get(
  */
 router.get(
   '/impact/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getImpactMeasurementById(req.params.id);
@@ -282,7 +314,9 @@ router.get(
  */
 router.get(
   '/impact/comparison/:caseId',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getImpactComparisonReport(req.params.caseId);
@@ -300,7 +334,9 @@ router.get(
  */
 router.get(
   '/surveys/templates',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = postRehabService.getSurveyTemplates();
@@ -314,7 +350,9 @@ router.get(
  */
 router.post(
   '/surveys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const data = { ...req.body, createdBy: req.user._id || req.user.id };
@@ -328,7 +366,9 @@ router.post(
  */
 router.get(
   '/surveys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.listSurveys(req.query);
@@ -341,7 +381,9 @@ router.get(
  */
 router.get(
   '/surveys/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getSurveyById(req.params.id);
@@ -355,7 +397,9 @@ router.get(
  */
 router.post(
   '/surveys/:id/submit',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize([...POST_REHAB_VIEW_ROLES]),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.submitSurveyResponses(req.params.id, req.body);
@@ -373,7 +417,9 @@ router.post(
  */
 router.post(
   '/re-enrollment',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const data = {
@@ -391,7 +437,9 @@ router.post(
  */
 router.get(
   '/re-enrollment',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.listReEnrollmentRequests(req.query);
@@ -404,7 +452,9 @@ router.get(
  */
 router.get(
   '/re-enrollment/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_VIEW_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getReEnrollmentRequestById(req.params.id);
@@ -418,7 +468,9 @@ router.get(
  */
 router.put(
   '/re-enrollment/:id/review',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ADMIN_ROLES),
   asyncHandler(async (req, res) => {
     const reviewData = {
@@ -440,7 +492,9 @@ router.put(
  */
 router.get(
   '/dashboard',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(POST_REHAB_ROLES),
   asyncHandler(async (req, res) => {
     const result = await postRehabService.getDashboardStats(req.query.branch);

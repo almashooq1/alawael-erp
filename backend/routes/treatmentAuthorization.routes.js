@@ -8,7 +8,7 @@ const router = express.Router();
 const TreatmentAuthorizationService = require('../services/treatmentAuthorization.service');
 const { authenticateToken, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 const AUTH_ROLES = [
@@ -24,7 +24,9 @@ const AUTH_ROLES = [
 // إنشاء طلب إذن علاج
 router.post(
   '/',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.createRequest(
@@ -38,7 +40,9 @@ router.post(
 // جلب الطلبات
 router.get(
   '/',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const result = await TreatmentAuthorizationService.getRequests(req.query);
@@ -49,7 +53,9 @@ router.get(
 // لوحة المعلومات
 router.get(
   '/dashboard',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const data = await TreatmentAuthorizationService.getDashboard(req.query.branch);
@@ -60,7 +66,9 @@ router.get(
 // الطلبات القريبة من الانتهاء
 router.get(
   '/expiring',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const data = await TreatmentAuthorizationService.checkExpiring();
@@ -71,7 +79,9 @@ router.get(
 // جلب طلب واحد
 router.get(
   '/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.getRequestById(req.params.id);
@@ -83,7 +93,9 @@ router.get(
 // تحديث طلب
 router.put(
   '/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.updateRequest(
@@ -98,7 +110,9 @@ router.put(
 // تقديم للمراجعة الداخلية
 router.post(
   '/:id/submit-review',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitForReview(
@@ -112,7 +126,9 @@ router.post(
 // تقديم لشركة التأمين
 router.post(
   '/:id/submit-insurer',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitToInsurer(
@@ -126,7 +142,9 @@ router.post(
 // تسجيل رد شركة التأمين
 router.post(
   '/:id/insurer-response',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.recordInsurerResponse(
@@ -141,7 +159,9 @@ router.post(
 // تقديم استئناف
 router.post(
   '/:id/appeal',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.submitAppeal(
@@ -156,7 +176,9 @@ router.post(
 // نتيجة الاستئناف
 router.post(
   '/:id/appeal-decision',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'center_manager', 'insurance_officer']),
   asyncHandler(async (req, res) => {
     const { decision, notes } = req.body;
@@ -173,7 +195,9 @@ router.post(
 // تسجيل استخدام جلسة
 router.post(
   '/:id/sessions/:serviceCode',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.recordSessionUsage(
@@ -189,7 +213,9 @@ router.post(
 // إضافة متابعة
 router.post(
   '/:id/follow-ups',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(AUTH_ROLES),
   asyncHandler(async (req, res) => {
     const request = await TreatmentAuthorizationService.addFollowUp(

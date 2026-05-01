@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const DatabaseMigrationService = require('../services/database-migration-service');
 const DatabaseBackupService = require('../services/database-backup-service');
 const { seedDatabase, clearDatabase } = require('../database/seeders/database-seeder');

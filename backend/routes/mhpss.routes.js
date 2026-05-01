@@ -60,7 +60,7 @@ const router = express.Router();
 const controller = require('../controllers/mhpss.controller');
 const { authenticate, authorize } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // All routes require authentication
 router.use(authenticate);
 router.use(requireBranchAccess);

@@ -13,7 +13,7 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const { authenticateToken, requireRole } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');

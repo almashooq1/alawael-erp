@@ -15,7 +15,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/therapistPortal.service');
 
 // حماية جميع مسارات المعالج
@@ -388,7 +388,7 @@ router.post(
 );
 
 // ─── Error handler ──────────────────────────────────────────────
-// eslint-disable-next-line no-unused-vars
+
 router.use((err, _req, res, _next) => {
   const status = err.status || 500;
   const message = err.message || 'خطأ في بوابة المعالج';

@@ -4,7 +4,7 @@ const {
   authenticateToken: authMiddleware,
   authorizeRole: roleMiddleware,
 } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 const {
   KnowledgeArticle,

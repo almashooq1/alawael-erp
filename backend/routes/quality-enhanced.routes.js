@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // Service exports a singleton instance — use directly (no `new`)
 const svc = require('../services/quality/quality-enhanced.service');
 const { stripUpdateMeta } = require('../utils/sanitize');

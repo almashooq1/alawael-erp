@@ -4,7 +4,7 @@ const express = require('express');
 
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // Service exports singleton instance — use directly (no `new`)
 const notifSvc = require('../services/notifications/notification-enhanced.service');
 const safeError = require('../utils/safeError');

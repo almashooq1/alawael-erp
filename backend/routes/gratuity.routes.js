@@ -12,7 +12,7 @@ const GratuityService = require('../services/hr/gratuityService');
 const Gratuity = require('../models/gratuity.model');
 const _GratuityAudit = require('../models/gratuityAudit.model');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { body, param: _param, validationResult } = require('express-validator');
 
 const MAX_PAGE_LIMIT = 100;

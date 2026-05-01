@@ -4,7 +4,7 @@
  */
 const Branch = require('../models/Branch');
 const BranchAuditLog = require('../models/BranchAuditLog');
-const { getBranchFilter, ROLES } = require('../services/branchPermission.service');
+const { getBranchFilter } = require('../services/branchPermission.service');
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
 const ok = (res, data, message = 'Success', statusCode = 200) =>

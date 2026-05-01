@@ -406,7 +406,7 @@ class InventoryEnhancedService {
   // ============================================================
 
   async createItem(data) {
-    const { InventoryItem: Item, ItemCategory } = require('../../models/InventoryItem');
+    const { InventoryItem: Item } = require('../../models/InventoryItem');
     const count = await Item.countDocuments();
     const sku = `ITM-${String(count + 1).padStart(4, '0')}`;
     return Item.create({ ...data, sku });

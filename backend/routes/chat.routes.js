@@ -21,7 +21,7 @@ const express = require('express');
 const router = express.Router();
 const { body, param, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const _logger = require('../utils/logger');
 
 // ── Service ──
@@ -80,7 +80,9 @@ router.get('/users/online', authenticate, requireBranchAccess, async (req, res) 
 
 router.get(
   '/users/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المستخدم مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -95,7 +97,9 @@ router.get(
 
 router.put(
   '/users/status',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [body('status').isIn(['online', 'away', 'busy', 'offline']).withMessage('حالة غير صالحة')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -123,7 +127,9 @@ router.get('/conversations', authenticate, requireBranchAccess, async (req, res)
 
 router.get(
   '/conversations/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -138,7 +144,9 @@ router.get(
 
 router.post(
   '/conversations/direct',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [body('userId').notEmpty().withMessage('معرّف المستخدم مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -153,7 +161,9 @@ router.post(
 
 router.post(
   '/conversations/group',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     body('name').notEmpty().withMessage('اسم المجموعة مطلوب'),
     body('participants').isArray({ min: 1 }).withMessage('يجب إضافة مشارك واحد على الأقل'),
@@ -171,7 +181,9 @@ router.post(
 
 router.put(
   '/conversations/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -186,7 +198,9 @@ router.put(
 
 router.delete(
   '/conversations/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'manager']),
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
@@ -206,7 +220,9 @@ router.delete(
 
 router.post(
   '/conversations/:id/participants',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     body('userId').notEmpty().withMessage('معرّف المستخدم مطلوب'),
@@ -224,7 +240,9 @@ router.post(
 
 router.delete(
   '/conversations/:id/participants/:userId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     param('userId').notEmpty().withMessage('معرّف المستخدم مطلوب'),
@@ -242,7 +260,9 @@ router.delete(
 
 router.post(
   '/conversations/:id/admins',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     body('userId').notEmpty().withMessage('معرّف المستخدم مطلوب'),
@@ -264,7 +284,9 @@ router.post(
 
 router.get(
   '/conversations/:id/messages',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -279,7 +301,9 @@ router.get(
 
 router.post(
   '/conversations/:id/messages',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     body('content').optional().isString().withMessage('محتوى الرسالة يجب أن يكون نص'),
@@ -297,7 +321,9 @@ router.post(
 
 router.put(
   '/messages/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف الرسالة مطلوب'),
     body('content').notEmpty().withMessage('محتوى الرسالة مطلوب'),
@@ -315,7 +341,9 @@ router.put(
 
 router.delete(
   '/messages/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الرسالة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -343,7 +371,9 @@ router.get('/messages/search', authenticate, requireBranchAccess, async (req, re
 
 router.post(
   '/messages/:id/reactions',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف الرسالة مطلوب'),
     body('emoji').notEmpty().withMessage('الرمز التعبيري مطلوب'),
@@ -361,7 +391,9 @@ router.post(
 
 router.get(
   '/messages/:id/reactions',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف الرسالة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -380,7 +412,9 @@ router.get(
 
 router.post(
   '/conversations/:id/read',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -408,7 +442,9 @@ router.get('/unread', authenticate, requireBranchAccess, async (req, res) => {
 
 router.get(
   '/conversations/:id/pinned',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -423,7 +459,9 @@ router.get(
 
 router.post(
   '/conversations/:id/pinned',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     body('messageId').notEmpty().withMessage('معرّف الرسالة مطلوب'),
@@ -441,7 +479,9 @@ router.post(
 
 router.delete(
   '/conversations/:id/pinned/:messageId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     param('messageId').notEmpty().withMessage('معرّف الرسالة مطلوب'),
@@ -463,7 +503,9 @@ router.delete(
 
 router.post(
   '/attachments',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     body('filename').notEmpty().withMessage('اسم الملف مطلوب'),
     body('mimeType').notEmpty().withMessage('نوع الملف مطلوب'),
@@ -481,7 +523,9 @@ router.post(
 
 router.get(
   '/attachments/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المرفق مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -496,7 +540,9 @@ router.get(
 
 router.get(
   '/conversations/:id/attachments',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -515,7 +561,9 @@ router.get(
 
 router.post(
   '/conversations/:id/typing',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     param('id').notEmpty().withMessage('معرّف المحادثة مطلوب'),
     body('isTyping').isBoolean().withMessage('يجب تحديد حالة الكتابة'),
@@ -533,7 +581,9 @@ router.post(
 
 router.get(
   '/conversations/:id/typing',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('id').notEmpty().withMessage('معرّف المحادثة مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -561,7 +611,9 @@ router.get('/blocked', authenticate, requireBranchAccess, async (req, res) => {
 
 router.post(
   '/blocked',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [body('userId').notEmpty().withMessage('معرّف المستخدم مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;
@@ -576,7 +628,9 @@ router.post(
 
 router.delete(
   '/blocked/:userId',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [param('userId').notEmpty().withMessage('معرّف المستخدم مطلوب')],
   async (req, res) => {
     if (handleValidation(req, res)) return;

@@ -15,8 +15,8 @@
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
-const { authenticate, requireAdmin } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { authenticate } = require('../middleware/auth');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 

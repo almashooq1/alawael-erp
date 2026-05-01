@@ -12,7 +12,7 @@ const {
   authenticateToken: authMiddleware,
   requireRole: roleMiddleware,
 } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 
 // ========================

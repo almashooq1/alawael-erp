@@ -8,7 +8,7 @@ const router = express.Router();
 const settingsService = require('../services/settingsService');
 const { GlobalSetting } = require('../models/BranchSetting');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');
 

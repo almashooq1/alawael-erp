@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const appointmentService = require('../services/appointment.service');
 const { asyncHandler } = require('../errors/errorHandler');
 const { AppError } = require('../errors/AppError');

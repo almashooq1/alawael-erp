@@ -13,7 +13,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const {
   LegalCase,
   CourtHearing,
@@ -78,7 +78,9 @@ const sanitize = obj => {
 // ── Legal Cases ───────────────────────────────────────────────────────────
 router.get(
   '/legal/cases',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await LegalCase.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -89,7 +91,9 @@ router.get(
 
 router.post(
   '/legal/cases',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalCase.create({
       ...sanitize(req.body),
@@ -102,7 +106,9 @@ router.post(
 
 router.get(
   '/legal/cases/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalCase.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -111,7 +117,9 @@ router.get(
 
 router.put(
   '/legal/cases/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalCase.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -122,7 +130,9 @@ router.put(
 
 router.patch(
   '/legal/cases/:id/status',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalCase.findByIdAndUpdate(
       req.params.id,
@@ -135,7 +145,9 @@ router.patch(
 
 router.get(
   '/legal/cases/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [total, open, won, lost] = await Promise.all([
@@ -157,7 +169,9 @@ router.get(
 // ── Court Hearings ────────────────────────────────────────────────────────
 router.get(
   '/legal/hearings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CourtHearing.find({ organization: req.user.organization })
       .populate('case', 'caseNumber title')
@@ -169,7 +183,9 @@ router.get(
 
 router.post(
   '/legal/hearings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CourtHearing.create({
       ...sanitize(req.body),
@@ -182,7 +198,9 @@ router.post(
 
 router.put(
   '/legal/hearings/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CourtHearing.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -194,7 +212,9 @@ router.put(
 // ── Power of Attorney ─────────────────────────────────────────────────────
 router.get(
   '/legal/poa',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await PowerOfAttorney.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -205,7 +225,9 @@ router.get(
 
 router.post(
   '/legal/poa',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await PowerOfAttorney.create({
       ...sanitize(req.body),
@@ -218,7 +240,9 @@ router.post(
 
 router.put(
   '/legal/poa/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await PowerOfAttorney.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -229,7 +253,9 @@ router.put(
 
 router.patch(
   '/legal/poa/:id/revoke',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await PowerOfAttorney.findByIdAndUpdate(
       req.params.id,
@@ -243,7 +269,9 @@ router.patch(
 // ── Legal Opinions ────────────────────────────────────────────────────────
 router.get(
   '/legal/opinions',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await LegalOpinion.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -254,7 +282,9 @@ router.get(
 
 router.post(
   '/legal/opinions',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalOpinion.create({
       ...sanitize(req.body),
@@ -267,7 +297,9 @@ router.post(
 
 router.put(
   '/legal/opinions/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalOpinion.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -278,7 +310,9 @@ router.put(
 
 router.patch(
   '/legal/opinions/:id/deliver',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await LegalOpinion.findByIdAndUpdate(
       req.params.id,
@@ -292,7 +326,9 @@ router.patch(
 // ── Regulatory Filings ───────────────────────────────────────────────────
 router.get(
   '/legal/filings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await RegulatoryFiling.find({ organization: req.user.organization }).sort({
       dueDate: 1,
@@ -303,7 +339,9 @@ router.get(
 
 router.post(
   '/legal/filings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await RegulatoryFiling.create({
       ...sanitize(req.body),
@@ -316,7 +354,9 @@ router.post(
 
 router.put(
   '/legal/filings/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await RegulatoryFiling.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -327,7 +367,9 @@ router.put(
 
 router.get(
   '/legal/filings/overdue',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await RegulatoryFiling.find({
       organization: req.user.organization,
@@ -345,7 +387,9 @@ router.get(
 // ── Board Meetings ────────────────────────────────────────────────────────
 router.get(
   '/governance/meetings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BoardMeeting.find({ organization: req.user.organization }).sort({
       date: -1,
@@ -356,7 +400,9 @@ router.get(
 
 router.post(
   '/governance/meetings',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardMeeting.create({
       ...sanitize(req.body),
@@ -369,7 +415,9 @@ router.post(
 
 router.get(
   '/governance/meetings/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardMeeting.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -378,7 +426,9 @@ router.get(
 
 router.put(
   '/governance/meetings/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardMeeting.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -389,7 +439,9 @@ router.put(
 
 router.patch(
   '/governance/meetings/:id/complete',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardMeeting.findByIdAndUpdate(
       req.params.id,
@@ -403,7 +455,9 @@ router.patch(
 // ── Committees ────────────────────────────────────────────────────────────
 router.get(
   '/governance/committees',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BoardCommittee.find({ organization: req.user.organization }).sort({
       name: 1,
@@ -414,7 +468,9 @@ router.get(
 
 router.post(
   '/governance/committees',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardCommittee.create({
       ...sanitize(req.body),
@@ -427,7 +483,9 @@ router.post(
 
 router.put(
   '/governance/committees/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardCommittee.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -439,7 +497,9 @@ router.put(
 // ── Resolutions ───────────────────────────────────────────────────────────
 router.get(
   '/governance/resolutions',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BoardResolution.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -450,7 +510,9 @@ router.get(
 
 router.post(
   '/governance/resolutions',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardResolution.create({
       ...sanitize(req.body),
@@ -463,7 +525,9 @@ router.post(
 
 router.put(
   '/governance/resolutions/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardResolution.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -474,7 +538,9 @@ router.put(
 
 router.patch(
   '/governance/resolutions/:id/vote',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { vote } = req.body; // 'for', 'against', 'abstain'
     const update = { $inc: { [`votes.${vote}`]: 1 } };
@@ -485,7 +551,9 @@ router.patch(
 
 router.patch(
   '/governance/resolutions/:id/implement',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BoardResolution.findByIdAndUpdate(
       req.params.id,
@@ -499,7 +567,9 @@ router.patch(
 // ── Governance Policies ───────────────────────────────────────────────────
 router.get(
   '/governance/policies',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await GovernancePolicy.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -510,7 +580,9 @@ router.get(
 
 router.post(
   '/governance/policies',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.create({
       ...sanitize(req.body),
@@ -523,7 +595,9 @@ router.post(
 
 router.put(
   '/governance/policies/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -534,7 +608,9 @@ router.put(
 
 router.post(
   '/governance/policies/:id/acknowledge',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await GovernancePolicy.findByIdAndUpdate(
       req.params.id,
@@ -555,7 +631,9 @@ router.post(
 // ── Governance Reports ────────────────────────────────────────────────────
 router.get(
   '/governance/reports',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await GovernanceReport.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -566,7 +644,9 @@ router.get(
 
 router.post(
   '/governance/reports',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await GovernanceReport.create({
       ...sanitize(req.body),
@@ -579,7 +659,9 @@ router.post(
 
 router.get(
   '/governance/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [meetings, committees, resolutions, policies] = await Promise.all([
@@ -612,7 +694,9 @@ router.get(
 // ── BCP Plans ─────────────────────────────────────────────────────────────
 router.get(
   '/bcp/plans',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BCPPlan.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -623,7 +707,9 @@ router.get(
 
 router.post(
   '/bcp/plans',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCPPlan.create({
       ...sanitize(req.body),
@@ -636,7 +722,9 @@ router.post(
 
 router.get(
   '/bcp/plans/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCPPlan.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -645,7 +733,9 @@ router.get(
 
 router.put(
   '/bcp/plans/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCPPlan.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
     res.json({ success: true, data: item });
@@ -654,7 +744,9 @@ router.put(
 
 router.patch(
   '/bcp/plans/:id/activate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCPPlan.findByIdAndUpdate(
       req.params.id,
@@ -668,7 +760,9 @@ router.patch(
 // ── Business Impact Analysis ──────────────────────────────────────────────
 router.get(
   '/bcp/bia',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BusinessImpactAnalysis.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -679,7 +773,9 @@ router.get(
 
 router.post(
   '/bcp/bia',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BusinessImpactAnalysis.create({
       ...sanitize(req.body),
@@ -692,7 +788,9 @@ router.post(
 
 router.put(
   '/bcp/bia/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BusinessImpactAnalysis.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -704,7 +802,9 @@ router.put(
 // ── Crisis Incidents ──────────────────────────────────────────────────────
 router.get(
   '/bcp/crises',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CrisisIncident.find({ organization: req.user.organization }).sort({
       detectedAt: -1,
@@ -715,7 +815,9 @@ router.get(
 
 router.post(
   '/bcp/crises',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.create({
       ...sanitize(req.body),
@@ -728,7 +830,9 @@ router.post(
 
 router.get(
   '/bcp/crises/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -737,7 +841,9 @@ router.get(
 
 router.put(
   '/bcp/crises/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -748,7 +854,9 @@ router.put(
 
 router.patch(
   '/bcp/crises/:id/escalate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
@@ -761,7 +869,9 @@ router.patch(
 
 router.patch(
   '/bcp/crises/:id/resolve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CrisisIncident.findByIdAndUpdate(
       req.params.id,
@@ -775,7 +885,9 @@ router.patch(
 // ── BC Drills ─────────────────────────────────────────────────────────────
 router.get(
   '/bcp/drills',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await BCDrill.find({ organization: req.user.organization }).sort({
       scheduledDate: -1,
@@ -786,7 +898,9 @@ router.get(
 
 router.post(
   '/bcp/drills',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCDrill.create({
       ...sanitize(req.body),
@@ -799,7 +913,9 @@ router.post(
 
 router.put(
   '/bcp/drills/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCDrill.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
     res.json({ success: true, data: item });
@@ -808,7 +924,9 @@ router.put(
 
 router.patch(
   '/bcp/drills/:id/score',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await BCDrill.findByIdAndUpdate(
       req.params.id,
@@ -822,7 +940,9 @@ router.patch(
 // ── Disaster Recovery Plans ───────────────────────────────────────────────
 router.get(
   '/bcp/drp',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await DisasterRecoveryPlan.find({ organization: req.user.organization }).sort({
       tier: 1,
@@ -833,7 +953,9 @@ router.get(
 
 router.post(
   '/bcp/drp',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await DisasterRecoveryPlan.create({
       ...sanitize(req.body),
@@ -846,7 +968,9 @@ router.post(
 
 router.put(
   '/bcp/drp/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await DisasterRecoveryPlan.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -857,7 +981,9 @@ router.put(
 
 router.get(
   '/bcp/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [plans, biaCount, activeCrises, drills, drpCount] = await Promise.all([
@@ -892,7 +1018,9 @@ router.get(
 // ── Surveys ───────────────────────────────────────────────────────────────
 router.get(
   '/cx/surveys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CXSurvey.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -903,7 +1031,9 @@ router.get(
 
 router.post(
   '/cx/surveys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXSurvey.create({
       ...sanitize(req.body),
@@ -916,7 +1046,9 @@ router.post(
 
 router.get(
   '/cx/surveys/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXSurvey.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -925,7 +1057,9 @@ router.get(
 
 router.put(
   '/cx/surveys/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXSurvey.findByIdAndUpdate(req.params.id, sanitize(req.body), { new: true });
     res.json({ success: true, data: item });
@@ -934,7 +1068,9 @@ router.put(
 
 router.patch(
   '/cx/surveys/:id/activate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXSurvey.findByIdAndUpdate(
       req.params.id,
@@ -948,7 +1084,9 @@ router.patch(
 // ── Feedback ──────────────────────────────────────────────────────────────
 router.get(
   '/cx/feedback',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CXFeedback.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -959,7 +1097,9 @@ router.get(
 
 router.post(
   '/cx/feedback',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXFeedback.create({
       ...sanitize(req.body),
@@ -972,7 +1112,9 @@ router.post(
 
 router.put(
   '/cx/feedback/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXFeedback.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -983,7 +1125,9 @@ router.put(
 
 router.get(
   '/cx/feedback/analytics',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const feedbacks = await CXFeedback.find({ organization: org }).lean();
@@ -1014,7 +1158,9 @@ router.get(
 // ── Complaints ────────────────────────────────────────────────────────────
 router.get(
   '/cx/complaints',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CXComplaint.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1025,7 +1171,9 @@ router.get(
 
 router.post(
   '/cx/complaints',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXComplaint.create({
       ...sanitize(req.body),
@@ -1038,7 +1186,9 @@ router.post(
 
 router.put(
   '/cx/complaints/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXComplaint.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1049,7 +1199,9 @@ router.put(
 
 router.patch(
   '/cx/complaints/:id/escalate',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXComplaint.findByIdAndUpdate(
       req.params.id,
@@ -1068,7 +1220,9 @@ router.patch(
 
 router.patch(
   '/cx/complaints/:id/resolve',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CXComplaint.findByIdAndUpdate(
       req.params.id,
@@ -1082,7 +1236,9 @@ router.patch(
 // ── Customer Journeys ─────────────────────────────────────────────────────
 router.get(
   '/cx/journeys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CustomerJourney.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1093,7 +1249,9 @@ router.get(
 
 router.post(
   '/cx/journeys',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CustomerJourney.create({
       ...sanitize(req.body),
@@ -1106,7 +1264,9 @@ router.post(
 
 router.put(
   '/cx/journeys/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CustomerJourney.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1118,7 +1278,9 @@ router.put(
 // ── Service Benchmarks ────────────────────────────────────────────────────
 router.get(
   '/cx/benchmarks',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await ServiceBenchmark.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1129,7 +1291,9 @@ router.get(
 
 router.post(
   '/cx/benchmarks',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ServiceBenchmark.create({
       ...sanitize(req.body),
@@ -1142,7 +1306,9 @@ router.post(
 
 router.put(
   '/cx/benchmarks/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ServiceBenchmark.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1153,7 +1319,9 @@ router.put(
 
 router.get(
   '/cx/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [surveys, feedbackCount, complaints, openComplaints, journeys] = await Promise.all([
@@ -1189,7 +1357,9 @@ router.get(
 // ── Energy Readings ───────────────────────────────────────────────────────
 router.get(
   '/sustainability/energy',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await EnergyReading.find({ organization: req.user.organization }).sort({
       readingDate: -1,
@@ -1200,7 +1370,9 @@ router.get(
 
 router.post(
   '/sustainability/energy',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await EnergyReading.create({
       ...sanitize(req.body),
@@ -1213,7 +1385,9 @@ router.post(
 
 router.put(
   '/sustainability/energy/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await EnergyReading.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1224,7 +1398,9 @@ router.put(
 
 router.get(
   '/sustainability/energy/summary',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const readings = await EnergyReading.find({ organization: req.user.organization }).lean();
     const byType = {};
@@ -1243,7 +1419,9 @@ router.get(
 // ── Carbon Footprint ──────────────────────────────────────────────────────
 router.get(
   '/sustainability/carbon',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await CarbonFootprint.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1254,7 +1432,9 @@ router.get(
 
 router.post(
   '/sustainability/carbon',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CarbonFootprint.create({
       ...sanitize(req.body),
@@ -1267,7 +1447,9 @@ router.post(
 
 router.put(
   '/sustainability/carbon/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await CarbonFootprint.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1279,7 +1461,9 @@ router.put(
 // ── Waste Records ─────────────────────────────────────────────────────────
 router.get(
   '/sustainability/waste',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await WasteRecord.find({ organization: req.user.organization }).sort({
       date: -1,
@@ -1290,7 +1474,9 @@ router.get(
 
 router.post(
   '/sustainability/waste',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await WasteRecord.create({
       ...sanitize(req.body),
@@ -1303,7 +1489,9 @@ router.post(
 
 router.put(
   '/sustainability/waste/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await WasteRecord.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1314,7 +1502,9 @@ router.put(
 
 router.get(
   '/sustainability/waste/summary',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const records = await WasteRecord.find({ organization: req.user.organization }).lean();
     let totalQuantity = 0;
@@ -1342,7 +1532,9 @@ router.get(
 // ── ESG Reports ───────────────────────────────────────────────────────────
 router.get(
   '/sustainability/esg',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await ESGReport.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1353,7 +1545,9 @@ router.get(
 
 router.post(
   '/sustainability/esg',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ESGReport.create({
       ...sanitize(req.body),
@@ -1366,7 +1560,9 @@ router.post(
 
 router.put(
   '/sustainability/esg/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await ESGReport.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1378,7 +1574,9 @@ router.put(
 // ── Sustainability Goals ──────────────────────────────────────────────────
 router.get(
   '/sustainability/goals',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await SustainabilityGoal.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1389,7 +1587,9 @@ router.get(
 
 router.post(
   '/sustainability/goals',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await SustainabilityGoal.create({
       ...sanitize(req.body),
@@ -1402,7 +1602,9 @@ router.post(
 
 router.put(
   '/sustainability/goals/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await SustainabilityGoal.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1413,7 +1615,9 @@ router.put(
 
 router.patch(
   '/sustainability/goals/:id/progress',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await SustainabilityGoal.findByIdAndUpdate(
       req.params.id,
@@ -1430,7 +1634,9 @@ router.patch(
 
 router.get(
   '/sustainability/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [energyCount, carbonCount, wasteCount, esgCount, goalCount] = await Promise.all([
@@ -1458,7 +1664,9 @@ router.get(
 // ── Maturity Assessments ──────────────────────────────────────────────────
 router.get(
   '/dt/assessments',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await MaturityAssessment.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1469,7 +1677,9 @@ router.get(
 
 router.post(
   '/dt/assessments',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await MaturityAssessment.create({
       ...sanitize(req.body),
@@ -1482,7 +1692,9 @@ router.post(
 
 router.get(
   '/dt/assessments/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await MaturityAssessment.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -1491,7 +1703,9 @@ router.get(
 
 router.put(
   '/dt/assessments/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await MaturityAssessment.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1503,7 +1717,9 @@ router.put(
 // ── Innovation Ideas ──────────────────────────────────────────────────────
 router.get(
   '/dt/ideas',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await InnovationIdea.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1514,7 +1730,9 @@ router.get(
 
 router.post(
   '/dt/ideas',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationIdea.create({
       ...sanitize(req.body),
@@ -1527,7 +1745,9 @@ router.post(
 
 router.put(
   '/dt/ideas/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationIdea.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1538,7 +1758,9 @@ router.put(
 
 router.post(
   '/dt/ideas/:id/vote',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const { direction } = req.body; // 'up' or 'down'
     const update = {
@@ -1552,7 +1774,9 @@ router.post(
 
 router.patch(
   '/dt/ideas/:id/status',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationIdea.findByIdAndUpdate(
       req.params.id,
@@ -1566,7 +1790,9 @@ router.patch(
 // ── Innovation Projects ───────────────────────────────────────────────────
 router.get(
   '/dt/projects',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await InnovationProject.find({ organization: req.user.organization }).sort({
       createdAt: -1,
@@ -1577,7 +1803,9 @@ router.get(
 
 router.post(
   '/dt/projects',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationProject.create({
       ...sanitize(req.body),
@@ -1590,7 +1818,9 @@ router.post(
 
 router.get(
   '/dt/projects/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationProject.findById(req.params.id).lean();
     res.json({ success: true, data: item });
@@ -1599,7 +1829,9 @@ router.get(
 
 router.put(
   '/dt/projects/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationProject.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1610,7 +1842,9 @@ router.put(
 
 router.patch(
   '/dt/projects/:id/stage',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await InnovationProject.findByIdAndUpdate(
       req.params.id,
@@ -1624,7 +1858,9 @@ router.patch(
 // ── Tech Radar ────────────────────────────────────────────────────────────
 router.get(
   '/dt/radar',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await TechRadarEntry.find({ organization: req.user.organization }).sort({
       quadrant: 1,
@@ -1636,7 +1872,9 @@ router.get(
 
 router.post(
   '/dt/radar',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TechRadarEntry.create({
       ...sanitize(req.body),
@@ -1649,7 +1887,9 @@ router.post(
 
 router.put(
   '/dt/radar/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TechRadarEntry.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1660,7 +1900,9 @@ router.put(
 
 router.patch(
   '/dt/radar/:id/move',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const entry = await TechRadarEntry.findById(req.params.id).lean();
     const item = await TechRadarEntry.findByIdAndUpdate(
@@ -1680,7 +1922,9 @@ router.patch(
 // ── Transformation KPIs ───────────────────────────────────────────────────
 router.get(
   '/dt/kpis',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const items = await TransformationKPI.find({ organization: req.user.organization }).sort({
       category: 1,
@@ -1691,7 +1935,9 @@ router.get(
 
 router.post(
   '/dt/kpis',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TransformationKPI.create({
       ...sanitize(req.body),
@@ -1704,7 +1950,9 @@ router.post(
 
 router.put(
   '/dt/kpis/:id',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TransformationKPI.findByIdAndUpdate(req.params.id, sanitize(req.body), {
       new: true,
@@ -1715,7 +1963,9 @@ router.put(
 
 router.patch(
   '/dt/kpis/:id/update-value',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const item = await TransformationKPI.findByIdAndUpdate(
       req.params.id,
@@ -1734,7 +1984,9 @@ router.patch(
 
 router.get(
   '/dt/dashboard/stats',
-  authenticateToken, requireBranchAccess, requireBranchAccess,
+  authenticateToken,
+  requireBranchAccess,
+  requireBranchAccess,
   asyncHandler(async (req, res) => {
     const org = req.user.organization;
     const [assessments, ideas, projects, radarEntries, kpis] = await Promise.all([

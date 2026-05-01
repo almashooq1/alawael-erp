@@ -92,7 +92,7 @@ const {
 /* ─── Middleware ────────────────────────────────────────────────────────── */
 const { authenticateToken } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 // ══════════════════════════════════════════════════════════════

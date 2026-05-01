@@ -5,7 +5,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 const SmartNotification = require('../models/SmartNotification');
 const safeError = require('../utils/safeError');
@@ -24,8 +24,17 @@ router.get('/', async (req, res) => {
       SmartNotification.find(filter).sort({ createdAt: -1 }).skip(skip).limit(+limit).lean(),
       SmartNotification.countDocuments(filter),
     ]);
-    const unreadCount = await SmartNotification.countDocuments({ recipient: req.user.id, isRead: false });
-    res.json({ success: true, data, unreadCount, pagination: { page: +page, limit: +limit, total }, message: 'قائمة الإشعارات' });
+    const unreadCount = await SmartNotification.countDocuments({
+      recipient: req.user.id,
+      isRead: false,
+    });
+    res.json({
+      success: true,
+      data,
+      unreadCount,
+      pagination: { page: +page, limit: +limit, total },
+      message: 'قائمة الإشعارات',
+    });
   } catch (error) {
     safeError(res, error, 'fetching notifications');
   }
@@ -53,7 +62,11 @@ router.put('/read-all', async (req, res) => {
       { recipient: req.user.id, isRead: false },
       { isRead: true, readAt: new Date() }
     );
-    res.json({ success: true, data: { modifiedCount: result.modifiedCount }, message: 'تم تحديد جميع الإشعارات كمقروءة' });
+    res.json({
+      success: true,
+      data: { modifiedCount: result.modifiedCount },
+      message: 'تم تحديد جميع الإشعارات كمقروءة',
+    });
   } catch (error) {
     safeError(res, error, 'marking all read');
   }
@@ -62,7 +75,10 @@ router.put('/read-all', async (req, res) => {
 // ─── Delete notification ─────────────────────────────────────────────────────
 router.delete('/:id', async (req, res) => {
   try {
-    const notif = await SmartNotification.findOneAndDelete({ _id: req.params.id, recipient: req.user.id });
+    const notif = await SmartNotification.findOneAndDelete({
+      _id: req.params.id,
+      recipient: req.user.id,
+    });
     if (!notif) return res.status(404).json({ success: false, message: 'الإشعار غير موجود' });
     res.json({ success: true, message: 'تم حذف الإشعار' });
   } catch (error) {
@@ -75,7 +91,13 @@ router.get('/preferences', async (req, res) => {
   try {
     res.json({
       success: true,
-      data: { email: true, push: true, sms: false, inApp: true, categories: ['system', 'task', 'approval', 'alert'] },
+      data: {
+        email: true,
+        push: true,
+        sms: false,
+        inApp: true,
+        categories: ['system', 'task', 'approval', 'alert'],
+      },
       message: 'تفضيلات الإشعارات',
     });
   } catch (error) {
@@ -100,9 +122,14 @@ router.post('/send', authorize(['admin', 'manager']), async (req, res) => {
       return res.status(400).json({ success: false, message: 'المستلم والعنوان والرسالة مطلوبة' });
     }
     const notif = await SmartNotification.create({
-      recipient, title, message, type: type || 'custom',
-      category: category || 'system', priority: priority || 'medium',
-      channel: channel || 'in_app', sentBy: req.user.id,
+      recipient,
+      title,
+      message,
+      type: type || 'custom',
+      category: category || 'system',
+      priority: priority || 'medium',
+      channel: channel || 'in_app',
+      sentBy: req.user.id,
     });
     res.status(201).json({ success: true, data: notif, message: 'تم إرسال الإشعار' });
   } catch (error) {

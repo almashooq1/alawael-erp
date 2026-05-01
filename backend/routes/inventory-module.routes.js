@@ -8,7 +8,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const InventoryItem = require('../models/inventory/InventoryItem');
 const InventoryTransaction = require('../models/inventory/InventoryTransaction');
 const PurchaseOrder = require('../models/inventory/PurchaseOrder');

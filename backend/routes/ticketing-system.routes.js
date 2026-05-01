@@ -26,7 +26,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const logger = require('../utils/logger');
 
 // Models
@@ -88,7 +88,7 @@ function addBusinessHours(startDate, hours) {
   const WORK_END = 17;
   const WEEKEND = [5, 6]; // الجمعة والسبت
 
-  let current = new Date(startDate);
+  const current = new Date(startDate);
   let remaining = hours;
 
   while (remaining > 0) {
@@ -781,7 +781,11 @@ router.post('/sla-configs', requireAdmin, async (req, res) => {
  */
 router.put('/sla-configs/:id', requireAdmin, async (req, res) => {
   try {
-    const config = await TicketSlaConfig.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), { new: true });
+    const config = await TicketSlaConfig.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      { new: true }
+    );
     if (!config) return res.status(404).json({ success: false, message: 'الإعداد غير موجود' });
     return res.json({ success: true, message: 'تم تحديث إعداد SLA', data: config });
   } catch (err) {
@@ -843,9 +847,13 @@ router.post('/escalation-rules', requireAdmin, async (req, res) => {
  */
 router.put('/escalation-rules/:id', requireAdmin, async (req, res) => {
   try {
-    const rule = await TicketEscalationRule.findByIdAndUpdate(req.params.id, stripUpdateMeta(req.body), {
-      new: true,
-    });
+    const rule = await TicketEscalationRule.findByIdAndUpdate(
+      req.params.id,
+      stripUpdateMeta(req.body),
+      {
+        new: true,
+      }
+    );
     if (!rule) return res.status(404).json({ success: false, message: 'القاعدة غير موجودة' });
     return res.json({ success: true, message: 'تم تحديث قاعدة التصعيد', data: rule });
   } catch (err) {

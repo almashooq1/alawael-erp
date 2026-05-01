@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { validate } = require('../middleware/validate');
 const { schemas } = require('../middleware/validationSchemas');
 const { SafetyIncident, SafetyInspection } = require('../models/HSE');

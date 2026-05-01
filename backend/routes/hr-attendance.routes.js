@@ -19,7 +19,7 @@ const router = express.Router();
 const AttendanceEngine = require('../services/hr/attendanceEngine');
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 // Maximum records per page — prevents DoS via unbounded queries
 const MAX_PAGE_LIMIT = 100;

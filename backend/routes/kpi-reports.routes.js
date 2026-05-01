@@ -7,7 +7,7 @@
 
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const router = express.Router();
 
 // 🔒 All KPI Reports routes require authentication

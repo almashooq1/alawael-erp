@@ -3,7 +3,7 @@
 const router = require('express').Router();
 const walletService = require('../services/digitalWallet.service');
 const { authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const escapeRegex = require('../utils/escapeRegex');
 
 const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -32,7 +32,9 @@ const requireWalletAccess = wrap(async (req, res, next) => {
 // ── قائمة المحافظ ────────────────────────────────────────────────────────────
 router.get(
   '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await walletService.list({ ...req.query, branchId: req.user.branchId });
@@ -43,7 +45,9 @@ router.get(
 // ── إحصائيات ─────────────────────────────────────────────────────────────────
 router.get(
   '/stats',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const data = await walletService.getStats(req.user.branchId);
@@ -54,7 +58,9 @@ router.get(
 // ── إنشاء محفظة ──────────────────────────────────────────────────────────────
 router.post(
   '/',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const wallet = await walletService.createWallet({
@@ -69,7 +75,9 @@ router.post(
 // ── عرض محفظة واحدة ──────────────────────────────────────────────────────────
 router.get(
   '/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const DigitalWallet = require('../models/DigitalWallet');
@@ -82,7 +90,9 @@ router.get(
 // ── شحن المحفظة ──────────────────────────────────────────────────────────────
 router.post(
   '/:id/topup',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await walletService.topUp(req.params.id, {
@@ -96,7 +106,9 @@ router.post(
 // ── خصم من المحفظة ───────────────────────────────────────────────────────────
 router.post(
   '/:id/debit',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.debit(req.params.id, {
@@ -110,7 +122,9 @@ router.post(
 // ── تحويل بين المحافظ ────────────────────────────────────────────────────────
 router.post(
   '/:id/transfer',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.transfer(req.params.id, req.body.targetWalletId, {
@@ -124,7 +138,9 @@ router.post(
 // ── تطبيق كوبون خصم ──────────────────────────────────────────────────────────
 router.post(
   '/:id/apply-coupon',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.applyCoupon(
@@ -140,7 +156,9 @@ router.post(
 // ── استرداد نقاط الولاء ──────────────────────────────────────────────────────
 router.post(
   '/:id/redeem-loyalty',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.redeemLoyaltyPoints(req.params.id, req.body.points, {
@@ -153,7 +171,9 @@ router.post(
 // ── كشف حساب المحفظة ─────────────────────────────────────────────────────────
 router.get(
   '/:id/statement',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   requireWalletAccess,
   wrap(async (req, res) => {
     const data = await walletService.getStatement(req.params.id, req.query);
@@ -164,7 +184,9 @@ router.get(
 // ── تجميد / إلغاء تجميد المحفظة ─────────────────────────────────────────────
 router.post(
   '/:id/block',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await walletService.blockWallet(req.params.id, req.body.reason);
@@ -174,7 +196,9 @@ router.post(
 
 router.post(
   '/:id/unblock',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const data = await walletService.unblockWallet(req.params.id);
@@ -185,7 +209,9 @@ router.post(
 // ── قائمة الكوبونات ──────────────────────────────────────────────────────────
 router.get(
   '/coupons/list',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance', 'manager']),
   wrap(async (req, res) => {
     const DiscountCoupon = require('../models/DiscountCoupon');
@@ -207,7 +233,9 @@ router.get(
 // ── إنشاء كوبون ──────────────────────────────────────────────────────────────
 router.post(
   '/coupons',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'finance']),
   wrap(async (req, res) => {
     const DiscountCoupon = require('../models/DiscountCoupon');
@@ -219,7 +247,9 @@ router.post(
 // ── تاريخ نقاط الولاء ────────────────────────────────────────────────────────
 router.get(
   '/:id/loyalty-history',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap(async (req, res) => {
     const LoyaltyPointsTransaction = require('../models/LoyaltyPointsTransaction');
     const page = parseInt(req.query.page) || 1;

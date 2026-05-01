@@ -5,7 +5,7 @@
 const express = require('express');
 const { body, param, query, validationResult } = require('express-validator');
 const { authenticateToken: authenticate, authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const svc = require('../services/ceoDashboard.service');
 
 const router = express.Router();
@@ -24,7 +24,9 @@ const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch
    ════════════════════════════════════════════ */
 router.get(
   '/dashboard',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getExecutiveDashboard();
     res.json({ success: true, data });
@@ -54,7 +56,9 @@ router.get('/strategic-statuses', authenticate, requireBranchAccess, (req, res) 
 );
 router.get(
   '/statistics',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.getStatistics() }))
 );
 
@@ -63,7 +67,9 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/kpis',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listKPIs(req.query.category);
     res.json({ success: true, data });
@@ -72,7 +78,9 @@ router.get(
 
 router.get(
   '/kpis/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -84,7 +92,9 @@ router.get(
 
 router.post(
   '/kpis',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   [
     body('code').notEmpty().withMessage('رمز المؤشر مطلوب'),
@@ -99,7 +109,9 @@ router.post(
 
 router.put(
   '/kpis/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -112,7 +124,9 @@ router.put(
 
 router.delete(
   '/kpis/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -126,7 +140,9 @@ router.delete(
 /* ── KPI Trends — اتجاهات المؤشرات ── */
 router.get(
   '/kpis/:id/trend',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -137,7 +153,9 @@ router.get(
 
 router.post(
   '/kpis/:id/snapshots',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   [
@@ -157,7 +175,9 @@ router.post(
    ════════════════════════════════════════════ */
 router.get(
   '/alerts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const { severity, category, isResolved, unreadOnly } = req.query;
     const filters = {};
@@ -172,7 +192,9 @@ router.get(
 
 router.get(
   '/alerts/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -184,7 +206,9 @@ router.get(
 
 router.post(
   '/alerts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   [body('titleAr').notEmpty().withMessage('عنوان التنبيه مطلوب')],
   handleValidation,
@@ -196,7 +220,9 @@ router.post(
 
 router.patch(
   '/alerts/:id/read',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -208,7 +234,9 @@ router.patch(
 
 router.patch(
   '/alerts/:id/resolve',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -221,7 +249,9 @@ router.patch(
 
 router.delete(
   '/alerts/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -237,7 +267,9 @@ router.delete(
    ════════════════════════════════════════════ */
 router.get(
   '/goals',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listGoals(req.query.status);
     res.json({ success: true, data });
@@ -246,7 +278,9 @@ router.get(
 
 router.get(
   '/goals/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -258,7 +292,9 @@ router.get(
 
 router.post(
   '/goals',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   [body('nameAr').notEmpty().withMessage('اسم الهدف بالعربية مطلوب')],
   handleValidation,
@@ -270,7 +306,9 @@ router.post(
 
 router.put(
   '/goals/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -283,7 +321,9 @@ router.put(
 
 router.delete(
   '/goals/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -299,7 +339,9 @@ router.delete(
    ════════════════════════════════════════════ */
 router.get(
   '/departments',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.listDepartments();
     res.json({ success: true, data });
@@ -308,7 +350,9 @@ router.get(
 
 router.get(
   '/departments/comparison',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => {
     const data = svc.getDepartmentComparison();
     res.json({ success: true, data });
@@ -317,7 +361,9 @@ router.get(
 
 router.get(
   '/departments/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -329,7 +375,9 @@ router.get(
 
 router.put(
   '/departments/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -345,13 +393,17 @@ router.put(
    ════════════════════════════════════════════ */
 router.get(
   '/widgets',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.listWidgets() }))
 );
 
 router.get(
   '/widgets/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -363,7 +415,9 @@ router.get(
 
 router.post(
   '/widgets',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   [body('title').notEmpty().withMessage('عنوان الأداة مطلوب')],
   handleValidation,
@@ -375,7 +429,9 @@ router.post(
 
 router.put(
   '/widgets/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   param('id').notEmpty(),
   handleValidation,
@@ -388,7 +444,9 @@ router.put(
 
 router.delete(
   '/widgets/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -402,13 +460,17 @@ router.delete(
 /* ── Layouts ── */
 router.get(
   '/layouts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.listLayouts() }))
 );
 
 router.get(
   '/layouts/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -420,7 +482,9 @@ router.get(
 
 router.post(
   '/layouts',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   [body('name').notEmpty().withMessage('اسم التخطيط مطلوب')],
   handleValidation,
@@ -432,7 +496,9 @@ router.post(
 
 router.patch(
   '/layouts/:id/set-default',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -445,7 +511,9 @@ router.patch(
 
 router.delete(
   '/layouts/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   param('id').notEmpty(),
   handleValidation,
@@ -464,13 +532,17 @@ router.delete(
    ════════════════════════════════════════════ */
 router.get(
   '/benchmarks',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.listBenchmarks() }))
 );
 
 router.get(
   '/benchmarks/:kpiCode',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('kpiCode').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -488,13 +560,17 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/reports',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   wrap((req, res) => res.json({ success: true, data: svc.listReports() }))
 );
 
 router.get(
   '/reports/:id',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -506,7 +582,9 @@ router.get(
 
 router.post(
   '/reports/generate',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo', 'manager']),
   wrap((req, res) => {
     const data = svc.generateReport(req.body.type, req.body.period, getUserId(req));
@@ -516,7 +594,9 @@ router.post(
 
 router.get(
   '/reports/:id/export',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   param('id').notEmpty(),
   handleValidation,
   wrap((req, res) => {
@@ -531,7 +611,9 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/compare',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   [
     query('period1').notEmpty().withMessage('الفترة الأولى مطلوبة'),
     query('period2').notEmpty().withMessage('الفترة الثانية مطلوبة'),
@@ -548,7 +630,9 @@ router.get(
    ════════════════════════════════════════════ */
 router.get(
   '/audit-log',
-  authenticate, requireBranchAccess, requireBranchAccess,
+  authenticate,
+  requireBranchAccess,
+  requireBranchAccess,
   authorize(['admin', 'ceo']),
   wrap((req, res) => {
     const MAX_AUDIT_LIMIT = 100;

@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { analyzeAndSuggestNotifications } = require('../services/aiNotificationService');
 const { authenticateToken } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // تحليل بيانات الموظف واقتراح تنبيهات ذكية

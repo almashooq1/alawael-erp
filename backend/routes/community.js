@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 const logger = require('../utils/logger');
 const { authenticate, _authorize } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const safeError = require('../utils/safeError');
 
 // Mock database storage

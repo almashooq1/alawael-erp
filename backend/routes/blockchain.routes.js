@@ -18,7 +18,7 @@ const {
   VerificationLog,
 } = require('../models/blockchain.model');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { escapeRegex, stripUpdateMeta } = require('../utils/sanitize');
 const logger = require('../utils/logger');
 const safeError = require('../utils/safeError');

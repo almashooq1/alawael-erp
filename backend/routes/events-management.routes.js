@@ -5,7 +5,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { authenticate } = require('../middleware/auth');
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 const { stripUpdateMeta } = require('../utils/sanitize');
 const safeError = require('../utils/safeError');
 

@@ -4,7 +4,7 @@ const router = express.Router();
 const fcmController = require('../controllers/fcmController');
 const { authenticateToken } = require('../middleware/auth');
 
-const { requireBranchAccess, branchFilter } = require('../middleware/branchScope.middleware');
+const { requireBranchAccess } = require('../middleware/branchScope.middleware');
 // جميع المسارات تتطلب مصادقة
 router.use(authenticateToken);
 router.use(requireBranchAccess);

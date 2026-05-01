@@ -36,16 +36,15 @@ jobs:
 
       - name: Run backend tests
         working-directory: backend
-        run: npm test -- --forceExit --detectOpenHandles --passWithNoTests --no-coverage 2>&1 || echo "⚠️ Some backend tests failed"
+        run: npm run quality:ci
         env:
           NODE_ENV: test
           JWT_SECRET: test-jwt-secret-ci-only
           MONGODB_URI: ""
 
-      - name: Backend security audit
+      - name: Backend security audit (high+)
         working-directory: backend
-        run: npm audit --audit-level=critical --omit=dev 2>&1 || echo "⚠️ Audit warnings found"
-        continue-on-error: true
+        run: npm audit --audit-level=high --omit=dev
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -53,7 +52,7 @@ jobs:
 
       - name: Frontend lint
         working-directory: frontend
-        run: npx eslint src/ --max-warnings=50 2>&1 || echo "⚠️ Lint warnings found"
+        run: npx eslint src/ --max-warnings=0
         env:
           CI: "false"
 
@@ -82,16 +81,14 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Backend audit
+      - name: Backend audit (high)
         working-directory: backend
         run: |
           npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-          npm audit --audit-level=high --omit=dev 2>&1 || echo "⚠️ Backend audit warnings"
-        continue-on-error: true
+          npm audit --audit-level=high --omit=dev
 
-      - name: Frontend audit
+      - name: Frontend audit (high)
         working-directory: frontend
         run: |
           npm ci --legacy-peer-deps 2>&1 || npm install --legacy-peer-deps
-          npm audit --audit-level=high --omit=dev 2>&1 || echo "⚠️ Frontend audit warnings"
-        continue-on-error: true
+          npm audit --audit-level=high --omit=dev

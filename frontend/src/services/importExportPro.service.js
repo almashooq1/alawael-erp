@@ -158,6 +158,7 @@ const importExportProService = {
         const decoder = new TextDecoder();
         let buffer = '';
 
+        // eslint-disable-next-line no-constant-condition -- streaming SSE pump terminates via `break` on done
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;

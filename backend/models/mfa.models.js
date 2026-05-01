@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /**
  * MFA Models
  * نماذج المصادقة متعددة العوامل
@@ -428,8 +427,10 @@ const MFASettings = mongoose.models.MFASettings || mongoose.model('MFASettings',
 const MFASession = mongoose.models.MFASession || mongoose.model('MFASession', mfaSessionSchema);
 const OTPLog = mongoose.models.OTPLog || mongoose.model('OTPLog', otpLogSchema);
 const MFAAuditLog = mongoose.models.MFAAuditLog || mongoose.model('MFAAuditLog', mfaAuditLogSchema);
-const TrustedDevice = mongoose.models.TrustedDevice || mongoose.model('TrustedDevice', trustedDeviceSchema);
-const MFARecoveryLog = mongoose.models.MFARecoveryLog || mongoose.model('MFARecoveryLog', mfaRecoveryLogSchema);
+const TrustedDevice =
+  mongoose.models.TrustedDevice || mongoose.model('TrustedDevice', trustedDeviceSchema);
+const MFARecoveryLog =
+  mongoose.models.MFARecoveryLog || mongoose.model('MFARecoveryLog', mfaRecoveryLogSchema);
 
 module.exports = {
   MFASettings,

@@ -28,7 +28,7 @@ const SCAN_ROOTS = [path.join(BACKEND_ROOT, 'models'), path.join(BACKEND_ROOT, '
 
 // Ratchet baseline — measured 2026-05-01. Lower this number as duplicates
 // are eliminated; never raise it.
-const MAX_COLLIDING_NAMES = 81;
+const MAX_COLLIDING_NAMES = 74;
 
 const REGISTER_RE = /mongoose\.model\(\s*['"]([A-Za-z][A-Za-z0-9_]*)['"]\s*,/g;
 
